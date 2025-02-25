@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Locomotion : MonoBehaviour, IBindableToPlayerEvents
 {
-
+    // Character Controller variables - start
     [SerializeField]
     CharacterController _controller;
 
@@ -10,8 +10,13 @@ public class Locomotion : MonoBehaviour, IBindableToPlayerEvents
     private float _bodyHeightMin = 0.5f;
     [SerializeField]
     private float _bodyHeightMax = 2f;
-
     private Vector3 _newControllerCenter = Vector3.zero;
+    [SerializeField]
+    private float _moveSpeed = 4.0f;
+    [SerializeField]
+    private bool _shouldMoveForward = false;
+    //End
+
 
 
     private void Awake()
@@ -35,6 +40,14 @@ public class Locomotion : MonoBehaviour, IBindableToPlayerEvents
         }
         eventManager.OnPlayerRotate += HandleRotation;
         eventManager.OnPlayerHeightUpdated += AdjustPlayerHeight;
+        eventManager.OnPlayerMove += SetShouldMoveforward;
+    }
+
+    private void Update()
+    {
+        if (!_shouldMoveForward) { return; }
+
+        MoveForward();
     }
 
     private void HandleRotation(Quaternion targetRotation)
@@ -57,5 +70,19 @@ public class Locomotion : MonoBehaviour, IBindableToPlayerEvents
 /*
         playerCollider.height = Mathf.Clamp(playerHead.localPosition.y, bodyHeightMin, bodyHeightMax);
         playerCollider.center = new Vector3(playerHead.localPosition.x, playerCollider.height / 2, playerHead.localPosition.z);*/
+    }
+
+    private void MoveForward()
+    {
+        if (_controller == null) { return; };
+
+        Vector3 moveDirection = _controller.transform.forward;
+
+        _controller.Move(moveDirection * _moveSpeed * Time.deltaTime);
+    }
+
+    private void SetShouldMoveforward(bool move)
+    {
+        _shouldMoveForward = move;
     }
 }

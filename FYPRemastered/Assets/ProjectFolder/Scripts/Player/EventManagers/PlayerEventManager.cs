@@ -6,6 +6,7 @@ public class PlayerEventManager : MonoBehaviour
 {
     public event Action<Quaternion> OnPlayerRotate;
     public event Action<Vector3> OnPlayerHeightUpdated;
+    public event Action<bool> OnPlayerMove;
 
     private List<IBindableToPlayerEvents> _cachedListeners;
 
@@ -15,6 +16,14 @@ public class PlayerEventManager : MonoBehaviour
         BindComponentsToEvents();
     }
 
+
+    public void PlayerMove(bool move)
+    {
+        if(OnPlayerMove != null)
+        {
+            OnPlayerMove?.Invoke(move);
+        }
+    }
 
     public void PlayerRotate(Quaternion targetrotation)
     {
