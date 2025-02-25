@@ -6,6 +6,14 @@ public class Locomotion : MonoBehaviour, IBindableToPlayerEvents
     [SerializeField]
     CharacterController _controller;
 
+    [SerializeField]
+    private float _bodyHeightMin = 0.5f;
+    [SerializeField]
+    private float _bodyHeightMax = 2f;
+
+    private Vector3 _newControllerCenter = Vector3.zero;
+
+
     private void Awake()
     {
         if(TryGetComponent<CharacterController>(out CharacterController characterController))
@@ -26,10 +34,28 @@ public class Locomotion : MonoBehaviour, IBindableToPlayerEvents
             return;
         }
         eventManager.OnPlayerRotate += HandleRotation;
+        eventManager.OnPlayerHeightUpdated += AdjustPlayerHeight;
     }
 
     private void HandleRotation(Quaternion targetRotation)
     {
         _controller.transform.rotation = Quaternion.Euler(0f, targetRotation.eulerAngles.y, 0f);
+    }
+
+    private void AdjustPlayerHeight(Vector3 _cameraLocalPos)
+    {
+        if(_controller == null) { return; }
+
+        _controller.height = Mathf.Clamp(_cameraLocalPos.y, _bodyHeightMin, _bodyHeightMax);
+        _newControllerCenter.x = _cameraLocalPos.x;
+        _newControllerCenter.y = _controller.height / 2;
+        _newControllerCenter.z = _cameraLocalPos.z;
+
+        _controller.center = _newControllerCenter;
+
+
+/*
+        playerCollider.height = Mathf.Clamp(playerHead.localPosition.y, bodyHeightMin, bodyHeightMax);
+        playerCollider.center = new Vector3(playerHead.localPosition.x, playerCollider.height / 2, playerHead.localPosition.z);*/
     }
 }

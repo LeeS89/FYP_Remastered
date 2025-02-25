@@ -2,8 +2,8 @@ using UnityEngine;
 
 public class RotationTracker : MonoBehaviour, IBindableToPlayerEvents
 {
-    [SerializeField]
-    private Transform _playerCamera;
+   /* [SerializeField]
+    private Transform _playerCamera;*/
 
     [SerializeField]
     PlayerEventManager _playerEventManager;
@@ -12,10 +12,10 @@ public class RotationTracker : MonoBehaviour, IBindableToPlayerEvents
     public float _rotateThreshold = 20.0f;
     public float _stopRotatingThreshold = 18.0f;
 
-    private Vector3 _moveDirection;
+    private Vector3 _rotationDirection;
     private Quaternion _startRotation;
     private bool _isRotating = false;
-
+   
 
 
 
@@ -29,23 +29,26 @@ public class RotationTracker : MonoBehaviour, IBindableToPlayerEvents
     }
 
 
-    private void Update()
+    private void LateUpdate()
     {
-        if (_playerEventManager == null || _playerCamera == null) { return; }
+        if (_playerEventManager == null) { return; }
 
         CheckRotation();
+        CheckHeight();
 
     }
 
     private void CheckRotation()
     {
-        _moveDirection = _playerCamera.forward;
-        _moveDirection.y = 0f;  // Ensure we don't rotate around the X and Z axes
-        _moveDirection.Normalize(); 
+        _rotationDirection = transform.forward;
+        //_moveDirection = _playerCamera.forward;
+        _rotationDirection.y = 0f;  // Ensure we don't rotate around the X and Z axes
+        _rotationDirection.Normalize();
 
         // Target rotation
-        _startRotation = transform.rotation;
-        Quaternion targetRotation = Quaternion.LookRotation(_moveDirection, Vector3.up);
+        _startRotation = transform.root.rotation;
+        //_startRotation = transform.rotation;
+        Quaternion targetRotation = Quaternion.LookRotation(_rotationDirection, Vector3.up);
 
         // Calculate angle difference
         float angleDifference = Quaternion.Angle(_startRotation, targetRotation);
@@ -68,6 +71,11 @@ public class RotationTracker : MonoBehaviour, IBindableToPlayerEvents
             targetRotation = Quaternion.Slerp(_startRotation, targetRotation, _rotationSpeed * Time.deltaTime);
             _playerEventManager.PlayerRotate(targetRotation);
         }
+    }
+
+    private void CheckHeight()
+    {
+        _playerEventManager.PlayerHeightUpdated(transform.localPosition);
     }
 
    
