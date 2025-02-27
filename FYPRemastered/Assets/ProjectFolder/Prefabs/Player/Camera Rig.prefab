@@ -7102,6 +7102,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1223875573500741211}
   - component: {fileID: 54564264100149569}
+  - component: {fileID: 8719751054362340894}
+  - component: {fileID: 6666441442646146232}
   m_Layer: 0
   m_Name: HandFeaturesRight
   m_TagString: Untagged
@@ -7137,6 +7139,47 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _hand: {fileID: 5809632613987246397}
+--- !u!114 &8719751054362340894
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2869930998878022837}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b942c16a6d6a4edaad7c18c7d5762cdf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _hand: {fileID: 5809632613987246397}
+  _fingerStateThresholds:
+  - Finger: 0
+    StateThresholds: {fileID: 11400000, guid: 1ee82d2d63daf8b4c93040e331f8e801, type: 2}
+  - Finger: 1
+    StateThresholds: {fileID: 11400000, guid: 29b0a95ffa0254044901c8c821379040, type: 2}
+  - Finger: 2
+    StateThresholds: {fileID: 11400000, guid: 6654d266dec806d458e8c45751c96535, type: 2}
+  - Finger: 3
+    StateThresholds: {fileID: 11400000, guid: 8b470e0c4b48d474c9a42d7f661d48c7, type: 2}
+  - Finger: 4
+    StateThresholds: {fileID: 11400000, guid: 8b470e0c4b48d474c9a42d7f661d48c7, type: 2}
+  _disableProactiveEvaluation: 0
+--- !u!114 &6666441442646146232
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2869930998878022837}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bffe606b408599b4fad696ddc889a943, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _hand: {fileID: 5809632613987246397}
+  _hmd: {fileID: 1717451809231694588}
+  _trackingToWorldTransformer: {fileID: 3546919113643124963}
+  _disableProactiveEvaluation: 0
 --- !u!1 &2915629785136304246
 GameObject:
   m_ObjectHideFlags: 0
@@ -9672,6 +9715,7 @@ GameObject:
   - component: {fileID: 2843174141350777700}
   - component: {fileID: 5442767024323076853}
   - component: {fileID: 564757172824443141}
+  - component: {fileID: 7663292831108128955}
   m_Layer: 0
   m_Name: HandGrabInteractor
   m_TagString: Untagged
@@ -9770,6 +9814,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _interactor: {fileID: 2843174141350777700}
   _hand: {fileID: 7056691773113547861}
+--- !u!114 &7663292831108128955
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4019068002163338020}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae43f25c06eb2d9408a201216b4c3ed7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _hand: {fileID: 7056691773113547861}
+  _hmd: {fileID: 1717451809231694588}
 --- !u!1 &4028136367343849932
 GameObject:
   m_ObjectHideFlags: 0
@@ -15068,7 +15126,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &8012668686449850105
 Transform:
   m_ObjectHideFlags: 0
@@ -15082,6 +15140,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 3053016823718320256}
   - {fileID: 8478871646242096354}
   - {fileID: 9134910880027001113}
   m_Father: {fileID: 0}
@@ -15252,6 +15311,8 @@ MonoBehaviour:
   _controller: {fileID: 0}
   _bodyHeightMin: 0.5
   _bodyHeightMax: 2
+  _moveSpeed: 4
+  _shouldMoveForward: 0
 --- !u!143 &6834268530813459320
 CharacterController:
   m_ObjectHideFlags: 0
@@ -15270,11 +15331,11 @@ CharacterController:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Height: 2
+  m_Height: 0.5
   m_Radius: 0.2
   m_SlopeLimit: 45
   m_StepOffset: 0.3
-  m_SkinWidth: 0.08
+  m_SkinWidth: 0.001
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &6146640174335485493
@@ -16483,6 +16544,8 @@ GameObject:
   m_Component:
   - component: {fileID: 2690365729183131125}
   - component: {fileID: 8594493324147300772}
+  - component: {fileID: 6505899553580241624}
+  - component: {fileID: 2963930755229485670}
   m_Layer: 0
   m_Name: HandFeaturesLeft
   m_TagString: Untagged
@@ -16518,6 +16581,47 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _hand: {fileID: 6538168669721916143}
+--- !u!114 &6505899553580241624
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6501445295917897173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b942c16a6d6a4edaad7c18c7d5762cdf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _hand: {fileID: 6538168669721916143}
+  _fingerStateThresholds:
+  - Finger: 0
+    StateThresholds: {fileID: 11400000, guid: 1ee82d2d63daf8b4c93040e331f8e801, type: 2}
+  - Finger: 1
+    StateThresholds: {fileID: 11400000, guid: 29b0a95ffa0254044901c8c821379040, type: 2}
+  - Finger: 2
+    StateThresholds: {fileID: 11400000, guid: 6654d266dec806d458e8c45751c96535, type: 2}
+  - Finger: 3
+    StateThresholds: {fileID: 11400000, guid: 8b470e0c4b48d474c9a42d7f661d48c7, type: 2}
+  - Finger: 4
+    StateThresholds: {fileID: 11400000, guid: 8b470e0c4b48d474c9a42d7f661d48c7, type: 2}
+  _disableProactiveEvaluation: 0
+--- !u!114 &2963930755229485670
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6501445295917897173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bffe606b408599b4fad696ddc889a943, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _hand: {fileID: 6538168669721916143}
+  _hmd: {fileID: 1717451809231694588}
+  _trackingToWorldTransformer: {fileID: 3546919113643124963}
+  _disableProactiveEvaluation: 0
 --- !u!1 &6506684132297493725
 GameObject:
   m_ObjectHideFlags: 0
@@ -22597,3 +22701,203 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1060934105459123199}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &7106621127567195303
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 8012668686449850105}
+    m_Modifications:
+    - target: {fileID: 2003917234654659209, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2224648235566082726, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: _whenSelected.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2224648235566082726, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: _whenSelected.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 3967848093325790168}
+    - target: {fileID: 2224648235566082726, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: _whenUnselected.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2224648235566082726, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: _whenUnselected.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 3967848093325790168}
+    - target: {fileID: 2224648235566082726, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: _whenSelected.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: MovementPoseRecognized
+      objectReference: {fileID: 0}
+    - target: {fileID: 2224648235566082726, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: _whenUnselected.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: MovementPoseReleased
+      objectReference: {fileID: 0}
+    - target: {fileID: 2224648235566082726, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: _whenSelected.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: MovementGestureController, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 2224648235566082726, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: _whenUnselected.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: MovementGestureController, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 2231983724394926011, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: _hand
+      value: 
+      objectReference: {fileID: 5809632613987246397}
+    - target: {fileID: 4441132029353264045, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: _fingerFeatureStateProvider
+      value: 
+      objectReference: {fileID: 8719751054362340894}
+    - target: {fileID: 4897475059039603722, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5011019730098116028, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: _transformFeatureStateProvider
+      value: 
+      objectReference: {fileID: 6666441442646146232}
+    - target: {fileID: 5242670330214360103, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.07867007
+      objectReference: {fileID: 0}
+    - target: {fileID: 5242670330214360103, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.58220196
+      objectReference: {fileID: 0}
+    - target: {fileID: 5242670330214360103, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.25907618
+      objectReference: {fileID: 0}
+    - target: {fileID: 5242670330214360103, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5242670330214360103, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5242670330214360103, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5242670330214360103, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5242670330214360103, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5242670330214360103, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5242670330214360103, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5666483993701670499, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: _whenSelected.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5666483993701670499, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: _whenSelected.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 7834405513984400736}
+    - target: {fileID: 5666483993701670499, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: _whenUnselected.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5666483993701670499, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: _whenUnselected.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 7834405513984400736}
+    - target: {fileID: 5666483993701670499, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: _whenSelected.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: MovementPoseRecognized
+      objectReference: {fileID: 0}
+    - target: {fileID: 5666483993701670499, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: _whenUnselected.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: MovementPoseReleased
+      objectReference: {fileID: 0}
+    - target: {fileID: 5666483993701670499, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: _whenSelected.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: MovementGestureController, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 5666483993701670499, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: _whenUnselected.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: MovementGestureController, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 6353100010133211228, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: m_Name
+      value: --GESTURES--
+      objectReference: {fileID: 0}
+    - target: {fileID: 6916014349226858852, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: _transformFeatureStateProvider
+      value: 
+      objectReference: {fileID: 2963930755229485670}
+    - target: {fileID: 8638268744913369454, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: _fingerFeatureStateProvider
+      value: 
+      objectReference: {fileID: 6505899553580241624}
+    - target: {fileID: 9167402947311192187, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      propertyPath: _hand
+      value: 
+      objectReference: {fileID: 6538168669721916143}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2003917234654659209, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7834405513984400736}
+    - targetCorrespondingSourceObject: {fileID: 4897475059039603722, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3967848093325790168}
+  m_SourcePrefab: {fileID: 100100000, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+--- !u!1 &2407343175624143021 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4897475059039603722, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+  m_PrefabInstance: {fileID: 7106621127567195303}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3967848093325790168
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2407343175624143021}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07b5012ac2ee710409e0df7d3013e2c4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _currentHand: 2
+--- !u!4 &3053016823718320256 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5242670330214360103, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+  m_PrefabInstance: {fileID: 7106621127567195303}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &8741647786722885166 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2003917234654659209, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
+  m_PrefabInstance: {fileID: 7106621127567195303}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7834405513984400736
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8741647786722885166}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07b5012ac2ee710409e0df7d3013e2c4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _currentHand: 1

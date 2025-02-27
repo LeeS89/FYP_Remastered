@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 4db1c05addae77846aedb6d50e1241a8
+timeCreated: 1497471801
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 93927
+  packageName: Laser Sword PRO
+  packageVersion: 1.1
+  assetPath: Assets/LaserSword/Demo/Material/M_Scene.mat
+  uploadId: 538924

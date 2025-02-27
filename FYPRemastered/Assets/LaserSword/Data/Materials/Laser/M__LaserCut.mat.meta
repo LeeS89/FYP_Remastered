@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f3c878808f0f4ed4db4631ccc27ddcae
+timeCreated: 1497901336
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 93927
+  packageName: Laser Sword PRO
+  packageVersion: 1.1
+  assetPath: Assets/LaserSword/Data/Materials/Laser/M__LaserCut.mat
+  uploadId: 538924

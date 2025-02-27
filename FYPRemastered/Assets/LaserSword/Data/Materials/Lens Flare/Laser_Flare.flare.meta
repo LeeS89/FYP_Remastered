@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 6029e3e9491ffce4891aea40a4abb21e
+timeCreated: 1497218600
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 93927
+  packageName: Laser Sword PRO
+  packageVersion: 1.1
+  assetPath: Assets/LaserSword/Data/Materials/Lens Flare/Laser_Flare.flare
+  uploadId: 538924

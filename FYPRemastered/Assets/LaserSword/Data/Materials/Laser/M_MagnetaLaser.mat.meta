@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 53c6b4dc7b0a30549a1ffa09d0e709bd
+timeCreated: 1455833045
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 93927
+  packageName: Laser Sword PRO
+  packageVersion: 1.1
+  assetPath: Assets/LaserSword/Data/Materials/Laser/M_MagnetaLaser.mat
+  uploadId: 538924

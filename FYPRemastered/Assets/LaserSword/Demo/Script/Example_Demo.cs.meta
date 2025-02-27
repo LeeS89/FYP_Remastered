@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 5961bd912fc0fbd43b13ea28bc645245
+timeCreated: 1498399221
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 93927
+  packageName: Laser Sword PRO
+  packageVersion: 1.1
+  assetPath: Assets/LaserSword/Demo/Script/Example_Demo.cs
+  uploadId: 538924

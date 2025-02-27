@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 9fe442eb6785f6f4cb0ae5f414ac644f
+timeCreated: 1497213638
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 93927
+  packageName: Laser Sword PRO
+  packageVersion: 1.1
+  assetPath: Assets/LaserSword/Demo/Animation/Human_Hit.anim
+  uploadId: 538924

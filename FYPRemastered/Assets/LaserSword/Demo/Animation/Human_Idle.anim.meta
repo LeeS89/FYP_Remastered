@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 7134b9efe8c6c7a45b56566a6aa01a27
+timeCreated: 1497216121
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 93927
+  packageName: Laser Sword PRO
+  packageVersion: 1.1
+  assetPath: Assets/LaserSword/Demo/Animation/Human_Idle.anim
+  uploadId: 538924

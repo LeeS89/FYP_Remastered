@@ -12,7 +12,7 @@ public class Locomotion : MonoBehaviour, IBindableToPlayerEvents
     [SerializeField] private float _moveSpeed = 4.0f;
     [SerializeField] private bool _shouldMoveForward = false;
     private const float GRAVITY = -9.8f;
-    private float velocityY = 0f;
+    //private float velocityY = 0f;
     private Vector3 velocity = Vector3.zero;
     private Vector3 _moveDirection = Vector3.zero;
     private float _effectiveMoveSpeed = 0f;

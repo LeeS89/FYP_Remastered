@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ab0715ec066028d42bda27214e872cc5
+timeCreated: 1455833045
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 93927
+  packageName: Laser Sword PRO
+  packageVersion: 1.1
+  assetPath: Assets/LaserSword/Data/Materials/Laser/M_WhiteLaser.mat
+  uploadId: 538924

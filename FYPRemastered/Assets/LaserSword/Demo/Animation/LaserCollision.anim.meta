@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b9358e7c18af34742905cd4333b5e099
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 93927
+  packageName: Laser Sword PRO
+  packageVersion: 1.1
+  assetPath: Assets/LaserSword/Demo/Animation/LaserCollision.anim
+  uploadId: 538924

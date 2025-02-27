@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 1bea48ff32bfa7f4695da613c7b4c909
+timeCreated: 1498388556
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 93927
+  packageName: Laser Sword PRO
+  packageVersion: 1.1
+  assetPath: Assets/LaserSword/Prefabs/White_Laser.prefab
+  uploadId: 538924

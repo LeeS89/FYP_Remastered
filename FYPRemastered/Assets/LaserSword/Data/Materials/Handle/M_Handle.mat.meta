@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: c40f0643d6a926b48ae800fd619d141d
+timeCreated: 1498321471
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 93927
+  packageName: Laser Sword PRO
+  packageVersion: 1.1
+  assetPath: Assets/LaserSword/Data/Materials/Handle/M_Handle.mat
+  uploadId: 538924

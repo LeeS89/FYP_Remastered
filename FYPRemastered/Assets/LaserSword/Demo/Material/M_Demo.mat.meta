@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 532bca462755897418d145ec81b110fd
+timeCreated: 1497988493
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 93927
+  packageName: Laser Sword PRO
+  packageVersion: 1.1
+  assetPath: Assets/LaserSword/Demo/Material/M_Demo.mat
+  uploadId: 538924

@@ -7,6 +7,7 @@ public class PlayerEventManager : MonoBehaviour
     public event Action<Quaternion> OnPlayerRotate;
     public event Action<Vector3> OnPlayerHeightUpdated;
     public event Action<bool> OnPlayerMove;
+    public event Action<Transform, MovementGestureController> OnTryGrab;
 
     private List<IBindableToPlayerEvents> _cachedListeners;
 
@@ -38,6 +39,14 @@ public class PlayerEventManager : MonoBehaviour
         if(OnPlayerHeightUpdated != null)
         {
             OnPlayerHeightUpdated?.Invoke(_cameraLocalPos);
+        }
+    }
+
+    public void TryGrab(Transform location, MovementGestureController grabbingHand)
+    {
+        if (OnTryGrab != null)
+        {
+            OnTryGrab?.Invoke(location, grabbingHand);
         }
     }
 

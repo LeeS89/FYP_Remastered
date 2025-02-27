@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ad23a8e4bc5d6a04b82998fbf004218b
+timeCreated: 1455833045
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 93927
+  packageName: Laser Sword PRO
+  packageVersion: 1.1
+  assetPath: Assets/LaserSword/Data/Materials/Laser/M_BlueLaser.mat
+  uploadId: 538924

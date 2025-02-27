@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 55bbf5e9403f556428cd215ea3901866
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 13400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 93927
+  packageName: Laser Sword PRO
+  packageVersion: 1.1
+  assetPath: Assets/LaserSword/Data/No_Friction.physicMaterial
+  uploadId: 538924

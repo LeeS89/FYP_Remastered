@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: cc8578874e0735f4c80be6485510b3e5
+timeCreated: 1497381453
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 93927
+  packageName: Laser Sword PRO
+  packageVersion: 1.1
+  assetPath: Assets/LaserSword/Data/Script/LaserCollider.cs
+  uploadId: 538924
