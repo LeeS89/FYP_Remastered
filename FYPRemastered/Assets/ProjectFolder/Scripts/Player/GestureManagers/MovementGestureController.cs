@@ -1,47 +1,42 @@
-using Meta.WitAi;
-using Oculus.Interaction.Input;
-using System;
-using System.Collections;
 using UnityEngine;
 
-public class MovementGestureController : MonoBehaviour, IBindableToPlayerEvents
+public class MovementGestureController : BaseGesture, IBindableToPlayerEvents
 {
-    public enum HandInControl
+    public enum HandSide
     {
         None,
         Left,
         Right
     }
-    private PlayerEventManager _playerEventManager;
+    private static HandSide _handInControl = HandSide.None;
+    public HandSide _side = HandSide.None;
+    private string _instanceID;
 
-    private static HandInControl _handInControl = HandInControl.None;
-    public HandInControl _currentHand = HandInControl.None;
     private static bool _leftHandActive = false;
     public static bool _rightHandActive = false;
-    private bool _isGrabbing = false;
+
+    private PlayerEventManager _playerEventManager;
+    [SerializeField] private bool _isGrabbing = false;
     [SerializeField] private Transform _grabTraceLocation;
 
-    private Coroutine _grabCheckDelay;
-    private WaitForSeconds _delay;
-    public float _delaytime = 0.1f;
-
-    public bool IsGrabbing
-    {
-        get { return _isGrabbing; }
-        set { _isGrabbing = value; }
-    }
     
+
     private void Awake()
     {
-        _delay = new WaitForSeconds(_delaytime);
-        _handInControl = HandInControl.None;
+        InitializeFields();
+    }
+
+    private void InitializeFields()
+    {
+        _handInControl = HandSide.None;
         _leftHandActive = false;
         _rightHandActive = false;
+        _instanceID = _side.ToString();
     }
 
     private void Start()
     {
-        if(_currentHand == HandInControl.None)
+        if(_side == HandSide.None)
         {
             Debug.LogWarning("_current hand must be set to left or right");
         }
@@ -52,17 +47,13 @@ public class MovementGestureController : MonoBehaviour, IBindableToPlayerEvents
         if (eventManager == null) { return; }
 
         _playerEventManager = eventManager;
+        _playerEventManager.OnGrab += HasGrabbedObject;
+        _playerEventManager.OnReleaseGrabbable += HasReleasedGrabbable;
     }
 
-
-    public void MovementPoseRecognized()
+    public override void OnGestureRecognized()
     {
-        /*if(_grabCheckDelay == null)
-        {
-            _grabCheckDelay = StartCoroutine(GrabCheck());
-        }*/
-       
-        _playerEventManager.TryGrab(_grabTraceLocation, this);
+        _playerEventManager.TryGrab(_grabTraceLocation, _instanceID);
 
         if (CheckIfCanTriggerMovementPoseResponse())
         {
@@ -71,58 +62,60 @@ public class MovementGestureController : MonoBehaviour, IBindableToPlayerEvents
                 _playerEventManager.PlayerMove(true);
             }
         }
-        SetHandActive(_currentHand, true);
+        SetHandActive(_side, true);
     }
 
-    private IEnumerator GrabCheck()
+    public override void OnGestureReleased()
     {
-        _playerEventManager.TryGrab(_grabTraceLocation, this);
-        yield return _delay;
-
         if (CheckIfCanTriggerMovementPoseResponse())
         {
             if (_playerEventManager != null)
-            {
-                _playerEventManager.PlayerMove(true);
-            }
-        }
-        _grabCheckDelay = null;
-    }
-
-    public void MovementPoseReleased()
-    {
-        if (CheckIfCanTriggerMovementPoseResponse())
-        {
-            if(_playerEventManager != null)
             {
                 _playerEventManager.PlayerMove(false);
             }
         }
-        SetHandActive(_currentHand, false);
+        SetHandActive(_side, false);
     }
-
 
     private bool CheckIfCanTriggerMovementPoseResponse()
     {
         if (_isGrabbing) { return false; }
 
-        if(_handInControl == HandInControl.None)
+        if (_handInControl == HandSide.None)
         {
-            _handInControl = (_currentHand == HandInControl.Left) ? HandInControl.Left : HandInControl.Right;
+            _handInControl = (_side == HandSide.Left) ? HandSide.Left : HandSide.Right;
             return true;
         }
-        return (_handInControl == HandInControl.Left && _currentHand == HandInControl.Left) ||
-        (_handInControl == HandInControl.Right && _currentHand == HandInControl.Right);
-    
+        return (_handInControl == HandSide.Left && _side == HandSide.Left) ||
+        (_handInControl == HandSide.Right && _side == HandSide.Right);
+
     }
 
-    private static void SetHandActive(HandInControl currentHand, bool isActive)
+    private void HasGrabbedObject(string id)
     {
-        if(currentHand == HandInControl.Left)
+        if(_instanceID == id)
+        {
+            _isGrabbing = true;
+        }
+      
+    }
+
+    private void HasReleasedGrabbable(string id)
+    {
+        if (_instanceID == id)
+        {
+            _isGrabbing = false;
+        }
+    }
+
+
+    private static void SetHandActive(HandSide currentHand, bool isActive)
+    {
+        if(currentHand == HandSide.Left)
         {
             _leftHandActive = isActive;
         }
-        else if(currentHand == HandInControl.Right)
+        else if(currentHand == HandSide.Right)
         {
             _rightHandActive = isActive;
         }
@@ -135,8 +128,9 @@ public class MovementGestureController : MonoBehaviour, IBindableToPlayerEvents
     {
         if(!_leftHandActive &&  !_rightHandActive)
         {
-            _handInControl = HandInControl.None;
+            _handInControl = HandSide.None;
         }
     }
 
+    
 }

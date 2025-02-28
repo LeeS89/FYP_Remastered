@@ -1,58 +1,40 @@
-using Oculus.Interaction.HandGrab;
 using UnityEngine;
 
 public abstract class GrabbableObject : MonoBehaviour
 {
-    [SerializeField] protected HandGrabInteractable _interactableLeft;
-    [SerializeField] protected HandGrabInteractable _interactableRight;
     protected bool _isGrabbed = false;
     protected MovementGestureController _grabbingHand;
-
-    /*protected void Awake()
+    protected string _grabbingHandID;
+    [SerializeField] protected PlayerEventManager _playerEventManager;
+   
+  
+    
+    public virtual void Grab(string handID)
     {
-        _interactableLeft.enabled = false;
-        _interactableRight.enabled = false;
-    }*/
+        if(_isGrabbed || _playerEventManager == null) { return; }
 
-    public virtual void Grab(MovementGestureController grabbingHand)
-    {
-        if(_isGrabbed) return;
-
-        if(grabbingHand != null && !grabbingHand.IsGrabbing)
-        {
-            _grabbingHand = grabbingHand;
-            if(grabbingHand._currentHand == MovementGestureController.HandInControl.Left)
-            {
-                _interactableLeft.enabled = true;
-                _interactableRight.enabled = false;
-            }
-            else
-            {
-                _interactableRight.enabled = true;
-                _interactableLeft.enabled = false;
-            }
-            grabbingHand.IsGrabbing = true;
-            //OnGrabbed();
-        }
+       
+        _grabbingHandID = handID;
+        _playerEventManager.Grab(handID);
+        _isGrabbed = true;
+        OnGrabbed();
+      
     }
+
+    
 
     public virtual void Release()
     {
-        if(_grabbingHand == null) return;
+        if(!_isGrabbed || _playerEventManager == null) return;
 
-        if (_grabbingHand._currentHand == MovementGestureController.HandInControl.Left)
-        {       
-            _interactableRight.enabled = true;
-        }
-        else
-        {
-            _interactableLeft.enabled = true;
-        }
+        _playerEventManager.ReleaseGrabbable(_grabbingHandID);
+       
         _isGrabbed = false;
-        _grabbingHand.IsGrabbing = false;
-        _grabbingHand = null;
+        _grabbingHandID = "";
+        OnReleased();
     }
 
+   
     protected abstract void OnGrabbed();
     protected abstract void OnReleased();
 }

@@ -2,9 +2,6 @@ using UnityEngine;
 
 public class RotationTracker : MonoBehaviour, IBindableToPlayerEvents
 {
-   /* [SerializeField]
-    private Transform _playerCamera;*/
-
     [SerializeField]
     PlayerEventManager _playerEventManager;
 

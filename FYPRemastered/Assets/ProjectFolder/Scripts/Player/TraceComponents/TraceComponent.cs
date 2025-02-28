@@ -1,5 +1,4 @@
-﻿//using System.Diagnostics;
-using UnityEngine;
+﻿using UnityEngine;
 
 
 public class TraceComponent : MonoBehaviour, IBindableToPlayerEvents
@@ -8,7 +7,7 @@ public class TraceComponent : MonoBehaviour, IBindableToPlayerEvents
     public float capsuleHeight = 0.3f;  // Height of the capsule
     public LayerMask grabbableLayer;
     public bool _debug = false;
-
+    private bool _lockStatus = false;
     public Transform _testLocation = null;
 
 
@@ -20,18 +19,11 @@ public class TraceComponent : MonoBehaviour, IBindableToPlayerEvents
         }
     }
 
-    private void Update()
-    {
-        if(_testLocation != null)
-        {
-            //TestDebug();
-        }
-    }
+   
 
-
-    private void CheckForGrabbable(Transform location, MovementGestureController grabbingHand)
+    private void CheckForGrabbable(Transform location, string handID)
     {
-        _testLocation = location;
+       
         Vector3 start = location.position - location.forward * (capsuleHeight / 2f);  // Bottom of capsule
         Vector3 end = location.position + location.forward * (capsuleHeight / 2f);    // Top of capsule
 
@@ -42,7 +34,7 @@ public class TraceComponent : MonoBehaviour, IBindableToPlayerEvents
 
         if (_debug)
         {
-            // ✅ Use DebugExtension to draw a capsule in Gizmos
+ 
             DebugExtension.DebugCapsule(start, end, debugColor, capsuleRadius, 1.0f);
         }
 
@@ -53,15 +45,15 @@ public class TraceComponent : MonoBehaviour, IBindableToPlayerEvents
 
             foreach (Collider col in colliders)
             {
-                GrabbableObject grabbable = col.GetComponent<GrabbableObject>();
-                if (grabbable != null)
+                if(col.TryGetComponent<GrabbableObject>(out GrabbableObject obj))
                 {
-                    grabbable.Grab(grabbingHand);
+                    obj.Grab(handID);
                     return;
-                    
                 }
+
             }
         }
+       
     }
 
     /*public void TestDebug()

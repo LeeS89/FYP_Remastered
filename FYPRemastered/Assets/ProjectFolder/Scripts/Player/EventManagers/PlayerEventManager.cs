@@ -7,7 +7,9 @@ public class PlayerEventManager : MonoBehaviour
     public event Action<Quaternion> OnPlayerRotate;
     public event Action<Vector3> OnPlayerHeightUpdated;
     public event Action<bool> OnPlayerMove;
-    public event Action<Transform, MovementGestureController> OnTryGrab;
+    public event Action<Transform, string> OnTryGrab;
+    public event Action<string> OnGrab;
+    public event Action<string> OnReleaseGrabbable;
 
     private List<IBindableToPlayerEvents> _cachedListeners;
 
@@ -17,10 +19,28 @@ public class PlayerEventManager : MonoBehaviour
         BindComponentsToEvents();
     }
 
+    /// <summary>
+    /// Finds all Interface components within the player and 
+    /// ensures each component binds to their relevant events
+    /// </summary>
+    public void BindComponentsToEvents()
+    {
+        var parentListeners = GetComponents<IBindableToPlayerEvents>();
+        _cachedListeners.AddRange(parentListeners);
 
+        var childListeners = GetComponentsInChildren<IBindableToPlayerEvents>(true);
+        _cachedListeners.AddRange(childListeners);
+
+        foreach (var listener in _cachedListeners)
+        {
+            listener.OnBindToPlayerEvents(this);
+        }
+    }
+
+    #region Locomotion events
     public void PlayerMove(bool move)
     {
-        if(OnPlayerMove != null)
+        if (OnPlayerMove != null)
         {
             OnPlayerMove?.Invoke(move);
         }
@@ -36,32 +56,45 @@ public class PlayerEventManager : MonoBehaviour
 
     public void PlayerHeightUpdated(Vector3 _cameraLocalPos)
     {
-        if(OnPlayerHeightUpdated != null)
+        if (OnPlayerHeightUpdated != null)
         {
             OnPlayerHeightUpdated?.Invoke(_cameraLocalPos);
         }
     }
+    #endregion
 
-    public void TryGrab(Transform location, MovementGestureController grabbingHand)
+    #region Grab events
+    public void TryGrab(Transform location, string targetID)
     {
         if (OnTryGrab != null)
         {
-            OnTryGrab?.Invoke(location, grabbingHand);
+            OnTryGrab?.Invoke(location, targetID);
         }
     }
 
-    public void BindComponentsToEvents()
+    public void Grab(string targetID)
     {
-        var parentListeners = GetComponents<IBindableToPlayerEvents>();
-        _cachedListeners.AddRange(parentListeners);
-
-        var childListeners = GetComponentsInChildren<IBindableToPlayerEvents>(true);
-        _cachedListeners.AddRange(childListeners);
-
-        foreach (var listener in _cachedListeners)
+        if (OnGrab != null)
         {
-            listener.OnBindToPlayerEvents(this);
+            OnGrab?.Invoke(targetID);
         }
     }
+
+    public void ReleaseGrabbable(string targetID)
+    {
+        if (OnReleaseGrabbable != null)
+        {
+            OnReleaseGrabbable?.Invoke(targetID);
+        }
+    }
+    #endregion
+
+
+   
+
+   
+
+
+    
 
 }
