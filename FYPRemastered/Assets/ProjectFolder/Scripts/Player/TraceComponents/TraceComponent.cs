@@ -15,7 +15,7 @@ public class TraceComponent : MonoBehaviour, IBindableToPlayerEvents
     {
         if(eventManager != null)
         {
-            eventManager.OnTryGrab += CheckForGrabbable;
+            //eventManager.OnTryGrab += CheckForGrabbable;
         }
     }
 
@@ -47,7 +47,7 @@ public class TraceComponent : MonoBehaviour, IBindableToPlayerEvents
             {
                 if(col.TryGetComponent<GrabbableObject>(out GrabbableObject obj))
                 {
-                    obj.Grab(handID);
+                    //obj.Grab(handID);
                     return;
                 }
 

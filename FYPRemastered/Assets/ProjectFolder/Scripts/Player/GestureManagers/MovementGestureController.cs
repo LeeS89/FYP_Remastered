@@ -2,15 +2,10 @@ using UnityEngine;
 
 public class MovementGestureController : BaseGesture, IBindableToPlayerEvents
 {
-    public enum HandSide
-    {
-        None,
-        Left,
-        Right
-    }
+   
     private static HandSide _handInControl = HandSide.None;
     public HandSide _side = HandSide.None;
-    private string _instanceID;
+    
 
     private static bool _leftHandActive = false;
     public static bool _rightHandActive = false;
@@ -31,7 +26,7 @@ public class MovementGestureController : BaseGesture, IBindableToPlayerEvents
         _handInControl = HandSide.None;
         _leftHandActive = false;
         _rightHandActive = false;
-        _instanceID = _side.ToString();
+        
     }
 
     private void Start()
@@ -47,13 +42,13 @@ public class MovementGestureController : BaseGesture, IBindableToPlayerEvents
         if (eventManager == null) { return; }
 
         _playerEventManager = eventManager;
-        _playerEventManager.OnGrab += HasGrabbedObject;
-        _playerEventManager.OnReleaseGrabbable += HasReleasedGrabbable;
+        _playerEventManager.OnGrab += ToggleHasGrabbedObject;
+        _playerEventManager.OnReleaseGrabbable += ToggleHasGrabbedObject;
     }
 
     public override void OnGestureRecognized()
     {
-        _playerEventManager.TryGrab(_grabTraceLocation, _instanceID);
+        //_playerEventManager.TryGrab(_grabTraceLocation, _instanceID);
 
         if (CheckIfCanTriggerMovementPoseResponse())
         {
@@ -91,20 +86,11 @@ public class MovementGestureController : BaseGesture, IBindableToPlayerEvents
 
     }
 
-    private void HasGrabbedObject(string id)
+    private void ToggleHasGrabbedObject(HandSide uniqueID, bool grabbing)
     {
-        if(_instanceID == id)
+        if (_side == uniqueID)
         {
-            _isGrabbing = true;
-        }
-      
-    }
-
-    private void HasReleasedGrabbable(string id)
-    {
-        if (_instanceID == id)
-        {
-            _isGrabbing = false;
+            _isGrabbing = grabbing;
         }
     }
 

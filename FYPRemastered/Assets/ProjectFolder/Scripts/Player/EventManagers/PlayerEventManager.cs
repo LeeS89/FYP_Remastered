@@ -1,16 +1,18 @@
+using Oculus.Interaction.HandGrab;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerEventManager : MonoBehaviour
+public class PlayerEventManager : MonoBehaviour, IEventManager
 {
     public event Action<Quaternion> OnPlayerRotate;
     public event Action<Vector3> OnPlayerHeightUpdated;
     public event Action<bool> OnPlayerMove;
     public event Action<Transform, string> OnTryGrab;
-    public event Action<string> OnGrab;
-    public event Action<string> OnReleaseGrabbable;
-
+    public event Action<HandSide, bool> OnGrab;
+    public event Action<HandSide, bool> OnReleaseGrabbable;
+    public event Action<HandGrabInteractor, bool> OnGrabbedObject; 
+    public static Dictionary<HandGrabInteractor, bool> _lastGrabbingStates = new Dictionary<HandGrabInteractor, bool>();
     private List<IBindableToPlayerEvents> _cachedListeners;
 
     private void Awake()
@@ -72,19 +74,33 @@ public class PlayerEventManager : MonoBehaviour
         }
     }
 
-    public void Grab(string targetID)
+    public void GrabbedObject(HandGrabInteractor handInteractor, bool isGrabbing)
+    {
+        if (_lastGrabbingStates.TryGetValue(handInteractor, out bool lastState))
+        {
+            if (lastState == isGrabbing) return; // No change, do nothing
+        }
+
+        // Store the updated grabbing state
+        _lastGrabbingStates[handInteractor] = isGrabbing;
+
+    
+        OnGrabbedObject?.Invoke(handInteractor, isGrabbing);
+    }
+
+    public void Grab(HandSide uniqueID, bool grabbingState)
     {
         if (OnGrab != null)
         {
-            OnGrab?.Invoke(targetID);
+            OnGrab?.Invoke(uniqueID, grabbingState);
         }
     }
 
-    public void ReleaseGrabbable(string targetID)
+    public void ReleaseGrabbable(HandSide uniqueID, bool grabbingState)
     {
         if (OnReleaseGrabbable != null)
         {
-            OnReleaseGrabbable?.Invoke(targetID);
+            OnReleaseGrabbable?.Invoke(uniqueID, grabbingState);
         }
     }
     #endregion

@@ -1,36 +1,45 @@
+using Oculus.Interaction.HandGrab;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public abstract class GrabbableObject : MonoBehaviour
 {
     protected bool _isGrabbed = false;
-    protected MovementGestureController _grabbingHand;
-    protected string _grabbingHandID;
+    //protected MovementGestureController _grabbingHand;
+    //protected string _grabbingHandID;
     [SerializeField] protected PlayerEventManager _playerEventManager;
-   
-  
-    
-    public virtual void Grab(string handID)
+    protected HandSide _handSide = HandSide.None;
+    public HandGrabInteractable _interactable;
+
+
+
+    public virtual void Grab(int handSideInt)
     {
         if(_isGrabbed || _playerEventManager == null) { return; }
 
-       
-        _grabbingHandID = handID;
-        _playerEventManager.Grab(handID);
+        _handSide = (HandSide)handSideInt;
         _isGrabbed = true;
+        _playerEventManager.Grab(_handSide, _isGrabbed);
+        //_grabbingHandID = handID;
+        //_playerEventManager.Grab(handID);
+        
         OnGrabbed();
       
     }
 
     
 
-    public virtual void Release()
+    public virtual void Release(int handSideInt)
     {
         if(!_isGrabbed || _playerEventManager == null) return;
-
-        _playerEventManager.ReleaseGrabbable(_grabbingHandID);
-       
         _isGrabbed = false;
-        _grabbingHandID = "";
+
+        _playerEventManager.ReleaseGrabbable(_handSide, _isGrabbed);
+        _handSide = HandSide.None;
+        
+       
+        
+       // _grabbingHandID = "";
         OnReleased();
     }
 
