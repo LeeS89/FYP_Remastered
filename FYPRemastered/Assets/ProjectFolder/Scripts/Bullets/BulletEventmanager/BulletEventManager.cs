@@ -8,6 +8,8 @@ public class BulletEventManager : MonoBehaviour, IEventManager
     public event Action OnExpired;
     public event Action OnFired;
     public event Action OnCollision;
+    public event Action<Quaternion, float> OnDeflected;
+    public event Action<BulletBase, BulletType> OnParticlePlay;
     //public event Action OnStartMovement;
 
 
@@ -25,9 +27,14 @@ public class BulletEventManager : MonoBehaviour, IEventManager
 
         foreach(var listener in _cachedListeners)
         {
-            Debug.LogError($"Registered listener: {listener.GetType().Name} on {((MonoBehaviour)listener).gameObject.name}");
+            //Debug.LogError($"Registered listener: {listener.GetType().Name} on {((MonoBehaviour)listener).gameObject.name}");
             listener.RegisterEvents(this);
         }
+    }
+
+    public void ParticlePlay(BulletBase bullet, BulletType bulletType)
+    {
+        OnParticlePlay?.Invoke(bullet, bulletType);
     }
 
     public void Fired()
@@ -41,6 +48,11 @@ public class BulletEventManager : MonoBehaviour, IEventManager
             Debug.LogError("Event Is Null");
         }
 
+    }
+
+    public void Deflected(Quaternion rotation, float speed)
+    {
+        OnDeflected?.Invoke(rotation, speed);
     }
 
     public void Collision()

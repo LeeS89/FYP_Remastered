@@ -1,45 +1,69 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class BulletManagers : MonoBehaviour
+public class ParticleManager : MonoBehaviour
 {
-    public static BulletManagers instance;
+    public static ParticleManager instance;
     private ParticleSystem.Particle[] particles;
+    private bool _particlesExist = false;
 
     private void Awake()
     {
         instance = this;
     }
 
-    public ParticleSystem _particleSystem; 
-    public List<Bullet> activeBullets; 
+    public ParticleSystem _particleSystem;
+    public List<BulletBase> activeBullets;
 
-   
-    public void Removebullet(Bullet bullet)
+    public void AddBullet(BulletBase bullet, BulletType bulletType)
+    {
+        if(!activeBullets.Contains(bullet))
+        {
+            activeBullets.Add(bullet);
+            if(!_particlesExist)
+            {
+                _particlesExist = true;
+            }
+        }
+    }
+
+    public void Removebullet(BulletBase bullet)
     {
         activeBullets.Remove(bullet);
+        if(activeBullets.Count <= 0 )
+        {
+            _particlesExist = false;
+
+        }
     }
 
     void Update()
     {
+        if (!_particlesExist) { return; }
 
+        UpdateMovingParticles();
+
+    }
+
+    private void UpdateMovingParticles()
+    {
         int bulletCount = activeBullets.Count;
 
         if (bulletCount == 0) return;
 
-        
+
         if (particles == null || particles.Length < bulletCount)
         {
             particles = new ParticleSystem.Particle[bulletCount];
         }
 
-        
+
         int particleCount = _particleSystem.GetParticles(particles);
 
-        
+
         for (int i = 0; i < bulletCount; i++)
         {
-            if (i >= particleCount) // If there aren’t enough active particles, emit new ones
+            if (i >= particleCount) // If there aren�t enough active particles, emit new ones
             {
                 _particleSystem.Emit(1);
                 _particleSystem.GetParticles(particles); // Refresh the particles list
@@ -51,8 +75,7 @@ public class BulletManagers : MonoBehaviour
 
         // Apply the updated positions
         _particleSystem.SetParticles(particles, particleCount);
-       
     }
 
-   
+
 }

@@ -1,21 +1,20 @@
+using UnityEngine;
+
 public class Bullet : BulletBase
 {
 
-    private void OnDisable()
-    {
-        //BulletManagers.instance.Removebullet(this);
-    }
-
     protected override void OnExpired()
     {
-        BulletManagers.instance.Removebullet(this);
+        ParticleManager.instance.Removebullet(this);
+        
+        //_cachedRoot.SetActive(false);
         Destroy(_cachedRoot);
     }
 
-    /*public override void Initializebullet(Vector3 position, Quaternion rotation)
+    public override void Initializebullet()
     {
-        base.Initializebullet(position, rotation);
-    }*/
+        base.Initializebullet();
+    }
 
     public override void Freeze()
     {
