@@ -5,13 +5,10 @@ using UnityEngine;
 public abstract class GrabbableObject : MonoBehaviour
 {
     protected bool _isGrabbed = false;
-    //protected MovementGestureController _grabbingHand;
-    //protected string _grabbingHandID;
+    
     [SerializeField] protected PlayerEventManager _playerEventManager;
     protected HandSide _handSide = HandSide.None;
-    public HandGrabInteractable _interactable;
-
-
+ 
 
     public virtual void Grab(int handSideInt)
     {
@@ -20,8 +17,6 @@ public abstract class GrabbableObject : MonoBehaviour
         _handSide = (HandSide)handSideInt;
         _isGrabbed = true;
         _playerEventManager.Grab(_handSide, _isGrabbed);
-        //_grabbingHandID = handID;
-        //_playerEventManager.Grab(handID);
         
         OnGrabbed();
       
@@ -36,10 +31,7 @@ public abstract class GrabbableObject : MonoBehaviour
 
         _playerEventManager.ReleaseGrabbable(_handSide, _isGrabbed);
         _handSide = HandSide.None;
-        
-       
-        
-       // _grabbingHandID = "";
+   
         OnReleased();
     }
 

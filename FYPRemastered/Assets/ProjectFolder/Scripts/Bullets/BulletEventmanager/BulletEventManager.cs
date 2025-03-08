@@ -8,8 +8,9 @@ public class BulletEventManager : MonoBehaviour, IEventManager
     public event Action OnExpired;
     public event Action OnFired;
     public event Action OnCollision;
-    public event Action<Quaternion, float> OnDeflected;
+    public event Action<Vector3, Quaternion, float> OnDeflected;
     public event Action<BulletBase, BulletType> OnParticlePlay;
+    public event Action<BulletBase, BulletType> OnParticleStop;
     //public event Action OnStartMovement;
 
 
@@ -37,6 +38,11 @@ public class BulletEventManager : MonoBehaviour, IEventManager
         OnParticlePlay?.Invoke(bullet, bulletType);
     }
 
+    public void ParticleStop(BulletBase bullet, BulletType bulletType)
+    {
+        OnParticleStop?.Invoke(bullet, bulletType);
+    }
+
     public void Fired()
     {
         if (OnFired != null)
@@ -50,9 +56,9 @@ public class BulletEventManager : MonoBehaviour, IEventManager
 
     }
 
-    public void Deflected(Quaternion rotation, float speed)
+    public void Deflected(Vector3 direction, Quaternion rotation, float speed)
     {
-        OnDeflected?.Invoke(rotation, speed);
+        OnDeflected?.Invoke(direction, rotation, speed);
     }
 
     public void Collision()

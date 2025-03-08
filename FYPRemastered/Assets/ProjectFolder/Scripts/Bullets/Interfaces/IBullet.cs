@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class IBullet
+public interface IBullet
 {
-    
+    GameObject Owner { get; set; }
 }

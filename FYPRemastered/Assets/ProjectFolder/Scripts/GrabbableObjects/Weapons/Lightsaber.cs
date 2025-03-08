@@ -1,8 +1,6 @@
-using Oculus.Interaction.HandGrab;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Audio;
+
 
 public class Lightsaber : GrabbableObject
 {
@@ -15,27 +13,27 @@ public class Lightsaber : GrabbableObject
     [SerializeField] private AudioClip _deflect;
     [SerializeField] private AudioClip _swing;
 
-    public HandGrabInteractor _testInteractor;
-
+    
     private void Awake()
     {
         if(TryGetComponent<Animator>(out Animator anim))
         {
             _anim = anim;
         }
-    }
-    
 
+    }
+
+   
     protected override void OnGrabbed()
     {
-        Debug.LogError("Is Grabbing is: "+_testInteractor.IsGrabbing);
+       
         _anim.SetTrigger("extend");
         PowerUp();
     }
 
     protected override void OnReleased()
     {
-        Debug.LogError("Is Grabbing is: " + _testInteractor.IsGrabbing);
+        
         _anim.SetTrigger("retract");
         PowerDown();
     }
@@ -82,7 +80,7 @@ public class Lightsaber : GrabbableObject
     private void PowerDown()
     {
         StopAllCoroutines();
-       
+      
         _audio.volume = 1f;
         _audio.Stop();
         _audio.loop = false;

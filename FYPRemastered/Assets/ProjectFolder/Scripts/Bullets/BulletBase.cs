@@ -12,7 +12,8 @@ public abstract class BulletBase : MonoBehaviour, IBulletEvents
 {
     protected GameObject _cachedRoot;
     protected BulletEventManager _eventManager;
-    [SerializeField] protected float _deflectSpeed;
+    protected IDeflectable _deflectableComponent;
+   
     [SerializeField] protected BulletType _bulletType;
     [SerializeField]
     protected GameObject _owner;
@@ -30,22 +31,23 @@ public abstract class BulletBase : MonoBehaviour, IBulletEvents
 
     public void RegisterEvents(BulletEventManager eventManager)
     {
-        if (eventManager == null) 
-        {
-
-            Debug.LogError("No event manager");
-            return;
-        }
-        else
-        {
-            Debug.LogError("We have an event manager");
-        }
-
+        if (eventManager == null) { return; }
+       
+        RegisterDependancies();
         _eventManager = eventManager;
         _eventManager.OnExpired += OnExpired;
-        _cachedRoot = transform.root.gameObject;
-        StartCoroutine(FireDelay());
+        //StartCoroutine(FireDelay());
 
+    }
+
+    protected void RegisterDependancies()
+    {
+        _cachedRoot = transform.root.gameObject;
+        _deflectableComponent = _cachedRoot.GetComponentInChildren<IDeflectable>();
+        if (_deflectableComponent != null)
+        {
+            _deflectableComponent.RootComponent = _cachedRoot;
+        }
     }
 
     IEnumerator FireDelay()
@@ -56,26 +58,15 @@ public abstract class BulletBase : MonoBehaviour, IBulletEvents
 
     public virtual void Initializebullet()
     {
+        if(_deflectableComponent != null)
+        {
+            _deflectableComponent.ParentOwner = _owner;
+        }
         _eventManager.ParticlePlay(this, _bulletType);
         _eventManager.Fired();
     }
-    public bool testBool = false;
-    private void Update()
-    {
-        if (testBool)
-        {
-            Deflect();
-            testBool = false;
-        }
-    }
-
-    public virtual void Deflect()
-    {
-        Vector3 directionTotarget = TargetingUtility.GetDirectionToTarget(_owner, _cachedRoot);
-        Quaternion newRotation = Quaternion.LookRotation(directionTotarget);
-        _eventManager.Deflected(newRotation, _deflectSpeed);
-    }
-
+    
+  
     protected abstract void OnExpired();
 
     public abstract void Freeze();

@@ -3,16 +3,20 @@ using UnityEngine;
 public class BulletMovementComponent : MonoBehaviour, IBulletEvents
 {
     private Rigidbody _rb;
-    private bool _isMoving = false;
     [SerializeField] private float _speed;
-
+   
+    private bool _deflectionProcessed = false;
+    private BulletEventManager _eventManager;
+    private Vector3 _direction;
+   
     public void RegisterEvents(BulletEventManager eventManager)
     {
+        _eventManager = eventManager;
         _rb = GetComponentInParent<Rigidbody>();
-        if(eventManager != null)
+        if(_eventManager != null)
         {
-            eventManager.OnFired += Launch;
-            eventManager.OnDeflected += Deflected;
+            _eventManager.OnFired += Launch;
+            _eventManager.OnDeflected += Deflected;
         }
     }
 
@@ -20,26 +24,36 @@ public class BulletMovementComponent : MonoBehaviour, IBulletEvents
     {
         _speed = 0.2f;
     }
-
-    private void Deflected(Quaternion newRotation, float newSpeed)
+    public bool _deflect = false;
+    public void Deflected(Vector3 direction, Quaternion newRotation, float newSpeed)
     {
-        _rb.MoveRotation(newRotation);
         _speed = newSpeed;
+        _rb.MoveRotation(newRotation);
+
+        _rb.AddForce(direction * newSpeed, ForceMode.VelocityChange);
+        _deflect = true;
+
     }
 
     private void Launch()
     {
-        _isMoving = true;
+        //_rb.linearVelocity = _rb.transform.forward * _speed;
+        _rb.AddForce(_rb.transform.forward * _speed, ForceMode.VelocityChange);
     }
-
-    
 
     private void FixedUpdate()
     {
-        if (!_isMoving) { return; }
-        _rb.linearVelocity = _rb.transform.forward * _speed;
+        if (!_deflect) { return; }
 
+        if (_rb.linearVelocity.magnitude < _speed * 0.95f)
+        {
+            _rb.linearVelocity = _rb.transform.forward * _speed;
+        }
     }
 
 
+    public bool HasDeflectionBeenProcessed()
+    {
+        return _deflectionProcessed;
+    }
 }

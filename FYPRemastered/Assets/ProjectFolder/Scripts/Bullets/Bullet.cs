@@ -5,15 +5,14 @@ public class Bullet : BulletBase
 
     protected override void OnExpired()
     {
-        ParticleManager.instance.Removebullet(this);
-        
-        //_cachedRoot.SetActive(false);
-        Destroy(_cachedRoot);
+        _eventManager.ParticleStop(this, _bulletType);
+        _cachedRoot.SetActive(false);
     }
 
     public override void Initializebullet()
     {
         base.Initializebullet();
+       
     }
 
     public override void Freeze()
