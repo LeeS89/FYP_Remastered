@@ -10,11 +10,17 @@ public class BulletVFX : MonoBehaviour, IBulletEvents
         if(eventManager == null) { return; }
 
         _particleManager = ParticleManager.instance;
-        eventManager.OnParticlePlay += PlayBulletParticle;
-        eventManager.OnParticleStop += StopBulletParticle;
+        eventManager.OnBulletParticlePlay += PlayBulletParticle;
+        eventManager.OnBulletParticleStop += StopBulletParticle;
+        eventManager.OnSpawnHitParticle += SpawnHitParticle;
     }
 
    
+    private void SpawnHitParticle(Vector3 pos, Quaternion rot)
+    {
+        ParticlePool.SpawnHitParticle(pos, rot);
+    }
+
     private void PlayBulletParticle(BulletBase bullet, BulletType bulletType)
     {
         _particleManager.AddBullet(bullet, bulletType);

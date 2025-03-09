@@ -12,6 +12,7 @@ public class BulletCollisionComponent : MonoBehaviour, IBulletEvents, IDeflectab
     private bool _deflectionProcessed = false;
     public CapsuleCollider _collider;
     
+    public GameObject _hitParticle;
 
     public GameObject ParentOwner
     {
@@ -53,12 +54,20 @@ public class BulletCollisionComponent : MonoBehaviour, IBulletEvents, IDeflectab
 
     private void OnCollisionEnter(Collision collision)
     {
-        
+        ContactPoint contact = collision.contacts[0];
+        Vector3 impactPosition = contact.point;
+        //Instantiate(_hitParticle, impactPosition, Quaternion.identity);
+        _eventManager.SpawnHitParticle(impactPosition, Quaternion.identity);
+
         if ((_ignoreMask & (1 << collision.gameObject.layer)) != 0)
         {
+           /* ContactPoint contact = collision.contacts[0];
+            Vector3 impactPosition = contact.point;
+            Instantiate(_hitParticle, impactPosition, Quaternion.identity);*/
             GetComponent<Rigidbody>().excludeLayers = _ignoreMask;
             return; 
         }
+        
         //_parentOwner = null;
         _eventManager.Expired();
 

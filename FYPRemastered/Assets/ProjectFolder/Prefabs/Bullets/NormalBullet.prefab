@@ -140,6 +140,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   _collider: {fileID: 5111258017325434983}
+  _hitParticle: {fileID: 997633063660505334, guid: f33db7fc758f5944180365f8ef5eb197, type: 3}
 --- !u!1 &7876611720651942564
 GameObject:
   m_ObjectHideFlags: 0
@@ -263,7 +264,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b1b92c1cdcf52c4084ed357eca4e1f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _speed: 5
+  _speed: 7
   _deflect: 0
 --- !u!1 &8862239039402137114
 GameObject:

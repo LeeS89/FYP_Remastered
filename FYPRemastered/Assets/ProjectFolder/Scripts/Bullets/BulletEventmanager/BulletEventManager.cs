@@ -9,8 +9,9 @@ public class BulletEventManager : MonoBehaviour, IEventManager
     public event Action OnFired;
     public event Action OnCollision;
     public event Action<Vector3, Quaternion, float> OnDeflected;
-    public event Action<BulletBase, BulletType> OnParticlePlay;
-    public event Action<BulletBase, BulletType> OnParticleStop;
+    public event Action<BulletBase, BulletType> OnBulletParticlePlay;
+    public event Action<BulletBase, BulletType> OnBulletParticleStop;
+    public event Action<Vector3, Quaternion> OnSpawnHitParticle;
     //public event Action OnStartMovement;
 
 
@@ -35,12 +36,17 @@ public class BulletEventManager : MonoBehaviour, IEventManager
 
     public void ParticlePlay(BulletBase bullet, BulletType bulletType)
     {
-        OnParticlePlay?.Invoke(bullet, bulletType);
+        OnBulletParticlePlay?.Invoke(bullet, bulletType);
     }
 
     public void ParticleStop(BulletBase bullet, BulletType bulletType)
     {
-        OnParticleStop?.Invoke(bullet, bulletType);
+        OnBulletParticleStop?.Invoke(bullet, bulletType);
+    }
+
+    public void SpawnHitParticle(Vector3 position, Quaternion rotation)
+    {
+        OnSpawnHitParticle?.Invoke(position, rotation);
     }
 
     public void Fired()

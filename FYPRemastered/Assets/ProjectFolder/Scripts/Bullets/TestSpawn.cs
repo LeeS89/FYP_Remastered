@@ -8,12 +8,12 @@ public class TestSpawn : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        InvokeRepeating("FireBullet", 3f, 3f);
+        InvokeRepeating(nameof(FireBullet), 3f, 0.5f);
     }
 
     private void FireBullet()
     {
-        Vector3 _directionToPlayer = TargetingUtility.GetDirectionToTarget(_player, transform);
+        Vector3 _directionToPlayer = TargetingUtility.GetDirectionToTarget(_player, transform, true);
         Quaternion bulletRotation = Quaternion.LookRotation(_directionToPlayer);
 
         GameObject obj = Instantiate(_bullet, transform.position, bulletRotation);

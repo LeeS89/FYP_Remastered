@@ -40645,7 +40645,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07b5012ac2ee710409e0df7d3013e2c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _currentHand: 1
+  _side: 0
+  _isGrabbing: 0
+  _grabTraceLocation: {fileID: 0}
 --- !u!1 &6119602576146773302 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4897475059039603722, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
@@ -40663,7 +40665,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07b5012ac2ee710409e0df7d3013e2c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _currentHand: 2
+  _side: 0
+  _isGrabbing: 0
+  _grabTraceLocation: {fileID: 0}
 --- !u!4 &6907349076850187547 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5242670330214360103, guid: 0e24fb971bb38954c9d357acd935cdd6, type: 3}
