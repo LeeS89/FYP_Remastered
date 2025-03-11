@@ -10810,7 +10810,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _playerEventManager: {fileID: 0}
-  _interactable: {fileID: 0}
   _anim: {fileID: 0}
   _audio: {fileID: 6422574545454749276}
   _powerOn: {fileID: 8300000, guid: c60be5ce194f32f4bae4b4d1e685c0a1, type: 3}
@@ -10818,10 +10817,6 @@ MonoBehaviour:
   _hum: {fileID: 8300000, guid: 14131efae7e3b2143a51f094c5a1a595, type: 3}
   _deflect: {fileID: 8300000, guid: a372c4d566881cc4d97a23987191ed29, type: 3}
   _swing: {fileID: 8300000, guid: b506cba0f6171a549aa7b07c57b5071f, type: 3}
-  _traceStart: {fileID: 4019864654406446739}
-  _traceEnd: {fileID: 5960086205313968608}
-  _traceComponent: {fileID: 0}
-  _performTrace: 1
 --- !u!95 &6980154078472895432
 Animator:
   serializedVersion: 7

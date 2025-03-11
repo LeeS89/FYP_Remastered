@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class Bullet : BulletBase
 {
@@ -6,7 +7,9 @@ public class Bullet : BulletBase
     protected override void OnExpired()
     {
         _eventManager.ParticleStop(this, _bulletType);
-        _cachedRoot.SetActive(false);
+        _poolManager.ReleaseGameObject(_cachedRoot);
+        //ParticlePool.ReturnToPool(PoolType.NormalBullet, transform.parent.gameObject);
+        //_cachedRoot.SetActive(false);
     }
 
     public override void Initializebullet()

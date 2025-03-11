@@ -1,7 +1,7 @@
 using UnityEngine;
 
 
-[RequireComponent(typeof(Rigidbody))]
+//[RequireComponent(typeof(Rigidbody))]
 public class BulletCollisionComponent : MonoBehaviour, IBulletEvents, IDeflectable
 {
     private BulletEventManager _eventManager;
@@ -11,7 +11,7 @@ public class BulletCollisionComponent : MonoBehaviour, IBulletEvents, IDeflectab
     [SerializeField] private LayerMask _ignoreMask;
     private bool _deflectionProcessed = false;
     public CapsuleCollider _collider;
-    
+    public BulletBase _base;
     public GameObject _hitParticle;
 
     public GameObject ParentOwner
@@ -35,6 +35,7 @@ public class BulletCollisionComponent : MonoBehaviour, IBulletEvents, IDeflectab
         }
     }
 
+    
     public void Deflect()
     {
         _deflectionProcessed = true;

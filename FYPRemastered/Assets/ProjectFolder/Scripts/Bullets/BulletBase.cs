@@ -8,15 +8,14 @@ public enum BulletType
 }
 
 
-public abstract class BulletBase : MonoBehaviour, IBulletEvents
+public abstract class BulletBase : MonoBehaviour, IBulletEvents, IPoolable
 {
-    protected GameObject _cachedRoot;
+    [SerializeField] protected GameObject _cachedRoot;
     protected BulletEventManager _eventManager;
     protected IDeflectable _deflectableComponent;
-   
+    [SerializeField] protected PoolManager _poolManager;
     [SerializeField] protected BulletType _bulletType;
-    [SerializeField]
-    protected GameObject _owner;
+    [SerializeField] protected GameObject _owner;
     public GameObject Owner
     {
         get => _owner;
@@ -42,7 +41,7 @@ public abstract class BulletBase : MonoBehaviour, IBulletEvents
 
     protected void RegisterDependancies()
     {
-        _cachedRoot = transform.root.gameObject;
+        _cachedRoot = transform.parent.gameObject;
         _deflectableComponent = _cachedRoot.GetComponentInChildren<IDeflectable>();
         if (_deflectableComponent != null)
         {
@@ -53,11 +52,13 @@ public abstract class BulletBase : MonoBehaviour, IBulletEvents
     IEnumerator FireDelay()
     {
         yield return new WaitForEndOfFrame();
-        Initializebullet();
+        //Initializebullet();
     }
 
     public virtual void Initializebullet()
     {
+        //_cachedRoot.transform.position = position;
+        //_cachedRoot.transform.rotation = rotation;
         if(_deflectableComponent != null)
         {
             _deflectableComponent.ParentOwner = _owner;
@@ -72,5 +73,8 @@ public abstract class BulletBase : MonoBehaviour, IBulletEvents
     public abstract void Freeze();
     public abstract void UnFreeze();
 
-    
+    public void SetParentPool(PoolManager manager)
+    {
+       _poolManager = manager;
+    }
 }

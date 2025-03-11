@@ -45,6 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _particleManager: {fileID: 0}
+  _particle: {fileID: 2117498089286912745, guid: f33db7fc758f5944180365f8ef5eb197, type: 3}
 --- !u!1 &6588732399459625391
 GameObject:
   m_ObjectHideFlags: 0
@@ -135,11 +136,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _deflectSpeed: 25
   _parentOwner: {fileID: 0}
-  _rootComponent: {fileID: 0}
+  _rootComponent: {fileID: 6588732399459625391}
   _ignoreMask:
     serializedVersion: 2
     m_Bits: 256
   _collider: {fileID: 5111258017325434983}
+  _base: {fileID: 4723923294814418968}
   _hitParticle: {fileID: 997633063660505334, guid: f33db7fc758f5944180365f8ef5eb197, type: 3}
 --- !u!1 &7876611720651942564
 GameObject:
@@ -310,5 +312,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb3b506c9ea3e354296fead10ecf33f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _cachedRoot: {fileID: 0}
   _bulletType: 0
   _owner: {fileID: 0}

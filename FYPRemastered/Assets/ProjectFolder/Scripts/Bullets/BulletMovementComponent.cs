@@ -22,7 +22,10 @@ public class BulletMovementComponent : MonoBehaviour, IBulletEvents
 
     private void OnDisable()
     {
-        _speed = 0.2f;
+        _speed = 7f;
+        _rb.AddForce(Vector3.zero, ForceMode.VelocityChange);
+        _rb.linearVelocity = Vector3.zero;
+        _rb.angularVelocity = Vector3.zero;
     }
     public bool _deflect = false;
     public void Deflected(Vector3 direction, Quaternion newRotation, float newSpeed)

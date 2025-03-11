@@ -6,6 +6,8 @@ public class WeaponTraceComponent : MonoBehaviour
     [SerializeField] private Transform _traceEnd;
     [SerializeField] private float _radius = 1f;
     [SerializeField] private LayerMask _layers;
+    /*public AudioSource _audioSource;
+    public AudioClip _clip; */
 
     
     private void OnCollisionEnter(Collision collision)
@@ -22,15 +24,21 @@ public class WeaponTraceComponent : MonoBehaviour
             Debug.LogError("Deflectable is null");
             return;
         }
-      
+        ContactPoint contact = collision.contacts[0];
+        Vector3 impactPosition = contact.point;
+        AudioSource audio = ParticlePool.GetFromPool<AudioSource>(PoolType.AudioSRC, impactPosition, Quaternion.identity);
+        audio.Play();
+            //_audioSource.PlayOneShot(_clip);
             deflectable.Deflect();
           
     }
 
-    public void PerformTrace(Vector3 traceStart, Vector3 traceEnd, Vector3 direction)
+
+    #region Old Code
+    /*public void PerformTrace(Vector3 traceStart, Vector3 traceEnd, Vector3 direction)
     {
 
-        /*Vector3 startPoint = traceStart;
+        *//*Vector3 startPoint = traceStart;
         Vector3 endPoint = traceEnd;
         float radius = _radius;
 
@@ -64,26 +72,28 @@ public class WeaponTraceComponent : MonoBehaviour
         }
         DebugExtension.DebugCapsule(traceStart, traceEnd, Color.red, _radius);*/
 
-        /*RaycastHit[] hits = Physics.CapsuleCastAll(traceStart, traceEnd, _radius, direction, 0, _layers);
+    /*RaycastHit[] hits = Physics.CapsuleCastAll(traceStart, traceEnd, _radius, direction, 0, _layers);
 
-        foreach (RaycastHit hit in hits)
+    foreach (RaycastHit hit in hits)
+    {
+        IDeflectable deflectable = null;
+        if (!hit.collider.gameObject.TryGetComponent<IDeflectable>(out deflectable))
         {
-            IDeflectable deflectable = null;
-            if (!hit.collider.gameObject.TryGetComponent<IDeflectable>(out deflectable))
-            {
-                deflectable = hit.collider.GetComponentInParent<IDeflectable>() ??
-                              hit.collider.GetComponentInChildren<IDeflectable>();
-            }
-
-            if (deflectable == null) { continue; }
-
-            if (!deflectable.HasDeflectionBeenProcessed())
-            {
-                deflectable.Deflect();
-            }
-
+            deflectable = hit.collider.GetComponentInParent<IDeflectable>() ??
+                          hit.collider.GetComponentInChildren<IDeflectable>();
         }
 
-        DebugExtension.DebugCapsule(traceStart, traceEnd, Color.red, _radius);*/
+        if (deflectable == null) { continue; }
+
+        if (!deflectable.HasDeflectionBeenProcessed())
+        {
+            deflectable.Deflect();
+        }
+
     }
+
+    DebugExtension.DebugCapsule(traceStart, traceEnd, Color.red, _radius);*//*
+}*/
+    #endregion
+
 }

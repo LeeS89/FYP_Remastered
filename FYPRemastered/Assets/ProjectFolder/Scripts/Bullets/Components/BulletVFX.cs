@@ -4,7 +4,9 @@ public class BulletVFX : MonoBehaviour, IBulletEvents
 {
     [SerializeField]
     private ParticleManager _particleManager;
-
+    public ParticleSystem _particle;
+    private PoolManager _poolManager;
+    public MoonSceneManager _manager;
     public void RegisterEvents(BulletEventManager eventManager)
     {
         if(eventManager == null) { return; }
@@ -13,12 +15,17 @@ public class BulletVFX : MonoBehaviour, IBulletEvents
         eventManager.OnBulletParticlePlay += PlayBulletParticle;
         eventManager.OnBulletParticleStop += StopBulletParticle;
         eventManager.OnSpawnHitParticle += SpawnHitParticle;
+        _manager = FindAnyObjectByType<MoonSceneManager>();
+        _poolManager = new PoolManager(_particle, _manager);
+        
     }
 
    
     private void SpawnHitParticle(Vector3 pos, Quaternion rot)
     {
-        ParticlePool.SpawnHitParticle(pos, rot);
+        //ParticlePool.GetFromPool<ParticleSystem>(PoolType.HitParticle, pos, rot);
+        _poolManager.GetParticle(pos, rot);
+        //ParticlePool.SpawnHitParticle(pos, rot);
     }
 
     private void PlayBulletParticle(BulletBase bullet, BulletType bulletType)
