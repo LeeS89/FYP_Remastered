@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BulletEventManager : MonoBehaviour, IEventManager
+public class BulletEventManager : EventManager, IEventManager
 {
     private List<IBulletEvents> _cachedListeners;
     public event Action OnExpired;
@@ -12,16 +12,17 @@ public class BulletEventManager : MonoBehaviour, IEventManager
     public event Action<BulletBase, BulletType> OnBulletParticlePlay;
     public event Action<BulletBase, BulletType> OnBulletParticleStop;
     public event Action<Vector3, Quaternion> OnSpawnHitParticle;
+    public event Action<PoolManager> OnInjectPoolManager;
     //public event Action OnStartMovement;
 
 
     private void Awake()
     {
         _cachedListeners = new List<IBulletEvents>();
-        BindComponentsToEvents();
+        //BindComponentsToEvents();
     }
 
-    public void BindComponentsToEvents()
+    public override void BindComponentsToEvents()
     {
  
         var childListeners = GetComponentsInChildren<IBulletEvents>();
@@ -32,6 +33,17 @@ public class BulletEventManager : MonoBehaviour, IEventManager
             //Debug.LogError($"Registered listener: {listener.GetType().Name} on {((MonoBehaviour)listener).gameObject.name}");
             listener.RegisterEvents(this);
         }
+        InjectPoolManager(_poolManager);
+    }
+
+    public void InjectPoolManager(PoolManager manager)
+    {
+        OnInjectPoolManager?.Invoke(manager);
+    }
+    public override void ParentPoolInjection(PoolManager poolManager)
+    {
+
+        _poolManager = poolManager;
     }
 
     public void ParticlePlay(BulletBase bullet, BulletType bulletType)

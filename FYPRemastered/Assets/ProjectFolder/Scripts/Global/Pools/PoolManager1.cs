@@ -51,7 +51,7 @@ public partial class PoolManager
         IPoolable poolable = newObject.GetComponentInChildren<IPoolable>();
         if (poolable != null)
         {
-            poolable.SetParentPool(this);  // Inject the pool reference into the object
+            poolable.SetParentPool(this);  
         }
 
 
@@ -60,7 +60,7 @@ public partial class PoolManager
 
     private void OnGetFromPool(GameObject obj)
     {
-        obj.SetActive(false); // Activate the GameObject
+        obj.SetActive(false); 
     }
 
     private void OnReturnToPool(GameObject obj)
@@ -78,7 +78,7 @@ public partial class PoolManager
         return GetObjectFromPool(_gameObjectPool, position, rotation); // Get a GameObject from the pool
     }
 
-    public GameObject GetObjectFromPool(ObjectPool<GameObject> pool, Vector3 position, Quaternion rotation)
+    private GameObject GetObjectFromPool(ObjectPool<GameObject> pool, Vector3 position, Quaternion rotation)
     {
         GameObject obj = pool.Get();
         obj.transform.position = position;

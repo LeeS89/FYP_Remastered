@@ -69,7 +69,7 @@ public partial class PoolManager
 
     public ParticleSystem GetParticle(Vector3 position, Quaternion rotation)
     {
-        return GetObjectFromPool(_particlePool, position, rotation); // Get an AudioSource from the pool
+        return GetObjectFromPool(_particlePool, position, rotation); 
     }
 
     private ParticleSystem GetObjectFromPool(ObjectPool<ParticleSystem> pool, Vector3 position, Quaternion rotation)

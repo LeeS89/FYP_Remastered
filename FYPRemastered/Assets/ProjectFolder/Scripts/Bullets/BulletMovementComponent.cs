@@ -8,11 +8,13 @@ public class BulletMovementComponent : MonoBehaviour, IBulletEvents
     private bool _deflectionProcessed = false;
     private BulletEventManager _eventManager;
     private Vector3 _direction;
+
    
     public void RegisterEvents(BulletEventManager eventManager)
     {
         _eventManager = eventManager;
-        _rb = GetComponentInParent<Rigidbody>();
+        _rb = GetComponentInParent<Rigidbody>(true);
+       
         if(_eventManager != null)
         {
             _eventManager.OnFired += Launch;

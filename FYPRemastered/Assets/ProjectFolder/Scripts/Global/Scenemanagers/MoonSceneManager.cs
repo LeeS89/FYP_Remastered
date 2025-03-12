@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,7 +7,9 @@ public class MoonSceneManager : BaseSceneManager
     [SerializeField] private ParticleSystem _normalHitPrefab;
     [SerializeField] private AudioSource _deflectAudioPrefab;
     [SerializeField] private GameObject _normalBulletPrefab;
-    //PoolManager _poolManager;
+    private PoolManager _bulletPool;
+    private PoolManager _deflectAudioPool;
+    private PoolManager _hitParticlePool;
 
     private void Start()
     {
@@ -17,18 +20,76 @@ public class MoonSceneManager : BaseSceneManager
 
     public override void SetupScene()
     {
-        _normalBulletPrefab = Resources.Load<GameObject>("Bullets/NormalBullet");
-        //_normalBulletPrefab = bulletPrefab.GetComponentInChildren<BulletCollisionComponent>();
-        _deflectAudioPrefab = Resources.Load<AudioSource>("AudioPoolPrefabs/DeflectAudio");
+        LoadSceneResources();
+        /* _normalBulletPrefab = Resources.Load<GameObject>("Bullets/NormalBullet");
+         _normalHitPrefab = Resources.Load<ParticleSystem>("ParticlePoolPrefabs/BasicHit");
+         _deflectAudioPrefab = Resources.Load<AudioSource>("AudioPoolPrefabs/DeflectAudio");*/
 
-        Dictionary<PoolType, PoolSettings> poolData = new()
-        {
-            //{PoolType.NormalBullet, new PoolSettings(_normalBulletPrefab, 30, 50, typeof(GameObject)) },
-            {PoolType.HitParticle, new PoolSettings(_normalHitPrefab.gameObject, 20, 35, typeof(ParticleSystem)) },
-            {PoolType.AudioSRC, new PoolSettings(_deflectAudioPrefab.gameObject, 10, 25, typeof(AudioSource)) }
-        };
+        InitializePools();
+        StartCoroutine(InitializeDelay());
+        //LoadSceneEventManagers();
+        /* Dictionary<PoolType, PoolSettings> poolData = new()
+         {
+             //{PoolType.NormalBullet, new PoolSettings(_normalBulletPrefab, 30, 50, typeof(GameObject)) },
+             {PoolType.HitParticle, new PoolSettings(_normalHitPrefab.gameObject, 20, 35, typeof(ParticleSystem)) },
+             {PoolType.AudioSRC, new PoolSettings(_deflectAudioPrefab.gameObject, 10, 25, typeof(AudioSource)) }
+         };
 
-        ParticlePool.Initialize(poolData, this);
+         ParticlePool.Initialize(poolData, this);*/
         //ParticlePool.Initialize(_normalHitPrefab, this);
+    }
+
+    IEnumerator InitializeDelay()
+    {
+        yield return new WaitForSeconds(1f);
+        LoadSceneEventManagers();
+    }
+
+    protected override void LoadSceneResources()
+    {
+        _normalBulletPrefab = Resources.Load<GameObject>("Bullets/NormalBullet");
+        _normalHitPrefab = Resources.Load<ParticleSystem>("ParticlePoolPrefabs/BasicHit");
+        _deflectAudioPrefab = Resources.Load<AudioSource>("AudioPoolPrefabs/DeflectAudio");
+    }
+   
+
+    
+
+    private void InitializePools()
+    {
+        if(_normalBulletPrefab == null || _deflectAudioPrefab == null || _normalHitPrefab == null)
+        {
+            Debug.LogError("Failed to load Scene Resources");
+            return;
+        }
+
+        _bulletPool = new PoolManager(_normalBulletPrefab);
+        _bulletPool.PrewarmPool(5);
+
+        _deflectAudioPool = new PoolManager(_deflectAudioPrefab, this, 5,10);
+
+        _hitParticlePool = new PoolManager(_normalHitPrefab, this, 10, 20);
+    }
+
+    protected override void LoadSceneEventManagers()
+    {
+        _eventManagers = new List<EventManager>();
+
+        _eventManagers.AddRange(FindObjectsByType<EventManager>(FindObjectsInactive.Include, FindObjectsSortMode.None));
+
+        foreach(var eventManager in _eventManagers)
+        {
+            if(eventManager is TestSpawn)
+            {
+                eventManager.ParentPoolInjection(_bulletPool);
+            }
+            if(eventManager is BulletEventManager)
+            {
+                eventManager.ParentPoolInjection(_hitParticlePool);
+            }
+
+            eventManager.BindComponentsToEvents();
+        }
+
     }
 }

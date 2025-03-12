@@ -46,6 +46,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _particleManager: {fileID: 0}
   _particle: {fileID: 2117498089286912745, guid: f33db7fc758f5944180365f8ef5eb197, type: 3}
+  _manager: {fileID: 0}
 --- !u!1 &6588732399459625391
 GameObject:
   m_ObjectHideFlags: 0
@@ -266,6 +267,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b1b92c1cdcf52c4084ed357eca4e1f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _rb: {fileID: 0}
   _speed: 7
   _deflect: 0
 --- !u!1 &8862239039402137114

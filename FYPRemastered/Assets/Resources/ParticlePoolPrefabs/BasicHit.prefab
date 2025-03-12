@@ -4903,7 +4903,7 @@ GameObject:
   - component: {fileID: 2117498089286912745}
   - component: {fileID: 4751925600980457178}
   m_Layer: 0
-  m_Name: 'Basic Hit '
+  m_Name: BasicHit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
