@@ -26,21 +26,21 @@ public partial class PoolManager
         );
     }
 
-    public void PrewarmPool(ObjectPool<ParticleSystem> pool, int count)
+    private void PrewarmParticlePoolPool(int count)
     {
         int prewarmCount = Mathf.Min(count, _maxPoolSize);
         List<ParticleSystem> tempList = new List<ParticleSystem>();
 
-        Debug.LogError("PreWarm count is: " + prewarmCount);
+        
         for (int i = 0; i < prewarmCount; i++)
         {
-            ParticleSystem obj = pool.Get();
+            ParticleSystem obj = _particlePool.Get();
             tempList.Add(obj);
         }
 
         foreach (ParticleSystem obj in tempList)
         {
-            pool.Release(obj);
+            _particlePool.Release(obj);
         }
 
         tempList.Clear();
@@ -49,6 +49,7 @@ public partial class PoolManager
     private ParticleSystem CreatePooledParticleSystem()
     {
         ParticleSystem newObject = GameObject.Instantiate(_particlePrefab);
+        newObject.transform.root.parent = _poolContainer.transform;
         return newObject; // Get AudioSource component from the prefab
     }
 

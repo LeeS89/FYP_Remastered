@@ -6,10 +6,9 @@ public class Bullet : BulletBase
 
     protected override void OnExpired()
     {
+        _isAlive = false;
         _eventManager.ParticleStop(this, _bulletType);
-        _poolManager.ReleaseGameObject(_cachedRoot);
-        //ParticlePool.ReturnToPool(PoolType.NormalBullet, transform.parent.gameObject);
-        //_cachedRoot.SetActive(false);
+        _objectPoolManager.ReleaseGameObject(_cachedRoot);
     }
 
     public override void Initializebullet()
@@ -20,11 +19,11 @@ public class Bullet : BulletBase
 
     public override void Freeze()
     {
-        throw new System.NotImplementedException();
+        _isAlive = false;
     }
 
     public override void UnFreeze()
     {
-        throw new System.NotImplementedException();
+        _isAlive = true;
     }
 }

@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BulletEventManager : EventManager, IEventManager
+public class BulletEventManager : EventManager
 {
-    private List<IBulletEvents> _cachedListeners;
+    private List<IComponentEvents> _cachedListeners;
     public event Action OnExpired;
     public event Action OnFired;
     public event Action OnCollision;
@@ -12,20 +12,28 @@ public class BulletEventManager : EventManager, IEventManager
     public event Action<BulletBase, BulletType> OnBulletParticlePlay;
     public event Action<BulletBase, BulletType> OnBulletParticleStop;
     public event Action<Vector3, Quaternion> OnSpawnHitParticle;
-    public event Action<PoolManager> OnInjectPoolManager;
-    //public event Action OnStartMovement;
 
 
-    private void Awake()
+    private bool _isAlreadyInitialized = false;
+
+    public bool IsAlreadyInitialized
     {
-        _cachedListeners = new List<IBulletEvents>();
-        //BindComponentsToEvents();
+        get => _isAlreadyInitialized;
+        private set
+        {
+            _isAlreadyInitialized = value;
+        }
+     
     }
 
     public override void BindComponentsToEvents()
     {
- 
-        var childListeners = GetComponentsInChildren<IBulletEvents>();
+        if (IsAlreadyInitialized) { return; }
+        IsAlreadyInitialized = true;
+
+        _cachedListeners = new List<IComponentEvents>();
+
+        var childListeners = GetComponentsInChildren<IComponentEvents>();
         _cachedListeners.AddRange(childListeners);
 
         foreach(var listener in _cachedListeners)
@@ -33,17 +41,18 @@ public class BulletEventManager : EventManager, IEventManager
             //Debug.LogError($"Registered listener: {listener.GetType().Name} on {((MonoBehaviour)listener).gameObject.name}");
             listener.RegisterEvents(this);
         }
-        InjectPoolManager(_poolManager);
+       
     }
 
-    public void InjectPoolManager(PoolManager manager)
+    public override void UnbindComponentsToEvents()
     {
-        OnInjectPoolManager?.Invoke(manager);
-    }
-    public override void ParentPoolInjection(PoolManager poolManager)
-    {
-
-        _poolManager = poolManager;
+        foreach(var listener in _cachedListeners)
+        {
+            listener.UnRegisterEvents(this);
+        }
+        _cachedListeners?.Clear();
+        _cachedListeners = null;
+        IsAlreadyInitialized = false;
     }
 
     public void ParticlePlay(BulletBase bullet, BulletType bulletType)
@@ -88,4 +97,6 @@ public class BulletEventManager : EventManager, IEventManager
     {
         OnExpired?.Invoke();
     }
+
+    
 }

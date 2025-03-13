@@ -19,7 +19,10 @@ public class TraceComponent : MonoBehaviour, IBindableToPlayerEvents
         }
     }
 
-   
+    public void OnUnBindToPlayerEvents(PlayerEventManager eventManager)
+    {
+        return;
+    }
 
     private void CheckForGrabbable(Transform location, string handID)
     {
@@ -55,6 +58,8 @@ public class TraceComponent : MonoBehaviour, IBindableToPlayerEvents
         }
        
     }
+
+    
 
     /*public void TestDebug()
     {
@@ -101,6 +106,6 @@ public class TraceComponent : MonoBehaviour, IBindableToPlayerEvents
         }
     }*/
 
-    
+
 }
 

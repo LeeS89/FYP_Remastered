@@ -1,15 +1,29 @@
 using UnityEngine;
 
-public class WeaponTraceComponent : MonoBehaviour
+public class WeaponCollisionComponent : EventManager, IImpactAudio
 {
     [SerializeField] private Transform _traceStart;
     [SerializeField] private Transform _traceEnd;
     [SerializeField] private float _radius = 1f;
     [SerializeField] private LayerMask _layers;
-    /*public AudioSource _audioSource;
-    public AudioClip _clip; */
+    private PoolManager _audioPoolManager;
 
-    
+
+    public override void BindComponentsToEvents()
+    {
+        InterfaceRegistry.Add<IImpactAudio>(this);
+    }
+
+    public void SetDeflectAudioPool(PoolManager manager)
+    {
+        _audioPoolManager = manager;
+    }
+
+    public override void UnbindComponentsToEvents()
+    {
+        InterfaceRegistry.Remove<IImpactAudio>(this);
+    }
+
     private void OnCollisionEnter(Collision collision)
     {
         IDeflectable deflectable = null;
@@ -26,12 +40,14 @@ public class WeaponTraceComponent : MonoBehaviour
         }
         ContactPoint contact = collision.contacts[0];
         Vector3 impactPosition = contact.point;
-        AudioSource audio = ParticlePool.GetFromPool<AudioSource>(PoolType.AudioSRC, impactPosition, Quaternion.identity);
+        AudioSource audio = _audioPoolManager.GetAudioSource(impactPosition, transform.rotation);//ParticlePool.GetFromPool<AudioSource>(PoolType.AudioSRC, impactPosition, Quaternion.identity);
         audio.Play();
-            //_audioSource.PlayOneShot(_clip);
-            deflectable.Deflect();
+        //_audioSource.PlayOneShot(_clip);
+        deflectable.Deflect();
           
     }
+
+    
 
 
     #region Old Code

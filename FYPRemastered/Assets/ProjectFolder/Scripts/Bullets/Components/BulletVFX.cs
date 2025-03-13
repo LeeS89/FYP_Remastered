@@ -1,38 +1,42 @@
 using UnityEngine;
 
-public class BulletVFX : MonoBehaviour, IBulletEvents
+public class BulletVFX : MonoBehaviour, IComponentEvents, IImpactVFX
 {
     [SerializeField]
     private ParticleManager _particleManager;
     public ParticleSystem _particle;
     private PoolManager _poolManager;
+    private BulletEventManager _eventManager;
     //public MoonSceneManager _manager;
-    public void RegisterEvents(BulletEventManager eventManager)
+    public void RegisterEvents(EventManager eventManager)
     {
         if(eventManager == null) { return; }
-
+        _eventManager = (BulletEventManager)eventManager;
         _particleManager = ParticleManager.instance;
-        eventManager.OnBulletParticlePlay += PlayBulletParticle;
-        eventManager.OnBulletParticleStop += StopBulletParticle;
-        eventManager.OnSpawnHitParticle += SpawnHitParticle;
-        eventManager.OnInjectPoolManager += SetParticlePoolManager;
-        //_manager = FindAnyObjectByType<MoonSceneManager>();
-        //_poolManager = new PoolManager(_particle, this);
-        
+        _eventManager.OnBulletParticlePlay += PlayBulletParticle;
+        _eventManager.OnBulletParticleStop += StopBulletParticle;
+        _eventManager.OnSpawnHitParticle += SpawnHitParticle;
+
+        InterfaceRegistry.Add<IImpactVFX>(this);
+      
     }
 
-   
-    private void SetParticlePoolManager(PoolManager manager)
+    public void UnRegisterEvents(EventManager eventManager)
     {
-        _poolManager = manager;
+        if (eventManager == null) { return; }
+
+        _eventManager.Expired();
+        _particleManager = null;
+        _eventManager.OnBulletParticlePlay -= PlayBulletParticle;
+        _eventManager.OnBulletParticleStop -= StopBulletParticle;
+        _eventManager.OnSpawnHitParticle -= SpawnHitParticle;
+
+        InterfaceRegistry.Remove<IImpactVFX>(this);
     }
 
     private void SpawnHitParticle(Vector3 pos, Quaternion rot)
-    {
-        
-        //ParticlePool.GetFromPool<ParticleSystem>(PoolType.HitParticle, pos, rot);
-        _poolManager.GetParticle(pos, rot);
-        //ParticlePool.SpawnHitParticle(pos, rot);
+    { 
+        _poolManager.GetParticle(pos, rot);  
     }
 
     private void PlayBulletParticle(BulletBase bullet, BulletType bulletType)
@@ -44,6 +48,13 @@ public class BulletVFX : MonoBehaviour, IBulletEvents
     {
         _particleManager.Removebullet(bullet);
     }
+
+    public void SetImpactParticlePool(PoolManager manager)
+    {
+        _poolManager = manager;
+    }
+
+   
 
     /* private void OnDestroy()
      {

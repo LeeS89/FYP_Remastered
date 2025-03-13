@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerEventManager : MonoBehaviour, IEventManager
+public class PlayerEventManager : EventManager
 {
     public event Action<Quaternion> OnPlayerRotate;
     public event Action<Vector3> OnPlayerHeightUpdated;
@@ -11,32 +11,41 @@ public class PlayerEventManager : MonoBehaviour, IEventManager
     public event Action<Transform, string> OnTryGrab;
     public event Action<HandSide, bool> OnGrab;
     public event Action<HandSide, bool> OnReleaseGrabbable;
-    public event Action<HandGrabInteractor, bool> OnGrabbedObject; 
-    public static Dictionary<HandGrabInteractor, bool> _lastGrabbingStates = new Dictionary<HandGrabInteractor, bool>();
-    private List<IBindableToPlayerEvents> _cachedListeners;
+    //public event Action<HandGrabInteractor, bool> OnGrabbedObject; 
+    //public static Dictionary<HandGrabInteractor, bool> _lastGrabbingStates = new Dictionary<HandGrabInteractor, bool>();
+    private List<IComponentEvents> _cachedListeners;
 
     private void Awake()
     {
-        _cachedListeners = new List<IBindableToPlayerEvents>();
-        BindComponentsToEvents();
+       /* _cachedListeners = new List<IBindableToPlayerEvents>();
+        BindComponentsToEvents();*/
     }
 
     /// <summary>
     /// Finds all Interface components within the player and 
     /// ensures each component binds to their relevant events
     /// </summary>
-    public void BindComponentsToEvents()
+    public override void BindComponentsToEvents()
     {
-        var parentListeners = GetComponents<IBindableToPlayerEvents>();
-        _cachedListeners.AddRange(parentListeners);
-
-        var childListeners = GetComponentsInChildren<IBindableToPlayerEvents>(true);
+        _cachedListeners = new List<IComponentEvents>();
+        
+        var childListeners = GetComponentsInChildren<IComponentEvents>(true);
         _cachedListeners.AddRange(childListeners);
 
         foreach (var listener in _cachedListeners)
         {
-            listener.OnBindToPlayerEvents(this);
+            listener.RegisterEvents(this);
         }
+    }
+
+    public override void UnbindComponentsToEvents()
+    {
+        foreach (var listener in _cachedListeners)
+        {
+            listener.UnRegisterEvents(this);
+        }
+        _cachedListeners?.Clear();
+        _cachedListeners = null;
     }
 
     #region Locomotion events
@@ -74,7 +83,7 @@ public class PlayerEventManager : MonoBehaviour, IEventManager
         }
     }
 
-    public void GrabbedObject(HandGrabInteractor handInteractor, bool isGrabbing)
+   /* public void GrabbedObject(HandGrabInteractor handInteractor, bool isGrabbing)
     {
         if (_lastGrabbingStates.TryGetValue(handInteractor, out bool lastState))
         {
@@ -86,7 +95,7 @@ public class PlayerEventManager : MonoBehaviour, IEventManager
 
     
         OnGrabbedObject?.Invoke(handInteractor, isGrabbing);
-    }
+    }*/
 
     public void Grab(HandSide uniqueID, bool grabbingState)
     {
@@ -103,14 +112,16 @@ public class PlayerEventManager : MonoBehaviour, IEventManager
             OnReleaseGrabbable?.Invoke(uniqueID, grabbingState);
         }
     }
+
+    
     #endregion
 
 
-   
-
-   
 
 
-    
+
+
+
+
 
 }

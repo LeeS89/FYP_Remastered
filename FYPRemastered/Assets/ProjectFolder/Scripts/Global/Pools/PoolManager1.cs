@@ -18,18 +18,18 @@ public partial class PoolManager
             OnGetFromPool,
             OnReturnToPool,
             OnDestroyPooledObject,
-            false,
+            true,
             _defaultSize,
             _maxPoolSize
         );
     }
 
-    public void PrewarmPool(int count)
+    private void PrewarmObjectPool(int count)
     {
         int prewarmCount = Mathf.Min(count, _maxPoolSize);
         List<GameObject> tempList = new List<GameObject>();
 
-        Debug.LogError("PreWarm count is: " + prewarmCount);
+        
         for (int i = 0; i < prewarmCount; i++)
         {
             GameObject obj = _gameObjectPool.Get();
@@ -53,7 +53,7 @@ public partial class PoolManager
         {
             poolable.SetParentPool(this);  
         }
-
+        newObject.transform.root.parent = _poolContainer.transform;
 
         return newObject;
     }

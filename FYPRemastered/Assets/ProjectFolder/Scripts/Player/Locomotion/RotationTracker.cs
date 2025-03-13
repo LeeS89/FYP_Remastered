@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class RotationTracker : MonoBehaviour, IBindableToPlayerEvents
+public class RotationTracker : MonoBehaviour, IComponentEvents
 {
     [SerializeField]
     PlayerEventManager _playerEventManager;
@@ -20,9 +20,24 @@ public class RotationTracker : MonoBehaviour, IBindableToPlayerEvents
     public delegate void RotationHandler(Quaternion targetRotation);
     public event RotationHandler OnRotationChanged;*/
 
-    public void OnBindToPlayerEvents(PlayerEventManager eventManager)
+   /* public void OnBindToPlayerEvents(PlayerEventManager eventManager)
     {
         _playerEventManager = eventManager;
+    }
+
+    public void OnUnBindToPlayerEvents(PlayerEventManager eventManager)
+    {
+        _playerEventManager = null;
+    }*/
+
+    public void RegisterEvents(EventManager eventManager)
+    {
+        _playerEventManager = (PlayerEventManager)eventManager;
+    }
+
+    public void UnRegisterEvents(EventManager eventManager)
+    {
+        _playerEventManager = null;
     }
 
 
@@ -75,5 +90,5 @@ public class RotationTracker : MonoBehaviour, IBindableToPlayerEvents
         _playerEventManager.PlayerHeightUpdated(transform.localPosition);
     }
 
-   
+    
 }

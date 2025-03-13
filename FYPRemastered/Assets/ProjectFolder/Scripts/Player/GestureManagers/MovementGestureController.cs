@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class MovementGestureController : BaseGesture, IBindableToPlayerEvents
+public class MovementGestureController : BaseGesture, IComponentEvents
 {
    
     private static HandSide _handInControl = HandSide.None;
@@ -37,13 +37,40 @@ public class MovementGestureController : BaseGesture, IBindableToPlayerEvents
         }
     }
 
-    public void OnBindToPlayerEvents(PlayerEventManager eventManager)
+    /*public void OnBindToPlayerEvents(PlayerEventManager eventManager)
     {
         if (eventManager == null) { return; }
 
         _playerEventManager = eventManager;
         _playerEventManager.OnGrab += ToggleHasGrabbedObject;
         _playerEventManager.OnReleaseGrabbable += ToggleHasGrabbedObject;
+    }
+
+    public void OnUnBindToPlayerEvents(PlayerEventManager eventManager)
+    {
+        if (eventManager == null) { return; }
+
+        _playerEventManager.OnGrab -= ToggleHasGrabbedObject;
+        _playerEventManager.OnReleaseGrabbable -= ToggleHasGrabbedObject;
+        _playerEventManager = null;
+    }*/
+
+    public void RegisterEvents(EventManager eventManager)
+    {
+        if (eventManager == null) { return; }
+
+        _playerEventManager = (PlayerEventManager)eventManager;
+        _playerEventManager.OnGrab += ToggleHasGrabbedObject;
+        _playerEventManager.OnReleaseGrabbable += ToggleHasGrabbedObject;
+    }
+
+    public void UnRegisterEvents(EventManager eventManager)
+    {
+        if (eventManager == null) { return; }
+
+        _playerEventManager.OnGrab -= ToggleHasGrabbedObject;
+        _playerEventManager.OnReleaseGrabbable -= ToggleHasGrabbedObject;
+        _playerEventManager = null;
     }
 
     public override void OnGestureRecognized()
@@ -118,5 +145,5 @@ public class MovementGestureController : BaseGesture, IBindableToPlayerEvents
         }
     }
 
-    
+   
 }

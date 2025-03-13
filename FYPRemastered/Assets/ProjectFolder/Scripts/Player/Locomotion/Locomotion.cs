@@ -1,18 +1,18 @@
 using Oculus.Interaction;
 using UnityEngine;
 
-public class Locomotion : MonoBehaviour, IBindableToPlayerEvents
+public class Locomotion : MonoBehaviour, IComponentEvents
 {
     // Character Controller variables - start
     [SerializeField] CharacterController _controller;
-
+    private PlayerEventManager _eventManager;
     [SerializeField] private float _bodyHeightMin = 0.5f;
     [SerializeField] private float _bodyHeightMax = 2f;
     private Vector3 _newControllerCenter = Vector3.zero;
     [SerializeField] private float _moveSpeed = 4.0f;
     [SerializeField] private bool _shouldMoveForward = false;
     private const float GRAVITY = -9.8f;
-    //private float velocityY = 0f;
+   
     private Vector3 velocity = Vector3.zero;
     private Vector3 _moveDirection = Vector3.zero;
     private float _effectiveMoveSpeed = 0f;
@@ -34,16 +34,54 @@ public class Locomotion : MonoBehaviour, IBindableToPlayerEvents
         }
     }
 
-    public void OnBindToPlayerEvents(PlayerEventManager eventManager)
+   /* public void OnBindToPlayerEvents(PlayerEventManager eventManager)
     {
         if (eventManager == null)
         {
             Debug.LogError("Player event manager is null");
             return;
         }
+        
         eventManager.OnPlayerRotate += HandleRotation;
         eventManager.OnPlayerHeightUpdated += AdjustPlayerHeight;
         eventManager.OnPlayerMove += SetShouldMoveforward;
+    }
+
+    public void OnUnBindToPlayerEvents(PlayerEventManager eventManager)
+    {
+        if (eventManager == null)
+        {
+            Debug.LogError("Player event manager is null");
+            return;
+        }
+        eventManager.OnPlayerRotate -= HandleRotation;
+        eventManager.OnPlayerHeightUpdated -= AdjustPlayerHeight;
+        eventManager.OnPlayerMove -= SetShouldMoveforward;
+    }*/
+
+    public void RegisterEvents(EventManager eventManager)
+    {
+        if (eventManager == null)
+        {
+            Debug.LogError("Player event manager is null");
+            return;
+        }
+        _eventManager = (PlayerEventManager)eventManager;
+        _eventManager.OnPlayerRotate += HandleRotation;
+        _eventManager.OnPlayerHeightUpdated += AdjustPlayerHeight;
+        _eventManager.OnPlayerMove += SetShouldMoveforward;
+    }
+
+    public void UnRegisterEvents(EventManager eventManager)
+    {
+        if (eventManager == null)
+        {
+            Debug.LogError("Player event manager is null");
+            return;
+        }
+        _eventManager.OnPlayerRotate -= HandleRotation;
+        _eventManager.OnPlayerHeightUpdated -= AdjustPlayerHeight;
+        _eventManager.OnPlayerMove -= SetShouldMoveforward;
     }
 
     private void Update()

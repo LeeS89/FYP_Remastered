@@ -8,14 +8,20 @@ public enum BulletType
 }
 
 
-public abstract class BulletBase : MonoBehaviour, IBulletEvents, IPoolable
+public abstract class BulletBase : MonoBehaviour, IComponentEvents, IPoolable
 {
-    [SerializeField] protected GameObject _cachedRoot;
-    protected BulletEventManager _eventManager;
+    protected GameObject _cachedRoot;
+    [SerializeField] protected BulletEventManager _eventManager;
     protected IDeflectable _deflectableComponent;
-    [SerializeField] protected PoolManager _poolManager;
+    protected PoolManager _objectPoolManager;
+    protected PoolManager _hitParticlePoolManager;
     [SerializeField] protected BulletType _bulletType;
-    [SerializeField] protected GameObject _owner;
+    protected GameObject _owner;
+
+    [SerializeField] protected float _lifespan = 5f;
+    protected float _timeOut;
+    protected bool _isAlive = false;
+
     public GameObject Owner
     {
         get => _owner;
@@ -28,15 +34,20 @@ public abstract class BulletBase : MonoBehaviour, IBulletEvents, IPoolable
         }
     }
 
-    public void RegisterEvents(BulletEventManager eventManager)
+    public void RegisterEvents(EventManager eventManager)
     {
         if (eventManager == null) { return; }
        
         RegisterDependancies();
-        _eventManager = eventManager;
         _eventManager.OnExpired += OnExpired;
+        _timeOut = _lifespan;
         //StartCoroutine(FireDelay());
 
+    }
+
+    public void UnRegisterEvents(EventManager eventManager)
+    {
+        _eventManager.OnExpired -= OnExpired;
     }
 
     protected void RegisterDependancies()
@@ -57,17 +68,32 @@ public abstract class BulletBase : MonoBehaviour, IBulletEvents, IPoolable
 
     public virtual void Initializebullet()
     {
-        //_cachedRoot.transform.position = position;
-        //_cachedRoot.transform.rotation = rotation;
+        
         if(_deflectableComponent != null)
         {
             _deflectableComponent.ParentOwner = _owner;
         }
+        _isAlive = true;
         _eventManager.ParticlePlay(this, _bulletType);
         _eventManager.Fired();
+        _timeOut = _lifespan;
     }
-    
-  
+
+    protected void Update()
+    {
+        if (!_isAlive) { return; }
+
+        if(_timeOut > 0f)
+        {
+            _timeOut -= Time.deltaTime;
+        }
+        else
+        {
+            OnExpired();
+        }
+    }
+
+
     protected abstract void OnExpired();
 
     public abstract void Freeze();
@@ -75,6 +101,13 @@ public abstract class BulletBase : MonoBehaviour, IBulletEvents, IPoolable
 
     public void SetParentPool(PoolManager manager)
     {
-       _poolManager = manager;
+        _objectPoolManager = manager;
+
+        if (!_eventManager.IsAlreadyInitialized)
+        {
+            _eventManager.BindComponentsToEvents();
+        }
     }
+
+    
 }

@@ -6,5 +6,7 @@ public abstract class EventManager : MonoBehaviour
 
     public abstract void BindComponentsToEvents();
 
-    public virtual void ParentPoolInjection(PoolManager poolManager) { }
+    public abstract void UnbindComponentsToEvents();
+
+    public virtual void HitParticlePoolInjection(PoolManager poolManager) { }
 }

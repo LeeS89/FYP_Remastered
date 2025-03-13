@@ -25,7 +25,7 @@ public partial class PoolManager
         );
     }
 
-    public void PrewarmPool(ObjectPool<AudioSource> pool, int count)
+    private void PrewarmAudioPool(int count)
     {
         int prewarmCount = Mathf.Min(count, _maxPoolSize);
         List<AudioSource> tempList = new List<AudioSource>();
@@ -33,13 +33,13 @@ public partial class PoolManager
         Debug.LogError("PreWarm count is: " + prewarmCount);
         for (int i = 0; i < prewarmCount; i++)
         {
-            AudioSource obj = pool.Get();
+            AudioSource obj = _audioSourcePool.Get();
             tempList.Add(obj);
         }
 
         foreach (AudioSource obj in tempList)
         {
-            pool.Release(obj);
+            _audioSourcePool.Release(obj);
         }
 
         tempList.Clear();
@@ -48,6 +48,7 @@ public partial class PoolManager
     private AudioSource CreatePooledAudioSource()
     {
         AudioSource audio = GameObject.Instantiate( _audioPrefab );
+        audio.transform.root.parent = _poolContainer.transform;
         return audio; 
     }
 

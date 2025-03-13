@@ -14,8 +14,6 @@ public class MoonSceneManager : BaseSceneManager
     private void Start()
     {
         SetupScene();
-
-        //_poolManager = new PoolManager(_normalBulletPrefab);
     }
 
     public override void SetupScene()
@@ -26,17 +24,9 @@ public class MoonSceneManager : BaseSceneManager
          _deflectAudioPrefab = Resources.Load<AudioSource>("AudioPoolPrefabs/DeflectAudio");*/
 
         InitializePools();
-        StartCoroutine(InitializeDelay());
-        //LoadSceneEventManagers();
-        /* Dictionary<PoolType, PoolSettings> poolData = new()
-         {
-             //{PoolType.NormalBullet, new PoolSettings(_normalBulletPrefab, 30, 50, typeof(GameObject)) },
-             {PoolType.HitParticle, new PoolSettings(_normalHitPrefab.gameObject, 20, 35, typeof(ParticleSystem)) },
-             {PoolType.AudioSRC, new PoolSettings(_deflectAudioPrefab.gameObject, 10, 25, typeof(AudioSource)) }
-         };
-
-         ParticlePool.Initialize(poolData, this);*/
-        //ParticlePool.Initialize(_normalHitPrefab, this);
+        LoadSceneEventManagers();
+        //StartCoroutine(InitializeDelay());
+        
     }
 
     IEnumerator InitializeDelay()
@@ -53,8 +43,6 @@ public class MoonSceneManager : BaseSceneManager
     }
    
 
-    
-
     private void InitializePools()
     {
         if(_normalBulletPrefab == null || _deflectAudioPrefab == null || _normalHitPrefab == null)
@@ -64,11 +52,12 @@ public class MoonSceneManager : BaseSceneManager
         }
 
         _bulletPool = new PoolManager(_normalBulletPrefab);
-        _bulletPool.PrewarmPool(5);
+        _bulletPool.PrewarmPool(PoolContents.Object, 5);
 
         _deflectAudioPool = new PoolManager(_deflectAudioPrefab, this, 5,10);
 
         _hitParticlePool = new PoolManager(_normalHitPrefab, this, 10, 20);
+        _hitParticlePool.PrewarmPool(PoolContents.Particle, 5);
     }
 
     protected override void LoadSceneEventManagers()
@@ -81,14 +70,31 @@ public class MoonSceneManager : BaseSceneManager
         {
             if(eventManager is TestSpawn)
             {
-                eventManager.ParentPoolInjection(_bulletPool);
+                eventManager.HitParticlePoolInjection(_bulletPool);
             }
-            if(eventManager is BulletEventManager)
-            {
-                eventManager.ParentPoolInjection(_hitParticlePool);
-            }
+            
 
             eventManager.BindComponentsToEvents();
+        }
+
+        AssignPools();
+
+    }
+
+    private void AssignPools()
+    {
+        var impactParticleSubscribers = InterfaceRegistry.GetAll<IImpactVFX>();
+
+        foreach(var particleSubscriber in impactParticleSubscribers)
+        {
+            particleSubscriber.SetImpactParticlePool(_hitParticlePool);
+        }
+
+        var impactAudioSubscribers = InterfaceRegistry.GetAll<IImpactAudio>();
+
+        foreach(var audioSubscriber in impactAudioSubscribers)
+        {
+            audioSubscriber.SetDeflectAudioPool(_deflectAudioPool);
         }
 
     }

@@ -1975,7 +1975,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: df611475b51d6bc4fa11e21e9d393c3b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _bullet: {fileID: 6588732399459625391, guid: 0a079e03acf62314b99b18a709e823e3, type: 3}
   _player: {fileID: 361832570}
 --- !u!1 &661128880
 GameObject:
@@ -2520,6 +2519,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 5431893849646897263, guid: e37cd0debb8548946b869ecf235a88d4, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5956988267342537615, guid: e37cd0debb8548946b869ecf235a88d4, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.8837982
@@ -2564,7 +2567,17 @@ PrefabInstance:
       propertyPath: m_Name
       value: OldBullets
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 8633741059834928437, guid: e37cd0debb8548946b869ecf235a88d4, type: 3}
+      propertyPath: 'activeBullets.Array.data[0]'
+      value: 
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 8633741059834928437, guid: e37cd0debb8548946b869ecf235a88d4, type: 3}
+    - {fileID: 5493591962927851931, guid: e37cd0debb8548946b869ecf235a88d4, type: 3}
+    - {fileID: 5431893849646897263, guid: e37cd0debb8548946b869ecf235a88d4, type: 3}
     m_RemovedGameObjects:
     - {fileID: 5688705040970040467, guid: e37cd0debb8548946b869ecf235a88d4, type: 3}
     - {fileID: 4256552821885914167, guid: e37cd0debb8548946b869ecf235a88d4, type: 3}
@@ -5100,9 +5113,6 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1351727514}
     m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 4579910219311772944, guid: 8b8a47dd509973a4599dca415c2aa13b, type: 3}
-      insertIndex: 5
-      addedObject: {fileID: 8894052546914292623}
     - targetCorrespondingSourceObject: {fileID: 5127051721775726867, guid: 8b8a47dd509973a4599dca415c2aa13b, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1593848678}
@@ -5261,36 +5271,12 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 92b5e8197e5dcb8429c18479688e37b6, type: 3}
---- !u!1 &8495767185126496084 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4579910219311772944, guid: 8b8a47dd509973a4599dca415c2aa13b, type: 3}
-  m_PrefabInstance: {fileID: 2637593784199785640}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &8894052546914292623
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8495767185126496084}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c85e22eb0ffeb984c8722585028f0040, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  capsuleRadius: 0.04
-  capsuleHeight: 0.1
-  grabbableLayer:
-    serializedVersion: 2
-    m_Bits: 256
-  _debug: 1
-  _testLocation: {fileID: 0}
 --- !u!114 &8894052546914292626 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5895332772353476969, guid: 8b8a47dd509973a4599dca415c2aa13b, type: 3}
   m_PrefabInstance: {fileID: 2637593784199785640}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8495767185126496084}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4ca6b8022500fe84c8c5739780e553e0, type: 3}

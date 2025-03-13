@@ -28,13 +28,18 @@ public class TestSpawn : EventManager
         
     }
 
-    public override void ParentPoolInjection(PoolManager poolManager)
+    public override void HitParticlePoolInjection(PoolManager poolManager)
     {
         
         _poolManager = poolManager;
     }
 
     public override void BindComponentsToEvents()
+    {
+        return;
+    }
+
+    public override void UnbindComponentsToEvents()
     {
         return;
     }

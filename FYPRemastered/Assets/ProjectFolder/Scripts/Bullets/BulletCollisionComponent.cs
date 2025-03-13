@@ -1,8 +1,9 @@
+using NUnit.Framework.Constraints;
 using UnityEngine;
 
 
 //[RequireComponent(typeof(Rigidbody))]
-public class BulletCollisionComponent : MonoBehaviour, IBulletEvents, IDeflectable
+public class BulletCollisionComponent : MonoBehaviour, IComponentEvents, IDeflectable
 {
     private BulletEventManager _eventManager;
     [SerializeField] private float _deflectSpeed;
@@ -35,7 +36,10 @@ public class BulletCollisionComponent : MonoBehaviour, IBulletEvents, IDeflectab
         }
     }
 
-    
+    private void OnDisable()
+    {
+        _collider.excludeLayers = 0;
+    }
     public void Deflect()
     {
         _deflectionProcessed = true;
@@ -45,11 +49,16 @@ public class BulletCollisionComponent : MonoBehaviour, IBulletEvents, IDeflectab
         _eventManager.Deflected(directionTotarget, newRotation, _deflectSpeed);
     }
 
-    public void RegisterEvents(BulletEventManager eventManager)
+    public void RegisterEvents(EventManager eventManager)
     {
         if(eventManager == null) { return; }
-        _eventManager = eventManager;
+        _eventManager = (BulletEventManager)eventManager;
       
+    }
+
+    public void UnRegisterEvents(EventManager eventManager)
+    {
+        _eventManager = null;
     }
 
 
@@ -62,10 +71,7 @@ public class BulletCollisionComponent : MonoBehaviour, IBulletEvents, IDeflectab
 
         if ((_ignoreMask & (1 << collision.gameObject.layer)) != 0)
         {
-           /* ContactPoint contact = collision.contacts[0];
-            Vector3 impactPosition = contact.point;
-            Instantiate(_hitParticle, impactPosition, Quaternion.identity);*/
-            GetComponent<Rigidbody>().excludeLayers = _ignoreMask;
+            _collider.excludeLayers = _ignoreMask;
             return; 
         }
         
@@ -78,4 +84,6 @@ public class BulletCollisionComponent : MonoBehaviour, IBulletEvents, IDeflectab
     {
         return _deflectionProcessed;
     }
+
+    
 }

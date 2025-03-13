@@ -1,18 +1,18 @@
 using UnityEngine;
 
-public class BulletMovementComponent : MonoBehaviour, IBulletEvents
+public class BulletMovementComponent : MonoBehaviour, IComponentEvents
 {
     private Rigidbody _rb;
     [SerializeField] private float _speed;
    
     private bool _deflectionProcessed = false;
     private BulletEventManager _eventManager;
-    private Vector3 _direction;
+    
 
    
-    public void RegisterEvents(BulletEventManager eventManager)
+    public void RegisterEvents(EventManager eventManager)
     {
-        _eventManager = eventManager;
+        _eventManager = eventManager as BulletEventManager;
         _rb = GetComponentInParent<Rigidbody>(true);
        
         if(_eventManager != null)
@@ -22,13 +22,32 @@ public class BulletMovementComponent : MonoBehaviour, IBulletEvents
         }
     }
 
+    public void UnRegisterEvents(EventManager eventManager)
+    {
+        _eventManager.OnFired -= Launch;
+        _eventManager.OnDeflected -= Deflected;
+        _eventManager = null;
+
+        ResetRigidBody();
+        _rb = null;
+    }
+
     private void OnDisable()
+    {
+        if (_rb != null)
+        {
+            ResetRigidBody();
+        }
+    }
+
+    private void ResetRigidBody()
     {
         _speed = 7f;
         _rb.AddForce(Vector3.zero, ForceMode.VelocityChange);
         _rb.linearVelocity = Vector3.zero;
         _rb.angularVelocity = Vector3.zero;
     }
+
     public bool _deflect = false;
     public void Deflected(Vector3 direction, Quaternion newRotation, float newSpeed)
     {
@@ -61,4 +80,6 @@ public class BulletMovementComponent : MonoBehaviour, IBulletEvents
     {
         return _deflectionProcessed;
     }
+
+    
 }

@@ -2,39 +2,52 @@ using UnityEngine.Pool;
 using UnityEngine;
 using System.Collections.Generic;
 
+public enum PoolContents
+{
+    Object,
+    Particle,
+    Audio
+}
+
 public partial class PoolManager
 {
     private int _defaultSize;
     private int _maxPoolSize;
     private MonoBehaviour _caller;
+    private static GameObject _poolContainer;
 
     // Constructor that works for all object types
     public PoolManager(int defaultSize = 10, int maxSize = 20)
     {
         this._defaultSize = defaultSize;
         this._maxPoolSize = maxSize;
+
+        if(_poolContainer == null)
+        {
+            _poolContainer = new GameObject("PoolContainer");
+        }
     }
 
     // Common logic for prewarming the pool (retrieving and returning objects)
-   /* public void PrewarmPool(ObjectPool<GameObject> pool, int count)
-    {
-        int prewarmCount = Mathf.Min(count, _maxPoolSize);
-        List<GameObject> tempList = new List<GameObject>();
+    /* public void PrewarmPool(ObjectPool<GameObject> pool, int count)
+     {
+         int prewarmCount = Mathf.Min(count, _maxPoolSize);
+         List<GameObject> tempList = new List<GameObject>();
 
-        Debug.LogError("PreWarm count is: " + prewarmCount);
-        for (int i = 0; i < prewarmCount; i++)
-        {
-            GameObject obj = pool.Get();
-            tempList.Add(obj);
-        }
+         Debug.LogError("PreWarm count is: " + prewarmCount);
+         for (int i = 0; i < prewarmCount; i++)
+         {
+             GameObject obj = pool.Get();
+             tempList.Add(obj);
+         }
 
-        foreach (GameObject obj in tempList)
-        {
-            pool.Release(obj);
-        }
+         foreach (GameObject obj in tempList)
+         {
+             pool.Release(obj);
+         }
 
-        tempList.Clear();
-    }*/
+         tempList.Clear();
+     }*/
 
     // Common methods for getting and returning objects
     /*public GameObject GetObjectFromPool(ObjectPool<GameObject> pool, Vector3 position, Quaternion rotation)
@@ -44,6 +57,22 @@ public partial class PoolManager
         obj.transform.rotation = rotation;
         return obj;
     }*/
+
+    public void PrewarmPool(PoolContents pool, int count)
+    {
+        switch (pool)
+        {
+            case PoolContents.Object:
+                PrewarmObjectPool(count);
+                break;
+            case PoolContents.Particle:
+                PrewarmParticlePoolPool(count);
+                break;
+            case PoolContents.Audio: 
+                PrewarmAudioPool(count);
+                break;
+        }
+    }
 
     public void ReleaseObjectToPool(ObjectPool<GameObject> pool, GameObject obj)
     {
