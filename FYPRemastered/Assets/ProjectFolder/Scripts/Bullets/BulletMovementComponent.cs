@@ -42,7 +42,7 @@ public class BulletMovementComponent : MonoBehaviour, IComponentEvents
 
     private void ResetRigidBody()
     {
-        _speed = 7f;
+        _speed = 5f;
         _rb.AddForce(Vector3.zero, ForceMode.VelocityChange);
         _rb.linearVelocity = Vector3.zero;
         _rb.angularVelocity = Vector3.zero;

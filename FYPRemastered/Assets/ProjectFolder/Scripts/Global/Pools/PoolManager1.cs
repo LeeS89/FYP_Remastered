@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
+using UnityEngine.SceneManagement;
 
 public partial class PoolManager
 {
@@ -18,7 +19,7 @@ public partial class PoolManager
             OnGetFromPool,
             OnReturnToPool,
             OnDestroyPooledObject,
-            true,
+            false,
             _defaultSize,
             _maxPoolSize
         );
@@ -42,6 +43,7 @@ public partial class PoolManager
         }
 
         tempList.Clear();
+        tempList = null;
     }
 
     private GameObject CreatePooledGameObject()
@@ -54,7 +56,7 @@ public partial class PoolManager
             poolable.SetParentPool(this);  
         }
         newObject.transform.root.parent = _poolContainer.transform;
-
+        //Debug.LogError("Pre warmed bullet call create pooled object!!!");
         return newObject;
     }
 

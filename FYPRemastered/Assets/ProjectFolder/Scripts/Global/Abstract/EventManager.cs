@@ -8,5 +8,4 @@ public abstract class EventManager : MonoBehaviour
 
     public abstract void UnbindComponentsToEvents();
 
-    public virtual void HitParticlePoolInjection(PoolManager poolManager) { }
 }

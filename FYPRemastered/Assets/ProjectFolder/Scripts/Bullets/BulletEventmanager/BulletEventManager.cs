@@ -26,6 +26,11 @@ public class BulletEventManager : EventManager
      
     }
 
+    private void Awake()
+    {
+        BindComponentsToEvents();
+    }
+
     public override void BindComponentsToEvents()
     {
         if (IsAlreadyInitialized) { return; }

@@ -266,7 +266,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b1b92c1cdcf52c4084ed357eca4e1f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _speed: 6
+  _speed: 2
   _deflect: 0
 --- !u!1 &8862239039402137114
 GameObject:
@@ -312,8 +312,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb3b506c9ea3e354296fead10ecf33f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _cachedRoot: {fileID: 0}
   _eventManager: {fileID: 7026262071358711773}
   _bulletType: 0
-  _owner: {fileID: 0}
   _lifespan: 5

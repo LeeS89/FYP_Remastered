@@ -16,6 +16,12 @@ public class BaseSceneManager : MonoBehaviour, ISceneManager
 
     protected virtual void LoadSceneResources() { }
 
-    protected virtual void LoadSceneEventManagers() { }
-    
+    protected virtual void LoadActiveSceneEventManagers() { }
+
+
+    public virtual void GetImpactParticlePool(ref PoolManager manager) { }
+
+    public virtual void GetBulletPool(ref PoolManager manager) { }
+
+
 }

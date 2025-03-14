@@ -11,11 +11,17 @@ public class TestSpawn : EventManager
     {
         //_poolManager = new PoolManager(_bullet,1,2);
         //_poolManager.PrewarmPool(2);
+        //BaseSceneManager._instance.GetBulletPool(ref _poolManager);
         InvokeRepeating(nameof(FireBullet), 3f, 0.5f);
     }
 
     private void FireBullet()
     {
+        if(_poolManager == null)
+        {
+            BaseSceneManager._instance.GetBulletPool(ref _poolManager);
+        }
+
         Vector3 _directionToPlayer = TargetingUtility.GetDirectionToTarget(_player, transform, true);
         Quaternion bulletRotation = Quaternion.LookRotation(_directionToPlayer);
 
@@ -28,11 +34,11 @@ public class TestSpawn : EventManager
         
     }
 
-    public override void HitParticlePoolInjection(PoolManager poolManager)
+  /*  public void HitParticlePoolInjection(PoolManager poolManager)
     {
         
         _poolManager = poolManager;
-    }
+    }*/
 
     public override void BindComponentsToEvents()
     {

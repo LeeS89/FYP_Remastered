@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class BulletVFX : MonoBehaviour, IComponentEvents, IImpactVFX
+public class BulletVFX : MonoBehaviour, IComponentEvents
 {
     [SerializeField]
     private ParticleManager _particleManager;
@@ -17,8 +17,8 @@ public class BulletVFX : MonoBehaviour, IComponentEvents, IImpactVFX
         _eventManager.OnBulletParticleStop += StopBulletParticle;
         _eventManager.OnSpawnHitParticle += SpawnHitParticle;
 
-        InterfaceRegistry.Add<IImpactVFX>(this);
-      
+        BaseSceneManager._instance.GetImpactParticlePool(ref _poolManager);
+       
     }
 
     public void UnRegisterEvents(EventManager eventManager)
@@ -31,7 +31,7 @@ public class BulletVFX : MonoBehaviour, IComponentEvents, IImpactVFX
         _eventManager.OnBulletParticleStop -= StopBulletParticle;
         _eventManager.OnSpawnHitParticle -= SpawnHitParticle;
 
-        InterfaceRegistry.Remove<IImpactVFX>(this);
+        
     }
 
     private void SpawnHitParticle(Vector3 pos, Quaternion rot)
@@ -48,13 +48,6 @@ public class BulletVFX : MonoBehaviour, IComponentEvents, IImpactVFX
     {
         _particleManager.Removebullet(bullet);
     }
-
-    public void SetImpactParticlePool(PoolManager manager)
-    {
-        _poolManager = manager;
-    }
-
-   
 
     /* private void OnDestroy()
      {

@@ -30,7 +30,7 @@ public partial class PoolManager
         int prewarmCount = Mathf.Min(count, _maxPoolSize);
         List<AudioSource> tempList = new List<AudioSource>();
 
-        Debug.LogError("PreWarm count is: " + prewarmCount);
+        
         for (int i = 0; i < prewarmCount; i++)
         {
             AudioSource obj = _audioSourcePool.Get();
