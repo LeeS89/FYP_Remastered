@@ -1,5 +1,6 @@
 using NUnit.Framework.Constraints;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 
 //[RequireComponent(typeof(Rigidbody))]
@@ -14,7 +15,7 @@ public class BulletCollisionComponent : MonoBehaviour, IComponentEvents, IDeflec
     public CapsuleCollider _collider;
     public BulletBase _base;
     public GameObject _hitParticle;
-
+   
     public GameObject ParentOwner
     {
         get => _parentOwner;
@@ -36,6 +37,9 @@ public class BulletCollisionComponent : MonoBehaviour, IComponentEvents, IDeflec
         }
     }
 
+   
+
+
     private void OnDisable()
     {
         _collider.excludeLayers = 0;
@@ -53,17 +57,18 @@ public class BulletCollisionComponent : MonoBehaviour, IComponentEvents, IDeflec
     {
         if(eventManager == null) { return; }
         _eventManager = (BulletEventManager)eventManager;
-      
+
     }
 
     public void UnRegisterEvents(EventManager eventManager)
-    {
+    {      
         _eventManager = null;
     }
 
 
     private void OnCollisionEnter(Collision collision)
     {
+       
         ContactPoint contact = collision.contacts[0];
         Vector3 impactPosition = contact.point;
         //Instantiate(_hitParticle, impactPosition, Quaternion.identity);
@@ -72,12 +77,13 @@ public class BulletCollisionComponent : MonoBehaviour, IComponentEvents, IDeflec
         if ((_ignoreMask & (1 << collision.gameObject.layer)) != 0)
         {
             _collider.excludeLayers = _ignoreMask;
+            
             return; 
         }
         
         //_parentOwner = null;
         _eventManager.Expired();
-
+        
     }
 
     public bool HasDeflectionBeenProcessed()

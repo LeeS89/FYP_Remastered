@@ -51,14 +51,14 @@ public class MoonSceneManager : BaseSceneManager
             return;
         }
 
-        _hitParticlePool = new PoolManager(_normalHitPrefab, this, 10, 20);
-        _hitParticlePool.PrewarmPool(PoolContents.Particle, 15);
+        _hitParticlePool = new PoolManager(_normalHitPrefab, this, 40, 80);
+        //_hitParticlePool.PrewarmPool(PoolContents.Particle, 15);
 
         _deflectAudioPool = new PoolManager(_deflectAudioPrefab, this, 5, 10);
         _deflectAudioPool.PrewarmPool(PoolContents.Audio, 5);
 
-        _bulletPool = new PoolManager(_normalBulletPrefab);
-        _bulletPool.PrewarmPool(PoolContents.Object, 15);
+        _bulletPool = new PoolManager(_normalBulletPrefab, 40, 80);
+        //_bulletPool.PrewarmPool(PoolContents.Object, 40);
 
         
        

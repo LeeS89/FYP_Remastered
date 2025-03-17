@@ -10,18 +10,41 @@ public enum BulletType
 
 public abstract class BulletBase : MonoBehaviour, IComponentEvents, IPoolable
 {
-    protected GameObject _cachedRoot;
-    [SerializeField] protected BulletEventManager _eventManager;
-    protected IDeflectable _deflectableComponent;
+    [Header("Pools")]
     protected PoolManager _objectPoolManager;
     protected PoolManager _hitParticlePoolManager;
-    [SerializeField] protected BulletType _bulletType;
-    protected GameObject _owner;
 
+    [Header("Status")]
     [SerializeField] protected float _lifespan = 5f;
     protected float _timeOut;
     protected bool _isAlive = false;
+    protected bool _isFrozen = false;
+    protected bool _isCulled = false;
 
+
+    [Header("Culling")]
+    [SerializeField] protected float _distanceToPlayer;
+    [SerializeField] private float _cullDistance = 0.5f;
+    [SerializeField] private Animator _anim;
+
+    [Header("Components")]
+    [SerializeField] protected BulletEventManager _eventManager;
+    protected GameObject _owner;
+    protected GameObject _cachedRoot;
+    protected IDeflectable _deflectableComponent;
+   
+    [SerializeField] protected BulletType _bulletType;
+    
+
+    
+    
+    
+    
+  
+    [SerializeField] protected CapsuleCollider _capsuleCollider;
+    public LayerMask _layerMask;
+   
+   
     public GameObject Owner
     {
         get => _owner;
@@ -34,20 +57,30 @@ public abstract class BulletBase : MonoBehaviour, IComponentEvents, IPoolable
         }
     }
 
+    public bool IsAlive
+    {
+        get => _isAlive;
+    }
+
     public void RegisterEvents(EventManager eventManager)
     {
         if (eventManager == null) { return; }
        
         RegisterDependancies();
         _eventManager.OnExpired += OnExpired;
+       
         _timeOut = _lifespan;
+        
         //StartCoroutine(FireDelay());
 
     }
 
+   
+
     public void UnRegisterEvents(EventManager eventManager)
     {
         _eventManager.OnExpired -= OnExpired;
+       
     }
 
     protected void RegisterDependancies()
@@ -73,15 +106,17 @@ public abstract class BulletBase : MonoBehaviour, IComponentEvents, IPoolable
         {
             _deflectableComponent.ParentOwner = _owner;
         }
+        
         _isAlive = true;
         _eventManager.ParticlePlay(this, _bulletType);
         _eventManager.Fired();
         _timeOut = _lifespan;
+        
     }
 
-    protected void Update()
+    protected virtual void Update()
     {
-        if (!_isAlive) { return; }
+        if (_isFrozen || !_isAlive) { return; }
 
         if(_timeOut > 0f)
         {
@@ -91,13 +126,56 @@ public abstract class BulletBase : MonoBehaviour, IComponentEvents, IPoolable
         {
             OnExpired();
         }
+
+        
+
     }
 
+   
 
     protected abstract void OnExpired();
 
     public abstract void Freeze();
     public abstract void UnFreeze();
+
+    protected abstract void RemoveFromJob(); 
+
+    public virtual void SetDistanceToPlayer(float distance)
+    {
+        if (!_isFrozen) { return; }
+        _distanceToPlayer = distance;
+        
+        if (_distanceToPlayer <= _cullDistance)
+        {
+            if (!_isCulled)
+            {
+                Cull(true);
+            }
+        }
+        else
+        {
+            if (_isCulled)
+            {
+                Cull();
+            }
+        }
+    }
+
+    protected virtual void Cull(bool cull = false)
+    {
+        if (cull)
+        {
+            _anim.SetTrigger("minimize");
+            _eventManager.ParticleStop(this, _bulletType);
+            _isCulled = true;
+        }
+        else
+        {
+            _anim.SetTrigger("maximize");
+            _eventManager.ParticlePlay(this, _bulletType);
+            _isCulled = false;
+        }
+    }
 
     public void SetParentPool(PoolManager manager)
     {
@@ -109,5 +187,30 @@ public abstract class BulletBase : MonoBehaviour, IComponentEvents, IPoolable
         }
     }
 
-    
+
+    #region redundant
+    /*protected virtual void CheckForOverlap()
+    {
+
+        Vector3 center = _capsuleCollider.transform.TransformPoint(_capsuleCollider.center); // Convert to world position
+        float worldHeight = _capsuleCollider.height * _capsuleCollider.transform.lossyScale.y;
+        Vector3 start = center - _capsuleCollider.transform.up * (worldHeight * 0.8f);
+        Vector3 end = center + _capsuleCollider.transform.up * (worldHeight * 0.8f);
+        float capsuleRadius = _capsuleCollider.radius * Mathf.Max(_capsuleCollider.transform.lossyScale.x, _capsuleCollider.transform.lossyScale.y, _capsuleCollider.transform.lossyScale.z);
+        int hits = Physics.OverlapCapsuleNonAlloc(start, end, capsuleRadius * 1.65f, _overlapResults, _layerMask);
+        //DebugExtension.DebugCapsule(start, end, Color.blue, capsuleRadius * 1.4f);
+        for (int i = 0; i < hits; ++i)
+        {
+            if (_overlapResults[i].gameObject == _capsuleCollider.gameObject)
+            {
+                continue;
+            }
+            //Cull(true);
+            break;
+        }
+
+    }*/
+
+    #endregion
+
 }

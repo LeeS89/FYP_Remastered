@@ -122,7 +122,7 @@ Material:
     - _ColorMode: 0
     - _ColorMultiplier: 1.5
     - _Cull: 2
-    - _Cutoff: 0.5
+    - _Cutoff: 0.1
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _DistortMainTexture: 0

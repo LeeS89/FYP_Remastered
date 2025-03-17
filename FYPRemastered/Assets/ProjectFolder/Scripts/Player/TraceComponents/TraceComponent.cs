@@ -1,65 +1,117 @@
-﻿using UnityEngine;
+﻿using System.ComponentModel;
+using UnityEngine;
 
 
-public class TraceComponent : MonoBehaviour, IBindableToPlayerEvents
+public class TraceComponent : MonoBehaviour, IComponentEvents
 {
-    public float capsuleRadius = 0.2f;  // Thickness of the capsule
-    public float capsuleHeight = 0.3f;  // Height of the capsule
-    public LayerMask grabbableLayer;
-    public bool _debug = false;
-    private bool _lockStatus = false;
+    [Header("Trace shape size")]
+    [SerializeField] private float _sphereRadius = 0.2f;
+
+    [Header("Trace Center")]
+    [SerializeField] private Transform _traceLocation;
+
+    [Header("Trace Object Layer")]
+    [SerializeField] private LayerMask traceLayer;
+
+    [Header("Trace results max size")]
+    [SerializeField] private int maxSize = 50;
+    private Collider[] _overlapResults;
+
+    [Header("Trace debugging")]
+    [SerializeField] private bool _debug = false;
+    //private bool _lockStatus = false;
     public Transform _testLocation = null;
+    
+    private bool _canTrace = false;
 
-
-    public void OnBindToPlayerEvents(PlayerEventManager eventManager)
+    public bool CanTrace
     {
-        if(eventManager != null)
-        {
-            //eventManager.OnTryGrab += CheckForGrabbable;
-        }
+        get => _canTrace;
+        set => _canTrace = value;
     }
 
-    public void OnUnBindToPlayerEvents(PlayerEventManager eventManager)
+
+    public void RegisterEvents(EventManager eventManager)
     {
-        return;
+        _overlapResults = new Collider[maxSize];
     }
 
-    private void CheckForGrabbable(Transform location, string handID)
+    public void UnRegisterEvents(EventManager eventManager)
+    {
+        
+    }
+
+    private void Update()
+    {
+        if (!_canTrace) { return; }
+
+        CheckForFreezeable();
+    }
+
+
+    public void CheckForFreezeable()
     {
        
-        Vector3 start = location.position - location.forward * (capsuleHeight / 2f);  // Bottom of capsule
-        Vector3 end = location.position + location.forward * (capsuleHeight / 2f);    // Top of capsule
+        //Vector3 start = location.position - location.forward * (capsuleHeight / 2f);  // Bottom of capsule
+        //Vector3 end = location.position + location.forward * (capsuleHeight / 2f);    // Top of capsule
 
 
-        bool foundObject = Physics.CheckCapsule(start, end, capsuleRadius, grabbableLayer);
+        bool foundObject = Physics.CheckSphere(_traceLocation.position, _sphereRadius, traceLayer);
 
         Color debugColor = foundObject ? Color.green : Color.red; // Green if detected, red if not
 
         if (_debug)
         {
  
-            DebugExtension.DebugCapsule(start, end, debugColor, capsuleRadius, 1.0f);
+            DebugExtension.DebugWireSphere(_traceLocation.position, debugColor, _sphereRadius, 1.0f);
+            
         }
 
         if (foundObject)
         {
-            // Check for a GrabbableObject component
-            Collider[] colliders = Physics.OverlapCapsule(start, end, capsuleRadius, grabbableLayer);
+            
+            int hits = Physics.OverlapSphereNonAlloc(_traceLocation.position, _sphereRadius, _overlapResults, traceLayer);
 
-            foreach (Collider col in colliders)
+            for(int i = 0;  i < hits; i++)
             {
-                if(col.TryGetComponent<GrabbableObject>(out GrabbableObject obj))
-                {
-                    //obj.Grab(handID);
-                    return;
-                }
+                GameObject obj = _overlapResults[i].transform.parent.gameObject;
 
+                BulletBase bullet = obj.GetComponentInChildren<BulletBase>();
+
+                if(bullet == null) { continue; }
+                bullet.Freeze();
             }
+
+            /*foreach (Collider col in colliders)
+            {
+                GameObject obj = col.transform.parent.gameObject;
+
+                //Component[] components = obj.GetComponentsInChildren<Component>();
+                BulletBase bulletBase = obj.GetComponentInChildren<BulletBase>();
+
+                if(bulletBase != null)
+                {
+                    bulletBase.Freeze();
+                    //Debug.LogError("Found component: " + obj.GetType());
+                }
+                *//*foreach (var component in components)
+                {
+                    // Now you can check the type of each component or perform other logic
+                    Debug.LogError("Found component: " + component.GetType());
+                }*/
+                /*if(col.TryGetComponent<GrabbableObject>(out GrabbableObject obj))
+                {
+                    
+                    return;
+                }*//*
+
+            }*/
         }
        
     }
 
     
+
 
     /*public void TestDebug()
     {

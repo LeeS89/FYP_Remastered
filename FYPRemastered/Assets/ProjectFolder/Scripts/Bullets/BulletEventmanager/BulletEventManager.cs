@@ -9,9 +9,12 @@ public class BulletEventManager : EventManager
     public event Action OnFired;
     public event Action OnCollision;
     public event Action<Vector3, Quaternion, float> OnDeflected;
+    public event Action OnFreeze;
     public event Action<BulletBase, BulletType> OnBulletParticlePlay;
     public event Action<BulletBase, BulletType> OnBulletParticleStop;
     public event Action<Vector3, Quaternion> OnSpawnHitParticle;
+    public event Action<bool> OnCull;
+   
 
 
     private bool _isAlreadyInitialized = false;
@@ -60,6 +63,8 @@ public class BulletEventManager : EventManager
         IsAlreadyInitialized = false;
     }
 
+    
+
     public void ParticlePlay(BulletBase bullet, BulletType bulletType)
     {
         OnBulletParticlePlay?.Invoke(bullet, bulletType);
@@ -73,6 +78,11 @@ public class BulletEventManager : EventManager
     public void SpawnHitParticle(Vector3 position, Quaternion rotation)
     {
         OnSpawnHitParticle?.Invoke(position, rotation);
+    }
+
+    public void Cull(bool cull = false)
+    {
+        OnCull?.Invoke(cull);
     }
 
     public void Fired()
@@ -91,6 +101,11 @@ public class BulletEventManager : EventManager
     public void Deflected(Vector3 direction, Quaternion rotation, float speed)
     {
         OnDeflected?.Invoke(direction, rotation, speed);
+    }
+
+    public void Freeze()
+    {
+        OnFreeze?.Invoke();
     }
 
     public void Collision()

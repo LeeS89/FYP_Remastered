@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class BulletMovementComponent : MonoBehaviour, IComponentEvents
 {
@@ -7,9 +8,14 @@ public class BulletMovementComponent : MonoBehaviour, IComponentEvents
    
     private bool _deflectionProcessed = false;
     private BulletEventManager _eventManager;
-    
+    public Vector3 _scale;
 
-   
+    private void Awake()
+    {
+        _scale = transform.localScale;
+    }
+
+
     public void RegisterEvents(EventManager eventManager)
     {
         _eventManager = eventManager as BulletEventManager;
@@ -19,6 +25,7 @@ public class BulletMovementComponent : MonoBehaviour, IComponentEvents
         {
             _eventManager.OnFired += Launch;
             _eventManager.OnDeflected += Deflected;
+            _eventManager.OnFreeze += ResetRigidBody;
         }
     }
 
@@ -26,10 +33,19 @@ public class BulletMovementComponent : MonoBehaviour, IComponentEvents
     {
         _eventManager.OnFired -= Launch;
         _eventManager.OnDeflected -= Deflected;
+        _eventManager.OnFreeze -= ResetRigidBody;
         _eventManager = null;
 
         ResetRigidBody();
         _rb = null;
+    }
+
+    private void OnEnable()
+    {
+        if(transform.localScale != _scale)
+        {
+            transform.localScale = _scale;
+        }
     }
 
     private void OnDisable()
