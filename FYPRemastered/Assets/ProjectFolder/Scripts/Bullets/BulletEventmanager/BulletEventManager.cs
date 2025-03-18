@@ -10,6 +10,7 @@ public class BulletEventManager : EventManager
     public event Action OnCollision;
     public event Action<Vector3, Quaternion, float> OnDeflected;
     public event Action OnFreeze;
+    public event Action OnUnFreeze;
     public event Action<BulletBase, BulletType> OnBulletParticlePlay;
     public event Action<BulletBase, BulletType> OnBulletParticleStop;
     public event Action<Vector3, Quaternion> OnSpawnHitParticle;
@@ -17,7 +18,7 @@ public class BulletEventManager : EventManager
    
 
 
-    private bool _isAlreadyInitialized = false;
+    /*private bool _isAlreadyInitialized = false;
 
     public bool IsAlreadyInitialized
     {
@@ -27,7 +28,7 @@ public class BulletEventManager : EventManager
             _isAlreadyInitialized = value;
         }
      
-    }
+    }*/
 
     private void Awake()
     {
@@ -36,9 +37,7 @@ public class BulletEventManager : EventManager
 
     public override void BindComponentsToEvents()
     {
-        if (IsAlreadyInitialized) { return; }
-        IsAlreadyInitialized = true;
-
+       
         _cachedListeners = new List<IComponentEvents>();
 
         var childListeners = GetComponentsInChildren<IComponentEvents>();
@@ -60,7 +59,7 @@ public class BulletEventManager : EventManager
         }
         _cachedListeners?.Clear();
         _cachedListeners = null;
-        IsAlreadyInitialized = false;
+        
     }
 
     
@@ -106,6 +105,11 @@ public class BulletEventManager : EventManager
     public void Freeze()
     {
         OnFreeze?.Invoke();
+    }
+
+    public void UnFreeze()
+    {
+        OnUnFreeze?.Invoke();
     }
 
     public void Collision()

@@ -10,6 +10,12 @@ public class BulletMovementComponent : MonoBehaviour, IComponentEvents
     private BulletEventManager _eventManager;
     public Vector3 _scale;
 
+    public bool DeflectionProcessed
+    {
+        get => _deflectionProcessed;
+        private set => _deflectionProcessed = value;
+    }
+
     private void Awake()
     {
         _scale = transform.localScale;
@@ -58,20 +64,21 @@ public class BulletMovementComponent : MonoBehaviour, IComponentEvents
 
     private void ResetRigidBody()
     {
+        DeflectionProcessed = false;
         _speed = 5f;
         _rb.AddForce(Vector3.zero, ForceMode.VelocityChange);
         _rb.linearVelocity = Vector3.zero;
         _rb.angularVelocity = Vector3.zero;
     }
 
-    public bool _deflect = false;
+    //public bool _deflect = false;
     public void Deflected(Vector3 direction, Quaternion newRotation, float newSpeed)
     {
         _speed = newSpeed;
         _rb.MoveRotation(newRotation);
 
         _rb.AddForce(direction * newSpeed, ForceMode.VelocityChange);
-        _deflect = true;
+        DeflectionProcessed = true;
 
     }
 
@@ -83,7 +90,7 @@ public class BulletMovementComponent : MonoBehaviour, IComponentEvents
 
     private void FixedUpdate()
     {
-        if (!_deflect) { return; }
+        if (!DeflectionProcessed) { return; }
 
         if (_rb.linearVelocity.magnitude < _speed * 0.95f)
         {
@@ -92,10 +99,10 @@ public class BulletMovementComponent : MonoBehaviour, IComponentEvents
     }
 
 
-    public bool HasDeflectionBeenProcessed()
+   /* public bool HasDeflectionBeenProcessed()
     {
         return _deflectionProcessed;
-    }
+    }*/
 
     
 }

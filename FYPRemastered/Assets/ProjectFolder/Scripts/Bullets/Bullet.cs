@@ -8,7 +8,13 @@ public class Bullet : BulletBase
         _distanceToPlayer = float.MaxValue;
         _isAlive = false;
         _eventManager.ParticleStop(this, _bulletType);
+        if (_isFrozen)
+        {
+            _isFrozen = false;
+        }
         _objectPoolManager.ReleaseGameObject(_cachedRoot);
+
+        
     }
     public bool _testUnFreeze = false;
     protected override void Update()
@@ -43,7 +49,7 @@ public class Bullet : BulletBase
         {
             _eventManager.Freeze();
             _timeOut = _lifespan;
-            _capsuleCollider.enabled = false;
+            //_capsuleCollider.enabled = false;
         }
        
     }
@@ -53,6 +59,7 @@ public class Bullet : BulletBase
         if (!_isFrozen) { return; }
 
         RemoveFromJob();
+        _eventManager.UnFreeze();
     }
 
     protected override void RemoveFromJob()
@@ -63,9 +70,9 @@ public class Bullet : BulletBase
             {
                 Cull(false);
             }
-            _isFrozen = false;
+            //_isFrozen = false;
                       
-            _capsuleCollider.enabled = true;
+            //_capsuleCollider.enabled = true;
         }
 
     }

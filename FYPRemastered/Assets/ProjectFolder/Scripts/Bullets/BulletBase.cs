@@ -17,10 +17,6 @@ public abstract class BulletBase : MonoBehaviour, IComponentEvents, IPoolable
     [Header("Status")]
     [SerializeField] protected float _lifespan = 5f;
     protected float _timeOut;
-    protected bool _isAlive = false;
-    protected bool _isFrozen = false;
-    protected bool _isCulled = false;
-
 
     [Header("Culling")]
     [SerializeField] protected float _distanceToPlayer;
@@ -34,17 +30,19 @@ public abstract class BulletBase : MonoBehaviour, IComponentEvents, IPoolable
     protected IDeflectable _deflectableComponent;
    
     [SerializeField] protected BulletType _bulletType;
-    
-
-    
-    
-    
-    
-  
     [SerializeField] protected CapsuleCollider _capsuleCollider;
     public LayerMask _layerMask;
-   
-   
+
+    protected bool _isAlive = false;
+    public bool _isFrozen = false;
+    protected bool _isCulled = false;
+
+    protected byte _state;
+    protected const byte IsAlive = 1 << 0;
+    public const byte IsFrozen = 1 << 1;
+    protected const byte IsCulled = 1 << 2;
+
+
     public GameObject Owner
     {
         get => _owner;
@@ -57,10 +55,14 @@ public abstract class BulletBase : MonoBehaviour, IComponentEvents, IPoolable
         }
     }
 
-    public bool IsAlive
+    public bool Alive
     {
         get => _isAlive;
     }
+
+    protected void SetState(byte state) => _state |= state;
+    protected void ClearState(byte state) => _state &= (byte)~state;
+    public bool HasState(byte state) => (_state & state) != 0;
 
     public void RegisterEvents(EventManager eventManager)
     {
@@ -181,10 +183,10 @@ public abstract class BulletBase : MonoBehaviour, IComponentEvents, IPoolable
     {
         _objectPoolManager = manager;
 
-        if (!_eventManager.IsAlreadyInitialized)
+        /*if (!_eventManager.IsAlreadyInitialized)
         {
             _eventManager.BindComponentsToEvents();
-        }
+        }*/
     }
 
 

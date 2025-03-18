@@ -28,7 +28,7 @@ public class TestSpawn : EventManager
         GameObject obj = _poolManager.GetGameObject(transform.position, bulletRotation);
        
         BulletBase bullet = obj.GetComponentInChildren<BulletBase>();
-        bullet.Owner = gameObject;
+        bullet.Owner = transform.parent.gameObject;
         obj.SetActive(true);
         bullet.Initializebullet();
         
