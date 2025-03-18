@@ -33,6 +33,8 @@ public class RotationTracker : MonoBehaviour, IComponentEvents
     public void RegisterEvents(EventManager eventManager)
     {
         _playerEventManager = (PlayerEventManager)eventManager;
+
+        
     }
 
     public void UnRegisterEvents(EventManager eventManager)

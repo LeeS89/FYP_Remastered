@@ -10,7 +10,7 @@ public class MoonSceneManager : BaseSceneManager
     private PoolManager _bulletPool;
     private PoolManager _deflectAudioPool;
     private PoolManager _hitParticlePool;
-
+    public Dictionary<GameObject, float> stats = new Dictionary<GameObject, float>();
     private void Start()
     {
         SetupScene();
@@ -37,7 +37,7 @@ public class MoonSceneManager : BaseSceneManager
 
     protected override void LoadSceneResources()
     {
-        _normalBulletPrefab = Resources.Load<GameObject>("Bullets/NormalBullet");
+        _normalBulletPrefab = Resources.Load<GameObject>("Bullets/BasicBullet");
         _normalHitPrefab = Resources.Load<ParticleSystem>("ParticlePoolPrefabs/BasicHit");
         _deflectAudioPrefab = Resources.Load<AudioSource>("AudioPoolPrefabs/DeflectAudio");
     }

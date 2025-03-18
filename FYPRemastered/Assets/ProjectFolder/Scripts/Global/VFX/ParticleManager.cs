@@ -15,7 +15,7 @@ public class ParticleManager : MonoBehaviour
     public ParticleSystem _particleSystem;
     public List<BulletBase> activeBullets;
 
-    public void AddBullet(BulletBase bullet, BulletType bulletType)
+    public void AddBullet(BulletBase bullet/*, BulletType bulletType*/)
     {
         if(!activeBullets.Contains(bullet))
         {

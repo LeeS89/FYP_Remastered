@@ -13,6 +13,14 @@ public class BulletCollisionComponent : MonoBehaviour, IComponentEvents, IDeflec
     [Header("Layer to Ignore after deflection")]
     [SerializeField] private LayerMask _ignoreMask;
 
+    [Header("Damage Data")]
+    [SerializeField] private DamageData _damageData;
+    private float _baseDamage;
+    private DamageType _damageType;
+    private float _damageOverTime;
+    private float _dOTDuration;
+    [SerializeField] private float _statusEffectChancePercentage;
+
     private BulletEventManager _eventManager; 
     private GameObject _parentOwner;
     private GameObject _rootComponent;
@@ -46,7 +54,16 @@ public class BulletCollisionComponent : MonoBehaviour, IComponentEvents, IDeflec
         _eventManager = (BulletEventManager)eventManager;
 
         _eventManager.OnUnFreeze += Deflect;
+        InitializeDamageType();
+    }
 
+    private void InitializeDamageType()
+    {
+        if(_damageData == null) { return; }
+        _damageType = _damageData.damageType;
+        _baseDamage = _damageData.baseDamage;
+        _damageOverTime = _damageData.damageOverTime;
+        _dOTDuration = _damageData.duration;
     }
 
     public void UnRegisterEvents(EventManager eventManager)
@@ -85,6 +102,12 @@ public class BulletCollisionComponent : MonoBehaviour, IComponentEvents, IDeflec
             
             return; 
         }
+
+        if (collision.gameObject.TryGetComponent<IDamageable>(out IDamageable damageable))
+        {
+            damageable.TakeDamage(_baseDamage, _damageType, _statusEffectChancePercentage, _damageOverTime, _dOTDuration);
+        } 
+        //if(collision)
         
         //_parentOwner = null;
         _eventManager.Expired();

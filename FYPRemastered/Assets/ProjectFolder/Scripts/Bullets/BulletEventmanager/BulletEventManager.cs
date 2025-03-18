@@ -11,8 +11,8 @@ public class BulletEventManager : EventManager
     public event Action<Vector3, Quaternion, float> OnDeflected;
     public event Action OnFreeze;
     public event Action OnUnFreeze;
-    public event Action<BulletBase, BulletType> OnBulletParticlePlay;
-    public event Action<BulletBase, BulletType> OnBulletParticleStop;
+    public event Action<BulletBase/*, BulletType*/> OnBulletParticlePlay;
+    public event Action<BulletBase/*, BulletType*/> OnBulletParticleStop;
     public event Action<Vector3, Quaternion> OnSpawnHitParticle;
     public event Action<bool> OnCull;
    
@@ -64,14 +64,14 @@ public class BulletEventManager : EventManager
 
     
 
-    public void ParticlePlay(BulletBase bullet, BulletType bulletType)
+    public void ParticlePlay(BulletBase bullet/*, BulletType bulletType*/)
     {
-        OnBulletParticlePlay?.Invoke(bullet, bulletType);
+        OnBulletParticlePlay?.Invoke(bullet/*, bulletType*/);
     }
 
-    public void ParticleStop(BulletBase bullet, BulletType bulletType)
+    public void ParticleStop(BulletBase bullet/*, BulletType bulletType*/)
     {
-        OnBulletParticleStop?.Invoke(bullet, bulletType);
+        OnBulletParticleStop?.Invoke(bullet/*, bulletType*/);
     }
 
     public void SpawnHitParticle(Vector3 position, Quaternion rotation)

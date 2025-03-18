@@ -8,7 +8,7 @@ public class Bullet : BulletBase
         _distanceToPlayer = float.MaxValue;
         ClearState(IsAlive);
         //_isAlive = false;
-        _eventManager.ParticleStop(this, _bulletType);
+        _eventManager.ParticleStop(this/*, _bulletType*/);
         if (HasState(IsFrozen))
         {
             ClearState(IsFrozen);

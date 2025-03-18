@@ -39,12 +39,12 @@ public class BulletVFX : MonoBehaviour, IComponentEvents
         _poolManager.GetParticle(pos, rot);  
     }
 
-    private void PlayBulletParticle(BulletBase bullet, BulletType bulletType)
+    private void PlayBulletParticle(BulletBase bullet/*, BulletType bulletType*/)
     {
-        _particleManager.AddBullet(bullet, bulletType);
+        _particleManager.AddBullet(bullet/*, bulletType*/);
     }
 
-    private void StopBulletParticle(BulletBase bullet, BulletType bulletType)
+    private void StopBulletParticle(BulletBase bullet/*, BulletType bulletType*/)
     {
         _particleManager.Removebullet(bullet);
     }

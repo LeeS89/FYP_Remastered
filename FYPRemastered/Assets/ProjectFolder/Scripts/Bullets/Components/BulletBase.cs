@@ -1,11 +1,11 @@
 using System.Collections;
 using UnityEngine;
 
-public enum BulletType
+/*public enum BulletType
 {
     Normal,
     Fire
-}
+}*/
 
 
 public abstract class BulletBase : MonoBehaviour, IComponentEvents, IPoolable
@@ -29,7 +29,7 @@ public abstract class BulletBase : MonoBehaviour, IComponentEvents, IPoolable
     protected GameObject _cachedRoot;
     protected IDeflectable _deflectableComponent;
    
-    [SerializeField] protected BulletType _bulletType;
+    //[SerializeField] protected BulletType _bulletType;
     [SerializeField] protected CapsuleCollider _capsuleCollider;
     public LayerMask _layerMask;
 
@@ -111,7 +111,7 @@ public abstract class BulletBase : MonoBehaviour, IComponentEvents, IPoolable
 
         //_isAlive = true;
         SetState(IsAlive);
-        _eventManager.ParticlePlay(this, _bulletType);
+        _eventManager.ParticlePlay(this);
         _eventManager.Fired();
         _timeOut = _lifespan;
         
@@ -170,14 +170,14 @@ public abstract class BulletBase : MonoBehaviour, IComponentEvents, IPoolable
         if (cull)
         {
             _anim.SetTrigger("minimize");
-            _eventManager.ParticleStop(this, _bulletType);
+            _eventManager.ParticleStop(this/*, _bulletType*/);
             SetState(IsCulled);
             //_isCulled = true;
         }
         else
         {
             _anim.SetTrigger("maximize");
-            _eventManager.ParticlePlay(this, _bulletType);
+            _eventManager.ParticlePlay(this/*, _bulletType*/);
             ClearState(IsCulled);
             //_isCulled = false;
         }
