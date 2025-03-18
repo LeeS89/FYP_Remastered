@@ -37,14 +37,16 @@ public static class TargetingUtility
         BoxCollider collider = target.GetComponent<BoxCollider>();
         if (collider != null)
         {
-            Vector3 boxSize = collider.size * 0.5f; // Half extent like UE
+            Vector3 boxSize = Vector3.Scale(collider.size, collider.transform.lossyScale) * 0.5f; 
             Vector3 randomOffset = new Vector3(
                 Random.Range(-boxSize.x, boxSize.x),
                 Random.Range(-boxSize.y, boxSize.y),
                 Random.Range(-boxSize.z, boxSize.z)
             );
 
-            locationToOffset += randomOffset;
+            Vector3 randomPoint = collider.center + randomOffset;
+
+            locationToOffset += randomPoint;
         }
     }
 
@@ -84,14 +86,16 @@ public static class TargetingUtility
         BoxCollider collider = target.GetComponent<BoxCollider>();
         if (collider != null)
         {
-            Vector3 boxSize = collider.size * 0.5f; // Half extent like UE
+            Vector3 boxSize = Vector3.Scale(collider.size, collider.transform.lossyScale) * 0.5f; // Half extent like UE
             Vector3 randomOffset = new Vector3(
                 Random.Range(-boxSize.x, boxSize.x),
                 Random.Range(-boxSize.y, boxSize.y),
                 Random.Range(-boxSize.z, boxSize.z)
             );
 
-            locationToOffset += randomOffset;
+            Vector3 randomPoint = collider.center + randomOffset;
+
+            locationToOffset += randomPoint;
         }
     }
 }

@@ -6,11 +6,13 @@ public class Bullet : BulletBase
     {
         RemoveFromJob();
         _distanceToPlayer = float.MaxValue;
-        _isAlive = false;
+        ClearState(IsAlive);
+        //_isAlive = false;
         _eventManager.ParticleStop(this, _bulletType);
-        if (_isFrozen)
+        if (HasState(IsFrozen))
         {
-            _isFrozen = false;
+            ClearState(IsFrozen);
+            //_isFrozen = false;
         }
         _objectPoolManager.ReleaseGameObject(_cachedRoot);
 
@@ -43,20 +45,29 @@ public class Bullet : BulletBase
 
     public override void Freeze()
     {
-        if (_isFrozen) { return; }
+        if (HasState(IsFrozen)) { return; }
       
-        if (_isFrozen = BulletDistanceJob.Instance.AddFrozenBullet(this))
+        if (BulletDistanceJob.Instance.AddFrozenBullet(this))
         {
-            _eventManager.Freeze();
-            _timeOut = _lifespan;
+            SetState(IsFrozen);
+            //_eventManager.Freeze();
+           // _timeOut = _lifespan;
             //_capsuleCollider.enabled = false;
         }
-       
+        else
+        {
+            ClearState(IsFrozen);
+        }
+
+        if (!HasState(IsFrozen)) { return; }
+        SetState(IsFrozen);
+        _eventManager.Freeze();
+        _timeOut = _lifespan;
     }
 
     public override void UnFreeze()
     {
-        if (!_isFrozen) { return; }
+        if (!HasState(IsFrozen)) { return; }
 
         RemoveFromJob();
         _eventManager.UnFreeze();
@@ -64,16 +75,25 @@ public class Bullet : BulletBase
 
     protected override void RemoveFromJob()
     {
-        if (_isFrozen = BulletDistanceJob.Instance.RemoveFrozenBullet(this))
+        if (BulletDistanceJob.Instance.RemoveFrozenBullet(this))
         {
-            if (_isCulled)
+            SetState(IsFrozen);
+
+
+            /*if (_isCulled)
             {
                 Cull(false);
-            }
+            }*/
             //_isFrozen = false;
                       
             //_capsuleCollider.enabled = true;
         }
+        if(!HasState(IsFrozen)) { return; }
+        if (HasState(IsCulled))
+        {
+            Cull(false);
+        }
+
 
     }
 }

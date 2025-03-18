@@ -33,13 +33,13 @@ public abstract class BulletBase : MonoBehaviour, IComponentEvents, IPoolable
     [SerializeField] protected CapsuleCollider _capsuleCollider;
     public LayerMask _layerMask;
 
-    protected bool _isAlive = false;
+   /* protected bool _isAlive = false;
     public bool _isFrozen = false;
-    protected bool _isCulled = false;
+    protected bool _isCulled = false;*/
 
     protected byte _state;
     protected const byte IsAlive = 1 << 0;
-    public const byte IsFrozen = 1 << 1;
+    public static readonly byte IsFrozen = 1 << 1;
     protected const byte IsCulled = 1 << 2;
 
 
@@ -55,11 +55,11 @@ public abstract class BulletBase : MonoBehaviour, IComponentEvents, IPoolable
         }
     }
 
-    public bool Alive
+   /* public bool Alive
     {
         get => _isAlive;
     }
-
+*/
     protected void SetState(byte state) => _state |= state;
     protected void ClearState(byte state) => _state &= (byte)~state;
     public bool HasState(byte state) => (_state & state) != 0;
@@ -108,8 +108,9 @@ public abstract class BulletBase : MonoBehaviour, IComponentEvents, IPoolable
         {
             _deflectableComponent.ParentOwner = _owner;
         }
-        
-        _isAlive = true;
+
+        //_isAlive = true;
+        SetState(IsAlive);
         _eventManager.ParticlePlay(this, _bulletType);
         _eventManager.Fired();
         _timeOut = _lifespan;
@@ -118,9 +119,10 @@ public abstract class BulletBase : MonoBehaviour, IComponentEvents, IPoolable
 
     protected virtual void Update()
     {
-        if (_isFrozen || !_isAlive) { return; }
+        //if (_isFrozen || !_isAlive) { return; }
+        if (HasState(IsFrozen) || !HasState(IsAlive)) { return; }
 
-        if(_timeOut > 0f)
+        if (_timeOut > 0f)
         {
             _timeOut -= Time.deltaTime;
         }
@@ -144,19 +146,19 @@ public abstract class BulletBase : MonoBehaviour, IComponentEvents, IPoolable
 
     public virtual void SetDistanceToPlayer(float distance)
     {
-        if (!_isFrozen) { return; }
+        if (!HasState(IsFrozen)) { return; }
         _distanceToPlayer = distance;
         
         if (_distanceToPlayer <= _cullDistance)
         {
-            if (!_isCulled)
+            if (!HasState(IsCulled))
             {
                 Cull(true);
             }
         }
         else
         {
-            if (_isCulled)
+            if (HasState(IsCulled))
             {
                 Cull();
             }
@@ -169,13 +171,15 @@ public abstract class BulletBase : MonoBehaviour, IComponentEvents, IPoolable
         {
             _anim.SetTrigger("minimize");
             _eventManager.ParticleStop(this, _bulletType);
-            _isCulled = true;
+            SetState(IsCulled);
+            //_isCulled = true;
         }
         else
         {
             _anim.SetTrigger("maximize");
             _eventManager.ParticlePlay(this, _bulletType);
-            _isCulled = false;
+            ClearState(IsCulled);
+            //_isCulled = false;
         }
     }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -81,7 +82,7 @@ public class AbilitiesComponent : MonoBehaviour, IComponentEvents
 
         BulletBase bullet = obj.GetComponentInChildren<BulletBase>();
 
-        if (bullet == null || bullet._isFrozen) { return; }
+        if (bullet == null || bullet.HasState(BulletBase.IsFrozen)) { return; }
         bullet.Freeze();
         _bullets.Add(bullet);
     }
@@ -90,13 +91,21 @@ public class AbilitiesComponent : MonoBehaviour, IComponentEvents
     {
         if (_bullets.Count == 0) { return; }
 
-        for (int i = _bullets.Count - 1; i >= 0; i--) 
+        StartCoroutine(FireBackDelay());
+    }
+
+    private IEnumerator FireBackDelay()
+    {
+
+        for (int i = _bullets.Count - 1; i >= 0; i--)
         {
-            if (!_bullets[i]._isFrozen) { continue; }
+            if (!_bullets[i].HasState(BulletBase.IsFrozen)) { continue; }
 
             _bullets[i].UnFreeze();
-            _bullets.RemoveAt(i); 
+            _bullets.RemoveAt(i);
+            yield return new WaitForSeconds(0.1f);
         }
+       
     }
 
     
