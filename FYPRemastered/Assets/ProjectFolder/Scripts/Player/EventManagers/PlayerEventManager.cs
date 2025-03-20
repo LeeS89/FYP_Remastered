@@ -1,4 +1,3 @@
-using Oculus.Interaction.HandGrab;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,6 +10,7 @@ public class PlayerEventManager : EventManager
     public event Action<Transform, string> OnTryGrab;
     public event Action<HandSide, bool> OnGrab;
     public event Action<HandSide, bool> OnReleaseGrabbable;
+    
     //public event Action<HandGrabInteractor, bool> OnGrabbedObject; 
     //public static Dictionary<HandGrabInteractor, bool> _lastGrabbingStates = new Dictionary<HandGrabInteractor, bool>();
     private List<IComponentEvents> _cachedListeners;
@@ -96,6 +96,7 @@ public class PlayerEventManager : EventManager
     
         OnGrabbedObject?.Invoke(handInteractor, isGrabbing);
     }*/
+
 
     public void Grab(HandSide uniqueID, bool grabbingState)
     {

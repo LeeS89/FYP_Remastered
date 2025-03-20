@@ -1,63 +1,33 @@
 using Oculus.Interaction;
 using UnityEngine;
 
-public class Locomotion : MonoBehaviour, IComponentEvents
+public class Locomotion : MonoBehaviour, IComponentEvents, IPlayerEvents
 {
-    // Character Controller variables - start
-    [SerializeField] CharacterController _controller;
-    private PlayerEventManager _eventManager;
+    [Header("Character Controller Collider values")]
+    CharacterController _controller;
     [SerializeField] private float _bodyHeightMin = 0.5f;
     [SerializeField] private float _bodyHeightMax = 2f;
-    private Vector3 _newControllerCenter = Vector3.zero;
+    
+
+    [Header("Movement Speed")]
     [SerializeField] private float _moveSpeed = 4.0f;
-    [SerializeField] private bool _shouldMoveForward = false;
+    private bool _shouldMoveForward = false;
     private const float GRAVITY = -9.8f;
-   
     private Vector3 velocity = Vector3.zero;
     private Vector3 _moveDirection = Vector3.zero;
     private float _effectiveMoveSpeed = 0f;
+    private float newVelocityY = 0f;
+    private Vector3 _newControllerCenter = Vector3.zero;
 
-    float newVelocityY = 0f;
-    //End
-
-
-
-    private void Awake()
+    private PlayerEventManager _eventManager;
+    private bool _inputEnabled = false;
+    
+    public bool InputEnabled
     {
-        if (TryGetComponent<CharacterController>(out CharacterController characterController))
-        {
-            _controller = characterController;
-        }
-        else
-        {
-            Debug.LogWarning("Character controller not found, please ensure component exists before use");
-        }
+        get => _inputEnabled;
+        private set => _inputEnabled = value;
     }
-
-   /* public void OnBindToPlayerEvents(PlayerEventManager eventManager)
-    {
-        if (eventManager == null)
-        {
-            Debug.LogError("Player event manager is null");
-            return;
-        }
-        
-        eventManager.OnPlayerRotate += HandleRotation;
-        eventManager.OnPlayerHeightUpdated += AdjustPlayerHeight;
-        eventManager.OnPlayerMove += SetShouldMoveforward;
-    }
-
-    public void OnUnBindToPlayerEvents(PlayerEventManager eventManager)
-    {
-        if (eventManager == null)
-        {
-            Debug.LogError("Player event manager is null");
-            return;
-        }
-        eventManager.OnPlayerRotate -= HandleRotation;
-        eventManager.OnPlayerHeightUpdated -= AdjustPlayerHeight;
-        eventManager.OnPlayerMove -= SetShouldMoveforward;
-    }*/
+   
 
     public void RegisterEvents(EventManager eventManager)
     {
@@ -66,15 +36,25 @@ public class Locomotion : MonoBehaviour, IComponentEvents
             Debug.LogError("Player event manager is null");
             return;
         }
+        if (TryGetComponent<CharacterController>(out CharacterController characterController))
+        {
+            _controller = characterController;
+        }
+        else
+        {
+            Debug.LogWarning("Character controller not found, please ensure component exists before use");
+        }
         _eventManager = (PlayerEventManager)eventManager;
         _eventManager.OnPlayerRotate += HandleRotation;
         _eventManager.OnPlayerHeightUpdated += AdjustPlayerHeight;
         _eventManager.OnPlayerMove += SetShouldMoveforward;
+        GameManager.OnPlayerDied += OnPlayerDied;
+        GameManager.OnPlayerRespawn += OnPlayerRespawned;
     }
 
     public void UnRegisterEvents(EventManager eventManager)
     {
-        if (eventManager == null)
+        if (_eventManager == null)
         {
             Debug.LogError("Player event manager is null");
             return;
@@ -82,10 +62,17 @@ public class Locomotion : MonoBehaviour, IComponentEvents
         _eventManager.OnPlayerRotate -= HandleRotation;
         _eventManager.OnPlayerHeightUpdated -= AdjustPlayerHeight;
         _eventManager.OnPlayerMove -= SetShouldMoveforward;
+        GameManager.OnPlayerDied -= OnPlayerDied;
+        GameManager.OnPlayerRespawn -= OnPlayerRespawned;
+        _eventManager = null;
+
+
     }
 
     private void Update()
     {
+        if (!InputEnabled) { return; }
+
         ApplyPlayerMovement();
     }
 
@@ -145,5 +132,31 @@ public class Locomotion : MonoBehaviour, IComponentEvents
         return newVelocityY;
     }
 
-    
+    public void OnSceneStarted()
+    {
+        InputEnabled = true;
+    }
+
+    public void OnSceneComplete()
+    {
+        InputEnabled = false;
+        if (_shouldMoveForward)
+        {
+            _shouldMoveForward = false;
+        }
+    }
+
+    public void OnPlayerDied()
+    {
+        InputEnabled = false;
+        if(_shouldMoveForward)
+        {
+            _shouldMoveForward = false;
+        }
+    }
+
+    public void OnPlayerRespawned()
+    {
+        InputEnabled = true;
+    }
 }

@@ -1,8 +1,9 @@
+using System;
 using UnityEngine;
 
-public class MovementGestureController : BaseGesture, IComponentEvents
+public class MovementGestureController : BaseGesture
 {
-   
+    
     private static HandSide _handInControl = HandSide.None;
     public HandSide _side = HandSide.None;
     
@@ -14,14 +15,8 @@ public class MovementGestureController : BaseGesture, IComponentEvents
     [SerializeField] private bool _isGrabbing = false;
     [SerializeField] private Transform _grabTraceLocation;
 
-    
-
-    private void Awake()
-    {
-        InitializeFields();
-    }
-
-    private void InitializeFields()
+   
+    private void ResetFields()
     {
         _handInControl = HandSide.None;
         _leftHandActive = false;
@@ -37,45 +32,37 @@ public class MovementGestureController : BaseGesture, IComponentEvents
         }
     }
 
-    /*public void OnBindToPlayerEvents(PlayerEventManager eventManager)
+
+    public override void RegisterEvents(EventManager eventManager)
     {
         if (eventManager == null) { return; }
-
-        _playerEventManager = eventManager;
-        _playerEventManager.OnGrab += ToggleHasGrabbedObject;
-        _playerEventManager.OnReleaseGrabbable += ToggleHasGrabbedObject;
-    }
-
-    public void OnUnBindToPlayerEvents(PlayerEventManager eventManager)
-    {
-        if (eventManager == null) { return; }
-
-        _playerEventManager.OnGrab -= ToggleHasGrabbedObject;
-        _playerEventManager.OnReleaseGrabbable -= ToggleHasGrabbedObject;
-        _playerEventManager = null;
-    }*/
-
-    public void RegisterEvents(EventManager eventManager)
-    {
-        if (eventManager == null) { return; }
-
+        ResetFields();
         _playerEventManager = (PlayerEventManager)eventManager;
         _playerEventManager.OnGrab += ToggleHasGrabbedObject;
         _playerEventManager.OnReleaseGrabbable += ToggleHasGrabbedObject;
+        GameManager.OnPlayerRespawn += OnPlayerRespawned;
+        GameManager.OnPlayerDied += OnPlayerDied;
+        
     }
 
-    public void UnRegisterEvents(EventManager eventManager)
+  
+
+    public override void UnRegisterEvents(EventManager eventManager)
     {
         if (eventManager == null) { return; }
 
         _playerEventManager.OnGrab -= ToggleHasGrabbedObject;
         _playerEventManager.OnReleaseGrabbable -= ToggleHasGrabbedObject;
+        GameManager.OnPlayerRespawn -= OnPlayerRespawned;
+        GameManager.OnPlayerDied -= OnPlayerDied;
+        ResetFields();
         _playerEventManager = null;
     }
 
+    
+
     public override void OnGestureRecognized()
     {
-        //_playerEventManager.TryGrab(_grabTraceLocation, _instanceID);
 
         if (CheckIfCanTriggerMovementPoseResponse())
         {
@@ -85,6 +72,7 @@ public class MovementGestureController : BaseGesture, IComponentEvents
             }
         }
         SetHandActive(_side, true);
+
     }
 
     public override void OnGestureReleased()
@@ -99,9 +87,11 @@ public class MovementGestureController : BaseGesture, IComponentEvents
         SetHandActive(_side, false);
     }
 
+    
+
     private bool CheckIfCanTriggerMovementPoseResponse()
     {
-        if (_isGrabbing) { return false; }
+        if (!InputEnabled || _isGrabbing) { return false; }
 
         if (_handInControl == HandSide.None)
         {
@@ -145,5 +135,34 @@ public class MovementGestureController : BaseGesture, IComponentEvents
         }
     }
 
-   
+    public override void OnPlayerDied()
+    {
+        base.OnPlayerDied();
+        ResetStates();
+    }
+
+
+    protected override void ResetStates()
+    {
+        if(_handInControl != HandSide.None) { _handInControl = HandSide.None; }
+        if (_leftHandActive) {  _leftHandActive = false; }
+        if(_rightHandActive) { _rightHandActive = false; }
+    }
+
+    public override void OnSceneStarted()
+    {
+        
+    }
+
+    public override void OnSceneComplete()
+    {
+        throw new NotImplementedException();
+    }
+
+ 
+
+    public override void OnPlayerRespawned()
+    {
+        base.OnPlayerRespawned();
+    }
 }

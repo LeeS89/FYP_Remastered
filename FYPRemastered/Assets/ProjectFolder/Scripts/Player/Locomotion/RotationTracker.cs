@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class RotationTracker : MonoBehaviour, IComponentEvents
+public class RotationTracker : MonoBehaviour, IComponentEvents, IPlayerEvents
 {
     [SerializeField]
     PlayerEventManager _playerEventManager;
@@ -12,40 +12,39 @@ public class RotationTracker : MonoBehaviour, IComponentEvents
     private Vector3 _rotationDirection;
     private Quaternion _startRotation;
     private bool _isRotating = false;
-   
 
+    private bool _inputEnabled = false;
 
-
+    public bool InputEnabled
+    {
+        get => _inputEnabled;
+        private set => _inputEnabled = value;
+    }
     /*// Event to broadcast rotation (to be subscribed by the locomotion script)
     public delegate void RotationHandler(Quaternion targetRotation);
     public event RotationHandler OnRotationChanged;*/
 
-   /* public void OnBindToPlayerEvents(PlayerEventManager eventManager)
-    {
-        _playerEventManager = eventManager;
-    }
-
-    public void OnUnBindToPlayerEvents(PlayerEventManager eventManager)
-    {
-        _playerEventManager = null;
-    }*/
-
+  
     public void RegisterEvents(EventManager eventManager)
     {
         _playerEventManager = (PlayerEventManager)eventManager;
-
+        GameManager.OnPlayerRespawn += OnPlayerRespawned;
+        GameManager.OnPlayerDied += OnPlayerDied;
         
     }
 
     public void UnRegisterEvents(EventManager eventManager)
     {
+        GameManager.OnPlayerRespawn -= OnPlayerRespawned;
+        GameManager.OnPlayerDied -= OnPlayerDied;
         _playerEventManager = null;
     }
 
+    
 
     private void LateUpdate()
     {
-        if (_playerEventManager == null) { return; }
+        if (!InputEnabled || _playerEventManager == null) { return; }
 
         CheckRotation();
         CheckHeight();
@@ -92,5 +91,23 @@ public class RotationTracker : MonoBehaviour, IComponentEvents
         _playerEventManager.PlayerHeightUpdated(transform.localPosition);
     }
 
-    
+    public void OnSceneStarted()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void OnSceneComplete()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void OnPlayerDied()
+    {
+        InputEnabled = false;
+    }
+
+    public void OnPlayerRespawned()
+    {
+        InputEnabled = true;
+    }
 }

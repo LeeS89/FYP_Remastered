@@ -1,3 +1,4 @@
+using Oculus.Interaction;
 using UnityEngine;
 
 
@@ -103,15 +104,27 @@ public class BulletCollisionComponent : MonoBehaviour, IComponentEvents, IDeflec
             return; 
         }
 
-        if (collision.gameObject.TryGetComponent<IDamageable>(out IDamageable damageable))
-        {
-            damageable.TakeDamage(_baseDamage, _damageType, _statusEffectChancePercentage, _damageOverTime, _dOTDuration);
-        } 
-        //if(collision)
+        CheckForDamageableInterface(collision);
+        
         
         //_parentOwner = null;
         _eventManager.Expired();
         
+    }
+
+    private void CheckForDamageableInterface(Collision collision)
+    {
+        IDamageable damageable = null;
+        if (!collision.gameObject.TryGetComponent<IDamageable>(out damageable))
+        {
+            damageable = collision.gameObject.GetComponentInParent<IDamageable>() ??
+                         collision.gameObject.GetComponentInChildren<IDamageable>();
+        }
+
+        if (damageable == null) { return; }
+
+        damageable.TakeDamage(_baseDamage, _damageType, _statusEffectChancePercentage, _damageOverTime, _dOTDuration);
+
     }
 
     
