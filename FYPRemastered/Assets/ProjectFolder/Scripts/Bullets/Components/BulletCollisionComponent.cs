@@ -3,7 +3,7 @@ using UnityEngine;
 
 
 [RequireComponent(typeof(Rigidbody))]
-public class BulletCollisionComponent : MonoBehaviour, IComponentEvents, IDeflectable
+public class BulletCollisionComponent : ComponentEvents, IDeflectable
 {
     [Header("Deflection Speed")]
     [SerializeField] private float _deflectSpeed;
@@ -22,7 +22,7 @@ public class BulletCollisionComponent : MonoBehaviour, IComponentEvents, IDeflec
     private float _dOTDuration;
     [SerializeField] private float _statusEffectChancePercentage;
 
-    private BulletEventManager _eventManager; 
+    private BulletEventManager _bulletEventManager; 
     private GameObject _parentOwner;
     private GameObject _rootComponent;
     
@@ -49,12 +49,13 @@ public class BulletCollisionComponent : MonoBehaviour, IComponentEvents, IDeflec
         }
     }
 
-    public void RegisterEvents(EventManager eventManager)
+    public override void RegisterLocalEvents(EventManager eventManager)
     {
-        if (eventManager == null) { return; }
-        _eventManager = (BulletEventManager)eventManager;
+        base.RegisterLocalEvents(eventManager);
+        if (_eventManager == null) { return; }
+        _bulletEventManager = _eventManager as BulletEventManager;
 
-        _eventManager.OnUnFreeze += Deflect;
+        _bulletEventManager.OnUnFreeze += Deflect;
         InitializeDamageType();
     }
 
@@ -67,10 +68,11 @@ public class BulletCollisionComponent : MonoBehaviour, IComponentEvents, IDeflec
         _dOTDuration = _damageData.duration;
     }
 
-    public void UnRegisterEvents(EventManager eventManager)
+    public override void UnRegisterLocalEvents(EventManager eventManager)
     {
-        _eventManager.OnUnFreeze -= Deflect;
-        _eventManager = null;
+        _bulletEventManager.OnUnFreeze -= Deflect;
+        base.UnRegisterLocalEvents(eventManager);
+        _bulletEventManager = null;
     }
 
 
@@ -83,7 +85,7 @@ public class BulletCollisionComponent : MonoBehaviour, IComponentEvents, IDeflec
         Vector3 directionTotarget = TargetingUtility.GetDirectionToTarget(_parentOwner, _rootComponent, true);
         Quaternion newRotation = Quaternion.LookRotation(directionTotarget);
        
-        _eventManager.Deflected(directionTotarget, newRotation, _deflectSpeed);
+        _bulletEventManager.Deflected(directionTotarget, newRotation, _deflectSpeed);
     }
 
     
@@ -95,7 +97,7 @@ public class BulletCollisionComponent : MonoBehaviour, IComponentEvents, IDeflec
         ContactPoint contact = collision.contacts[0];
         Vector3 impactPosition = contact.point;
         
-        _eventManager.SpawnHitParticle(impactPosition, Quaternion.identity);
+        _bulletEventManager.SpawnHitParticle(impactPosition, Quaternion.identity);
 
         if ((_ignoreMask & (1 << collision.gameObject.layer)) != 0)
         {
@@ -108,7 +110,7 @@ public class BulletCollisionComponent : MonoBehaviour, IComponentEvents, IDeflec
         
         
         //_parentOwner = null;
-        _eventManager.Expired();
+        _bulletEventManager.Expired();
         
     }
 
@@ -127,5 +129,5 @@ public class BulletCollisionComponent : MonoBehaviour, IComponentEvents, IDeflec
 
     }
 
-    
+   
 }

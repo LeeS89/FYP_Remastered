@@ -13,7 +13,7 @@ public class PlayerEventManager : EventManager
     
     //public event Action<HandGrabInteractor, bool> OnGrabbedObject; 
     //public static Dictionary<HandGrabInteractor, bool> _lastGrabbingStates = new Dictionary<HandGrabInteractor, bool>();
-    private List<IComponentEvents> _cachedListeners;
+    private List<ComponentEvents> _cachedListeners;
 
     private void Awake()
     {
@@ -27,14 +27,14 @@ public class PlayerEventManager : EventManager
     /// </summary>
     public override void BindComponentsToEvents()
     {
-        _cachedListeners = new List<IComponentEvents>();
+        _cachedListeners = new List<ComponentEvents>();
         
-        var childListeners = GetComponentsInChildren<IComponentEvents>(true);
+        var childListeners = GetComponentsInChildren<ComponentEvents>(true);
         _cachedListeners.AddRange(childListeners);
 
         foreach (var listener in _cachedListeners)
         {
-            listener.RegisterEvents(this);
+            listener.RegisterLocalEvents(this);
         }
     }
 
@@ -42,7 +42,7 @@ public class PlayerEventManager : EventManager
     {
         foreach (var listener in _cachedListeners)
         {
-            listener.UnRegisterEvents(this);
+            listener.UnRegisterLocalEvents(this);
         }
         _cachedListeners?.Clear();
         _cachedListeners = null;

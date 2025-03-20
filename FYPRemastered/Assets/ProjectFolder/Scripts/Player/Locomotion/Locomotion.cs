@@ -1,7 +1,7 @@
 using Oculus.Interaction;
 using UnityEngine;
 
-public class Locomotion : MonoBehaviour, IComponentEvents, IPlayerEvents
+public class Locomotion : ComponentEvents, IPlayerEvents
 {
     [Header("Character Controller Collider values")]
     CharacterController _controller;
@@ -19,7 +19,7 @@ public class Locomotion : MonoBehaviour, IComponentEvents, IPlayerEvents
     private float newVelocityY = 0f;
     private Vector3 _newControllerCenter = Vector3.zero;
 
-    private PlayerEventManager _eventManager;
+    private PlayerEventManager _playerEventManager;
     private bool _inputEnabled = false;
     
     public bool InputEnabled
@@ -29,8 +29,9 @@ public class Locomotion : MonoBehaviour, IComponentEvents, IPlayerEvents
     }
    
 
-    public void RegisterEvents(EventManager eventManager)
+    public override void RegisterLocalEvents(EventManager eventManager)
     {
+        base.RegisterLocalEvents(eventManager);
         if (eventManager == null)
         {
             Debug.LogError("Player event manager is null");
@@ -44,29 +45,40 @@ public class Locomotion : MonoBehaviour, IComponentEvents, IPlayerEvents
         {
             Debug.LogWarning("Character controller not found, please ensure component exists before use");
         }
-        _eventManager = (PlayerEventManager)eventManager;
-        _eventManager.OnPlayerRotate += HandleRotation;
-        _eventManager.OnPlayerHeightUpdated += AdjustPlayerHeight;
-        _eventManager.OnPlayerMove += SetShouldMoveforward;
-        GameManager.OnPlayerDied += OnPlayerDied;
-        GameManager.OnPlayerRespawn += OnPlayerRespawned;
+        _playerEventManager = _eventManager as PlayerEventManager;
+        _playerEventManager.OnPlayerRotate += HandleRotation;
+        _playerEventManager.OnPlayerHeightUpdated += AdjustPlayerHeight;
+        _playerEventManager.OnPlayerMove += SetShouldMoveforward;
+        RegisterGlobalEvents();
     }
 
-    public void UnRegisterEvents(EventManager eventManager)
+    public override void UnRegisterLocalEvents(EventManager eventManager)
     {
         if (_eventManager == null)
         {
             Debug.LogError("Player event manager is null");
             return;
         }
-        _eventManager.OnPlayerRotate -= HandleRotation;
-        _eventManager.OnPlayerHeightUpdated -= AdjustPlayerHeight;
-        _eventManager.OnPlayerMove -= SetShouldMoveforward;
+        _playerEventManager.OnPlayerRotate -= HandleRotation;
+        _playerEventManager.OnPlayerHeightUpdated -= AdjustPlayerHeight;
+        _playerEventManager.OnPlayerMove -= SetShouldMoveforward;
+        UnRegisterGlobalEvents();
+        base.UnRegisterLocalEvents(eventManager);
+        _playerEventManager = null;
+
+
+    }
+
+    protected override void RegisterGlobalEvents()
+    {
+        GameManager.OnPlayerDied += OnPlayerDied;
+        GameManager.OnPlayerRespawn += OnPlayerRespawned;
+    }
+
+    protected override void UnRegisterGlobalEvents()
+    {
         GameManager.OnPlayerDied -= OnPlayerDied;
         GameManager.OnPlayerRespawn -= OnPlayerRespawned;
-        _eventManager = null;
-
-
     }
 
     private void Update()
@@ -159,4 +171,6 @@ public class Locomotion : MonoBehaviour, IComponentEvents, IPlayerEvents
     {
         InputEnabled = true;
     }
+
+   
 }

@@ -1,13 +1,13 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class BulletMovementComponent : MonoBehaviour, IComponentEvents
+public class BulletMovementComponent : ComponentEvents
 {
     private Rigidbody _rb;
     [SerializeField] private float _speed;
    
     private bool _deflectionProcessed = false;
-    private BulletEventManager _eventManager;
+    private BulletEventManager _bulletEventManager;
     public Vector3 _scale;
 
     public bool DeflectionProcessed
@@ -22,26 +22,27 @@ public class BulletMovementComponent : MonoBehaviour, IComponentEvents
     }
 
 
-    public void RegisterEvents(EventManager eventManager)
+    public override void RegisterLocalEvents(EventManager eventManager)
     {
-        _eventManager = eventManager as BulletEventManager;
+        base.RegisterLocalEvents(eventManager);
         _rb = GetComponentInParent<Rigidbody>(true);
        
         if(_eventManager != null)
         {
-            _eventManager.OnFired += Launch;
-            _eventManager.OnDeflected += Deflected;
-            _eventManager.OnFreeze += ResetRigidBody;
+            _bulletEventManager = _eventManager as BulletEventManager;
+            _bulletEventManager.OnFired += Launch;
+            _bulletEventManager.OnDeflected += Deflected;
+            _bulletEventManager.OnFreeze += ResetRigidBody;
         }
     }
 
-    public void UnRegisterEvents(EventManager eventManager)
+    public override void UnRegisterLocalEvents(EventManager eventManager)
     {
-        _eventManager.OnFired -= Launch;
-        _eventManager.OnDeflected -= Deflected;
-        _eventManager.OnFreeze -= ResetRigidBody;
+        _bulletEventManager.OnFired -= Launch;
+        _bulletEventManager.OnDeflected -= Deflected;
+        _bulletEventManager.OnFreeze -= ResetRigidBody;
+        _bulletEventManager = null;
         _eventManager = null;
-
         ResetRigidBody();
         _rb = null;
     }
@@ -98,11 +99,13 @@ public class BulletMovementComponent : MonoBehaviour, IComponentEvents
         }
     }
 
+   
 
-   /* public bool HasDeflectionBeenProcessed()
-    {
-        return _deflectionProcessed;
-    }*/
 
-    
+    /* public bool HasDeflectionBeenProcessed()
+     {
+         return _deflectionProcessed;
+     }*/
+
+
 }

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class StatHandler : MonoBehaviour, IComponentEvents, IDamageable
+public class StatHandler : ComponentEvents, IDamageable
 {
     [SerializeField] private List<StatEntry> _stats = new List<StatEntry>();
     private StatsComponent _statsComponent;
@@ -9,7 +9,7 @@ public class StatHandler : MonoBehaviour, IComponentEvents, IDamageable
 
 
 
-    public void RegisterEvents(EventManager eventManager)
+    public override void RegisterLocalEvents(EventManager eventManager)
     {
         _statsComponent = new StatsComponent(_stats);
 
@@ -64,8 +64,18 @@ public class StatHandler : MonoBehaviour, IComponentEvents, IDamageable
         }
     }
 
-    public void UnRegisterEvents(EventManager eventManager)
+    public override void UnRegisterLocalEvents(EventManager eventManager)
     {
-        throw new System.NotImplementedException();
+        _statsComponent = null;
+    }
+
+    protected override void RegisterGlobalEvents()
+    {
+        // Interface function - Not Implemented in class yet
+    }
+
+    protected override void UnRegisterGlobalEvents()
+    {
+        // Interface function - Not Implemented in class yet
     }
 }

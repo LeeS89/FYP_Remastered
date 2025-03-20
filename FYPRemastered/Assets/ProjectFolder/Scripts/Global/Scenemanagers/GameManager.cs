@@ -44,6 +44,7 @@ public class GameManager : MonoBehaviour
 
     private void Playerdied()
     {
+        //Debug.LogError("Player Died");
         OnPlayerDied?.Invoke();
         
     }

@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AbilitiesComponent : MonoBehaviour, IComponentEvents
+public class AbilitiesComponent : ComponentEvents
 {
     [Header("Trace Center")]
     [SerializeField] private Transform _traceLocation;
@@ -21,14 +21,14 @@ public class AbilitiesComponent : MonoBehaviour, IComponentEvents
     private bool _traceEnabled = false;
     private List<BulletBase> _bullets;
 
-    public void RegisterEvents(EventManager eventManager)
+    public override void RegisterLocalEvents(EventManager eventManager)
     {
         traceComp = new TraceComponent(_maxTraceResults);
         _bulletTraceresults = new Collider[_maxTraceResults];
         _bullets = new List<BulletBase>();
     }
 
-    public void UnRegisterEvents(EventManager eventManager)
+    public override void UnRegisterLocalEvents(EventManager eventManager)
     {
         Array.Clear(_bulletTraceresults, 0, _bulletTraceresults.Length);
         _bulletTraceresults = null;
@@ -108,5 +108,4 @@ public class AbilitiesComponent : MonoBehaviour, IComponentEvents
        
     }
 
-    
 }

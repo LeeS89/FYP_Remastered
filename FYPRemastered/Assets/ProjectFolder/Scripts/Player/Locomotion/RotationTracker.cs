@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class RotationTracker : MonoBehaviour, IComponentEvents, IPlayerEvents
+public class RotationTracker : ComponentEvents, IPlayerEvents
 {
     [SerializeField]
     PlayerEventManager _playerEventManager;
@@ -25,22 +25,32 @@ public class RotationTracker : MonoBehaviour, IComponentEvents, IPlayerEvents
     public event RotationHandler OnRotationChanged;*/
 
   
-    public void RegisterEvents(EventManager eventManager)
+    public override void RegisterLocalEvents(EventManager eventManager)
     {
         _playerEventManager = (PlayerEventManager)eventManager;
-        GameManager.OnPlayerRespawn += OnPlayerRespawned;
-        GameManager.OnPlayerDied += OnPlayerDied;
-        
+        RegisterGlobalEvents();
     }
 
-    public void UnRegisterEvents(EventManager eventManager)
+    public override void UnRegisterLocalEvents(EventManager eventManager)
     {
-        GameManager.OnPlayerRespawn -= OnPlayerRespawned;
-        GameManager.OnPlayerDied -= OnPlayerDied;
+        UnRegisterGlobalEvents();
         _playerEventManager = null;
     }
 
-    
+    protected override void RegisterGlobalEvents()
+    {
+        GameManager.OnPlayerRespawn += OnPlayerRespawned;
+        GameManager.OnPlayerDied += OnPlayerDied;
+
+    }
+
+    protected override void UnRegisterGlobalEvents()
+    {
+        GameManager.OnPlayerRespawn -= OnPlayerRespawned;
+        GameManager.OnPlayerDied -= OnPlayerDied;
+    }
+
+
 
     private void LateUpdate()
     {

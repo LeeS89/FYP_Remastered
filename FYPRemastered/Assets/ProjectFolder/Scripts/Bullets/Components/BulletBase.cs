@@ -8,7 +8,7 @@ using UnityEngine;
 }*/
 
 
-public abstract class BulletBase : MonoBehaviour, IComponentEvents, IPoolable
+public abstract class BulletBase : ComponentEvents, IPoolable
 {
     [Header("Pools")]
     protected PoolManager _objectPoolManager;
@@ -24,7 +24,7 @@ public abstract class BulletBase : MonoBehaviour, IComponentEvents, IPoolable
     [SerializeField] private Animator _anim;
 
     [Header("Components")]
-    [SerializeField] protected BulletEventManager _eventManager;
+    protected BulletEventManager _bulletEventManager;
     protected GameObject _owner;
     protected GameObject _cachedRoot;
     protected IDeflectable _deflectableComponent;
@@ -64,12 +64,13 @@ public abstract class BulletBase : MonoBehaviour, IComponentEvents, IPoolable
     protected void ClearState(byte state) => _state &= (byte)~state;
     public bool HasState(byte state) => (_state & state) != 0;
 
-    public void RegisterEvents(EventManager eventManager)
+    public override void RegisterLocalEvents(EventManager eventManager)
     {
-        if (eventManager == null) { return; }
-       
+        base.RegisterLocalEvents(eventManager);
+        if (_eventManager == null) { return; }
+        _bulletEventManager = (BulletEventManager)_eventManager;
         RegisterDependancies();
-        _eventManager.OnExpired += OnExpired;
+        _bulletEventManager.OnExpired += OnExpired;
        
         _timeOut = _lifespan;
         
@@ -79,9 +80,12 @@ public abstract class BulletBase : MonoBehaviour, IComponentEvents, IPoolable
 
    
 
-    public void UnRegisterEvents(EventManager eventManager)
+    public override void UnRegisterLocalEvents(EventManager eventManager)
     {
-        _eventManager.OnExpired -= OnExpired;
+        _bulletEventManager.OnExpired -= OnExpired;
+        base.UnRegisterLocalEvents(eventManager);
+        _bulletEventManager = null;
+        UnRegisterDependencies();
        
     }
 
@@ -93,6 +97,12 @@ public abstract class BulletBase : MonoBehaviour, IComponentEvents, IPoolable
         {
             _deflectableComponent.RootComponent = _cachedRoot;
         }
+    }
+
+    protected void UnRegisterDependencies()
+    {
+        _cachedRoot = null;
+        _deflectableComponent = null;
     }
 
     IEnumerator FireDelay()
@@ -111,8 +121,8 @@ public abstract class BulletBase : MonoBehaviour, IComponentEvents, IPoolable
 
         //_isAlive = true;
         SetState(IsAlive);
-        _eventManager.ParticlePlay(this);
-        _eventManager.Fired();
+        _bulletEventManager.ParticlePlay(this);
+        _bulletEventManager.Fired();
         _timeOut = _lifespan;
         
     }
@@ -134,8 +144,6 @@ public abstract class BulletBase : MonoBehaviour, IComponentEvents, IPoolable
         
 
     }
-
-   
 
     protected abstract void OnExpired();
 
@@ -170,14 +178,14 @@ public abstract class BulletBase : MonoBehaviour, IComponentEvents, IPoolable
         if (cull)
         {
             _anim.SetTrigger("minimize");
-            _eventManager.ParticleStop(this/*, _bulletType*/);
+            _bulletEventManager.ParticleStop(this/*, _bulletType*/);
             SetState(IsCulled);
             //_isCulled = true;
         }
         else
         {
             _anim.SetTrigger("maximize");
-            _eventManager.ParticlePlay(this/*, _bulletType*/);
+            _bulletEventManager.ParticlePlay(this/*, _bulletType*/);
             ClearState(IsCulled);
             //_isCulled = false;
         }
@@ -192,6 +200,8 @@ public abstract class BulletBase : MonoBehaviour, IComponentEvents, IPoolable
             _eventManager.BindComponentsToEvents();
         }*/
     }
+
+    
 
 
     #region redundant

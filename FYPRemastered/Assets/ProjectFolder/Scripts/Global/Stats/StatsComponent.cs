@@ -13,7 +13,27 @@ public class StatsComponent
     {
         _stats = sharedStats;
 
+        if (!HasStat(StatType.MaxHealth))
+        {
+            StatEntry entry = new StatEntry();
+            entry.statType = StatType.MaxHealth;
+            entry.value = 100;
+            _stats.Add(entry);
+        }
+
+        if (!HasStat(StatType.Health))
+        {
+            StatEntry entry = new StatEntry();  
+            entry.statType = StatType.Health;
+            entry.value = 0;
+            _stats.Add(entry);
+        }
         ModifyStat(StatType.Health, GetStat(StatType.MaxHealth));
+    }
+
+    private bool HasStat(StatType statType)
+    {
+        return _stats.Exists(s => s.statType == statType);
     }
 
     public float ModifyStat(StatType stat, float amount)

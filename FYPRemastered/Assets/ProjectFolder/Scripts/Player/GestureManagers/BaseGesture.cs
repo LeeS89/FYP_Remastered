@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public abstract class BaseGesture : MonoBehaviour, IComponentEvents, IPlayerEvents
+public abstract class BaseGesture : ComponentEvents, IPlayerEvents
 {
     protected bool _inputEnabled = false;
 
@@ -11,11 +11,11 @@ public abstract class BaseGesture : MonoBehaviour, IComponentEvents, IPlayerEven
    
     protected virtual void ResetStates() { }
 
-    public abstract void RegisterEvents(EventManager eventManager);
+   /* public abstract override void RegisterLocalEvents(EventManager eventManager);
 
 
-    public abstract void UnRegisterEvents(EventManager eventManager);
-
+    public abstract void UnRegisterLocalEvents(EventManager eventManager);
+*/
 
     public virtual bool InputEnabled
     {
@@ -35,7 +35,10 @@ public abstract class BaseGesture : MonoBehaviour, IComponentEvents, IPlayerEven
 
 
     public virtual void OnPlayerRespawned() {  InputEnabled = true; }
-    
 
-   
+    public abstract void RegisterGlobalEvents();
+
+
+    public abstract void UnRegisterGlobalEvents();
+    
 }

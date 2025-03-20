@@ -8,7 +8,7 @@ public class Bullet : BulletBase
         _distanceToPlayer = float.MaxValue;
         ClearState(IsAlive);
         //_isAlive = false;
-        _eventManager.ParticleStop(this/*, _bulletType*/);
+        _bulletEventManager.ParticleStop(this/*, _bulletType*/);
         if (HasState(IsFrozen))
         {
             ClearState(IsFrozen);
@@ -61,7 +61,7 @@ public class Bullet : BulletBase
 
         if (!HasState(IsFrozen)) { return; }
         SetState(IsFrozen);
-        _eventManager.Freeze();
+        _bulletEventManager.Freeze();
         _timeOut = _lifespan;
     }
 
@@ -70,7 +70,7 @@ public class Bullet : BulletBase
         if (!HasState(IsFrozen)) { return; }
 
         RemoveFromJob();
-        _eventManager.UnFreeze();
+        _bulletEventManager.UnFreeze();
     }
 
     protected override void RemoveFromJob()

@@ -1,38 +1,45 @@
 using UnityEngine;
 
-public class BulletVFX : MonoBehaviour, IComponentEvents
+public class BulletVFX : ComponentEvents
 {
     [SerializeField]
     private ParticleManager _particleManager;
     public ParticleSystem _particle;
     private PoolManager _poolManager;
-    private BulletEventManager _eventManager;
+    private BulletEventManager _bulletEventManager;
+
     //public MoonSceneManager _manager;
-    public void RegisterEvents(EventManager eventManager)
+    public override void RegisterLocalEvents(EventManager eventManager)
     {
-        if(eventManager == null) { return; }
-        _eventManager = (BulletEventManager)eventManager;
+        base.RegisterLocalEvents(eventManager);
+        if (_eventManager == null) { return; }
+        _bulletEventManager = (BulletEventManager)_eventManager;
+        
         _particleManager = ParticleManager.instance;
-        _eventManager.OnBulletParticlePlay += PlayBulletParticle;
-        _eventManager.OnBulletParticleStop += StopBulletParticle;
-        _eventManager.OnSpawnHitParticle += SpawnHitParticle;
+        _bulletEventManager.OnBulletParticlePlay += PlayBulletParticle;
+        _bulletEventManager.OnBulletParticleStop += StopBulletParticle;
+        _bulletEventManager.OnSpawnHitParticle += SpawnHitParticle;
 
         BaseSceneManager._instance.GetImpactParticlePool(ref _poolManager);
        
     }
 
-    public void UnRegisterEvents(EventManager eventManager)
+    public override void UnRegisterLocalEvents(EventManager eventManager)
     {
-        if (eventManager == null) { return; }
+        if (_eventManager == null) { return; }
 
-        _eventManager.Expired();
+        _bulletEventManager.Expired();
         _particleManager = null;
-        _eventManager.OnBulletParticlePlay -= PlayBulletParticle;
-        _eventManager.OnBulletParticleStop -= StopBulletParticle;
-        _eventManager.OnSpawnHitParticle -= SpawnHitParticle;
+        _bulletEventManager.OnBulletParticlePlay -= PlayBulletParticle;
+        _bulletEventManager.OnBulletParticleStop -= StopBulletParticle;
+        _bulletEventManager.OnSpawnHitParticle -= SpawnHitParticle;
+        base.UnRegisterLocalEvents(eventManager);
+        _bulletEventManager = null;
 
         
     }
+
+   
 
     private void SpawnHitParticle(Vector3 pos, Quaternion rot)
     { 

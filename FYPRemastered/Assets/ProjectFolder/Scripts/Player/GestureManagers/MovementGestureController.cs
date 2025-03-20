@@ -33,33 +33,42 @@ public class MovementGestureController : BaseGesture
     }
 
 
-    public override void RegisterEvents(EventManager eventManager)
+    public override void RegisterLocalEvents(EventManager eventManager)
     {
         if (eventManager == null) { return; }
         ResetFields();
         _playerEventManager = (PlayerEventManager)eventManager;
         _playerEventManager.OnGrab += ToggleHasGrabbedObject;
         _playerEventManager.OnReleaseGrabbable += ToggleHasGrabbedObject;
-        GameManager.OnPlayerRespawn += OnPlayerRespawned;
-        GameManager.OnPlayerDied += OnPlayerDied;
+        RegisterGlobalEvents();
         
     }
 
   
 
-    public override void UnRegisterEvents(EventManager eventManager)
+    public override void UnRegisterLocalEvents(EventManager eventManager)
     {
         if (eventManager == null) { return; }
 
         _playerEventManager.OnGrab -= ToggleHasGrabbedObject;
         _playerEventManager.OnReleaseGrabbable -= ToggleHasGrabbedObject;
-        GameManager.OnPlayerRespawn -= OnPlayerRespawned;
-        GameManager.OnPlayerDied -= OnPlayerDied;
+        UnRegisterGlobalEvents();
         ResetFields();
         _playerEventManager = null;
     }
 
-    
+    public override void RegisterGlobalEvents()
+    {
+        GameManager.OnPlayerRespawn += OnPlayerRespawned;
+        GameManager.OnPlayerDied += OnPlayerDied;
+    }
+
+    public override void UnRegisterGlobalEvents()
+    {
+        GameManager.OnPlayerRespawn -= OnPlayerRespawned;
+        GameManager.OnPlayerDied -= OnPlayerDied;
+    }
+
 
     public override void OnGestureRecognized()
     {
