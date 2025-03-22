@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: c74e940239e15bf4aa35fd1f7534fe42
+timeCreated: 1441449660
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 45901
+  packageName: Sci-Fi Intruder
+  packageVersion: 1.0
+  assetPath: Assets/intruder/walk.controller
+  uploadId: 81133

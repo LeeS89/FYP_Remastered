@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 50799b5046fa241449fea08dd8c8f6d3
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 45901
+  packageName: Sci-Fi Intruder
+  packageVersion: 1.0
+  assetPath: Assets/intruder/ParticleSystems/Scripts/SmokeParticles.cs
+  uploadId: 81133

@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 1b878b2bd27dca747855179c7ca76010
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 45901
+  packageName: Sci-Fi Intruder
+  packageVersion: 1.0
+  assetPath: Assets/Standard Assets/Vehicles/Aircraft/Scripts/JetParticleEffect.cs
+  uploadId: 81133

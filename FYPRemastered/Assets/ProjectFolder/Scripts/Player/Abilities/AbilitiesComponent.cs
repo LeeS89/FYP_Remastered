@@ -71,12 +71,12 @@ public class AbilitiesComponent : ComponentEvents
         
         for (int i = 0; i < numBullets; i++)
         {
-            Handletraceresults(i);
+            HandleTraceResults(i);
         }
         
     }
 
-    private void Handletraceresults(int j)
+    private void HandleTraceResults(int j)
     {
         GameObject obj = _bulletTraceresults[j].transform.parent.gameObject;
 

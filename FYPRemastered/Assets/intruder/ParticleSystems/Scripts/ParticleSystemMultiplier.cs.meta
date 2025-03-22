@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: f37e45100f3ab8a45880d3a89e23b7c8
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 45901
+  packageName: Sci-Fi Intruder
+  packageVersion: 1.0
+  assetPath: Assets/intruder/ParticleSystems/Scripts/ParticleSystemMultiplier.cs
+  uploadId: 81133

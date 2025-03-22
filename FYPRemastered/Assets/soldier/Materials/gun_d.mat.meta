@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 5116b5a15f9909f43a74e886bd1bc99f
+timeCreated: 18446744011573954816
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 8042
+  packageName: Futuristic Soldier
+  packageVersion: 1.1
+  assetPath: Assets/soldier/Materials/gun_d.mat
+  uploadId: 242199

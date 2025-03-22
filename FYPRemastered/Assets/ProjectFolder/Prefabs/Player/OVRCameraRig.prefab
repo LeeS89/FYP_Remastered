@@ -21693,6 +21693,7 @@ GameObject:
   - component: {fileID: 6324312337921889092}
   - component: {fileID: 2024878569438777599}
   - component: {fileID: 7416273003992140369}
+  - component: {fileID: 1210552597580251229}
   m_Layer: 0
   m_Name: OVRCameraRig
   m_TagString: Untagged
@@ -21863,11 +21864,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81652228358d7c1499600f8129cfe4b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _controller: {fileID: 0}
   _bodyHeightMin: 0.5
   _bodyHeightMax: 2
   _moveSpeed: 4
-  _shouldMoveForward: 0
 --- !u!143 &2024878569438777599
 CharacterController:
   m_ObjectHideFlags: 0
@@ -21912,6 +21911,25 @@ MonoBehaviour:
   _sphereRadius: 1.5
   _maxTraceResults: 30
   _bulletTraceresults: []
+--- !u!114 &1210552597580251229
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4579910219311772944}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81e0cf32b275ce74187f123d49365918, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _stats:
+  - statType: 1
+    value: 100
+  - statType: 0
+    value: 0
+  _characterType: 0
+  _testDamage: 0
 --- !u!1 &4581950023465667236
 GameObject:
   m_ObjectHideFlags: 0

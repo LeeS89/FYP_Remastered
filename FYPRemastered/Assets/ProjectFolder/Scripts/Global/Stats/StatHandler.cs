@@ -34,7 +34,7 @@ public class StatHandler : ComponentEvents, IDamageable
         switch (dType)
         {
             case DamageType.Normal:
-                ApplyInstantDamage(baseDamage);
+               // ApplyInstantDamage(baseDamage);
                 break;
             case DamageType.Fire:
                 ApplyElementalDamage(dType, statusEffectChancePercentage, damageOverTime, duration);

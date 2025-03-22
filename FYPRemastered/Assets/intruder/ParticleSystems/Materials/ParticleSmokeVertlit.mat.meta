@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: 71a3e2a5358bac44087b24b9a99e278e
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 45901
+  packageName: Sci-Fi Intruder
+  packageVersion: 1.0
+  assetPath: Assets/intruder/ParticleSystems/Materials/ParticleSmokeVertlit.mat
+  uploadId: 81133

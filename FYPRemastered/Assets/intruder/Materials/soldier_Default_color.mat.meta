@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f241523ec13f8e94aa8d67057222e87a
+timeCreated: 1442074528
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 45901
+  packageName: Sci-Fi Intruder
+  packageVersion: 1.0
+  assetPath: Assets/intruder/Materials/soldier_Default_color.mat
+  uploadId: 81133

@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 5d44a238286f6904198ab78e914c229d
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 45901
+  packageName: Sci-Fi Intruder
+  packageVersion: 1.0
+  assetPath: Assets/Standard Assets/ParticleSystems/Scripts/AfterburnerPhysicsForce.cs
+  uploadId: 81133

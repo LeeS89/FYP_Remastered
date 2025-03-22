@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: d983753b5f5b5574c9621d5ece497af0
+timeCreated: 1442074528
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 45901
+  packageName: Sci-Fi Intruder
+  packageVersion: 1.0
+  assetPath: Assets/intruder/Materials/grenade_d.mat
+  uploadId: 81133

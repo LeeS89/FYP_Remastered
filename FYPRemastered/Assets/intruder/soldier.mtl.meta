@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: c245933682dacd543818b77ce3b0965c
+timeCreated: 1441715505
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 45901
+  packageName: Sci-Fi Intruder
+  packageVersion: 1.0
+  assetPath: Assets/intruder/soldier.mtl
+  uploadId: 81133

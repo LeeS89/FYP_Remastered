@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 9d947dd57072d31479c99415547e696a
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 45901
+  packageName: Sci-Fi Intruder
+  packageVersion: 1.0
+  assetPath: Assets/intruder/ParticleSystems/Scripts/Explosive.cs
+  uploadId: 81133

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: c39fa9de7b5e4d74395547a2ffc450f6
+timeCreated: 1442077237
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 45901
+  packageName: Sci-Fi Intruder
+  packageVersion: 1.0
+  assetPath: Assets/intruder/Materials/weapon_o.mat
+  uploadId: 81133

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 326a44e6a863be84b9a148219a399906
+timeCreated: 1440516368
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 45901
+  packageName: Sci-Fi Intruder
+  packageVersion: 1.0
+  assetPath: Assets/intruder/Materials/ground.mat
+  uploadId: 81133

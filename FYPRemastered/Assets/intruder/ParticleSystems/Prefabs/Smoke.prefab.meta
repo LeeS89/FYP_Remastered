@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: f86eddd03cd39c647bc7eb53fc507475
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 45901
+  packageName: Sci-Fi Intruder
+  packageVersion: 1.0
+  assetPath: Assets/intruder/ParticleSystems/Prefabs/Smoke.prefab
+  uploadId: 81133

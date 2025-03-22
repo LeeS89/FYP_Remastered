@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: fe4aee2bf010fbb459c50494928a1313
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 45901
+  packageName: Sci-Fi Intruder
+  packageVersion: 1.0
+  assetPath: Assets/intruder/ParticleSystems/Shaders/PriorityParticleAdd.shader
+  uploadId: 81133

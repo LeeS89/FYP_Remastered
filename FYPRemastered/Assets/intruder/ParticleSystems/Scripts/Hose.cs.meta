@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 4c6055d0c1c7e494989c21894df3ecac
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 45901
+  packageName: Sci-Fi Intruder
+  packageVersion: 1.0
+  assetPath: Assets/intruder/ParticleSystems/Scripts/Hose.cs
+  uploadId: 81133

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 222b2f30ec970644fa7f52d8424b3175
+timeCreated: 1441444919
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 45901
+  packageName: Sci-Fi Intruder
+  packageVersion: 1.0
+  assetPath: Assets/intruder/scene.unity
+  uploadId: 81133

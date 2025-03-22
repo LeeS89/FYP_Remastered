@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 39dfe4474bb6e15428a64b99d6682ff6
+timeCreated: 1441452752
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 45901
+  packageName: Sci-Fi Intruder
+  packageVersion: 1.0
+  assetPath: Assets/intruder/Point light 2.controller
+  uploadId: 81133
