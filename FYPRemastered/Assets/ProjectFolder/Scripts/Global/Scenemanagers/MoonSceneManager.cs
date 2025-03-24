@@ -25,6 +25,7 @@ public class MoonSceneManager : BaseSceneManager
         InitializePools();
         LoadActiveSceneEventManagers();
         //StartCoroutine(InitializeDelay());
+        SceneStarted();
         
     }
 
@@ -78,7 +79,7 @@ public class MoonSceneManager : BaseSceneManager
         }
 
         AssignPools();
-        GameManager.PlayerRespawned();
+        //GameManager.PlayerRespawned();
     }
 
 

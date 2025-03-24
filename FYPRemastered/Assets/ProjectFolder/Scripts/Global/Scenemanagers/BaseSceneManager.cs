@@ -1,8 +1,12 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class BaseSceneManager : MonoBehaviour, ISceneManager
 {
+    public event Action OnSceneStarted;
+    public event Action OnSceneEnded;
+
     [SerializeField] protected List<EventManager> _eventManagers;
 
     public static BaseSceneManager _instance {  get; private set; }
@@ -10,6 +14,16 @@ public class BaseSceneManager : MonoBehaviour, ISceneManager
     protected virtual void Awake()
     {
         _instance = this;
+    }
+
+    public void SceneStarted()
+    {
+        OnSceneStarted?.Invoke();
+    }
+
+    public void SceneEnded()
+    {
+        OnSceneEnded?.Invoke();
     }
 
     public virtual void SetupScene() { }

@@ -1,28 +1,21 @@
 using System;
 using UnityEngine;
+using UnityEngine.AI;
 
 public abstract class EnemyState
 {
-    public event Action<AnimationAction> OnAnimationTriggered;
-    public event Action<float, float> OnSpeedChanged;
-
-    protected EnemyFSMController _fsm;
+  
+    protected NavMeshAgent _agent;
     protected Coroutine _coroutine;
+    protected EnemyEventManager _eventManager;
 
-    public EnemyState(EnemyFSMController fsm)
+    public EnemyState(NavMeshAgent agent, EnemyEventManager eventManager)
     {
-        _fsm = fsm;
+        _agent = agent;
+        _eventManager = eventManager;
     }
+    
 
-    public void AnimationTriggered(AnimationAction action)
-    {
-        OnAnimationTriggered?.Invoke(action);
-    }
-
-    public void SpeedChanged(float speed, float lerpSpeed)
-    {
-        OnSpeedChanged?.Invoke(speed, lerpSpeed);
-    }
 
     public abstract void EnterState();
     public abstract void UpdateState();

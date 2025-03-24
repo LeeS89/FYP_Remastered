@@ -1,7 +1,7 @@
 using Oculus.Interaction;
 using UnityEngine;
 
-public class Locomotion : ComponentEvents, IPlayerEvents
+public class Locomotion : ComponentEvents//, IPlayerEvents
 {
     [Header("Character Controller Collider values")]
     CharacterController _controller;
@@ -49,6 +49,7 @@ public class Locomotion : ComponentEvents, IPlayerEvents
         _playerEventManager.OnPlayerRotate += HandleRotation;
         _playerEventManager.OnPlayerHeightUpdated += AdjustPlayerHeight;
         _playerEventManager.OnPlayerMove += SetShouldMoveforward;
+        
         RegisterGlobalEvents();
     }
 
@@ -71,6 +72,8 @@ public class Locomotion : ComponentEvents, IPlayerEvents
 
     protected override void RegisterGlobalEvents()
     {
+        BaseSceneManager._instance.OnSceneStarted += OnSceneStarted;
+        BaseSceneManager._instance.OnSceneEnded += OnSceneComplete;
         GameManager.OnPlayerDied += OnPlayerDied;
         GameManager.OnPlayerRespawn += OnPlayerRespawned;
     }
@@ -79,6 +82,8 @@ public class Locomotion : ComponentEvents, IPlayerEvents
     {
         GameManager.OnPlayerDied -= OnPlayerDied;
         GameManager.OnPlayerRespawn -= OnPlayerRespawned;
+        BaseSceneManager._instance.OnSceneStarted -= OnSceneStarted;
+        BaseSceneManager._instance.OnSceneEnded -= OnSceneComplete;
     }
 
     private void Update()
@@ -144,12 +149,12 @@ public class Locomotion : ComponentEvents, IPlayerEvents
         return newVelocityY;
     }
 
-    public void OnSceneStarted()
+    protected override void OnSceneStarted()
     {
         InputEnabled = true;
     }
 
-    public void OnSceneComplete()
+    protected override void OnSceneComplete()
     {
         InputEnabled = false;
         if (_shouldMoveForward)
@@ -158,7 +163,7 @@ public class Locomotion : ComponentEvents, IPlayerEvents
         }
     }
 
-    public void OnPlayerDied()
+    protected override void OnPlayerDied()
     {
         InputEnabled = false;
         if(_shouldMoveForward)
@@ -167,7 +172,7 @@ public class Locomotion : ComponentEvents, IPlayerEvents
         }
     }
 
-    public void OnPlayerRespawned()
+    protected override void OnPlayerRespawned()
     {
         InputEnabled = true;
     }

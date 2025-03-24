@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public abstract class BaseGesture : ComponentEvents, IPlayerEvents
+public abstract class BaseGesture : ComponentEvents//, IPlayerEvents
 {
     protected bool _inputEnabled = false;
 
@@ -25,20 +25,20 @@ public abstract class BaseGesture : ComponentEvents, IPlayerEvents
     }
 
 
-    public abstract void OnSceneStarted();
+    protected override void OnSceneStarted() { }
 
 
-    public abstract void OnSceneComplete();
+    protected override void OnSceneComplete() { }
 
 
-    public virtual void OnPlayerDied() { InputEnabled = false; }
+    protected override void OnPlayerDied() { InputEnabled = false; }
 
 
-    public virtual void OnPlayerRespawned() {  InputEnabled = true; }
+    protected override void OnPlayerRespawned() {  InputEnabled = true; }
 
-    public abstract void RegisterGlobalEvents();
+    protected override void RegisterGlobalEvents() { }
 
 
-    public abstract void UnRegisterGlobalEvents();
+    protected override void UnRegisterGlobalEvents() { }
     
 }

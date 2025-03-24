@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class RotationTracker : ComponentEvents, IPlayerEvents
+public class RotationTracker : ComponentEvents//, IPlayerEvents
 {
     [SerializeField]
     PlayerEventManager _playerEventManager;
@@ -28,6 +28,7 @@ public class RotationTracker : ComponentEvents, IPlayerEvents
     public override void RegisterLocalEvents(EventManager eventManager)
     {
         _playerEventManager = (PlayerEventManager)eventManager;
+
         RegisterGlobalEvents();
     }
 
@@ -39,6 +40,8 @@ public class RotationTracker : ComponentEvents, IPlayerEvents
 
     protected override void RegisterGlobalEvents()
     {
+        BaseSceneManager._instance.OnSceneStarted += OnSceneStarted;
+        BaseSceneManager._instance.OnSceneEnded += OnSceneComplete;
         GameManager.OnPlayerRespawn += OnPlayerRespawned;
         GameManager.OnPlayerDied += OnPlayerDied;
 
@@ -46,6 +49,8 @@ public class RotationTracker : ComponentEvents, IPlayerEvents
 
     protected override void UnRegisterGlobalEvents()
     {
+        BaseSceneManager._instance.OnSceneStarted -= OnSceneStarted;
+        BaseSceneManager._instance.OnSceneEnded -= OnSceneComplete;
         GameManager.OnPlayerRespawn -= OnPlayerRespawned;
         GameManager.OnPlayerDied -= OnPlayerDied;
     }
@@ -101,22 +106,23 @@ public class RotationTracker : ComponentEvents, IPlayerEvents
         _playerEventManager.PlayerHeightUpdated(transform.localPosition);
     }
 
-    public void OnSceneStarted()
+    protected override void OnSceneStarted()
     {
-        throw new System.NotImplementedException();
+        InputEnabled = true;
     }
 
-    public void OnSceneComplete()
+    protected override void OnSceneComplete()
     {
-        throw new System.NotImplementedException();
+        InputEnabled = false;
+        //UnRegisterGlobalEvents();
     }
 
-    public void OnPlayerDied()
+    protected override void OnPlayerDied()
     {
         InputEnabled = false;
     }
 
-    public void OnPlayerRespawned()
+    protected override void OnPlayerRespawned()
     {
         InputEnabled = true;
     }

@@ -28,7 +28,7 @@ public class TraceComponent
         if (debug)
         {
 
-            DebugExtension.DebugWireSphere(traceLocation.position, debugColor, sphereRadius, 1.0f);
+            DebugExtension.DebugWireSphere(traceLocation.position, debugColor, sphereRadius);
 
         }
 

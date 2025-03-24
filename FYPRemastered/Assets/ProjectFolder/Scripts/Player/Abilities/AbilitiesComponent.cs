@@ -33,6 +33,9 @@ public class AbilitiesComponent : ComponentEvents
         Array.Clear(_bulletTraceresults, 0, _bulletTraceresults.Length);
         _bulletTraceresults = null;
         traceComp = null;
+        _bullets.Clear();
+        _bullets = null;
+
     }
 
     public bool TraceEnabled

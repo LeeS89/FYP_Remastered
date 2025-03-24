@@ -11,4 +11,12 @@ public class ComponentEvents : MonoBehaviour
     protected virtual void RegisterGlobalEvents() { }
 
     protected virtual void UnRegisterGlobalEvents() { }
+
+    protected virtual void OnSceneStarted() { }
+
+    protected virtual void OnSceneComplete() { }
+
+    protected virtual void OnPlayerDied() { }
+
+    protected virtual void OnPlayerRespawned() { }
 }

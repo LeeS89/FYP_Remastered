@@ -12,7 +12,6 @@ public class PatrolState : EnemyState
     private float _walkSpeed;
 
     private List<Transform> _wayPoints;
-    private NavMeshAgent _agent;
 
     private WaitUntil _waitUntilDestinationReached;
     private Func<bool> hasReachedDestination;
@@ -24,12 +23,12 @@ public class PatrolState : EnemyState
     private bool _isPatrolling = false;
     
 
-    public PatrolState(EnemyFSMController fsm, List<Transform> wayPoints, NavMeshAgent agent, float randomDelay, float walkSpeed) : base(fsm)
+    public PatrolState(List<Transform> wayPoints, NavMeshAgent agent, EnemyEventManager eventManager, float randomDelay, float walkSpeed) : base(agent, eventManager)
     {
         _walkSpeed = walkSpeed;
         _randomWaitTime = randomDelay;
         _wayPoints = wayPoints;
-        _agent = agent;
+        //_agent = agent;
         hasReachedDestination = CheckDestinationReached;
         _waitUntilDestinationReached = new WaitUntil(hasReachedDestination);
     }
@@ -40,7 +39,7 @@ public class PatrolState : EnemyState
         if (_coroutine == null)
         {
             _isPatrolling = true;
-            _coroutine = _fsm.StartCoroutine(TraverseWayPoints());
+            _coroutine = CoroutineRunner.Instance.StartCoroutine(TraverseWayPoints());
         }
     }
 
@@ -52,13 +51,13 @@ public class PatrolState : EnemyState
             index = GetNextDestination();
 
             _agent.SetDestination(_wayPoints[index].position);
-            SpeedChanged(_walkSpeed, 2f);
-            //OnSpeedChanged?.Invoke(_walkSpeed, 2f);
+            _eventManager.SpeedChanged(_walkSpeed, 2f);
+            
 
             yield return _waitUntilDestinationReached;
 
-            SpeedChanged(0f, 10f);
-            //OnSpeedChanged?.Invoke(0.0f, 10f);
+            _eventManager.SpeedChanged(0f, 10f);
+           
             // Calculating the direction vector from the agent to the destination
             Vector3 directionToFace = _wayPoints[index].forward;
 
@@ -72,7 +71,7 @@ public class PatrolState : EnemyState
                 yield return null;
             }
 
-            AnimationTriggered(AnimationAction.Look);
+            _eventManager.AnimationTriggered(AnimationAction.Look);
             
 
             float _delayTime = Random.Range(0, _randomWaitTime);
@@ -115,7 +114,7 @@ public class PatrolState : EnemyState
     {
         
         GetDistanceToDestination();
-        return _distance <= (_agent.stoppingDistance + 0.5f);
+        return _distance <= (_agent.stoppingDistance + 0.2f);
 
     }
 
@@ -135,7 +134,7 @@ public class PatrolState : EnemyState
         if(_coroutine != null)
         {
             _isPatrolling = false;
-            _fsm.StopCoroutine(_coroutine);
+            CoroutineRunner.Instance.StopCoroutine(_coroutine);
             _coroutine = null;
         }
     }

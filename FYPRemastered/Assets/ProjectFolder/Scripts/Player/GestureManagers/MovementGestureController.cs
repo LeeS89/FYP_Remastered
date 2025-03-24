@@ -40,6 +40,7 @@ public class MovementGestureController : BaseGesture
         _playerEventManager = (PlayerEventManager)eventManager;
         _playerEventManager.OnGrab += ToggleHasGrabbedObject;
         _playerEventManager.OnReleaseGrabbable += ToggleHasGrabbedObject;
+        
         RegisterGlobalEvents();
         
     }
@@ -57,16 +58,20 @@ public class MovementGestureController : BaseGesture
         _playerEventManager = null;
     }
 
-    public override void RegisterGlobalEvents()
+    protected override void RegisterGlobalEvents()
     {
+        BaseSceneManager._instance.OnSceneStarted += OnSceneStarted;
+        BaseSceneManager._instance.OnSceneEnded += OnSceneComplete;
         GameManager.OnPlayerRespawn += OnPlayerRespawned;
         GameManager.OnPlayerDied += OnPlayerDied;
     }
 
-    public override void UnRegisterGlobalEvents()
+    protected override void UnRegisterGlobalEvents()
     {
         GameManager.OnPlayerRespawn -= OnPlayerRespawned;
         GameManager.OnPlayerDied -= OnPlayerDied;
+        BaseSceneManager._instance.OnSceneStarted -= OnSceneStarted;
+        BaseSceneManager._instance.OnSceneEnded -= OnSceneComplete;
     }
 
 
@@ -144,7 +149,7 @@ public class MovementGestureController : BaseGesture
         }
     }
 
-    public override void OnPlayerDied()
+    protected override void OnPlayerDied()
     {
         base.OnPlayerDied();
         ResetStates();
@@ -158,19 +163,19 @@ public class MovementGestureController : BaseGesture
         if(_rightHandActive) { _rightHandActive = false; }
     }
 
-    public override void OnSceneStarted()
+    protected override void OnSceneStarted()
     {
-        
+        InputEnabled = true;
     }
 
-    public override void OnSceneComplete()
+    protected override void OnSceneComplete()
     {
-        throw new NotImplementedException();
+        InputEnabled = false;
     }
 
- 
 
-    public override void OnPlayerRespawned()
+
+    protected override void OnPlayerRespawned()
     {
         base.OnPlayerRespawned();
     }

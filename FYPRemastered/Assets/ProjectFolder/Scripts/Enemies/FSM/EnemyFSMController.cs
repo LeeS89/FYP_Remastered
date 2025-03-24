@@ -15,64 +15,88 @@ public class EnemyFSMController : ComponentEvents
     [SerializeField] private float _stopAndWaitDelay;
     [SerializeField] private List<Transform> _wayPoints;
     private PatrolState _patrol;
-    
+
+
+    [Header("Trace Component Parameters")]
+    [SerializeField] private Transform _fovLocation;
+    [SerializeField] private float _fovTraceRadius = 5f;
+    [SerializeField] private LayerMask _fovLayerMask;
+    [SerializeField] private Collider[] _fovTraceresults;
+    [SerializeField] private float _patrolCheckFrequency = 1f;
+    [SerializeField] private float _alertcheckFrequency = 0.1f;
+    private float _fovCheckFrequency;
+
+    private float _nextCheckTime = 0f;
+    private TraceComponent _fov;
+
     private float _targetSpeed = 0f;
     private float _lerpSpeed = 0f;
     public bool _movementChanged = false;
+    private EnemyEventManager _enemyEventManager;
 
     
     
-   
-
     public override void RegisterLocalEvents(EventManager eventManager)
     {
         base.RegisterLocalEvents(eventManager);
+        _enemyEventManager = _eventManager as EnemyEventManager;
+        _enemyEventManager.OnAnimationTriggered += PlayAnimationType;
+        _enemyEventManager.OnSpeedChanged += UpdateTargetSpeedValues;
+        RegisterGlobalEvents();
 
+        //SetupFSM();
     }
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
+        _enemyEventManager.OnAnimationTriggered -= PlayAnimationType;
+        _enemyEventManager.OnSpeedChanged -= UpdateTargetSpeedValues;
         base.UnRegisterLocalEvents(eventManager);
+        _enemyEventManager = null;
     }
 
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    protected override void RegisterGlobalEvents()
     {
-        _animController = new EnemyAnimController(_anim);
-        _patrol = new PatrolState(this, _wayPoints, _agent, _stopAndWaitDelay, _walkSpeed);
-        //_patrol.OnSpeedChanged += UpdateTargetSpeedValues;
-        //_patrol.OnAnimationTriggered += PlayAnimationType;
-        _currentState = _patrol;
-        _currentState.OnSpeedChanged += UpdateTargetSpeedValues;
-        _currentState.OnAnimationTriggered += PlayAnimationType;
-        _currentState.EnterState();
-
-        
-        //_patrol.EnterState();
-       
+        BaseSceneManager._instance.OnSceneStarted += OnSceneStarted;
+        BaseSceneManager._instance.OnSceneEnded += OnSceneComplete;
     }
+
+    protected override void UnRegisterGlobalEvents()
+    {
+        BaseSceneManager._instance.OnSceneStarted -= OnSceneStarted;
+        BaseSceneManager._instance.OnSceneEnded -= OnSceneComplete;
+    }
+
+
+    private void SetupFSM()
+    {
+        _fovCheckFrequency = _patrolCheckFrequency;
+        _fov = new TraceComponent(1);
+        _fovTraceresults = new Collider[1];
+        _animController = new EnemyAnimController(_anim);
+        _patrol = new PatrolState(_wayPoints, _agent, _enemyEventManager, _stopAndWaitDelay, _walkSpeed);
+
+        _currentState = _patrol;
+       
+        _currentState.EnterState();
+    }
+
 
     public void ChangeState(EnemyState state)
     {
         if(_currentState != null)
         {
-            _currentState.OnSpeedChanged -= UpdateTargetSpeedValues;
-            _currentState.OnAnimationTriggered -= PlayAnimationType;
-
             _currentState.ExitState();
         }
         _currentState = state;
 
-        _currentState.OnSpeedChanged += UpdateTargetSpeedValues;
-        _currentState.OnAnimationTriggered += PlayAnimationType;
 
         _currentState.EnterState();
     }
 
     public bool _testDeath = false;
 
-    // Update is called once per frame
+    
     void Update()
     {
         if (_testDeath)
@@ -82,10 +106,33 @@ public class EnemyFSMController : ComponentEvents
             //_animController.EnemyDied();
             _testDeath = false;
         }
+
+        
     }
 
     private void LateUpdate()
     {
+        //if (_fov != null)
+        //{
+        //    _fov.CheckForFreezeable(_fovLocation, out _fovTraceresults, _fovTraceRadius, _fovLayerMask, true);
+        //    if (_fovTraceresults.Length > 0)
+        //    {
+        //        LineOfSightUtility.HasLineOfSight(_test, _fovTraceresults[0].transform, 360f, _plqayer);
+        //        //_fovCheckFrequency = _alertcheckFrequency;
+        //    }
+        //}
+        if (Time.time >= _nextCheckTime && _fov != null)
+        {
+            _nextCheckTime = Time.time + _fovCheckFrequency;
+
+            _fov.CheckForFreezeable(_fovLocation, out _fovTraceresults, _fovTraceRadius, _fovLayerMask, true);
+            if (_fovTraceresults.Length > 0)
+            {
+                _fovCheckFrequency = _alertcheckFrequency;
+            }
+
+        }
+
         if (!_movementChanged) { return; }
 
         UpdateAnimatorSpeed();
@@ -106,8 +153,9 @@ public class EnemyFSMController : ComponentEvents
         // Update animator (assumes 1D blend tree for walk/run)
         _animController.UpdateSpeed(smoothedSpeed);
 
-        if (Mathf.Abs(_agent.speed - _targetSpeed) <= 0.01f)
+        if (Mathf.Abs(_agent.speed - _targetSpeed) <= 0.001f)
         {
+            //Debug.LogError("Speed finished changing");
             _agent.speed = _targetSpeed;
             _animController.UpdateSpeed(_targetSpeed);
             _movementChanged = false;
@@ -139,5 +187,23 @@ public class EnemyFSMController : ComponentEvents
         _targetSpeed = speed;
         _lerpSpeed = lerpSpeed;
         _movementChanged = true;
+    }
+
+    protected override void OnSceneStarted()
+    {
+        SetupFSM();
+    }
+
+    protected override void OnSceneComplete()
+    {
+        if (_currentState != null)
+        {
+            _currentState.ExitState();
+            _currentState = null;
+        }
+        _patrol = null;
+        _fov = null;
+        _fovTraceresults = null;
+        _animController = null;
     }
 }
