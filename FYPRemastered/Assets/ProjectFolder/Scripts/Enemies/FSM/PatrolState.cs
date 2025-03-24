@@ -3,10 +3,14 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using Random = UnityEngine.Random;
 
 
 public class PatrolState : EnemyState
 {
+    
+    private float _walkSpeed;
+
     private List<Transform> _wayPoints;
     private NavMeshAgent _agent;
 
@@ -15,10 +19,15 @@ public class PatrolState : EnemyState
     private int index = 0;
 
     private Vector3 _direction;
-    private float distance;
+    private float _distance;
+    private float _randomWaitTime;
+    private bool _isPatrolling = false;
+    
 
-    public PatrolState(EnemyFSMController fsm, List<Transform> wayPoints, NavMeshAgent agent) : base(fsm)
+    public PatrolState(EnemyFSMController fsm, List<Transform> wayPoints, NavMeshAgent agent, float randomDelay, float walkSpeed) : base(fsm)
     {
+        _walkSpeed = walkSpeed;
+        _randomWaitTime = randomDelay;
         _wayPoints = wayPoints;
         _agent = agent;
         hasReachedDestination = CheckDestinationReached;
@@ -28,21 +37,28 @@ public class PatrolState : EnemyState
     
     public override void EnterState()
     {
-        _fsm.StartCoroutine(TraverseWayPoints());
+        if (_coroutine == null)
+        {
+            _isPatrolling = true;
+            _coroutine = _fsm.StartCoroutine(TraverseWayPoints());
+        }
     }
 
 
     IEnumerator TraverseWayPoints()
     {
-        while (true)
+        while (_isPatrolling)
         {
             index = GetNextDestination();
 
             _agent.SetDestination(_wayPoints[index].position);
+            SpeedChanged(_walkSpeed, 2f);
+            //OnSpeedChanged?.Invoke(_walkSpeed, 2f);
 
             yield return _waitUntilDestinationReached;
-            //_walk = false;
 
+            SpeedChanged(0f, 10f);
+            //OnSpeedChanged?.Invoke(0.0f, 10f);
             // Calculating the direction vector from the agent to the destination
             Vector3 directionToFace = _wayPoints[index].forward;
 
@@ -56,7 +72,19 @@ public class PatrolState : EnemyState
                 yield return null;
             }
 
+            AnimationTriggered(AnimationAction.Look);
             
+
+            float _delayTime = Random.Range(0, _randomWaitTime);
+            float elapsedTime = 0.0f;
+            //Debug.LogError("Delay Time: " + _delayTime);
+            while (elapsedTime < _delayTime)
+            {
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+
+
         }
     }
 
@@ -87,7 +115,7 @@ public class PatrolState : EnemyState
     {
         
         GetDistanceToDestination();
-        return distance <= (_agent.stoppingDistance + 0.5f);
+        return _distance <= (_agent.stoppingDistance + 0.5f);
 
     }
 
@@ -97,14 +125,19 @@ public class PatrolState : EnemyState
         if (_wayPoints[index].gameObject.activeInHierarchy)
         {
             _direction = _agent.transform.position - _wayPoints[index].position;
-            distance = _direction.magnitude;
+            _distance = _direction.magnitude;
         }
        
     }
 
     public override void ExitState()
     {
-        throw new System.NotImplementedException();
+        if(_coroutine != null)
+        {
+            _isPatrolling = false;
+            _fsm.StopCoroutine(_coroutine);
+            _coroutine = null;
+        }
     }
 
     public override void UpdateState()

@@ -1,148 +1,429 @@
 fileFormatVersion: 2
 guid: 21e89d1d872df584a8693b5145501773
-timeCreated: 1524561073
-licenseType: Store
+AssetOrigin:
+  serializedVersion: 1
+  productId: 8042
+  packageName: Futuristic Soldier
+  packageVersion: 1.1
+  assetPath: Assets/soldier/SoldierMecanim.fbx
+  uploadId: 242199
 ModelImporter:
-  serializedVersion: 22
-  fileIDToRecycleName:
-    100000: Bind_Head
-    100002: Bind_Hips
-    100004: Bind_LeftArm
-    100006: Bind_LeftFoot
-    100008: Bind_LeftForeArm
-    100010: Bind_LeftHand
-    100012: Bind_LeftHandIndex1
-    100014: Bind_LeftHandIndex2
-    100016: Bind_LeftHandIndex3
-    100018: Bind_LeftHandMiddle1
-    100020: Bind_LeftHandMiddle2
-    100022: Bind_LeftHandMiddle3
-    100024: Bind_LeftHandPinky1
-    100026: Bind_LeftHandPinky2
-    100028: Bind_LeftHandPinky3
-    100030: Bind_LeftHandRing1
-    100032: Bind_LeftHandRing2
-    100034: Bind_LeftHandRing3
-    100036: Bind_LeftHandThumb1
-    100038: Bind_LeftHandThumb2
-    100040: Bind_LeftHandThumb3
-    100042: Bind_LeftLeg
-    100044: Bind_LeftShoulder
-    100046: Bind_LeftToeBase
-    100048: Bind_LeftUpLeg
-    100050: Bind_Neck
-    100052: Bind_RightArm
-    100054: Bind_RightFoot
-    100056: Bind_RightForeArm
-    100058: Bind_RightHand
-    100060: Bind_RightHandIndex1
-    100062: Bind_RightHandIndex2
-    100064: Bind_RightHandIndex3
-    100066: Bind_RightHandMiddle1
-    100068: Bind_RightHandMiddle2
-    100070: Bind_RightHandMiddle3
-    100072: Bind_RightHandPinky1
-    100074: Bind_RightHandPinky2
-    100076: Bind_RightHandPinky3
-    100078: Bind_RightHandRing1
-    100080: Bind_RightHandRing2
-    100082: Bind_RightHandRing3
-    100084: Bind_RightHandThumb1
-    100086: Bind_RightHandThumb2
-    100088: Bind_RightHandThumb3
-    100090: Bind_RightLeg
-    100092: Bind_RightShoulder
-    100094: Bind_RightToeBase
-    100096: Bind_RightUpLeg
-    100098: Bind_Root
-    100100: Bind_Spine
-    100102: Bind_Spine1
-    100104: Bind_Spine2
-    100106: gun
-    100108: //RootNode
-    100110: soldier
-    400000: Bind_Head
-    400002: Bind_Hips
-    400004: Bind_LeftArm
-    400006: Bind_LeftFoot
-    400008: Bind_LeftForeArm
-    400010: Bind_LeftHand
-    400012: Bind_LeftHandIndex1
-    400014: Bind_LeftHandIndex2
-    400016: Bind_LeftHandIndex3
-    400018: Bind_LeftHandMiddle1
-    400020: Bind_LeftHandMiddle2
-    400022: Bind_LeftHandMiddle3
-    400024: Bind_LeftHandPinky1
-    400026: Bind_LeftHandPinky2
-    400028: Bind_LeftHandPinky3
-    400030: Bind_LeftHandRing1
-    400032: Bind_LeftHandRing2
-    400034: Bind_LeftHandRing3
-    400036: Bind_LeftHandThumb1
-    400038: Bind_LeftHandThumb2
-    400040: Bind_LeftHandThumb3
-    400042: Bind_LeftLeg
-    400044: Bind_LeftShoulder
-    400046: Bind_LeftToeBase
-    400048: Bind_LeftUpLeg
-    400050: Bind_Neck
-    400052: Bind_RightArm
-    400054: Bind_RightFoot
-    400056: Bind_RightForeArm
-    400058: Bind_RightHand
-    400060: Bind_RightHandIndex1
-    400062: Bind_RightHandIndex2
-    400064: Bind_RightHandIndex3
-    400066: Bind_RightHandMiddle1
-    400068: Bind_RightHandMiddle2
-    400070: Bind_RightHandMiddle3
-    400072: Bind_RightHandPinky1
-    400074: Bind_RightHandPinky2
-    400076: Bind_RightHandPinky3
-    400078: Bind_RightHandRing1
-    400080: Bind_RightHandRing2
-    400082: Bind_RightHandRing3
-    400084: Bind_RightHandThumb1
-    400086: Bind_RightHandThumb2
-    400088: Bind_RightHandThumb3
-    400090: Bind_RightLeg
-    400092: Bind_RightShoulder
-    400094: Bind_RightToeBase
-    400096: Bind_RightUpLeg
-    400098: Bind_Root
-    400100: Bind_Spine
-    400102: Bind_Spine1
-    400104: Bind_Spine2
-    400106: gun
-    400108: //RootNode
-    400110: soldier
-    2100000: gun
-    2100002: soldier
-    4300000: gun
-    4300002: soldier
-    7400000: idleWgun
-    7400002: walk
-    7400004: walkAndLook
-    7400006: run
-    7400008: shooting
-    7400010: rapidShooting
-    7400012: runAndShooting
-    7400014: strafeRight
-    7400016: strafeLeft
-    7400018: backpaddle
-    7400020: jump
-    7400022: crouch
-    7400024: crouchWalk
-    7400026: reload
-    7400028: melee
-    7400030: death
-    7400032: revive
-    7400034: idleWithoutGun
-    9500000: //RootNode
-    11100000: //RootNode
-    13700000: gun
-    13700002: soldier
+  serializedVersion: 22200
+  internalIDToNameTable:
+  - first:
+      1: 100000
+    second: Bind_Head
+  - first:
+      1: 100002
+    second: Bind_Hips
+  - first:
+      1: 100004
+    second: Bind_LeftArm
+  - first:
+      1: 100006
+    second: Bind_LeftFoot
+  - first:
+      1: 100008
+    second: Bind_LeftForeArm
+  - first:
+      1: 100010
+    second: Bind_LeftHand
+  - first:
+      1: 100012
+    second: Bind_LeftHandIndex1
+  - first:
+      1: 100014
+    second: Bind_LeftHandIndex2
+  - first:
+      1: 100016
+    second: Bind_LeftHandIndex3
+  - first:
+      1: 100018
+    second: Bind_LeftHandMiddle1
+  - first:
+      1: 100020
+    second: Bind_LeftHandMiddle2
+  - first:
+      1: 100022
+    second: Bind_LeftHandMiddle3
+  - first:
+      1: 100024
+    second: Bind_LeftHandPinky1
+  - first:
+      1: 100026
+    second: Bind_LeftHandPinky2
+  - first:
+      1: 100028
+    second: Bind_LeftHandPinky3
+  - first:
+      1: 100030
+    second: Bind_LeftHandRing1
+  - first:
+      1: 100032
+    second: Bind_LeftHandRing2
+  - first:
+      1: 100034
+    second: Bind_LeftHandRing3
+  - first:
+      1: 100036
+    second: Bind_LeftHandThumb1
+  - first:
+      1: 100038
+    second: Bind_LeftHandThumb2
+  - first:
+      1: 100040
+    second: Bind_LeftHandThumb3
+  - first:
+      1: 100042
+    second: Bind_LeftLeg
+  - first:
+      1: 100044
+    second: Bind_LeftShoulder
+  - first:
+      1: 100046
+    second: Bind_LeftToeBase
+  - first:
+      1: 100048
+    second: Bind_LeftUpLeg
+  - first:
+      1: 100050
+    second: Bind_Neck
+  - first:
+      1: 100052
+    second: Bind_RightArm
+  - first:
+      1: 100054
+    second: Bind_RightFoot
+  - first:
+      1: 100056
+    second: Bind_RightForeArm
+  - first:
+      1: 100058
+    second: Bind_RightHand
+  - first:
+      1: 100060
+    second: Bind_RightHandIndex1
+  - first:
+      1: 100062
+    second: Bind_RightHandIndex2
+  - first:
+      1: 100064
+    second: Bind_RightHandIndex3
+  - first:
+      1: 100066
+    second: Bind_RightHandMiddle1
+  - first:
+      1: 100068
+    second: Bind_RightHandMiddle2
+  - first:
+      1: 100070
+    second: Bind_RightHandMiddle3
+  - first:
+      1: 100072
+    second: Bind_RightHandPinky1
+  - first:
+      1: 100074
+    second: Bind_RightHandPinky2
+  - first:
+      1: 100076
+    second: Bind_RightHandPinky3
+  - first:
+      1: 100078
+    second: Bind_RightHandRing1
+  - first:
+      1: 100080
+    second: Bind_RightHandRing2
+  - first:
+      1: 100082
+    second: Bind_RightHandRing3
+  - first:
+      1: 100084
+    second: Bind_RightHandThumb1
+  - first:
+      1: 100086
+    second: Bind_RightHandThumb2
+  - first:
+      1: 100088
+    second: Bind_RightHandThumb3
+  - first:
+      1: 100090
+    second: Bind_RightLeg
+  - first:
+      1: 100092
+    second: Bind_RightShoulder
+  - first:
+      1: 100094
+    second: Bind_RightToeBase
+  - first:
+      1: 100096
+    second: Bind_RightUpLeg
+  - first:
+      1: 100098
+    second: Bind_Root
+  - first:
+      1: 100100
+    second: Bind_Spine
+  - first:
+      1: 100102
+    second: Bind_Spine1
+  - first:
+      1: 100104
+    second: Bind_Spine2
+  - first:
+      1: 100106
+    second: gun
+  - first:
+      1: 100108
+    second: //RootNode
+  - first:
+      1: 100110
+    second: soldier
+  - first:
+      4: 400000
+    second: Bind_Head
+  - first:
+      4: 400002
+    second: Bind_Hips
+  - first:
+      4: 400004
+    second: Bind_LeftArm
+  - first:
+      4: 400006
+    second: Bind_LeftFoot
+  - first:
+      4: 400008
+    second: Bind_LeftForeArm
+  - first:
+      4: 400010
+    second: Bind_LeftHand
+  - first:
+      4: 400012
+    second: Bind_LeftHandIndex1
+  - first:
+      4: 400014
+    second: Bind_LeftHandIndex2
+  - first:
+      4: 400016
+    second: Bind_LeftHandIndex3
+  - first:
+      4: 400018
+    second: Bind_LeftHandMiddle1
+  - first:
+      4: 400020
+    second: Bind_LeftHandMiddle2
+  - first:
+      4: 400022
+    second: Bind_LeftHandMiddle3
+  - first:
+      4: 400024
+    second: Bind_LeftHandPinky1
+  - first:
+      4: 400026
+    second: Bind_LeftHandPinky2
+  - first:
+      4: 400028
+    second: Bind_LeftHandPinky3
+  - first:
+      4: 400030
+    second: Bind_LeftHandRing1
+  - first:
+      4: 400032
+    second: Bind_LeftHandRing2
+  - first:
+      4: 400034
+    second: Bind_LeftHandRing3
+  - first:
+      4: 400036
+    second: Bind_LeftHandThumb1
+  - first:
+      4: 400038
+    second: Bind_LeftHandThumb2
+  - first:
+      4: 400040
+    second: Bind_LeftHandThumb3
+  - first:
+      4: 400042
+    second: Bind_LeftLeg
+  - first:
+      4: 400044
+    second: Bind_LeftShoulder
+  - first:
+      4: 400046
+    second: Bind_LeftToeBase
+  - first:
+      4: 400048
+    second: Bind_LeftUpLeg
+  - first:
+      4: 400050
+    second: Bind_Neck
+  - first:
+      4: 400052
+    second: Bind_RightArm
+  - first:
+      4: 400054
+    second: Bind_RightFoot
+  - first:
+      4: 400056
+    second: Bind_RightForeArm
+  - first:
+      4: 400058
+    second: Bind_RightHand
+  - first:
+      4: 400060
+    second: Bind_RightHandIndex1
+  - first:
+      4: 400062
+    second: Bind_RightHandIndex2
+  - first:
+      4: 400064
+    second: Bind_RightHandIndex3
+  - first:
+      4: 400066
+    second: Bind_RightHandMiddle1
+  - first:
+      4: 400068
+    second: Bind_RightHandMiddle2
+  - first:
+      4: 400070
+    second: Bind_RightHandMiddle3
+  - first:
+      4: 400072
+    second: Bind_RightHandPinky1
+  - first:
+      4: 400074
+    second: Bind_RightHandPinky2
+  - first:
+      4: 400076
+    second: Bind_RightHandPinky3
+  - first:
+      4: 400078
+    second: Bind_RightHandRing1
+  - first:
+      4: 400080
+    second: Bind_RightHandRing2
+  - first:
+      4: 400082
+    second: Bind_RightHandRing3
+  - first:
+      4: 400084
+    second: Bind_RightHandThumb1
+  - first:
+      4: 400086
+    second: Bind_RightHandThumb2
+  - first:
+      4: 400088
+    second: Bind_RightHandThumb3
+  - first:
+      4: 400090
+    second: Bind_RightLeg
+  - first:
+      4: 400092
+    second: Bind_RightShoulder
+  - first:
+      4: 400094
+    second: Bind_RightToeBase
+  - first:
+      4: 400096
+    second: Bind_RightUpLeg
+  - first:
+      4: 400098
+    second: Bind_Root
+  - first:
+      4: 400100
+    second: Bind_Spine
+  - first:
+      4: 400102
+    second: Bind_Spine1
+  - first:
+      4: 400104
+    second: Bind_Spine2
+  - first:
+      4: 400106
+    second: gun
+  - first:
+      4: 400108
+    second: //RootNode
+  - first:
+      4: 400110
+    second: soldier
+  - first:
+      21: 2100000
+    second: gun
+  - first:
+      21: 2100002
+    second: soldier
+  - first:
+      43: 4300000
+    second: gun
+  - first:
+      43: 4300002
+    second: soldier
+  - first:
+      74: 7400000
+    second: idleWgun
+  - first:
+      74: 7400002
+    second: walk
+  - first:
+      74: 7400004
+    second: walkAndLook
+  - first:
+      74: 7400006
+    second: run
+  - first:
+      74: 7400008
+    second: shooting
+  - first:
+      74: 7400010
+    second: rapidShooting
+  - first:
+      74: 7400012
+    second: runAndShooting
+  - first:
+      74: 7400014
+    second: strafeRight
+  - first:
+      74: 7400016
+    second: strafeLeft
+  - first:
+      74: 7400018
+    second: backpaddle
+  - first:
+      74: 7400020
+    second: jump
+  - first:
+      74: 7400022
+    second: crouch
+  - first:
+      74: 7400024
+    second: crouchWalk
+  - first:
+      74: 7400026
+    second: reload
+  - first:
+      74: 7400028
+    second: melee
+  - first:
+      74: 7400030
+    second: death
+  - first:
+      74: 7400032
+    second: revive
+  - first:
+      74: 7400034
+    second: idleWithoutGun
+  - first:
+      95: 9500000
+    second: //RootNode
+  - first:
+      111: 11100000
+    second: //RootNode
+  - first:
+      137: 13700000
+    second: gun
+  - first:
+      137: 13700002
+    second: soldier
   externalObjects:
   - first:
       type: UnityEngine:Material
@@ -155,7 +436,7 @@ ModelImporter:
       name: soldier
     second: {fileID: 2100000, guid: 9652d6c97f1099448996989d6c219b1e, type: 2}
   materials:
-    importMaterials: 1
+    materialImportMode: 1
     materialName: 0
     materialSearch: 2
     materialLocation: 0
@@ -164,9 +445,8 @@ ModelImporter:
     bakeSimulation: 0
     resampleCurves: 1
     optimizeGameObjects: 0
+    removeConstantScaleCurves: 0
     motionNodeName: <Root Transform>
-    rigImportErrors: 
-    rigImportWarnings: 
     animationImportErrors: 
     animationImportWarnings: "\nClip 'walk' has import animation warnings that might
       lower retargeting quality:\n\t'Bind_Hips' is inbetween humanoid transforms
@@ -197,6 +477,7 @@ ModelImporter:
     animationRetargetingWarnings: 
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
+    importConstraints: 0
     animationCompression: 3
     animationRotationError: 0.5
     animationPositionError: 0.5
@@ -204,39 +485,578 @@ ModelImporter:
     animationWrapMode: 0
     extraExposedTransformPaths: []
     extraUserProperties: []
-    clipAnimations: []
+    clipAnimations:
+    - serializedVersion: 16
+      name: idleWgun
+      takeName: idleWgun
+      internalID: 7400000
+      firstFrame: 0
+      lastFrame: 59
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 1
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: walk
+      takeName: walk
+      internalID: 7400002
+      firstFrame: 0
+      lastFrame: 40
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 1
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: walkAndLook
+      takeName: walkAndLook
+      internalID: 7400004
+      firstFrame: 0
+      lastFrame: 120
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: run
+      takeName: run
+      internalID: 7400006
+      firstFrame: 0
+      lastFrame: 20
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 1
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: shooting
+      takeName: shooting
+      internalID: 7400008
+      firstFrame: 0
+      lastFrame: 20
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: rapidShooting
+      takeName: rapidShooting
+      internalID: 7400010
+      firstFrame: 0
+      lastFrame: 50
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: runAndShooting
+      takeName: runAndShooting
+      internalID: 7400012
+      firstFrame: 0
+      lastFrame: 20
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: strafeRight
+      takeName: strafeRight
+      internalID: 7400014
+      firstFrame: 0
+      lastFrame: 36
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: strafeLeft
+      takeName: strafeLeft
+      internalID: 7400016
+      firstFrame: 0
+      lastFrame: 36
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: backpaddle
+      takeName: backpaddle
+      internalID: 7400018
+      firstFrame: 0
+      lastFrame: 40
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: jump
+      takeName: jump
+      internalID: 7400020
+      firstFrame: 0
+      lastFrame: 30
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: crouch
+      takeName: crouch
+      internalID: 7400022
+      firstFrame: 0
+      lastFrame: 60
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: crouchWalk
+      takeName: crouchWalk
+      internalID: 7400024
+      firstFrame: 0
+      lastFrame: 40
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: reload
+      takeName: reload
+      internalID: 7400026
+      firstFrame: 0
+      lastFrame: 55
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: melee
+      takeName: melee
+      internalID: 7400028
+      firstFrame: 0
+      lastFrame: 20
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: death
+      takeName: death
+      internalID: 7400030
+      firstFrame: 0
+      lastFrame: 30
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: revive
+      takeName: revive
+      internalID: 7400032
+      firstFrame: 0
+      lastFrame: 70
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: idleWithoutGun
+      takeName: idleWithoutGun
+      internalID: 7400034
+      firstFrame: 0
+      lastFrame: 59
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
     isReadable: 1
   meshes:
     lODScreenPercentages: []
-    globalScale: 0.3
+    globalScale: 0.22
     meshCompression: 0
     addColliders: 1
+    useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
+    importPhysicalCameras: 0
     importVisibility: 1
     importBlendShapes: 1
     importCameras: 1
     importLights: 1
+    nodeNameCollisionStrategy: 0
+    fileIdsGeneration: 1
     swapUVChannels: 0
     generateSecondaryUV: 1
     useFileUnits: 1
-    optimizeMeshForGPU: 1
     keepQuads: 0
     weldVertices: 1
+    bakeAxisConversion: 0
     preserveHierarchy: 0
+    skinWeightsMode: 1
+    maxBonesPerVertex: 2
+    minBoneWeight: 0.001
+    optimizeBones: 1
+    meshOptimizationFlags: -1
     indexFormat: 0
     secondaryUVAngleDistortion: 8
     secondaryUVAreaDistortion: 15.000001
     secondaryUVHardAngle: 88
+    secondaryUVMarginMethod: 0
+    secondaryUVMinLightmapResolution: 40
+    secondaryUVMinObjectScale: 1
     secondaryUVPackMargin: 4
     useFileScale: 0
+    strictVertexDataChecks: 0
   tangentSpace:
     normalSmoothAngle: 60
     normalImportMode: 0
     tangentImportMode: 3
     normalCalculationMode: 4
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 1
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  referencedClips: []
   importAnimation: 1
-  copyAvatar: 0
   humanDescription:
-    serializedVersion: 2
+    serializedVersion: 3
     human:
     - boneName: Bind_Root
       humanName: Hips
@@ -638,277 +1458,277 @@ ModelImporter:
       scale: {x: 1, y: 1, z: 1}
     - name: Bind_Root
       parentName: SoldierMecanim(Clone)
-      position: {x: -0.0013533011, y: 1.6680278, z: -0.0035589088}
+      position: {x: -0.0009924208, y: 1.2232203, z: -0.0026098664}
       rotation: {x: -0.013643845, y: -0.03114634, z: 0.010330055, w: 0.99936837}
       scale: {x: 1, y: 0.99999994, z: 1}
     - name: Bind_Hips
       parentName: Bind_Root
-      position: {x: -0, y: -7.993606e-16, z: 0.000000008940697}
+      position: {x: -0, y: -5.861977e-16, z: 0.000000006556511}
       rotation: {x: -0.045658365, y: -0.005597174, z: 0.000239674, w: 0.9989415}
       scale: {x: 1.0000002, y: 1.0000001, z: 1.0000001}
     - name: Bind_LeftUpLeg
       parentName: Bind_Hips
-      position: {x: -0.14474726, y: -0.076046996, z: -0.00062459486}
+      position: {x: -0.10614799, y: -0.055767793, z: -0.0004580362}
       rotation: {x: -0.16594172, y: 0.06395474, z: 0.9806659, w: 0.081655316}
       scale: {x: 1.000001, y: 1.0000007, z: 1}
     - name: Bind_LeftLeg
       parentName: Bind_LeftUpLeg
-      position: {x: -0, y: 0.6965203, z: 0}
+      position: {x: -0, y: 0.5107815, z: 0}
       rotation: {x: -0.19179206, y: 0.000007835216, z: -0.0000013438984, w: 0.9814356}
       scale: {x: 1.0000005, y: 1.0000007, z: 0.99999976}
     - name: Bind_LeftFoot
       parentName: Bind_LeftLeg
-      position: {x: 0.00000003576279, y: 0.7149435, z: 0}
+      position: {x: 0.000000026226044, y: 0.5242919, z: 0}
       rotation: {x: 0.5363036, y: -0.02173546, z: 0.036907908, w: 0.8429377}
       scale: {x: 1.0000006, y: 1.0000002, z: 1.0000006}
     - name: Bind_LeftToeBase
       parentName: Bind_LeftFoot
-      position: {x: -0, y: 0.32443315, z: -3.3306692e-17}
+      position: {x: -0, y: 0.2379176, z: -2.4424906e-17}
       rotation: {x: 0.3438957, y: 0.031652354, z: -0.011599148, w: 0.93840253}
       scale: {x: 1.0000002, y: 1.0000001, z: 0.99999946}
     - name: Bind_RightUpLeg
       parentName: Bind_Hips
-      position: {x: 0.14526524, y: -0.07604714, z: -0.00022840129}
+      position: {x: 0.106527835, y: -0.0557679, z: -0.00016749428}
       rotation: {x: 0.22657725, y: 0.036907256, z: 0.96749896, w: -0.10604916}
       scale: {x: 1.0000007, y: 1.000001, z: 1.0000002}
     - name: Bind_RightLeg
       parentName: Bind_RightUpLeg
-      position: {x: -0.00000003576279, y: 0.69649774, z: -0.00000003576279}
+      position: {x: -0.000000026226044, y: 0.510765, z: -0.000000026226044}
       rotation: {x: -0.18959875, y: -0.0000058813007, z: 0.0000009927896, w: 0.98186165}
       scale: {x: 0.99999964, y: 1, z: 1.0000004}
     - name: Bind_RightFoot
       parentName: Bind_RightLeg
-      position: {x: 0.00000003576279, y: 0.7150464, z: 0.000000017881394}
+      position: {x: 0.000000026226044, y: 0.52436733, z: 0.000000013113022}
       rotation: {x: 0.5483623, y: 0.020277642, z: -0.061026856, w: 0.83376455}
       scale: {x: 1.0000007, y: 1.0000008, z: 1.0000002}
     - name: Bind_RightToeBase
       parentName: Bind_RightFoot
-      position: {x: -1.3322677e-16, y: 0.3227433, z: 0}
+      position: {x: -9.7699626e-17, y: 0.2366784, z: 0}
       rotation: {x: 0.345892, y: -0.031424705, z: 0.011590994, w: 0.9376763}
       scale: {x: 1.0000007, y: 1.0000001, z: 1.0000006}
     - name: Bind_Spine
       parentName: Bind_Root
-      position: {x: 0.00017825514, y: 0.1368848, z: -0.012150497}
+      position: {x: 0.00013072042, y: 0.10038218, z: -0.0089103645}
       rotation: {x: -0.03418595, y: -0.0055731535, z: -0.00034685433, w: 0.99939996}
       scale: {x: 1.0000004, y: 1, z: 1.0000004}
     - name: Bind_Spine1
       parentName: Bind_Spine
-      position: {x: 1.6653346e-17, y: 0.16032715, z: -8.3819035e-10}
+      position: {x: 1.2212453e-17, y: 0.11757324, z: -6.146728e-10}
       rotation: {x: 0.088741966, y: 0.026169779, z: -0.0023323686, w: 0.9957081}
       scale: {x: 0.99999994, y: 0.99999994, z: 0.99999994}
     - name: Bind_Spine2
       parentName: Bind_Spine1
-      position: {x: 0.0000000044703485, y: 0.18323107, z: 0}
+      position: {x: 0.0000000032782554, y: 0.13436945, z: 0}
       rotation: {x: 0.000000037252903, y: -0, z: -0.0000000013969839, w: 1}
       scale: {x: 1, y: 1.0000001, z: 1.0000001}
     - name: Bind_LeftShoulder
       parentName: Bind_Spine2
-      position: {x: -0.094117716, y: 0.16295543, z: -0.0042018774}
+      position: {x: -0.06901965, y: 0.119500645, z: -0.0030813767}
       rotation: {x: 0.5785485, y: -0.36759868, z: 0.5471245, w: 0.48042452}
       scale: {x: 1.0000005, y: 1.0000012, z: 1.0000012}
     - name: Bind_LeftArm
       parentName: Bind_LeftShoulder
-      position: {x: -0.000000008940697, y: 0.20727053, z: 0}
+      position: {x: -0.000000006556511, y: 0.15199839, z: 0}
       rotation: {x: -0.14374049, y: 0.079054765, z: 0.034212403, w: 0.9858593}
       scale: {x: 1, y: 1.0000005, z: 1.0000001}
     - name: Bind_LeftForeArm
       parentName: Bind_LeftArm
-      position: {x: -2.6645354e-16, y: 0.33446425, z: 0}
+      position: {x: -1.9539925e-16, y: 0.24527377, z: 0}
       rotation: {x: -0.0023350413, y: 0.10660399, z: -0.02602282, w: 0.9939583}
       scale: {x: 1.0000005, y: 1.0000007, z: 1.0000002}
     - name: Bind_LeftHand
       parentName: Bind_LeftForeArm
-      position: {x: -0.000005856154, y: 0.40973565, z: 0.0000151598615}
+      position: {x: -0.0000042945126, y: 0.3004728, z: 0.00001111723}
       rotation: {x: 0.0371908, y: -0.12074395, z: 0.08916779, w: 0.98797107}
       scale: {x: 1.0000008, y: 1.000001, z: 1.0000006}
     - name: Bind_LeftHandIndex1
       parentName: Bind_LeftHand
-      position: {x: 0.06894779, y: 0.21509011, z: -0.00195508}
+      position: {x: 0.05056171, y: 0.15773274, z: -0.0014337254}
       rotation: {x: -0.9962231, y: -0.0029333855, z: -0.07920543, w: 0.035461687}
       scale: {x: 1.0000008, y: 1.0000005, z: 1.0000011}
     - name: Bind_LeftHandIndex2
       parentName: Bind_LeftHandIndex1
-      position: {x: -0.0021537782, y: -0.05589967, z: -3.996803e-16}
+      position: {x: -0.0015794372, y: -0.040993087, z: -2.9309884e-16}
       rotation: {x: 0.014358624, y: -0.00078906456, z: -0.038858395, w: 0.9991413}
       scale: {x: 1.000001, y: 1.0000011, z: 1.0000004}
     - name: Bind_LeftHandIndex3
       parentName: Bind_LeftHandIndex2
-      position: {x: 0.0021443367, y: -0.052330043, z: 0}
+      position: {x: 0.0015725135, y: -0.038375363, z: 0}
       rotation: {x: 0.5836741, y: -0.000000048515147, z: -0.00000011863526, w: 0.8119881}
       scale: {x: 1.0000002, y: 1.0000002, z: 1}
     - name: Bind_LeftHandMiddle1
       parentName: Bind_LeftHand
-      position: {x: 0.020742847, y: 0.21613641, z: 0.003186107}
+      position: {x: 0.01521142, y: 0.1585, z: 0.002336478}
       rotation: {x: -0.99422544, y: 0.079836816, z: 0.011639094, w: 0.070755914}
       scale: {x: 1.0000007, y: 1.0000007, z: 1.0000006}
     - name: Bind_LeftHandMiddle2
       parentName: Bind_LeftHandMiddle1
-      position: {x: -0.0067886356, y: -0.056244407, z: 0}
+      position: {x: -0.004978332, y: -0.041245896, z: 0}
       rotation: {x: 0.007114925, y: 0.029407421, z: -0.08736363, w: 0.995717}
       scale: {x: 1.0000005, y: 1.000001, z: 1.0000004}
     - name: Bind_LeftHandMiddle3
       parentName: Bind_LeftHandMiddle2
-      position: {x: 0.0030040026, y: -0.053500846, z: -0.000000008940697}
+      position: {x: 0.002202935, y: -0.03923395, z: -0.000000006556511}
       rotation: {x: 0.19476904, y: 0.0000000765425, z: -0.000000047300926, w: 0.98084915}
       scale: {x: 1.0000006, y: 1.0000002, z: 1.0000007}
     - name: Bind_LeftHandPinky1
       parentName: Bind_LeftHand
-      position: {x: -0.07885323, y: 0.17810029, z: 0.034313466}
+      position: {x: -0.0578257, y: 0.13060686, z: 0.025163207}
       rotation: {x: -0.9796471, y: 0.06172444, z: 0.17423552, w: 0.07825436}
       scale: {x: 1.0000004, y: 1.0000007, z: 1.0000002}
     - name: Bind_LeftHandPinky2
       parentName: Bind_LeftHandPinky1
-      position: {x: -0.0005626917, y: -0.03041103, z: -0.00000014305115}
+      position: {x: -0.00041264057, y: -0.022301419, z: -0.000000104904174}
       rotation: {x: 0.016162029, y: -0.020861479, z: -0.051202644, w: 0.99833965}
       scale: {x: 1.0000004, y: 1.0000011, z: 0.99999976}
     - name: Bind_LeftHandPinky3
       parentName: Bind_LeftHandPinky2
-      position: {x: 0.0022440434, y: -0.025857212, z: 0}
+      position: {x: 0.0016456316, y: -0.018961953, z: 0}
       rotation: {x: -0.17999077, y: -0.00000001029923, z: 0.0000000036812884, w: 0.9836683}
       scale: {x: 0.99999994, y: 0.9999999, z: 1}
     - name: Bind_LeftHandRing1
       parentName: Bind_LeftHand
-      position: {x: -0.03410225, y: 0.18690702, z: 0.004696226}
+      position: {x: -0.025008313, y: 0.13706514, z: 0.003443899}
       rotation: {x: -0.9834447, y: 0.08952993, z: 0.14505115, w: 0.06149049}
       scale: {x: 1.0000002, y: 1.0000006, z: 1.0000005}
     - name: Bind_LeftHandRing2
       parentName: Bind_LeftHandRing1
-      position: {x: -0.0069168094, y: -0.048745144, z: 0}
+      position: {x: -0.005072326, y: -0.03574644, z: 0}
       rotation: {x: 0.015703058, y: 0.030683614, z: -0.09093917, w: 0.99525976}
       scale: {x: 1.0000011, y: 1.0000017, z: 1.0000002}
     - name: Bind_LeftHandRing3
       parentName: Bind_LeftHandRing2
-      position: {x: 0.0021243813, y: -0.046832517, z: -0.00000006258488}
+      position: {x: 0.0015578794, y: -0.034343846, z: -0.000000045895572}
       rotation: {x: 0.20840071, y: 0.000000032437573, z: 0.00000008791205, w: 0.97804356}
       scale: {x: 1.0000008, y: 1.0000008, z: 1.0000002}
     - name: Bind_LeftHandThumb1
       parentName: Bind_LeftHand
-      position: {x: 0.041130066, y: 0.060580302, z: 0.027166987}
+      position: {x: 0.030162044, y: 0.044425555, z: 0.019922458}
       rotation: {x: -0.91108537, y: 0.3330429, z: -0.24279612, w: -0.007475803}
       scale: {x: 1.0000007, y: 1.0000007, z: 1.0000007}
     - name: Bind_LeftHandThumb2
       parentName: Bind_LeftHandThumb1
-      position: {x: 0.0087684635, y: -0.06186215, z: 0.000000017881394}
+      position: {x: 0.006430206, y: -0.045365576, z: 0.000000013113022}
       rotation: {x: -0.03590359, y: 0.053379565, z: 0.035786126, w: 0.9972868}
       scale: {x: 1.0000002, y: 1.0000001, z: 1.0000004}
     - name: Bind_LeftHandThumb3
       parentName: Bind_LeftHandThumb2
-      position: {x: 0.002731991, y: -0.067536056, z: 0}
+      position: {x: 0.0020034597, y: -0.049526438, z: 0}
       rotation: {x: -0.036988568, y: 1.8997104e-10, z: 0.000000005843124, w: 0.9993157}
       scale: {x: 0.99999994, y: 0.99999994, z: 1}
     - name: Bind_Neck
       parentName: Bind_Spine2
-      position: {x: -0.0000000029508072, y: 0.20613499, z: -4.570921e-10}
+      position: {x: -0.0000000021639253, y: 0.15116566, z: -3.3520087e-10}
       rotation: {x: 0.04106354, y: 0.063831694, z: 0.059727285, w: 0.995325}
       scale: {x: 1.0000004, y: 1.0000002, z: 1.0000004}
     - name: Bind_Head
       parentName: Bind_Neck
-      position: {x: 0.009, y: 0.116, z: 0.042}
+      position: {x: 0.006599999, y: 0.08506666, z: 0.030799996}
       rotation: {x: -0.15477884, y: -0.080092184, z: -0.06844641, w: 0.98231554}
       scale: {x: 0.99999976, y: 1.0000002, z: 0.9999998}
     - name: Bind_RightShoulder
       parentName: Bind_Spine2
-      position: {x: 0.09380887, y: 0.16313425, z: -0.0034478547}
+      position: {x: 0.06879316, y: 0.119631775, z: -0.0025284267}
       rotation: {x: -0.55598164, y: -0.43090147, z: 0.57679147, w: -0.41535527}
       scale: {x: 1.0000005, y: 1.0000005, z: 1.0000004}
     - name: Bind_RightArm
       parentName: Bind_RightShoulder
-      position: {x: 0.00000003576279, y: 0.20650473, z: 0}
+      position: {x: 0.000000026226044, y: 0.1514368, z: 0}
       rotation: {x: 0.12194122, y: -0.2329472, z: 0.009412676, w: -0.96476805}
       scale: {x: 1.0000002, y: 1.0000004, z: 1.0000005}
     - name: Bind_RightForeArm
       parentName: Bind_RightArm
-      position: {x: -0, y: 0.3340349, z: -0.00000014305115}
+      position: {x: -0, y: 0.2449589, z: -0.000000104904174}
       rotation: {x: -0.0078433575, y: -0.09732755, z: -0.0077956216, w: 0.995191}
       scale: {x: 0.99999964, y: 0.99999994, z: 0.99999964}
     - name: Bind_RightHand
       parentName: Bind_RightForeArm
-      position: {x: 0.000000089872664, y: 0.41020182, z: -0.000000019557781}
+      position: {x: 0.00000006590662, y: 0.30081466, z: -0.000000014342372}
       rotation: {x: 0.046627637, y: 0.1724125, z: 0.0034328224, w: 0.9839147}
       scale: {x: 1.0000007, y: 1.0000005, z: 1.0000002}
     - name: Bind_RightHandIndex1
       parentName: Bind_RightHand
-      position: {x: -0.07210943, y: 0.22411036, z: -0.002681603}
+      position: {x: -0.05288025, y: 0.16434759, z: -0.0019665088}
       rotation: {x: -0.96654946, y: -0.007174282, z: -0.25111365, w: 0.051696237}
       scale: {x: 1.0000002, y: 1.0000005, z: 1.0000001}
     - name: Bind_RightHandIndex2
       parentName: Bind_RightHandIndex1
-      position: {x: 0.002200842, y: -0.053005386, z: 1.6653345e-16}
+      position: {x: 0.0016139505, y: -0.038870618, z: 1.2212452e-16}
       rotation: {x: 0.024085034, y: 0.001607673, z: 0.04296696, w: 0.99878484}
       scale: {x: 1.0000007, y: 1.0000005, z: 1}
     - name: Bind_RightHandIndex3
       parentName: Bind_RightHandIndex2
-      position: {x: -0.0025709153, y: -0.051461294, z: 0}
+      position: {x: -0.0018853376, y: -0.03773828, z: 0}
       rotation: {x: -0.05958141, y: 0.000000064408134, z: 0.00000006583582, w: 0.9982235}
       scale: {x: 1.0000004, y: 1.0000002, z: 1.0000002}
     - name: Bind_RightHandMiddle1
       parentName: Bind_RightHand
-      position: {x: -0.024371002, y: 0.20588557, z: 0.0014039889}
+      position: {x: -0.017872069, y: 0.15098275, z: 0.0010295918}
       rotation: {x: -0.94235826, y: -0.06844031, z: -0.3196079, w: 0.07160755}
       scale: {x: 1.0000004, y: 1.0000004, z: 1.0000001}
     - name: Bind_RightHandMiddle2
       parentName: Bind_RightHandMiddle1
-      position: {x: 0.0071434025, y: -0.058703188, z: -0.000000107288365}
+      position: {x: 0.005238495, y: -0.043049004, z: -0.00000007867812}
       rotation: {x: 0.0114328, y: -0.03734691, z: 0.072981164, w: 0.99656826}
       scale: {x: 0.99999994, y: 0.9999997, z: 0.9999998}
     - name: Bind_RightHandMiddle3
       parentName: Bind_RightHandMiddle2
-      position: {x: -0.0015144825, y: -0.056295313, z: 0.00000007152558}
+      position: {x: -0.0011106204, y: -0.041283224, z: 0.000000052452087}
       rotation: {x: 0.37809727, y: -0.00000007133079, z: 0.00000021269403, w: 0.9257659}
       scale: {x: 1.0000004, y: 1.0000007, z: 1.0000008}
     - name: Bind_RightHandPinky1
       parentName: Bind_RightHand
-      position: {x: 0.07772527, y: 0.1787455, z: 0.040294256}
+      position: {x: 0.05699853, y: 0.13108002, z: 0.02954912}
       rotation: {x: -0.9817946, y: -0.09446817, z: -0.15068008, w: 0.066712946}
       scale: {x: 1.0000005, y: 1, z: 0.9999998}
     - name: Bind_RightHandPinky2
       parentName: Bind_RightHandPinky1
-      position: {x: 0.0021128654, y: -0.028801562, z: 0.00000007152558}
+      position: {x: 0.0015494346, y: -0.021121142, z: 0.000000052452087}
       rotation: {x: 0.018193875, y: 0.0062679555, z: 0.082140885, w: 0.9964349}
       scale: {x: 0.99999976, y: 1.0000002, z: 1}
     - name: Bind_RightHandPinky3
       parentName: Bind_RightHandPinky2
-      position: {x: -0.0024391653, y: -0.025090653, z: 0.00000003576279}
+      position: {x: -0.0017887211, y: -0.01839981, z: 0.000000026226044}
       rotation: {x: 0.27486718, y: 0.000000003880386, z: -0.000000013118492, w: 0.9614822}
       scale: {x: 1, y: 1, z: 1}
     - name: Bind_RightHandRing1
       parentName: Bind_RightHand
-      position: {x: 0.03131461, y: 0.18821469, z: 0.0061287046}
+      position: {x: 0.022964045, y: 0.1380241, z: 0.004494383}
       rotation: {x: -0.97351503, y: -0.100155406, z: -0.19638373, w: 0.060587868}
       scale: {x: 1.0000007, y: 1.0000005, z: 1.0000004}
     - name: Bind_RightHandRing2
       parentName: Bind_RightHandRing1
-      position: {x: 0.0066317082, y: -0.05055914, z: 0.00000007152558}
+      position: {x: 0.004863253, y: -0.0370767, z: 0.000000052452087}
       rotation: {x: -0.013760942, y: 0.011646394, z: -0.11018523, w: -0.9937476}
       scale: {x: 1.0000004, y: 1.0000008, z: 1.0000004}
     - name: Bind_RightHandRing3
       parentName: Bind_RightHandRing2
-      position: {x: -0.004435015, y: -0.04654169, z: 0.00000014305115}
+      position: {x: -0.0032523442, y: -0.03413057, z: 0.000000104904174}
       rotation: {x: 0.28262106, y: -0.0000001896256, z: 0.000000074362816, w: 0.9592316}
       scale: {x: 1.0000001, y: 1.0000005, z: 1}
     - name: Bind_RightHandThumb1
       parentName: Bind_RightHand
-      position: {x: -0.045654267, y: 0.062072862, z: 0.029801792}
+      position: {x: -0.033479795, y: 0.045520093, z: 0.021854645}
       rotation: {x: -0.94216645, y: -0.2912915, z: -0.12197627, w: -0.11222094}
       scale: {x: 1.0000007, y: 1.0000004, z: 1.0000004}
     - name: Bind_RightHandThumb2
       parentName: Bind_RightHandThumb1
-      position: {x: -0.010033179, y: -0.06531911, z: 0}
+      position: {x: -0.0073576644, y: -0.047900677, z: 0}
       rotation: {x: 0.0076339385, y: -0.042402368, z: -0.0721276, w: 0.9964645}
       scale: {x: 1.0000004, y: 1.0000004, z: 0.99999964}
     - name: Bind_RightHandThumb3
       parentName: Bind_RightHandThumb2
-      position: {x: 0.0031710148, y: -0.06528172, z: 0}
+      position: {x: 0.002325411, y: -0.04787326, z: 0}
       rotation: {x: -0.08407842, y: 0.020167014, z: 0.23236911, w: 0.96877694}
       scale: {x: 1, y: 0.99999994, z: 1.0000002}
     - name: gun
       parentName: SoldierMecanim(Clone)
-      position: {x: -6.6613384e-17, y: -2.6645354e-16, z: -1.9984015e-16}
+      position: {x: -4.8849813e-17, y: -1.9539925e-16, z: -1.4654942e-16}
       rotation: {x: 2.7755576e-17, y: -9.62965e-35, z: -3.469447e-18, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: soldier
       parentName: SoldierMecanim(Clone)
-      position: {x: -8.326673e-18, y: 0, z: -8.326673e-18}
+      position: {x: -6.1062266e-18, y: 0, z: -6.1062266e-18}
       rotation: {x: 0, y: -2.7755576e-17, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     armTwist: 0.503
@@ -918,22 +1738,20 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
+    globalScale: 0.22
     rootMotionBoneName: 
-    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
     hasTranslationDoF: 1
     hasExtraRoot: 0
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
   animationType: 3
   humanoidOversampling: 1
+  avatarSetup: 1
+  addHumanoidExtraRootOnlyWhenUsingAvatar: 0
+  importBlendShapeDeformPercent: 0
+  remapMaterialsIfMaterialImportModeIsNone: 1
   additionalBone: 0
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 8042
-  packageName: Futuristic Soldier
-  packageVersion: 1.1
-  assetPath: Assets/soldier/SoldierMecanim.fbx
-  uploadId: 242199
