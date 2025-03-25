@@ -7,6 +7,7 @@ public class EnemyEventManager : EventManager
     public event Action<AnimationAction> OnAnimationTriggered;
     public event Action<float, float> OnSpeedChanged;
 
+
     private List<ComponentEvents> _cachedListeners;
 
     public override void BindComponentsToEvents()

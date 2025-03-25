@@ -3940,6 +3940,7 @@ MonoBehaviour:
   _patrolCheckFrequency: 1
   _alertcheckFrequency: 0.1
   _movementChanged: 0
+  _player: {fileID: 2637593784199785641}
   _testDeath: 0
 --- !u!54 &1098147879
 Rigidbody:
@@ -5749,6 +5750,7 @@ MonoBehaviour:
   _patrolCheckFrequency: 1
   _alertcheckFrequency: 0.1
   _movementChanged: 0
+  _player: {fileID: 0}
   _testDeath: 0
 --- !u!1 &1551932212
 GameObject:
@@ -11380,6 +11382,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8b8a47dd509973a4599dca415c2aa13b, type: 3}
+--- !u!4 &2637593784199785641 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5567585103406991563, guid: 8b8a47dd509973a4599dca415c2aa13b, type: 3}
+  m_PrefabInstance: {fileID: 2637593784199785640}
+  m_PrefabAsset: {fileID: 0}
 --- !u!137 &2688865387775082825
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 0

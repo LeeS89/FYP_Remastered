@@ -34,8 +34,8 @@ public class EnemyFSMController : ComponentEvents
     public bool _movementChanged = false;
     private EnemyEventManager _enemyEventManager;
 
-    
-    
+
+    #region Event Registrations
     public override void RegisterLocalEvents(EventManager eventManager)
     {
         base.RegisterLocalEvents(eventManager);
@@ -44,7 +44,6 @@ public class EnemyFSMController : ComponentEvents
         _enemyEventManager.OnSpeedChanged += UpdateTargetSpeedValues;
         RegisterGlobalEvents();
 
-        //SetupFSM();
     }
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
@@ -66,8 +65,45 @@ public class EnemyFSMController : ComponentEvents
         BaseSceneManager._instance.OnSceneStarted -= OnSceneStarted;
         BaseSceneManager._instance.OnSceneEnded -= OnSceneComplete;
     }
+    #endregion
 
 
+    public float GetStraightLineDistance(Vector3 from, Vector3 to)
+    {
+        return Vector3.Distance(from, to);
+    }
+
+    public float GetNavMeshPathDistance(Vector3 from, Vector3 to)
+    {
+        NavMeshPath path = new NavMeshPath();
+        if (NavMesh.CalculatePath(from, to, NavMesh.AllAreas, path))
+        {
+            float distance = 0f;
+            for (int i = 1; i < path.corners.Length; i++)
+            {
+                distance += Vector3.Distance(path.corners[i - 1], path.corners[i]);
+            }
+            return distance;
+        }
+        return float.PositiveInfinity; // No valid path
+    }
+    public Transform _player;
+
+    void CompareDistances(Vector3 enemyPosition, Vector3 playerPosition)
+    {
+        if (_agent.hasPath && !_agent.pathPending)
+        {
+            float disRem = _agent.remainingDistance;
+            float straightLineDist = GetStraightLineDistance(enemyPosition, _agent.destination);
+            float navMeshDist = GetNavMeshPathDistance(enemyPosition, _agent.destination);
+
+            Debug.LogError($"Straight-Line Distance: {straightLineDist}");
+            Debug.LogError($"NavMesh Path Distance: {navMeshDist}");
+            Debug.LogError($"remaining Distance: {disRem}");
+        }
+    }
+
+    #region FSM Management
     private void SetupFSM()
     {
         _fovCheckFrequency = _patrolCheckFrequency;
@@ -93,18 +129,20 @@ public class EnemyFSMController : ComponentEvents
 
         _currentState.EnterState();
     }
-
-    public bool _testDeath = false;
+    #endregion
 
     
+
+    #region Updates
     void Update()
     {
         if (_testDeath)
         {
-            _animController.LookAround();
+            //_animController.LookAround();
             //_agent.enabled = false;
             //_animController.EnemyDied();
-            _testDeath = false;
+            CompareDistances(transform.position, _player.position);
+            //_testDeath = false;
         }
 
         
@@ -133,16 +171,16 @@ public class EnemyFSMController : ComponentEvents
 
         }
 
+
         if (!_movementChanged) { return; }
 
         UpdateAnimatorSpeed();
     }
+    #endregion
 
-    public void TesReset()
-    {
-        _animController.ResetLook();
-    }
+    
 
+    #region Animation Updates
     private void UpdateAnimatorSpeed()
     {
       
@@ -188,6 +226,9 @@ public class EnemyFSMController : ComponentEvents
         _lerpSpeed = lerpSpeed;
         _movementChanged = true;
     }
+    #endregion
+
+    #region Global Events
 
     protected override void OnSceneStarted()
     {
@@ -206,4 +247,16 @@ public class EnemyFSMController : ComponentEvents
         _fovTraceresults = null;
         _animController = null;
     }
+    #endregion
+
+    #region Test Functions
+    public bool _testDeath = false;
+    public void TesReset()
+    {
+        _animController.ResetLook();
+    }
+
+
+
+    #endregion
 }
