@@ -18,6 +18,7 @@ public class BaseSceneManager : MonoBehaviour, ISceneManager
 
     public void SceneStarted()
     {
+        GameManager.Instance.SetPlayer();
         OnSceneStarted?.Invoke();
     }
 

@@ -11,6 +11,9 @@ public enum CharacterType
 
 public class GameManager : MonoBehaviour
 {
+    public Transform PlayerTransform { get; private set; }
+
+
     public static GameManager Instance { get; private set; }
     public static event Action OnPlayerDied;
     public static event Action OnPlayerRespawn;
@@ -57,5 +60,23 @@ public class GameManager : MonoBehaviour
     public static void PlayerRespawned()
     {
         OnPlayerRespawn?.Invoke();
+    }
+
+    public void SetPlayer()
+    {
+        if (PlayerTransform == null)
+        {
+            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+
+            if (playerObj != null)
+            {
+                PlayerTransform = playerObj.transform;
+                //Debug.LogError("Player assigned in GameManager: " + PlayerTransform.name);
+            }
+            else
+            {
+                Debug.LogWarning("Player not found! Ensure the Player has the correct tag.");
+            }
+        }
     }
 }

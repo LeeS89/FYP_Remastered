@@ -8,17 +8,13 @@ using Random = UnityEngine.Random;
 
 public class PatrolState : EnemyState
 {
-    
-    private float _walkSpeed;
-
     private List<Transform> _wayPoints;
+    private float _walkSpeed;
 
     private WaitUntil _waitUntilDestinationReached;
     private Func<bool> hasReachedDestination;
     private int index = 0;
 
-    private Vector3 _direction;
-    private float _distance;
     private float _randomWaitTime;
     private bool _isPatrolling = false;
     
@@ -28,7 +24,6 @@ public class PatrolState : EnemyState
         _walkSpeed = walkSpeed;
         _randomWaitTime = randomDelay;
         _wayPoints = wayPoints;
-        //_agent = agent;
         hasReachedDestination = CheckDestinationReached;
         _waitUntilDestinationReached = new WaitUntil(hasReachedDestination);
     }
@@ -36,6 +31,7 @@ public class PatrolState : EnemyState
     
     public override void EnterState()
     {
+        _eventManager.OnDestinationReached += SetDestinationReached;
         if (_coroutine == null)
         {
             _isPatrolling = true;
@@ -48,13 +44,16 @@ public class PatrolState : EnemyState
     {
         while (_isPatrolling)
         {
+            SetDestinationReached(false);
             index = GetNextDestination();
-
-            _agent.SetDestination(_wayPoints[index].position);
+           
+            _eventManager.DestinationUpdated(_wayPoints[index].position);
+            
             _eventManager.SpeedChanged(_walkSpeed, 2f);
             
 
             yield return _waitUntilDestinationReached;
+            
 
             _eventManager.SpeedChanged(0f, 10f);
            
@@ -72,62 +71,43 @@ public class PatrolState : EnemyState
             }
 
             _eventManager.AnimationTriggered(AnimationAction.Look);
-            
-
+          
             float _delayTime = Random.Range(0, _randomWaitTime);
             float elapsedTime = 0.0f;
-            //Debug.LogError("Delay Time: " + _delayTime);
+           
             while (elapsedTime < _delayTime)
             {
                 elapsedTime += Time.deltaTime;
                 yield return null;
             }
-
-
+            
         }
     }
 
+    public override void UpdateState() { }
+    
+   
     private int GetNextDestination()
     {
         int newIndex = 0;
-        int _nextIndex = UnityEngine.Random.Range(0, _wayPoints.Count - 1);
 
-        if (_wayPoints[_nextIndex].gameObject.activeInHierarchy)
+        do
         {
-            newIndex = _nextIndex;
-            //return _nextIndex;
+            newIndex = Random.Range(0, _wayPoints.Count);
         }
-        else
-        {
-            for (int i = 0; i < _wayPoints.Count; i++)
-            {
-                if (_wayPoints[i].gameObject.activeInHierarchy)
-                {
-                    newIndex = i;
-                    break;
-                }
-            }
-        }
+        while(newIndex == index);
+
+       
         return newIndex;
     }
+
     private bool CheckDestinationReached()
     {
+        return _destinationReached;
         
-        GetDistanceToDestination();
-        return _distance <= (_agent.stoppingDistance + 0.2f);
-
     }
 
-
-    private void GetDistanceToDestination()
-    {
-        if (_wayPoints[index].gameObject.activeInHierarchy)
-        {
-            _direction = _agent.transform.position - _wayPoints[index].position;
-            _distance = _direction.magnitude;
-        }
-       
-    }
+  
 
     public override void ExitState()
     {
@@ -137,12 +117,10 @@ public class PatrolState : EnemyState
             CoroutineRunner.Instance.StopCoroutine(_coroutine);
             _coroutine = null;
         }
+        _eventManager.OnDestinationReached -= SetDestinationReached;
     }
 
-    public override void UpdateState()
-    {
-        throw new System.NotImplementedException();
-    }
+   
 
     public override void OnStateDestroyed()
     {
@@ -151,5 +129,8 @@ public class PatrolState : EnemyState
         _agent = null;
         hasReachedDestination = null;
         _waitUntilDestinationReached = null;
+        _eventManager = null;
     }
+
+   
 }

@@ -28,6 +28,7 @@ public class EnemyAnimController
 
     }
 
+
     public void DeadAnimation()
     {
         _anim.SetTrigger("dead");
@@ -40,6 +41,7 @@ public class EnemyAnimController
 
     public void ResetLook()
     {
+        _anim.ResetTrigger("look");
         //_anim.SetLayerWeight(1, 0);
     }
 }

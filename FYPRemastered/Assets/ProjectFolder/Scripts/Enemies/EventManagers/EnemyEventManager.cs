@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class EnemyEventManager : EventManager
 {
+    public event Action<bool> OnDestinationReached;
+    public event Action<Vector3> OnDestinationUpdated;
     public event Action<AnimationAction> OnAnimationTriggered;
     public event Action<float, float> OnSpeedChanged;
 
@@ -39,5 +41,15 @@ public class EnemyEventManager : EventManager
         OnSpeedChanged?.Invoke(moveSpeed, lerpSpeed);
     }
 
-    
+    public void DestinationReached(bool reached)
+    {
+        OnDestinationReached?.Invoke(reached);
+    }
+
+    public void DestinationUpdated(Vector3 newDestination)
+    {
+        OnDestinationUpdated?.Invoke(newDestination);
+    }
+
+   
 }

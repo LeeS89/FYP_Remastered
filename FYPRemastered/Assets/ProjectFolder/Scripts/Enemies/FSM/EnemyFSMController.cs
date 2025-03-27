@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -6,6 +7,7 @@ public class EnemyFSMController : ComponentEvents
 {
     [Header("Components")]
     [SerializeField] private NavMeshAgent _agent;
+    [SerializeField] private NavMeshObstacle _obstacle;
     [SerializeField] private Animator _anim;
     private EnemyAnimController _animController;
 
@@ -40,14 +42,18 @@ public class EnemyFSMController : ComponentEvents
     {
         base.RegisterLocalEvents(eventManager);
         _enemyEventManager = _eventManager as EnemyEventManager;
+        _enemyEventManager.OnDestinationUpdated += UpdateAgentDestination;
+        _enemyEventManager.OnDestinationReached += CarveOnDestinationReached;
         _enemyEventManager.OnAnimationTriggered += PlayAnimationType;
         _enemyEventManager.OnSpeedChanged += UpdateTargetSpeedValues;
         RegisterGlobalEvents();
-
+       
     }
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
+        _enemyEventManager.OnDestinationUpdated -= UpdateAgentDestination;
+        _enemyEventManager.OnDestinationReached -= CarveOnDestinationReached;
         _enemyEventManager.OnAnimationTriggered -= PlayAnimationType;
         _enemyEventManager.OnSpeedChanged -= UpdateTargetSpeedValues;
         base.UnRegisterLocalEvents(eventManager);
@@ -96,7 +102,7 @@ public class EnemyFSMController : ComponentEvents
             float disRem = _agent.remainingDistance;
             float straightLineDist = GetStraightLineDistance(enemyPosition, _agent.destination);
             float navMeshDist = GetNavMeshPathDistance(enemyPosition, _agent.destination);
-
+            
             Debug.LogError($"Straight-Line Distance: {straightLineDist}");
             Debug.LogError($"NavMesh Path Distance: {navMeshDist}");
             Debug.LogError($"remaining Distance: {disRem}");
@@ -111,7 +117,7 @@ public class EnemyFSMController : ComponentEvents
         _fovTraceresults = new Collider[1];
         _animController = new EnemyAnimController(_anim);
         _patrol = new PatrolState(_wayPoints, _agent, _enemyEventManager, _stopAndWaitDelay, _walkSpeed);
-
+        
         _currentState = _patrol;
        
         _currentState.EnterState();
@@ -129,24 +135,19 @@ public class EnemyFSMController : ComponentEvents
 
         _currentState.EnterState();
     }
+
+    private bool CheckIfDestinationIsReached()
+    {
+        return _agent.remainingDistance <= 0.2f;
+    }
+
     #endregion
 
     
 
     #region Updates
-    void Update()
-    {
-        if (_testDeath)
-        {
-            //_animController.LookAround();
-            //_agent.enabled = false;
-            //_animController.EnemyDied();
-            CompareDistances(transform.position, _player.position);
-            //_testDeath = false;
-        }
-
-        
-    }
+    void Update() { }
+    
 
     private void LateUpdate()
     {
@@ -171,6 +172,25 @@ public class EnemyFSMController : ComponentEvents
 
         }
 
+        if (_testDeath)
+        {
+            //_animController.LookAround();
+            //_agent.enabled = false;
+            //_animController.EnemyDied();
+            CompareDistances(transform.position, _player.position);
+            //_testDeath = false;
+        }
+        if (_currentState != null && _agent.hasPath && !_agent.pathPending)
+        {
+            if (CheckIfDestinationIsReached()) 
+            { 
+                _enemyEventManager.DestinationReached(true);
+                _agent.ResetPath();
+                //_agent.path = null;
+            }
+
+        }
+
 
         if (!_movementChanged) { return; }
 
@@ -188,7 +208,7 @@ public class EnemyFSMController : ComponentEvents
         _agent.speed = smoothedSpeed;
 
        
-        // Update animator (assumes 1D blend tree for walk/run)
+        // Update animator 
         _animController.UpdateSpeed(smoothedSpeed);
 
         if (Mathf.Abs(_agent.speed - _targetSpeed) <= 0.001f)
@@ -220,6 +240,26 @@ public class EnemyFSMController : ComponentEvents
         }
     }
 
+    private void CarveOnDestinationReached(bool _)
+    {
+        _agent.enabled = false;
+        _obstacle.enabled = true;
+    }
+
+    private void UpdateAgentDestination(Vector3 newDestination)
+    {
+        _obstacle.enabled = false;
+        StartCoroutine(SetDestinationDelay(newDestination));
+    }
+
+    private IEnumerator SetDestinationDelay(Vector3 newDestination)
+    {
+        yield return new WaitForSeconds(0.15f);
+        _agent.enabled = true;
+        _agent.SetDestination(newDestination);
+    }
+
+   
     private void UpdateTargetSpeedValues(float speed, float lerpSpeed)
     {
         _targetSpeed = speed;
@@ -251,12 +291,6 @@ public class EnemyFSMController : ComponentEvents
 
     #region Test Functions
     public bool _testDeath = false;
-    public void TesReset()
-    {
-        _animController.ResetLook();
-    }
-
-
-
+   
     #endregion
 }

@@ -15,18 +15,22 @@ public class Throwaway : MonoBehaviour
         
     }
 
+    public void dResetLook()
+    {
+        _anim.ResetTrigger("look");
+    }
     // Update is called once per frame
-    void Update()
+    /*void Update()
     {
 
-        _speed = _agent.velocity.magnitude;
+        *//*_speed = _agent.velocity.magnitude;
         _anim.SetFloat("speed", _speed);
         if (testDead)
         {
             EnemyDied();
             testDead = false;
-        }
-    }
+        }*//*
+    }*/
     public void EnemyDied()
     {
         _anim.SetTrigger("dead");
