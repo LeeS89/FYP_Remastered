@@ -7,11 +7,9 @@ public enum CharacterType
     Enemy
 }
 
-
-
 public class GameManager : MonoBehaviour
 {
-    public Transform PlayerTransform { get; private set; }
+    public GameObject Player { get; private set; }
 
 
     public static GameManager Instance { get; private set; }
@@ -64,13 +62,13 @@ public class GameManager : MonoBehaviour
 
     public void SetPlayer()
     {
-        if (PlayerTransform == null)
+        if (Player == null)
         {
             GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
 
             if (playerObj != null)
             {
-                PlayerTransform = playerObj.transform;
+                Player = playerObj;
                 //Debug.LogError("Player assigned in GameManager: " + PlayerTransform.name);
             }
             else
@@ -78,5 +76,11 @@ public class GameManager : MonoBehaviour
                 Debug.LogWarning("Player not found! Ensure the Player has the correct tag.");
             }
         }
+    }
+
+    public Transform GetPlayerPosition()
+    {
+        if (!Player) { return null; }
+        return Player.transform;
     }
 }

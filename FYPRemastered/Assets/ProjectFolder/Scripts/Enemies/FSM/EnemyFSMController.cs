@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,7 +6,7 @@ using UnityEngine.AI;
 
 public class EnemyFSMController : ComponentEvents
 {
-    [Header("Components")]
+    [Header("Agent and Animation Components")]
     [SerializeField] private NavMeshAgent _agent;
     [SerializeField] private NavMeshObstacle _obstacle;
     [SerializeField] private Animator _anim;
@@ -13,19 +14,26 @@ public class EnemyFSMController : ComponentEvents
 
     private EnemyState _currentState;
     [Header("Patrol State - Random number between 0 and stopAndWaitDelay to wait at each way point")]
-    [SerializeField] private float _walkSpeed;
+    [SerializeField, Tooltip("Do Not Change - Synchronized with Walking animation")] private float _walkSpeed;
     [SerializeField] private float _stopAndWaitDelay;
     [SerializeField] private List<Transform> _wayPoints;
     private PatrolState _patrol;
 
+    [Header("Chasing State Params")]
+    [SerializeField, Tooltip("Do Not Change - Synchronized with sprinting animation")] private float _sprintSpeed;
+    private ChasingState _chasing;
 
-    [Header("Trace Component Parameters")]
+    [Header("Stationary State Params")]
+    private StationaryState _stationary;
+
+    [Header("Field of View Component Parameters")]
     [SerializeField] private Transform _fovLocation;
+    [SerializeField] private float _patrolFOVCheckFrequency = 1f;
+    [SerializeField] private float _alertFOVCheckFrequency = 0.1f;
     [SerializeField] private float _fovTraceRadius = 5f;
     [SerializeField] private LayerMask _fovLayerMask;
-    [SerializeField] private Collider[] _fovTraceresults;
-    [SerializeField] private float _patrolCheckFrequency = 1f;
-    [SerializeField] private float _alertcheckFrequency = 0.1f;
+    [SerializeField] private Collider[] _fovTraceResults;
+   
     private float _fovCheckFrequency;
 
     private float _nextCheckTime = 0f;
@@ -33,9 +41,13 @@ public class EnemyFSMController : ComponentEvents
 
     private float _targetSpeed = 0f;
     private float _lerpSpeed = 0f;
-    public bool _movementChanged = false;
+    private bool _movementChanged = false;
     private EnemyEventManager _enemyEventManager;
+    private bool _canSeePlayer = false;
 
+    
+    private FieldOfViewFrequencyStatus _fieldOfViewStatus = FieldOfViewFrequencyStatus.Normal;
+    private AlertStatus _alertStatus = AlertStatus.None;
 
     #region Event Registrations
     public override void RegisterLocalEvents(EventManager eventManager)
@@ -93,7 +105,7 @@ public class EnemyFSMController : ComponentEvents
         }
         return float.PositiveInfinity; // No valid path
     }
-    public Transform _player;
+   // public Transform _player;
 
     void CompareDistances(Vector3 enemyPosition, Vector3 playerPosition)
     {
@@ -112,12 +124,15 @@ public class EnemyFSMController : ComponentEvents
     #region FSM Management
     private void SetupFSM()
     {
-        _fovCheckFrequency = _patrolCheckFrequency;
+        _fovCheckFrequency = _patrolFOVCheckFrequency;
         _fov = new TraceComponent(1);
-        _fovTraceresults = new Collider[1];
+        _fovTraceResults = new Collider[1];
         _animController = new EnemyAnimController(_anim);
         _patrol = new PatrolState(_wayPoints, _agent, _enemyEventManager, _stopAndWaitDelay, _walkSpeed);
-        
+        _chasing = new ChasingState(_agent, _enemyEventManager);
+        _stationary = new StationaryState(_agent, _enemyEventManager);
+
+
         _currentState = _patrol;
        
         _currentState.EnterState();
@@ -133,12 +148,12 @@ public class EnemyFSMController : ComponentEvents
         _currentState = state;
 
 
-        _currentState.EnterState();
+        _currentState.EnterState(AlertStatus.Alert);
     }
 
     private bool CheckIfDestinationIsReached()
     {
-        return _agent.remainingDistance <= 0.2f;
+        return _agent.remainingDistance <= (_agent.stoppingDistance + 0.2f);
     }
 
     #endregion
@@ -146,59 +161,109 @@ public class EnemyFSMController : ComponentEvents
     
 
     #region Updates
-    void Update() { }
+    void Update()
+    {
+        if(_testDeath)
+        {
+            ChangeState(_stationary);
+            //CarveOnDestinationReached(true);
+            _testDeath = false;
+        }
+    }
     
 
     private void LateUpdate()
     {
-        //if (_fov != null)
-        //{
-        //    _fov.CheckForFreezeable(_fovLocation, out _fovTraceresults, _fovTraceRadius, _fovLayerMask, true);
-        //    if (_fovTraceresults.Length > 0)
-        //    {
-        //        LineOfSightUtility.HasLineOfSight(_test, _fovTraceresults[0].transform, 360f, _plqayer);
-        //        //_fovCheckFrequency = _alertcheckFrequency;
-        //    }
-        //}
-        if (Time.time >= _nextCheckTime && _fov != null)
-        {
-            _nextCheckTime = Time.time + _fovCheckFrequency;
+       
+        UpdateFieldOfViewCheck();
 
-            _fov.CheckForFreezeable(_fovLocation, out _fovTraceresults, _fovTraceRadius, _fovLayerMask, true);
-            if (_fovTraceresults.Length > 0)
-            {
-                _fovCheckFrequency = _alertcheckFrequency;
-            }
-
-        }
-
-        if (_testDeath)
+        /*if (_testDeath)
         {
             //_animController.LookAround();
             //_agent.enabled = false;
             //_animController.EnemyDied();
             CompareDistances(transform.position, _player.position);
             //_testDeath = false;
-        }
+        }*/
+        //_currentState.LateUpdateState();
+
         if (_currentState != null && _agent.hasPath && !_agent.pathPending)
         {
             if (CheckIfDestinationIsReached()) 
-            { 
+            {
+                
                 _enemyEventManager.DestinationReached(true);
                 _agent.ResetPath();
-                //_agent.path = null;
+               
             }
 
         }
+        
 
 
         if (!_movementChanged) { return; }
 
         UpdateAnimatorSpeed();
     }
+
+    private void UpdateFieldOfViewCheck()
+    {
+        switch (_fieldOfViewStatus)
+        {
+            case FieldOfViewFrequencyStatus.Normal:
+                if (_fovCheckFrequency != _patrolFOVCheckFrequency)
+                {
+                    _fovCheckFrequency = _patrolFOVCheckFrequency;
+                }
+                break;
+            case FieldOfViewFrequencyStatus.Heightened:
+                if (_fovCheckFrequency != _alertFOVCheckFrequency)
+                {
+                    _fovCheckFrequency = _alertFOVCheckFrequency;
+                }
+                break;
+            default:
+                _fovCheckFrequency = _patrolFOVCheckFrequency;
+                break;
+        }
+
+
+        if (Time.time >= _nextCheckTime && _fov != null)
+        {
+            _nextCheckTime = Time.time + _fovCheckFrequency;
+            bool playerSeen = false;
+
+            _fov.CheckForFreezeable(_fovLocation, out _fovTraceResults, _fovTraceRadius, _fovLayerMask, true);
+
+            if (_fovTraceResults.Length > 0)
+            {
+                playerSeen = LineOfSightUtility.HasLineOfSight(_fovLocation, _fovTraceResults[0].transform, 360f, _fovLayerMask);
+
+                if(_fieldOfViewStatus != FieldOfViewFrequencyStatus.Heightened)
+                    _fieldOfViewStatus = FieldOfViewFrequencyStatus.Heightened;
+            }
+            else
+            {
+                if (_fieldOfViewStatus != FieldOfViewFrequencyStatus.Normal)
+                    _fieldOfViewStatus = FieldOfViewFrequencyStatus.Normal;
+            }
+
+            UpdateFieldOfViewResults(playerSeen);
+
+
+        }
+    }
+
+    private void UpdateFieldOfViewResults(bool playerSeen)
+    {
+        if(_canSeePlayer == playerSeen) { return; } // Already Updated, return early
+
+        _canSeePlayer = playerSeen;
+    }
+
     #endregion
 
-    
+
 
     #region Animation Updates
     private void UpdateAnimatorSpeed()
@@ -242,21 +307,42 @@ public class EnemyFSMController : ComponentEvents
 
     private void CarveOnDestinationReached(bool _)
     {
-        _agent.enabled = false;
+        ToggleAgent(false);
         _obstacle.enabled = true;
     }
-
-    private void UpdateAgentDestination(Vector3 newDestination)
+ 
+    private void UpdateAgentDestination(Vector3 newDestination, int stoppingDistance = 0) 
     {
-        _obstacle.enabled = false;
-        StartCoroutine(SetDestinationDelay(newDestination));
+        if (!_agent.enabled)
+        {
+            _obstacle.enabled = false;
+            //_agent.stoppingDistance = stoppingDistance;
+            StartCoroutine(SetDestinationDelay(newDestination, stoppingDistance));
+            return;
+        }
+        _agent.stoppingDistance = stoppingDistance;
+        _agent.SetDestination(newDestination);
+
     }
 
-    private IEnumerator SetDestinationDelay(Vector3 newDestination)
+    /// <summary>
+    /// Used when transitioning from stationary to moving
+    /// to give time for disabling carving and re enabling the agent
+    /// </summary>
+    /// <param name="newDestination"></param>
+    /// <param name="stoppingDistance"></param>
+    /// <returns></returns>
+    private IEnumerator SetDestinationDelay(Vector3 newDestination, int stoppingDistance) 
     {
         yield return new WaitForSeconds(0.15f);
-        _agent.enabled = true;
+        ToggleAgent(true);
+        _agent.stoppingDistance = stoppingDistance;
         _agent.SetDestination(newDestination);
+    }
+
+    private void ToggleAgent(bool agentEnabled)
+    {
+        _agent.enabled = agentEnabled;
     }
 
    
@@ -283,8 +369,10 @@ public class EnemyFSMController : ComponentEvents
             _currentState = null;
         }
         _patrol = null;
+        _chasing = null;
+        _stationary = null;
         _fov = null;
-        _fovTraceresults = null;
+        _fovTraceResults = null;
         _animController = null;
     }
     #endregion

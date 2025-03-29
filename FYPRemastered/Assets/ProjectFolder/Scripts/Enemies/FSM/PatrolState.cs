@@ -29,7 +29,7 @@ public class PatrolState : EnemyState
     }
 
     
-    public override void EnterState()
+    public override void EnterState(AlertStatus alertStatus = AlertStatus.None)
     {
         _eventManager.OnDestinationReached += SetDestinationReached;
         if (_coroutine == null)
@@ -132,5 +132,5 @@ public class PatrolState : EnemyState
         _eventManager = null;
     }
 
-   
+    
 }

@@ -5,7 +5,7 @@ using UnityEngine;
 public class EnemyEventManager : EventManager
 {
     public event Action<bool> OnDestinationReached;
-    public event Action<Vector3> OnDestinationUpdated;
+    public event Action<Vector3, int> OnDestinationUpdated;
     public event Action<AnimationAction> OnAnimationTriggered;
     public event Action<float, float> OnSpeedChanged;
 
@@ -46,9 +46,9 @@ public class EnemyEventManager : EventManager
         OnDestinationReached?.Invoke(reached);
     }
 
-    public void DestinationUpdated(Vector3 newDestination)
+    public void DestinationUpdated(Vector3 newDestination, int stoppingDistance = 0)
     {
-        OnDestinationUpdated?.Invoke(newDestination);
+        OnDestinationUpdated?.Invoke(newDestination, stoppingDistance);
     }
 
    

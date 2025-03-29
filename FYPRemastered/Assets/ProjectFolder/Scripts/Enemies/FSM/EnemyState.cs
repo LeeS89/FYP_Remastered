@@ -9,6 +9,7 @@ public abstract class EnemyState
     protected EnemyEventManager _eventManager;
     protected bool _destinationReached = false;
     protected float _remainingDistance;
+    protected AlertStatus _alertStatus;
 
     public EnemyState(NavMeshAgent agent, EnemyEventManager eventManager)
     {
@@ -20,9 +21,10 @@ public abstract class EnemyState
    
     public virtual void UpdateDistanceRemainingToDestination(float remainingDistance) { _remainingDistance = remainingDistance; }
 
-    public abstract void EnterState();
+    public virtual void EnterState(AlertStatus alertStatus = AlertStatus.None) {  _alertStatus = alertStatus; }
     public abstract void UpdateState();
 
+    public virtual void LateUpdateState() { }
     public abstract void ExitState();
     public abstract void OnStateDestroyed();
 
