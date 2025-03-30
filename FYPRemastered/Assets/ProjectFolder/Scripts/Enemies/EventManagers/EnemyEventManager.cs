@@ -8,6 +8,7 @@ public class EnemyEventManager : EventManager
     public event Action<Vector3, int> OnDestinationUpdated;
     public event Action<AnimationAction> OnAnimationTriggered;
     public event Action<float, float> OnSpeedChanged;
+    public event Action<bool> OnPlayerSeen;
 
 
     private List<ComponentEvents> _cachedListeners;
@@ -51,5 +52,9 @@ public class EnemyEventManager : EventManager
         OnDestinationUpdated?.Invoke(newDestination, stoppingDistance);
     }
 
-   
+    public void PlayerSeen(bool seen)
+    {
+        OnPlayerSeen?.Invoke(seen);
+    }
+
 }

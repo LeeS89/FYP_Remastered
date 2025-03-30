@@ -9,10 +9,10 @@ using Random = UnityEngine.Random;
 public class PatrolState : EnemyState
 {
     private List<Transform> _wayPoints;
-    private float _walkSpeed;
+    
 
     private WaitUntil _waitUntilDestinationReached;
-    private Func<bool> hasReachedDestination;
+    private Func<bool> _hasReachedDestination;
     private int index = 0;
 
     private float _randomWaitTime;
@@ -24,8 +24,8 @@ public class PatrolState : EnemyState
         _walkSpeed = walkSpeed;
         _randomWaitTime = randomDelay;
         _wayPoints = wayPoints;
-        hasReachedDestination = CheckDestinationReached;
-        _waitUntilDestinationReached = new WaitUntil(hasReachedDestination);
+        _hasReachedDestination = CheckDestinationReached;
+        _waitUntilDestinationReached = new WaitUntil(_hasReachedDestination);
     }
 
     
@@ -101,13 +101,13 @@ public class PatrolState : EnemyState
         return newIndex;
     }
 
-    private bool CheckDestinationReached()
+  /*  private bool CheckDestinationReached()
     {
         return _destinationReached;
         
     }
 
-  
+  */
 
     public override void ExitState()
     {
@@ -126,10 +126,10 @@ public class PatrolState : EnemyState
     {
         ExitState();
         _wayPoints = null;
-        _agent = null;
-        hasReachedDestination = null;
+        _hasReachedDestination = null;
         _waitUntilDestinationReached = null;
-        _eventManager = null;
+        base.OnStateDestroyed();
+        
     }
 
     

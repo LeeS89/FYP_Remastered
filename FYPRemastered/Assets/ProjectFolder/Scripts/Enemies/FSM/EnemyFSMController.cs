@@ -10,11 +10,12 @@ public class EnemyFSMController : ComponentEvents
     [SerializeField] private NavMeshAgent _agent;
     [SerializeField] private NavMeshObstacle _obstacle;
     [SerializeField] private Animator _anim;
+    [SerializeField, Tooltip("Do Not Change - Synchronized with Walking animation")] private float _walkSpeed;
     private EnemyAnimController _animController;
 
     private EnemyState _currentState;
     [Header("Patrol State - Random number between 0 and stopAndWaitDelay to wait at each way point")]
-    [SerializeField, Tooltip("Do Not Change - Synchronized with Walking animation")] private float _walkSpeed;
+    
     [SerializeField] private float _stopAndWaitDelay;
     [SerializeField] private List<Transform> _wayPoints;
     private PatrolState _patrol;
@@ -44,10 +45,11 @@ public class EnemyFSMController : ComponentEvents
     private bool _movementChanged = false;
     private EnemyEventManager _enemyEventManager;
     private bool _canSeePlayer = false;
-
+    private Action _destinationCheckAction;
     
     private FieldOfViewFrequencyStatus _fieldOfViewStatus = FieldOfViewFrequencyStatus.Normal;
     private AlertStatus _alertStatus = AlertStatus.None;
+    
 
     #region Event Registrations
     public override void RegisterLocalEvents(EventManager eventManager)
@@ -58,6 +60,7 @@ public class EnemyFSMController : ComponentEvents
         _enemyEventManager.OnDestinationReached += CarveOnDestinationReached;
         _enemyEventManager.OnAnimationTriggered += PlayAnimationType;
         _enemyEventManager.OnSpeedChanged += UpdateTargetSpeedValues;
+        
         RegisterGlobalEvents();
        
     }
@@ -86,40 +89,7 @@ public class EnemyFSMController : ComponentEvents
     #endregion
 
 
-    public float GetStraightLineDistance(Vector3 from, Vector3 to)
-    {
-        return Vector3.Distance(from, to);
-    }
-
-    public float GetNavMeshPathDistance(Vector3 from, Vector3 to)
-    {
-        NavMeshPath path = new NavMeshPath();
-        if (NavMesh.CalculatePath(from, to, NavMesh.AllAreas, path))
-        {
-            float distance = 0f;
-            for (int i = 1; i < path.corners.Length; i++)
-            {
-                distance += Vector3.Distance(path.corners[i - 1], path.corners[i]);
-            }
-            return distance;
-        }
-        return float.PositiveInfinity; // No valid path
-    }
-   // public Transform _player;
-
-    void CompareDistances(Vector3 enemyPosition, Vector3 playerPosition)
-    {
-        if (_agent.hasPath && !_agent.pathPending)
-        {
-            float disRem = _agent.remainingDistance;
-            float straightLineDist = GetStraightLineDistance(enemyPosition, _agent.destination);
-            float navMeshDist = GetNavMeshPathDistance(enemyPosition, _agent.destination);
-            
-            Debug.LogError($"Straight-Line Distance: {straightLineDist}");
-            Debug.LogError($"NavMesh Path Distance: {navMeshDist}");
-            Debug.LogError($"remaining Distance: {disRem}");
-        }
-    }
+   
 
     #region FSM Management
     private void SetupFSM()
@@ -129,13 +99,12 @@ public class EnemyFSMController : ComponentEvents
         _fovTraceResults = new Collider[1];
         _animController = new EnemyAnimController(_anim);
         _patrol = new PatrolState(_wayPoints, _agent, _enemyEventManager, _stopAndWaitDelay, _walkSpeed);
-        _chasing = new ChasingState(_agent, _enemyEventManager);
+        _chasing = new ChasingState(_agent, _enemyEventManager, _walkSpeed, _sprintSpeed);
         _stationary = new StationaryState(_agent, _enemyEventManager);
+        
 
-
-        _currentState = _patrol;
-       
-        _currentState.EnterState();
+        ChangeState(_patrol);
+        
     }
 
 
@@ -147,12 +116,15 @@ public class EnemyFSMController : ComponentEvents
         }
         _currentState = state;
 
+        
+        _destinationCheckAction = _currentState == _stationary ? StopImmediately : MeasurePathToDestination;
 
         _currentState.EnterState(AlertStatus.Alert);
     }
 
     private bool CheckIfDestinationIsReached()
     {
+        //Debug.LogError("Remainingdistance: "+_agent.remainingDistance);
         return _agent.remainingDistance <= (_agent.stoppingDistance + 0.2f);
     }
 
@@ -165,7 +137,7 @@ public class EnemyFSMController : ComponentEvents
     {
         if(_testDeath)
         {
-            ChangeState(_stationary);
+            ChangeState(_chasing);
             //CarveOnDestinationReached(true);
             _testDeath = false;
         }
@@ -175,7 +147,7 @@ public class EnemyFSMController : ComponentEvents
     private void LateUpdate()
     {
        
-        UpdateFieldOfViewCheck();
+        UpdateFieldOfViewCheckFrequency();
 
         /*if (_testDeath)
         {
@@ -186,27 +158,51 @@ public class EnemyFSMController : ComponentEvents
             //_testDeath = false;
         }*/
         //_currentState.LateUpdateState();
-
-        if (_currentState != null && _agent.hasPath && !_agent.pathPending)
-        {
-            if (CheckIfDestinationIsReached()) 
-            {
-                
-                _enemyEventManager.DestinationReached(true);
-                _agent.ResetPath();
-               
-            }
-
-        }
-        
-
-
+        //MeasurePathToDestination();
+        _destinationCheckAction?.Invoke();
+       
         if (!_movementChanged) { return; }
 
         UpdateAnimatorSpeed();
     }
 
-    private void UpdateFieldOfViewCheck()
+    private void MeasurePathToDestination()
+    {
+        if(!_agent.enabled) { return; }
+        //DebugExtension.DebugWireSphere(_agent.destination, Color.green);
+        if (_currentState != null && _agent.hasPath && !_agent.pathPending)
+        {
+            if (CheckIfDestinationIsReached())
+            {
+                
+                _agent.ResetPath();
+                _enemyEventManager.DestinationReached(true);
+                
+
+            }
+
+        }
+    }
+
+    /// <summary>
+    /// Used when agent enters Stationary state
+    /// </summary>
+    private void StopImmediately()
+    {
+        _agent.SetDestination(_agent.transform.position);
+        _agent.ResetPath();
+        _enemyEventManager.DestinationReached(true);
+        
+
+        _destinationCheckAction = null;
+    }
+
+
+    #endregion
+
+
+    #region Field Of View functions
+    private void UpdateFieldOfViewCheckFrequency()
     {
         switch (_fieldOfViewStatus)
         {
@@ -227,19 +223,25 @@ public class EnemyFSMController : ComponentEvents
                 break;
         }
 
+        PerformFieldOfViewCheck();
+    }
 
+
+    private void PerformFieldOfViewCheck()
+    {
         if (Time.time >= _nextCheckTime && _fov != null)
         {
             _nextCheckTime = Time.time + _fovCheckFrequency;
             bool playerSeen = false;
 
-            _fov.CheckForFreezeable(_fovLocation, out _fovTraceResults, _fovTraceRadius, _fovLayerMask, true);
+            // CheckForTarget first performs a Physics.CheckSphere. If check passes, an overlapsphere is performed which returns the targets collider information
+            _fov.CheckForTarget(_fovLocation, out _fovTraceResults, _fovTraceRadius, _fovLayerMask, true);
 
             if (_fovTraceResults.Length > 0)
             {
                 playerSeen = LineOfSightUtility.HasLineOfSight(_fovLocation, _fovTraceResults[0].transform, 360f, _fovLayerMask);
 
-                if(_fieldOfViewStatus != FieldOfViewFrequencyStatus.Heightened)
+                if (_fieldOfViewStatus != FieldOfViewFrequencyStatus.Heightened)
                     _fieldOfViewStatus = FieldOfViewFrequencyStatus.Heightened;
             }
             else
@@ -256,14 +258,70 @@ public class EnemyFSMController : ComponentEvents
 
     private void UpdateFieldOfViewResults(bool playerSeen)
     {
-        if(_canSeePlayer == playerSeen) { return; } // Already Updated, return early
+        if (_canSeePlayer == playerSeen) { return; } // Already Updated, return early
 
         _canSeePlayer = playerSeen;
-    }
 
+        if(_canSeePlayer)
+        {
+            _enemyEventManager.PlayerSeen(_canSeePlayer);
+            // Alert Group Here (Moon Scene Manager)
+            /* if(_currentState != _chasing)
+             {
+                 ChangeState(_chasing);
+             }*/
+        }
+        else
+        {
+            _enemyEventManager.PlayerSeen(false);
+        }
+
+        //Update Shooting Component Here
+    }
     #endregion
 
+    #region Destination Updates
+    private void CarveOnDestinationReached(bool _)
+    {
+        ToggleAgent(false);
+        _obstacle.enabled = true;
+    }
 
+    private void UpdateAgentDestination(Vector3 newDestination, int stoppingDistance = 0)
+    {
+        if (!_agent.enabled)
+        {
+            _obstacle.enabled = false;
+            //_agent.stoppingDistance = stoppingDistance;
+            StartCoroutine(SetDestinationDelay(newDestination, stoppingDistance));
+            return;
+        }
+        _agent.stoppingDistance = stoppingDistance;
+        _agent.SetDestination(newDestination);
+
+    }
+
+    /// <summary>
+    /// Used when transitioning from stationary to moving
+    /// to give time for disabling carving and re enabling the agent
+    /// </summary>
+    /// <param name="newDestination"></param>
+    /// <param name="stoppingDistance"></param>
+    /// <returns></returns>
+    private IEnumerator SetDestinationDelay(Vector3 newDestination, int stoppingDistance)
+    {
+        yield return new WaitForSeconds(0.15f);
+        ToggleAgent(true);
+        _agent.stoppingDistance = stoppingDistance;
+        _agent.SetDestination(newDestination);
+
+    }
+
+    private void ToggleAgent(bool agentEnabled)
+    {
+        _agent.enabled = agentEnabled;
+    }
+    #endregion
 
     #region Animation Updates
     private void UpdateAnimatorSpeed()
@@ -305,45 +363,6 @@ public class EnemyFSMController : ComponentEvents
         }
     }
 
-    private void CarveOnDestinationReached(bool _)
-    {
-        ToggleAgent(false);
-        _obstacle.enabled = true;
-    }
- 
-    private void UpdateAgentDestination(Vector3 newDestination, int stoppingDistance = 0) 
-    {
-        if (!_agent.enabled)
-        {
-            _obstacle.enabled = false;
-            //_agent.stoppingDistance = stoppingDistance;
-            StartCoroutine(SetDestinationDelay(newDestination, stoppingDistance));
-            return;
-        }
-        _agent.stoppingDistance = stoppingDistance;
-        _agent.SetDestination(newDestination);
-
-    }
-
-    /// <summary>
-    /// Used when transitioning from stationary to moving
-    /// to give time for disabling carving and re enabling the agent
-    /// </summary>
-    /// <param name="newDestination"></param>
-    /// <param name="stoppingDistance"></param>
-    /// <returns></returns>
-    private IEnumerator SetDestinationDelay(Vector3 newDestination, int stoppingDistance) 
-    {
-        yield return new WaitForSeconds(0.15f);
-        ToggleAgent(true);
-        _agent.stoppingDistance = stoppingDistance;
-        _agent.SetDestination(newDestination);
-    }
-
-    private void ToggleAgent(bool agentEnabled)
-    {
-        _agent.enabled = agentEnabled;
-    }
 
    
     private void UpdateTargetSpeedValues(float speed, float lerpSpeed)
@@ -354,11 +373,14 @@ public class EnemyFSMController : ComponentEvents
     }
     #endregion
 
+   
+
     #region Global Events
 
     protected override void OnSceneStarted()
     {
-        SetupFSM();
+        Invoke(nameof(SetupFSM), 1f);
+        //SetupFSM();
     }
 
     protected override void OnSceneComplete()
@@ -379,6 +401,40 @@ public class EnemyFSMController : ComponentEvents
 
     #region Test Functions
     public bool _testDeath = false;
-   
+
+    public float GetStraightLineDistance(Vector3 from, Vector3 to)
+    {
+        return Vector3.Distance(from, to);
+    }
+
+    public float GetNavMeshPathDistance(Vector3 from, Vector3 to)
+    {
+        NavMeshPath path = new NavMeshPath();
+        if (NavMesh.CalculatePath(from, to, NavMesh.AllAreas, path))
+        {
+            float distance = 0f;
+            for (int i = 1; i < path.corners.Length; i++)
+            {
+                distance += Vector3.Distance(path.corners[i - 1], path.corners[i]);
+            }
+            return distance;
+        }
+        return float.PositiveInfinity; // No valid path
+    }
+
+
+    void CompareDistances(Vector3 enemyPosition, Vector3 playerPosition)
+    {
+        if (_agent.hasPath && !_agent.pathPending)
+        {
+            float disRem = _agent.remainingDistance;
+            float straightLineDist = GetStraightLineDistance(enemyPosition, _agent.destination);
+            float navMeshDist = GetNavMeshPathDistance(enemyPosition, _agent.destination);
+
+            Debug.LogError($"Straight-Line Distance: {straightLineDist}");
+            Debug.LogError($"NavMesh Path Distance: {navMeshDist}");
+            Debug.LogError($"remaining Distance: {disRem}");
+        }
+    }
     #endregion
 }

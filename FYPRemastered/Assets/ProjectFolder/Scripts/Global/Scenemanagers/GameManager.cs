@@ -78,6 +78,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public Transform _test;
     public Transform GetPlayerPosition()
     {
         if (!Player) { return null; }

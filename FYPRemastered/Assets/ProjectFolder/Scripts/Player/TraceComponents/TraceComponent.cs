@@ -14,7 +14,7 @@ public class TraceComponent
         this._overlapResults = new Collider[maxSize];
     }
 
-    public int CheckForFreezeable(Transform traceLocation, out Collider[] hitResults, float sphereRadius = 0.2f, LayerMask traceLayer = default, bool debug = false)
+    public int CheckForTarget(Transform traceLocation, out Collider[] hitResults, float sphereRadius = 0.2f, LayerMask traceLayer = default, bool debug = false)
     {
        
         //Vector3 start = location.position - location.forward * (capsuleHeight / 2f);  // Bottom of capsule

@@ -13,11 +13,17 @@ public class StationaryState : EnemyState
         switch (_alertStatus)
         {
             case AlertStatus.None:
-                _eventManager.DestinationUpdated(_agent.transform.position);
+                //_eventManager.StopImmediately();
+                //_eventManager.DestinationUpdated(_agent.transform.position);
+                //_eventManager.SpeedChanged(0f, 10f);
                 Debug.LogError("In Stationary State, no alert status");
                 break;
             case AlertStatus.Alert:
                 Debug.LogError("In Stationary State, with alert status");
+                break;
+            default:
+                _eventManager.DestinationUpdated(_agent.transform.position);
+                _eventManager.SpeedChanged(0f, 10f);
                 break;
         }
         
@@ -32,7 +38,7 @@ public class StationaryState : EnemyState
 
     public override void OnStateDestroyed()
     {
-        throw new System.NotImplementedException();
+        base.OnStateDestroyed();
     }
 
     public override void UpdateState()

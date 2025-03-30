@@ -68,7 +68,7 @@ public class AbilitiesComponent : ComponentEvents
 
     private void SweepForBullets()
     {
-        int numBullets = traceComp.CheckForFreezeable(_traceLocation, out _bulletTraceresults, _sphereRadius, _traceLayer);
+        int numBullets = traceComp.CheckForTarget(_traceLocation, out _bulletTraceresults, _sphereRadius, _traceLayer);
         
         if(numBullets <= 0) { return; }
         
