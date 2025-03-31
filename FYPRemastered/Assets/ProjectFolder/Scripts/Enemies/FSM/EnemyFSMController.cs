@@ -34,7 +34,10 @@ public class EnemyFSMController : ComponentEvents
     [SerializeField] private float _fovTraceRadius = 5f;
     [SerializeField] private LayerMask _fovLayerMask;
     [SerializeField] private Collider[] _fovTraceResults;
-   
+
+    [Header("Gun Parameters")]
+    [SerializeField] private Transform _bulletSpawnPoint;
+
     private float _fovCheckFrequency;
 
     private float _nextCheckTime = 0f;
@@ -49,7 +52,7 @@ public class EnemyFSMController : ComponentEvents
     
     private FieldOfViewFrequencyStatus _fieldOfViewStatus = FieldOfViewFrequencyStatus.Normal;
     private AlertStatus _alertStatus = AlertStatus.None;
-    
+    private Gun _gun;
 
     #region Event Registrations
     public override void RegisterLocalEvents(EventManager eventManager)
@@ -101,7 +104,9 @@ public class EnemyFSMController : ComponentEvents
         _patrol = new PatrolState(_wayPoints, _agent, _enemyEventManager, _stopAndWaitDelay, _walkSpeed);
         _chasing = new ChasingState(_agent, _enemyEventManager, _walkSpeed, _sprintSpeed);
         _stationary = new StationaryState(_agent, _enemyEventManager);
-        
+
+        Transform playerTransform = GameManager.Instance.GetPlayerPosition();
+        _gun = new Gun(_bulletSpawnPoint, playerTransform, _enemyEventManager);
 
         ChangeState(_patrol);
         
@@ -143,11 +148,23 @@ public class EnemyFSMController : ComponentEvents
         }
     }
     
-
+    public bool testSeeView = false;
     private void LateUpdate()
     {
-       
-        UpdateFieldOfViewCheckFrequency();
+        if (!testSeeView)
+        {
+            UpdateFieldOfViewCheckFrequency();
+        }
+        else
+        {
+            if (_canSeePlayer)
+            {
+                _animController.SetAlertStatus(false);
+                _enemyEventManager.PlayerSeen(false);
+                _canSeePlayer = false;
+                ChangeState(_patrol);
+            }
+        }
 
         /*if (_testDeath)
         {
@@ -264,6 +281,7 @@ public class EnemyFSMController : ComponentEvents
 
         if(_canSeePlayer)
         {
+            _animController.SetAlertStatus(true);
             _enemyEventManager.PlayerSeen(_canSeePlayer);
             // Alert Group Here (Moon Scene Manager)
             /* if(_currentState != _chasing)
@@ -273,6 +291,7 @@ public class EnemyFSMController : ComponentEvents
         }
         else
         {
+            _animController.SetAlertStatus(false);
             _enemyEventManager.PlayerSeen(false);
         }
 

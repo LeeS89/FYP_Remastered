@@ -9,6 +9,7 @@ public class EnemyEventManager : EventManager
     public event Action<AnimationAction> OnAnimationTriggered;
     public event Action<float, float> OnSpeedChanged;
     public event Action<bool> OnPlayerSeen;
+    public event Action OnShoot;
 
 
     private List<ComponentEvents> _cachedListeners;
@@ -55,6 +56,11 @@ public class EnemyEventManager : EventManager
     public void PlayerSeen(bool seen)
     {
         OnPlayerSeen?.Invoke(seen);
+    }
+
+    public void Shoot()
+    {
+        OnShoot?.Invoke();
     }
 
 }

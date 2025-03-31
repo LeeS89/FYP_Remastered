@@ -9,6 +9,11 @@ public class EnemyAnimController
         _anim = anim;
     }
 
+    public void SetAlertStatus(bool alert)
+    {
+        _anim.SetBool("alert", alert);
+    }
+
     public void EnemyDied()
     {
         _anim.SetTrigger("dead");
@@ -26,6 +31,11 @@ public class EnemyAnimController
         _anim.SetTrigger("look");
         //_anim.SetTrigger("dead");
 
+    }
+
+    public void Reload()
+    {
+        _anim.SetTrigger("reload");
     }
 
 
