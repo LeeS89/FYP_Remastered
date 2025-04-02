@@ -35,7 +35,7 @@ public class GameManager : MonoBehaviour
         switch (type)
         {
             case CharacterType.Player:
-                Playerdied();
+                PlayerDied();
                 break;
             case CharacterType.Enemy:
                 EnemyDied(obj);
@@ -43,7 +43,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void Playerdied()
+    private void PlayerDied()
     {
         //Debug.LogError("Player Died");
         OnPlayerDied?.Invoke();

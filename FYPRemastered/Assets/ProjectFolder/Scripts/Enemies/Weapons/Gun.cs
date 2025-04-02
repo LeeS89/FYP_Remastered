@@ -1,24 +1,42 @@
+using System;
 using System.Collections;
 using UnityEngine;
-using static UnityEditor.Experimental.GraphView.GraphView;
+
 
 public class Gun
 {
+    [Header("Bullet Params")]
     private Transform _bulletSpawnPoint;
     private PoolManager _poolManager;
     private Transform _target;
-    private bool _targetSeen = false;
+    
     private EnemyEventManager _enemyEventManager;
-    private bool _isShooting = false;
+    
 
+    [Header("Firing Sequence Conditions")]
+    private WaitUntil _waitUntilAimIsReady;
+    private Func<bool> _hasAimAnimationCompleted;
+    private bool _targetSeen = false;
+    private bool _isShooting = false;
+    private bool _isAimReady = false;
+    private bool _playerHasDied = false;
+
+    #region Constructors
     public Gun(EventManager eventManager)
     {
-        //_enemyEventManager = eventManager;
 
         if(eventManager is EnemyEventManager enemyEventManager)
         {
             _enemyEventManager = enemyEventManager;
+            _hasAimAnimationCompleted = IsAimReady;
+            _waitUntilAimIsReady = new WaitUntil(_hasAimAnimationCompleted);
+
+            _enemyEventManager.OnShoot += Shoot;
             _enemyEventManager.OnPlayerSeen += UpdateTargetVisibility;
+            _enemyEventManager.OnAimingLayerReady += SetAimReady;
+            GameManager.OnPlayerDied += PlayerHasDied;
+            GameManager.OnPlayerRespawn += PlayerHasRespawned;
+           
         }
     }
 
@@ -43,13 +61,39 @@ public class Gun
         _bulletSpawnPoint = spawnPoint;
     }
 
+    #endregion
+
+    #region Bool Setters And Getters
+    private void PlayerHasDied()
+    {
+        _playerHasDied = true;
+    }
+
+    private void PlayerHasRespawned()
+    {
+        _playerHasDied = false;
+    }
+
+    private void SetAimReady(bool isReady)
+    {
+        _isAimReady = isReady;
+    }
+
+    private bool IsAimReady()
+    {
+        return _isAimReady;
+    }
+    #endregion
+
+
+    #region Shooting Region
     public void UpdateTargetVisibility(bool targetSeen)
     {
         if(_targetSeen == targetSeen) { return; }
 
         _targetSeen = targetSeen;
 
-        if (_targetSeen)
+        if (_targetSeen && !_isShooting)
         {
             _isShooting = true;
             CoroutineRunner.Instance.StartCoroutine(FiringSequence());
@@ -65,19 +109,51 @@ public class Gun
     {
         while (_isShooting)
         {
+            if (!IsAimReady())
+            {
+                yield return _waitUntilAimIsReady;
+            }
 
-            Vector3 _directionToPlayer = TargetingUtility.GetDirectionToTarget(_target, _bulletSpawnPoint, true);
-            Quaternion bulletRotation = Quaternion.LookRotation(_directionToPlayer);
-
-            GameObject obj = _poolManager.GetGameObject(_bulletSpawnPoint.position, bulletRotation);
-
-            BulletBase bullet = obj.GetComponentInChildren<BulletBase>();
-            //bullet.Owner = transform.parent.gameObject;
-            obj.SetActive(true);
-            bullet.Initializebullet();
             _enemyEventManager.AnimationTriggered(AnimationAction.Shoot);
 
             yield return new WaitForSeconds(2f);
         }
+    }
+
+    /// <summary>
+    /// Called From Animation Event
+    /// </summary>
+    private void Shoot()
+    {
+        if (_playerHasDied) { return; }
+
+        Vector3 _directionToTarget = TargetingUtility.GetDirectionToTarget(_target, _bulletSpawnPoint, true);
+        Quaternion bulletRotation = Quaternion.LookRotation(_directionToTarget);
+
+        GameObject obj = _poolManager.GetGameObject(_bulletSpawnPoint.position, bulletRotation);
+
+        BulletBase bullet = obj.GetComponentInChildren<BulletBase>();
+        //bullet.Owner = transform.parent.gameObject;
+        obj.SetActive(true);
+        bullet.Initializebullet();
+    }
+
+    #endregion
+
+    public void OnInstanceDestroyed()
+    {
+        _isAimReady = false;
+        _isShooting = false;
+        CoroutineRunner.Instance.StopCoroutine(FiringSequence());
+        _enemyEventManager.OnShoot -= Shoot;
+        _enemyEventManager.OnPlayerSeen -= UpdateTargetVisibility;
+        _enemyEventManager.OnAimingLayerReady -= SetAimReady;
+        GameManager.OnPlayerDied -= PlayerHasDied;
+        GameManager.OnPlayerRespawn -= PlayerHasRespawned;
+        _poolManager = null;
+        _enemyEventManager = null;
+        _hasAimAnimationCompleted = null;
+        _waitUntilAimIsReady = null;
+        
     }
 }

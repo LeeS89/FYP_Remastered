@@ -11,6 +11,8 @@ public class EnemyEventManager : EventManager
     public event Action<bool> OnPlayerSeen;
     public event Action OnShoot;
 
+    public event Action<int, float, float, float, bool> OnChangeAnimatorLayerWeight;
+    public event Action<bool> OnAimingLayerReady;
 
     private List<ComponentEvents> _cachedListeners;
 
@@ -63,4 +65,13 @@ public class EnemyEventManager : EventManager
         OnShoot?.Invoke();
     }
 
+    public void ChangeAnimatorLayerWeight(int layer, float from, float to, float duration, bool layerReady)
+    {
+        OnChangeAnimatorLayerWeight?.Invoke(layer, from, to, duration, layerReady);
+    }
+
+    public void AimingLayerReady(bool isReady)
+    {
+        OnAimingLayerReady?.Invoke(isReady);
+    }
 }

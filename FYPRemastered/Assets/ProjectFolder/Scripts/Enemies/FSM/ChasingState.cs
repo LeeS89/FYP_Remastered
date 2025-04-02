@@ -18,13 +18,14 @@ public class ChasingState : EnemyState
         _sprintSpeed = sprintSpeed;
         _hasPlayerMoved = CheckIfPlayerHasMoved;
         _waitUntilPlayerHasMoved = new WaitUntil(_hasPlayerMoved);
-        _eventManager.OnPlayerSeen += SetPlayerSeen;
+        //_eventManager.OnPlayerSeen += SetPlayerSeen;
     }
    
 
     public override void EnterState(AlertStatus alertStatus = AlertStatus.None)
     {
-        //_eventManager.OnPlayerSeen += SetPlayerSeen;
+        //Debug.LogError("Entering Chase state");
+        _eventManager.OnPlayerSeen += SetPlayerSeen;
         _eventManager.OnDestinationReached += SetDestinationReached;
         //Vector3 _playerPos = GameManager.Instance.GetPlayerPosition().position;
         _randomStoppingDistance = Random.Range(5,11);
@@ -114,7 +115,7 @@ public class ChasingState : EnemyState
             CoroutineRunner.Instance.StopCoroutine(_coroutine);
             _coroutine = null;
         }
-        //_eventManager.OnPlayerSeen -= SetPlayerSeen;
+        _eventManager.OnPlayerSeen -= SetPlayerSeen;
         _eventManager.OnDestinationReached -= SetDestinationReached;
         _canSeePlayer = false;
     }

@@ -61,7 +61,7 @@ public class EnemyFSMController : ComponentEvents
         _enemyEventManager = _eventManager as EnemyEventManager;
         _enemyEventManager.OnDestinationUpdated += UpdateAgentDestination;
         _enemyEventManager.OnDestinationReached += CarveOnDestinationReached;
-        _enemyEventManager.OnAnimationTriggered += PlayAnimationType;
+        //_enemyEventManager.OnAnimationTriggered += PlayAnimationType;
         _enemyEventManager.OnSpeedChanged += UpdateTargetSpeedValues;
         
         RegisterGlobalEvents();
@@ -72,7 +72,7 @@ public class EnemyFSMController : ComponentEvents
     {
         _enemyEventManager.OnDestinationUpdated -= UpdateAgentDestination;
         _enemyEventManager.OnDestinationReached -= CarveOnDestinationReached;
-        _enemyEventManager.OnAnimationTriggered -= PlayAnimationType;
+        //_enemyEventManager.OnAnimationTriggered -= PlayAnimationType;
         _enemyEventManager.OnSpeedChanged -= UpdateTargetSpeedValues;
         base.UnRegisterLocalEvents(eventManager);
         _enemyEventManager = null;
@@ -100,7 +100,7 @@ public class EnemyFSMController : ComponentEvents
         _fovCheckFrequency = _patrolFOVCheckFrequency;
         _fov = new TraceComponent(1);
         _fovTraceResults = new Collider[1];
-        _animController = new EnemyAnimController(_anim);
+        _animController = new EnemyAnimController(_anim, _enemyEventManager);
         _patrol = new PatrolState(_wayPoints, _agent, _enemyEventManager, _stopAndWaitDelay, _walkSpeed);
         _chasing = new ChasingState(_agent, _enemyEventManager, _walkSpeed, _sprintSpeed);
         _stationary = new StationaryState(_agent, _enemyEventManager);
@@ -142,6 +142,7 @@ public class EnemyFSMController : ComponentEvents
     {
         if(_testDeath)
         {
+            //_animController.DeadAnimation();
             ChangeState(_chasing);
             //CarveOnDestinationReached(true);
             _testDeath = false;
@@ -159,9 +160,10 @@ public class EnemyFSMController : ComponentEvents
         {
             if (_canSeePlayer)
             {
-                _animController.SetAlertStatus(false);
+                //_animController.SetAlertStatus(false);
                 _enemyEventManager.PlayerSeen(false);
                 _canSeePlayer = false;
+                _enemyEventManager.ChangeAnimatorLayerWeight(1, 1, 0, 0.5f, false);
                 ChangeState(_patrol);
             }
         }
@@ -281,18 +283,21 @@ public class EnemyFSMController : ComponentEvents
 
         if(_canSeePlayer)
         {
-            _animController.SetAlertStatus(true);
+            if (_currentState != _chasing)
+            {
+                ChangeState(_chasing);
+            }
+            //_animController.SetAlertStatus(true);
             _enemyEventManager.PlayerSeen(_canSeePlayer);
+            _enemyEventManager.ChangeAnimatorLayerWeight(1, 0, 1, 0.5f, true);
             // Alert Group Here (Moon Scene Manager)
-            /* if(_currentState != _chasing)
-             {
-                 ChangeState(_chasing);
-             }*/
+            
         }
         else
         {
-            _animController.SetAlertStatus(false);
+            //_animController.SetAlertStatus(false);
             _enemyEventManager.PlayerSeen(false);
+            _enemyEventManager.ChangeAnimatorLayerWeight(1, 1, 0, 0.5f, false);
         }
 
         //Update Shooting Component Here
@@ -355,33 +360,13 @@ public class EnemyFSMController : ComponentEvents
 
         if (Mathf.Abs(_agent.speed - _targetSpeed) <= 0.001f)
         {
-            //Debug.LogError("Speed finished changing");
+           
             _agent.speed = _targetSpeed;
             _animController.UpdateSpeed(_targetSpeed);
             _movementChanged = false;
         }
        
     }
-
-    private void PlayAnimationType(AnimationAction action)
-    {
-        switch (action)
-        {
-            case AnimationAction.Look:
-                _animController.LookAround();
-                break;
-            case AnimationAction.Shoot:
-                _animController.Shoot();
-                break;
-            case AnimationAction.Dead:
-                _animController.DeadAnimation();
-                break;
-            default:
-                Debug.LogWarning("No Animation Type Selected");
-                break;
-        }
-    }
-
 
    
     private void UpdateTargetSpeedValues(float speed, float lerpSpeed)
