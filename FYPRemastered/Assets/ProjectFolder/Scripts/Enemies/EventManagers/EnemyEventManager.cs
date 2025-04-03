@@ -4,15 +4,21 @@ using UnityEngine;
 
 public class EnemyEventManager : EventManager
 {
+    // Nav mesh agent events
     public event Action<bool> OnDestinationReached;
-    public event Action<Vector3, int> OnDestinationUpdated;
+    public event Action<Vector3, int> OnDestinationUpdated;  
+    public event Action<bool> OnPlayerSeen;
+
+    // Animation events
     public event Action<AnimationAction> OnAnimationTriggered;
     public event Action<float, float> OnSpeedChanged;
-    public event Action<bool> OnPlayerSeen;
-    public event Action OnShoot;
-
     public event Action<int, float, float, float, bool> OnChangeAnimatorLayerWeight;
     public event Action<bool> OnAimingLayerReady;
+
+    // Gun Events
+    public event Action OnShoot;
+
+    public event Action OnReloadComplete;
 
     private List<ComponentEvents> _cachedListeners;
 
@@ -73,5 +79,11 @@ public class EnemyEventManager : EventManager
     public void AimingLayerReady(bool isReady)
     {
         OnAimingLayerReady?.Invoke(isReady);
+    }
+
+   
+    public void ReloadComplete()
+    {
+        OnReloadComplete?.Invoke();
     }
 }

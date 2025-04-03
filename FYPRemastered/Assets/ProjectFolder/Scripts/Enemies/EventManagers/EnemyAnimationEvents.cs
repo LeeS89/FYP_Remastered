@@ -14,4 +14,9 @@ public class EnemyAnimationEvents : ComponentEvents
     {
         _enemyEventManager.Shoot();
     }
+
+    public void OnReloadComplete()
+    {
+        _enemyEventManager.ReloadComplete();
+    }
 }

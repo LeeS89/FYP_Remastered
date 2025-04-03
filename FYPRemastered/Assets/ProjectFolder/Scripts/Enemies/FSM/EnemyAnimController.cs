@@ -83,6 +83,9 @@ public class EnemyAnimController
             case AnimationAction.Dead:
                 DeadAnimation();
                 break;
+            case AnimationAction.Reload:
+                Reload();
+                break;
             default:
                 Debug.LogWarning("No Animation Type Selected");
                 break;

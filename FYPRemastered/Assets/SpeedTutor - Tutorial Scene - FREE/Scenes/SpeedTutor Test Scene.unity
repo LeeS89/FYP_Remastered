@@ -4109,7 +4109,7 @@ MonoBehaviour:
   _fovLocation: {fileID: 505650297}
   _patrolFOVCheckFrequency: 1
   _alertFOVCheckFrequency: 0.1
-  _fovTraceRadius: 1
+  _fovTraceRadius: 10
   _fovLayerMask:
     serializedVersion: 2
     m_Bits: 8
