@@ -15,8 +15,11 @@ public class EnemyAnimationEvents : ComponentEvents
         _enemyEventManager.Shoot();
     }
 
-    public void OnReloadComplete()
+    public void OnReloadComplete(int reloadingInt)
     {
-        _enemyEventManager.ReloadComplete();
+        int clampedValue = Mathf.Clamp(reloadingInt, 0, 1);
+        bool isReloading = reloadingInt != 0;
+
+        _enemyEventManager.Reload(isReloading);
     }
 }

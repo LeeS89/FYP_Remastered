@@ -18,7 +18,7 @@ public class EnemyEventManager : EventManager
     // Gun Events
     public event Action OnShoot;
 
-    public event Action OnReloadComplete;
+    public event Action<bool> OnReload;
 
     private List<ComponentEvents> _cachedListeners;
 
@@ -82,8 +82,8 @@ public class EnemyEventManager : EventManager
     }
 
    
-    public void ReloadComplete()
+    public void Reload(bool isReloading)
     {
-        OnReloadComplete?.Invoke();
+        OnReload?.Invoke(isReloading);
     }
 }

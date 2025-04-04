@@ -12,10 +12,12 @@ public class EnemyFSMController : ComponentEvents
     [SerializeField] private Animator _anim;
     [SerializeField, Tooltip("Do Not Change - Synchronized with Walking animation")] private float _walkSpeed;
     private EnemyAnimController _animController;
-
+    private Action _destinationCheckAction;
     private EnemyState _currentState;
+    private bool _agentIsActive = true;
+    private bool _playerIsDead = false;
+
     [Header("Patrol State - Random number between 0 and stopAndWaitDelay to wait at each way point")]
-    
     [SerializeField] private float _stopAndWaitDelay;
     [SerializeField] private List<Transform> _wayPoints;
     private PatrolState _patrol;
@@ -34,25 +36,28 @@ public class EnemyFSMController : ComponentEvents
     [SerializeField] private float _fovTraceRadius = 5f;
     [SerializeField] private LayerMask _fovLayerMask;
     [SerializeField] private Collider[] _fovTraceResults;
+    private float _fovCheckFrequency;
+    private float _nextCheckTime = 0f;
+    private TraceComponent _fov;
+    private FieldOfViewFrequencyStatus _fieldOfViewStatus = FieldOfViewFrequencyStatus.Normal;
+    private bool _canSeePlayer = false;
 
     [Header("Gun Parameters")]
     [SerializeField] private Transform _bulletSpawnPoint;
+    private Gun _gun;
 
-    private float _fovCheckFrequency;
 
-    private float _nextCheckTime = 0f;
-    private TraceComponent _fov;
-
+    [Header("Agent and animation speed values")]
     private float _targetSpeed = 0f;
     private float _lerpSpeed = 0f;
     private bool _movementChanged = false;
     private EnemyEventManager _enemyEventManager;
-    private bool _canSeePlayer = false;
-    private Action _destinationCheckAction;
     
-    private FieldOfViewFrequencyStatus _fieldOfViewStatus = FieldOfViewFrequencyStatus.Normal;
-    private AlertStatus _alertStatus = AlertStatus.None;
-    private Gun _gun;
+    
+    
+    
+    //private AlertStatus _alertStatus = AlertStatus.None;
+    
 
     #region Event Registrations
     public override void RegisterLocalEvents(EventManager eventManager)
@@ -80,12 +85,16 @@ public class EnemyFSMController : ComponentEvents
 
     protected override void RegisterGlobalEvents()
     {
+        GameManager.OnPlayerDied += OnPlayerDied;
+        GameManager.OnPlayerRespawn += OnPlayerRespawned;
         BaseSceneManager._instance.OnSceneStarted += OnSceneStarted;
         BaseSceneManager._instance.OnSceneEnded += OnSceneComplete;
     }
 
     protected override void UnRegisterGlobalEvents()
     {
+        GameManager.OnPlayerDied -= OnPlayerDied;
+        GameManager.OnPlayerRespawn -= OnPlayerRespawned;
         BaseSceneManager._instance.OnSceneStarted -= OnSceneStarted;
         BaseSceneManager._instance.OnSceneEnded -= OnSceneComplete;
     }
@@ -133,26 +142,49 @@ public class EnemyFSMController : ComponentEvents
         return _agent.remainingDistance <= (_agent.stoppingDistance + 0.2f);
     }
 
+    private void ResetFSM()
+    {
+        if (_canSeePlayer)
+        {
+            UpdateFieldOfViewResults(false);
+           /* _canSeePlayer = false;
+            _enemyEventManager.PlayerSeen(false);
+            _enemyEventManager.ChangeAnimatorLayerWeight(1, 1, 0, 0.5f, false);*/
+        }
+        if (_currentState != _patrol)
+        {
+            ChangeState(_patrol);
+        }
+    }
+
     #endregion
 
-    
 
+    public bool testRespawn = false;
     #region Updates
     void Update()
     {
         if(_testDeath)
         {
+            GameManager.Instance.CharacterDied(CharacterType.Player);
             //_animController.DeadAnimation();
-            ChangeState(_chasing);
+            //ChangeState(_chasing);
             //CarveOnDestinationReached(true);
             _testDeath = false;
+        }
+
+        if (testRespawn)
+        {
+            GameManager.PlayerRespawned();
+            //_playerIsDead = false;
+            testRespawn = false;
         }
     }
     
     public bool testSeeView = false;
     private void LateUpdate()
     {
-        if (!testSeeView)
+        /*if (!testSeeView)
         {
             UpdateFieldOfViewCheckFrequency();
         }
@@ -166,7 +198,13 @@ public class EnemyFSMController : ComponentEvents
                 _enemyEventManager.ChangeAnimatorLayerWeight(1, 1, 0, 0.5f, false);
                 ChangeState(_patrol);
             }
+        }*/
+
+        if (!_playerIsDead && _agentIsActive)
+        {
+            UpdateFieldOfViewCheckFrequency();
         }
+        
 
         /*if (_testDeath)
         {
@@ -400,6 +438,21 @@ public class EnemyFSMController : ComponentEvents
         _fov = null;
         _fovTraceResults = null;
         _animController = null;
+    }
+
+    protected override void OnPlayerDied()
+    {
+        _playerIsDead = true;
+        if (!_agentIsActive) { return; }
+
+        
+        ResetFSM();
+        
+    }
+
+    protected override void OnPlayerRespawned()
+    {
+        _playerIsDead = false;
     }
     #endregion
 

@@ -18,12 +18,12 @@ public class Gun
     private WaitUntil _waitUntilAimIsReady;
     private Func<bool> _hasAimAnimationCompleted;
     private WaitUntil _waitUntilFinishedReloading;
-    private Func<bool> _hasReloaded;
+    private Func<bool> _reloadComplete;
     private bool _targetSeen = false;
     private bool _isShooting = false;
     private bool _isAimReady = false;
     private bool _playerHasDied = false;
-    private bool _reloadingComplete = true;
+    private bool _reloading = false;
     private int _ammo = 5;
 
     #region Constructors
@@ -35,14 +35,14 @@ public class Gun
             _enemyEventManager = enemyEventManager;
             _hasAimAnimationCompleted = IsAimReady;
             _waitUntilAimIsReady = new WaitUntil(_hasAimAnimationCompleted);
-            _hasReloaded = IsReloadingComplete;
-            _waitUntilFinishedReloading = new WaitUntil(_hasReloaded);
+            _reloadComplete = IsReloading;
+            _waitUntilFinishedReloading = new WaitUntil(_reloadComplete);
 
-            _enemyEventManager.OnShoot += Shoot;
+            _enemyEventManager.OnShoot += SpawnBullet;
             _enemyEventManager.OnPlayerSeen += UpdateTargetVisibility;
             _enemyEventManager.OnAimingLayerReady += SetAimReady;
            
-            _enemyEventManager.OnReloadComplete += ReloadingComplete;
+            _enemyEventManager.OnReload += Reload;
             GameManager.OnPlayerDied += PlayerHasDied;
             GameManager.OnPlayerRespawn += PlayerHasRespawned;
            
@@ -93,19 +93,16 @@ public class Gun
         return _isAimReady;
     }
 
-    private void StartReloading()
+    private void Reload(bool isReloading)
     {
-        _reloadingComplete = false;
+        _reloading = isReloading;
     }
 
-    private void ReloadingComplete()
-    {
-        _reloadingComplete = true;
-    }
+   
 
-    private bool IsReloadingComplete()
+    private bool IsReloading()
     {
-        return _reloadingComplete;
+        return !_reloading;
     }
     #endregion
 
@@ -138,52 +135,51 @@ public class Gun
                 yield return _waitUntilAimIsReady;
             }
 
-            if (!IsReloadingComplete())
+            if (IsReloading())
             {
                 yield return _waitUntilFinishedReloading;
             }
 
             if (!_playerHasDied)
             {
-                if (_ammo > 0)
-                {
-                    _enemyEventManager.AnimationTriggered(AnimationAction.Shoot);
-                }
-                else
-                {
-                    StartReloading();
-                    _ammo = 5;
-
-                    _enemyEventManager.AnimationTriggered(AnimationAction.Reload);
-                }
+                Shoot();
             }
 
             yield return new WaitForSeconds(2f);
         }
     }
 
+    private void Shoot()
+    {
+        if (_ammo-- > 0)
+        {
+            _enemyEventManager.AnimationTriggered(AnimationAction.Shoot);
+        }
+        else
+        {
+
+            _ammo = 5;
+
+            _enemyEventManager.AnimationTriggered(AnimationAction.Reload);
+        }
+    }
+
     /// <summary>
     /// Called From Animation Event
     /// </summary>
-    private void Shoot()
+    private void SpawnBullet()
     {
-        if (_playerHasDied) { return; }
-
-        if (_ammo > 0)
-        {
-            Vector3 _directionToTarget = TargetingUtility.GetDirectionToTarget(_target, _bulletSpawnPoint, true);
-            Quaternion bulletRotation = Quaternion.LookRotation(_directionToTarget);
-
-            GameObject obj = _poolManager.GetGameObject(_bulletSpawnPoint.position, bulletRotation);
-
-            BulletBase bullet = obj.GetComponentInChildren<BulletBase>();
-            //bullet.Owner = transform.parent.gameObject;
-            obj.SetActive(true);
-            bullet.Initializebullet();
-
-            _ammo--;
-        }
        
+        Vector3 _directionToTarget = TargetingUtility.GetDirectionToTarget(_target, _bulletSpawnPoint, true);
+        Quaternion bulletRotation = Quaternion.LookRotation(_directionToTarget);
+
+        GameObject obj = _poolManager.GetGameObject(_bulletSpawnPoint.position, bulletRotation);
+
+        BulletBase bullet = obj.GetComponentInChildren<BulletBase>();
+        //bullet.Owner = transform.parent.gameObject;
+        obj.SetActive(true);
+        bullet.Initializebullet();
+
     }
 
     #endregion
@@ -193,18 +189,18 @@ public class Gun
         _isAimReady = false;
         _isShooting = false;
         CoroutineRunner.Instance.StopCoroutine(FiringSequence());
-        _enemyEventManager.OnShoot -= Shoot;
+        _enemyEventManager.OnShoot -= SpawnBullet;
         _enemyEventManager.OnPlayerSeen -= UpdateTargetVisibility;
         _enemyEventManager.OnAimingLayerReady -= SetAimReady;
         
-        _enemyEventManager.OnReloadComplete -= ReloadingComplete;
+        _enemyEventManager.OnReload -= Reload;
         GameManager.OnPlayerDied -= PlayerHasDied;
         GameManager.OnPlayerRespawn -= PlayerHasRespawned;
         _poolManager = null;
         _enemyEventManager = null;
         _hasAimAnimationCompleted = null;
         _waitUntilAimIsReady = null;
-        _hasReloaded = null;
+        _reloadComplete = null;
         _waitUntilFinishedReloading = null;
 
     }
