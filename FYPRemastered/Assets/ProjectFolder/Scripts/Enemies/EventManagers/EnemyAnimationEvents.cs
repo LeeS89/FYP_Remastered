@@ -22,4 +22,9 @@ public class EnemyAnimationEvents : ComponentEvents
 
         _enemyEventManager.Reload(isReloading);
     }
+
+    public void DeathanimationComplete()
+    {
+        _enemyEventManager.DeathAnimationComplete();
+    }
 }

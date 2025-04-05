@@ -42,6 +42,9 @@ public class EnemyFSMController : ComponentEvents
     private FieldOfViewFrequencyStatus _fieldOfViewStatus = FieldOfViewFrequencyStatus.Normal;
     private bool _canSeePlayer = false;
 
+    [Header("Death State")]
+    private DeathState _deathState;
+
     [Header("Gun Parameters")]
     [SerializeField] private Transform _bulletSpawnPoint;
     private Gun _gun;
@@ -64,9 +67,12 @@ public class EnemyFSMController : ComponentEvents
     {
         base.RegisterLocalEvents(eventManager);
         _enemyEventManager = _eventManager as EnemyEventManager;
+        _enemyEventManager.OnOwnerDied += OnDeath;
+        _enemyEventManager.OnAgentDeathComplete += ToggleGameObject;
+        _enemyEventManager.OnAgentRespawn += ToggleGameObject;
         _enemyEventManager.OnDestinationUpdated += UpdateAgentDestination;
         _enemyEventManager.OnDestinationReached += CarveOnDestinationReached;
-        //_enemyEventManager.OnAnimationTriggered += PlayAnimationType;
+        
         _enemyEventManager.OnSpeedChanged += UpdateTargetSpeedValues;
         
         RegisterGlobalEvents();
@@ -77,7 +83,10 @@ public class EnemyFSMController : ComponentEvents
     {
         _enemyEventManager.OnDestinationUpdated -= UpdateAgentDestination;
         _enemyEventManager.OnDestinationReached -= CarveOnDestinationReached;
-        //_enemyEventManager.OnAnimationTriggered -= PlayAnimationType;
+        _enemyEventManager.OnOwnerDied -= OnDeath;
+        _enemyEventManager.OnAgentDeathComplete -= ToggleGameObject;
+        _enemyEventManager.OnAgentRespawn -= ToggleGameObject;
+        
         _enemyEventManager.OnSpeedChanged -= UpdateTargetSpeedValues;
         base.UnRegisterLocalEvents(eventManager);
         _enemyEventManager = null;
@@ -113,6 +122,7 @@ public class EnemyFSMController : ComponentEvents
         _patrol = new PatrolState(_wayPoints, _agent, _enemyEventManager, _stopAndWaitDelay, _walkSpeed);
         _chasing = new ChasingState(_agent, _enemyEventManager, _walkSpeed, _sprintSpeed);
         _stationary = new StationaryState(_agent, _enemyEventManager);
+        _deathState = new DeathState(_agent, _enemyEventManager);
 
         Transform playerTransform = GameManager.Instance.GetPlayerPosition();
         _gun = new Gun(_bulletSpawnPoint, playerTransform, _enemyEventManager);
@@ -142,22 +152,71 @@ public class EnemyFSMController : ComponentEvents
         return _agent.remainingDistance <= (_agent.stoppingDistance + 0.2f);
     }
 
-    private void ResetFSM()
+    public void ResetFSM(EnemyState contextState = null)
     {
         if (_canSeePlayer)
         {
             UpdateFieldOfViewResults(false);
-           /* _canSeePlayer = false;
-            _enemyEventManager.PlayerSeen(false);
-            _enemyEventManager.ChangeAnimatorLayerWeight(1, 1, 0, 0.5f, false);*/
+           
         }
-        if (_currentState != _patrol)
+
+        switch (contextState)
         {
-            ChangeState(_patrol);
+            case PatrolState: // ResetFSM called when the player dies, or this agent is respawning
+                
+                break;
+            case DeathState: // ResetFSM called when this agent dies
+                DisableAgent();
+                break;
+            default: // ResetFSM called when this agent is respawning
+                contextState = _patrol;
+                if (!_agentIsActive)
+                {
+                    HandleAgentRespawn();
+                }
+                break;
+        }
+        if (_currentState != contextState)
+        {
+            ChangeState(contextState);
         }
     }
 
+    private void HandleAgentRespawn()
+    {
+        ToggleGameObject(true);
+        _agent.enabled = true;
+        _agentIsActive = true;
+    }
     #endregion
+
+    #region Death Region
+    private void OnDeath()
+    {
+        if (_agentIsActive) { _agentIsActive = false; }
+
+        ResetFSM(_deathState);
+    }
+
+    private void DisableAgent()
+    {
+        if (_agent.enabled)
+        {
+            _agent.enabled = false;
+        }
+        if (_obstacle.enabled)
+        {
+            _obstacle.enabled = false;
+        }
+    }
+
+    private void ToggleGameObject(bool status)
+    {
+        gameObject.SetActive(status);
+    }
+
+    #endregion
+
 
 
     public bool testRespawn = false;
@@ -204,7 +263,7 @@ public class EnemyFSMController : ComponentEvents
         {
             UpdateFieldOfViewCheckFrequency();
         }
-        
+
 
         /*if (_testDeath)
         {
@@ -214,7 +273,11 @@ public class EnemyFSMController : ComponentEvents
             CompareDistances(transform.position, _player.position);
             //_testDeath = false;
         }*/
-        //_currentState.LateUpdateState();
+
+        if (_currentState != null)
+        {
+            _currentState.LateUpdateState();
+        }
         //MeasurePathToDestination();
         _destinationCheckAction?.Invoke();
        
@@ -438,6 +501,7 @@ public class EnemyFSMController : ComponentEvents
         _fov = null;
         _fovTraceResults = null;
         _animController = null;
+        _deathState = null;
     }
 
     protected override void OnPlayerDied()
@@ -446,7 +510,7 @@ public class EnemyFSMController : ComponentEvents
         if (!_agentIsActive) { return; }
 
         
-        ResetFSM();
+        ResetFSM(_patrol);
         
     }
 

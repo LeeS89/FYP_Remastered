@@ -30,7 +30,7 @@ public abstract class EnemyState
     public virtual void UpdateDistanceRemainingToDestination(float remainingDistance) { _remainingDistance = remainingDistance; }
 
     public virtual void EnterState(AlertStatus alertStatus = AlertStatus.None) {  _alertStatus = alertStatus; }
-    public abstract void UpdateState();
+    public virtual void UpdateState() { }
 
     public virtual void LateUpdateState() { }
     public abstract void ExitState();

@@ -12,9 +12,21 @@ public class MoonSceneManager : BaseSceneManager
     private PoolManager _hitParticlePool;
     public Dictionary<GameObject, float> stats = new Dictionary<GameObject, float>();
 
+    public EnemyFSMController _enemy;
+    public bool _testspawn = false;
+
     private void Start()
     {
         SetupScene();
+    }
+
+    private void Update()
+    {
+        if (_testspawn)
+        {
+            _enemy.ResetFSM();
+            _testspawn = false;
+        }
     }
 
     public override void SetupScene()

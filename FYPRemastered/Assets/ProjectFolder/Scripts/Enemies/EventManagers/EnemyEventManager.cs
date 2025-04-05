@@ -14,6 +14,11 @@ public class EnemyEventManager : EventManager
     public event Action<float, float> OnSpeedChanged;
     public event Action<int, float, float, float, bool> OnChangeAnimatorLayerWeight;
     public event Action<bool> OnAimingLayerReady;
+    public event Action OnDeathAnimationComplete;
+
+    // Death/Respawn events
+    public event Action<bool> OnAgentDeathComplete;
+    public event Action<bool> OnAgentRespawn;
 
     // Gun Events
     public event Action OnShoot;
@@ -85,5 +90,20 @@ public class EnemyEventManager : EventManager
     public void Reload(bool isReloading)
     {
         OnReload?.Invoke(isReloading);
+    }
+
+    public void DeathComplete(bool status)
+    {
+        OnAgentDeathComplete?.Invoke(status);
+    }
+
+    public void AgentRespawn(bool status)
+    {
+        OnAgentRespawn?.Invoke(status);
+    }
+
+    public void DeathAnimationComplete()
+    {
+        OnDeathAnimationComplete?.Invoke();
     }
 }

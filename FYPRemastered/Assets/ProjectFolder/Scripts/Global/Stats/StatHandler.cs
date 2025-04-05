@@ -11,6 +11,7 @@ public class StatHandler : ComponentEvents, IDamageable
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
+        base.RegisterLocalEvents(eventManager);
         _statsComponent = new StatsComponent(_stats);
 
         //float hlth = _statsComponent.Gethealth();
@@ -61,6 +62,7 @@ public class StatHandler : ComponentEvents, IDamageable
         if(_statsComponent.ModifyStat(StatType.Health, -damage) == 0f)
         {
             GameManager.Instance.CharacterDied(_characterType);
+            _eventManager.OwnerDied();
         }
     }
 

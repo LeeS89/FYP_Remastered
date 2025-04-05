@@ -1,0 +1,45 @@
+using UnityEngine;
+using UnityEngine.AI;
+
+public class DeathState : EnemyState
+{
+    private bool _deathAnimationComplete = false;
+    private float _timeToDisable = 3;
+    private float _countdown;
+
+    public DeathState(NavMeshAgent agent, EnemyEventManager eventManager) : base(agent, eventManager) { }
+    
+
+    public override void EnterState(AlertStatus alertStatus = AlertStatus.None)
+    {
+        _eventManager.OnDeathAnimationComplete += DeathAnimationComplete;
+        _eventManager.AnimationTriggered(AnimationAction.Dead);
+        _deathAnimationComplete = false;
+        _countdown = _timeToDisable;
+    }
+
+    public override void ExitState()
+    {
+        _eventManager.OnDeathAnimationComplete -= DeathAnimationComplete;
+    }
+
+    private void DeathAnimationComplete()
+    {
+        _deathAnimationComplete = true;
+    }
+
+    public override void LateUpdateState()
+    {
+        if (!_deathAnimationComplete) { return; }
+
+        if(_countdown > 0)
+        {
+            _countdown -= Time.deltaTime;
+        }
+        else
+        {
+            _deathAnimationComplete = false;
+            _eventManager.DeathComplete(false);
+        }
+    }
+}

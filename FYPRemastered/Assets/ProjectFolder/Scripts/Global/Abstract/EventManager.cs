@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public abstract class EventManager : MonoBehaviour
@@ -8,5 +9,10 @@ public abstract class EventManager : MonoBehaviour
 
     public abstract void UnbindComponentsToEvents();
 
+    public event Action OnOwnerDied;
 
+    public void OwnerDied()
+    {
+        OnOwnerDied?.Invoke();
+    }
 }

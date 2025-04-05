@@ -29,10 +29,10 @@ public class EnemyAnimController
         _anim.SetBool("alert", alert);
     }
 
-    public void EnemyDied()
+   /* public void EnemyDied()
     {
         _anim.SetTrigger("dead");
-    }
+    }*/
 
     public void UpdateSpeed(float speed)
     {
@@ -41,11 +41,8 @@ public class EnemyAnimController
 
     public void LookAround()
     {
-        //_anim.SetLayerWeight(1, 1);
-        //_anim.SetBool("testingBool", true);
         _anim.SetTrigger("look");
-        //_anim.SetTrigger("dead");
-
+       
     }
 
     public void Reload()
@@ -64,11 +61,7 @@ public class EnemyAnimController
         _anim.SetTrigger("shoot");
     }
 
-    public void ResetLook()
-    {
-        _anim.ResetTrigger("look");
-        //_anim.SetLayerWeight(1, 0);
-    }
+   
 
     private void PlayAnimationType(AnimationAction action)
     {
