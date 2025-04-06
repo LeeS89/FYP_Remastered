@@ -4,8 +4,10 @@ using UnityEngine.UIElements;
 public class BulletMovementComponent : ComponentEvents
 {
     private Rigidbody _rb;
-    [SerializeField] private float _speed;
-   
+    [SerializeField] private float _editableSpeed;
+    private float _speed;
+    
+
     private bool _deflectionProcessed = false;
     private BulletEventManager _bulletEventManager;
     public Vector3 _scale;
@@ -29,6 +31,7 @@ public class BulletMovementComponent : ComponentEvents
        
         if(_eventManager != null)
         {
+            _speed = _editableSpeed;
             _bulletEventManager = _eventManager as BulletEventManager;
             _bulletEventManager.OnFired += Launch;
             _bulletEventManager.OnDeflected += Deflected;
@@ -66,7 +69,7 @@ public class BulletMovementComponent : ComponentEvents
     private void ResetRigidBody()
     {
         DeflectionProcessed = false;
-        _speed = 5f;
+        _speed = _editableSpeed;
         _rb.AddForce(Vector3.zero, ForceMode.VelocityChange);
         _rb.linearVelocity = Vector3.zero;
         _rb.angularVelocity = Vector3.zero;

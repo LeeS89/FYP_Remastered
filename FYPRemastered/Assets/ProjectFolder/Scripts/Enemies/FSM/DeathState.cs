@@ -25,7 +25,7 @@ public class DeathState : EnemyState
 
     private void DeathAnimationComplete()
     {
-        _deathAnimationComplete = true;
+        _deathAnimationComplete = true; // This is called on the last frame of the death animation via animation event
     }
 
     public override void LateUpdateState()
@@ -39,7 +39,7 @@ public class DeathState : EnemyState
         else
         {
             _deathAnimationComplete = false;
-            _eventManager.DeathComplete(false);
+            _eventManager.DeathComplete(false); // Passing false here disables the game object once the death sequence completes
         }
     }
 }

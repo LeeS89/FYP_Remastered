@@ -7,10 +7,16 @@ public enum CharacterType
     Enemy
 }
 
+public enum PlayerPart
+{
+    Position,
+    DefenceCollider
+}
+
 public class GameManager : MonoBehaviour
 {
     public GameObject Player { get; private set; }
-
+    public GameObject PlayerDefenceCollider { get; private set; }
 
     public static GameManager Instance { get; private set; }
     public static event Action OnPlayerDied;
@@ -75,13 +81,34 @@ public class GameManager : MonoBehaviour
             {
                 Debug.LogWarning("Player not found! Ensure the Player has the correct tag.");
             }
+
+            if(PlayerDefenceCollider == null)
+            {
+                GameObject playerDef = GameObject.FindGameObjectWithTag("MainCamera");
+
+                if(playerDef != null)
+                {
+                    PlayerDefenceCollider = playerDef;
+                }
+                else
+                {
+                    Debug.LogError("Player Defence Collider Not found - Ensure Correct Tag is assigned");
+                }
+            }
         }
     }
 
     public Transform _test;
-    public Transform GetPlayerPosition()
+    public Transform GetPlayerPosition(PlayerPart part)
     {
-        if (!Player) { return null; }
-        return Player.transform;
+        if (!Player || !PlayerDefenceCollider) { return null; }
+        Transform playerPart = part switch
+        {
+            PlayerPart.Position => Player.transform,
+            PlayerPart.DefenceCollider => PlayerDefenceCollider.transform,
+            _ => null
+        };
+        
+        return playerPart;
     }
 }

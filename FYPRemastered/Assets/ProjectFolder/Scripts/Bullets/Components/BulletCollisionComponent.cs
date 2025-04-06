@@ -1,4 +1,3 @@
-using Oculus.Interaction;
 using UnityEngine;
 
 
@@ -80,6 +79,7 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
     {
         _collider.excludeLayers = 0;
     }
+
     public void Deflect()
     {
         Vector3 directionTotarget = TargetingUtility.GetDirectionToTarget(_parentOwner, _rootComponent, true);
@@ -88,7 +88,16 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
         _bulletEventManager.Deflected(directionTotarget, newRotation, _deflectSpeed);
     }
 
-    
+
+    public bool _testDeflect = false;
+    private void Update()
+    {
+        if (_testDeflect)
+        {
+            Deflect();
+            _testDeflect = false;
+        }
+    }
 
 
     private void OnCollisionEnter(Collision collision)
@@ -125,6 +134,7 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
 
         if (damageable == null) { return; }
 
+        
         damageable.TakeDamage(_baseDamage, _damageType, _statusEffectChancePercentage, _damageOverTime, _dOTDuration);
 
     }

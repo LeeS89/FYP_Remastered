@@ -25,14 +25,16 @@ public class Gun
     private bool _playerHasDied = false;
     private bool _reloading = false;
     private int _ammo = 5;
+    private GameObject _owner;
 
     #region Constructors
-    public Gun(EventManager eventManager)
+    public Gun(EventManager eventManager, GameObject gunOwner)
     {
 
         if(eventManager is EnemyEventManager enemyEventManager)
         {
             _enemyEventManager = enemyEventManager;
+            _owner = gunOwner;
             _hasAimAnimationCompleted = IsAimReady;
             _waitUntilAimIsReady = new WaitUntil(_hasAimAnimationCompleted);
             _reloadComplete = IsReloading;
@@ -49,13 +51,13 @@ public class Gun
         }
     }
 
-    public Gun(Transform bulletSpawnPoint, EventManager eventManager) : this(eventManager)
+    public Gun(Transform bulletSpawnPoint, EventManager eventManager, GameObject gunOwner) : this(eventManager, gunOwner)
     {
         _bulletSpawnPoint = bulletSpawnPoint;
         BaseSceneManager._instance.GetBulletPool(ref _poolManager);
     }
 
-    public Gun(Transform bulletSpawnPoint, Transform target, EventManager eventManager) : this(bulletSpawnPoint, eventManager)
+    public Gun(Transform bulletSpawnPoint, Transform target, EventManager eventManager, GameObject gunOwner) : this(bulletSpawnPoint, eventManager, gunOwner)
     {
         _target = target;
     }
@@ -176,7 +178,7 @@ public class Gun
         GameObject obj = _poolManager.GetGameObject(_bulletSpawnPoint.position, bulletRotation);
 
         BulletBase bullet = obj.GetComponentInChildren<BulletBase>();
-        //bullet.Owner = transform.parent.gameObject;
+        bullet.Owner = _owner;
         obj.SetActive(true);
         bullet.Initializebullet();
 

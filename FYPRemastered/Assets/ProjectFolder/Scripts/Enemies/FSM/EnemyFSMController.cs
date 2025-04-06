@@ -1,10 +1,9 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class EnemyFSMController : ComponentEvents
+public partial class EnemyFSMController : ComponentEvents
 {
     [Header("Agent and Animation Components")]
     [SerializeField] private NavMeshAgent _agent;
@@ -47,6 +46,7 @@ public class EnemyFSMController : ComponentEvents
 
     [Header("Gun Parameters")]
     [SerializeField] private Transform _bulletSpawnPoint;
+    [SerializeField] private GameObject _gunOwner;
     private Gun _gun;
 
 
@@ -57,8 +57,6 @@ public class EnemyFSMController : ComponentEvents
     private EnemyEventManager _enemyEventManager;
     
     
-    
-    
     //private AlertStatus _alertStatus = AlertStatus.None;
     
 
@@ -67,6 +65,7 @@ public class EnemyFSMController : ComponentEvents
     {
         base.RegisterLocalEvents(eventManager);
         _enemyEventManager = _eventManager as EnemyEventManager;
+        _gunOwner = gameObject;
         _enemyEventManager.OnOwnerDied += OnDeath;
         _enemyEventManager.OnAgentDeathComplete += ToggleGameObject;
         _enemyEventManager.OnAgentRespawn += ToggleGameObject;
@@ -109,344 +108,6 @@ public class EnemyFSMController : ComponentEvents
     }
     #endregion
 
-
-   
-
-    #region FSM Management
-    private void SetupFSM()
-    {
-        _fovCheckFrequency = _patrolFOVCheckFrequency;
-        _fov = new TraceComponent(1);
-        _fovTraceResults = new Collider[1];
-        _animController = new EnemyAnimController(_anim, _enemyEventManager);
-        _patrol = new PatrolState(_wayPoints, _agent, _enemyEventManager, _stopAndWaitDelay, _walkSpeed);
-        _chasing = new ChasingState(_agent, _enemyEventManager, _walkSpeed, _sprintSpeed);
-        _stationary = new StationaryState(_agent, _enemyEventManager);
-        _deathState = new DeathState(_agent, _enemyEventManager);
-
-        Transform playerTransform = GameManager.Instance.GetPlayerPosition();
-        _gun = new Gun(_bulletSpawnPoint, playerTransform, _enemyEventManager);
-
-        ChangeState(_patrol);
-        
-    }
-
-
-    public void ChangeState(EnemyState state)
-    {
-        if(_currentState != null)
-        {
-            _currentState.ExitState();
-        }
-        _currentState = state;
-
-        
-        _destinationCheckAction = _currentState == _stationary ? StopImmediately : MeasurePathToDestination;
-
-        _currentState.EnterState(AlertStatus.Alert);
-    }
-
-    private bool CheckIfDestinationIsReached()
-    {
-        //Debug.LogError("Remainingdistance: "+_agent.remainingDistance);
-        return _agent.remainingDistance <= (_agent.stoppingDistance + 0.2f);
-    }
-
-    public void ResetFSM(EnemyState contextState = null)
-    {
-        if (_canSeePlayer)
-        {
-            UpdateFieldOfViewResults(false);
-           
-        }
-
-        switch (contextState)
-        {
-            case PatrolState: // ResetFSM called when the player dies, or this agent is respawning
-                
-                break;
-            case DeathState: // ResetFSM called when this agent dies
-                DisableAgent();
-                break;
-            default: // ResetFSM called when this agent is respawning
-                contextState = _patrol;
-                if (!_agentIsActive)
-                {
-                    HandleAgentRespawn();
-                }
-                break;
-        }
-        if (_currentState != contextState)
-        {
-            ChangeState(contextState);
-        }
-    }
-
-    private void HandleAgentRespawn()
-    {
-        ToggleGameObject(true);
-        _agent.enabled = true;
-        _agentIsActive = true;
-    }
-    #endregion
-
-    #region Death Region
-    private void OnDeath()
-    {
-        if (_agentIsActive) { _agentIsActive = false; }
-
-        ResetFSM(_deathState);
-    }
-
-    private void DisableAgent()
-    {
-        if (_agent.enabled)
-        {
-            _agent.enabled = false;
-        }
-        if (_obstacle.enabled)
-        {
-            _obstacle.enabled = false;
-        }
-    }
-
-    private void ToggleGameObject(bool status)
-    {
-        gameObject.SetActive(status);
-    }
-
-    #endregion
-
-
-
-    public bool testRespawn = false;
-    #region Updates
-    void Update()
-    {
-        if(_testDeath)
-        {
-            GameManager.Instance.CharacterDied(CharacterType.Player);
-            //_animController.DeadAnimation();
-            //ChangeState(_chasing);
-            //CarveOnDestinationReached(true);
-            _testDeath = false;
-        }
-
-        if (testRespawn)
-        {
-            GameManager.PlayerRespawned();
-            //_playerIsDead = false;
-            testRespawn = false;
-        }
-    }
-    
-    public bool testSeeView = false;
-    private void LateUpdate()
-    {
-        /*if (!testSeeView)
-        {
-            UpdateFieldOfViewCheckFrequency();
-        }
-        else
-        {
-            if (_canSeePlayer)
-            {
-                //_animController.SetAlertStatus(false);
-                _enemyEventManager.PlayerSeen(false);
-                _canSeePlayer = false;
-                _enemyEventManager.ChangeAnimatorLayerWeight(1, 1, 0, 0.5f, false);
-                ChangeState(_patrol);
-            }
-        }*/
-
-        if (!_playerIsDead && _agentIsActive)
-        {
-            UpdateFieldOfViewCheckFrequency();
-        }
-
-
-        /*if (_testDeath)
-        {
-            //_animController.LookAround();
-            //_agent.enabled = false;
-            //_animController.EnemyDied();
-            CompareDistances(transform.position, _player.position);
-            //_testDeath = false;
-        }*/
-
-        if (_currentState != null)
-        {
-            _currentState.LateUpdateState();
-        }
-        //MeasurePathToDestination();
-        _destinationCheckAction?.Invoke();
-       
-        if (!_movementChanged) { return; }
-
-        UpdateAnimatorSpeed();
-    }
-
-    private void MeasurePathToDestination()
-    {
-        if(!_agent.enabled) { return; }
-        //DebugExtension.DebugWireSphere(_agent.destination, Color.green);
-        if (_currentState != null && _agent.hasPath && !_agent.pathPending)
-        {
-            if (CheckIfDestinationIsReached())
-            {
-                
-                _agent.ResetPath();
-                _enemyEventManager.DestinationReached(true);
-                
-
-            }
-
-        }
-    }
-
-    /// <summary>
-    /// Used when agent enters Stationary state
-    /// </summary>
-    private void StopImmediately()
-    {
-        _agent.SetDestination(_agent.transform.position);
-        _agent.ResetPath();
-        _enemyEventManager.DestinationReached(true);
-        
-
-        _destinationCheckAction = null;
-    }
-
-
-    #endregion
-
-
-    #region Field Of View functions
-    private void UpdateFieldOfViewCheckFrequency()
-    {
-        switch (_fieldOfViewStatus)
-        {
-            case FieldOfViewFrequencyStatus.Normal:
-                if (_fovCheckFrequency != _patrolFOVCheckFrequency)
-                {
-                    _fovCheckFrequency = _patrolFOVCheckFrequency;
-                }
-                break;
-            case FieldOfViewFrequencyStatus.Heightened:
-                if (_fovCheckFrequency != _alertFOVCheckFrequency)
-                {
-                    _fovCheckFrequency = _alertFOVCheckFrequency;
-                }
-                break;
-            default:
-                _fovCheckFrequency = _patrolFOVCheckFrequency;
-                break;
-        }
-
-        PerformFieldOfViewCheck();
-    }
-
-
-    private void PerformFieldOfViewCheck()
-    {
-        if (Time.time >= _nextCheckTime && _fov != null)
-        {
-            _nextCheckTime = Time.time + _fovCheckFrequency;
-            bool playerSeen = false;
-
-            // CheckForTarget first performs a Physics.CheckSphere. If check passes, an overlapsphere is performed which returns the targets collider information
-            _fov.CheckForTarget(_fovLocation, out _fovTraceResults, _fovTraceRadius, _fovLayerMask, true);
-
-            if (_fovTraceResults.Length > 0)
-            {
-                playerSeen = LineOfSightUtility.HasLineOfSight(_fovLocation, _fovTraceResults[0].transform, 360f, _fovLayerMask);
-
-                if (_fieldOfViewStatus != FieldOfViewFrequencyStatus.Heightened)
-                    _fieldOfViewStatus = FieldOfViewFrequencyStatus.Heightened;
-            }
-            else
-            {
-                if (_fieldOfViewStatus != FieldOfViewFrequencyStatus.Normal)
-                    _fieldOfViewStatus = FieldOfViewFrequencyStatus.Normal;
-            }
-
-            UpdateFieldOfViewResults(playerSeen);
-
-
-        }
-    }
-
-    private void UpdateFieldOfViewResults(bool playerSeen)
-    {
-        if (_canSeePlayer == playerSeen) { return; } // Already Updated, return early
-
-        _canSeePlayer = playerSeen;
-
-        if(_canSeePlayer)
-        {
-            if (_currentState != _chasing)
-            {
-                ChangeState(_chasing);
-            }
-            //_animController.SetAlertStatus(true);
-            _enemyEventManager.PlayerSeen(_canSeePlayer);
-            _enemyEventManager.ChangeAnimatorLayerWeight(1, 0, 1, 0.5f, true);
-            // Alert Group Here (Moon Scene Manager)
-            
-        }
-        else
-        {
-            //_animController.SetAlertStatus(false);
-            _enemyEventManager.PlayerSeen(false);
-            _enemyEventManager.ChangeAnimatorLayerWeight(1, 1, 0, 0.5f, false);
-        }
-
-        //Update Shooting Component Here
-    }
-    #endregion
-
-    #region Destination Updates
-    private void CarveOnDestinationReached(bool _)
-    {
-        ToggleAgent(false);
-        _obstacle.enabled = true;
-    }
-
-    private void UpdateAgentDestination(Vector3 newDestination, int stoppingDistance = 0)
-    {
-        if (!_agent.enabled)
-        {
-            _obstacle.enabled = false;
-            //_agent.stoppingDistance = stoppingDistance;
-            StartCoroutine(SetDestinationDelay(newDestination, stoppingDistance));
-            return;
-        }
-        _agent.stoppingDistance = stoppingDistance;
-        _agent.SetDestination(newDestination);
-
-    }
-
-    /// <summary>
-    /// Used when transitioning from stationary to moving
-    /// to give time for disabling carving and re enabling the agent
-    /// </summary>
-    /// <param name="newDestination"></param>
-    /// <param name="stoppingDistance"></param>
-    /// <returns></returns>
-    private IEnumerator SetDestinationDelay(Vector3 newDestination, int stoppingDistance)
-    {
-        yield return new WaitForSeconds(0.15f);
-        ToggleAgent(true);
-        _agent.stoppingDistance = stoppingDistance;
-        _agent.SetDestination(newDestination);
-
-    }
-
-    private void ToggleAgent(bool agentEnabled)
-    {
-        _agent.enabled = agentEnabled;
-    }
-    #endregion
 
     #region Animation Updates
     private void UpdateAnimatorSpeed()

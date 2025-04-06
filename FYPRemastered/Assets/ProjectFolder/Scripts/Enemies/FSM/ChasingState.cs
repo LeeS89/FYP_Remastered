@@ -50,7 +50,7 @@ public class ChasingState : EnemyState
         while (_isChasing)
         {
             SetDestinationReached(false);
-            Vector3 _playerPos = GameManager.Instance.GetPlayerPosition().position;
+            Vector3 _playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
             _eventManager.DestinationUpdated(_playerPos, _randomStoppingDistance);
 
             while (!CheckIfPlayerHasMoved())
