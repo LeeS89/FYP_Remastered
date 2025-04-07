@@ -5,7 +5,7 @@ using UnityEngine.AI;
 public abstract class EnemyState
 {
   
-    protected NavMeshAgent _agent;
+    //protected NavMeshAgent _agent;
     protected Coroutine _coroutine;
     protected EnemyEventManager _eventManager;
     protected bool _destinationReached = false;
@@ -15,9 +15,8 @@ public abstract class EnemyState
     protected float _walkSpeed;
     protected float _sprintSpeed;
 
-    public EnemyState(NavMeshAgent agent, EnemyEventManager eventManager)
+    public EnemyState(EnemyEventManager eventManager)
     {
-        _agent = agent;
         _eventManager = eventManager;
     }
 
@@ -25,6 +24,8 @@ public abstract class EnemyState
 
     protected bool CheckIfPlayerHasMoved() { return _playerHasMoved; }
     
+    protected void SetPlayerMoved(bool playerHasMoved) {  _playerHasMoved = playerHasMoved; }
+
     protected void SetDestinationReached(bool reached) { _destinationReached = reached; }
    
     public virtual void UpdateDistanceRemainingToDestination(float remainingDistance) { _remainingDistance = remainingDistance; }
@@ -36,7 +37,6 @@ public abstract class EnemyState
     public abstract void ExitState();
     public virtual void OnStateDestroyed()
     {
-        _agent = null;
         _eventManager = null;
     }
 

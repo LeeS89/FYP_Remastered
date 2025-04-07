@@ -2,14 +2,14 @@ using System.Collections;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AI;
 using Random = UnityEngine.Random;
+
 
 
 public class PatrolState : EnemyState
 {
     private List<Transform> _wayPoints;
-    
+    private GameObject _owner;
 
     private WaitUntil _waitUntilDestinationReached;
     private Func<bool> _hasReachedDestination;
@@ -19,8 +19,9 @@ public class PatrolState : EnemyState
     private bool _isPatrolling = false;
     
 
-    public PatrolState(List<Transform> wayPoints, NavMeshAgent agent, EnemyEventManager eventManager, float randomDelay, float walkSpeed) : base(agent, eventManager)
+    public PatrolState(List<Transform> wayPoints, GameObject owner, EnemyEventManager eventManager, float randomDelay, float walkSpeed) : base(eventManager)
     {
+        _owner = owner;
         _walkSpeed = walkSpeed;
         _randomWaitTime = randomDelay;
         _wayPoints = wayPoints;
@@ -63,10 +64,10 @@ public class PatrolState : EnemyState
             //New rotation based on the direction vector
             Quaternion targetRotation = Quaternion.LookRotation(directionToFace);
 
-            while (Quaternion.Angle(_agent.transform.rotation, targetRotation) > 2.0f)
+            while (Quaternion.Angle(_owner.transform.rotation, targetRotation) > 2.0f)
             {
                 // Smoothly rotating the agent towards the target rotation
-                _agent.transform.rotation = Quaternion.Slerp(_agent.transform.rotation, targetRotation, Time.deltaTime * 3.0f);
+                _owner.transform.rotation = Quaternion.Slerp(_owner.transform.rotation, targetRotation, Time.deltaTime * 2.0f);
                 yield return null;
             }
 

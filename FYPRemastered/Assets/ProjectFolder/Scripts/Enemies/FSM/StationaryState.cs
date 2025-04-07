@@ -3,7 +3,9 @@ using UnityEngine.AI;
 
 public class StationaryState : EnemyState
 {
-    public StationaryState(NavMeshAgent agent, EnemyEventManager eventManager) : base(agent, eventManager) { }
+    private GameObject _owner;
+
+    public StationaryState(EnemyEventManager eventManager, GameObject owner) : base(eventManager) { _owner = owner; }
    
 
     public override void EnterState(AlertStatus alertStatus = AlertStatus.None)
@@ -22,7 +24,7 @@ public class StationaryState : EnemyState
                 Debug.LogError("In Stationary State, with alert status");
                 break;
             default:
-                _eventManager.DestinationUpdated(_agent.transform.position);
+                _eventManager.DestinationUpdated(_owner.transform.position);
                 _eventManager.SpeedChanged(0f, 10f);
                 break;
         }

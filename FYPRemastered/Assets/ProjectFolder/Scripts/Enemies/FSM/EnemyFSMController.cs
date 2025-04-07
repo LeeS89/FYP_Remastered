@@ -34,6 +34,7 @@ public partial class EnemyFSMController : ComponentEvents
     [SerializeField] private float _alertFOVCheckFrequency = 0.1f;
     [SerializeField] private float _fovTraceRadius = 5f;
     [SerializeField] private LayerMask _fovLayerMask;
+    [SerializeField] private LayerMask _lineOfSightMask;
     [SerializeField] private Collider[] _fovTraceResults;
     private float _fovCheckFrequency;
     private float _nextCheckTime = 0f;
@@ -46,7 +47,7 @@ public partial class EnemyFSMController : ComponentEvents
 
     [Header("Gun Parameters")]
     [SerializeField] private Transform _bulletSpawnPoint;
-    [SerializeField] private GameObject _gunOwner;
+    [SerializeField] private GameObject _owningGameObject;
     private Gun _gun;
 
 
@@ -65,7 +66,7 @@ public partial class EnemyFSMController : ComponentEvents
     {
         base.RegisterLocalEvents(eventManager);
         _enemyEventManager = _eventManager as EnemyEventManager;
-        _gunOwner = gameObject;
+        _owningGameObject = gameObject;
         _enemyEventManager.OnOwnerDied += OnDeath;
         _enemyEventManager.OnAgentDeathComplete += ToggleGameObject;
         _enemyEventManager.OnAgentRespawn += ToggleGameObject;

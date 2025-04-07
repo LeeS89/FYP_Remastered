@@ -86,11 +86,21 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
         BaseSceneManager._instance.OnSceneEnded -= OnSceneComplete;
     }
 
+    public bool _testMove = false;
     private void Update()
     {
         if (!InputEnabled) { return; }
 
         ApplyPlayerMovement();
+
+        if (_testMove)
+        {
+            GameManager.Instance.PlayerHasMoved = true;
+        }
+        else
+        {
+            GameManager.Instance.PlayerHasMoved = false;
+        }
     }
 
     private void HandleRotation(Quaternion targetRotation)
@@ -117,6 +127,7 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
     private void SetShouldMoveforward(bool move)
     {
         _shouldMoveForward = move;
+        GameManager.Instance.PlayerHasMoved = move;
     }
 
 

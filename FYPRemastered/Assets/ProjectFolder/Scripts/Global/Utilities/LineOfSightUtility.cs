@@ -14,6 +14,7 @@ public static class LineOfSightUtility
 
         if (Physics.Raycast(from.position, directionToTarget, out RaycastHit hit, 100f, blockingMask))
         {
+            //Debug.LogError("Hit collider name: "+hit.collider.gameObject.name);
             if (hit.transform == target)
             {
                 Debug.DrawRay(from.position, directionToTarget * hit.distance, Color.green);
@@ -22,6 +23,7 @@ public static class LineOfSightUtility
             else
             {
                 Debug.DrawRay(from.position, directionToTarget * hit.distance, Color.red);
+                return false;            
             }
         }
 

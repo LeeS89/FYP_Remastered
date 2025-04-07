@@ -9,13 +9,13 @@ public partial class EnemyFSMController : ComponentEvents
         _fov = new TraceComponent(1);
         _fovTraceResults = new Collider[1];
         _animController = new EnemyAnimController(_anim, _enemyEventManager);
-        _patrol = new PatrolState(_wayPoints, _agent, _enemyEventManager, _stopAndWaitDelay, _walkSpeed);
-        _chasing = new ChasingState(_agent, _enemyEventManager, _walkSpeed, _sprintSpeed);
-        _stationary = new StationaryState(_agent, _enemyEventManager);
-        _deathState = new DeathState(_agent, _enemyEventManager);
+        _patrol = new PatrolState(_wayPoints, _owningGameObject, _enemyEventManager, _stopAndWaitDelay, _walkSpeed);
+        _chasing = new ChasingState(_enemyEventManager, _walkSpeed, _sprintSpeed);
+        _stationary = new StationaryState(_enemyEventManager, _owningGameObject);
+        _deathState = new DeathState(_enemyEventManager);
 
         Transform playerTransform = GameManager.Instance.GetPlayerPosition(PlayerPart.DefenceCollider);
-        _gun = new Gun(_bulletSpawnPoint, playerTransform, _enemyEventManager, _gunOwner);
+        _gun = new Gun(_bulletSpawnPoint, playerTransform, _enemyEventManager, _owningGameObject);
 
         ChangeState(_patrol);
 

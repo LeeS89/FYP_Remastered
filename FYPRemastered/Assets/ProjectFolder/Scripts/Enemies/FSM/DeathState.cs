@@ -7,7 +7,7 @@ public class DeathState : EnemyState
     private float _timeToDisable = 3;
     private float _countdown;
 
-    public DeathState(NavMeshAgent agent, EnemyEventManager eventManager) : base(agent, eventManager) { }
+    public DeathState(EnemyEventManager eventManager) : base(eventManager) { }
     
 
     public override void EnterState(AlertStatus alertStatus = AlertStatus.None)

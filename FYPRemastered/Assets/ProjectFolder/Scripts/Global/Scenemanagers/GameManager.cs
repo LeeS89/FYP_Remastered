@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 public enum CharacterType
@@ -21,7 +22,20 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
     public static event Action OnPlayerDied;
     public static event Action OnPlayerRespawn;
-
+    private bool _playerHasMoved = false;
+    
+    public bool PlayerHasMoved
+    {
+        set
+        {
+            if (_playerHasMoved != value)
+            {
+                _playerHasMoved = value;
+            }
+        }
+        private get => _playerHasMoved;
+        
+    }
 
     private void Awake()
     {
@@ -110,5 +124,43 @@ public class GameManager : MonoBehaviour
         };
         
         return playerPart;
+    }
+
+    private static event Action<bool> _onPlayerMovedinternal;
+    private static Coroutine _playerMovedCoroutine;
+    public static event Action<bool> OnPlayerMoved
+    {
+        add
+        {
+            bool wasEmpty = _onPlayerMovedinternal == null;
+            _onPlayerMovedinternal += value;
+
+            if(wasEmpty && Instance != null)
+            {               
+                _playerMovedCoroutine = Instance.StartCoroutine(Instance.PlayerMovedroutine());
+            }
+        }
+        remove
+        {
+            _onPlayerMovedinternal -= value;
+
+            if(_onPlayerMovedinternal == null && _playerMovedCoroutine != null && Instance != null)
+            {
+                Instance.StopCoroutine(_playerMovedCoroutine);
+                _playerMovedCoroutine = null;
+            }
+        }
+    }
+
+   
+
+    private IEnumerator PlayerMovedroutine()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(0.25f);
+
+            _onPlayerMovedinternal?.Invoke(_playerHasMoved);
+        }
     }
 }

@@ -11,33 +11,36 @@ public class ChasingState : EnemyState
     private Func<bool> _hasPlayerMoved;
     private int _randomStoppingDistance;
     private bool _canSeePlayer = false;
+    
 
-    public ChasingState(NavMeshAgent agent, EnemyEventManager eventManager, float walkSpeed, float sprintSpeed) : base(agent, eventManager)
+    public ChasingState(EnemyEventManager eventManager, float walkSpeed, float sprintSpeed) : base(eventManager)
     {
+        
         _walkSpeed = walkSpeed;
         _sprintSpeed = sprintSpeed;
         _hasPlayerMoved = CheckIfPlayerHasMoved;
         _waitUntilPlayerHasMoved = new WaitUntil(_hasPlayerMoved);
         //_eventManager.OnPlayerSeen += SetPlayerSeen;
     }
-   
+
 
     public override void EnterState(AlertStatus alertStatus = AlertStatus.None)
     {
-        //Debug.LogError("Entering Chase state");
+
+        GameManager.OnPlayerMoved += SetPlayerMoved;
+
         _eventManager.OnPlayerSeen += SetPlayerSeen;
         _eventManager.OnDestinationReached += SetDestinationReached;
-        //Vector3 _playerPos = GameManager.Instance.GetPlayerPosition().position;
-        _randomStoppingDistance = Random.Range(5,11);
-        //_eventManager.DestinationUpdated(_playerPos, _randomStoppingDistance);
-        
+        _randomStoppingDistance = Random.Range(5, 11);
+
+
         _isChasing = true;
         if (_coroutine == null)
         {
             _eventManager.SpeedChanged(0.9f, 2f);
             _coroutine = CoroutineRunner.Instance.StartCoroutine(ChasePlayerRoutine());
         }
-        //_eventManager.SpeedChanged(0.9f, 2f);
+
     }
 
     private void SetPlayerSeen(bool seen)
@@ -56,23 +59,32 @@ public class ChasingState : EnemyState
             while (!CheckIfPlayerHasMoved())
             {
                 if (CheckDestinationReached())
-                {
-                    //Debug.LogError("Chasing Reached Dest");
+                {                   
                     _eventManager.SpeedChanged(0f, 10f);
                     //SetDestinationReached(false);
                 }
                 else
                 {
-                    if(_canSeePlayer)
+                    _eventManager.SpeedChanged(_canSeePlayer ? _walkSpeed : _sprintSpeed, 5f);
+                    /*if (_canSeePlayer)
                     {
                         _eventManager.SpeedChanged(_walkSpeed, 5f);
                     }
                     else
                     {
                         _eventManager.SpeedChanged(_sprintSpeed, 5f);
-                    }
+                    }*/
                 }
                 yield return null;
+            }
+
+            while (CheckIfPlayerHasMoved())
+            {
+                _playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
+                _eventManager.DestinationUpdated(_playerPos, _randomStoppingDistance);
+                _eventManager.SpeedChanged(_canSeePlayer ? _walkSpeed : _sprintSpeed, 5f);
+
+                yield return new WaitForSeconds(0.25f);
             }
 
             yield return null;
@@ -94,27 +106,18 @@ public class ChasingState : EnemyState
         
     }
 
-   
-   
-    public override void UpdateState()
-    {
-        throw new System.NotImplementedException();
-    }
-
-    public override void LateUpdateState()
-    {
-        
-    }
-
     public override void ExitState()
     {
-        
+
         _isChasing = false;
-        if(_coroutine != null)
+        if (_coroutine != null)
         {
             CoroutineRunner.Instance.StopCoroutine(_coroutine);
             _coroutine = null;
         }
+
+        GameManager.OnPlayerMoved -= SetPlayerMoved;
+
         _eventManager.OnPlayerSeen -= SetPlayerSeen;
         _eventManager.OnDestinationReached -= SetDestinationReached;
         _canSeePlayer = false;
