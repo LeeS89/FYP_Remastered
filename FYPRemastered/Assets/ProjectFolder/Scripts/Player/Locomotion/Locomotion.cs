@@ -87,20 +87,33 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
     }
 
     public bool _testMove = false;
+    private Vector3 _lastPosition;
+    public float movementThreshold = 0.01f;
     private void Update()
     {
         if (!InputEnabled) { return; }
 
         ApplyPlayerMovement();
+        float movedDistance = Vector3.Distance(transform.position, _lastPosition);
 
-        if (_testMove)
+        if (movedDistance > movementThreshold)
+        {
+            GameManager.Instance.PlayerHasMoved = true;  // Replace with your actual method
+        }
+        else
+        {
+            GameManager.Instance.PlayerHasMoved = false;
+        }
+
+        _lastPosition = transform.position;
+        /*if (_testMove)
         {
             GameManager.Instance.PlayerHasMoved = true;
         }
         else
         {
             GameManager.Instance.PlayerHasMoved = false;
-        }
+        }*/
     }
 
     private void HandleRotation(Quaternion targetRotation)
@@ -163,6 +176,7 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
     protected override void OnSceneStarted()
     {
         InputEnabled = true;
+        _lastPosition = transform.position;
     }
 
     protected override void OnSceneComplete()

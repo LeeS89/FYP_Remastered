@@ -1,8 +1,11 @@
 using UnityEngine;
+using UnityEngine.AI;
 
 public static class LineOfSightUtility
 {
-    public static bool HasLineOfSight(Transform from, Transform target, float viewAngle, LayerMask blockingMask)
+    //private static readonly NavMeshPath _cachedPath = new NavMeshPath();
+
+    /*public static bool HasLineOfSight(Transform from, Transform target, float viewAngle, LayerMask blockingMask)
     {
         Vector3 directionToTarget = (target.position - from.position).normalized;
 
@@ -14,7 +17,7 @@ public static class LineOfSightUtility
 
         if (Physics.Raycast(from.position, directionToTarget, out RaycastHit hit, 100f, blockingMask))
         {
-            //Debug.LogError("Hit collider name: "+hit.collider.gameObject.name);
+            
             if (hit.transform == target)
             {
                 Debug.DrawRay(from.position, directionToTarget * hit.distance, Color.green);
@@ -28,5 +31,60 @@ public static class LineOfSightUtility
         }
 
         return false;
+    }*/
+
+    public static bool HasLineOfSight(Transform from, Transform target, float viewAngle, LayerMask blockingMask)
+    {
+        Vector3 directionToTarget = (target.position - from.position).normalized;
+
+        // First check the field of view angle
+        if (Vector3.Angle(from.forward, directionToTarget) > viewAngle * 0.5f)
+        {
+            Debug.DrawRay(from.position, directionToTarget * 100f, Color.yellow);
+            return false;
+        }
+
+        // Now use Linecast to check if anything is blocking the view
+        if (Physics.Linecast(from.position, target.position, out RaycastHit hit, blockingMask))
+        {
+            if (hit.transform == target)
+            {
+                Debug.DrawLine(from.position, target.position, Color.green);
+                return true;
+            }
+            else
+            {
+                Debug.DrawLine(from.position, hit.point, Color.red);
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    public static float GetNavMeshPathDistance(Vector3 from, Vector3 to, NavMeshPath path)
+    {
+        //NavMeshPath path = new NavMeshPath();
+        if (NavMesh.CalculatePath(from, to, NavMesh.AllAreas, path))
+        {
+            float distance = 0f;
+            for (int i = 1; i < path.corners.Length; i++)
+            {
+                distance += Vector3.Distance(path.corners[i - 1], path.corners[i]);
+            }
+            return distance;
+        }
+        return float.PositiveInfinity; // No valid path
+    }
+
+    public static Vector3 GetClosestPointOnNavMesh(Vector3 position, float maxDistance = 2f)
+    {
+        if (NavMesh.SamplePosition(position, out NavMeshHit hit, maxDistance, NavMesh.AllAreas))
+        {
+            return hit.position;
+        }
+
+        // If no point is found, fallback to original position (or handle differently)
+        return position;
     }
 }
