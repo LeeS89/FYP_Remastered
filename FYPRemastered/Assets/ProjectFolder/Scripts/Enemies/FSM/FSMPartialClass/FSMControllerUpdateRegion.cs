@@ -26,6 +26,12 @@ public partial class EnemyFSMController : ComponentEvents
     public bool testSeeView = false;
     private void LateUpdate()
     {
+
+        if (testSeeView)
+        {
+            ChangeState(_stationary);
+            testSeeView = false;
+        }
         /*if (!testSeeView)
         {
             UpdateFieldOfViewCheckFrequency();

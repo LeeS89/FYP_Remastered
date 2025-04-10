@@ -67,6 +67,9 @@ public partial class EnemyFSMController : ComponentEvents
         base.RegisterLocalEvents(eventManager);
         _enemyEventManager = _eventManager as EnemyEventManager;
         _owningGameObject = gameObject;
+
+        _enemyEventManager.OnRequestChasingState += ChasingStateRequested;
+        _enemyEventManager.OnRequestStationaryState += StationaryStateRequested;
         _enemyEventManager.OnOwnerDied += OnDeath;
         _enemyEventManager.OnAgentDeathComplete += ToggleGameObject;
         _enemyEventManager.OnAgentRespawn += ToggleGameObject;
@@ -81,6 +84,8 @@ public partial class EnemyFSMController : ComponentEvents
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
+        _enemyEventManager.OnRequestChasingState -= ChasingStateRequested;
+        _enemyEventManager.OnRequestStationaryState -= StationaryStateRequested;
         _enemyEventManager.OnDestinationUpdated -= UpdateAgentDestination;
         _enemyEventManager.OnDestinationReached -= CarveOnDestinationReached;
         _enemyEventManager.OnOwnerDied -= OnDeath;

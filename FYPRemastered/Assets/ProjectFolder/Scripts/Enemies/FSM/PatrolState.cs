@@ -30,7 +30,7 @@ public class PatrolState : EnemyState
     }
 
     
-    public override void EnterState(AlertStatus alertStatus = AlertStatus.None)
+    public override void EnterState(AlertStatus alertStatus = AlertStatus.None, float _ = 0)
     {
         _eventManager.OnDestinationReached += SetDestinationReached;
         if (_coroutine == null)
@@ -45,7 +45,7 @@ public class PatrolState : EnemyState
     {
         while (_isPatrolling)
         {
-            SetDestinationReached(false);
+            //SetDestinationReached(false);
             index = GetNextDestination();
            
             _eventManager.DestinationUpdated(_wayPoints[index].position);

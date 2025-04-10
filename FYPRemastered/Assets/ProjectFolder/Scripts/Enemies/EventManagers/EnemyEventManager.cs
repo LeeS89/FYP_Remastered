@@ -27,6 +27,10 @@ public class EnemyEventManager : EventManager
 
     private List<ComponentEvents> _cachedListeners;
 
+    // Chasing Events
+    public event Action<AlertStatus, float> OnRequestStationaryState;
+    public event Action OnRequestChasingState;
+
     public override void BindComponentsToEvents()
     {
         _cachedListeners = new List<ComponentEvents>();
@@ -105,5 +109,15 @@ public class EnemyEventManager : EventManager
     public void DeathAnimationComplete()
     {
         OnDeathAnimationComplete?.Invoke();
+    }
+
+    public void RequestStationaryState(AlertStatus alertStatus, float stoppingDistance)
+    {
+        OnRequestStationaryState?.Invoke(alertStatus, stoppingDistance);
+    }
+
+    public void RequestChasingState()
+    {
+        OnRequestChasingState?.Invoke();
     }
 }

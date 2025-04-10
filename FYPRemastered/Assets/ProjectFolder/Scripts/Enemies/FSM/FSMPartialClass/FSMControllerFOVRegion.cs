@@ -75,12 +75,12 @@ public partial class EnemyFSMController : ComponentEvents
             // Alert Group Here (Moon Scene Manager)
 
         }
-        else
-        {
-            //_animController.SetAlertStatus(false);
-            _enemyEventManager.PlayerSeen(false);
-            _enemyEventManager.ChangeAnimatorLayerWeight(1, 1, 0, 0.5f, false);
-        }
+        //else
+        //{
+        //    //_animController.SetAlertStatus(false);
+        //    _enemyEventManager.PlayerSeen(false);
+        //    _enemyEventManager.ChangeAnimatorLayerWeight(1, 1, 0, 0.5f, false);
+        //}
 
         //Update Shooting Component Here
     }

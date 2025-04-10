@@ -10,7 +10,7 @@ public class DeathState : EnemyState
     public DeathState(EnemyEventManager eventManager) : base(eventManager) { }
     
 
-    public override void EnterState(AlertStatus alertStatus = AlertStatus.None)
+    public override void EnterState(AlertStatus alertStatus = AlertStatus.None, float _ = 0)
     {
         _eventManager.OnDeathAnimationComplete += DeathAnimationComplete;
         _eventManager.AnimationTriggered(AnimationAction.Dead);

@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public partial class EnemyFSMController : ComponentEvents
@@ -22,7 +23,7 @@ public partial class EnemyFSMController : ComponentEvents
     }
 
 
-    public void ChangeState(EnemyState state)
+    public void ChangeState(EnemyState state, AlertStatus alertStatus = AlertStatus.None, float stoppingDistance = 0)
     {
         if (_currentState != null)
         {
@@ -33,7 +34,17 @@ public partial class EnemyFSMController : ComponentEvents
 
         _destinationCheckAction = _currentState == _stationary ? StopImmediately : MeasurePathToDestination;
 
-        _currentState.EnterState(AlertStatus.Alert);
+        _currentState.EnterState(AlertStatus.Alert, stoppingDistance);
+    }
+
+    private void StationaryStateRequested(AlertStatus alertStatus, float stoppingDistance)
+    {
+        ChangeState(_stationary, alertStatus, stoppingDistance);
+    }
+
+    private void ChasingStateRequested()
+    {
+        ChangeState(_chasing);
     }
 
     private bool CheckIfDestinationIsReached()

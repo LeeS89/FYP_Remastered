@@ -12,6 +12,7 @@ public partial class EnemyFSMController : ComponentEvents
 
     private void UpdateAgentDestination(Vector3 newDestination, int stoppingDistance = 0)
     {
+        
         if (!_agent.enabled)
         {
             _obstacle.enabled = false;
@@ -19,8 +20,10 @@ public partial class EnemyFSMController : ComponentEvents
             StartCoroutine(SetDestinationDelay(newDestination, stoppingDistance));
             return;
         }
+        
         _agent.stoppingDistance = stoppingDistance;
         _agent.SetDestination(newDestination);
+        _enemyEventManager.DestinationReached(false);
 
     }
 
@@ -35,8 +38,10 @@ public partial class EnemyFSMController : ComponentEvents
     {
         yield return new WaitForSeconds(0.15f);
         ToggleAgent(true);
+        
         _agent.stoppingDistance = stoppingDistance;
         _agent.SetDestination(newDestination);
+        _enemyEventManager.DestinationReached(false);
 
     }
 
