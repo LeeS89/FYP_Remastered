@@ -9,7 +9,7 @@ public abstract class EnemyState
     protected Coroutine _coroutine;
     protected EnemyEventManager _eventManager;
     protected bool _destinationReached = false;
-    protected bool _playerHasMoved = false;
+    protected static bool _playerHasMoved = false;
     protected float _remainingDistance;
     protected AlertStatus _alertStatus;
     protected float _walkSpeed;
@@ -22,9 +22,9 @@ public abstract class EnemyState
 
     protected bool CheckDestinationReached() { /*Debug.LogError("Checking Reached");*/ return _destinationReached; }
 
-    protected bool CheckIfPlayerHasMoved() { return _playerHasMoved; }
+    protected static bool CheckIfPlayerHasMoved() { return _playerHasMoved; }
     
-    protected void SetPlayerMoved(bool playerHasMoved) {  _playerHasMoved = playerHasMoved; }
+    public static void SetPlayerMoved(bool playerHasMoved) {  _playerHasMoved = playerHasMoved; }
 
     protected void SetDestinationReached(bool reached) { _destinationReached = reached; }
    

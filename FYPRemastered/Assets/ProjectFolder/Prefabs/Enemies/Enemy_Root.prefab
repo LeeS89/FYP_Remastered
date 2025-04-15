@@ -226,10 +226,13 @@ MonoBehaviour:
   _fovTraceRadius: 15
   _fovLayerMask:
     serializedVersion: 2
-    m_Bits: 8
+    m_Bits: 512
+  _lineOfSightMask:
+    serializedVersion: 2
+    m_Bits: 531
   _fovTraceResults: []
   _bulletSpawnPoint: {fileID: 1520609376679817542}
-  _gunOwner: {fileID: 0}
+  _owningGameObject: {fileID: 0}
   _testDeath: 0
   testRespawn: 0
   testSeeView: 0

@@ -3,6 +3,8 @@ using UnityEngine;
 
 public partial class EnemyFSMController : ComponentEvents
 {
+    private bool _waitForNewDestination = true;
+
     #region Destination Updates
     private void CarveOnDestinationReached(bool _)
     {
@@ -22,8 +24,8 @@ public partial class EnemyFSMController : ComponentEvents
         }
         
         _agent.stoppingDistance = stoppingDistance;
-        _agent.SetDestination(newDestination);
-        _enemyEventManager.DestinationReached(false);
+        _agent.SetDestination(LineOfSightUtility.GetClosestPointOnNavMesh(newDestination));
+        //_enemyEventManager.DestinationReached(false);
 
     }
 
@@ -36,13 +38,17 @@ public partial class EnemyFSMController : ComponentEvents
     /// <returns></returns>
     private IEnumerator SetDestinationDelay(Vector3 newDestination, int stoppingDistance)
     {
-        yield return new WaitForSeconds(0.15f);
-        ToggleAgent(true);
-        
-        _agent.stoppingDistance = stoppingDistance;
-        _agent.SetDestination(newDestination);
-        _enemyEventManager.DestinationReached(false);
+        //if (!_waitForNewDestination)
+        //yield return new WaitUntil(() => _waitForNewDestination);
+        //_waitForNewDestination = false;
+        yield return null;//new WaitForSeconds(0.15f);
+            ToggleAgent(true);
 
+            _agent.stoppingDistance = stoppingDistance;
+            _agent.SetDestination(LineOfSightUtility.GetClosestPointOnNavMesh(newDestination));
+            //_enemyEventManager.DestinationReached(false);
+            _waitForNewDestination = true;
+        
     }
 
     private void ToggleAgent(bool agentEnabled)

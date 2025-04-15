@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -11,6 +12,9 @@ public class StationaryState : EnemyState
     private bool _shouldUpdateDestination = false;
     private WaitUntil _waitUntilPathCheckComplete;
     private float _alertPhaseStoppingDistance;
+
+    //fgdhfg
+    private float _entryDistance;
 
     public StationaryState(EnemyEventManager eventManager, GameObject owner) : base(eventManager) 
     { 
@@ -34,16 +38,17 @@ public class StationaryState : EnemyState
             case AlertStatus.Alert:
                 //_eventManager.DestinationUpdated(_owner.transform.position);
                 _eventManager.SpeedChanged(0f, 10f);
-                GameManager.OnPlayerMoved += SetPlayerMoved;
+                //GameManager.OnPlayerMoved += SetPlayerMoved;
                 _alertPhaseStoppingDistance = stoppingDistance;
+                _entryDistance = Vector3.Distance(_owner.transform.position, GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position);
                 if (_coroutine == null)
                 {
                     _isStationary = true;
                     _coroutine = CoroutineRunner.Instance.StartCoroutine(ChasePlayerRoutine());
                 }
-                Debug.LogError("Player moved is: " + _playerHasMoved);
+                /*Debug.LogError("Player moved is: " + _playerHasMoved);
                 Debug.LogError("Alert stopping distance is: "+_alertPhaseStoppingDistance);
-                Debug.LogError("In Stationary State, with alert status");
+                Debug.LogError("In Stationary State, with alert status");*/
                 break;
             default:
                 _eventManager.DestinationUpdated(_owner.transform.position);
@@ -59,12 +64,12 @@ public class StationaryState : EnemyState
     {
         //Vector3 _playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
         
-
+        yield return new WaitForSeconds(0.5f);
         while (_isStationary)
         {
            
 
-            if (CheckIfPlayerHasMoved())
+            while (CheckIfPlayerHasMoved())
             {
                 CheckIfDestinationShouldUpdate();
 
@@ -77,6 +82,7 @@ public class StationaryState : EnemyState
                     _eventManager.RequestChasingState();
                     _shouldUpdateDestination = false;
                     _isStationary = false;
+                    yield return new WaitForEndOfFrame();
                     //SetDestinationReached(false);
                 }
 
@@ -93,19 +99,27 @@ public class StationaryState : EnemyState
     {
         _pathCheckComplete = false;
 
-        PathCheckRequest request = new PathCheckRequest
+        float dis = Vector3.Distance(_owner.transform.position, GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position);
+        //Debug.LogError("Distance: " + dis + " and alertStop distance: " + _entryDistance);
+        _shouldUpdateDestination = dis > (_entryDistance * 1.2f);
+        _pathCheckComplete = true;
+
+        /*PathCheckRequest request = new PathCheckRequest
         {
             From = LineOfSightUtility.GetClosestPointOnNavMesh(_owner.transform.position),//_owner.transform.position,
             To = LineOfSightUtility.GetClosestPointOnNavMesh(GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position),
             Path = _path,
             OnComplete = (distance) =>
             {
-                _shouldUpdateDestination = distance > _alertPhaseStoppingDistance;
+                
+                float dis = Vector3.Distance(_owner.transform.position, GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position);
+                Debug.LogError("Distance: " + distance + " and alertStop distance: " + _alertPhaseStoppingDistance + " and vec distance: "+dis);
+                _shouldUpdateDestination = dis > (_entryDistance +0.2f);
                 _pathCheckComplete = true;
             }
         };
 
-        PathDistanceBatcher.RequestCheck(request);
+        PathDistanceBatcher.RequestCheck(request);*/
     }
 
     public override void ExitState()
@@ -116,7 +130,7 @@ public class StationaryState : EnemyState
             CoroutineRunner.Instance.StopCoroutine(_coroutine);
             _coroutine = null;
         }
-        GameManager.OnPlayerMoved -= SetPlayerMoved;
+        //GameManager.OnPlayerMoved -= SetPlayerMoved;
     }
 
     public override void OnStateDestroyed()

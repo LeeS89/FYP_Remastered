@@ -32,8 +32,9 @@ public class GameManager : MonoBehaviour
             {
                 _playerHasMoved = value;
             }
+            _onPlayerMovedinternal?.Invoke(_playerHasMoved);
         }
-        private get => _playerHasMoved;
+        get => _playerHasMoved;
         
     }
 
@@ -126,8 +127,9 @@ public class GameManager : MonoBehaviour
         return playerPart;
     }
 
-    private static event Action<bool> _onPlayerMovedinternal;
+    public static event Action<bool> _onPlayerMovedinternal;
     private static Coroutine _playerMovedCoroutine;
+
     public static event Action<bool> OnPlayerMoved
     {
         add
@@ -137,7 +139,7 @@ public class GameManager : MonoBehaviour
 
             if(wasEmpty && Instance != null)
             {               
-                _playerMovedCoroutine = Instance.StartCoroutine(Instance.PlayerMovedroutine());
+               // _playerMovedCoroutine = Instance.StartCoroutine(Instance.PlayerMovedroutine());
             }
         }
         remove
@@ -146,13 +148,14 @@ public class GameManager : MonoBehaviour
 
             if(_onPlayerMovedinternal == null && _playerMovedCoroutine != null && Instance != null)
             {
-                Instance.StopCoroutine(_playerMovedCoroutine);
+                //Instance.StopCoroutine(_playerMovedCoroutine);
                 _playerMovedCoroutine = null;
             }
         }
     }
 
    
+
 
     private IEnumerator PlayerMovedroutine()
     {
@@ -162,5 +165,10 @@ public class GameManager : MonoBehaviour
 
             _onPlayerMovedinternal?.Invoke(_playerHasMoved);
         }
+    }
+
+    public void PlayerMoved()
+    {
+        _onPlayerMovedinternal?.Invoke(_playerHasMoved);
     }
 }

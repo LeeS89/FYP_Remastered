@@ -98,11 +98,17 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
 
         if (movedDistance > movementThreshold)
         {
-            GameManager.Instance.PlayerHasMoved = true;  // Replace with your actual method
+            if (!GameManager.Instance.PlayerHasMoved)
+            {
+                GameManager.Instance.PlayerHasMoved = true;  // Replace with your actual method
+            }
         }
         else
         {
-            GameManager.Instance.PlayerHasMoved = false;
+            if (GameManager.Instance.PlayerHasMoved)
+            {
+                GameManager.Instance.PlayerHasMoved = false;
+            }
         }
 
         _lastPosition = transform.position;

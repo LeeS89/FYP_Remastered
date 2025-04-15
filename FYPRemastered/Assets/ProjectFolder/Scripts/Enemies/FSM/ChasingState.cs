@@ -35,11 +35,11 @@ public class ChasingState : EnemyState
     public override void EnterState(AlertStatus alertStatus = AlertStatus.None, float _ = 0)
     {
 
-        GameManager.OnPlayerMoved += SetPlayerMoved;
+       // GameManager.OnPlayerMoved += SetPlayerMoved;
 
         _eventManager.OnPlayerSeen += SetPlayerSeen;
         //_eventManager.OnDestinationReached += SetDestinationReached;
-        _randomStoppingDistance = Random.Range(5, 11);
+        _randomStoppingDistance = 8;//Random.Range(5, 11);
 
 
         
@@ -62,16 +62,16 @@ public class ChasingState : EnemyState
 
     private IEnumerator ChasePlayerRoutine()
     {
-        //SetDestinationReached(false);
+        SetDestinationReached(false);
         /*Vector3 _playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
         _eventManager.DestinationUpdated(_playerPos, _randomStoppingDistance);*/
 
-        while (_isChasing)
+        while (!CheckDestinationReached())
         {
             //SetDestinationReached(false);
 
-            if (!CheckDestinationReached())
-            {
+            //if (!CheckDestinationReached())
+            //{
                 _eventManager.SpeedChanged(_canSeePlayer ? _walkSpeed : _sprintSpeed, 5f);
 
 
@@ -79,16 +79,16 @@ public class ChasingState : EnemyState
                 {
                     _playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
                     _eventManager.DestinationUpdated(_playerPos, _randomStoppingDistance);
-                    yield return new WaitForSeconds(0.25f);
+                    yield return new WaitForSeconds(0.1f);
                 }
+                //yield return new WaitForSeconds(0.25f);
                 yield return null;
-            }
-            else
-            {
+           // }
+           // else
+            //{
                 /// Change to stationary state here
-                _eventManager.RequestStationaryState(AlertStatus.Alert, _randomStoppingDistance);
-                _isChasing = false;
-            }
+               
+           // }
                 
 
             //while (!CheckIfPlayerHasMoved())
@@ -151,7 +151,9 @@ public class ChasingState : EnemyState
 
              yield return _waitUntilPlayerHasMoved;*/
         }
-        
+        _eventManager.RequestStationaryState(AlertStatus.Alert, _randomStoppingDistance);
+        _isChasing = false;
+
     }
 
     private void CheckIfDestinationShouldUpdate()
@@ -183,7 +185,7 @@ public class ChasingState : EnemyState
             _coroutine = null;
         }
 
-        GameManager.OnPlayerMoved -= SetPlayerMoved;
+        //GameManager.OnPlayerMoved -= SetPlayerMoved;
 
         _eventManager.OnPlayerSeen -= SetPlayerSeen;
         //_eventManager.OnDestinationReached -= SetDestinationReached;

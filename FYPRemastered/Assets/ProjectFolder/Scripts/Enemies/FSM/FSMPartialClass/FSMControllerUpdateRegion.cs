@@ -32,6 +32,8 @@ public partial class EnemyFSMController : ComponentEvents
             ChangeState(_stationary);
             testSeeView = false;
         }
+
+        
         /*if (!testSeeView)
         {
             UpdateFieldOfViewCheckFrequency();
@@ -98,7 +100,7 @@ public partial class EnemyFSMController : ComponentEvents
     /// </summary>
     private void StopImmediately()
     {
-        _agent.SetDestination(_agent.transform.position);
+        _agent.SetDestination(LineOfSightUtility.GetClosestPointOnNavMesh(_agent.transform.position));
         _agent.ResetPath();
         _enemyEventManager.DestinationReached(true);
 
