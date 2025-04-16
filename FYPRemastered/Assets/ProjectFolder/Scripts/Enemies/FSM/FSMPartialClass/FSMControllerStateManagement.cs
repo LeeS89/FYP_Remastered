@@ -19,7 +19,7 @@ public partial class EnemyFSMController : ComponentEvents
         _gun = new Gun(_bulletSpawnPoint, playerTransform, _enemyEventManager, _owningGameObject);
         GameManager._onPlayerMovedinternal += EnemyState.SetPlayerMoved;
 
-        ChangeState(_patrol);
+        ChangeState(_patrol); // uncomment later
 
     }
 

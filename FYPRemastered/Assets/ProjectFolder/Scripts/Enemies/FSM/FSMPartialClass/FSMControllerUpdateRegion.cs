@@ -24,12 +24,15 @@ public partial class EnemyFSMController : ComponentEvents
     }
 
     public bool testSeeView = false;
+    public UniformZoneGridManager _gridManager;
     private void LateUpdate()
     {
 
         if (testSeeView)
         {
-            ChangeState(_stationary);
+            Vector3 newPoint = _gridManager.GetRandomPointXStepsFromPlayer(4);
+            _enemyEventManager.DestinationUpdated(newPoint);
+            //ChangeState(_stationary);
             testSeeView = false;
         }
 
