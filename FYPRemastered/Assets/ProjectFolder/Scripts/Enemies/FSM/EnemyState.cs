@@ -14,13 +14,17 @@ public abstract class EnemyState
     protected AlertStatus _alertStatus;
     protected float _walkSpeed;
     protected float _sprintSpeed;
+    protected bool _canSeePlayer = false;
 
     public EnemyState(EnemyEventManager eventManager)
     {
         _eventManager = eventManager;
+        _eventManager.OnPlayerSeen += SetPlayerSeen;
     }
 
     protected bool CheckDestinationReached() { /*Debug.LogError("Checking Reached");*/ return _destinationReached; }
+
+    protected void SetPlayerSeen(bool seen) { _canSeePlayer = seen; }
 
     protected static bool CheckIfPlayerHasMoved() { return _playerHasMoved; }
     

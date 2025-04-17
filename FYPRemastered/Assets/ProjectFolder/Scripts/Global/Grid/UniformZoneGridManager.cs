@@ -63,6 +63,7 @@ public class UniformZoneGridManager : MonoBehaviour
                 float posZ = min.z + z * cellSize + cellSize * 0.5f;
                 Vector3 sample = new Vector3(posX, bounds.max.y, posZ);
 
+                
                 if (NavMesh.SamplePosition(sample, out NavMeshHit hit, sampleRadius, NavMesh.AllAreas))
                 {
                     GameObject cube = Instantiate(markerPrefab, hit.position, Quaternion.identity);

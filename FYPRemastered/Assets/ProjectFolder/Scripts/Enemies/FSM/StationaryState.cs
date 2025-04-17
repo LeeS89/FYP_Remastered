@@ -88,6 +88,15 @@ public class StationaryState : EnemyState
 
                 
             }
+
+            if (!_canSeePlayer)
+            {
+                UniformZoneGridManager _gridManager = GameObject.FindFirstObjectByType<UniformZoneGridManager>();
+                Vector3 newPoint = _gridManager.GetRandomPointXStepsFromPlayer(4);
+                _eventManager.DestinationUpdated(newPoint);
+
+                yield return new WaitForSeconds(25f);
+            }
            
             yield return null;
 
