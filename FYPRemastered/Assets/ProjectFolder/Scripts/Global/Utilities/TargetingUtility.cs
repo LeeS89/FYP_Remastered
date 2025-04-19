@@ -98,4 +98,6 @@ public static class TargetingUtility
             locationToOffset += randomPoint;
         }
     }
+
+    
 }

@@ -7,7 +7,7 @@ public class DeathState : EnemyState
     private float _timeToDisable = 3;
     private float _countdown;
 
-    public DeathState(EnemyEventManager eventManager) : base(eventManager) { }
+    public DeathState(EnemyEventManager eventManager, GameObject owner) : base(eventManager, owner) { }
     
 
     public override void EnterState(AlertStatus alertStatus = AlertStatus.None, float _ = 0)

@@ -1,25 +1,23 @@
 using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
 public class StationaryState : EnemyState
 {
-    private GameObject _owner;
+
     private bool _isStationary = false;
-    private NavMeshPath _path;
+    
     private bool _pathCheckComplete = false;
     private bool _shouldUpdateDestination = false;
     private WaitUntil _waitUntilPathCheckComplete;
     private float _alertPhaseStoppingDistance;
 
-    //fgdhfg
+    //
     private float _entryDistance;
 
-    public StationaryState(EnemyEventManager eventManager, GameObject owner) : base(eventManager) 
+    public StationaryState(EnemyEventManager eventManager, GameObject owner, NavMeshPath path) : base(eventManager, path, owner) 
     { 
-        _owner = owner;
-        _path = new NavMeshPath();
+      
         _waitUntilPathCheckComplete = new WaitUntil(() => _pathCheckComplete);
     }
    
@@ -67,9 +65,16 @@ public class StationaryState : EnemyState
         yield return new WaitForSeconds(0.5f);
         while (_isStationary)
         {
-           
 
-            while (CheckIfPlayerHasMoved())
+            if(IsTargetMovingAndReachable(_owner.transform.position, GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position, _entryDistance, _path))
+            {
+                _isStationary = false;
+                _eventManager.RequestChasingState();
+                yield break;
+            }
+            yield return new WaitForSeconds(1f);
+
+           /* while (CheckIfPlayerHasMoved())
             {
                 CheckIfDestinationShouldUpdate();
 
@@ -87,16 +92,16 @@ public class StationaryState : EnemyState
                 }
 
                 
-            }
+            }*/
 
-            if (!_canSeePlayer)
+           /* if (!_canSeePlayer)
             {
                 UniformZoneGridManager _gridManager = GameObject.FindFirstObjectByType<UniformZoneGridManager>();
                 Vector3 newPoint = _gridManager.GetRandomPointXStepsFromPlayer(4);
                 _eventManager.DestinationUpdated(newPoint);
 
                 yield return new WaitForSeconds(25f);
-            }
+            }*/
            
             yield return null;
 
@@ -113,7 +118,7 @@ public class StationaryState : EnemyState
         _shouldUpdateDestination = dis > (_entryDistance * 1.2f);
         _pathCheckComplete = true;
 
-        /*PathCheckRequest request = new PathCheckRequest
+        PathCheckRequest request = new PathCheckRequest
         {
             From = LineOfSightUtility.GetClosestPointOnNavMesh(_owner.transform.position),//_owner.transform.position,
             To = LineOfSightUtility.GetClosestPointOnNavMesh(GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position),
@@ -128,7 +133,7 @@ public class StationaryState : EnemyState
             }
         };
 
-        PathDistanceBatcher.RequestCheck(request);*/
+        PathDistanceBatcher.RequestCheck(request);
     }
 
     public override void ExitState()

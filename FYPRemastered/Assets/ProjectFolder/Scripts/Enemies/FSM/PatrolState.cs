@@ -9,8 +9,7 @@ using Random = UnityEngine.Random;
 public class PatrolState : EnemyState
 {
     private List<Transform> _wayPoints;
-    private GameObject _owner;
-
+   
     private WaitUntil _waitUntilDestinationReached;
     private Func<bool> _hasReachedDestination;
     private int index = 0;
@@ -19,9 +18,9 @@ public class PatrolState : EnemyState
     private bool _isPatrolling = false;
     
 
-    public PatrolState(List<Transform> wayPoints, GameObject owner, EnemyEventManager eventManager, float randomDelay, float walkSpeed) : base(eventManager)
+    public PatrolState(List<Transform> wayPoints, GameObject owner, EnemyEventManager eventManager, float randomDelay, float walkSpeed) : base(eventManager, owner)
     {
-        _owner = owner;
+       
         _walkSpeed = walkSpeed;
         _randomWaitTime = randomDelay;
         _wayPoints = wayPoints;

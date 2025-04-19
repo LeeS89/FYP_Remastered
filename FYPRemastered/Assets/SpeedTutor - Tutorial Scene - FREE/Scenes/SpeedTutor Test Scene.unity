@@ -16051,7 +16051,7 @@ PrefabInstance:
       objectReference: {fileID: 1500387837}
     - target: {fileID: 960491701997048275, guid: 8b63e884631feb14da8f59c2b7e506ef, type: 3}
       propertyPath: _fovTraceRadius
-      value: 1
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 960491701997048275, guid: 8b63e884631feb14da8f59c2b7e506ef, type: 3}
       propertyPath: _lineOfSightMask.m_Bits
@@ -17292,6 +17292,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2403360007884865655, guid: 8b8a47dd509973a4599dca415c2aa13b, type: 3}
       propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2427725912462476686, guid: 8b8a47dd509973a4599dca415c2aa13b, type: 3}
+      propertyPath: _handMaterialPropertyBlocks.Array.size
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2444888528065945607, guid: 8b8a47dd509973a4599dca415c2aa13b, type: 3}
@@ -18664,7 +18668,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5567585103406991563, guid: 8b8a47dd509973a4599dca415c2aa13b, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.76
+      value: -7.08
       objectReference: {fileID: 0}
     - target: {fileID: 5567585103406991563, guid: 8b8a47dd509973a4599dca415c2aa13b, type: 3}
       propertyPath: m_LocalPosition.y
@@ -18672,7 +18676,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5567585103406991563, guid: 8b8a47dd509973a4599dca415c2aa13b, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -6.447
+      value: -1.338
       objectReference: {fileID: 0}
     - target: {fileID: 5567585103406991563, guid: 8b8a47dd509973a4599dca415c2aa13b, type: 3}
       propertyPath: m_LocalRotation.w

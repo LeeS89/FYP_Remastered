@@ -1,19 +1,21 @@
-using Unity.VisualScripting;
+
 using UnityEngine;
+using UnityEngine.AI;
 
 public partial class EnemyFSMController : ComponentEvents
 {
     #region FSM Management
     private void SetupFSM()
     {
+        _path = new NavMeshPath();
         _fovCheckFrequency = _patrolFOVCheckFrequency;
         _fov = new TraceComponent(1);
         _fovTraceResults = new Collider[1];
         _animController = new EnemyAnimController(_anim, _enemyEventManager);
         _patrol = new PatrolState(_wayPoints, _owningGameObject, _enemyEventManager, _stopAndWaitDelay, _walkSpeed);
         _chasing = new ChasingState(_enemyEventManager, _owningGameObject, _walkSpeed, _sprintSpeed);
-        _stationary = new StationaryState(_enemyEventManager, _owningGameObject);
-        _deathState = new DeathState(_enemyEventManager);
+        _stationary = new StationaryState(_enemyEventManager, _owningGameObject, _path);
+        _deathState = new DeathState(_enemyEventManager, _owningGameObject);
 
         Transform playerTransform = GameManager.Instance.GetPlayerPosition(PlayerPart.DefenceCollider);
         _gun = new Gun(_bulletSpawnPoint, playerTransform, _enemyEventManager, _owningGameObject);

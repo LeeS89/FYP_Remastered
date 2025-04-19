@@ -11,17 +11,16 @@ public class ChasingState : EnemyState
     private WaitUntil _waitUntilPathCheckComplete;
     //private Func<bool> _hasPlayerMoved;
     private int _randomStoppingDistance;
-    private bool _canSeePlayer = false;
+    //private bool _canSeePlayer = false;
     private bool _pathCheckComplete = false;
     private bool _shouldUpdateDestination = false;
-    private GameObject _owner;
-    private NavMeshPath _path;
+
+   
     private Vector3 _playerPos;
 
-    public ChasingState(EnemyEventManager eventManager, GameObject owner, float walkSpeed, float sprintSpeed) : base(eventManager)
+    public ChasingState(EnemyEventManager eventManager, GameObject owner, float walkSpeed, float sprintSpeed) : base(eventManager, owner)
     {
-        _owner = owner;
-        _path = new NavMeshPath();
+      
         _walkSpeed = walkSpeed;
         _sprintSpeed = sprintSpeed;
         _eventManager.OnDestinationReached += SetDestinationReached;
@@ -55,11 +54,11 @@ public class ChasingState : EnemyState
 
     }
 
-    private void SetPlayerSeen(bool seen)
+  /*  private void SetPlayerSeen(bool seen)
     {
         _canSeePlayer = seen;
     }
-
+*/
     private IEnumerator ChasePlayerRoutine()
     {
         SetDestinationReached(false);

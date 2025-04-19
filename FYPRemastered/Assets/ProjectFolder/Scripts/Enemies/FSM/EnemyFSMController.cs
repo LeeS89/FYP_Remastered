@@ -10,6 +10,7 @@ public partial class EnemyFSMController : ComponentEvents
     [SerializeField] private NavMeshObstacle _obstacle;
     [SerializeField] private Animator _anim;
     [SerializeField, Tooltip("Do Not Change - Synchronized with Walking animation")] private float _walkSpeed;
+    private NavMeshPath _path;
     private EnemyAnimController _animController;
     private Action _destinationCheckAction;
     private EnemyState _currentState;
