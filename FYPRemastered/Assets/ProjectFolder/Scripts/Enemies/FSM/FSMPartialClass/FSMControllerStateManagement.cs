@@ -26,7 +26,7 @@ public partial class EnemyFSMController : ComponentEvents
     }
 
 
-    public void ChangeState(EnemyState state, AlertStatus alertStatus = AlertStatus.None, float stoppingDistance = 0)
+    public void ChangeState(EnemyState state, Vector3? destination = null, AlertStatus alertStatus = AlertStatus.None, float stoppingDistance = 0)
     {
         if (_currentState != null)
         {
@@ -34,21 +34,34 @@ public partial class EnemyFSMController : ComponentEvents
         }
         _currentState = state;
 
-
         _destinationCheckAction = _currentState == _stationary ? StopImmediately : MeasurePathToDestination;
 
-        _currentState.EnterState(AlertStatus.Alert, stoppingDistance);
-        //Debug.LogError("Current State: " + _currentState.GetType().Name);
+
+
+        _currentState.EnterState(destination, alertStatus, stoppingDistance);
+
+        //_currentState.EnterState(destination);
+
+        Debug.LogError("Current State: " + _currentState.GetType().Name);
     }
 
-    private void StationaryStateRequested(AlertStatus alertStatus, float stoppingDistance)
+    private void StationaryStateRequested(AlertStatus alertStatus)
     {
-        ChangeState(_stationary, alertStatus, stoppingDistance);
+        if (_currentState == _stationary)
+        {
+            return;
+        }
+        ChangeState(_stationary, null, alertStatus);
     }
 
-    private void ChasingStateRequested()
+    private void ChasingStateRequested(Vector3? destination = null)
     {
-        ChangeState(_chasing);
+        if (_currentState == _chasing)
+        {
+            return;
+        }
+        
+        ChangeState(_chasing, destination);
     }
 
     private bool CheckIfDestinationIsReached()

@@ -29,7 +29,7 @@ public class PatrolState : EnemyState
     }
 
     
-    public override void EnterState(AlertStatus alertStatus = AlertStatus.None, float _ = 0)
+    public override void EnterState(Vector3? destination = null, AlertStatus alertStatus = AlertStatus.None, float _ = 0)
     {
         _eventManager.OnDestinationReached += SetDestinationReached;
         if (_coroutine == null)
@@ -44,7 +44,7 @@ public class PatrolState : EnemyState
     {
         while (_isPatrolling)
         {
-            //SetDestinationReached(false);
+            SetDestinationReached(false);
             index = GetNextDestination();
            
             _eventManager.DestinationUpdated(_wayPoints[index].position);
@@ -53,7 +53,7 @@ public class PatrolState : EnemyState
             
 
             yield return _waitUntilDestinationReached;
-            
+            Debug.LogError("Reached destination: " + _wayPoints[index].name);
 
             _eventManager.SpeedChanged(0f, 10f);
            

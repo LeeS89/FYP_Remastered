@@ -68,6 +68,7 @@ public partial class EnemyFSMController : ComponentEvents
         {
             if (_currentState != _chasing)
             {
+                //ChasingStateRequested();
                 ChangeState(_chasing);
             }
             //_animController.SetAlertStatus(true);

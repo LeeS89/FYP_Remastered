@@ -10,10 +10,10 @@ public class StationaryState : EnemyState
     private bool _pathCheckComplete = false;
     private bool _shouldUpdateDestination = false;
     private WaitUntil _waitUntilPathCheckComplete;
-    private float _alertPhaseStoppingDistance;
+    //private float _alertPhaseStoppingDistance;
 
     //
-    private float _entryDistance;
+    private float _stateEntryDistanceFromPlayer;
 
     public StationaryState(EnemyEventManager eventManager, GameObject owner, NavMeshPath path) : base(eventManager, path, owner) 
     { 
@@ -22,11 +22,11 @@ public class StationaryState : EnemyState
     }
    
 
-    public override void EnterState(AlertStatus alertStatus = AlertStatus.None, float stoppingDistance = 0)
+    public override void EnterState(Vector3? destination = null, AlertStatus alertStatus = AlertStatus.None, float stoppingDistance = 0)
     {
-        base.EnterState(alertStatus);
+        //base.EnterState(alertStatus);
 
-        switch (_alertStatus)
+        switch (alertStatus)
         {
             case AlertStatus.None:
                 //_eventManager.DestinationUpdated(_owner.transform.position);
@@ -37,8 +37,8 @@ public class StationaryState : EnemyState
                 //_eventManager.DestinationUpdated(_owner.transform.position);
                 _eventManager.SpeedChanged(0f, 10f);
                 //GameManager.OnPlayerMoved += SetPlayerMoved;
-                _alertPhaseStoppingDistance = stoppingDistance;
-                _entryDistance = Vector3.Distance(_owner.transform.position, GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position);
+                //_alertPhaseStoppingDistance = stoppingDistance;
+                _stateEntryDistanceFromPlayer = Vector3.Distance(_owner.transform.position, GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position);
                 if (_coroutine == null)
                 {
                     _isStationary = true;
@@ -66,7 +66,7 @@ public class StationaryState : EnemyState
         while (_isStationary)
         {
 
-            if(IsTargetMovingAndReachable(_owner.transform.position, GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position, _entryDistance, _path))
+            if(IsTargetMovingAndReachable(_owner.transform.position, GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position, _stateEntryDistanceFromPlayer, _path))
             {
                 _isStationary = false;
                 _eventManager.RequestChasingState();
@@ -115,7 +115,7 @@ public class StationaryState : EnemyState
 
         float dis = Vector3.Distance(_owner.transform.position, GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position);
         //Debug.LogError("Distance: " + dis + " and alertStop distance: " + _entryDistance);
-        _shouldUpdateDestination = dis > (_entryDistance * 1.2f);
+        _shouldUpdateDestination = dis > (_stateEntryDistanceFromPlayer * 1.2f);
         _pathCheckComplete = true;
 
         PathCheckRequest request = new PathCheckRequest
@@ -127,8 +127,8 @@ public class StationaryState : EnemyState
             {
                 
                 float dis = Vector3.Distance(_owner.transform.position, GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position);
-                Debug.LogError("Distance: " + distance + " and alertStop distance: " + _alertPhaseStoppingDistance + " and vec distance: "+dis);
-                _shouldUpdateDestination = dis > (_entryDistance +0.2f);
+                //Debug.LogError("Distance: " + distance + " and alertStop distance: " + _alertPhaseStoppingDistance + " and vec distance: "+dis);
+                _shouldUpdateDestination = dis > (_stateEntryDistanceFromPlayer +0.2f);
                 _pathCheckComplete = true;
             }
         };

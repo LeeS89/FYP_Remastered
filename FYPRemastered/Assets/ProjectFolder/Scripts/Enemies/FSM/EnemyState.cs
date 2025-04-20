@@ -47,13 +47,17 @@ public abstract class EnemyState
    
     public virtual void UpdateDistanceRemainingToDestination(float remainingDistance) { _remainingDistance = remainingDistance; }
 
-    public virtual void EnterState(AlertStatus alertStatus = AlertStatus.None, float stoppingDistance = 0) {  _alertStatus = alertStatus; }
+    public virtual void EnterState(Vector3? destination = null, AlertStatus alertStatus = AlertStatus.None, float stoppingDistance = 0) {  _alertStatus = alertStatus; }
+
+    //public virtual void EnterState(Vector3? destination = null) { }
+
     public virtual void UpdateState() { }
 
     public virtual void LateUpdateState() { }
     public abstract void ExitState();
     public virtual void OnStateDestroyed()
     {
+        _eventManager.OnPlayerSeen -= SetPlayerSeen;
         _eventManager = null;
         ExitState();
     }

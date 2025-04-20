@@ -31,14 +31,14 @@ public class ChasingState : EnemyState
     }
 
 
-    public override void EnterState(AlertStatus alertStatus = AlertStatus.None, float _ = 0)
+    public override void EnterState(Vector3? destination = null, AlertStatus alertStatus = AlertStatus.None, float stoppingDistance = 0)
     {
 
        // GameManager.OnPlayerMoved += SetPlayerMoved;
 
-        _eventManager.OnPlayerSeen += SetPlayerSeen;
+        //_eventManager.OnPlayerSeen += SetPlayerSeen;
         //_eventManager.OnDestinationReached += SetDestinationReached;
-        _randomStoppingDistance = 8;//Random.Range(5, 11);
+        _randomStoppingDistance = Random.Range(3, 11);
 
 
         
@@ -46,10 +46,19 @@ public class ChasingState : EnemyState
         {
             _isChasing = true;
             //_eventManager.SpeedChanged(0.9f, 2f);
-            _playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
-            _eventManager.DestinationUpdated(_playerPos, _randomStoppingDistance);
+            if(destination == null)
+            {
+                _playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
+                _eventManager.DestinationUpdated(_playerPos, _randomStoppingDistance);
+                //_coroutine = CoroutineRunner.Instance.StartCoroutine(ChasePlayerRoutine());
+            }
+            else
+            {
+                _eventManager.DestinationUpdated(destination.Value);
+            }
+            Debug.LogError("Destination: "+destination);
             _coroutine = CoroutineRunner.Instance.StartCoroutine(ChasePlayerRoutine());
-            
+
         }
 
     }
@@ -150,7 +159,7 @@ public class ChasingState : EnemyState
 
              yield return _waitUntilPlayerHasMoved;*/
         }
-        _eventManager.RequestStationaryState(AlertStatus.Alert, _randomStoppingDistance);
+        _eventManager.RequestStationaryState(AlertStatus.Alert);
         _isChasing = false;
 
     }
@@ -186,7 +195,7 @@ public class ChasingState : EnemyState
 
         //GameManager.OnPlayerMoved -= SetPlayerMoved;
 
-        _eventManager.OnPlayerSeen -= SetPlayerSeen;
+        //_eventManager.OnPlayerSeen -= SetPlayerSeen;
         //_eventManager.OnDestinationReached -= SetDestinationReached;
         //_canSeePlayer = false;
     }

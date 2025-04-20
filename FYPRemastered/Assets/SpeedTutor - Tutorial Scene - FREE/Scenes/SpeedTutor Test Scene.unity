@@ -9423,6 +9423,17 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1245375184}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1254439904 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6440398613314546065, guid: 8b8a47dd509973a4599dca415c2aa13b, type: 3}
+  m_PrefabInstance: {fileID: 2637593784199785640}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5e48d93b64a9ae4f9fd5a728c8f51af, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1263330282
 GameObject:
   m_ObjectHideFlags: 0
@@ -11944,6 +11955,17 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1518620037}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1530815881 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 9023769677491459897, guid: 8b8a47dd509973a4599dca415c2aa13b, type: 3}
+  m_PrefabInstance: {fileID: 2637593784199785640}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5e48d93b64a9ae4f9fd5a728c8f51af, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1551932212
 GameObject:
   m_ObjectHideFlags: 0
@@ -16570,6 +16592,14 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: 781080080871489059, guid: 8b8a47dd509973a4599dca415c2aa13b, type: 3}
+      propertyPath: _handMaterialPropertyBlocks.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 781080080871489059, guid: 8b8a47dd509973a4599dca415c2aa13b, type: 3}
+      propertyPath: '_handMaterialPropertyBlocks.Array.data[0]'
+      value: 
+      objectReference: {fileID: 1254439904}
     - target: {fileID: 790476623276965760, guid: 8b8a47dd509973a4599dca415c2aa13b, type: 3}
       propertyPath: m_Layer
       value: 0
@@ -16709,6 +16739,10 @@ PrefabInstance:
     - target: {fileID: 1178625680637209208, guid: 8b8a47dd509973a4599dca415c2aa13b, type: 3}
       propertyPath: m_Layer
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1210552597580251229, guid: 8b8a47dd509973a4599dca415c2aa13b, type: 3}
+      propertyPath: _stats.Array.data[0].value
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 1218574015139488951, guid: 8b8a47dd509973a4599dca415c2aa13b, type: 3}
       propertyPath: m_Layer
@@ -17296,8 +17330,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2427725912462476686, guid: 8b8a47dd509973a4599dca415c2aa13b, type: 3}
       propertyPath: _handMaterialPropertyBlocks.Array.size
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2427725912462476686, guid: 8b8a47dd509973a4599dca415c2aa13b, type: 3}
+      propertyPath: '_handMaterialPropertyBlocks.Array.data[0]'
+      value: 
+      objectReference: {fileID: 1530815881}
     - target: {fileID: 2444888528065945607, guid: 8b8a47dd509973a4599dca415c2aa13b, type: 3}
       propertyPath: m_Layer
       value: 3
@@ -18668,7 +18706,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5567585103406991563, guid: 8b8a47dd509973a4599dca415c2aa13b, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -7.08
+      value: -9.71
       objectReference: {fileID: 0}
     - target: {fileID: 5567585103406991563, guid: 8b8a47dd509973a4599dca415c2aa13b, type: 3}
       propertyPath: m_LocalPosition.y
@@ -18676,7 +18714,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5567585103406991563, guid: 8b8a47dd509973a4599dca415c2aa13b, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -1.338
+      value: -7.33
       objectReference: {fileID: 0}
     - target: {fileID: 5567585103406991563, guid: 8b8a47dd509973a4599dca415c2aa13b, type: 3}
       propertyPath: m_LocalRotation.w
