@@ -65,8 +65,8 @@ public class StationaryState : EnemyState
         yield return new WaitForSeconds(0.5f);
         while (_isStationary)
         {
-
-            if(IsTargetMovingAndReachable(_owner.transform.position, GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position, _stateEntryDistanceFromPlayer, _path))
+            Vector3 playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
+            if (IsTargetMovingAndReachable(LineOfSightUtility.GetClosestPointOnNavMesh(_owner.transform.position), playerPos, _stateEntryDistanceFromPlayer, _path))
             {
                 _isStationary = false;
                 _eventManager.RequestChasingState();
@@ -156,5 +156,10 @@ public class StationaryState : EnemyState
     public override void UpdateState()
     {
         throw new System.NotImplementedException();
+    }
+
+    public override void LateUpdateState()
+    {
+        
     }
 }

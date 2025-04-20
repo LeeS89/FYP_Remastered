@@ -3,6 +3,7 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.AI;
 using static UnityEngine.UI.GridLayoutGroup;
+using Random = UnityEngine.Random;
 
 public abstract class EnemyState
 {
@@ -67,9 +68,10 @@ public abstract class EnemyState
     Vector3 from,
     Vector3 to,
     float threshold,
-    NavMeshPath path,
-    float bufferMultiplier = 1.3f)
+    NavMeshPath path
+    )
     {
+        float bufferMultiplier = Random.Range(1.2f, 1.45f);
         float thresholdSqr = threshold * threshold;
         float distSqr = (to - from).sqrMagnitude;
 

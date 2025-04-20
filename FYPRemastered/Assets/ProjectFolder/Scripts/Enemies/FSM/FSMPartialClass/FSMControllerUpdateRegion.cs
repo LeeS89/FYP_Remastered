@@ -103,8 +103,11 @@ public partial class EnemyFSMController : ComponentEvents
     /// </summary>
     private void StopImmediately()
     {
-        _agent.SetDestination(LineOfSightUtility.GetClosestPointOnNavMesh(_agent.transform.position));
-        _agent.ResetPath();
+        //_agent.SetDestination(LineOfSightUtility.GetClosestPointOnNavMesh(_agent.transform.position));
+        if (_agent.hasPath)
+        {
+            _agent.ResetPath();
+        }
         _enemyEventManager.DestinationReached(true);
 
 

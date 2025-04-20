@@ -41,14 +41,14 @@ public partial class EnemyFSMController : ComponentEvents
         //if (!_waitForNewDestination)
         //yield return new WaitUntil(() => _waitForNewDestination);
         //_waitForNewDestination = false;
-        yield return null;//new WaitForSeconds(0.15f);
-            ToggleAgent(true);
+        yield return new WaitForSeconds(0.15f);
+        ToggleAgent(true);
 
-            _agent.stoppingDistance = stoppingDistance;
-            _agent.SetDestination(LineOfSightUtility.GetClosestPointOnNavMesh(newDestination));
-            //_enemyEventManager.DestinationReached(false);
-            _waitForNewDestination = true;
-        
+        _agent.stoppingDistance = stoppingDistance;
+        _agent.SetDestination(LineOfSightUtility.GetClosestPointOnNavMesh(newDestination));
+        //_enemyEventManager.DestinationReached(false);
+        //_waitForNewDestination = true;
+
     }
 
     private void ToggleAgent(bool agentEnabled)
