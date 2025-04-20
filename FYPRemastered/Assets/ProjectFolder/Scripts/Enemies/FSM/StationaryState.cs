@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -53,23 +53,28 @@ public class StationaryState : EnemyState
                 _eventManager.SpeedChanged(0f, 10f);
                 break;
         }
-
-       /* _eventManager.DestinationUpdated(_owner.transform.position);
-        _eventManager.SpeedChanged(0f, 10f);*/
+        _owner.GetComponent<NavMeshAgent>().enabled = false;
+        /*_owner.GetComponent<NavMeshObstacle>().enabled = true;*/
+        //_owner.GetComponent<NavMeshAgent>().updateRotation = false;
+        /* _eventManager.DestinationUpdated(_owner.transform.position);
+         _eventManager.SpeedChanged(0f, 10f);*/
     }
 
     private IEnumerator ChasePlayerRoutine()
     {
         //Vector3 _playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
-        
+        //_owner.GetComponent<NavMeshAgent>().enabled = false;
         yield return new WaitForSeconds(0.5f);
+        //_owner.GetComponent<NavMeshObstacle>().enabled = true;
         while (_isStationary)
         {
             Vector3 playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
-            if (IsTargetMovingAndReachable(LineOfSightUtility.GetClosestPointOnNavMesh(_owner.transform.position), playerPos, _stateEntryDistanceFromPlayer, _path))
+            if (IsTargetMovingAndReachable(/*LineOfSightUtility.GetClosestPointOnNavMesh(_owner.transform.position)*/_owner.transform.position, playerPos, _stateEntryDistanceFromPlayer, _path))
             {
+                _owner.GetComponent<NavMeshAgent>().enabled = true;
                 _isStationary = false;
                 _eventManager.RequestChasingState();
+                _coroutine = null;
                 yield break;
             }
             yield return new WaitForSeconds(1f);
@@ -140,6 +145,9 @@ public class StationaryState : EnemyState
     {
         if (_coroutine != null)
         {
+            _owner.GetComponent<NavMeshAgent>().updateRotation = true;
+            //_owner.GetComponent<NavMeshObstacle>().enabled = false;
+            //_owner.GetComponent<NavMeshAgent>().enabled = true;
             _isStationary = false;
             CoroutineRunner.Instance.StopCoroutine(_coroutine);
             _coroutine = null;
@@ -160,6 +168,34 @@ public class StationaryState : EnemyState
 
     public override void LateUpdateState()
     {
-        
+        if (_owner == null || GameManager.Instance == null)
+            return;
+
+        Transform player = GameManager.Instance.GetPlayerPosition(PlayerPart.Position);
+        if (player == null)
+            return;
+
+        Vector3 toPlayer = player.position - _owner.transform.position;
+        toPlayer.y = 0f;
+
+        if (toPlayer.sqrMagnitude < 0.001f)
+            return;
+
+        Vector3 forward = _owner.transform.forward;
+        forward.y = 0f;
+
+        // ✅ Check if agent is already facing the player (dot ~ 1 = same direction)
+        float dot = Vector3.Dot(forward.normalized, toPlayer.normalized);
+        const float facingThreshold = 0.995f; // ~cos(5°)
+
+        if (dot >= facingThreshold)
+            return; // ✅ Already facing the player closely enough
+
+        // ✅ Apply smooth rotation toward player
+        Quaternion targetRotation = Quaternion.LookRotation(toPlayer.normalized);
+        _owner.transform.rotation = Quaternion.Slerp(
+            _owner.transform.rotation,
+            targetRotation,
+            Time.deltaTime * 3f);
     }
 }

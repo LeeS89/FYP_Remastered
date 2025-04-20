@@ -38,7 +38,7 @@ public class ChasingState : EnemyState
 
         //_eventManager.OnPlayerSeen += SetPlayerSeen;
         //_eventManager.OnDestinationReached += SetDestinationReached;
-        _randomStoppingDistance = Random.Range(3, 11);
+        _randomStoppingDistance = Random.Range(4, 11);
 
 
         
@@ -56,18 +56,14 @@ public class ChasingState : EnemyState
             {
                 _eventManager.DestinationUpdated(destination.Value);
             }
-            Debug.LogError("Destination: "+destination);
+            
             _coroutine = CoroutineRunner.Instance.StartCoroutine(ChasePlayerRoutine());
 
         }
 
     }
 
-  /*  private void SetPlayerSeen(bool seen)
-    {
-        _canSeePlayer = seen;
-    }
-*/
+
     private IEnumerator ChasePlayerRoutine()
     {
         SetDestinationReached(false);

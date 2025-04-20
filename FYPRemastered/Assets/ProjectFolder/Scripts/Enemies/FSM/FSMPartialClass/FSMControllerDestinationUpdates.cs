@@ -41,7 +41,8 @@ public partial class EnemyFSMController : ComponentEvents
         //if (!_waitForNewDestination)
         //yield return new WaitUntil(() => _waitForNewDestination);
         //_waitForNewDestination = false;
-        yield return new WaitForSeconds(0.15f);
+        yield return new WaitForEndOfFrame();
+        //yield return new WaitForSeconds(0.15f);
         ToggleAgent(true);
 
         _agent.stoppingDistance = stoppingDistance;

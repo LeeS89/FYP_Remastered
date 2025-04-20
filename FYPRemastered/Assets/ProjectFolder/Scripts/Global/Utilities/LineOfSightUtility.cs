@@ -45,11 +45,42 @@ public static class LineOfSightUtility
         }
 
         // Now use Linecast to check if anything is blocking the view
-        if (Physics.Linecast(from.position, target.position, out RaycastHit hit, blockingMask))
+        if (Physics.Linecast(from.position, (target.position + new Vector3(0,0.1f,0)), out RaycastHit hit, blockingMask))
         {
             if (hit.transform == target)
             {
                 Debug.DrawLine(from.position, target.position, Color.green);
+                return true;
+            }
+            else
+            {
+                Debug.DrawLine(from.position, hit.point, Color.red);
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    public static bool HasLineOfSight(Transform from, Collider target, float viewAngle, LayerMask blockingMask)
+    {
+        BoxCollider boxCollider = target as BoxCollider;
+        Vector3 directionToTarget = (target.transform.position - from.position).normalized;
+
+        // First check the field of view angle
+        if (Vector3.Angle(from.forward, directionToTarget) > viewAngle * 0.5f)
+        {
+            Debug.DrawRay(from.position, directionToTarget * 100f, Color.yellow);
+            return false;
+        }
+
+        Vector3 top = boxCollider.bounds.center;// + Vector3.up * (boxCollider.bounds.extents.y - 0.05f);
+        // Now use Linecast to check if anything is blocking the view
+        if (Physics.Linecast(from.position, top, out RaycastHit hit, blockingMask))
+        {
+            if (hit.collider == target)
+            {
+                Debug.DrawLine(from.position, top, Color.green);
                 return true;
             }
             else

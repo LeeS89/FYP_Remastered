@@ -75,7 +75,7 @@ public partial class EnemyFSMController : ComponentEvents
         _enemyEventManager.OnAgentDeathComplete += ToggleGameObject;
         _enemyEventManager.OnAgentRespawn += ToggleGameObject;
         _enemyEventManager.OnDestinationUpdated += UpdateAgentDestination;
-        _enemyEventManager.OnDestinationReached += CarveOnDestinationReached;
+        //_enemyEventManager.OnDestinationReached += CarveOnDestinationReached;
         
         _enemyEventManager.OnSpeedChanged += UpdateTargetSpeedValues;
         
@@ -88,7 +88,7 @@ public partial class EnemyFSMController : ComponentEvents
         _enemyEventManager.OnRequestChasingState -= ChasingStateRequested;
         _enemyEventManager.OnRequestStationaryState -= StationaryStateRequested;
         _enemyEventManager.OnDestinationUpdated -= UpdateAgentDestination;
-        _enemyEventManager.OnDestinationReached -= CarveOnDestinationReached;
+        //_enemyEventManager.OnDestinationReached -= CarveOnDestinationReached;
         _enemyEventManager.OnOwnerDied -= OnDeath;
         _enemyEventManager.OnAgentDeathComplete -= ToggleGameObject;
         _enemyEventManager.OnAgentRespawn -= ToggleGameObject;
