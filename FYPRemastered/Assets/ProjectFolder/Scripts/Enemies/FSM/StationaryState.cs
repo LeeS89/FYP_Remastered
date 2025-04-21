@@ -53,7 +53,8 @@ public class StationaryState : EnemyState
                 _eventManager.SpeedChanged(0f, 10f);
                 break;
         }
-        _owner.GetComponent<NavMeshAgent>().enabled = false;
+        _owner.GetComponent<NavMeshAgent>().updateRotation = false;
+        //_owner.GetComponent<NavMeshAgent>().enabled = false;
         /*_owner.GetComponent<NavMeshObstacle>().enabled = true;*/
         //_owner.GetComponent<NavMeshAgent>().updateRotation = false;
         /* _eventManager.DestinationUpdated(_owner.transform.position);
@@ -71,7 +72,7 @@ public class StationaryState : EnemyState
             Vector3 playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
             if (IsTargetMovingAndReachable(/*LineOfSightUtility.GetClosestPointOnNavMesh(_owner.transform.position)*/_owner.transform.position, playerPos, _stateEntryDistanceFromPlayer, _path))
             {
-                _owner.GetComponent<NavMeshAgent>().enabled = true;
+                //_owner.GetComponent<NavMeshAgent>().enabled = true;
                 _isStationary = false;
                 _eventManager.RequestChasingState();
                 _coroutine = null;
