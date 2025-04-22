@@ -20,6 +20,7 @@ public abstract class EnemyState
     protected float _walkSpeed;
     protected float _sprintSpeed;
     protected bool _canSeePlayer = false;
+    protected bool _shouldUpdateDestination = false;
 
     public EnemyState(EnemyEventManager eventManager, GameObject owner)
     {
@@ -56,6 +57,9 @@ public abstract class EnemyState
 
     public virtual void LateUpdateState() { }
     public abstract void ExitState();
+
+    public virtual void SetChaseEligibility(bool canChase, Vector3 playerPosition) { _shouldUpdateDestination = canChase; }
+
     public virtual void OnStateDestroyed()
     {
         _eventManager.OnPlayerSeen -= SetPlayerSeen;
@@ -64,24 +68,36 @@ public abstract class EnemyState
     }
 
 
-    public static bool IsTargetMovingAndReachable(
+    /*public static bool IsTargetMovingAndReachable(
     Vector3 from,
     Vector3 to,
-    float threshold,
+    float thresholdSqr,
     NavMeshPath path
     )
     {
         float bufferMultiplier = Random.Range(1.2f, 1.45f);
-        float thresholdSqr = threshold * threshold;
+        float bufferedThresholdSqr = thresholdSqr * (bufferMultiplier * bufferMultiplier);
+
         float distSqr = (to - from).sqrMagnitude;
 
-        if (distSqr <= (thresholdSqr * bufferMultiplier))
+        Debug.LogError("Current Distance: " + distSqr + " | Threshold with buffer: " + bufferedThresholdSqr);
+
+        if (distSqr <= bufferedThresholdSqr)
             return false;
+
 
         if (!NavMesh.CalculatePath(from, to, NavMesh.AllAreas, path))
             return false;
 
-        Debug.LogError("Path status: " + path.status);
+        //Debug.LogError("Path status: " + path.status);
+        return path.status == NavMeshPathStatus.PathComplete;
+    }*/
+
+    protected static bool HasClearPathToTarget(Vector3 from, Vector3 to, NavMeshPath path)
+    {
+        if(!NavMesh.CalculatePath(from, to, NavMesh.AllAreas, path))
+            return false;
+
         return path.status == NavMeshPathStatus.PathComplete;
     }
     /* protected static bool IsDistanceGreaterThan(Vector3 from, Vector3 to, float threshold)

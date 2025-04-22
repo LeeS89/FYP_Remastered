@@ -28,7 +28,7 @@ public class EnemyEventManager : EventManager
     private List<ComponentEvents> _cachedListeners;
 
     // Chasing Events
-    public event Action<AlertStatus> OnRequestStationaryState;
+    public event Action OnRequestStationaryState;
     public event Action<Vector3?> OnRequestChasingState;
 
     public override void BindComponentsToEvents()
@@ -111,9 +111,9 @@ public class EnemyEventManager : EventManager
         OnDeathAnimationComplete?.Invoke();
     }
 
-    public void RequestStationaryState(AlertStatus alertStatus)
+    public void RequestStationaryState()
     {
-        OnRequestStationaryState?.Invoke(alertStatus);
+        OnRequestStationaryState?.Invoke();
     }
 
     public void RequestChasingState(Vector3? destination = null)

@@ -59,7 +59,7 @@ public partial class EnemyFSMController : ComponentEvents
     private EnemyEventManager _enemyEventManager;
     
     
-    //private AlertStatus _alertStatus = AlertStatus.None;
+    private AlertStatus _alertStatus = AlertStatus.None;
     
 
     #region Event Registrations
@@ -75,7 +75,7 @@ public partial class EnemyFSMController : ComponentEvents
         _enemyEventManager.OnAgentDeathComplete += ToggleGameObject;
         _enemyEventManager.OnAgentRespawn += ToggleGameObject;
         _enemyEventManager.OnDestinationUpdated += UpdateAgentDestination;
-        _enemyEventManager.OnDestinationReached += CarveOnDestinationReached;
+        //_enemyEventManager.OnDestinationReached += CarveOnDestinationReached;
         
         _enemyEventManager.OnSpeedChanged += UpdateTargetSpeedValues;
         
@@ -88,7 +88,7 @@ public partial class EnemyFSMController : ComponentEvents
         _enemyEventManager.OnRequestChasingState -= ChasingStateRequested;
         _enemyEventManager.OnRequestStationaryState -= StationaryStateRequested;
         _enemyEventManager.OnDestinationUpdated -= UpdateAgentDestination;
-        _enemyEventManager.OnDestinationReached -= CarveOnDestinationReached;
+        //_enemyEventManager.OnDestinationReached -= CarveOnDestinationReached;
         _enemyEventManager.OnOwnerDied -= OnDeath;
         _enemyEventManager.OnAgentDeathComplete -= ToggleGameObject;
         _enemyEventManager.OnAgentRespawn -= ToggleGameObject;

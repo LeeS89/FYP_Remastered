@@ -66,14 +66,23 @@ public partial class EnemyFSMController : ComponentEvents
 
         if (_canSeePlayer)
         {
-            if (_currentState != _chasing)
+            //if (_alertStatus == AlertStatus.None)
+            // {
+            //_alertStatus = AlertStatus.Alert;
+
+
+            if (_currentState != _chasing && _alertStatus == AlertStatus.None)
             {
+                _enemyEventManager.ChangeAnimatorLayerWeight(1, 0, 1, 0.5f, true);
+                _alertStatus = AlertStatus.Alert;
                 //ChasingStateRequested();
                 ChangeState(_chasing);
             }
+               // _enemyEventManager.ChangeAnimatorLayerWeight(1, 0, 1, 0.5f, true);
+           // }
             //_animController.SetAlertStatus(true);
             _enemyEventManager.PlayerSeen(_canSeePlayer);
-            _enemyEventManager.ChangeAnimatorLayerWeight(1, 0, 1, 0.5f, true);
+            //_enemyEventManager.ChangeAnimatorLayerWeight(1, 0, 1, 0.5f, true);
             // Alert Group Here (Moon Scene Manager)
 
         }
@@ -81,7 +90,7 @@ public partial class EnemyFSMController : ComponentEvents
         {
         //    //_animController.SetAlertStatus(false);
             _enemyEventManager.PlayerSeen(false);
-            _enemyEventManager.ChangeAnimatorLayerWeight(1, 1, 0, 0.5f, false);
+            //_enemyEventManager.ChangeAnimatorLayerWeight(1, 1, 0, 0.5f, false);
         }
 
         //Update Shooting Component Here

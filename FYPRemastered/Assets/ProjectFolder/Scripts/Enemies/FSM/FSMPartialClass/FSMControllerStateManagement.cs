@@ -45,13 +45,14 @@ public partial class EnemyFSMController : ComponentEvents
         Debug.LogError("Current State: " + _currentState.GetType().Name);
     }
 
-    private void StationaryStateRequested(AlertStatus alertStatus)
+    private void StationaryStateRequested(/*AlertStatus alertStatus*/)
     {
         if (_currentState == _stationary)
         {
             return;
         }
-        ChangeState(_stationary, null, alertStatus);
+
+        ChangeState(_stationary, null, _alertStatus);
     }
 
     private void ChasingStateRequested(Vector3? destination = null)

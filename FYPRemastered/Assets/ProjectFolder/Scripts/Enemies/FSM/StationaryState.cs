@@ -4,11 +4,11 @@ using UnityEngine.AI;
 
 public class StationaryState : EnemyState
 {
-
+    private int _agentId = 0;
     private bool _isStationary = false;
     
     private bool _pathCheckComplete = false;
-    private bool _shouldUpdateDestination = false;
+    /*private bool _shouldUpdateDestination = false;*/
     private WaitUntil _waitUntilPathCheckComplete;
     //private float _alertPhaseStoppingDistance;
 
@@ -29,24 +29,23 @@ public class StationaryState : EnemyState
         switch (alertStatus)
         {
             case AlertStatus.None:
-                //_eventManager.DestinationUpdated(_owner.transform.position);
-                //_eventManager.SpeedChanged(0f, 10f);
-                //Debug.LogError("In Stationary State, no alert status");
+                
                 break;
             case AlertStatus.Alert:
-                //_eventManager.DestinationUpdated(_owner.transform.position);
+               
                 _eventManager.SpeedChanged(0f, 10f);
-                //GameManager.OnPlayerMoved += SetPlayerMoved;
-                //_alertPhaseStoppingDistance = stoppingDistance;
-                _stateEntryDistanceFromPlayer = Vector3.Distance(_owner.transform.position, GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position);
+               
+                /*_stateEntryDistanceFromPlayer = Vector3.Distance(_owner.transform.position, GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position);*/
+                //_stateEntryDistanceFromPlayer = (GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position - _owner.transform.position).sqrMagnitude;
+               /* Debug.LogError("Distance on entry: " + _stateEntryDistanceFromPlayer);*/
                 if (_coroutine == null)
                 {
                     _isStationary = true;
                     _coroutine = CoroutineRunner.Instance.StartCoroutine(ChasePlayerRoutine());
+
+                    
                 }
-                /*Debug.LogError("Player moved is: " + _playerHasMoved);
-                Debug.LogError("Alert stopping distance is: "+_alertPhaseStoppingDistance);
-                Debug.LogError("In Stationary State, with alert status");*/
+               
                 break;
             default:
                 _eventManager.DestinationUpdated(_owner.transform.position);
@@ -54,51 +53,44 @@ public class StationaryState : EnemyState
                 break;
         }
         _owner.GetComponent<NavMeshAgent>().updateRotation = false;
-        //_owner.GetComponent<NavMeshAgent>().enabled = false;
-        /*_owner.GetComponent<NavMeshObstacle>().enabled = true;*/
-        //_owner.GetComponent<NavMeshAgent>().updateRotation = false;
-        /* _eventManager.DestinationUpdated(_owner.transform.position);
-         _eventManager.SpeedChanged(0f, 10f);*/
+       
     }
 
     private IEnumerator ChasePlayerRoutine()
     {
-        //Vector3 _playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
-        //_owner.GetComponent<NavMeshAgent>().enabled = false;
+       
         yield return new WaitForSeconds(0.5f);
-        //_owner.GetComponent<NavMeshObstacle>().enabled = true;
+        float bufferMultiplier = Random.Range(1.2f, 1.45f);
+        _agentId = StationaryChaseManagerJob.Instance.RegisterAgent(_owner.transform.position, bufferMultiplier, this);
+        //_stateEntryDistanceFromPlayer = (GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position - _owner.transform.position).sqrMagnitude; //Vector3.Distance(_owner.transform.position, GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position);
+        //Debug.LogError("Distance on entry: " + _stateEntryDistanceFromPlayer);
+
         while (_isStationary)
         {
-            Vector3 playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
-            if (IsTargetMovingAndReachable(/*LineOfSightUtility.GetClosestPointOnNavMesh(_owner.transform.position)*/_owner.transform.position, playerPos, _stateEntryDistanceFromPlayer, _path))
+            /*Vector3 playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
+            if (IsTargetMovingAndReachable(LineOfSightUtility.GetClosestPointOnNavMesh(_owner.transform.position)*//*_owner.transform.position*//*, LineOfSightUtility.GetClosestPointOnNavMesh(playerPos)*//* playerPos*//*, _stateEntryDistanceFromPlayer, _path))
             {
-                //_owner.GetComponent<NavMeshAgent>().enabled = true;
+          
                 _isStationary = false;
                 _eventManager.RequestChasingState();
-                _coroutine = null;
+               
+                yield break;
+            }*/
+
+            yield return _waitUntilPathCheckComplete;
+            _pathCheckComplete = false;
+
+            if (_shouldUpdateDestination)
+            {
+                _isStationary = false;
+                _eventManager.RequestChasingState();
+
                 yield break;
             }
-            yield return new WaitForSeconds(1f);
 
-           /* while (CheckIfPlayerHasMoved())
-            {
-                CheckIfDestinationShouldUpdate();
+            //yield return new WaitForSeconds(1f);
 
-                yield return _waitUntilPathCheckComplete;
-
-
-                if (_shouldUpdateDestination)
-                {
-                    /// Change state to chasing
-                    _eventManager.RequestChasingState();
-                    _shouldUpdateDestination = false;
-                    _isStationary = false;
-                    yield return new WaitForEndOfFrame();
-                    //SetDestinationReached(false);
-                }
-
-                
-            }*/
+          
 
            /* if (!_canSeePlayer)
             {
@@ -109,47 +101,38 @@ public class StationaryState : EnemyState
                 yield return new WaitForSeconds(25f);
             }*/
            
-            yield return null;
+            //yield return null;
 
         }
 
     }
 
-    private void CheckIfDestinationShouldUpdate()
+    public override void SetChaseEligibility(bool canChase, Vector3 playerPosition)
     {
-        _pathCheckComplete = false;
+        base.SetChaseEligibility(canChase, playerPosition);
 
-        float dis = Vector3.Distance(_owner.transform.position, GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position);
-        //Debug.LogError("Distance: " + dis + " and alertStop distance: " + _entryDistance);
-        _shouldUpdateDestination = dis > (_stateEntryDistanceFromPlayer * 1.2f);
-        _pathCheckComplete = true;
-
-        PathCheckRequest request = new PathCheckRequest
+        if (canChase)
         {
-            From = LineOfSightUtility.GetClosestPointOnNavMesh(_owner.transform.position),//_owner.transform.position,
-            To = LineOfSightUtility.GetClosestPointOnNavMesh(GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position),
-            Path = _path,
-            OnComplete = (distance) =>
-            {
-                
-                float dis = Vector3.Distance(_owner.transform.position, GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position);
-                //Debug.LogError("Distance: " + distance + " and alertStop distance: " + _alertPhaseStoppingDistance + " and vec distance: "+dis);
-                _shouldUpdateDestination = dis > (_stateEntryDistanceFromPlayer +0.2f);
-                _pathCheckComplete = true;
-            }
-        };
+           _shouldUpdateDestination = HasClearPathToTarget(LineOfSightUtility.GetClosestPointOnNavMesh(_owner.transform.position), playerPosition, _path);
+                  
+        }
 
-        PathDistanceBatcher.RequestCheck(request);
+        _pathCheckComplete = true;
     }
+
+
 
     public override void ExitState()
     {
         if (_coroutine != null)
         {
+            StationaryChaseManagerJob.Instance.UnregisterAgent(_agentId);
             _owner.GetComponent<NavMeshAgent>().updateRotation = true;
             //_owner.GetComponent<NavMeshObstacle>().enabled = false;
             //_owner.GetComponent<NavMeshAgent>().enabled = true;
             _isStationary = false;
+            _pathCheckComplete = false;
+            _shouldUpdateDestination = false;
             CoroutineRunner.Instance.StopCoroutine(_coroutine);
             _coroutine = null;
         }
