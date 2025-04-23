@@ -6,7 +6,8 @@ public class StationaryState : EnemyState
 {
     private int _agentId = 0;
     private bool _isStationary = false;
-    
+    private float intervalTimer = 0;
+    private float checkInterval = 2.5f;
     private bool _pathCheckComplete = false;
     /*private bool _shouldUpdateDestination = false;*/
     private WaitUntil _waitUntilPathCheckComplete;
@@ -61,7 +62,7 @@ public class StationaryState : EnemyState
        
         yield return new WaitForSeconds(0.5f);
         float bufferMultiplier = Random.Range(1.2f, 1.45f);
-        _agentId = StationaryChaseManagerJob.Instance.RegisterAgent(_owner.transform.position, bufferMultiplier, this);
+        _agentId = StationaryChaseManagerJob.Instance.RegisterAgent(LineOfSightUtility.GetClosestPointOnNavMesh(_owner.transform.position), bufferMultiplier, this);
         //_stateEntryDistanceFromPlayer = (GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position - _owner.transform.position).sqrMagnitude; //Vector3.Distance(_owner.transform.position, GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position);
         //Debug.LogError("Distance on entry: " + _stateEntryDistanceFromPlayer);
 
@@ -90,18 +91,33 @@ public class StationaryState : EnemyState
 
             //yield return new WaitForSeconds(1f);
 
-          
-
-           /* if (!_canSeePlayer)
+            /*intervalTimer += Time.deltaTime;*/
+            if (intervalTimer >= checkInterval)
             {
-                UniformZoneGridManager _gridManager = GameObject.FindFirstObjectByType<UniformZoneGridManager>();
-                Vector3 newPoint = _gridManager.GetRandomPointXStepsFromPlayer(4);
-                _eventManager.DestinationUpdated(newPoint);
+                intervalTimer = 0f;
 
-                yield return new WaitForSeconds(25f);
-            }*/
-           
-            //yield return null;
+                if (!_canSeePlayer)
+                {
+                    _isStationary = false;
+                    UniformZoneGridManager _gridManager = GameObject.FindFirstObjectByType<UniformZoneGridManager>();
+                    Vector3 newPoint = _gridManager.GetRandomPointXStepsFromPlayer(4);
+                    _eventManager.RequestChasingState(newPoint);
+                    yield break;
+                }
+            }
+
+            /* if (!_canSeePlayer)
+             {
+                 _isStationary = false;
+                 UniformZoneGridManager _gridManager = GameObject.FindFirstObjectByType<UniformZoneGridManager>();
+                 Vector3 newPoint = _gridManager.GetRandomPointXStepsFromPlayer(4);
+                 _eventManager.RequestChasingState(newPoint);
+                 //_eventManager.DestinationUpdated(newPoint);
+                 yield break;
+                 //yield return new WaitForSeconds(25f);
+             }*/
+
+            yield return null;
 
         }
 
@@ -152,6 +168,8 @@ public class StationaryState : EnemyState
 
     public override void LateUpdateState()
     {
+        intervalTimer += Time.deltaTime;
+
         if (_owner == null || GameManager.Instance == null)
             return;
 
@@ -168,18 +186,27 @@ public class StationaryState : EnemyState
         Vector3 forward = _owner.transform.forward;
         forward.y = 0f;
 
-        // ✅ Check if agent is already facing the player (dot ~ 1 = same direction)
         float dot = Vector3.Dot(forward.normalized, toPlayer.normalized);
-        const float facingThreshold = 0.995f; // ~cos(5°)
+        float angle = Mathf.Acos(dot) * Mathf.Rad2Deg;
 
-        if (dot >= facingThreshold)
-            return; // ✅ Already facing the player closely enough
+        const float precisionThreshold = 1f; // degrees
 
-        // ✅ Apply smooth rotation toward player
-        Quaternion targetRotation = Quaternion.LookRotation(toPlayer.normalized);
+        Quaternion targetRotation = Quaternion.LookRotation(toPlayer);
+
+        if (angle < precisionThreshold)
+        {
+            // ✅ Close enough — complete the rotation smoothly
+            _owner.transform.rotation = Quaternion.Slerp(
+                _owner.transform.rotation,
+                targetRotation,
+                1f); // forces it to land exactly, still smooth
+            return;
+        }
+
+        // ✅ Smoothly rotate toward target
         _owner.transform.rotation = Quaternion.Slerp(
             _owner.transform.rotation,
             targetRotation,
-            Time.deltaTime * 3f);
+            Time.deltaTime * 5f); // adjust speed as needed
     }
 }

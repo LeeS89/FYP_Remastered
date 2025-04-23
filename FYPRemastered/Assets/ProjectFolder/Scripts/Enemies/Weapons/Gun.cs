@@ -132,15 +132,15 @@ public class Gun
     {
         while (_isShooting)
         {
-            if (!IsAimReady())
-            {
-                yield return _waitUntilAimIsReady;
-            }
+            //if (!IsAimReady())
+            //{
+            yield return _waitUntilAimIsReady;
+            //}
 
-            if (IsReloading())
-            {
-                yield return _waitUntilFinishedReloading;
-            }
+            // if (IsReloading())
+            // {
+            yield return _waitUntilFinishedReloading;
+            // }
 
             if (!_playerHasDied)
             {

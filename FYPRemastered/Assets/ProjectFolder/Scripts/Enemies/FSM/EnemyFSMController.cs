@@ -30,10 +30,11 @@ public partial class EnemyFSMController : ComponentEvents
     private StationaryState _stationary;
 
     [Header("Field of View Component Parameters")]
-    [SerializeField] private Transform _fovLocation;
+    [SerializeField] public Transform _fovLocation; // Make Private Later
     [SerializeField] private float _patrolFOVCheckFrequency = 1f;
     [SerializeField] private float _alertFOVCheckFrequency = 0.1f;
-    [SerializeField] private float _fovTraceRadius = 5f;
+    [SerializeField] public float _fovTraceRadius = 5f; // Make Private Later
+    [Range(0, 360)]  public float _angle; // Make Private Later
     [SerializeField] private LayerMask _fovLayerMask;
     [SerializeField] private LayerMask _lineOfSightMask;
     [SerializeField] private Collider[] _fovTraceResults;
@@ -41,7 +42,7 @@ public partial class EnemyFSMController : ComponentEvents
     private float _nextCheckTime = 0f;
     private TraceComponent _fov;
     private FieldOfViewFrequencyStatus _fieldOfViewStatus = FieldOfViewFrequencyStatus.Normal;
-    private bool _canSeePlayer = false;
+    public bool _canSeePlayer = false; // Make Private Later
 
     [Header("Death State")]
     private DeathState _deathState;
@@ -75,7 +76,7 @@ public partial class EnemyFSMController : ComponentEvents
         _enemyEventManager.OnAgentDeathComplete += ToggleGameObject;
         _enemyEventManager.OnAgentRespawn += ToggleGameObject;
         _enemyEventManager.OnDestinationUpdated += UpdateAgentDestination;
-        //_enemyEventManager.OnDestinationReached += CarveOnDestinationReached;
+        _enemyEventManager.OnDestinationReached += CarveOnDestinationReached;
         
         _enemyEventManager.OnSpeedChanged += UpdateTargetSpeedValues;
         
@@ -88,7 +89,7 @@ public partial class EnemyFSMController : ComponentEvents
         _enemyEventManager.OnRequestChasingState -= ChasingStateRequested;
         _enemyEventManager.OnRequestStationaryState -= StationaryStateRequested;
         _enemyEventManager.OnDestinationUpdated -= UpdateAgentDestination;
-        //_enemyEventManager.OnDestinationReached -= CarveOnDestinationReached;
+        _enemyEventManager.OnDestinationReached -= CarveOnDestinationReached;
         _enemyEventManager.OnOwnerDied -= OnDeath;
         _enemyEventManager.OnAgentDeathComplete -= ToggleGameObject;
         _enemyEventManager.OnAgentRespawn -= ToggleGameObject;
