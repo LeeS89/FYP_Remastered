@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 6c961eb9ef7f92d48811a02a114f86a4
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 36300000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 190606
+  packageName: PBR Modular Sci-Fi Corridor v1 VR/Mobile
+  packageVersion: 1.0
+  assetPath: Assets/PBR_Modular_SciFi_corridor/Map_v1/OcclusionCullingData.asset
+  uploadId: 420792

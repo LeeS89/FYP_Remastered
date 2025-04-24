@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ef951046f174a1c4090c0646269790e2
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 190606
+  packageName: PBR Modular Sci-Fi Corridor v1 VR/Mobile
+  packageVersion: 1.0
+  assetPath: Assets/PBR_Modular_SciFi_corridor/Models/Engine_Room/Source/Engine_Room.mat
+  uploadId: 420792

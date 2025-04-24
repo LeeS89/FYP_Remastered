@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 357e53e47b8e7a947b41aa249627ff48
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 190606
+  packageName: PBR Modular Sci-Fi Corridor v1 VR/Mobile
+  packageVersion: 1.0
+  assetPath: Assets/PBR_Modular_SciFi_corridor/Models/Corridor_Parts/Source/Corridor_Parts.mat
+  uploadId: 420792

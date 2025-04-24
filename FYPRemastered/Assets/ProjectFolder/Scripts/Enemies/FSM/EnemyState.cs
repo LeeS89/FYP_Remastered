@@ -1,9 +1,6 @@
-using System;
-using System.IO;
 using UnityEngine;
 using UnityEngine.AI;
-using static UnityEngine.UI.GridLayoutGroup;
-using Random = UnityEngine.Random;
+
 
 public abstract class EnemyState
 {
@@ -68,6 +65,35 @@ public abstract class EnemyState
     }
 
 
+    
+
+    protected static bool HasClearPathToTarget(Vector3 from, Vector3 to, NavMeshPath path)
+    {
+        if(!NavMesh.CalculatePath(from, to, NavMesh.AllAreas, path))
+            return false;
+
+        return path.status == NavMeshPathStatus.PathComplete;
+    }
+
+
+    #region Old Code
+    /* protected static bool IsDistanceGreaterThan(Vector3 from, Vector3 to, float threshold)
+    {
+        float thresholdSqr = threshold * threshold;
+        float distSqr = (to - from).sqrMagnitude;
+        return distSqr > (thresholdSqr * 1.3f);
+    }
+
+    protected bool IsPathToTargetComplete(Vector3 destination)
+    {
+        if (NavMesh.CalculatePath(_owner.transform.position, destination, NavMesh.AllAreas, _path))
+        {
+            return _path.status == NavMeshPathStatus.PathComplete;
+        }
+
+        return false;
+    }*/
+
     /*public static bool IsTargetMovingAndReachable(
     Vector3 from,
     Vector3 to,
@@ -92,29 +118,6 @@ public abstract class EnemyState
         //Debug.LogError("Path status: " + path.status);
         return path.status == NavMeshPathStatus.PathComplete;
     }*/
-
-    protected static bool HasClearPathToTarget(Vector3 from, Vector3 to, NavMeshPath path)
-    {
-        if(!NavMesh.CalculatePath(from, to, NavMesh.AllAreas, path))
-            return false;
-
-        return path.status == NavMeshPathStatus.PathComplete;
-    }
-    /* protected static bool IsDistanceGreaterThan(Vector3 from, Vector3 to, float threshold)
-     {
-         float thresholdSqr = threshold * threshold;
-         float distSqr = (to - from).sqrMagnitude;
-         return distSqr > (thresholdSqr * 1.3f);
-     }
-
-     protected bool IsPathToTargetComplete(Vector3 destination)
-     {
-         if (NavMesh.CalculatePath(_owner.transform.position, destination, NavMesh.AllAreas, _path))
-         {
-             return _path.status == NavMeshPathStatus.PathComplete;
-         }
-
-         return false;
-     }*/
+    #endregion
 
 }

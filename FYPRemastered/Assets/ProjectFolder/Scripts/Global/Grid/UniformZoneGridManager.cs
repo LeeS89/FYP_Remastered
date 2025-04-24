@@ -25,6 +25,9 @@ public class UniformZoneGridManager : MonoBehaviour
     public float sampleRadius = 2f;
     public GameObject markerPrefab;
 
+    [Header("NavMesh Source Objects")]
+    public List<GameObject> navMeshObjects = new List<GameObject>();
+
     [Header("Step Logic")]
     public float stepSize = 1f; // Step bands: step 2 = 2–2.99, etc.
     public int maxSteps = 30;
@@ -39,9 +42,58 @@ public class UniformZoneGridManager : MonoBehaviour
     [ContextMenu("Auto Place Sample Cubes on NavMesh")]
     public void AutoPlaceCubesOnNavMesh()
     {
+        if (navMeshObjects == null || navMeshObjects.Count == 0)
+        {
+            Debug.LogError("No NavMesh objects assigned.");
+            return;
+        }
+
+        if (markerPrefab == null)
+        {
+            Debug.LogError("Missing Marker Prefab.");
+            return;
+        }
+
+
         ClearExistingSampleCubes();
 
-        Renderer rend = GetComponent<Renderer>();
+        foreach (GameObject obj in navMeshObjects)
+        {
+            Renderer rend = obj.GetComponent<Renderer>();
+            if (rend == null)
+            {
+                Debug.LogWarning($"No Renderer found on {obj.name}, skipping.");
+                continue;
+            }
+
+            Bounds bounds = rend.bounds;
+
+            Vector3 min = bounds.min;
+            Vector3 max = bounds.max;
+
+            int numX = Mathf.CeilToInt((max.x - min.x) / cellSize);
+            int numZ = Mathf.CeilToInt((max.z - min.z) / cellSize);
+
+            for (int x = 0; x < numX; x++)
+            {
+                for (int z = 0; z < numZ; z++)
+                {
+                    float posX = min.x + x * cellSize + cellSize * 0.5f;
+                    float posZ = min.z + z * cellSize + cellSize * 0.5f;
+                    Vector3 sample = new Vector3(posX, bounds.max.y, posZ);
+
+                    if (NavMesh.SamplePosition(sample, out NavMeshHit hit, sampleRadius, NavMesh.AllAreas))
+                    {
+                        GameObject cube = Instantiate(markerPrefab, hit.position, Quaternion.identity);
+                        cube.name = $"SampleNav_{x}_{z}";
+                        cube.transform.SetParent(transform);
+                        manualSamplePoints.Add(cube.transform);
+                    }
+                }
+            }
+        }
+
+        /*Renderer rend = GetComponent<Renderer>();
         if (rend == null || markerPrefab == null)
         {
             Debug.LogError("Missing Renderer or Marker Prefab");
@@ -72,7 +124,7 @@ public class UniformZoneGridManager : MonoBehaviour
                     manualSamplePoints.Add(cube.transform);
                 }
             }
-        }
+        }*/
 
         Debug.LogError($"Placed {manualSamplePoints.Count} sample cubes on NavMesh.");
     }

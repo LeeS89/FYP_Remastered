@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: c445d2020a412564a9b0b7e805cca037
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 190606
+  packageName: PBR Modular Sci-Fi Corridor v1 VR/Mobile
+  packageVersion: 1.0
+  assetPath: Assets/PBR_Modular_SciFi_corridor/Models/Engine_Room/Anim/Rotate_ER_v4_2.anim
+  uploadId: 420792

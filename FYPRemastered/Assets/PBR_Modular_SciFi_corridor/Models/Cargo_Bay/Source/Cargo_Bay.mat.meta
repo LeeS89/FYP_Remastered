@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 925360ecbe0bdb84f84a7c736e0ada3a
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 190606
+  packageName: PBR Modular Sci-Fi Corridor v1 VR/Mobile
+  packageVersion: 1.0
+  assetPath: Assets/PBR_Modular_SciFi_corridor/Models/Cargo_Bay/Source/Cargo_Bay.mat
+  uploadId: 420792
