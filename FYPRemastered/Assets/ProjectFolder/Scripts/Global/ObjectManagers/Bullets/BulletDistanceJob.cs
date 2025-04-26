@@ -8,7 +8,7 @@ public class BulletDistanceJob : MonoBehaviour
 {
     public static BulletDistanceJob Instance { get; private set; }
 
-    [SerializeField] private Transform _player;
+    [SerializeField] private Transform _player; /// Set with game manager eventually
 
     private NativeArray<Vector3> _bulletPositions;
     private NativeArray<float> _distances;
