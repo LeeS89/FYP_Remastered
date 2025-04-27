@@ -10,6 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1730306358030552484}
   - component: {fileID: 730729865798543561}
+  - component: {fileID: 2406689411211726246}
+  - component: {fileID: 2678948082886071746}
   m_Layer: 0
   m_Name: MoonSceneManager
   m_TagString: Untagged
@@ -44,4 +46,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2698b3cf1092f7a479dbe4629746662d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _normalHitPrefab: {fileID: 2117498089286912745, guid: f33db7fc758f5944180365f8ef5eb197, type: 3}
+  _eventManagers: []
+  _normalHitPrefab: {fileID: 0}
+  _deflectAudioPrefab: {fileID: 0}
+  _normalBulletPrefab: {fileID: 0}
+  _enemy: {fileID: 0}
+  _testspawn: 0
+--- !u!114 &2406689411211726246
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7785938470125478005}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c46ad8cce7657ff4298dc2ece3fb33ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _player: {fileID: 0}
+  _maxbullets: 100
+--- !u!114 &2678948082886071746
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7785938470125478005}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae9a0022d9958274aba62a232de71756, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

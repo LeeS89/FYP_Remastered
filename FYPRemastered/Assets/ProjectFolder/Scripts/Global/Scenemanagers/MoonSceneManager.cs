@@ -25,6 +25,8 @@ public class MoonSceneManager : BaseSceneManager
 
     private void Update()
     {
+        if(_enemy == null) { return; }
+
         if (_testspawn)
         {
             _enemy.ResetFSM();

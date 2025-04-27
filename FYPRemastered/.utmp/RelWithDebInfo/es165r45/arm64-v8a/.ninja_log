@@ -1,10 +1,19 @@
 # ninja log v5
+953	1081	7636654351164589	C:/Users/leesl/Documents/GitHub/FYP_Remastered/FYPRemastered/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/es165r45/obj/arm64-v8a/libgame.so	246779797e495941
 26	690	7636654347663973	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	f24da4e9bfe5ca6c
 43	697	7636654347730565	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	c09216ffee04ef1e
-9	710	7636654347857270	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	f77572c9b882ed96
-53	729	7636654348046884	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	aabd45e5ee53bcef
-0	744	7636654348194379	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	abac45d587d61721
 64	798	7636654348747676	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	86c5058a9e9a39e8
+9	710	7636654347857270	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	f77572c9b882ed96
+0	744	7636654348194379	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	abac45d587d61721
+53	729	7636654348046884	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	aabd45e5ee53bcef
 34	889	7636654349660618	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	3c05f80f5455a999
 18	952	7636654350241969	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	f35d019031503134
-953	1081	7636654351164589	C:/Users/leesl/Documents/GitHub/FYP_Remastered/FYPRemastered/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/es165r45/obj/arm64-v8a/libgame.so	246779797e495941
+0	1833	7674198920809758	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	f35d019031503134
+234	1834	7674198920895372	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	abac45d587d61721
+462	1836	7674198922758799	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	f77572c9b882ed96
+692	1837	7674198924858156	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	f24da4e9bfe5ca6c
+920	1838	7674198926835399	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	aabd45e5ee53bcef
+1142	2102	7674198930726744	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	3c05f80f5455a999
+1372	2132	7674198931053117	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	c09216ffee04ef1e
+1600	2457	7674198934155198	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	86c5058a9e9a39e8
+2458	2936	7674198938914635	C:/Users/leesl/Documents/GitHub/FYP_Remastered/FYPRemastered/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/es165r45/obj/arm64-v8a/libgame.so	246779797e495941
