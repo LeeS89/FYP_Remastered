@@ -21,7 +21,7 @@ public partial class EnemyFSMController : ComponentEvents
         GameManager._onPlayerMovedinternal += EnemyState.SetPlayerMoved;
 
         ChangeState(_patrol); 
-        //ChangeState(_chasing);
+
     }
 
 

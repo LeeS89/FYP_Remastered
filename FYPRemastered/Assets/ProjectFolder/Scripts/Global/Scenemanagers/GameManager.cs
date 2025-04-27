@@ -113,7 +113,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    //public Transform _test;
+    public Transform _test;
     public Transform GetPlayerPosition(PlayerPart part)
     {
         if (!Player || !PlayerDefenceCollider) { return null; }
