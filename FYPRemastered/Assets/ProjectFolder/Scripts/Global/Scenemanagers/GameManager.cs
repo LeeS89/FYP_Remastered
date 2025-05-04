@@ -51,6 +51,13 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        Application.targetFrameRate = 90;
+    }
+
+    
+
     public void CharacterDied(CharacterType type, GameObject obj = null)
     {
         switch (type)

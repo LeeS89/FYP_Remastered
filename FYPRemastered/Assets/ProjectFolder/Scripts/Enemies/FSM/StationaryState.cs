@@ -9,13 +9,9 @@ public class StationaryState : EnemyState
     private float intervalTimer = 0;
     private float checkInterval = 2.5f;
     private bool _pathCheckComplete = false;
-    /*private bool _shouldUpdateDestination = false;*/
+    
     private WaitUntil _waitUntilPathCheckComplete;
-    //private float _alertPhaseStoppingDistance;
-
-    //
-    private float _stateEntryDistanceFromPlayer;
-
+   
     public StationaryState(EnemyEventManager eventManager, GameObject owner, NavMeshPath path) : base(eventManager, path, owner) 
     { 
       
@@ -42,7 +38,7 @@ public class StationaryState : EnemyState
                 if (_coroutine == null)
                 {
                     _isStationary = true;
-                    _coroutine = CoroutineRunner.Instance.StartCoroutine(ChasePlayerRoutine());
+                    _coroutine = CoroutineRunner.Instance.StartCoroutine(PlayerProximityRoutine());
 
                     
                 }
@@ -57,27 +53,20 @@ public class StationaryState : EnemyState
        
     }
 
-    private IEnumerator ChasePlayerRoutine()
+    private IEnumerator PlayerProximityRoutine()
     {
        
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.5f); // Small buffer before coroutine starts running
+
+        /// When the agent registers with the StationaryChaseManagerJob, this calculates the agents distance from the player
+        /// and if the distance between the agent and player becomes > that distance multiplied by the bufferMultiplier, the agent will start chasing again
         float bufferMultiplier = Random.Range(1.2f, 1.45f);
         _agentId = StationaryChaseManagerJob.Instance.RegisterAgent(LineOfSightUtility.GetClosestPointOnNavMesh(_owner.transform.position), bufferMultiplier, this);
-        //_stateEntryDistanceFromPlayer = (GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position - _owner.transform.position).sqrMagnitude; //Vector3.Distance(_owner.transform.position, GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position);
-        //Debug.LogError("Distance on entry: " + _stateEntryDistanceFromPlayer);
+
 
         while (_isStationary)
         {
-            /*Vector3 playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
-            if (IsTargetMovingAndReachable(LineOfSightUtility.GetClosestPointOnNavMesh(_owner.transform.position)*//*_owner.transform.position*//*, LineOfSightUtility.GetClosestPointOnNavMesh(playerPos)*//* playerPos*//*, _stateEntryDistanceFromPlayer, _path))
-            {
-          
-                _isStationary = false;
-                _eventManager.RequestChasingState();
-               
-                yield break;
-            }*/
-
+           
             yield return _waitUntilPathCheckComplete;
             _pathCheckComplete = false;
 
@@ -89,9 +78,6 @@ public class StationaryState : EnemyState
                 yield break;
             }
 
-            //yield return new WaitForSeconds(1f);
-
-            /*intervalTimer += Time.deltaTime;*/
             if (intervalTimer >= checkInterval)
             {
                 intervalTimer = 0f;
@@ -123,6 +109,13 @@ public class StationaryState : EnemyState
 
     }
 
+    /// <summary>
+    /// Each time a StationaryChaseManagerJob job runs, it calls this function, passing the result of the distance from the player calculation
+    /// and the players current position.
+    /// If true is passed, a path check is done to determine if the player is reachable.
+    /// </summary>
+    /// <param name="canChase"> passes true if the distance between agent and player is greater than distance on entry * bufferMultiplier </param>
+    /// <param name="playerPosition"></param>
     public override void SetChaseEligibility(bool canChase, Vector3 playerPosition)
     {
         base.SetChaseEligibility(canChase, playerPosition);
@@ -144,8 +137,7 @@ public class StationaryState : EnemyState
         {
             StationaryChaseManagerJob.Instance.UnregisterAgent(_agentId);
             _owner.GetComponent<NavMeshAgent>().updateRotation = true;
-            //_owner.GetComponent<NavMeshObstacle>().enabled = false;
-            //_owner.GetComponent<NavMeshAgent>().enabled = true;
+           
             _isStationary = false;
             _pathCheckComplete = false;
             _shouldUpdateDestination = false;
@@ -173,6 +165,11 @@ public class StationaryState : EnemyState
         if (_owner == null || GameManager.Instance == null)
             return;
 
+        RotateTowardsPlayer();
+    }
+
+    private void RotateTowardsPlayer()
+    {
         Transform player = GameManager.Instance.GetPlayerPosition(PlayerPart.Position);
         if (player == null)
             return;
