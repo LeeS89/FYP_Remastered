@@ -37,7 +37,7 @@ public class ParticleManager : MonoBehaviour
         }
     }
 
-    void Update()
+    void FixedUpdate()
     {
         if (!_particlesExist) { return; }
 

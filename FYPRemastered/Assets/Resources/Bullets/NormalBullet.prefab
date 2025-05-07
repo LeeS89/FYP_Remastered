@@ -46,6 +46,38 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _particleManager: {fileID: 0}
   _particle: {fileID: 2117498089286912745, guid: f33db7fc758f5944180365f8ef5eb197, type: 3}
+  particleMove: {fileID: 0}
+--- !u!1 &4136559357840876812
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1329424013444801620}
+  m_Layer: 0
+  m_Name: OldBullets (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &1329424013444801620
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4136559357840876812}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.5, y: 0.5, z: -0.5, w: 0.5}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 28.57143, y: 28.571426, z: 28.571434}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1947713748307513525}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6588732399459625391
 GameObject:
   m_ObjectHideFlags: 0
@@ -141,6 +173,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   _damageData: {fileID: 11400000, guid: b7f82553a2b81bd4194b10319677300f, type: 2}
+  _statusEffectChancePercentage: 0
+  _testDeflect: 0
 --- !u!95 &853653332336143470
 Animator:
   serializedVersion: 7
@@ -195,7 +229,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.07, y: 0.07, z: 0.07}
   m_ConstrainProportionsScale: 1
-  m_Children: []
+  m_Children:
+  - {fileID: 1329424013444801620}
   m_Father: {fileID: 6050013699054771250}
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!33 &4295967632962239504
@@ -286,7 +321,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b1b92c1cdcf52c4084ed357eca4e1f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _speed: 2
+  _editableSpeed: 2
   _scale: {x: 0, y: 0, z: 0}
 --- !u!1 &8862239039402137114
 GameObject:
@@ -336,7 +371,6 @@ MonoBehaviour:
   _distanceToPlayer: 0
   _cullDistance: 0.5
   _anim: {fileID: 853653332336143470}
-  _eventManager: {fileID: 7026262071358711773}
   _capsuleCollider: {fileID: 5111258017325434983}
   _layerMask:
     serializedVersion: 2

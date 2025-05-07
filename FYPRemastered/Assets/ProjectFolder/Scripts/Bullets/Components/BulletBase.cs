@@ -111,6 +111,11 @@ public abstract class BulletBase : ComponentEvents, IPoolable
         //Initializebullet();
     }
 
+    private void Start()
+    {
+        _bulletEventManager.ParticlePlay(this);
+    }
+
     public virtual void Initializebullet()
     {
         

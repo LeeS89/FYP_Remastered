@@ -8,6 +8,8 @@ public class BulletVFX : ComponentEvents
     private PoolManager _poolManager;
     private BulletEventManager _bulletEventManager;
 
+    public ParticleSystem particleMove;
+
     //public MoonSceneManager _manager;
     public override void RegisterLocalEvents(EventManager eventManager)
     {
@@ -48,14 +50,68 @@ public class BulletVFX : ComponentEvents
 
     private void PlayBulletParticle(BulletBase bullet/*, BulletType bulletType*/)
     {
+        //ParticleSystem particle = transform.root.GetComponentInChildren<ParticleSystem>();
+        
+
+        //particleMove.Clear(true); // Clear old particles
+        //particleMove.Play(true);  // Force restart from frame 0
+
+        //particleMove.Play();
+
+        if (_particleManager == null) { return; }    
+
         _particleManager.AddBullet(bullet/*, bulletType*/);
     }
 
     private void StopBulletParticle(BulletBase bullet/*, BulletType bulletType*/)
     {
+        //ParticleSystem particle = transform.root.GetComponentInChildren<ParticleSystem>();
+        /*particleMove.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);*/
+        
+        //particleMove.Pause();
+
+        if (_particleManager == null) { return; }
         _particleManager.Removebullet(bullet);
     }
 
+    private void OnDisable()
+    {
+        //particleMove.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        //particleMove.transform.localPosition = Vector3.zero;
+    }
+
+    /*private void OnEnable()
+    {
+        particleMove.transform.localPosition = Vector3.zero;
+    }*/
+
+   /* private void Update()
+    {
+        if (particleMove.isPlaying)
+        {
+            particleMove.transform.localPosition = Vector3.zero;
+        }
+    }*/
+
+    private bool _justActivated = false;
+
+    void OnEnable()
+    {
+       // particleMove.Play(true);
+        //particleMove.transform.localPosition = Vector3.zero;
+        //particleMove.Clear(true);
+        //_justActivated = true;
+    }
+
+    void LateUpdate()
+    {
+        /*if (_justActivated)
+        {
+            //particleMove.Play(true);
+            particleMove.transform.localPosition = Vector3.zero;
+            _justActivated = false;
+        }*/
+    }
     /* private void OnDestroy()
      {
          BulletBase bullet = GetComponentInParent<BulletBase>();
