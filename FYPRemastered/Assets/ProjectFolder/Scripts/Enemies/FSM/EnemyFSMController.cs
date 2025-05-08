@@ -57,6 +57,7 @@ public partial class EnemyFSMController : ComponentEvents
     private float _targetSpeed = 0f;
     private float _lerpSpeed = 0f;
     private bool _movementChanged = false;
+    private float _previousDirection = 0f;
     private EnemyEventManager _enemyEventManager;
     
     
@@ -145,6 +146,29 @@ public partial class EnemyFSMController : ComponentEvents
         _lerpSpeed = lerpSpeed;
         _movementChanged = true;
     }
+
+    private void UpdateAnimatorDirection()
+    {
+        // Get the normalized movement direction
+        Vector3 movementDirection = _agent.velocity.normalized;
+
+        // Calculate the angle between the agent's forward direction and the movement direction
+        float angle = Vector3.SignedAngle(transform.forward, movementDirection, Vector3.up);
+
+        // Normalize the angle to a value between -1 and 1
+        float normalizedDirection = angle / 90f;
+
+        // Only update the direction if it has changed significantly (for example, threshold of 0.1)
+        if (Mathf.Abs(normalizedDirection - _previousDirection) > 0.1f)
+        {
+            _animController.UpdateDirection(normalizedDirection); // Update the animator with the new direction
+            //animator.SetFloat("direction", normalizedDirection); // Update the direction parameter
+            _previousDirection = normalizedDirection; // Store the new direction
+        }
+
+        // Update the speed as usual
+        //animator.SetFloat("speed", _agent.velocity.magnitude);
+    } 
     #endregion
 
    

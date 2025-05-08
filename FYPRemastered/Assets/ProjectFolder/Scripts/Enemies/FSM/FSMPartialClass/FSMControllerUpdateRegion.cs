@@ -1,4 +1,5 @@
-using UnityEngine;
+﻿using UnityEngine;
+
 
 public partial class EnemyFSMController : ComponentEvents
 {
@@ -75,6 +76,18 @@ public partial class EnemyFSMController : ComponentEvents
         //MeasurePathToDestination();
         _destinationCheckAction?.Invoke();
 
+
+        if(_currentState != _stationary && _canSeePlayer)
+        {
+            if (_agent.updateRotation)
+            {
+                _agent.updateRotation = false;
+            }
+           
+            RotateTowardsPlayer();
+            UpdateAnimatorDirection();
+        }
+
         if (!_movementChanged) { return; }
 
         UpdateAnimatorSpeed();
@@ -114,6 +127,45 @@ public partial class EnemyFSMController : ComponentEvents
         _destinationCheckAction = null;
     }
 
+
+    private void RotateTowardsPlayer()
+    {
+        Transform player = GameManager.Instance.GetPlayerPosition(PlayerPart.Position);
+        if (player == null)
+            return;
+
+        Vector3 toPlayer = player.position - transform.position;
+        toPlayer.y = 0f;
+
+        if (toPlayer.sqrMagnitude < 0.001f)
+            return;
+
+        Vector3 forward = transform.forward;
+        forward.y = 0f;
+
+        float dot = Vector3.Dot(forward.normalized, toPlayer.normalized);
+        float angle = Mathf.Acos(dot) * Mathf.Rad2Deg;
+
+        const float precisionThreshold = 1f; // degrees
+
+        Quaternion targetRotation = Quaternion.LookRotation(toPlayer);
+
+        if (angle < precisionThreshold)
+        {
+            // ✅ Close enough — complete the rotation smoothly
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation,
+                targetRotation,
+                1f); // forces it to land exactly, still smooth
+            return;
+        }
+
+        // ✅ Smoothly rotate toward target
+        transform.rotation = Quaternion.Slerp(
+            transform.rotation,
+            targetRotation,
+            Time.deltaTime * 5f); // adjust speed as needed
+    }
 
     #endregion
 }

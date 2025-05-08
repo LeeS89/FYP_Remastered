@@ -39,6 +39,11 @@ public class EnemyAnimController
         _anim.SetFloat("speed", speed);
     }
 
+    public void UpdateDirection(float direction)
+    {
+        _anim.SetFloat("direction", direction);
+    }
+
     public void LookAround()
     {
         _anim.SetTrigger("look");
