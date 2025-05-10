@@ -1,3 +1,61 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:07e8a66be910e720eec1ab75c1a907cd41501d4d457336b80aa6ad3503408a3b
-size 2498
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c252863d3264814b8c34a1c4a2e762d, type: 3}
+  m_Name: Magneta_Laser_HandGrabCollection
+  m_EditorClassIdentifier: 
+  _interactablesData:
+  - poses:
+    - gripPose:
+        position: {x: 0.107190244, y: -0.2539413, z: 0.0938079}
+        rotation: {x: -0.6559443, y: -0.6962311, z: -0.005995387, w: 0.2914848}
+      handPose:
+        _handedness: 0
+        _fingersFreedom: 0200000002000000010000000100000000000000
+        _jointRotations:
+        - {x: 0.0926601, y: 0.43277073, z: -0.6526154, w: 0.6149926}
+        - {x: 0.28964815, y: -0.043055315, z: 0.08026255, w: 0.95278937}
+        - {x: 0.25118113, y: 0.03769606, z: -0.07387378, w: 0.9643804}
+        - {x: 0, y: 0, z: 0, w: 0.99999964}
+        - {x: 0.34104934, y: -0.026311984, z: -0.033114962, w: 0.93909305}
+        - {x: 0.6986572, y: 0.012905986, z: 0.022100806, w: 0.7149985}
+        - {x: 0.4433267, y: -0.016039688, z: 0.016918449, w: 0.8960569}
+        - {x: 0, y: 0, z: 0, w: 0.99999964}
+        - {x: 0.42017487, y: -0.059930135, z: 0.032044664, w: 0.90489435}
+        - {x: 0.6907294, y: 0.0046150014, z: 0.01257515, w: 0.7229889}
+        - {x: 0.5250552, y: 0.022459455, z: 0.08850069, w: 0.84615594}
+        - {x: 0, y: 0, z: 0, w: 0.99999964}
+        - {x: 0.4446383, y: -0.081686676, z: 0.090684384, w: 0.8873555}
+        - {x: 0.70552963, y: 0.021532742, z: 0.041541953, w: 0.70713377}
+        - {x: 0.5480505, y: 0.02704582, z: 0.02960012, w: 0.8354836}
+        - {x: 0.018311806, y: -0.14034274, z: 0.20703594, w: 0.96804136}
+        - {x: 0.45782623, y: -0.027143426, z: -0.067771904, w: 0.8860389}
+        - {x: 0.6482742, y: -0.0069600064, z: 0.0863238, w: 0.7564655}
+        - {x: 0.53387326, y: 0.04118598, z: -0.0024566092, w: 0.8445571}
+      scale: 1.628845
+    grabType: 3
+    handAlignment: 1
+    scoringModifier:
+      _positionRotationWeight: 0.8
+    pinchGrabRules:
+      _thumbRequirement: 1
+      _indexRequirement: 1
+      _middleRequirement: 1
+      _ringRequirement: 0
+      _pinkyRequirement: 0
+      _unselectMode: 0
+    palmGrabRules:
+      _thumbRequirement: 1
+      _indexRequirement: 2
+      _middleRequirement: 2
+      _ringRequirement: 2
+      _pinkyRequirement: 1
+      _unselectMode: 0

@@ -8,3 +8,11 @@
 *.blend filter=lfs diff=lfs merge=lfs -text
 *.jpg filter=lfs diff=lfs merge=lfs -text
 *.mp3 filter=lfs diff=lfs merge=lfs -text
+FYPRemastered/Assets/intruder/intruder.fbx !text !filter !merge !diff
+FYPRemastered/Assets/intruder/textures/day_bottom.png !text !filter !merge !diff
+FYPRemastered/Assets/intruder/textures/day_right.png !text !filter !merge !diff
+FYPRemastered/Assets/intruder/textures/day_left.png !text !filter !merge !diff
+FYPRemastered/Assets/intruder/textures/day_up.png !text !filter !merge !diff
+*.png !text !filter !merge !diff
+*.jpg !text !filter !merge !diff
+*.asset !text !filter !merge !diff

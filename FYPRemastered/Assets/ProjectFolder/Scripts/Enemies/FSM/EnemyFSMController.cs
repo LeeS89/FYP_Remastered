@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
+
 public partial class EnemyFSMController : ComponentEvents
 {
     [Header("Agent and Animation Components")]
@@ -19,7 +20,12 @@ public partial class EnemyFSMController : ComponentEvents
 
     [Header("Patrol State - Random number between 0 and stopAndWaitDelay to wait at each way point")]
     [SerializeField] private float _stopAndWaitDelay;
-    [SerializeField] private List<Transform> _wayPoints;
+    [SerializeField] private List<Vector3> _wayPoints;
+    [SerializeField] private List<Vector3> _wayPointForwards;
+    [SerializeField] private WaypointManager _waypointManager;
+    private GameObject _waypointBlock;
+    private BlockData _blockData;
+    public int _blockZone = 0;
     private PatrolState _patrol;
 
     [Header("Chasing State Params")]

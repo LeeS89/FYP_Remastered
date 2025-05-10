@@ -8,8 +8,9 @@ using Random = UnityEngine.Random;
 
 public class PatrolState : EnemyState
 {
-    private List<Transform> _wayPoints;
-   
+    private List<Vector3> _wayPoints;
+    private List<Vector3> _waypointForwards;
+
     private WaitUntil _waitUntilDestinationReached;
     private Func<bool> _hasReachedDestination;
     private int index = 0;
@@ -18,12 +19,13 @@ public class PatrolState : EnemyState
     private bool _isPatrolling = false;
     
 
-    public PatrolState(List<Transform> wayPoints, GameObject owner, EnemyEventManager eventManager, float randomDelay, float walkSpeed) : base(eventManager, owner)
+    public PatrolState(List<Vector3> wayPoints, List<Vector3> waypointforwards, GameObject owner, EnemyEventManager eventManager, float randomDelay, float walkSpeed) : base(eventManager, owner)
     {
        
         _walkSpeed = walkSpeed;
         _randomWaitTime = randomDelay;
         _wayPoints = wayPoints;
+        _waypointForwards = waypointforwards;
         _hasReachedDestination = CheckDestinationReached;
         _waitUntilDestinationReached = new WaitUntil(_hasReachedDestination);
     }
@@ -47,18 +49,18 @@ public class PatrolState : EnemyState
             SetDestinationReached(false);
             index = GetNextDestination();
            
-            _eventManager.DestinationUpdated(_wayPoints[index].position);
+            _eventManager.DestinationUpdated(_wayPoints[index]);
             
             _eventManager.SpeedChanged(_walkSpeed, 2f);
             
 
             yield return _waitUntilDestinationReached;
-            Debug.LogError("Reached destination: " + _wayPoints[index].name);
+            Debug.LogError("Reached destination: " + _wayPoints[index]);
 
             _eventManager.SpeedChanged(0f, 10f);
            
             // Calculating the direction vector from the agent to the destination
-            Vector3 directionToFace = _wayPoints[index].forward;
+            Vector3 directionToFace = _waypointForwards[index];
 
             //New rotation based on the direction vector
             Quaternion targetRotation = Quaternion.LookRotation(directionToFace);

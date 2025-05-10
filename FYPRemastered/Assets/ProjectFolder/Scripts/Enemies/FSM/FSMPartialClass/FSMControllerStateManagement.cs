@@ -6,12 +6,30 @@ public partial class EnemyFSMController : ComponentEvents
     #region FSM Management
     private void SetupFSM()
     {
+        _waypointManager = GameObject.FindFirstObjectByType<WaypointManager>();
+        _blockData = _waypointManager.RequestWaypointBlock();
+        //_waypointBlock = _blockData._block;
+        _blockZone = _blockData._blockZone;
+
+        Debug.LogError("Block Zone for enemy: " + _blockZone);
+
+        foreach (Vector3 position in _blockData._waypointPositions)
+        {
+            Debug.LogError("Position: "+position);
+            _wayPoints.Add(position);
+        }
+
+        foreach (Vector3 forward in _blockData._waypointForwards)
+        {
+            _wayPointForwards.Add(forward);
+        }
+
         _path = new NavMeshPath();
         _fovCheckFrequency = _patrolFOVCheckFrequency;
         _fov = new TraceComponent(1);
         _fovTraceResults = new Collider[1];
         _animController = new EnemyAnimController(_anim, _enemyEventManager);
-        _patrol = new PatrolState(_wayPoints, _owningGameObject, _enemyEventManager, _stopAndWaitDelay, _walkSpeed);
+        _patrol = new PatrolState(_wayPoints, _wayPointForwards, _owningGameObject, _enemyEventManager, _stopAndWaitDelay, _walkSpeed);
         _chasing = new ChasingState(_enemyEventManager, _owningGameObject, _walkSpeed, _sprintSpeed);
         _stationary = new StationaryState(_enemyEventManager, _owningGameObject, _path);
         _deathState = new DeathState(_enemyEventManager, _owningGameObject);
@@ -19,6 +37,9 @@ public partial class EnemyFSMController : ComponentEvents
         Transform playerTransform = GameManager.Instance.GetPlayerPosition(PlayerPart.DefenceCollider);
         _gun = new Gun(_bulletSpawnPoint, playerTransform, _enemyEventManager, _owningGameObject);
         GameManager._onPlayerMovedinternal += EnemyState.SetPlayerMoved;
+
+
+       
 
         ChangeState(_patrol); 
 

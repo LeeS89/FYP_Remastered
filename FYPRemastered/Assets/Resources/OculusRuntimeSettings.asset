@@ -1,3 +1,22 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:7b28ea476d76c6c9fae43b952998ca828912947882a5c26152ac27cfc8e1fb6b
-size 664
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3863570e7e6387a40ae4f323d83291e5, type: 3}
+  m_Name: OculusRuntimeSettings
+  m_EditorClassIdentifier: 
+  handSkeletonVersion: 1
+  colorSpace: 7
+  requestsVisualFaceTracking: 1
+  requestsAudioFaceTracking: 1
+  enableFaceTrackingVisemesOutput: 0
+  telemetryProjectGuid: fdd4ff9f-7cd9-4652-b66b-8251df2eb16d
+  bodyTrackingFidelity: 1
+  bodyTrackingJointSet: 0
