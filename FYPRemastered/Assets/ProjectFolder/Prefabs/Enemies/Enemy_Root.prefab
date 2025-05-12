@@ -207,31 +207,21 @@ MonoBehaviour:
   _anim: {fileID: 8894583834217872234}
   _walkSpeed: 0.9
   _stopAndWaitDelay: 6
-  _wayPoints:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  _wayPoints: []
+  _wayPointForwards: []
+  _blockZone: 0
   _sprintSpeed: 3.6
   _fovLocation: {fileID: 3514716611913536367}
   _patrolFOVCheckFrequency: 1
   _alertFOVCheckFrequency: 0.1
-  _fovTraceRadius: 15
+  _fovTraceRadius: 50
   _angle: 65
   _fovLayerMask:
     serializedVersion: 2
     m_Bits: 512
   _lineOfSightMask:
     serializedVersion: 2
-    m_Bits: 515
+    m_Bits: 514
   _fovTraceResults: []
   _canSeePlayer: 0
   _bulletSpawnPoint: {fileID: 1520609376679817542}

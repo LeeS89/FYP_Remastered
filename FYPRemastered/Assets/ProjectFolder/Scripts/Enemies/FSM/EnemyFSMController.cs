@@ -22,8 +22,8 @@ public partial class EnemyFSMController : ComponentEvents
     [SerializeField] private float _stopAndWaitDelay;
     [SerializeField] private List<Vector3> _wayPoints;
     [SerializeField] private List<Vector3> _wayPointForwards;
-    [SerializeField] private WaypointManager _waypointManager;
-    private GameObject _waypointBlock;
+    //[SerializeField] private WaypointManager _waypointManager;
+    //private GameObject _waypointBlock;
     private BlockData _blockData;
     public int _blockZone = 0;
     private PatrolState _patrol;

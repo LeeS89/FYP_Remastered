@@ -7,6 +7,8 @@ public class BaseSceneManager : MonoBehaviour, ISceneManager
     public event Action OnSceneStarted;
     public event Action OnSceneEnded;
 
+    [SerializeField] protected WaypointBlockData _waypointBlockData;
+    [SerializeField] protected WaypointManager _waypointManager;
     [SerializeField] protected List<EventManager> _eventManagers;
 
     public static BaseSceneManager _instance {  get; private set; }
@@ -37,6 +39,37 @@ public class BaseSceneManager : MonoBehaviour, ISceneManager
     public virtual void GetImpactParticlePool(ref PoolManager manager) { }
 
     public virtual void GetBulletPool(ref PoolManager manager) { }
+
+    protected virtual void LoadWaypoints()
+    {
+        if (_waypointManager == null)
+        {
+            _waypointManager = FindFirstObjectByType<WaypointManager>();
+        }
+        if (_waypointManager != null)
+        {
+            _waypointBlockData = _waypointManager.RetreiveWaypointData();
+        }
+    }
+
+    public virtual BlockData RequestWaypointBlock()
+    {
+        if(_waypointBlockData == null)
+        {
+            Debug.LogWarning("No Waypoints exist in the scene, please update waypoint manager");
+            return null;
+        }
+
+        foreach (var blockData in _waypointBlockData.blockDataArray)
+        {
+            if (!blockData._inUse)
+            {
+                blockData._inUse = true;
+                return blockData;
+            }
+        }
+        return null; 
+    }
 
 
 }

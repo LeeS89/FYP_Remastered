@@ -44,7 +44,7 @@ public class WaypointBlock : MonoBehaviour
         textMesh.fontSize = 16;
         textMesh.alignment = TextAlignment.Center;
         textMesh.anchor = TextAnchor.MiddleCenter;
-        textMesh.color = Color.black;
+        textMesh.color = Color.red;
         
     }
 }

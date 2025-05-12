@@ -12,4 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27835643e8da3df468a818bac6034ff2, type: 3}
   m_Name: MoonSceneWP
   m_EditorClassIdentifier: 
-  blockDataArray: []
+  blockDataArray:
+  - _block: {fileID: 0}
+    _blockPosition: {x: -36.57, y: 2.749, z: 1.43}
+    _waypointPositions:
+    - {x: -36.57, y: 2.749, z: 1.43}
+    - {x: -34.57, y: 2.749, z: 1.43}
+    - {x: -32.57, y: 2.749, z: 1.43}
+    - {x: -30.57, y: 2.749, z: 1.43}
+    _waypointForwards:
+    - {x: 0, y: 0, z: 1}
+    - {x: 0, y: 0, z: 1}
+    - {x: 0, y: 0, z: 1}
+    - {x: 0, y: 0, z: 1}
+    _blockZone: 1
+    _inUse: 0

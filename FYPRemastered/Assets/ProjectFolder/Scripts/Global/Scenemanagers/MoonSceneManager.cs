@@ -42,6 +42,8 @@ public class MoonSceneManager : BaseSceneManager
         InitializePools();
         LoadActiveSceneEventManagers();
         //StartCoroutine(InitializeDelay());
+        LoadWaypoints();
+
         SceneStarted();
         
     }

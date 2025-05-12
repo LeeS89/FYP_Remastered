@@ -1,8 +1,10 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
 
+[RequireComponent(typeof(WaypointBlock))]
 public class WaypointManager : MonoBehaviour
 {
 
@@ -10,10 +12,11 @@ public class WaypointManager : MonoBehaviour
     [SerializeField] private int _blockZone = 0;
     [SerializeField] private Vector3 blockPosition = new Vector3(0, 0, 0);
 
-    [SerializeField] public int _numWaypoints = 0;
-    [SerializeField]private List<BlockData> _waypointBlocks = new List<BlockData>();
+    [SerializeField] private int _numWaypoints = 0;
+    [SerializeField] private List<BlockData> _waypointBlocks = new List<BlockData>();
 
-    public WaypointBlockData waypointBlockData;
+    [SerializeField] private WaypointBlockData _waypointBlockData;
+    [SerializeField] private WaypointBlock _waypointBlock;
 
 
 
@@ -21,14 +24,20 @@ public class WaypointManager : MonoBehaviour
     [ContextMenu("Create Block")]
     public void CreateWaypointBlock()
     {
+        if(_waypointBlockData.blockDataArray.Length > 0)
+        {
+            ReloadWaypointsFromSO();
+        }
+
+
         // Instantiate the block at the desired position
         GameObject block = Instantiate(_waypointBlockPrefab, blockPosition, Quaternion.identity);
         block.name = "WaypointBlock_" + _waypointBlocks.Count + 1;
 
    
-        WaypointBlock waypointBlock = GetComponent<WaypointBlock>();
-        waypointBlock._numberOfWaypoints = _numWaypoints;  // Set the number of waypoints
-        waypointBlock.InstantiateWaypoints(block);
+        //WaypointBlock waypointBlock = GetComponent<WaypointBlock>();
+        _waypointBlock._numberOfWaypoints = _numWaypoints;  // Set the number of waypoints
+        _waypointBlock.InstantiateWaypoints(block);
 
         // Create a new BlockData entry and populate the list
         BlockData newBlock = new BlockData
@@ -52,13 +61,15 @@ public class WaypointManager : MonoBehaviour
 
     public WaypointBlockData RetreiveWaypointData()
     {
-        return waypointBlockData;
+        return _waypointBlockData;
     }
 
     [ContextMenu("Confirm Waypoint List")]
     public void UpdateWayPoints()
     {
-        for(int i = 0; i < _waypointBlocks.Count; i++)
+        //UpdateList();
+
+        for (int i = 0; i < _waypointBlocks.Count; i++)
         {
             BlockData data = _waypointBlocks[i];
 
@@ -71,16 +82,24 @@ public class WaypointManager : MonoBehaviour
                 waypointPositions.Add(waypoint.position);
                 waypointForwards.Add(waypoint.forward);
             }
-
+            data._blockPosition = data._block.transform.position;
             data._waypointPositions = waypointPositions.ToArray();
             data._waypointForwards = waypointForwards.ToArray();
 
         }
+
+        StoreWaypointsInSO();
     }
 
-    [ContextMenu("Store Waypoints in SO")]
-    public void StoreWaypointsInSO()
+    //[ContextMenu("Store Waypoints in SO")]
+    private void StoreWaypointsInSO()
     {
+        if(_waypointBlockData != null && _waypointBlockData.blockDataArray.Length > 0)
+        {
+            _waypointBlockData.ClearData();
+        }
+
+        
         List<BlockData> storedBlocks = new List<BlockData>();
 
         // Store the waypoint blocks data into the ScriptableObject
@@ -101,7 +120,9 @@ public class WaypointManager : MonoBehaviour
         }
 
         // Update the ScriptableObject with the data
-        waypointBlockData.blockDataArray = storedBlocks.ToArray();
+        _waypointBlockData.blockDataArray = storedBlocks.ToArray();
+
+        SaveScriptableObject();
 
         if (Application.isEditor && !Application.isPlaying)
         {
@@ -145,23 +166,29 @@ public class WaypointManager : MonoBehaviour
     }
 
 
-    [ContextMenu("Test Count")]
-    public void PrintCount()
-    {
-        int waypoints = _waypointBlocks[0]._block.transform.childCount;
-        /*foreach (Transform t in _waypointBlocks[0]._block.transform)
-        {
-            waypoints++;
-        }*/
-       // int waypoints = _waypointBlocks[0]._block.GetComponentsInChildren<Transform>().Length;
-        Debug.LogError("Count is: "+waypoints);
-    }
+    //[ContextMenu("Test Count")]
+    //public void PrintCount()
+    //{
+    //    int waypoints = _waypointBlocks[0]._block.transform.childCount;
+    //    /*foreach (Transform t in _waypointBlocks[0]._block.transform)
+    //    {
+    //        waypoints++;
+    //    }*/
+    //   // int waypoints = _waypointBlocks[0]._block.GetComponentsInChildren<Transform>().Length;
+    //    Debug.LogError("Count is: "+waypoints);
+    //}
 
     [ContextMenu("Reload Waypoints from SO")]
     public void ReloadWaypointsFromSO()
     {
+        if(_waypointBlockData.blockDataArray.Length == 0)
+        {
+            //Debug.LogWarning("No waypoint data found in the ScriptableObject.");
+            return;
+        }
+
         // Repopulate the _waypointBlocks list with data from the ScriptableObject
-        foreach (var blockData in waypointBlockData.blockDataArray)
+        foreach (var blockData in _waypointBlockData.blockDataArray)
         {
             // Instantiate the block prefab and set its position
             GameObject block = Instantiate(_waypointBlockPrefab, blockData._blockPosition, Quaternion.identity);
@@ -171,9 +198,9 @@ public class WaypointManager : MonoBehaviour
             blockData._block = block;  // Set the block reference here
 
             // Instantiate the waypoints for this block
-            WaypointBlock waypointBlock = block.GetComponent<WaypointBlock>();
-            waypointBlock._numberOfWaypoints = blockData._waypointPositions.Length;
-            waypointBlock.InstantiateWaypoints(block);  // Method to instantiate waypoints for this block
+            
+            _waypointBlock._numberOfWaypoints = blockData._waypointPositions.Length;
+            _waypointBlock.InstantiateWaypoints(block);  // Method to instantiate waypoints for this block
 
             // Now reposition the waypoints using the data from ScriptableObject
             int waypoints = block.transform.childCount;
@@ -201,31 +228,48 @@ public class WaypointManager : MonoBehaviour
 
             _waypointBlocks.Add(blockData);
         }
+        _waypointBlockData.ClearData(); // Clear the data in the ScriptableObject after loading
+
+        SaveScriptableObject();
+    }
+
+    private void SaveScriptableObject()
+    {
+        if (Application.isEditor && !Application.isPlaying)
+        {
+            EditorUtility.SetDirty(_waypointBlockData);  // Mark the ScriptableObject as modified
+            AssetDatabase.SaveAssets();  // Force Unity to save the changes
+        }
     }
 
 
     [ContextMenu("Refresh Waypoint List")]
     public void UpdateList()
     {
+        if(_waypointBlocks.Count == 0)
+        {
+            return;
+        }
+
         for (int i = _waypointBlocks.Count - 1; i >= 0; i--)
         {
             // Check if the position of the block is invalid or if other conditions apply.
             // In this case, we'll check if any of the waypoints are invalid (you could also check other conditions).
-            //bool isValidBlock = _waypointBlocks[i]._waypointPositions != null && _waypointBlocks[i]._waypointPositions.Length > 0;
-            //bool validBlock = _waypointBlocks[i]._blockPosition != null;
             GameObject obj = _waypointBlocks[i]._block;
             if (obj == null)
             {
                 // Remove the block from the list if it's not valid
                 _waypointBlocks.RemoveAt(i);
-                Debug.Log("Removed invalid block at index: " + i);
+                
             }
         }
+
+        
     }
 
 
     // Function to request a block
-    public BlockData RequestWaypointBlock()
+    /*public BlockData RequestWaypointBlock()
     {
         foreach (var blockData in _waypointBlocks)
         {
@@ -236,7 +280,7 @@ public class WaypointManager : MonoBehaviour
             }
         }
         return null; // No available blocks
-    }
+    }*/
 
     /*// Function to return a block
     public void ReturnWaypointBlock(GameObject block)

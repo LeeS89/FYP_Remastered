@@ -165,6 +165,11 @@ public class UniformZoneGridManager : MonoBehaviour
     // ----------------------------------------
     void Start()
     {
+        if(manualSamplePoints.Count == 0)
+        {
+            return;
+        }
+
         GenerateSamplePointData();
     }
 

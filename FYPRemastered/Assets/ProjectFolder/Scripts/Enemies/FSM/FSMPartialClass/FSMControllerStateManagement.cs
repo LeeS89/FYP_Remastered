@@ -6,22 +6,26 @@ public partial class EnemyFSMController : ComponentEvents
     #region FSM Management
     private void SetupFSM()
     {
-        _waypointManager = GameObject.FindFirstObjectByType<WaypointManager>();
-        _blockData = _waypointManager.RequestWaypointBlock();
+        //_waypointManager = GameObject.FindFirstObjectByType<WaypointManager>();
+        _blockData = BaseSceneManager._instance.RequestWaypointBlock();
         //_waypointBlock = _blockData._block;
-        _blockZone = _blockData._blockZone;
 
-        Debug.LogError("Block Zone for enemy: " + _blockZone);
-
-        foreach (Vector3 position in _blockData._waypointPositions)
+        if (_blockData != null)
         {
-            Debug.LogError("Position: "+position);
-            _wayPoints.Add(position);
-        }
+            _blockZone = _blockData._blockZone;
+            //Debug.LogError("Block Zone for enemy: " + _blockZone);
 
-        foreach (Vector3 forward in _blockData._waypointForwards)
-        {
-            _wayPointForwards.Add(forward);
+
+            foreach (Vector3 position in _blockData._waypointPositions)
+            {
+                //Debug.LogError("Position: " + position);
+                _wayPoints.Add(position);
+            }
+
+            foreach (Vector3 forward in _blockData._waypointForwards)
+            {
+                _wayPointForwards.Add(forward);
+            }
         }
 
         _path = new NavMeshPath();

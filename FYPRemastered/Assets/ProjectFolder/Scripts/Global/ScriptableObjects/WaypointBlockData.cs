@@ -4,4 +4,9 @@ using UnityEngine;
 public class WaypointBlockData : ScriptableObject
 {
     public BlockData[] blockDataArray;
+
+    public void ClearData()
+    {
+        blockDataArray = new BlockData[0];
+    }
 }

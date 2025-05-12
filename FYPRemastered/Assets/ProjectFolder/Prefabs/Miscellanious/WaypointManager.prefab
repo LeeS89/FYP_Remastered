@@ -49,21 +49,7 @@ MonoBehaviour:
   _blockZone: 1
   blockPosition: {x: 0, y: 0, z: 0}
   _numWaypoints: 4
-  _waypointBlocks:
-  - _block: {fileID: 0}
-    _blockPosition: {x: 0, y: 0, z: 0}
-    _waypointPositions:
-    - {x: -45.64, y: 2.785, z: -2.1449995}
-    - {x: -27.734999, y: 2.7445002, z: 1.7449999}
-    - {x: -28.364998, y: 2.7515001, z: -19.9}
-    - {x: -45.355, y: 2.7495003, z: -19.85}
-    _waypointForwards:
-    - {x: 0, y: 0, z: 1}
-    - {x: 0, y: 0, z: 1}
-    - {x: 0, y: 0, z: 1}
-    - {x: 0, y: 0, z: 1}
-    _blockZone: 1
-    _inUse: 0
+  _waypointBlocks: []
   waypointBlockData: {fileID: 11400000, guid: 68176bf3450091e468e20392c97f8d1b, type: 2}
 --- !u!114 &2107000924409752589
 MonoBehaviour:
@@ -80,4 +66,4 @@ MonoBehaviour:
   _waypointPrefab: {fileID: 1776933471414127626, guid: b772e3f70b653864abee4e05f4853641, type: 3}
   _waypointColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   _spacing: 2
-  _numberOfWaypoints: 5
+  _numberOfWaypoints: 4
