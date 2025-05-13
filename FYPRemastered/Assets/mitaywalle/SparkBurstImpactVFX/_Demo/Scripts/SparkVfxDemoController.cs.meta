@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: f355b70f3c8fb5b419a0d515a84696aa
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 183631
+  packageName: Spark Burst impact VFX
+  packageVersion: 1.001
+  assetPath: Assets/mitaywalle/SparkBurstImpactVFX/_Demo/Scripts/SparkVfxDemoController.cs
+  uploadId: 424871

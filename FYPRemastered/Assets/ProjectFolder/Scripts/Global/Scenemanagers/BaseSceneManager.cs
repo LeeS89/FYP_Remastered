@@ -50,6 +50,14 @@ public class BaseSceneManager : MonoBehaviour, ISceneManager
         {
             _waypointBlockData = _waypointManager.RetreiveWaypointData();
         }
+
+        if(_waypointBlockData != null)
+        {
+            foreach (var blockData in _waypointBlockData.blockDataArray)
+            {
+                blockData._inUse = false;
+            }
+        }
     }
 
     public virtual BlockData RequestWaypointBlock()

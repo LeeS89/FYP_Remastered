@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 039c521a453b4a04c98705d50aa5685c
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 183631
+  packageName: Spark Burst impact VFX
+  packageVersion: 1.001
+  assetPath: Assets/mitaywalle/SparkBurstImpactVFX/_Demo/Shaders/CustomOverdraw.shader
+  uploadId: 424871

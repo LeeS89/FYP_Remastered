@@ -1,8 +1,11 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor;
+
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 [RequireComponent(typeof(WaypointBlock))]
 public class WaypointManager : MonoBehaviour
@@ -29,6 +32,8 @@ public class WaypointManager : MonoBehaviour
             ReloadWaypointsFromSO();
         }
 
+
+        RefreshList();
 
         // Instantiate the block at the desired position
         GameObject block = Instantiate(_waypointBlockPrefab, blockPosition, Quaternion.identity);
@@ -67,7 +72,7 @@ public class WaypointManager : MonoBehaviour
     [ContextMenu("Confirm Waypoint List")]
     public void UpdateWayPoints()
     {
-        //UpdateList();
+        RefreshList();
 
         for (int i = 0; i < _waypointBlocks.Count; i++)
         {
@@ -237,34 +242,25 @@ public class WaypointManager : MonoBehaviour
     {
         if (Application.isEditor && !Application.isPlaying)
         {
+#if UNITY_EDITOR
             EditorUtility.SetDirty(_waypointBlockData);  // Mark the ScriptableObject as modified
             AssetDatabase.SaveAssets();  // Force Unity to save the changes
+#endif
         }
     }
 
 
     [ContextMenu("Refresh Waypoint List")]
-    public void UpdateList()
+    public void RefreshList()
     {
         if(_waypointBlocks.Count == 0)
         {
             return;
         }
 
-        for (int i = _waypointBlocks.Count - 1; i >= 0; i--)
-        {
-            // Check if the position of the block is invalid or if other conditions apply.
-            // In this case, we'll check if any of the waypoints are invalid (you could also check other conditions).
-            GameObject obj = _waypointBlocks[i]._block;
-            if (obj == null)
-            {
-                // Remove the block from the list if it's not valid
-                _waypointBlocks.RemoveAt(i);
-                
-            }
-        }
+        _waypointBlocks.RemoveAll(block => block._block == null); // Remove any blocks that are null
 
-        
+
     }
 
 

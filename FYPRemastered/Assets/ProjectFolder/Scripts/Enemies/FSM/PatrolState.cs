@@ -55,7 +55,7 @@ public class PatrolState : EnemyState
             
 
             yield return _waitUntilDestinationReached;
-            Debug.LogError("Reached destination: " + _wayPoints[index]);
+            
 
             _eventManager.SpeedChanged(0f, 10f);
            

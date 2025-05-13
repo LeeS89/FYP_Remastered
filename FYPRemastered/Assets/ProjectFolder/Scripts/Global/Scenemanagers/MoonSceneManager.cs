@@ -42,7 +42,7 @@ public class MoonSceneManager : BaseSceneManager
         InitializePools();
         LoadActiveSceneEventManagers();
         //StartCoroutine(InitializeDelay());
-        LoadWaypoints();
+        
 
         SceneStarted();
         
@@ -59,6 +59,7 @@ public class MoonSceneManager : BaseSceneManager
         _normalBulletPrefab = Resources.Load<GameObject>("Bullets/BasicBullet");
         _normalHitPrefab = Resources.Load<ParticleSystem>("ParticlePoolPrefabs/BasicHit");
         _deflectAudioPrefab = Resources.Load<AudioSource>("AudioPoolPrefabs/DeflectAudio");
+        LoadWaypoints();
     }
    
 
