@@ -1,10 +1,42 @@
+using System;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
 
 public partial class EnemyFSMController : ComponentEvents
 {
+    private WaypointData _wpData;
+
     #region FSM Management
     private void SetupFSM()
+    {
+    
+        _path = new NavMeshPath();
+        _fovCheckFrequency = _patrolFOVCheckFrequency;
+        _fov = new TraceComponent(1);
+        _fovTraceResults = new Collider[1];
+        _animController = new EnemyAnimController(_anim, _enemyEventManager);
+        _patrol = new PatrolState(_owningGameObject, _enemyEventManager, _stopAndWaitDelay, _walkSpeed);
+        _chasing = new ChasingState(_enemyEventManager, _owningGameObject, _walkSpeed, _sprintSpeed);
+        _stationary = new StationaryState(_enemyEventManager, _owningGameObject, _path);
+        _deathState = new DeathState(_enemyEventManager, _owningGameObject);
+
+        InitializeWaypoints();
+        InitializeWeapon();
+
+       // ChangeState(_patrol);
+
+    }
+
+    private void ChangeWaypoints()
+    {
+        BlockData temp = _blockData;
+        InitializeWaypoints();
+        BaseSceneManager._instance.ReturnWaypointBlock(temp);
+        
+    }
+
+    private void InitializeWaypoints()
     {
         //_waypointManager = GameObject.FindFirstObjectByType<WaypointManager>();
         _blockData = BaseSceneManager._instance.RequestWaypointBlock();
@@ -15,8 +47,10 @@ public partial class EnemyFSMController : ComponentEvents
             _blockZone = _blockData._blockZone;
             //Debug.LogError("Block Zone for enemy: " + _blockZone);
 
+            _wpData.UpdateData(_blockData._waypointPositions.ToList(), _blockData._waypointForwards.ToList());
 
-            foreach (Vector3 position in _blockData._waypointPositions)
+            _enemyEventManager.WaypointsUpdated(_wpData);
+            /*foreach (Vector3 position in _blockData._waypointPositions)
             {
                 //Debug.LogError("Position: " + position);
                 _wayPoints.Add(position);
@@ -25,30 +59,21 @@ public partial class EnemyFSMController : ComponentEvents
             foreach (Vector3 forward in _blockData._waypointForwards)
             {
                 _wayPointForwards.Add(forward);
-            }
+            }*/
         }
-
-        _path = new NavMeshPath();
-        _fovCheckFrequency = _patrolFOVCheckFrequency;
-        _fov = new TraceComponent(1);
-        _fovTraceResults = new Collider[1];
-        _animController = new EnemyAnimController(_anim, _enemyEventManager);
-        _patrol = new PatrolState(_wayPoints, _wayPointForwards, _owningGameObject, _enemyEventManager, _stopAndWaitDelay, _walkSpeed);
-        _chasing = new ChasingState(_enemyEventManager, _owningGameObject, _walkSpeed, _sprintSpeed);
-        _stationary = new StationaryState(_enemyEventManager, _owningGameObject, _path);
-        _deathState = new DeathState(_enemyEventManager, _owningGameObject);
-
-        Transform playerTransform = GameManager.Instance.GetPlayerPosition(PlayerPart.DefenceCollider);
-        _gun = new Gun(_bulletSpawnPoint, playerTransform, _enemyEventManager, _owningGameObject);
-        GameManager._onPlayerMovedinternal += EnemyState.SetPlayerMoved;
-
-
-       
-
-        ChangeState(_patrol); 
-
     }
 
+    private void InitializeWeapon()
+    {
+        Transform playerTransform = GameManager.Instance.GetPlayerPosition(PlayerPart.DefenceCollider);
+        if (playerTransform == null)
+        {
+            Debug.LogError("Player transform not found!");
+            return;
+        }
+        _gun = new Gun(_bulletSpawnPoint, playerTransform, _enemyEventManager, _owningGameObject);
+        GameManager._onPlayerMovedinternal += EnemyState.SetPlayerMoved;
+    }
 
     public void ChangeState(EnemyState state, Vector3? destination = null, AlertStatus alertStatus = AlertStatus.None, float stoppingDistance = 0)
     {

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public enum CharacterType
 {
@@ -40,6 +41,7 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
+        SceneManager.sceneLoaded += OnSceneLoaded;
         if(Instance == null)
         {
             Instance = this;
@@ -50,13 +52,22 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
-
+/*
     private void Start()
     {
         Application.targetFrameRate = 90;
+    }*/
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        SetPlayer();
+        Debug.LogError("Player has been Set");
     }
 
-    
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
 
     public void CharacterDied(CharacterType type, GameObject obj = null)
     {
@@ -97,11 +108,11 @@ public class GameManager : MonoBehaviour
             if (playerObj != null)
             {
                 Player = playerObj;
-                //Debug.LogError("Player assigned in GameManager: " + PlayerTransform.name);
             }
             else
             {
-                Debug.LogWarning("Player not found! Ensure the Player has the correct tag.");
+                Debug.LogError("Player not found! Ensure the Player has the correct tag.");
+                return;
             }
 
             if(PlayerDefenceCollider == null)

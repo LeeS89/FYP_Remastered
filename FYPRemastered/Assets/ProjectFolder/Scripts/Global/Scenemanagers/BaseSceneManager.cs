@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class BaseSceneManager : MonoBehaviour, ISceneManager
@@ -20,7 +21,7 @@ public class BaseSceneManager : MonoBehaviour, ISceneManager
 
     public void SceneStarted()
     {
-        GameManager.Instance.SetPlayer();
+        //GameManager.Instance.SetPlayer();
         OnSceneStarted?.Invoke();
     }
 
@@ -77,6 +78,18 @@ public class BaseSceneManager : MonoBehaviour, ISceneManager
             }
         }
         return null; 
+    }
+
+    public virtual void ReturnWaypointBlock(BlockData bd)
+    {
+        if (!_waypointBlockData.blockDataArray.Contains(bd)) { return; }
+
+        int index = Array.FindIndex(_waypointBlockData.blockDataArray, block => block == bd);
+
+        if(index >= 0)
+        {
+            _waypointBlockData.blockDataArray[index]._inUse = false;
+        }
     }
 
 

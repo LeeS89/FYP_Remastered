@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class EnemyEventManager : EventManager
 {
@@ -20,6 +21,9 @@ public class EnemyEventManager : EventManager
     public event Action<bool> OnAgentDeathComplete;
     public event Action<bool> OnAgentRespawn;
 
+    //Patrolling events
+    public event Action<WaypointData> OnWaypointsUpdated;
+
     // Gun Events
     public event Action OnShoot;
 
@@ -31,6 +35,10 @@ public class EnemyEventManager : EventManager
     public event Action OnRequestStationaryState;
     public event Action<Vector3?> OnRequestChasingState;
 
+
+    /// <summary>
+    /// Called From Scene Manager
+    /// </summary>
     public override void BindComponentsToEvents()
     {
         _cachedListeners = new List<ComponentEvents>();
@@ -44,17 +52,36 @@ public class EnemyEventManager : EventManager
         }
     }
 
+
+    /// <summary>
+    /// Come back to later -> Will be called on Scene Completed
+    /// </summary>
+    /// <exception cref="System.NotImplementedException"></exception>
     public override void UnbindComponentsToEvents()
     {
         throw new System.NotImplementedException();
     }
 
 
+    public void WaypointsUpdated(WaypointData wpData)
+    {
+        OnWaypointsUpdated?.Invoke(wpData);
+    }
+
+    /// <summary>
+    /// Animation actions other than Locomotion i.e. Melee, Look around etc
+    /// </summary>
+    /// <param name="action"></param>
     public void AnimationTriggered(AnimationAction action)
     {
         OnAnimationTriggered?.Invoke(action);
     }
 
+    /// <summary>
+    /// Updates agent move speed and animation
+    /// </summary>
+    /// <param name="moveSpeed"></param>
+    /// <param name="lerpSpeed"></param>
     public void SpeedChanged(float moveSpeed, float lerpSpeed)
     {
         OnSpeedChanged?.Invoke(moveSpeed, lerpSpeed);
@@ -80,11 +107,23 @@ public class EnemyEventManager : EventManager
         OnShoot?.Invoke();
     }
 
+    /// <summary>
+    /// Used to switch between aiming and non-aiming layers
+    /// </summary>
+    /// <param name="layer"></param>
+    /// <param name="from"></param>
+    /// <param name="to"></param>
+    /// <param name="duration"></param>
+    /// <param name="layerReady"></param>
     public void ChangeAnimatorLayerWeight(int layer, float from, float to, float duration, bool layerReady)
     {
         OnChangeAnimatorLayerWeight?.Invoke(layer, from, to, duration, layerReady);
     }
 
+    /// <summary>
+    /// Used to alert the agents weapon to be ready to fire
+    /// </summary>
+    /// <param name="isReady"></param>
     public void AimingLayerReady(bool isReady)
     {
         OnAimingLayerReady?.Invoke(isReady);

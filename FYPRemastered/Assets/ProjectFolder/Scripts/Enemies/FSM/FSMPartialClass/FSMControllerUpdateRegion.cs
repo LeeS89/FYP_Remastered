@@ -4,6 +4,7 @@
 public partial class EnemyFSMController : ComponentEvents
 {
     public bool testRespawn = false;
+    public bool _testWaypoint = false;
     #region Updates
     void Update()
     {
@@ -21,6 +22,12 @@ public partial class EnemyFSMController : ComponentEvents
             GameManager.PlayerRespawned();
             //_playerIsDead = false;
             testRespawn = false;
+        }
+
+        if (_testWaypoint)
+        {
+            ChangeWaypoints();
+            _testWaypoint = false;
         }
     }
 

@@ -19,13 +19,11 @@ public class PatrolState : EnemyState
     private bool _isPatrolling = false;
     
 
-    public PatrolState(List<Vector3> wayPoints, List<Vector3> waypointforwards, GameObject owner, EnemyEventManager eventManager, float randomDelay, float walkSpeed) : base(eventManager, owner)
+    public PatrolState(GameObject owner, EnemyEventManager eventManager, float randomDelay, float walkSpeed) : base(eventManager, owner)
     {
-       
+        _eventManager.OnWaypointsUpdated += WaypointsUpdated;
         _walkSpeed = walkSpeed;
         _randomWaitTime = randomDelay;
-        _wayPoints = wayPoints;
-        _waypointForwards = waypointforwards;
         _hasReachedDestination = CheckDestinationReached;
         _waitUntilDestinationReached = new WaitUntil(_hasReachedDestination);
     }
@@ -39,6 +37,19 @@ public class PatrolState : EnemyState
             _isPatrolling = true;
             _coroutine = CoroutineRunner.Instance.StartCoroutine(TraverseWayPoints());
         }
+    }
+
+    private void WaypointsUpdated(WaypointData wpData)
+    {
+        if (wpData.Equals(default(WaypointData)))
+        {
+            Debug.LogWarning("WaypointData is in its default state, and might not be initialized properly.");
+            return; // You can handle it here (e.g., early exit or use default values)
+        }
+
+        _wayPoints = wpData._waypointPositions;
+        _waypointForwards = wpData._waypointForwards;
+
     }
 
 
@@ -130,6 +141,7 @@ public class PatrolState : EnemyState
         _wayPoints = null;
         _hasReachedDestination = null;
         _waitUntilDestinationReached = null;
+        _eventManager.OnWaypointsUpdated -= WaypointsUpdated;
         base.OnStateDestroyed();
         
     }

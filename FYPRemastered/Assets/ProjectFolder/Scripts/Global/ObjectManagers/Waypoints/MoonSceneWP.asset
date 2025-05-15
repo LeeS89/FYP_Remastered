@@ -22,8 +22,18 @@ MonoBehaviour:
     - {x: -45.53, y: 2.749, z: -20.57}
     _waypointForwards:
     - {x: 0, y: 0, z: 1}
-    - {x: 1.0000001, y: 0, z: -0.00000011920929}
+    - {x: 0.99999994, y: 0, z: -0.00000011920929}
     - {x: 0, y: 0, z: 1}
     - {x: 0, y: 0, z: 1}
     _blockZone: 1
-    _inUse: 0
+    _inUse: 1
+  - _block: {fileID: 0}
+    _blockPosition: {x: -43.69, y: 4.956, z: 18.153}
+    _waypointPositions:
+    - {x: -53.655, y: 4.2454996, z: 18.4285}
+    - {x: -27.085, y: 4.251, z: 18.153}
+    _waypointForwards:
+    - {x: 0, y: 0, z: 1}
+    - {x: 0, y: 0, z: 1}
+    _blockZone: 1
+    _inUse: 1

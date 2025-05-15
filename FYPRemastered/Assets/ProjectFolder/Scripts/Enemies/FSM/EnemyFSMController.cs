@@ -86,9 +86,11 @@ public partial class EnemyFSMController : ComponentEvents
         _enemyEventManager.OnDestinationReached += CarveOnDestinationReached;
         
         _enemyEventManager.OnSpeedChanged += UpdateTargetSpeedValues;
-        
+
+     
         RegisterGlobalEvents();
-       
+        SetupFSM();
+
     }
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
@@ -183,8 +185,11 @@ public partial class EnemyFSMController : ComponentEvents
 
     protected override void OnSceneStarted()
     {
-        Invoke(nameof(SetupFSM), 1f);
-        //SetupFSM();
+        //Invoke(nameof(InitializeWeapon), 1f);
+        //Begin Patrolling here instead
+        ChangeState(_patrol);
+        //Invoke(nameof(SetupFSM), 1f);
+     
     }
 
     protected override void OnSceneComplete()

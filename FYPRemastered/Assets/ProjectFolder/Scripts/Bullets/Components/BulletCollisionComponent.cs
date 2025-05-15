@@ -103,6 +103,7 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
     private void OnCollisionEnter(Collision collision)
     {
        
+        //Debug.LogError($"Collision with: {collision.gameObject.name}");
         ContactPoint contact = collision.contacts[0];
         Vector3 impactPosition = contact.point;
         
