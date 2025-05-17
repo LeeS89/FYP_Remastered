@@ -32,65 +32,38 @@ public class BaseSceneManager : MonoBehaviour, ISceneManager
 
     public virtual void SetupScene() { }
 
+    
+
+    protected virtual void LoadActiveSceneEventManagers()
+    {
+        _eventManagers = new List<EventManager>();
+
+        _eventManagers.AddRange(FindObjectsByType<EventManager>(FindObjectsInactive.Include, FindObjectsSortMode.None));
+
+        foreach (var eventManager in _eventManagers)
+        {
+            if (eventManager is not BulletEventManager)
+            {
+                eventManager.BindComponentsToEvents();
+            }
+        }
+    }
+
+
+
+
+
+    /// Scene Specific overridden Functions
     protected virtual void LoadSceneResources() { }
 
-    protected virtual void LoadActiveSceneEventManagers() { }
+    protected virtual void LoadWaypoints() { }
 
+    public virtual BlockData RequestWaypointBlock() { return null; }
+
+    public virtual void ReturnWaypointBlock(BlockData bd) { }
 
     public virtual void GetImpactParticlePool(ref PoolManager manager) { }
 
     public virtual void GetBulletPool(ref PoolManager manager) { }
-
-    protected virtual void LoadWaypoints()
-    {
-        if (_waypointManager == null)
-        {
-            _waypointManager = FindFirstObjectByType<WaypointManager>();
-        }
-        if (_waypointManager != null)
-        {
-            _waypointBlockData = _waypointManager.RetreiveWaypointData();
-        }
-
-        if(_waypointBlockData != null)
-        {
-            foreach (var blockData in _waypointBlockData.blockDataArray)
-            {
-                blockData._inUse = false;
-            }
-        }
-    }
-
-    public virtual BlockData RequestWaypointBlock()
-    {
-        if(_waypointBlockData == null)
-        {
-            Debug.LogWarning("No Waypoints exist in the scene, please update waypoint manager");
-            return null;
-        }
-
-        foreach (var blockData in _waypointBlockData.blockDataArray)
-        {
-            if (!blockData._inUse)
-            {
-                blockData._inUse = true;
-                return blockData;
-            }
-        }
-        return null; 
-    }
-
-    public virtual void ReturnWaypointBlock(BlockData bd)
-    {
-        if (!_waypointBlockData.blockDataArray.Contains(bd)) { return; }
-
-        int index = Array.FindIndex(_waypointBlockData.blockDataArray, block => block == bd);
-
-        if(index >= 0)
-        {
-            _waypointBlockData.blockDataArray[index]._inUse = false;
-        }
-    }
-
 
 }

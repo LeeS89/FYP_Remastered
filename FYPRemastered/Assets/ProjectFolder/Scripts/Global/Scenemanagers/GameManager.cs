@@ -108,6 +108,7 @@ public class GameManager : MonoBehaviour
             if (playerObj != null)
             {
                 Player = playerObj;
+                Debug.LogWarning("Player has been Set");
             }
             else
             {
@@ -115,11 +116,11 @@ public class GameManager : MonoBehaviour
                 return;
             }
 
-            if(PlayerDefenceCollider == null)
+            if (PlayerDefenceCollider == null)
             {
                 GameObject playerDef = GameObject.FindGameObjectWithTag("MainCamera");
 
-                if(playerDef != null)
+                if (playerDef != null)
                 {
                     PlayerDefenceCollider = playerDef;
                 }
@@ -129,6 +130,48 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
+    }
+
+    public void SetPlayer(GameObject player)
+    {
+        if (player != null)
+        {
+           // GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+
+            if (player != null)
+            {
+                Player = player;
+                Debug.LogWarning("Player has been Set");
+            }
+            else
+            {
+                Debug.LogWarning("Player not found! Ensure the Player has the correct tag.");
+                return;
+            }
+
+            if (PlayerDefenceCollider == null)
+            {
+                foreach (Transform child in player.transform)
+                {
+                    if (child.CompareTag("MainCamera"))
+                    {
+                        PlayerDefenceCollider = child.gameObject;
+                        break;
+                    }
+                }
+                    //GameObject playerDef = GameObject.FindGameObjectWithTag("MainCamera");
+
+               /* if (playerDef != null)
+                {
+                    PlayerDefenceCollider = playerDef;
+                }
+                else
+                {
+                    Debug.LogError("Player Defence Collider Not found - Ensure Correct Tag is assigned");
+                }*/
+            }
+        }
+       
     }
 
     public Transform _test;

@@ -36,4 +36,4 @@ MonoBehaviour:
     - {x: 0, y: 0, z: 1}
     - {x: 0, y: 0, z: 1}
     _blockZone: 1
-    _inUse: 1
+    _inUse: 0

@@ -103,7 +103,7 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
     private void OnCollisionEnter(Collision collision)
     {
        
-        //Debug.LogError($"Collision with: {collision.gameObject.name}");
+       
         ContactPoint contact = collision.contacts[0];
         Vector3 impactPosition = contact.point;
         
@@ -119,7 +119,7 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
         CheckForDamageableInterface(collision);
         
         
-        //_parentOwner = null;
+       
         _bulletEventManager.Expired();
         
     }
@@ -137,6 +137,15 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
 
         
         damageable.TakeDamage(_baseDamage, _damageType, _statusEffectChancePercentage, _damageOverTime, _dOTDuration);
+
+        //return;
+
+        /*if (damageable is IEnemyDamageable enemy)
+        {
+            Vector3 impactPoint = collision.contacts[0].point;
+            Collider hitCollider = collision.collider;
+            enemy.HandleHit(hitCollider, impactPoint);
+        }*/
 
     }
 

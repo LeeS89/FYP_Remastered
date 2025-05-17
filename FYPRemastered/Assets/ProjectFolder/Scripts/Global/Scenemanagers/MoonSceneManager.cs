@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class MoonSceneManager : BaseSceneManager
@@ -42,7 +43,7 @@ public class MoonSceneManager : BaseSceneManager
         InitializePools();
         LoadActiveSceneEventManagers();
         //StartCoroutine(InitializeDelay());
-        
+        AssignPools();
 
         SceneStarted();
         
@@ -84,7 +85,7 @@ public class MoonSceneManager : BaseSceneManager
        
     }
 
-    protected override void LoadActiveSceneEventManagers()
+    /*protected override void LoadActiveSceneEventManagers()
     {
         _eventManagers = new List<EventManager>();
 
@@ -98,9 +99,7 @@ public class MoonSceneManager : BaseSceneManager
             }
         }
 
-        AssignPools();
-        //GameManager.PlayerRespawned();
-    }
+    }*/
 
 
     public override void GetImpactParticlePool(ref PoolManager manager)
@@ -125,5 +124,57 @@ public class MoonSceneManager : BaseSceneManager
 
     }
 
-    
+
+
+    protected override void LoadWaypoints()
+    {
+        if (_waypointManager == null)
+        {
+            _waypointManager = FindFirstObjectByType<WaypointManager>();
+        }
+        if (_waypointManager != null)
+        {
+            _waypointBlockData = _waypointManager.RetreiveWaypointData();
+        }
+
+        if (_waypointBlockData != null)
+        {
+            foreach (var blockData in _waypointBlockData.blockDataArray)
+            {
+                blockData._inUse = false;
+            }
+        }
+    }
+
+    public override BlockData RequestWaypointBlock()
+    {
+        if (_waypointBlockData == null)
+        {
+            Debug.LogWarning("No Waypoints exist in the scene, please update waypoint manager");
+            return null;
+        }
+
+        foreach (var blockData in _waypointBlockData.blockDataArray)
+        {
+            if (!blockData._inUse)
+            {
+                blockData._inUse = true;
+                return blockData;
+            }
+        }
+        return null;
+    }
+
+    public override void ReturnWaypointBlock(BlockData bd)
+    {
+        if (!_waypointBlockData.blockDataArray.Contains(bd)) { return; }
+
+        int index = Array.FindIndex(_waypointBlockData.blockDataArray, block => block == bd);
+
+        if (index >= 0)
+        {
+            _waypointBlockData.blockDataArray[index]._inUse = false;
+        }
+    }
+
 }

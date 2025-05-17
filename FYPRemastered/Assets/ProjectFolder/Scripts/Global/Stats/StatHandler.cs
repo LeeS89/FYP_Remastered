@@ -47,17 +47,17 @@ public class StatHandler : ComponentEvents, IDamageable
         
     }
 
-    private bool HealthIsEmpty()
+    protected bool HealthIsEmpty()
     {
         return _statsComponent.GetStat(StatType.Health) == 0;
     }
 
-    private void ApplyElementalDamage(DamageType dType = DamageType.None, float statusEffectChancePercentage = 0, float damageOverTime = 0, float duration = 0)
+    protected void ApplyElementalDamage(DamageType dType = DamageType.None, float statusEffectChancePercentage = 0, float damageOverTime = 0, float duration = 0)
     {
 
     }
 
-    private void ApplyInstantDamage(float damage)
+    protected void ApplyInstantDamage(float damage)
     {
         if(_statsComponent.ModifyStat(StatType.Health, -damage) == 0f)
         {

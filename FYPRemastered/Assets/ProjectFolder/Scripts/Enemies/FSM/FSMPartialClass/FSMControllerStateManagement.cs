@@ -10,7 +10,8 @@ public partial class EnemyFSMController : ComponentEvents
     #region FSM Management
     private void SetupFSM()
     {
-    
+
+        Debug.LogWarning("Set up FSM called during loading wohooo");
         _path = new NavMeshPath();
         _fovCheckFrequency = _patrolFOVCheckFrequency;
         _fov = new TraceComponent(1);
@@ -32,6 +33,7 @@ public partial class EnemyFSMController : ComponentEvents
     {
         BlockData temp = _blockData;
         InitializeWaypoints();
+        
         BaseSceneManager._instance.ReturnWaypointBlock(temp);
         
     }
@@ -91,7 +93,7 @@ public partial class EnemyFSMController : ComponentEvents
 
         //_currentState.EnterState(destination);
 
-        Debug.LogError("Current State: " + _currentState.GetType().Name);
+       // Debug.LogError("Current State: " + _currentState.GetType().Name);
     }
 
     private void StationaryStateRequested(/*AlertStatus alertStatus*/)
