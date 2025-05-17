@@ -11,17 +11,22 @@ public class PatrolState : EnemyState
     private List<Vector3> _wayPoints;
     private List<Vector3> _waypointForwards;
 
+    private List<Vector3> _updatedWP;
+    private List<Vector3> _updatedForwards;
+    
+
     private WaitUntil _waitUntilDestinationReached;
     private Func<bool> _hasReachedDestination;
     private int index = 0;
 
     private float _randomWaitTime;
     private bool _isPatrolling = false;
+    private bool _wpPendingUpdate = true;
     
 
     public PatrolState(GameObject owner, EnemyEventManager eventManager, float randomDelay, float walkSpeed) : base(eventManager, owner)
     {
-        _eventManager.OnWaypointsUpdated += WaypointsUpdated;
+        _eventManager.OnWaypointsUpdated += WaypointsUpdatePending;
         _walkSpeed = walkSpeed;
         _randomWaitTime = randomDelay;
         _hasReachedDestination = CheckDestinationReached;
@@ -39,24 +44,50 @@ public class PatrolState : EnemyState
         }
     }
 
-    private void WaypointsUpdated(WaypointData wpData)
+    private void UpdateWaypoints()
+    {
+       
+        _wayPoints = _updatedWP;
+        _waypointForwards = _updatedForwards;
+
+        _updatedWP = null;
+        _updatedForwards = null;
+
+        
+    }
+
+    private void WaypointsUpdatePending(WaypointData wpData)
     {
         if (wpData.Equals(default(WaypointData)))
         {
             Debug.LogWarning("WaypointData is in its default state, and might not be initialized properly.");
-            return; // You can handle it here (e.g., early exit or use default values)
+            return; 
         }
 
-        _wayPoints = wpData._waypointPositions;
-        _waypointForwards = wpData._waypointForwards;
-
+        _updatedWP = wpData._waypointPositions;
+        _updatedForwards = wpData._waypointForwards;
+        _wpPendingUpdate = true;
+        
     }
 
 
     IEnumerator TraverseWayPoints()
     {
+        if (_wpPendingUpdate)
+        {
+            _wpPendingUpdate = false;
+            UpdateWaypoints();
+        }
+
         while (_isPatrolling)
         {
+            if (_wpPendingUpdate)
+            {
+                _wpPendingUpdate = false;
+                UpdateWaypoints();
+            }
+            
+
             SetDestinationReached(false);
             index = GetNextDestination();
            
@@ -76,7 +107,7 @@ public class PatrolState : EnemyState
             //New rotation based on the direction vector
             Quaternion targetRotation = Quaternion.LookRotation(directionToFace);
 
-            while (Quaternion.Angle(_owner.transform.rotation, targetRotation) > 2.0f)
+            while (Quaternion.Angle(_owner.transform.rotation, targetRotation) > 2.0f + Mathf.Epsilon)
             {
                 // Smoothly rotating the agent towards the target rotation
                 _owner.transform.rotation = Quaternion.Slerp(_owner.transform.rotation, targetRotation, Time.deltaTime * 2.0f);
@@ -114,13 +145,7 @@ public class PatrolState : EnemyState
         return newIndex;
     }
 
-  /*  private bool CheckDestinationReached()
-    {
-        return _destinationReached;
-        
-    }
-
-  */
+  
 
     public override void ExitState()
     {
@@ -141,7 +166,7 @@ public class PatrolState : EnemyState
         _wayPoints = null;
         _hasReachedDestination = null;
         _waitUntilDestinationReached = null;
-        _eventManager.OnWaypointsUpdated -= WaypointsUpdated;
+        _eventManager.OnWaypointsUpdated -= WaypointsUpdatePending;
         base.OnStateDestroyed();
         
     }

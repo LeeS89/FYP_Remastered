@@ -61,7 +61,7 @@ public class GameManager : MonoBehaviour
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         SetPlayer();
-        Debug.LogError("Player has been Set");
+        //Debug.LogWarning("Scene Has Loaded In background Wohoo!!, for scene name: "+SceneManager.GetActiveScene().name);
     }
 
     private void OnDisable()

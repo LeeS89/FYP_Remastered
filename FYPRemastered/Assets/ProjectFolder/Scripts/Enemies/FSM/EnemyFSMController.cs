@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.SceneManagement;
 
 
 public partial class EnemyFSMController : ComponentEvents
@@ -68,7 +69,8 @@ public partial class EnemyFSMController : ComponentEvents
     
     
     private AlertStatus _alertStatus = AlertStatus.None;
-    
+
+
 
     #region Event Registrations
     public override void RegisterLocalEvents(EventManager eventManager)
