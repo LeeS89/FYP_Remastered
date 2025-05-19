@@ -1,7 +1,5 @@
-
+﻿
 using System.Collections.Generic;
-using System.Linq;
-
 using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -96,92 +94,67 @@ public class WaypointManager : MonoBehaviour
         StoreWaypointsInSO();
     }
 
-    //[ContextMenu("Store Waypoints in SO")]
+   
     private void StoreWaypointsInSO()
     {
-        if(_waypointBlockData != null && _waypointBlockData.blockDataArray.Length > 0)
+#if UNITY_EDITOR
+        if (_waypointBlockData == null) return;
+
+        // Optional: clear existing data
+        if (_waypointBlockData.blockDataArray != null && _waypointBlockData.blockDataArray.Length > 0)
         {
             _waypointBlockData.ClearData();
         }
 
-        
         List<BlockData> storedBlocks = new List<BlockData>();
 
-        // Store the waypoint blocks data into the ScriptableObject
         foreach (var block in _waypointBlocks)
         {
             BlockData newBlockData = new BlockData
             {
-                _blockPosition = block._blockPosition,             // Store position of the block
-                _blockZone = block._blockZone,                     // Store zone
-                _waypointPositions = block._waypointPositions,     // Store waypoint positions
-                _waypointForwards = block._waypointForwards,       // Store waypoint forwards (if needed)
-                _inUse = block._inUse                              // Store whether the block is in use
+                _blockPosition = block._blockPosition,
+                _blockZone = block._blockZone,
+                _waypointPositions = block._waypointPositions,
+                _waypointForwards = block._waypointForwards,
+                _inUse = block._inUse
+                // _block is intentionally excluded
             };
 
-            // Add the block data (without _block reference)
             storedBlocks.Add(newBlockData);
-
         }
 
-        // Update the ScriptableObject with the data
+        // 🔄 Assign new data
         _waypointBlockData.blockDataArray = storedBlocks.ToArray();
 
-        SaveScriptableObject();
+        // ✅ Persist the change
+        UnityEditor.EditorUtility.SetDirty(_waypointBlockData);
+        UnityEditor.AssetDatabase.SaveAssets();
 
-        if (Application.isEditor && !Application.isPlaying)
+        // 🧹 Clean up waypoint objects from scene
+        foreach (var blockData in _waypointBlocks)
         {
-            // Iterate through _waypointBlocks list and destroy the blocks' children (the waypoints)
-            foreach (var blockData in _waypointBlocks)
+            if (blockData._block != null)
             {
-                if (blockData._block != null)
+                foreach (Transform waypoint in blockData._block.transform)
                 {
-                    // Destroy the waypoints (children of each block)
-                    foreach (Transform waypoint in blockData._block.transform)
-                    {
-                        DestroyImmediate(waypoint.gameObject); // Destroy each waypoint child
-                    }
-
-                    // Now destroy the block itself
-                    DestroyImmediate(blockData._block); // Destroy the block
+                    Object.DestroyImmediate(waypoint.gameObject);
                 }
+
+                Object.DestroyImmediate(blockData._block);
             }
         }
-        else
-        {
-            // Iterate through _waypointBlocks list and destroy the blocks' children (the waypoints)
-            foreach (var blockData in _waypointBlocks)
-            {
-                if (blockData._block != null)
-                {
-                    // Destroy the waypoints (children of each block)
-                    foreach (Transform waypoint in blockData._block.transform)
-                    {
-                        Destroy(waypoint.gameObject); // Destroy each waypoint child
-                    }
 
-                    // Now destroy the block itself
-                    Destroy(blockData._block); // Destroy the block
-                }
-            }
-        }
-        // Clear the waypoint blocks from the scene and list
         _waypointBlocks.Clear();
-        
+#endif
+
+#if UNITY_EDITOR
+        UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
+        UnityEditor.SceneManagement.EditorSceneManager.SaveScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
+#endif
+
     }
 
 
-    //[ContextMenu("Test Count")]
-    //public void PrintCount()
-    //{
-    //    int waypoints = _waypointBlocks[0]._block.transform.childCount;
-    //    /*foreach (Transform t in _waypointBlocks[0]._block.transform)
-    //    {
-    //        waypoints++;
-    //    }*/
-    //   // int waypoints = _waypointBlocks[0]._block.GetComponentsInChildren<Transform>().Length;
-    //    Debug.LogError("Count is: "+waypoints);
-    //}
 
     [ContextMenu("Reload Waypoints from SO")]
     public void ReloadWaypointsFromSO()
@@ -264,47 +237,4 @@ public class WaypointManager : MonoBehaviour
     }
 
 
-    // Function to request a block
-    /*public BlockData RequestWaypointBlock()
-    {
-        foreach (var blockData in _waypointBlocks)
-        {
-            if (!blockData._inUse)
-            {
-                blockData._inUse = true;
-                return blockData;
-            }
-        }
-        return null; // No available blocks
-    }*/
-
-    /*// Function to return a block
-    public void ReturnWaypointBlock(GameObject block)
-    {
-        foreach (var blockData in _waypointBlocks)
-        {
-            if (blockData._block == block)
-            {
-                blockData._inUse = false;
-                break;
-            }
-        }
-    }*/
-
-    /* 
-
-     public void ReturnWaypointBlock(GameObject block)
-     {
-         if (_waypointBlockStatus.ContainsKey(block))
-         {
-             // Mark the block as available again
-             BlockData blockData = _waypointBlockStatus[block];
-             blockData.isInUse = false;
-             _waypointBlockStatus[block] = blockData; // Update the status
-         }
-     }*/
-
-   
-
-    
 }

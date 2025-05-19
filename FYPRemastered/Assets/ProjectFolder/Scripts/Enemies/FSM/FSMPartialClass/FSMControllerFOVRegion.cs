@@ -57,7 +57,7 @@ public partial class EnemyFSMController : ComponentEvents
 
         }
     }
-
+    private static bool _testAlert = false;
     private void UpdateFieldOfViewResults(bool playerSeen)
     {
         if (_canSeePlayer == playerSeen) { return; } // Already Updated, return early
@@ -69,18 +69,8 @@ public partial class EnemyFSMController : ComponentEvents
             //if (_alertStatus == AlertStatus.None)
             // {
             //_alertStatus = AlertStatus.Alert;
+            EnterAlertPhase();
 
-
-            if (_currentState != _chasing && _alertStatus == AlertStatus.None)
-            {
-                _enemyEventManager.ChangeAnimatorLayerWeight(1, 0, 1, 0.5f, true);
-                _alertStatus = AlertStatus.Alert;
-                //ChasingStateRequested();
-                ChangeState(_chasing);
-            }
-               // _enemyEventManager.ChangeAnimatorLayerWeight(1, 0, 1, 0.5f, true);
-           // }
-            //_animController.SetAlertStatus(true);
             _enemyEventManager.PlayerSeen(_canSeePlayer);
             //_enemyEventManager.ChangeAnimatorLayerWeight(1, 0, 1, 0.5f, true);
             // Alert Group Here (Moon Scene Manager)
@@ -94,6 +84,28 @@ public partial class EnemyFSMController : ComponentEvents
         }
 
         //Update Shooting Component Here
+    }
+
+    public void EnterAlertPhase()
+    {
+        if (!_testAlert)
+        {
+            _testAlert = true;
+            BaseSceneManager._instance.AlertZoneAgents(_blockZone, this);
+            
+
+        }
+
+        if (_currentState != _chasing && _alertStatus == AlertStatus.None)
+        {
+           //BaseSceneManager._instance.AlertZoneAgents(_blockZone, this);
+            _enemyEventManager.ChangeAnimatorLayerWeight(1, 0, 1, 0.5f, true);
+            _alertStatus = AlertStatus.Alert;
+           
+            ChangeState(_chasing);
+        }
+       
+       
     }
     #endregion
 }

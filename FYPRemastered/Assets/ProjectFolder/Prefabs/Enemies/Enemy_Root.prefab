@@ -103,7 +103,7 @@ GameObject:
   - component: {fileID: 6327916865483116688}
   - component: {fileID: 960491701997048275}
   - component: {fileID: 7963726222172396574}
-  - component: {fileID: 2208923880378078878}
+  - component: {fileID: 3074888559223914219}
   - component: {fileID: 3309944096030598539}
   m_Layer: 4
   m_Name: Enemy_Root
@@ -214,7 +214,7 @@ MonoBehaviour:
   _fovLocation: {fileID: 3514716611913536367}
   _patrolFOVCheckFrequency: 1
   _alertFOVCheckFrequency: 0.1
-  _fovTraceRadius: 50
+  _fovTraceRadius: 0.5
   _angle: 65
   _fovLayerMask:
     serializedVersion: 2
@@ -228,6 +228,7 @@ MonoBehaviour:
   _owningGameObject: {fileID: 0}
   _testDeath: 0
   testRespawn: 0
+  _testWaypoint: 0
   testSeeView: 0
   _gridManager: {fileID: 0}
 --- !u!208 &7963726222172396574
@@ -246,7 +247,7 @@ NavMeshObstacle:
   m_CarveOnlyStationary: 1
   m_Center: {x: 0, y: 0, z: 0}
   m_TimeToStationary: 0.5
---- !u!114 &2208923880378078878
+--- !u!114 &3074888559223914219
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -255,16 +256,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 295630588504063347}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 81e0cf32b275ce74187f123d49365918, type: 3}
+  m_Script: {fileID: 11500000, guid: ebd499f2509f21246acef5e387357895, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _stats:
   - statType: 1
-    value: 1500
+    value: 1000
   - statType: 0
     value: 0
   _characterType: 1
   _testDamage: 0
+  skinnedRenderer: {fileID: 0}
 --- !u!65 &3309944096030598539
 BoxCollider:
   m_ObjectHideFlags: 0

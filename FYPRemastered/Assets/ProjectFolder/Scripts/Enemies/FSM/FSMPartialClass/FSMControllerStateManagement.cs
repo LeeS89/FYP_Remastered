@@ -11,7 +11,6 @@ public partial class EnemyFSMController : ComponentEvents
     private void SetupFSM()
     {
 
-        Debug.LogWarning("Set up FSM called during loading wohooo");
         _path = new NavMeshPath();
         _fovCheckFrequency = _patrolFOVCheckFrequency;
         _fov = new TraceComponent(1);
@@ -40,9 +39,8 @@ public partial class EnemyFSMController : ComponentEvents
 
     private void InitializeWaypoints()
     {
-        //_waypointManager = GameObject.FindFirstObjectByType<WaypointManager>();
+        
         _blockData = BaseSceneManager._instance.RequestWaypointBlock();
-        //_waypointBlock = _blockData._block;
 
         if (_blockData != null)
         {
@@ -52,16 +50,8 @@ public partial class EnemyFSMController : ComponentEvents
             _wpData.UpdateData(_blockData._waypointPositions.ToList(), _blockData._waypointForwards.ToList());
 
             _enemyEventManager.WaypointsUpdated(_wpData);
-            /*foreach (Vector3 position in _blockData._waypointPositions)
-            {
-                //Debug.LogError("Position: " + position);
-                _wayPoints.Add(position);
-            }
-
-            foreach (Vector3 forward in _blockData._waypointForwards)
-            {
-                _wayPointForwards.Add(forward);
-            }*/
+            
+            BaseSceneManager._instance.RegisterAgentAndZone(this, _blockZone);
         }
     }
 

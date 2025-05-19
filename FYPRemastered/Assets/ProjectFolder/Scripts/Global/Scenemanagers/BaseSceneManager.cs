@@ -66,4 +66,9 @@ public class BaseSceneManager : MonoBehaviour, ISceneManager
 
     public virtual void GetBulletPool(ref PoolManager manager) { }
 
+
+    public virtual void RegisterAgentAndZone(EnemyFSMController agent, int zone) { }
+    public virtual void UnregisterAgentAndZone(EnemyFSMController agent, int zone) { }
+    public virtual void AlertZoneAgents(int zone, EnemyFSMController source) { }
+
 }

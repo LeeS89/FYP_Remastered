@@ -16,8 +16,8 @@ public class MoonSceneManager : BaseSceneManager
 
     public EnemyFSMController _enemy;
     public bool _testspawn = false;
+    private ZoneAgentRegistry _zoneAgentRegistry;
 
-    
 
     private void Start()
     {
@@ -60,6 +60,7 @@ public class MoonSceneManager : BaseSceneManager
         _normalBulletPrefab = Resources.Load<GameObject>("Bullets/BasicBullet");
         _normalHitPrefab = Resources.Load<ParticleSystem>("ParticlePoolPrefabs/BasicHit");
         _deflectAudioPrefab = Resources.Load<AudioSource>("AudioPoolPrefabs/DeflectAudio");
+        _zoneAgentRegistry = new ZoneAgentRegistry();
         LoadWaypoints();
     }
    
@@ -175,6 +176,15 @@ public class MoonSceneManager : BaseSceneManager
         {
             _waypointBlockData.blockDataArray[index]._inUse = false;
         }
+       
     }
+
+
+    #region Agent Registry
+   
+    public override void RegisterAgentAndZone(EnemyFSMController agent, int zone) => _zoneAgentRegistry.Register(agent, zone);
+    public override void UnregisterAgentAndZone(EnemyFSMController agent, int zone) => _zoneAgentRegistry.Unregister(agent, zone);
+    public override void AlertZoneAgents(int zone, EnemyFSMController source) => _zoneAgentRegistry.AlertZone(zone, source);
+    #endregion
 
 }

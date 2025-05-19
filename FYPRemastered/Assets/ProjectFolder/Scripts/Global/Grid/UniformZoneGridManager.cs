@@ -27,32 +27,42 @@ public class UniformZoneGridManager : MonoBehaviour
 
     [Header("NavMesh Source Objects")]
     public List<GameObject> navMeshObjects = new List<GameObject>();
+    private List<GameObject> _navMeshObjectsBackup = new List<GameObject>();
 
     [Header("Step Logic")]
     public float stepSize = 1f; // Step bands: step 2 = 2–2.99, etc.
     public int maxSteps = 30;
 
+    public SamplePointDataSO _samplePointDataSO; // ScriptableObject to save data
 
     [HideInInspector] public List<Transform> manualSamplePoints = new List<Transform>();
     public List<SamplePointData> savedPoints = new List<SamplePointData>();
 
-    // ----------------------------------------
-    // Auto Place Cubes (NavMesh-aware)
-    // ----------------------------------------
+    /// <summary>
+    /// Scans the navmesh objects and places cubes at regular intervals.
+    /// </summary>
     [ContextMenu("Auto Place Sample Cubes on NavMesh")]
     public void AutoPlaceCubesOnNavMesh()
     {
-        if (navMeshObjects == null || navMeshObjects.Count == 0)
-        {
-            Debug.LogError("No NavMesh objects assigned.");
-            return;
-        }
-
         if (markerPrefab == null)
         {
             Debug.LogError("Missing Marker Prefab.");
             return;
         }
+
+        if (_samplePointDataSO.savedPoints.Count == 0)
+        {
+
+            if (navMeshObjects == null || navMeshObjects.Count == 0)
+            {
+                Debug.LogError("No NavMesh objects assigned.");
+                return;
+            }
+
+            _navMeshObjectsBackup = new List<GameObject>(navMeshObjects);
+        }
+
+        
 
 
         ClearExistingSampleCubes();
@@ -129,9 +139,9 @@ public class UniformZoneGridManager : MonoBehaviour
         Debug.LogError($"Placed {manualSamplePoints.Count} sample cubes on NavMesh.");
     }
 
-    // ----------------------------------------
-    // Collect cubes manually edited in scene
-    // ----------------------------------------
+    /// <summary>
+    /// Once cubes are generated and edited, this function collects them into the manualSamplePoints list.
+    /// </summary>
     [ContextMenu("Collect Sample Cubes")]
     public void CollectSampleCubes()
     {
@@ -148,6 +158,9 @@ public class UniformZoneGridManager : MonoBehaviour
         Debug.LogError($"Collected {manualSamplePoints.Count} sample cubes.");
     }
 
+    /// <summary>
+    /// Removes all existing sample cubes from the scene.
+    /// </summary>
     [ContextMenu("Clear Sample Cubes")]
     private void ClearExistingSampleCubes()
     {
@@ -160,9 +173,6 @@ public class UniformZoneGridManager : MonoBehaviour
         Debug.LogError("Cleared existing sample cubes.");
     }
 
-    // ----------------------------------------
-    // Generate data structure with step distances
-    // ----------------------------------------
     void Start()
     {
         if(manualSamplePoints.Count == 0)
@@ -180,6 +190,15 @@ public class UniformZoneGridManager : MonoBehaviour
 
     public Transform nearestPointTransform;
 
+    /// <summary>
+    /// Generates and processes sample point data based on the positions of manually defined points.
+    /// </summary>
+    /// <remarks>This method clears any previously saved points and generates a new set of sample point data 
+    /// by iterating through the provided manual sample points. It calculates step-grouped distances  between points and
+    /// determines reachable steps for each point based on the specified step size  and maximum step limit. Debug
+    /// information about the generated points is logged.  If a player reference is set in the Unity Editor, the method
+    /// also identifies the nearest point  to the player and logs its index and position. If no player reference is set,
+    /// a warning is logged.</remarks>
     public void GenerateSamplePointData()
     {
         savedPoints.Clear();
@@ -263,6 +282,15 @@ public class UniformZoneGridManager : MonoBehaviour
         // manualSamplePoints.Clear();
     }
 
+    /// <summary>
+    /// Retrieves a random point that is exactly the specified number of steps away from the player's nearest point.
+    /// </summary>
+    /// <remarks>This method assumes that the player's nearest point and the saved points have been properly
+    /// initialized.  If no saved points are available or the nearest point to the player is invalid, the method returns
+    /// the  current position of the object.</remarks>
+    /// <param name="step">The number of steps away from the player's nearest point. Must be a positive integer.</param>
+    /// <returns>A <see cref="Vector3"/> representing the position of a random point that is <paramref name="step"/> steps away 
+    /// from the player's nearest point. If no such point exists, returns the position of the player's nearest point.</returns>
     public Vector3 GetRandomPointXStepsFromPlayer(int step)
     {
         if (savedPoints == null || savedPoints.Count == 0)

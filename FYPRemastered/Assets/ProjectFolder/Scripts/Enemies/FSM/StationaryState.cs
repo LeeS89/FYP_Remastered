@@ -85,9 +85,10 @@ public class StationaryState : EnemyState
                 if (!_canSeePlayer)
                 {
                     _isStationary = false;
-                    UniformZoneGridManager _gridManager = GameObject.FindFirstObjectByType<UniformZoneGridManager>();
+                     UniformZoneGridManager _gridManager = GameObject.FindFirstObjectByType<UniformZoneGridManager>();
                     Vector3 newPoint = _gridManager.GetRandomPointXStepsFromPlayer(4);
                     _eventManager.RequestChasingState(newPoint);
+                    _eventManager.RequestChasingState();
                     yield break;
                 }
             }
