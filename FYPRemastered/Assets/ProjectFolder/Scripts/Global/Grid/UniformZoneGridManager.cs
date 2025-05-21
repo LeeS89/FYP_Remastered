@@ -26,8 +26,8 @@ public class UniformZoneGridManager : MonoBehaviour
     public GameObject markerPrefab;
 
     [Header("NavMesh Source Objects")]
-    public List<GameObject> navMeshObjects = new List<GameObject>();
-    private List<GameObject> _navMeshObjectsBackup = new List<GameObject>();
+    public List<GameObject> _navMeshObjects = new List<GameObject>();
+    [SerializeField] private List<GameObject> _navMeshObjectsBackup = new List<GameObject>();
 
     [Header("Step Logic")]
     public float stepSize = 1f; // Step bands: step 2 = 2–2.99, etc.
@@ -44,30 +44,70 @@ public class UniformZoneGridManager : MonoBehaviour
     [ContextMenu("Auto Place Sample Cubes on NavMesh")]
     public void AutoPlaceCubesOnNavMesh()
     {
-        if (markerPrefab == null)
+        if (markerPrefab == null || _navMeshObjects.Count == 0 || _samplePointDataSO == null)
         {
             Debug.LogError("Missing Marker Prefab.");
             return;
         }
 
+        ClearExistingSampleCubes();
+
         if (_samplePointDataSO.savedPoints.Count == 0)
         {
 
-            if (navMeshObjects == null || navMeshObjects.Count == 0)
+            _navMeshObjectsBackup = new List<GameObject>(_navMeshObjects);
+            GenerateNewCubes(_navMeshObjectsBackup);
+        }
+        else
+        {
+            List<GameObject> newObjectsForCubePlacement = new List<GameObject>();
+            foreach (var obj in _navMeshObjects)
             {
-                Debug.LogError("No NavMesh objects assigned.");
-                return;
+                if (!_navMeshObjectsBackup.Contains(obj))
+                {
+                    _navMeshObjectsBackup.Add(obj);
+                    newObjectsForCubePlacement.Add(obj);
+                }
             }
-
-            _navMeshObjectsBackup = new List<GameObject>(navMeshObjects);
+            ReloadStoredCubes();
+            GenerateNewCubes(newObjectsForCubePlacement);
         }
 
-        
+        CollectSampleCubes();
+    }
 
+    private void ReloadStoredCubes()
+    {
+        if(_samplePointDataSO == null || _samplePointDataSO.savedPoints.Count == 0)
+        {
+            Debug.LogError("No saved points available in the ScriptableObject.");
+            return;
+        }
 
-        ClearExistingSampleCubes();
+        foreach (var pos in _samplePointDataSO.savedPoints)
+        {
+            GameObject cube = Instantiate(markerPrefab, pos.position, Quaternion.identity);
+            cube.transform.SetParent(transform);
+            manualSamplePoints.Add(cube.transform);
+        }
+        _samplePointDataSO.ClearData();
+        SaveScriptableObject(); // Clear the data in the ScriptableObject after loading
+    }
 
-        foreach (GameObject obj in navMeshObjects)
+    private void SaveScriptableObject()
+    {
+        if (Application.isEditor && !Application.isPlaying)
+        {
+#if UNITY_EDITOR
+            EditorUtility.SetDirty(_samplePointDataSO);  // Mark the ScriptableObject as modified
+            AssetDatabase.SaveAssets();  // Force Unity to save the changes
+#endif
+        }
+    }
+
+    private void GenerateNewCubes(List<GameObject> objetcsToScan)
+    {
+        foreach (GameObject obj in objetcsToScan)
         {
             Renderer rend = obj.GetComponent<Renderer>();
             if (rend == null)
@@ -103,38 +143,7 @@ public class UniformZoneGridManager : MonoBehaviour
             }
         }
 
-        /*Renderer rend = GetComponent<Renderer>();
-        if (rend == null || markerPrefab == null)
-        {
-            Debug.LogError("Missing Renderer or Marker Prefab");
-            return;
-        }
-
-        Bounds bounds = rend.bounds;
-        Vector3 min = bounds.min;
-        Vector3 max = bounds.max;
-
-        int numX = Mathf.CeilToInt((max.x - min.x) / cellSize);
-        int numZ = Mathf.CeilToInt((max.z - min.z) / cellSize);
-
-        for (int x = 0; x < numX; x++)
-        {
-            for (int z = 0; z < numZ; z++)
-            {
-                float posX = min.x + x * cellSize + cellSize * 0.5f;
-                float posZ = min.z + z * cellSize + cellSize * 0.5f;
-                Vector3 sample = new Vector3(posX, bounds.max.y, posZ);
-
-                
-                if (NavMesh.SamplePosition(sample, out NavMeshHit hit, sampleRadius, NavMesh.AllAreas))
-                {
-                    GameObject cube = Instantiate(markerPrefab, hit.position, Quaternion.identity);
-                    cube.name = $"SampleNav_{x}_{z}";
-                    cube.transform.SetParent(transform);
-                    manualSamplePoints.Add(cube.transform);
-                }
-            }
-        }*/
+        
 
         Debug.LogError($"Placed {manualSamplePoints.Count} sample cubes on NavMesh.");
     }
@@ -142,7 +151,7 @@ public class UniformZoneGridManager : MonoBehaviour
     /// <summary>
     /// Once cubes are generated and edited, this function collects them into the manualSamplePoints list.
     /// </summary>
-    [ContextMenu("Collect Sample Cubes")]
+    //[ContextMenu("Collect Sample Cubes")]
     public void CollectSampleCubes()
     {
         manualSamplePoints.Clear();
@@ -175,12 +184,33 @@ public class UniformZoneGridManager : MonoBehaviour
 
     void Start()
     {
+#if UNITY_EDITOR
+        if (!Application.isPlaying) return;
+#endif
+
+        DeserializeSavedPoints();
+        /*
         if(manualSamplePoints.Count == 0)
         {
             return;
         }
 
-        GenerateSamplePointData();
+        GenerateSamplePointData();*/
+    }
+
+    private void DeserializeSavedPoints()
+    {
+        foreach (var point in _samplePointDataSO.savedPoints)
+        {
+            point.reachableSteps = new Dictionary<int, List<int>>();
+
+            foreach (var entry in point.serializedReachableSteps)
+            {
+                point.reachableSteps[entry.step] = new List<int>(entry.reachableIndices);
+            }
+        }
+
+        savedPoints = new List<SamplePointData>(_samplePointDataSO.savedPoints); // Optional: sync to local list
     }
 
     [Header("Runtime Info (Debug / Optional)")]
@@ -199,6 +229,7 @@ public class UniformZoneGridManager : MonoBehaviour
     /// information about the generated points is logged.  If a player reference is set in the Unity Editor, the method
     /// also identifies the nearest point  to the player and logs its index and position. If no player reference is set,
     /// a warning is logged.</remarks>
+    [ContextMenu("Generate and save data")]
     public void GenerateSamplePointData()
     {
         savedPoints.Clear();
@@ -216,6 +247,7 @@ public class UniformZoneGridManager : MonoBehaviour
 
         for (int i = 0; i < count; i++)
         {
+         
             var from = savedPoints[i];
 
             for (int j = 0; j < count; j++)
@@ -243,7 +275,38 @@ public class UniformZoneGridManager : MonoBehaviour
                     from.reachableSteps[step].Add(j);
                 }
             }
+            
         }
+
+        foreach (var point in savedPoints)
+        {
+            var copy = new SamplePointData
+            {
+                position = point.position,
+                serializedReachableSteps = new List<StepEntry>()
+            };
+
+            foreach (var kvp in point.reachableSteps)
+            {
+                copy.serializedReachableSteps.Add(new StepEntry
+                {
+                    step = kvp.Key,
+                    reachableIndices = new List<int>(kvp.Value)
+                });
+            }
+
+            _samplePointDataSO.savedPoints.Add(copy);
+        }
+        /*foreach (var point in savedPoints)
+        {
+            var copy = new SamplePointData();
+            copy.position = point.position;
+            copy.reachableSteps = DeepCopyReachableSteps(point.reachableSteps);
+
+            _samplePointDataSO.savedPoints.Add(copy);
+        }*/
+
+        SaveScriptableObject(); 
 
         Debug.LogError($"Generated {savedPoints.Count} points with step-grouped distances.");
         // --- Optional: Find Closest Point to Player on Scene Start ---
@@ -272,15 +335,35 @@ public class UniformZoneGridManager : MonoBehaviour
         {
             Debug.LogWarning("[Debug] Player reference not set — can't find nearest point.");
         }
-#endif
+
+        ClearExistingSampleCubes(); // Clear existing cubes after data generation
         // Clean up visual cubes after data is generated
-        /*foreach (Transform point in manualSamplePoints)
-        {
-            Destroy(point.gameObject);
-        }*/
+        //foreach (Transform point in manualSamplePoints)
+        //{
+        //    DestroyImmediate(point.gameObject);
+        //}
 
         // manualSamplePoints.Clear();
+
+        UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
+        UnityEditor.SceneManagement.EditorSceneManager.SaveScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
+#endif
     }
+
+    private Dictionary<int, List<int>> DeepCopyReachableSteps(Dictionary<int, List<int>> original)
+    {
+        var newDict = new Dictionary<int, List<int>>();
+
+        foreach (var kvp in original)
+        {
+            // Create a new list and copy each element
+            List<int> copiedList = new List<int>(kvp.Value);
+            newDict[kvp.Key] = copiedList;
+        }
+
+        return newDict;
+    }
+
 
     /// <summary>
     /// Retrieves a random point that is exactly the specified number of steps away from the player's nearest point.
@@ -351,7 +434,13 @@ public class UniformZoneGridManager : MonoBehaviour
             return;
         }
 
-        var selectedData = savedPoints[selectedIndex];
+        var selectedData = _samplePointDataSO.savedPoints[selectedIndex];
+
+        if(_samplePointDataSO.savedPoints.Count == 0)
+        {
+            Debug.LogError("No sample points available to visualize.");
+            return;
+        }
 
         // Clear existing labels first
         foreach (Transform cube in manualSamplePoints)
@@ -362,10 +451,12 @@ public class UniformZoneGridManager : MonoBehaviour
                 Destroy(existing.gameObject);
             }
         }
+        Debug.LogError($"Selected index: {selectedIndex}, Manual Points Count: {manualSamplePoints.Count}");
 
         // Loop through all reachableSteps
         foreach (var kvp in selectedData.reachableSteps)
         {
+           
             int step = kvp.Key;
             foreach (int targetIndex in kvp.Value)
             {

@@ -88,7 +88,7 @@ public class StationaryState : EnemyState
                      UniformZoneGridManager _gridManager = GameObject.FindFirstObjectByType<UniformZoneGridManager>();
                     Vector3 newPoint = _gridManager.GetRandomPointXStepsFromPlayer(4);
                     _eventManager.RequestChasingState(newPoint);
-                    _eventManager.RequestChasingState();
+                    //_eventManager.RequestChasingState();
                     yield break;
                 }
             }

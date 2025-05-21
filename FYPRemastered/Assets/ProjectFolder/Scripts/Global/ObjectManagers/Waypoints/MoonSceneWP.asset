@@ -14,26 +14,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blockDataArray:
   - _block: {fileID: 0}
-    _blockPosition: {x: -36.57, y: 2.749, z: 1.43}
+    _blockPosition: {x: -37.08, y: 2.747, z: 0}
     _waypointPositions:
-    - {x: -46.03, y: 2.749, z: -1.3100001}
-    - {x: -26.974998, y: 2.749, z: 1.43}
-    - {x: -27.974998, y: 2.749, z: -20.574999}
-    - {x: -45.53, y: 2.749, z: -20.57}
+    - {x: -45.895, y: 2.747, z: -0.76}
+    - {x: -27.155003, y: 2.747, z: 1.18}
+    - {x: -26.95, y: 2.747, z: -20.38}
+    - {x: -45.29, y: 2.747, z: -20.46}
     _waypointForwards:
     - {x: 0, y: 0, z: 1}
-    - {x: 0.99999994, y: 0, z: -0.00000011920929}
+    - {x: 1.0000001, y: 0, z: -0.00000011920929}
     - {x: 0, y: 0, z: 1}
-    - {x: 0, y: 0, z: 1}
+    - {x: 1.0000001, y: 0, z: -0.00000011920929}
     _blockZone: 1
-    _inUse: 1
+    _inUse: 0
   - _block: {fileID: 0}
-    _blockPosition: {x: -43.69, y: 4.956, z: 18.153}
+    _blockPosition: {x: -44.49, y: 4.246, z: 18.89}
     _waypointPositions:
-    - {x: -53.655, y: 4.2454996, z: 18.4285}
-    - {x: -27.085, y: 4.251, z: 18.153}
+    - {x: -64.61, y: 4.246, z: 18.89}
+    - {x: -23.455002, y: 4.246, z: 18.57}
     _waypointForwards:
     - {x: 0, y: 0, z: 1}
     - {x: 0, y: 0, z: 1}
     _blockZone: 1
-    _inUse: 1
+    _inUse: 0
