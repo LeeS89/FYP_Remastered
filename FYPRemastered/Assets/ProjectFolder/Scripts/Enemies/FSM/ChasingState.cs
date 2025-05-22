@@ -55,6 +55,7 @@ public class ChasingState : EnemyState
             else
             {
                 _eventManager.DestinationUpdated(destination.Value);
+                _eventManager.RotateTowardsTarget(true);
             }
             
             _coroutine = CoroutineRunner.Instance.StartCoroutine(ChasePlayerRoutine());
@@ -78,6 +79,7 @@ public class ChasingState : EnemyState
             {
                 _playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
                 _eventManager.DestinationUpdated(_playerPos, _randomStoppingDistance);
+                _eventManager.RotateTowardsTarget(false);
                 yield return new WaitForSeconds(0.15f);
             }
             //yield return new WaitForSeconds(0.25f);
@@ -96,6 +98,7 @@ public class ChasingState : EnemyState
         _isChasing = false;
         if (_coroutine != null)
         {
+            _eventManager.RotateTowardsTarget(false);
             CoroutineRunner.Instance.StopCoroutine(_coroutine);
             _coroutine = null;
         }

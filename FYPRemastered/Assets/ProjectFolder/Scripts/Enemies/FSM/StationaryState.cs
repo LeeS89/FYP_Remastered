@@ -39,8 +39,8 @@ public class StationaryState : EnemyState
                 {
                     _isStationary = true;
                     _coroutine = CoroutineRunner.Instance.StartCoroutine(PlayerProximityRoutine());
+                    _eventManager.RotateTowardsTarget(true);
 
-                    
                 }
                
                 break;
@@ -138,7 +138,7 @@ public class StationaryState : EnemyState
         {
             StationaryChaseManagerJob.Instance.UnregisterAgent(_agentId);
             _owner.GetComponent<NavMeshAgent>().updateRotation = true;
-           
+            _eventManager.RotateTowardsTarget(false);
             _isStationary = false;
             _pathCheckComplete = false;
             _shouldUpdateDestination = false;
@@ -166,7 +166,7 @@ public class StationaryState : EnemyState
         if (_owner == null || GameManager.Instance == null)
             return;
 
-        RotateTowardsPlayer();
+        //RotateTowardsPlayer();
     }
 
     private void RotateTowardsPlayer()

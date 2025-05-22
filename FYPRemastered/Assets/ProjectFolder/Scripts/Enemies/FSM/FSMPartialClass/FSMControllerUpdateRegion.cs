@@ -83,17 +83,26 @@ public partial class EnemyFSMController : ComponentEvents
         //MeasurePathToDestination();
         _destinationCheckAction?.Invoke();
 
-
-        if(_currentState != _stationary && _canSeePlayer)
+        if (_rotatingTowardsTarget)
         {
-            if (_agent.updateRotation)
-            {
-                _agent.updateRotation = false;
-            }
-           
+            //if (_agent.updateRotation)
+            //{
+            //    _agent.updateRotation = false;
+            //}
+
             RotateTowardsPlayer();
             UpdateAnimatorDirection();
         }
+        /* if(_currentState != _stationary && _canSeePlayer)
+         {
+             if (_agent.updateRotation)
+             {
+                 _agent.updateRotation = false;
+             }
+
+             RotateTowardsPlayer();
+             UpdateAnimatorDirection();
+         }*/
 
         if (!_movementChanged) { return; }
 

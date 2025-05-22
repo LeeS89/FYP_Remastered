@@ -9,6 +9,7 @@ public class EnemyEventManager : EventManager
     public event Action<bool> OnDestinationReached;
     public event Action<Vector3, int> OnDestinationUpdated;  
     public event Action<bool> OnPlayerSeen;
+    public event Action<bool> OnRotateTowardsTarget;
 
     // Animation events
     public event Action<AnimationAction> OnAnimationTriggered;
@@ -158,5 +159,10 @@ public class EnemyEventManager : EventManager
     public void RequestChasingState(Vector3? destination = null)
     {
         OnRequestChasingState?.Invoke(destination);
+    }
+
+    public void RotateTowardsTarget(bool rotate)
+    {
+        OnRotateTowardsTarget?.Invoke(rotate);
     }
 }

@@ -18,6 +18,7 @@ public partial class EnemyFSMController : ComponentEvents
     private EnemyState _currentState;
     private bool _agentIsActive = true;
     private bool _playerIsDead = false;
+    private bool _rotatingTowardsTarget = false;
 
     [Header("Patrol State - Random number between 0 and stopAndWaitDelay to wait at each way point")]
     [SerializeField] private float _stopAndWaitDelay;
@@ -86,7 +87,7 @@ public partial class EnemyFSMController : ComponentEvents
         _enemyEventManager.OnAgentRespawn += ToggleGameObject;
         _enemyEventManager.OnDestinationUpdated += UpdateAgentDestination;
         _enemyEventManager.OnDestinationReached += CarveOnDestinationReached;
-        
+        _enemyEventManager.OnRotateTowardsTarget += ToggleRotationToTarget;
         _enemyEventManager.OnSpeedChanged += UpdateTargetSpeedValues;
 
      
@@ -104,7 +105,7 @@ public partial class EnemyFSMController : ComponentEvents
         _enemyEventManager.OnOwnerDied -= OnDeath;
         _enemyEventManager.OnAgentDeathComplete -= ToggleGameObject;
         _enemyEventManager.OnAgentRespawn -= ToggleGameObject;
-        
+        _enemyEventManager.OnRotateTowardsTarget -= ToggleRotationToTarget;
         _enemyEventManager.OnSpeedChanged -= UpdateTargetSpeedValues;
         base.UnRegisterLocalEvents(eventManager);
         _enemyEventManager = null;
@@ -129,6 +130,17 @@ public partial class EnemyFSMController : ComponentEvents
 
 
     #region Animation Updates
+
+    private void ToggleRotationToTarget(bool rotate)
+    {
+        if(_rotatingTowardsTarget == rotate)
+        {
+            return;
+        }
+        _agent.updateRotation = !rotate;
+        _rotatingTowardsTarget = rotate;
+    }
+
     private void UpdateAnimatorSpeed()
     {
       
