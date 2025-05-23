@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+
 public class MoonSceneManager : BaseSceneManager
 {
     [SerializeField] private ParticleSystem _normalHitPrefab;
@@ -17,15 +18,24 @@ public class MoonSceneManager : BaseSceneManager
     public EnemyFSMController _enemy;
     public bool _testspawn = false;
     private ZoneAgentRegistry _zoneAgentRegistry;
-
+    private ClosestPointToPlayerJob _closestPointjob;
+    [SerializeField] private UniformZoneGridManager _gridManager;
 
     private void Start()
     {
         SetupScene();
     }
 
+    public bool _testJobRun = false;
+
     private void Update()
     {
+        if (_testJobRun)
+        {
+            _closestPointjob.RunClosestPointJob();
+            _testJobRun = false;
+        }
+
         if(_enemy == null) { return; }
 
         if (_testspawn)
@@ -49,6 +59,8 @@ public class MoonSceneManager : BaseSceneManager
         
     }
 
+
+
     IEnumerator InitializeDelay()
     {
         yield return new WaitForSeconds(1f);
@@ -62,6 +74,17 @@ public class MoonSceneManager : BaseSceneManager
         _deflectAudioPrefab = Resources.Load<AudioSource>("AudioPoolPrefabs/DeflectAudio");
         _zoneAgentRegistry = new ZoneAgentRegistry();
         LoadWaypoints();
+
+        _gridManager = FindFirstObjectByType<UniformZoneGridManager>();
+
+        if (!_gridManager)
+        {
+            Debug.LogError("No Grid Manager found in scene");
+            return;
+        }
+
+        _closestPointjob = new ClosestPointToPlayerJob();
+        _closestPointjob.AddSamplePointData(_gridManager.InitializeGrid());
     }
    
 
@@ -88,17 +111,9 @@ public class MoonSceneManager : BaseSceneManager
 
     /*protected override void LoadActiveSceneEventManagers()
     {
-        _eventManagers = new List<EventManager>();
+        base.LoadActiveSceneEventManagers();
 
-        _eventManagers.AddRange(FindObjectsByType<EventManager>(FindObjectsInactive.Include, FindObjectsSortMode.None));
-
-        foreach(var eventManager in _eventManagers)
-        {
-            if (eventManager is not BulletEventManager)
-            {
-                eventManager.BindComponentsToEvents();
-            }
-        }
+        _closestPointjob.AddSamplePointData(_gridData);
 
     }*/
 

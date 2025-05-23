@@ -30,6 +30,10 @@ public class UniformZoneGridManager : MonoBehaviour
     [HideInInspector] public List<Transform> manualSamplePoints = new List<Transform>();
     public List<SamplePointData> savedPoints = new List<SamplePointData>();
 
+
+    //public ClosestPointToPlayerJob _playerJob;
+
+
     /// <summary>
     /// Scans the navmesh objects and places cubes at regular intervals.
     /// </summary>
@@ -165,29 +169,43 @@ public class UniformZoneGridManager : MonoBehaviour
     [ContextMenu("Clear Sample Cubes")]
     private void ClearExistingSampleCubes()
     {
-        for (int i = transform.childCount - 1; i >= 0; i--)
+        /*for (int i = transform.childCount - 1; i >= 0; i--)
         {
             DestroyImmediate(transform.GetChild(i).gameObject);
         }
 
-        manualSamplePoints.Clear();
+        manualSamplePoints.Clear();*/
         Debug.LogError("Cleared existing sample cubes.");
     }
 
-    void Start()
+   /* void Start()
     {
-#if UNITY_EDITOR
-        if (!Application.isPlaying) return;
-#endif
 
-        DeserializeSavedPoints();
-        /*
+
+        //DeserializeSavedPoints();
+
+        //_playerJob.AddSamplePointData(_samplePointDataSO);
+        *//*
         if(manualSamplePoints.Count == 0)
         {
             return;
         }
 
-        GenerateSamplePointData();*/
+        GenerateSamplePointData();*//*
+    }*/
+
+    
+
+    public SamplePointDataSO InitializeGrid()
+    {
+#if UNITY_EDITOR
+        if (!Application.isPlaying) return null;
+#endif
+        BaseSceneManager._instance.OnClosestPointToPlayerJobComplete += SetNearestIndexToPlayer;
+
+        DeserializeSavedPoints();
+
+        return _samplePointDataSO;
     }
 
     private void DeserializeSavedPoints()
@@ -335,7 +353,7 @@ public class UniformZoneGridManager : MonoBehaviour
 #endif
     }
 
-    public void SetNearestIndexToPlayer(int nearestPointIndex)
+    private void SetNearestIndexToPlayer(int nearestPointIndex)
     {
         _nearestPointToPlayer = nearestPointIndex;
         nearestPointTransform = manualSamplePoints[_nearestPointToPlayer]; // Delete Later
@@ -457,5 +475,7 @@ public class UniformZoneGridManager : MonoBehaviour
 #endif
     }
 
+   
 
+    
 }

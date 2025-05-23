@@ -49,14 +49,13 @@ public class BaseSceneManager : MonoBehaviour, ISceneManager
         }
     }
 
-
-
-
+  
 
     /// Scene Specific overridden Functions
     protected virtual void LoadSceneResources() { }
 
     protected virtual void LoadWaypoints() { }
+
 
     public virtual BlockData RequestWaypointBlock() { return null; }
 
@@ -70,5 +69,19 @@ public class BaseSceneManager : MonoBehaviour, ISceneManager
     public virtual void RegisterAgentAndZone(EnemyFSMController agent, int zone) { }
     public virtual void UnregisterAgentAndZone(EnemyFSMController agent, int zone) { }
     public virtual void AlertZoneAgents(int zone, EnemyFSMController source) { }
+
+    public event Action OnClosestPointToPlayerChanged;
+
+    public event Action<int> OnClosestPointToPlayerJobComplete;
+
+    public void ClosestPointToPlayerchanged() // Player will invoke this event, and the scene manager will listen to it
+    {
+        OnClosestPointToPlayerChanged?.Invoke();
+    }
+
+    public void ClosestPointToPlayerJobComplete(int pointIndex)
+    {
+        OnClosestPointToPlayerJobComplete?.Invoke(pointIndex);
+    }
 
 }
