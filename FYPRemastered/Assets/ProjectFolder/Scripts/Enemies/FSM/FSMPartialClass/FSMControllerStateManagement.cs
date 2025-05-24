@@ -64,7 +64,7 @@ public partial class EnemyFSMController : ComponentEvents
             return;
         }
         _gun = new Gun(_bulletSpawnPoint, playerTransform, _enemyEventManager, _owningGameObject);
-        GameManager._onPlayerMovedinternal += EnemyState.SetPlayerMoved;
+        //GameManager._onPlayerMovedinternal += EnemyState.SetPlayerMoved;
     }
 
     public void ChangeState(EnemyState state, Vector3? destination = null, AlertStatus alertStatus = AlertStatus.None, float stoppingDistance = 0)

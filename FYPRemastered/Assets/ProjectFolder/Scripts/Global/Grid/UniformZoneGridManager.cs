@@ -40,7 +40,7 @@ public class UniformZoneGridManager : MonoBehaviour
     [ContextMenu("Auto Place Sample Cubes on NavMesh")]
     public void AutoPlaceCubesOnNavMesh()
     {
-        if (markerPrefab == null || _navMeshObjects.Count == 0 || _samplePointDataSO == null)
+        if (markerPrefab == null || _samplePointDataSO == null)
         {
             Debug.LogError("Missing Marker Prefab.");
             return;
@@ -48,9 +48,12 @@ public class UniformZoneGridManager : MonoBehaviour
 
         ClearExistingSampleCubes();
 
+        //CheckForDuplicates();
+
         if (_samplePointDataSO.savedPoints.Count == 0)
         {
-
+            if(_navMeshObjects.Count == 0) { return; }
+            CheckForDuplicates();
             _navMeshObjectsBackup = new List<GameObject>(_navMeshObjects);
             GenerateNewCubes(_navMeshObjectsBackup);
         }
@@ -66,10 +69,30 @@ public class UniformZoneGridManager : MonoBehaviour
                 }
             }
             ReloadStoredCubes();
-            GenerateNewCubes(newObjectsForCubePlacement);
+
+            if (newObjectsForCubePlacement.Count > 0)
+            {
+                GenerateNewCubes(newObjectsForCubePlacement);
+            }
         }
 
         CollectSampleCubes();
+    }
+
+    private void CheckForDuplicates()
+    {
+        List<GameObject> temp = new List<GameObject>();
+
+        foreach (var obj in _navMeshObjects)
+        {
+            if (!temp.Contains(obj))
+            {
+                temp.Add(obj);
+            }
+        }
+
+        _navMeshObjects.Clear();
+        _navMeshObjects.AddRange(temp);
     }
 
     private void ReloadStoredCubes()
@@ -169,13 +192,13 @@ public class UniformZoneGridManager : MonoBehaviour
     [ContextMenu("Clear Sample Cubes")]
     private void ClearExistingSampleCubes()
     {
-        /*for (int i = transform.childCount - 1; i >= 0; i--)
+        for (int i = transform.childCount - 1; i >= 0; i--)
         {
             DestroyImmediate(transform.GetChild(i).gameObject);
         }
 
-        manualSamplePoints.Clear();*/
-        Debug.LogError("Cleared existing sample cubes.");
+        manualSamplePoints.Clear();
+        //Debug.LogError("Cleared existing sample cubes.");
     }
 
    /* void Start()
@@ -330,7 +353,7 @@ public class UniformZoneGridManager : MonoBehaviour
             }
 
             _nearestPointToPlayer = closestIndex;
-            nearestPointTransform = manualSamplePoints[closestIndex];
+            //nearestPointTransform = manualSamplePoints[closestIndex];
 
             Debug.Log($"[Debug] Nearest point to player: index {_nearestPointToPlayer} at {savedPoints[_nearestPointToPlayer].position}");
         }
@@ -356,7 +379,7 @@ public class UniformZoneGridManager : MonoBehaviour
     private void SetNearestIndexToPlayer(int nearestPointIndex)
     {
         _nearestPointToPlayer = nearestPointIndex;
-        nearestPointTransform = manualSamplePoints[_nearestPointToPlayer]; // Delete Later
+        //nearestPointTransform = manualSamplePoints[_nearestPointToPlayer]; // Delete Later
     }
 
 

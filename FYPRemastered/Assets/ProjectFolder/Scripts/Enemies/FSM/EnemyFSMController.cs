@@ -88,7 +88,7 @@ public partial class EnemyFSMController : ComponentEvents
         _enemyEventManager.OnDestinationUpdated += UpdateAgentDestination;
         _enemyEventManager.OnDestinationReached += CarveOnDestinationReached;
         _enemyEventManager.OnRotateTowardsTarget += ToggleRotationToTarget;
-        _enemyEventManager.OnSpeedChanged += UpdateTargetSpeedValues;
+        _enemyEventManager.OnSpeedChanged += UpdateAnimatorSpeedValues;
 
      
         RegisterGlobalEvents();
@@ -106,7 +106,7 @@ public partial class EnemyFSMController : ComponentEvents
         _enemyEventManager.OnAgentDeathComplete -= ToggleGameObject;
         _enemyEventManager.OnAgentRespawn -= ToggleGameObject;
         _enemyEventManager.OnRotateTowardsTarget -= ToggleRotationToTarget;
-        _enemyEventManager.OnSpeedChanged -= UpdateTargetSpeedValues;
+        _enemyEventManager.OnSpeedChanged -= UpdateAnimatorSpeedValues;
         base.UnRegisterLocalEvents(eventManager);
         _enemyEventManager = null;
     }
@@ -115,6 +115,7 @@ public partial class EnemyFSMController : ComponentEvents
     {
         GameManager.OnPlayerDied += OnPlayerDied;
         GameManager.OnPlayerRespawn += OnPlayerRespawned;
+        GameManager._onPlayerMovedinternal += EnemyState.SetPlayerMoved;
         BaseSceneManager._instance.OnSceneStarted += OnSceneStarted;
         BaseSceneManager._instance.OnSceneEnded += OnSceneComplete;
     }
@@ -123,6 +124,7 @@ public partial class EnemyFSMController : ComponentEvents
     {
         GameManager.OnPlayerDied -= OnPlayerDied;
         GameManager.OnPlayerRespawn -= OnPlayerRespawned;
+        GameManager._onPlayerMovedinternal -= EnemyState.SetPlayerMoved;
         BaseSceneManager._instance.OnSceneStarted -= OnSceneStarted;
         BaseSceneManager._instance.OnSceneEnded -= OnSceneComplete;
     }
@@ -141,7 +143,7 @@ public partial class EnemyFSMController : ComponentEvents
         _rotatingTowardsTarget = rotate;
     }
 
-    private void UpdateAnimatorSpeed()
+    private void ApplyAnimatorSpeedValues()
     {
       
         float smoothedSpeed = Mathf.Lerp(_agent.speed, _targetSpeed, _lerpSpeed * Time.deltaTime);
@@ -162,7 +164,7 @@ public partial class EnemyFSMController : ComponentEvents
     }
 
    
-    private void UpdateTargetSpeedValues(float speed, float lerpSpeed)
+    private void UpdateAnimatorSpeedValues(float speed, float lerpSpeed)
     {
         _targetSpeed = speed;
         _lerpSpeed = lerpSpeed;

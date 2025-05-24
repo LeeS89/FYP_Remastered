@@ -21,8 +21,7 @@ public class StationaryState : EnemyState
 
     public override void EnterState(Vector3? destination = null, AlertStatus alertStatus = AlertStatus.None, float stoppingDistance = 0)
     {
-        //base.EnterState(alertStatus);
-
+       
         switch (alertStatus)
         {
             case AlertStatus.None:
@@ -32,9 +31,6 @@ public class StationaryState : EnemyState
                
                 _eventManager.SpeedChanged(0f, 10f);
                
-                /*_stateEntryDistanceFromPlayer = Vector3.Distance(_owner.transform.position, GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position);*/
-                //_stateEntryDistanceFromPlayer = (GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position - _owner.transform.position).sqrMagnitude;
-               /* Debug.LogError("Distance on entry: " + _stateEntryDistanceFromPlayer);*/
                 if (_coroutine == null)
                 {
                     _isStationary = true;
@@ -85,24 +81,13 @@ public class StationaryState : EnemyState
                 if (!_canSeePlayer)
                 {
                     _isStationary = false;
-                     UniformZoneGridManager _gridManager = GameObject.FindFirstObjectByType<UniformZoneGridManager>();
+                    UniformZoneGridManager _gridManager = GameObject.FindFirstObjectByType<UniformZoneGridManager>();
                     Vector3 newPoint = _gridManager.GetRandomPointXStepsFromPlayer(4);
                     _eventManager.RequestChasingState(newPoint);
-                    //_eventManager.RequestChasingState();
+                    
                     yield break;
                 }
             }
-
-            /* if (!_canSeePlayer)
-             {
-                 _isStationary = false;
-                 UniformZoneGridManager _gridManager = GameObject.FindFirstObjectByType<UniformZoneGridManager>();
-                 Vector3 newPoint = _gridManager.GetRandomPointXStepsFromPlayer(4);
-                 _eventManager.RequestChasingState(newPoint);
-                 //_eventManager.DestinationUpdated(newPoint);
-                 yield break;
-                 //yield return new WaitForSeconds(25f);
-             }*/
 
             yield return null;
 
@@ -154,57 +139,10 @@ public class StationaryState : EnemyState
         _path = null;
     }
 
-    public override void UpdateState()
-    {
-        throw new System.NotImplementedException();
-    }
-
     public override void LateUpdateState()
     {
         intervalTimer += Time.deltaTime;
-
-        if (_owner == null || GameManager.Instance == null)
-            return;
-
-        //RotateTowardsPlayer();
     }
 
-    private void RotateTowardsPlayer()
-    {
-        Transform player = GameManager.Instance.GetPlayerPosition(PlayerPart.Position);
-        if (player == null)
-            return;
-
-        Vector3 toPlayer = player.position - _owner.transform.position;
-        toPlayer.y = 0f;
-
-        if (toPlayer.sqrMagnitude < 0.001f)
-            return;
-
-        Vector3 forward = _owner.transform.forward;
-        forward.y = 0f;
-
-        float dot = Vector3.Dot(forward.normalized, toPlayer.normalized);
-        float angle = Mathf.Acos(dot) * Mathf.Rad2Deg;
-
-        const float precisionThreshold = 1f; // degrees
-
-        Quaternion targetRotation = Quaternion.LookRotation(toPlayer);
-
-        if (angle < precisionThreshold)
-        {
-            // ✅ Close enough — complete the rotation smoothly
-            _owner.transform.rotation = Quaternion.Slerp(
-                _owner.transform.rotation,
-                targetRotation,
-                1f); // forces it to land exactly, still smooth
-            return;
-        }
-
-        // ✅ Smoothly rotate toward target
-        _owner.transform.rotation = Quaternion.Slerp(
-            _owner.transform.rotation,
-            targetRotation,
-            Time.deltaTime * 5f); // adjust speed as needed
-    }
+   
 }

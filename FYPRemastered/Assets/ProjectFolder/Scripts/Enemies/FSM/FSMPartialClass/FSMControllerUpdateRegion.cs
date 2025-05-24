@@ -106,7 +106,7 @@ public partial class EnemyFSMController : ComponentEvents
 
         if (!_movementChanged) { return; }
 
-        UpdateAnimatorSpeed();
+        ApplyAnimatorSpeedValues();
     }
 
     private void MeasurePathToDestination()

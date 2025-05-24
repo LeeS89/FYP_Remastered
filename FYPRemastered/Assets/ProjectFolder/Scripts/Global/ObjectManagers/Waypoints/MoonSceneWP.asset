@@ -26,7 +26,7 @@ MonoBehaviour:
     - {x: 0, y: 0, z: 1}
     - {x: 1.0000001, y: 0, z: -0.00000011920929}
     _blockZone: 1
-    _inUse: 0
+    _inUse: 1
   - _block: {fileID: 0}
     _blockPosition: {x: -44.49, y: 4.246, z: 18.89}
     _waypointPositions:
@@ -36,4 +36,4 @@ MonoBehaviour:
     - {x: 0, y: 0, z: 1}
     - {x: 0, y: 0, z: 1}
     _blockZone: 1
-    _inUse: 0
+    _inUse: 1
