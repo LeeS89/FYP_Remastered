@@ -10,6 +10,7 @@ public class EnemyEventManager : EventManager
     public event Action<Vector3, int> OnDestinationUpdated;  
     public event Action<bool> OnPlayerSeen;
     public event Action<bool> OnRotateTowardsTarget;
+    public event Action OnPathInvalid;
 
     // Animation events
     public event Action<AnimationAction> OnAnimationTriggered;
@@ -86,6 +87,11 @@ public class EnemyEventManager : EventManager
     public void SpeedChanged(float moveSpeed, float lerpSpeed)
     {
         OnSpeedChanged?.Invoke(moveSpeed, lerpSpeed);
+    }
+
+    public void PathInvalid()
+    {
+        OnPathInvalid?.Invoke();
     }
 
     public void DestinationReached(bool reached)

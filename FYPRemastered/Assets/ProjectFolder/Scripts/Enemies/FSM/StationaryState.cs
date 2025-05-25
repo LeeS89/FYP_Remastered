@@ -1,4 +1,8 @@
-﻿using System.Collections;
+﻿using Meta.XR.MRUtilityKit.SceneDecorator;
+using NUnit.Framework;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -9,13 +13,17 @@ public class StationaryState : EnemyState
     private float intervalTimer = 0;
     private float checkInterval = 2.5f;
     private bool _pathCheckComplete = false;
-    
+    private int _maxSteps = 0;
+
     private WaitUntil _waitUntilPathCheckComplete;
-   
-    public StationaryState(EnemyEventManager eventManager, GameObject owner, NavMeshPath path) : base(eventManager, path, owner) 
+    private UniformZoneGridManager _gridManager;
+
+
+    public StationaryState(EnemyEventManager eventManager, GameObject owner, NavMeshPath path, int maxSteps) : base(eventManager, path, owner) 
     { 
-      
+        _maxSteps = maxSteps;
         _waitUntilPathCheckComplete = new WaitUntil(() => _pathCheckComplete);
+        _gridManager = GameObject.FindFirstObjectByType<UniformZoneGridManager>();
     }
    
 
@@ -66,7 +74,7 @@ public class StationaryState : EnemyState
             yield return _waitUntilPathCheckComplete;
             _pathCheckComplete = false;
 
-            if (_shouldUpdateDestination)
+            if (_shouldReChasePlayer)
             {
                 _isStationary = false;
                 _eventManager.RequestChasingState();
@@ -79,20 +87,63 @@ public class StationaryState : EnemyState
                 intervalTimer = 0f;
 
                 if (!_canSeePlayer)
-                {
-                    _isStationary = false;
-                    UniformZoneGridManager _gridManager = GameObject.FindFirstObjectByType<UniformZoneGridManager>();
-                    Vector3 newPoint = _gridManager.GetRandomPointXStepsFromPlayer(4);
-                    _eventManager.RequestChasingState(newPoint);
-                    
-                    yield break;
+                {    
+                    Vector3 newPoint = RequestFlankingPoint();
+                    if (newPoint != Vector3.zero) // Vector3.zero = No valid point found
+                    {
+                        _isStationary = false;
+                        _eventManager.RequestChasingState(newPoint);
+
+                        yield break;
+                    }
+                    // => else, if newPoint = Vector3.zero, We stop the interval timer to prevent unneccessary checks
                 }
+
             }
 
             yield return null;
 
         }
 
+    }
+
+    private Vector3 RequestFlankingPoint()
+    {
+        List<int> stepsToTry = new List<int>();
+        int randomIndex = Random.Range(4, _maxSteps +1);
+        int temp = randomIndex;
+        while (temp >= 4)
+        {
+            stepsToTry.Add(temp);
+            temp--;
+        }
+        temp = randomIndex + 1;
+        while (temp < 13)
+        {
+            stepsToTry.Add(temp);
+            temp++;
+        }
+
+        foreach (int step in stepsToTry)
+        {
+            List<Vector3> newPoints = _gridManager.GetCandidatePointsAtStep(step);
+
+            if (newPoints.Count == 0) { continue; }
+            
+            newPoints = newPoints.OrderBy(p => Random.value).ToList();
+
+            foreach (var point in newPoints)
+            {
+                if (HasClearPathToTarget(LineOfSightUtility.GetClosestPointOnNavMesh(_owner.transform.position), point, _path))
+                {
+                    Debug.LogError("Point Index: "+step);
+                    return point;
+                }
+            }
+           
+        }
+
+        return Vector3.zero; 
     }
 
     /// <summary>
@@ -108,7 +159,7 @@ public class StationaryState : EnemyState
 
         if (canChase)
         {
-           _shouldUpdateDestination = HasClearPathToTarget(LineOfSightUtility.GetClosestPointOnNavMesh(_owner.transform.position), playerPosition, _path);
+           _shouldReChasePlayer = HasClearPathToTarget(LineOfSightUtility.GetClosestPointOnNavMesh(_owner.transform.position), playerPosition, _path);
                   
         }
 
@@ -126,7 +177,7 @@ public class StationaryState : EnemyState
             _eventManager.RotateTowardsTarget(false);
             _isStationary = false;
             _pathCheckComplete = false;
-            _shouldUpdateDestination = false;
+            _shouldReChasePlayer = false;
             CoroutineRunner.Instance.StopCoroutine(_coroutine);
             _coroutine = null;
         }

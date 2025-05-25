@@ -18,7 +18,7 @@ public partial class EnemyFSMController : ComponentEvents
         _animController = new EnemyAnimController(_anim, _enemyEventManager);
         _patrol = new PatrolState(_owningGameObject, _enemyEventManager, _stopAndWaitDelay, _walkSpeed);
         _chasing = new ChasingState(_enemyEventManager, _owningGameObject, _walkSpeed, _sprintSpeed);
-        _stationary = new StationaryState(_enemyEventManager, _owningGameObject, _path);
+        _stationary = new StationaryState(_enemyEventManager, _owningGameObject, _path, _maxFlankingSteps);
         _deathState = new DeathState(_enemyEventManager, _owningGameObject);
 
         InitializeWaypoints();

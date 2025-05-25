@@ -7,27 +7,28 @@ using UnityEngine;
 
 public class MoonSceneManager : BaseSceneManager
 {
-    [SerializeField] private ParticleSystem _normalHitPrefab;
-    [SerializeField] private AudioSource _deflectAudioPrefab;
-    [SerializeField] private GameObject _normalBulletPrefab;
-    private PoolManager _bulletPool;
-    private PoolManager _deflectAudioPool;
-    private PoolManager _hitParticlePool;
+    [SerializeField] private WaypointBlockData _waypointBlockData;
+    [SerializeField] private WaypointManager _waypointManager;
+    
     public Dictionary<GameObject, float> stats = new Dictionary<GameObject, float>();
 
+    // Test Variables
     public EnemyFSMController _enemy;
     public bool _testspawn = false;
+    public bool _testJobRun = false;
+    /// End Test
+
     private ZoneAgentRegistry _zoneAgentRegistry;
     private ClosestPointToPlayerJob _closestPointjob;
     [SerializeField] private UniformZoneGridManager _gridManager;
 
     private void Start()
     {
-        SetupScene();
+        SetupScene(); // Will be called by Game Manager once fully tested
     }
 
-    public bool _testJobRun = false;
-
+    
+    // Update used for Testing only - Delete Later
     private void Update()
     {
         if (_testJobRun)
@@ -52,20 +53,13 @@ public class MoonSceneManager : BaseSceneManager
 
         InitializePools();
         LoadActiveSceneEventManagers();
-        //StartCoroutine(InitializeDelay());
+        
         AssignPools();
 
         SceneStarted();
         
     }
 
-
-
-    IEnumerator InitializeDelay()
-    {
-        yield return new WaitForSeconds(1f);
-        LoadActiveSceneEventManagers();
-    }
 
     protected override void LoadSceneResources()
     {
@@ -85,6 +79,11 @@ public class MoonSceneManager : BaseSceneManager
 
         _closestPointjob = new ClosestPointToPlayerJob();
         _closestPointjob.AddSamplePointData(_gridManager.InitializeGrid());
+    }
+
+    protected override void UnloadSceneResources()
+    {
+       // Implement Later
     }
    
 
@@ -108,15 +107,6 @@ public class MoonSceneManager : BaseSceneManager
         
        
     }
-
-    /*protected override void LoadActiveSceneEventManagers()
-    {
-        base.LoadActiveSceneEventManagers();
-
-        _closestPointjob.AddSamplePointData(_gridData);
-
-    }*/
-
 
     public override void GetImpactParticlePool(ref PoolManager manager)
     {

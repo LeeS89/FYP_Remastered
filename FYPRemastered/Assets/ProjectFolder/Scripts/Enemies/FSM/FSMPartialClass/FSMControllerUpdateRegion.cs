@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.AI;
 
 
 public partial class EnemyFSMController : ComponentEvents
@@ -29,6 +30,8 @@ public partial class EnemyFSMController : ComponentEvents
             ChangeWaypoints();
             _testWaypoint = false;
         }
+
+        
     }
 
     public bool testSeeView = false;
@@ -44,7 +47,7 @@ public partial class EnemyFSMController : ComponentEvents
             testSeeView = false;
         }
 
-        
+
         /*if (!testSeeView)
         {
             UpdateFieldOfViewCheckFrequency();
@@ -80,6 +83,10 @@ public partial class EnemyFSMController : ComponentEvents
         {
             _currentState.LateUpdateState();
         }
+
+        CheckCurrentPathValidity();
+
+
         //MeasurePathToDestination();
         _destinationCheckAction?.Invoke();
 
@@ -107,6 +114,18 @@ public partial class EnemyFSMController : ComponentEvents
         if (!_movementChanged) { return; }
 
         ApplyAnimatorSpeedValues();
+    }
+
+    private void CheckCurrentPathValidity()
+    {
+        if (_agent.hasPath)
+        {
+            if (_agent.pathStatus != NavMeshPathStatus.PathComplete)
+            {
+                _enemyEventManager.PathInvalid();
+                //Debug.LogError("Path is invalid, resetting path.");
+            }
+        }
     }
 
     private void MeasurePathToDestination()

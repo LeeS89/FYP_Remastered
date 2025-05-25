@@ -211,6 +211,7 @@ MonoBehaviour:
   _wayPointForwards: []
   _blockZone: 0
   _sprintSpeed: 3.6
+  _maxFlankingSteps: 12
   _fovLocation: {fileID: 3514716611913536367}
   _patrolFOVCheckFrequency: 1
   _alertFOVCheckFrequency: 0.1

@@ -36,6 +36,7 @@ public partial class EnemyFSMController : ComponentEvents
 
     [Header("Stationary State Params")]
     private StationaryState _stationary;
+    [SerializeField] private int _maxFlankingSteps = 0;
 
     [Header("Field of View Component Parameters")]
     [SerializeField] public Transform _fovLocation; // Make Private Later

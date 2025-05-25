@@ -3,21 +3,26 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class BaseSceneManager : MonoBehaviour, ISceneManager
+public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
 {
-    public event Action OnSceneStarted;
-    public event Action OnSceneEnded;
+    public static BaseSceneManager _instance { get; private set; }
 
-    [SerializeField] protected WaypointBlockData _waypointBlockData;
-    [SerializeField] protected WaypointManager _waypointManager;
     [SerializeField] protected List<EventManager> _eventManagers;
-
-    public static BaseSceneManager _instance {  get; private set; }
+    [SerializeField] protected ParticleSystem _normalHitPrefab;
+    [SerializeField] protected AudioSource _deflectAudioPrefab;
+    [SerializeField] protected GameObject _normalBulletPrefab;
+    protected PoolManager _bulletPool;
+    protected PoolManager _deflectAudioPool;
+    protected PoolManager _hitParticlePool;
 
     protected virtual void Awake()
     {
         _instance = this;
     }
+
+    #region Scene Events
+    public event Action OnSceneStarted;
+    public event Action OnSceneEnded;
 
     public void SceneStarted()
     {
@@ -30,9 +35,36 @@ public class BaseSceneManager : MonoBehaviour, ISceneManager
         OnSceneEnded?.Invoke();
     }
 
-    public virtual void SetupScene() { }
+    /// <summary>
+    /// Events used with Enemy AI system to notify when the closest flanking point to player has changed.
+    /// When there is an active Alert status - OnClosestPointToPlayerChanged will be invoked by the player when ever they stop moving
+    /// This in turn runs the ClosestPointToPlayerJob to find the closest point to player. Once job completes,
+    /// OnClosestPointToPlayerJobComplete notifies all interested parties with the index of the closest point to player.
+    /// </summary>
+    public event Action OnClosestPointToPlayerChanged;
+    public event Action<int> OnClosestPointToPlayerJobComplete;
 
-    
+    public void ClosestPointToPlayerchanged() // Player will invoke this event, and the scene manager will listen to it
+    {
+        OnClosestPointToPlayerChanged?.Invoke();
+    }
+
+    public void ClosestPointToPlayerJobComplete(int pointIndex)
+    {
+        OnClosestPointToPlayerJobComplete?.Invoke(pointIndex);
+    }
+
+
+    #endregion
+
+    #region Abstract Functions
+    public abstract void SetupScene();
+    protected abstract void LoadSceneResources();
+
+    protected abstract void UnloadSceneResources();
+    #endregion
+
+    #region Shared Scene Functions
 
     protected virtual void LoadActiveSceneEventManagers()
     {
@@ -48,12 +80,9 @@ public class BaseSceneManager : MonoBehaviour, ISceneManager
             }
         }
     }
+    #endregion
 
-  
-
-    /// Scene Specific overridden Functions
-    protected virtual void LoadSceneResources() { }
-
+    #region Waypoint and enemy alert phase Functions  
     protected virtual void LoadWaypoints() { }
 
 
@@ -61,27 +90,19 @@ public class BaseSceneManager : MonoBehaviour, ISceneManager
 
     public virtual void ReturnWaypointBlock(BlockData bd) { }
 
+    public virtual void RegisterAgentAndZone(EnemyFSMController agent, int zone) { }
+    public virtual void UnregisterAgentAndZone(EnemyFSMController agent, int zone) { }
+    public virtual void AlertZoneAgents(int zone, EnemyFSMController source) { }
+    #endregion
+
+
+
+    #region Object Pooling Region
     public virtual void GetImpactParticlePool(ref PoolManager manager) { }
 
     public virtual void GetBulletPool(ref PoolManager manager) { }
 
+    #endregion
 
-    public virtual void RegisterAgentAndZone(EnemyFSMController agent, int zone) { }
-    public virtual void UnregisterAgentAndZone(EnemyFSMController agent, int zone) { }
-    public virtual void AlertZoneAgents(int zone, EnemyFSMController source) { }
-
-    public event Action OnClosestPointToPlayerChanged;
-
-    public event Action<int> OnClosestPointToPlayerJobComplete;
-
-    public void ClosestPointToPlayerchanged() // Player will invoke this event, and the scene manager will listen to it
-    {
-        OnClosestPointToPlayerChanged?.Invoke();
-    }
-
-    public void ClosestPointToPlayerJobComplete(int pointIndex)
-    {
-        OnClosestPointToPlayerJobComplete?.Invoke(pointIndex);
-    }
 
 }

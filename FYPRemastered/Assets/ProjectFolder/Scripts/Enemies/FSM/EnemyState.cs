@@ -17,7 +17,7 @@ public abstract class EnemyState
     protected float _walkSpeed;
     protected float _sprintSpeed;
     protected bool _canSeePlayer = false;
-    protected bool _shouldUpdateDestination = false;
+    protected bool _shouldReChasePlayer = false;
 
     public EnemyState(EnemyEventManager eventManager, GameObject owner)
     {
@@ -55,7 +55,7 @@ public abstract class EnemyState
     public virtual void LateUpdateState() { }
     public abstract void ExitState();
 
-    public virtual void SetChaseEligibility(bool canChase, Vector3 playerPosition) { _shouldUpdateDestination = canChase; }
+    public virtual void SetChaseEligibility(bool canChase, Vector3 playerPosition) { _shouldReChasePlayer = canChase; }
 
     public virtual void OnStateDestroyed()
     {

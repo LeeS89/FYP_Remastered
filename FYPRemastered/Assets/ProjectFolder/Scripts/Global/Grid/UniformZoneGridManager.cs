@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using System.Linq;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -155,6 +157,7 @@ public class UniformZoneGridManager : MonoBehaviour
                     {
                         GameObject cube = Instantiate(markerPrefab, hit.position, Quaternion.identity);
                         cube.name = $"SampleNav_{x}_{z}";
+                        cube.tag = "SampleNavMeshPoint"; // Optional: tag for easier identification
                         cube.transform.SetParent(transform);
                         manualSamplePoints.Add(cube.transform);
                     }
@@ -162,9 +165,44 @@ public class UniformZoneGridManager : MonoBehaviour
             }
         }
 
-
+        RemoveOverlappingCubes();
+        
 
         Debug.LogError($"Placed {manualSamplePoints.Count} sample cubes on NavMesh.");
+    }
+
+    private void RemoveOverlappingCubes()
+    {
+#if UNITY_EDITOR
+        HashSet<Transform> destroyed = new HashSet<Transform>();
+
+        foreach (Transform cube in manualSamplePoints.ToList())
+        {
+            if (destroyed.Contains(cube)) { continue; }
+
+            BoxCollider coll = cube.GetComponent<BoxCollider>();
+            if (!coll) { continue; }
+
+            Collider[] overlaps = Physics.OverlapBox(
+                coll.bounds.center,
+                coll.bounds.extents * 3f,
+                cube.rotation
+                );
+
+            foreach(Collider overlap in overlaps)
+            {
+                if(overlap.transform == cube.transform) {  continue; }
+
+                if (overlap.CompareTag("SampleNavMeshPoint") && !destroyed.Contains(overlap.transform))
+                {
+                    destroyed.Add(overlap.transform);
+                    manualSamplePoints.Remove(overlap.transform);
+                    DestroyImmediate(overlap.gameObject);
+                }
+            }
+        }
+        Debug.Log($"Removed {destroyed.Count} overlapping cubes.");
+#endif
     }
 
     /// <summary>
@@ -353,7 +391,7 @@ public class UniformZoneGridManager : MonoBehaviour
             }
 
             _nearestPointToPlayer = closestIndex;
-            //nearestPointTransform = manualSamplePoints[closestIndex];
+            nearestPointTransform = manualSamplePoints[closestIndex];
 
             Debug.Log($"[Debug] Nearest point to player: index {_nearestPointToPlayer} at {savedPoints[_nearestPointToPlayer].position}");
         }
@@ -362,7 +400,7 @@ public class UniformZoneGridManager : MonoBehaviour
             Debug.LogWarning("[Debug] Player reference not set — can't find nearest point.");
         }
 
-        ClearExistingSampleCubes(); // Clear existing cubes after data generation
+        //ClearExistingSampleCubes(); // Clear existing cubes after data generation
         // Clean up visual cubes after data is generated
         //foreach (Transform point in manualSamplePoints)
         //{
@@ -379,7 +417,7 @@ public class UniformZoneGridManager : MonoBehaviour
     private void SetNearestIndexToPlayer(int nearestPointIndex)
     {
         _nearestPointToPlayer = nearestPointIndex;
-        //nearestPointTransform = manualSamplePoints[_nearestPointToPlayer]; // Delete Later
+        nearestPointTransform = manualSamplePoints[_nearestPointToPlayer]; // Delete Later
     }
 
 
@@ -414,6 +452,27 @@ public class UniformZoneGridManager : MonoBehaviour
 
         Debug.LogWarning($"No points found {step} steps away from player's nearest point.");
         return savedPoints[_nearestPointToPlayer].position;
+    }
+
+    public List<Vector3> GetCandidatePointsAtStep(int step)
+    {
+        List<Vector3> positions = new List<Vector3>();
+
+        if (savedPoints == null || savedPoints.Count == 0 ||
+            _nearestPointToPlayer < 0 || _nearestPointToPlayer >= savedPoints.Count)
+        {
+            return positions;
+        }
+
+        if (savedPoints[_nearestPointToPlayer].reachableSteps.TryGetValue(step, out var indices))
+        {
+            foreach (int i in indices)
+            {
+                positions.Add(savedPoints[i].position);
+            }
+        }
+
+        return positions;
     }
 
     /*    public Vector3 GetRandomValidPoint()
