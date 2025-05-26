@@ -11,6 +11,7 @@ public class EnemyEventManager : EventManager
     public event Action<bool> OnPlayerSeen;
     public event Action<bool> OnRotateTowardsTarget;
     public event Action OnPathInvalid;
+    public event Action<PathRequest> OnPathRequested;
 
     // Animation events
     public event Action<AnimationAction> OnAnimationTriggered;
@@ -30,6 +31,8 @@ public class EnemyEventManager : EventManager
     public event Action OnShoot;
 
     public event Action<bool> OnReload;
+
+    public event Action<bool> OnFacingTarget;
 
     private List<ComponentEvents> _cachedListeners;
 
@@ -94,6 +97,11 @@ public class EnemyEventManager : EventManager
         OnPathInvalid?.Invoke();
     }
 
+    public void PathRequested(PathRequest request)
+    {
+        OnPathRequested?.Invoke(request);
+    }
+
     public void DestinationReached(bool reached)
     {
         OnDestinationReached?.Invoke(reached);
@@ -109,6 +117,10 @@ public class EnemyEventManager : EventManager
         OnPlayerSeen?.Invoke(seen);
     }
 
+    public void FacingTarget(bool facingTarget)
+    {
+        OnFacingTarget?.Invoke(facingTarget);
+    }
     public void Shoot()
     {
         OnShoot?.Invoke();

@@ -391,7 +391,7 @@ public class UniformZoneGridManager : MonoBehaviour
             }
 
             _nearestPointToPlayer = closestIndex;
-            nearestPointTransform = manualSamplePoints[closestIndex];
+            //nearestPointTransform = manualSamplePoints[closestIndex];
 
             Debug.Log($"[Debug] Nearest point to player: index {_nearestPointToPlayer} at {savedPoints[_nearestPointToPlayer].position}");
         }
@@ -400,7 +400,7 @@ public class UniformZoneGridManager : MonoBehaviour
             Debug.LogWarning("[Debug] Player reference not set — can't find nearest point.");
         }
 
-        //ClearExistingSampleCubes(); // Clear existing cubes after data generation
+        ClearExistingSampleCubes(); // Clear existing cubes after data generation
         // Clean up visual cubes after data is generated
         //foreach (Transform point in manualSamplePoints)
         //{
@@ -417,7 +417,7 @@ public class UniformZoneGridManager : MonoBehaviour
     private void SetNearestIndexToPlayer(int nearestPointIndex)
     {
         _nearestPointToPlayer = nearestPointIndex;
-        nearestPointTransform = manualSamplePoints[_nearestPointToPlayer]; // Delete Later
+        //nearestPointTransform = manualSamplePoints[_nearestPointToPlayer]; // Delete Later
     }
 
 

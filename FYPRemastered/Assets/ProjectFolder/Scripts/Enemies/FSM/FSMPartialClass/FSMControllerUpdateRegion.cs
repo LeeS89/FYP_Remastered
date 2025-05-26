@@ -69,6 +69,10 @@ public partial class EnemyFSMController : ComponentEvents
             UpdateFieldOfViewCheckFrequency();
         }
 
+        if (_gun != null)
+        {
+            _gun.UpdateGun();
+        }
 
         /*if (_testDeath)
         {
@@ -92,24 +96,11 @@ public partial class EnemyFSMController : ComponentEvents
 
         if (_rotatingTowardsTarget)
         {
-            //if (_agent.updateRotation)
-            //{
-            //    _agent.updateRotation = false;
-            //}
 
             RotateTowardsPlayer();
             UpdateAnimatorDirection();
         }
-        /* if(_currentState != _stationary && _canSeePlayer)
-         {
-             if (_agent.updateRotation)
-             {
-                 _agent.updateRotation = false;
-             }
-
-             RotateTowardsPlayer();
-             UpdateAnimatorDirection();
-         }*/
+      
 
         if (!_movementChanged) { return; }
 
@@ -192,14 +183,19 @@ public partial class EnemyFSMController : ComponentEvents
                 transform.rotation,
                 targetRotation,
                 1f); // forces it to land exactly, still smooth
+            //_enemyEventManager.FacingTarget(true);
             return;
         }
+        /*else
+        {
+            _enemyEventManager.FacingTarget(false);
+        }*/
 
-        // ✅ Smoothly rotate toward target
-        transform.rotation = Quaternion.Slerp(
-            transform.rotation,
-            targetRotation,
-            Time.deltaTime * 5f); // adjust speed as needed
+            // ✅ Smoothly rotate toward target
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation,
+                targetRotation,
+                Time.deltaTime * 5f); // adjust speed as needed
     }
 
     #endregion

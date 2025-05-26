@@ -44,6 +44,7 @@ public partial class EnemyFSMController : ComponentEvents
     [SerializeField] private float _alertFOVCheckFrequency = 0.1f;
     [SerializeField] public float _fovTraceRadius = 5f; // Make Private Later
     [Range(0, 360)]  public float _angle; // Make Private Later
+    [Range(0, 360)]  [SerializeField] private float _shootAngleThreshold = 30f;
     [SerializeField] private LayerMask _fovLayerMask;
     [SerializeField] private LayerMask _lineOfSightMask;
     [SerializeField] private Collider[] _fovTraceResults;
@@ -52,6 +53,7 @@ public partial class EnemyFSMController : ComponentEvents
     private TraceComponent _fov;
     private FieldOfViewFrequencyStatus _fieldOfViewStatus = FieldOfViewFrequencyStatus.Normal;
     public bool _canSeePlayer = false; // Make Private Later
+    private bool _canShootPlayer;
 
     [Header("Death State")]
     private DeathState _deathState;
@@ -91,6 +93,8 @@ public partial class EnemyFSMController : ComponentEvents
         _enemyEventManager.OnRotateTowardsTarget += ToggleRotationToTarget;
         _enemyEventManager.OnSpeedChanged += UpdateAnimatorSpeedValues;
 
+        _enemyEventManager.OnPathRequested += PathRequested;
+
      
         RegisterGlobalEvents();
         SetupFSM();
@@ -108,6 +112,8 @@ public partial class EnemyFSMController : ComponentEvents
         _enemyEventManager.OnAgentRespawn -= ToggleGameObject;
         _enemyEventManager.OnRotateTowardsTarget -= ToggleRotationToTarget;
         _enemyEventManager.OnSpeedChanged -= UpdateAnimatorSpeedValues;
+
+        _enemyEventManager.OnPathRequested -= PathRequested;
         base.UnRegisterLocalEvents(eventManager);
         _enemyEventManager = null;
     }
@@ -117,6 +123,7 @@ public partial class EnemyFSMController : ComponentEvents
         GameManager.OnPlayerDied += OnPlayerDied;
         GameManager.OnPlayerRespawn += OnPlayerRespawned;
         GameManager._onPlayerMovedinternal += EnemyState.SetPlayerMoved;
+        
         BaseSceneManager._instance.OnSceneStarted += OnSceneStarted;
         BaseSceneManager._instance.OnSceneEnded += OnSceneComplete;
     }
@@ -133,6 +140,11 @@ public partial class EnemyFSMController : ComponentEvents
 
 
     #region Animation Updates
+
+    private void PathRequested(PathRequest request)
+    {
+        BaseSceneManager._instance.EnqueuePathRequest(request);
+    }
 
     private void ToggleRotationToTarget(bool rotate)
     {

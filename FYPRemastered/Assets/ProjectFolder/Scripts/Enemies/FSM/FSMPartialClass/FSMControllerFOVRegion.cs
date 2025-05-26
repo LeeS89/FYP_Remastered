@@ -40,7 +40,13 @@ public partial class EnemyFSMController : ComponentEvents
 
             if (_fovTraceResults.Length > 0)
             {
-                playerSeen = LineOfSightUtility.HasLineOfSight(_fovLocation, _fovTraceResults[0], _angle, _lineOfSightMask);
+                
+                playerSeen = LineOfSightUtility.HasLineOfSight(_fovLocation, _fovTraceResults[0], _angle, _shootAngleThreshold, _lineOfSightMask, out _canShootPlayer);
+
+                if (_canShootPlayer)
+                {
+                    _enemyEventManager.FacingTarget(_canShootPlayer);
+                }
 
                 if (_fieldOfViewStatus != FieldOfViewFrequencyStatus.Heightened)
                     _fieldOfViewStatus = FieldOfViewFrequencyStatus.Heightened;

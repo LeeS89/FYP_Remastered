@@ -14,6 +14,7 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
     protected PoolManager _bulletPool;
     protected PoolManager _deflectAudioPool;
     protected PoolManager _hitParticlePool;
+    protected PathRequestManager _pathRequestManager;
 
     protected virtual void Awake()
     {
@@ -34,6 +35,7 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
     {
         OnSceneEnded?.Invoke();
     }
+
 
     /// <summary>
     /// Events used with Enemy AI system to notify when the closest flanking point to player has changed.
@@ -93,6 +95,8 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
     public virtual void RegisterAgentAndZone(EnemyFSMController agent, int zone) { }
     public virtual void UnregisterAgentAndZone(EnemyFSMController agent, int zone) { }
     public virtual void AlertZoneAgents(int zone, EnemyFSMController source) { }
+
+    public virtual void EnqueuePathRequest(PathRequest request) { }
     #endregion
 
 

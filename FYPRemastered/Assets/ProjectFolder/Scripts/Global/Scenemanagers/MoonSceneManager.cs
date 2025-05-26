@@ -37,13 +37,19 @@ public class MoonSceneManager : BaseSceneManager
             _testJobRun = false;
         }
 
-        if(_enemy == null) { return; }
+        //if(_enemy == null) { return; }
 
         if (_testspawn)
         {
             _enemy.ResetFSM();
             _testspawn = false;
         }
+
+        if (_pathRequestManager != null && _pathRequestManager.GetPendingRequestCount() > 0)
+        {
+            _pathRequestManager.ExecutePathRequests();
+        }
+        
     }
 
     public override void SetupScene()
@@ -61,7 +67,7 @@ public class MoonSceneManager : BaseSceneManager
     }
 
 
-    protected override void LoadSceneResources()
+    protected override void LoadSceneResources() // Create Resources Component Later
     {
         _normalBulletPrefab = Resources.Load<GameObject>("Bullets/BasicBullet");
         _normalHitPrefab = Resources.Load<ParticleSystem>("ParticlePoolPrefabs/BasicHit");
@@ -79,6 +85,8 @@ public class MoonSceneManager : BaseSceneManager
 
         _closestPointjob = new ClosestPointToPlayerJob();
         _closestPointjob.AddSamplePointData(_gridManager.InitializeGrid());
+
+        _pathRequestManager = new PathRequestManager();
     }
 
     protected override void UnloadSceneResources()
@@ -132,7 +140,7 @@ public class MoonSceneManager : BaseSceneManager
 
 
 
-    protected override void LoadWaypoints()
+    protected override void LoadWaypoints() // Create WaypointManager Component Later
     {
         if (_waypointManager == null)
         {
@@ -185,11 +193,15 @@ public class MoonSceneManager : BaseSceneManager
     }
 
 
-    #region Agent Registry
+    #region Agent Zone Registry
    
     public override void RegisterAgentAndZone(EnemyFSMController agent, int zone) => _zoneAgentRegistry.Register(agent, zone);
     public override void UnregisterAgentAndZone(EnemyFSMController agent, int zone) => _zoneAgentRegistry.Unregister(agent, zone);
     public override void AlertZoneAgents(int zone, EnemyFSMController source) => _zoneAgentRegistry.AlertZone(zone, source);
+    #endregion
+
+    #region Agent Path Finding
+    public override void EnqueuePathRequest(PathRequest request) => _pathRequestManager.AddRequest(request);
     #endregion
 
 }

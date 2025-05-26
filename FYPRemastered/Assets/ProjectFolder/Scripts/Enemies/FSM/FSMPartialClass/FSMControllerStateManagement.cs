@@ -80,7 +80,7 @@ public partial class EnemyFSMController : ComponentEvents
 
 
         _currentState.EnterState(destination, alertStatus, stoppingDistance);
-
+        _enemyEventManager.PlayerSeen(_canSeePlayer);
         //_currentState.EnterState(destination);
 
        // Debug.LogError("Current State: " + _currentState.GetType().Name);

@@ -26,6 +26,10 @@ public class Gun
     private bool _reloading = false;
     private int _ammo = 5;
     private GameObject _owner;
+    private bool _isFacingTarget = false;
+
+    private float _shootInterval = 2f;
+    private float _nextShootTime = 0f;
 
     #region Constructors
     public Gun(EventManager eventManager, GameObject gunOwner)
@@ -43,7 +47,8 @@ public class Gun
             _enemyEventManager.OnShoot += SpawnBullet;
             _enemyEventManager.OnPlayerSeen += UpdateTargetVisibility;
             _enemyEventManager.OnAimingLayerReady += SetAimReady;
-           
+            _enemyEventManager.OnFacingTarget += SetIsFacingTarget;
+
             _enemyEventManager.OnReload += Reload;
             GameManager.OnPlayerDied += PlayerHasDied;
             GameManager.OnPlayerRespawn += PlayerHasRespawned;
@@ -106,6 +111,11 @@ public class Gun
     {
         return !_reloading;
     }
+
+    private void SetIsFacingTarget(bool isFacingTarget)
+    {
+        _isFacingTarget = isFacingTarget;
+    }
     #endregion
 
 
@@ -116,7 +126,7 @@ public class Gun
 
         _targetSeen = targetSeen;
 
-        if (_targetSeen && !_isShooting)
+        /*if (_targetSeen && !_isShooting)
         {
             _isShooting = true;
             CoroutineRunner.Instance.StartCoroutine(FiringSequence());
@@ -125,7 +135,7 @@ public class Gun
         {
             _isShooting = false;
             CoroutineRunner.Instance.StopCoroutine(FiringSequence());
-        }
+        }*/
     }
 
     private IEnumerator FiringSequence()
@@ -151,8 +161,24 @@ public class Gun
         }
     }
 
+    public void UpdateGun()
+    {
+        if (!_targetSeen) { return; }
+
+        if (Time.time >= _nextShootTime)
+        {
+            if (!_playerHasDied && _isAimReady && !_reloading && _isFacingTarget)
+            {
+                Shoot();
+            }
+            _nextShootTime = Time.time + _shootInterval;
+        }
+    }
+
     private void Shoot()
     {
+        if (!_isFacingTarget) { return; }
+
         if (_ammo-- > 0)
         {
             _enemyEventManager.AnimationTriggered(AnimationAction.Shoot);
@@ -194,7 +220,8 @@ public class Gun
         _enemyEventManager.OnShoot -= SpawnBullet;
         _enemyEventManager.OnPlayerSeen -= UpdateTargetVisibility;
         _enemyEventManager.OnAimingLayerReady -= SetAimReady;
-        
+        _enemyEventManager.OnFacingTarget -= SetIsFacingTarget;
+
         _enemyEventManager.OnReload -= Reload;
         GameManager.OnPlayerDied -= PlayerHasDied;
         GameManager.OnPlayerRespawn -= PlayerHasRespawned;

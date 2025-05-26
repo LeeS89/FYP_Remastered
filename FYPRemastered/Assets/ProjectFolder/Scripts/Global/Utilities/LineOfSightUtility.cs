@@ -93,6 +93,43 @@ public static class LineOfSightUtility
         return false;
     }
 
+    public static bool HasLineOfSight(Transform from, Collider target, float viewAngle, float shootAngle, LayerMask blockingMask, out bool canShoot)
+    {
+        BoxCollider boxCollider = target as BoxCollider;
+        Vector3 directionToTarget = (target.transform.position - from.position).normalized;
+
+        float angleToTarget = Vector3.Angle(from.forward, directionToTarget);
+
+        // Determine general visibility
+        if (angleToTarget > viewAngle * 0.5f)
+        {
+            Debug.DrawRay(from.position, directionToTarget * 100f, Color.yellow);
+            canShoot = false;
+            return false;
+        }
+
+        Vector3 top = boxCollider.bounds.center;
+
+        if (Physics.Linecast(from.position, top, out RaycastHit hit, blockingMask))
+        {
+            if (hit.collider == target)
+            {
+                Debug.DrawLine(from.position, top, Color.green);
+                canShoot = angleToTarget <= shootAngle * 0.5f;
+                return true;
+            }
+            else
+            {
+                Debug.DrawLine(from.position, hit.point, Color.red);
+                canShoot = false;
+                return false;
+            }
+        }
+
+        canShoot = false;
+        return false;
+    }
+
     public static float GetNavMeshPathDistance(Vector3 from, Vector3 to, NavMeshPath path)
     {
         //NavMeshPath path = new NavMeshPath();

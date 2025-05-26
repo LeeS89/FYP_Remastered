@@ -18,12 +18,13 @@ public abstract class EnemyState
     protected float _sprintSpeed;
     protected bool _canSeePlayer = false;
     protected bool _shouldReChasePlayer = false;
+   
 
     public EnemyState(EnemyEventManager eventManager, GameObject owner)
     {
         _owner = owner;
         _eventManager = eventManager;
-        _eventManager.OnPlayerSeen += SetPlayerSeen;
+        //_eventManager.OnPlayerSeen += SetPlayerSeen;
        
     }
 
@@ -36,7 +37,7 @@ public abstract class EnemyState
 
     protected bool CheckDestinationReached() { /*Debug.LogError("Checking Reached");*/ return _destinationReached; }
 
-    protected void SetPlayerSeen(bool seen) { _canSeePlayer = seen; }
+    protected virtual void SetPlayerSeen(bool seen) { _canSeePlayer = seen; }
 
     protected static bool CheckIfPlayerHasMoved() { return _playerHasMoved; }
     
