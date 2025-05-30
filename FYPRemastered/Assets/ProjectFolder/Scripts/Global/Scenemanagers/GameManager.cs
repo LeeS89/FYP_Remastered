@@ -23,6 +23,8 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
     public static event Action OnPlayerDied;
     public static event Action OnPlayerRespawn;
+    public static event Action<bool> OnPlayerMoved;
+
     private bool _playerHasMoved = false;
     
     public bool PlayerHasMoved
@@ -33,7 +35,8 @@ public class GameManager : MonoBehaviour
             {
                 _playerHasMoved = value;
             }
-            _onPlayerMovedinternal?.Invoke(_playerHasMoved);
+            PlayerMoved(_playerHasMoved);
+            //_onPlayerMovedinternal?.Invoke(_playerHasMoved);
         }
         get => _playerHasMoved;
         
@@ -187,11 +190,11 @@ public class GameManager : MonoBehaviour
         
         return playerPart;
     }
-
-    public static event Action<bool> _onPlayerMovedinternal;
+    
+   // public static event Action<bool> _onPlayerMovedinternal;
     private static Coroutine _playerMovedCoroutine;
 
-    public static event Action<bool> OnPlayerMoved
+   /* public static event Action<bool> OnPlayerMoved
     {
         add
         {
@@ -213,12 +216,12 @@ public class GameManager : MonoBehaviour
                 _playerMovedCoroutine = null;
             }
         }
-    }
+    }*/
 
    
 
 
-    private IEnumerator PlayerMovedroutine()
+    /*private IEnumerator PlayerMovedroutine()
     {
         while (true)
         {
@@ -226,10 +229,11 @@ public class GameManager : MonoBehaviour
 
             _onPlayerMovedinternal?.Invoke(_playerHasMoved);
         }
-    }
+    }*/
 
-    public void PlayerMoved()
+    public void PlayerMoved(bool playerMoved)
     {
-        _onPlayerMovedinternal?.Invoke(_playerHasMoved);
+        OnPlayerMoved?.Invoke(playerMoved);
+        //_onPlayerMovedinternal?.Invoke(_playerHasMoved);
     }
 }

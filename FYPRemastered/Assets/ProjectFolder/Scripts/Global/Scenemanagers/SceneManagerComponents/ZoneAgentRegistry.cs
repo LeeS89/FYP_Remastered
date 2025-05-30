@@ -14,7 +14,7 @@ public class ZoneAgentRegistry
         if (!_zoneAgents[zone].Contains(agent))
         {
             _zoneAgents[zone].Add(agent);
-            Debug.LogWarning("Agent Registered in Zone: "+zone);
+            //Debug.LogWarning("Agent Registered in Zone: "+zone);
         }
             
     }

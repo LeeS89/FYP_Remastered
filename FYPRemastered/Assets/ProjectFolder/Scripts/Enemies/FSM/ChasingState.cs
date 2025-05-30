@@ -6,7 +6,7 @@ using Random = UnityEngine.Random;
 
 public class ChasingState : EnemyState
 {
-   
+    PathRequest _chasePlayerPathRequest;
     private int _randomStoppingDistance;
    
     private Vector3 _playerPos;
@@ -20,7 +20,7 @@ public class ChasingState : EnemyState
 
     public ChasingState(EnemyEventManager eventManager, GameObject owner, float walkSpeed, float sprintSpeed) : base(eventManager, owner)
     {
-      
+        _chasePlayerPathRequest = new PathRequest();
         _walkSpeed = walkSpeed;
         _sprintSpeed = sprintSpeed;
         _eventManager.OnDestinationReached += SetDestinationReached;
@@ -84,8 +84,27 @@ public class ChasingState : EnemyState
             if (CheckIfPlayerHasMoved())
             {
                 _playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
-                _eventManager.DestinationUpdated(_playerPos, _randomStoppingDistance);
-                
+               // bool resultReceived = false;
+               // bool isValid = false;
+
+                //CheckNewPath(LineOfSightUtility.GetClosestPointOnNavMesh(_owner.transform.position), LineOfSightUtility.GetClosestPointOnNavMesh(_playerPos), _path, out isValid, out resultReceived);
+               /* _chasePlayerPathRequest.start = LineOfSightUtility.GetClosestPointOnNavMesh(_owner.transform.position);
+                _chasePlayerPathRequest.end = LineOfSightUtility.GetClosestPointOnNavMesh(_playerPos);
+                _chasePlayerPathRequest.path = _path;
+                _chasePlayerPathRequest.callback = (success) =>
+                {
+                    isValid = success;
+                    resultReceived = true;
+                };
+*/
+                //_eventManager.PathRequested(_chasePlayerPathRequest);
+
+                //yield return new WaitUntil(() => resultReceived);
+
+                //if (isValid)
+                //{
+                    _eventManager.DestinationUpdated(LineOfSightUtility.GetClosestPointOnNavMesh(_playerPos), _randomStoppingDistance);
+               // }
                 yield return new WaitForSeconds(0.15f);
             }
             
@@ -94,6 +113,33 @@ public class ChasingState : EnemyState
         }
         _eventManager.RequestStationaryState();
        
+    }
+
+    private void CheckNewPath(Vector3 from, Vector3 to, NavMeshPath path, out bool valid, out bool result)
+    {
+        // Initialize the out parameters to ensure they are assigned before leaving the method
+        valid = false;
+        result = false;
+
+        // Create local variables to capture the lambda results
+        bool localValid = false;
+        bool localResult = false;
+
+        _chasePlayerPathRequest.start = from;
+        _chasePlayerPathRequest.end = to;
+        _chasePlayerPathRequest.path = path;
+        _chasePlayerPathRequest.callback = (success) =>
+        {
+            localValid = success;
+            localResult = true;
+        };
+
+        // Simulate the callback execution (this part depends on how the callback is triggered in your system)
+        _eventManager.PathRequested(_chasePlayerPathRequest);
+
+        // Assign the local variables to the out parameters
+        valid = localValid;
+        result = localResult;
     }
 
   

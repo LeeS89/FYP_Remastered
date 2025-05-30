@@ -24,7 +24,7 @@ public abstract class EnemyState
     {
         _owner = owner;
         _eventManager = eventManager;
-        //_eventManager.OnPlayerSeen += SetPlayerSeen;
+        _eventManager.OnPlayerSeen += SetPlayerSeen;
        
     }
 

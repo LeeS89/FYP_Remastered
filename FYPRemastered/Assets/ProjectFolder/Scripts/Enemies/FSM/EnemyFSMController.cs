@@ -122,8 +122,8 @@ public partial class EnemyFSMController : ComponentEvents
     {
         GameManager.OnPlayerDied += OnPlayerDied;
         GameManager.OnPlayerRespawn += OnPlayerRespawned;
-        GameManager._onPlayerMovedinternal += EnemyState.SetPlayerMoved;
-        
+        //GameManager._onPlayerMovedinternal += EnemyState.SetPlayerMoved;
+        GameManager.OnPlayerMoved += EnemyState.SetPlayerMoved;
         BaseSceneManager._instance.OnSceneStarted += OnSceneStarted;
         BaseSceneManager._instance.OnSceneEnded += OnSceneComplete;
     }
@@ -132,7 +132,8 @@ public partial class EnemyFSMController : ComponentEvents
     {
         GameManager.OnPlayerDied -= OnPlayerDied;
         GameManager.OnPlayerRespawn -= OnPlayerRespawned;
-        GameManager._onPlayerMovedinternal -= EnemyState.SetPlayerMoved;
+        GameManager.OnPlayerMoved -= EnemyState.SetPlayerMoved;
+        //GameManager._onPlayerMovedinternal -= EnemyState.SetPlayerMoved;
         BaseSceneManager._instance.OnSceneStarted -= OnSceneStarted;
         BaseSceneManager._instance.OnSceneEnded -= OnSceneComplete;
     }

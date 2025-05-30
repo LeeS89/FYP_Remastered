@@ -145,7 +145,7 @@ public static class LineOfSightUtility
         return float.PositiveInfinity; // No valid path
     }
 
-    public static Vector3 GetClosestPointOnNavMesh(Vector3 position, float maxDistance = 2f)
+    public static Vector3 GetClosestPointOnNavMesh(Vector3 position, float maxDistance = 4f)
     {
         if (NavMesh.SamplePosition(position, out NavMeshHit hit, maxDistance, NavMesh.AllAreas))
         {

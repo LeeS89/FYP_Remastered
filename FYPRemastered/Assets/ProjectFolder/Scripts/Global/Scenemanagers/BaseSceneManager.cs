@@ -108,5 +108,6 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
 
     #endregion
 
-
+    //Testing
+    public virtual void TestRun() { }
 }

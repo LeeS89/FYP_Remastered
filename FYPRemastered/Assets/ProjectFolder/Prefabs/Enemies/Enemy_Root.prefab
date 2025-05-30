@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2880464380981520310}
   - component: {fileID: 6510694641669438300}
-  m_Layer: 4
+  m_Layer: 2
   m_Name: gun
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -217,12 +217,13 @@ MonoBehaviour:
   _alertFOVCheckFrequency: 0.1
   _fovTraceRadius: 0.5
   _angle: 65
+  _shootAngleThreshold: 25
   _fovLayerMask:
     serializedVersion: 2
     m_Bits: 512
   _lineOfSightMask:
     serializedVersion: 2
-    m_Bits: 514
+    m_Bits: 530
   _fovTraceResults: []
   _canSeePlayer: 0
   _bulletSpawnPoint: {fileID: 1520609376679817542}

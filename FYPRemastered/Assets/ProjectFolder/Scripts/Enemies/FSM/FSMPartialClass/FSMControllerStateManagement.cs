@@ -80,10 +80,10 @@ public partial class EnemyFSMController : ComponentEvents
 
 
         _currentState.EnterState(destination, alertStatus, stoppingDistance);
-        _enemyEventManager.PlayerSeen(_canSeePlayer);
+        //_enemyEventManager.PlayerSeen(_canSeePlayer);
         //_currentState.EnterState(destination);
 
-       // Debug.LogError("Current State: " + _currentState.GetType().Name);
+        //Debug.LogError("Current State: " + _currentState.GetType().Name);
     }
 
     private void StationaryStateRequested(/*AlertStatus alertStatus*/)
@@ -109,7 +109,7 @@ public partial class EnemyFSMController : ComponentEvents
     private bool CheckIfDestinationIsReached()
     {
         //Debug.LogError("Remainingdistance: "+_agent.remainingDistance);
-        return _agent.remainingDistance <= (_agent.stoppingDistance + 0.2f);
+        return _agent.remainingDistance <= (_agent.stoppingDistance + 0.25f);
     }
 
     public void ResetFSM(EnemyState contextState = null)

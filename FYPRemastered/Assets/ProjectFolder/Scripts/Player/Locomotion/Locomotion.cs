@@ -21,7 +21,9 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
 
     private PlayerEventManager _playerEventManager;
     private bool _inputEnabled = false;
-    
+
+    public UniformZoneGridManager _gridManager;
+
     public bool InputEnabled
     {
         get => _inputEnabled;
@@ -86,7 +88,7 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
         BaseSceneManager._instance.OnSceneEnded -= OnSceneComplete;
     }
 
-    public bool _testMove = false;
+    //public bool _testMove = false;
     private Vector3 _lastPosition;
     public float movementThreshold = 0.01f;
     private void Update()
@@ -94,6 +96,8 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
         if (!InputEnabled) { return; }
 
         ApplyPlayerMovement();
+
+#if UNITY_EDITOR
         float movedDistance = Vector3.Distance(transform.position, _lastPosition);
 
         if (movedDistance > movementThreshold)
@@ -112,6 +116,7 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
         }
 
         _lastPosition = transform.position;
+#endif
         /*if (_testMove)
         {
             GameManager.Instance.PlayerHasMoved = true;
@@ -119,6 +124,14 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
         else
         {
             GameManager.Instance.PlayerHasMoved = false;
+        }*/
+        /*if (_testMove)
+        {
+            SetShouldMoveforward(true);
+        }
+        else
+        {
+            SetShouldMoveforward(false);
         }*/
     }
 
@@ -142,11 +155,20 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
 
     }
 
-   
+    public bool _testMove = false;
     private void SetShouldMoveforward(bool move)
     {
-        _shouldMoveForward = move;
-        GameManager.Instance.PlayerHasMoved = move;
+        //if (_shouldMoveForward != move)
+       // {
+            _shouldMoveForward = move;
+            GameManager.Instance.PlayerHasMoved = _shouldMoveForward;
+
+            if (!_shouldMoveForward)
+            {
+               
+               MoonSceneManager._instance.TestRun();
+            }
+       // }
     }
 
 

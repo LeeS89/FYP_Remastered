@@ -39,12 +39,14 @@ public partial class EnemyFSMController : ComponentEvents
     private void LateUpdate()
     {
 
+
         if (testSeeView)
         {
-            Vector3 newPoint = _gridManager.GetRandomPointXStepsFromPlayer(4);
-            _enemyEventManager.DestinationUpdated(newPoint);
-            //ChangeState(_stationary);
-            testSeeView = false;
+            Debug.LogError("Current State: " + _currentState.GetType().Name);
+            //Vector3 newPoint = _gridManager.GetRandomPointXStepsFromPlayer(4);
+            //_enemyEventManager.DestinationUpdated(newPoint);
+            ////ChangeState(_stationary);
+            //testSeeView = false;
         }
 
 

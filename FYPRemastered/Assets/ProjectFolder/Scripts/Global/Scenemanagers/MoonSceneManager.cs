@@ -28,6 +28,11 @@ public class MoonSceneManager : BaseSceneManager
     }
 
     
+    public override void TestRun()
+    {
+        _closestPointjob.RunClosestPointJob();
+    }
+
     // Update used for Testing only - Delete Later
     private void Update()
     {
