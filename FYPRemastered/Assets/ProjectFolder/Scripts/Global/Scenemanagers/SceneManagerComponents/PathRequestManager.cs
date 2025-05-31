@@ -7,7 +7,7 @@ using UnityEngine.AI;
 /// </summary>
 public class PathRequestManager
 {
-    private Queue<PathRequest> _pathRequests = new Queue<PathRequest>();
+    private Queue<DestinationRequestData> _pathRequests = new Queue<DestinationRequestData>();
     private int _maxConcurrentRequests = 5;
 
     public void ExecutePathRequests()
@@ -20,7 +20,7 @@ public class PathRequestManager
 
             bool success = HasClearPathToTarget(request.start, request.end, request.path);
 
-            request.callback?.Invoke(success);
+            request.externalCallback?.Invoke(success);
 
 
             processed++;
@@ -35,7 +35,7 @@ public class PathRequestManager
         return path.status == NavMeshPathStatus.PathComplete;
     }
 
-    public void AddRequest(PathRequest request)
+    public void AddRequest(DestinationRequestData request)
     {
         _pathRequests.Enqueue(request);
     }

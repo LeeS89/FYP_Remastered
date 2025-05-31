@@ -206,7 +206,7 @@ public class MoonSceneManager : BaseSceneManager
     #endregion
 
     #region Agent Path Finding
-    public override void EnqueuePathRequest(PathRequest request) => _pathRequestManager.AddRequest(request);
+    public override void EnqueuePathRequest(DestinationRequestData request) => _pathRequestManager.AddRequest(request);
     #endregion
 
 }

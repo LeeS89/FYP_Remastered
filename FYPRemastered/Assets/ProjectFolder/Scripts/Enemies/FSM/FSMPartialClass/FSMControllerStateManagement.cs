@@ -106,6 +106,30 @@ public partial class EnemyFSMController : ComponentEvents
         ChangeState(_chasing, destination);
     }
 
+    private void PursuitTargetRequested(DestinationType chaseType)
+    {
+        switch (chaseType)
+        {
+            case DestinationType.Chase:
+                /*if (_currentState == _chasing && _chasing.ChaseType == ChaseType.FlankPlayer)
+                {
+                    ChangeState(_chasing, null, _alertStatus);
+                }*/
+                break;
+            case DestinationType.Flank:
+                AttemptTargetFlank();
+                break;
+            default:
+                Debug.LogError("Invalid chase type requested: " + chaseType);
+                break;
+        }
+    }
+    
+    private void AttemptTargetFlank()
+    {
+
+    }
+
     private bool CheckIfDestinationIsReached()
     {
         //Debug.LogError("Remainingdistance: "+_agent.remainingDistance);

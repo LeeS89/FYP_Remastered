@@ -142,7 +142,7 @@ public partial class EnemyFSMController : ComponentEvents
 
     #region Animation Updates
 
-    private void PathRequested(PathRequest request)
+    private void PathRequested(DestinationRequestData request)
     {
         BaseSceneManager._instance.EnqueuePathRequest(request);
     }

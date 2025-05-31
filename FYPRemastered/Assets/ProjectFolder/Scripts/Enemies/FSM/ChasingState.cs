@@ -6,7 +6,7 @@ using Random = UnityEngine.Random;
 
 public class ChasingState : EnemyState
 {
-    PathRequest _chasePlayerPathRequest;
+    DestinationRequestData _chasePlayerPathRequest;
     private int _randomStoppingDistance;
    
     private Vector3 _playerPos;
@@ -20,7 +20,7 @@ public class ChasingState : EnemyState
 
     public ChasingState(EnemyEventManager eventManager, GameObject owner, float walkSpeed, float sprintSpeed) : base(eventManager, owner)
     {
-        _chasePlayerPathRequest = new PathRequest();
+        _chasePlayerPathRequest = new DestinationRequestData();
         _walkSpeed = walkSpeed;
         _sprintSpeed = sprintSpeed;
         _eventManager.OnDestinationReached += SetDestinationReached;
@@ -128,7 +128,7 @@ public class ChasingState : EnemyState
         _chasePlayerPathRequest.start = from;
         _chasePlayerPathRequest.end = to;
         _chasePlayerPathRequest.path = path;
-        _chasePlayerPathRequest.callback = (success) =>
+        _chasePlayerPathRequest.externalCallback = (success) =>
         {
             localValid = success;
             localResult = true;

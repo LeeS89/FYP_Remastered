@@ -11,7 +11,7 @@ public class EnemyEventManager : EventManager
     public event Action<bool> OnPlayerSeen;
     public event Action<bool> OnRotateTowardsTarget;
     public event Action OnPathInvalid;
-    public event Action<PathRequest> OnPathRequested;
+    public event Action<DestinationRequestData> OnPathRequested;
 
     // Animation events
     public event Action<AnimationAction> OnAnimationTriggered;
@@ -39,6 +39,7 @@ public class EnemyEventManager : EventManager
     // Chasing Events
     public event Action OnRequestStationaryState;
     public event Action<Vector3?> OnRequestChasingState;
+    public event Action<DestinationType> OnRequestTargetPursuit;
 
 
     /// <summary>
@@ -97,7 +98,7 @@ public class EnemyEventManager : EventManager
         OnPathInvalid?.Invoke();
     }
 
-    public void PathRequested(PathRequest request)
+    public void PathRequested(DestinationRequestData request)
     {
         OnPathRequested?.Invoke(request);
     }
@@ -177,6 +178,11 @@ public class EnemyEventManager : EventManager
     public void RequestChasingState(Vector3? destination = null)
     {
         OnRequestChasingState?.Invoke(destination);
+    }
+
+    public void RequestTargetPursuit(DestinationType type)
+    {
+        OnRequestTargetPursuit?.Invoke(type);
     }
 
     public void RotateTowardsTarget(bool rotate)

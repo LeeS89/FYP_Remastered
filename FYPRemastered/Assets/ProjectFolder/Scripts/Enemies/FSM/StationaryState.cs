@@ -14,8 +14,8 @@ public class StationaryState : EnemyState
     private bool _isInState = false;
 
     private UniformZoneGridManager _gridManager;
-    private PathRequest _chasePlayerPathRequest;
-    private PathRequest _flankePlayerPathRequest;
+    private DestinationRequestData _chasePlayerPathRequest;
+    private DestinationRequestData _flankePlayerPathRequest;
 
     private bool _queuedForNewFlankPoint = false;
     private bool _newDestinationAlreadyApplied = false;
@@ -28,8 +28,8 @@ public class StationaryState : EnemyState
         _maxSteps = maxSteps;
         
         _gridManager = GameObject.FindFirstObjectByType<UniformZoneGridManager>();
-        _chasePlayerPathRequest = new PathRequest();
-        _flankePlayerPathRequest = new PathRequest();
+        _chasePlayerPathRequest = new DestinationRequestData();
+        _flankePlayerPathRequest = new DestinationRequestData();
         _stepsToTry = new List<int>();
         _newPoints = new List<Vector3>();
     }
@@ -99,7 +99,7 @@ public class StationaryState : EnemyState
                 _flankePlayerPathRequest.start = LineOfSightUtility.GetClosestPointOnNavMesh(_owner.transform.position);
                 _flankePlayerPathRequest.end = LineOfSightUtility.GetClosestPointOnNavMesh(point);
                 _flankePlayerPathRequest.path = _path;
-                _flankePlayerPathRequest.callback = (success) =>
+                _flankePlayerPathRequest.externalCallback = (success) =>
                 {
                     isValid = success;
                     resultReceived = true;
@@ -123,6 +123,7 @@ public class StationaryState : EnemyState
 
                         _newDestinationAlreadyApplied = true;
                         _eventManager.RequestChasingState(point);
+                        //_eventManager.RequestTargetPursuit(ChaseType.Flanking);
                         yield break;
                     }
                 }
@@ -178,7 +179,7 @@ public class StationaryState : EnemyState
                 _chasePlayerPathRequest.end = LineOfSightUtility.GetClosestPointOnNavMesh(targetPosition);
                 _eventManager.PathRequested(_chasePlayerPathRequest);
 
-                _chasePlayerPathRequest.callback = (success) =>
+                _chasePlayerPathRequest.externalCallback = (success) =>
                 {
                     _shouldReChasePlayer = success;
                     _queuedForNewFlankPoint = false;
