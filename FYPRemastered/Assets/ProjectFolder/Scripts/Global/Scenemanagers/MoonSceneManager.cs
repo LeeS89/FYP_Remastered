@@ -94,6 +94,11 @@ public class MoonSceneManager : BaseSceneManager
         _pathRequestManager = new PathRequestManager();
     }
 
+    public override UniformZoneGridManager GetGridManager()
+    {
+        return _gridManager;
+    }
+
     protected override void UnloadSceneResources()
     {
        // Implement Later

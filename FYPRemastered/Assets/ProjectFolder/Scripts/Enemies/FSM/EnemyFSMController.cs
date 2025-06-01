@@ -71,9 +71,10 @@ public partial class EnemyFSMController : ComponentEvents
     private float _previousDirection = 0f;
     private EnemyEventManager _enemyEventManager;
     
-    
-    private AlertStatus _alertStatus = AlertStatus.None;
+    private DestinationManager _destinationManager;
 
+    private AlertStatus _alertStatus = AlertStatus.None;
+    [SerializeField] private UniformZoneGridManager _gridManager;
 
 
     #region Event Registrations
@@ -85,6 +86,7 @@ public partial class EnemyFSMController : ComponentEvents
 
         _enemyEventManager.OnRequestChasingState += ChasingStateRequested;
         _enemyEventManager.OnRequestStationaryState += StationaryStateRequested;
+        _enemyEventManager.OnRequestTargetPursuit += PursuitTargetRequested;
         _enemyEventManager.OnOwnerDied += OnDeath;
         _enemyEventManager.OnAgentDeathComplete += ToggleGameObject;
         _enemyEventManager.OnAgentRespawn += ToggleGameObject;
@@ -106,6 +108,8 @@ public partial class EnemyFSMController : ComponentEvents
         _enemyEventManager.OnRequestChasingState -= ChasingStateRequested;
         _enemyEventManager.OnRequestStationaryState -= StationaryStateRequested;
         _enemyEventManager.OnDestinationUpdated -= UpdateAgentDestination;
+
+        _enemyEventManager.OnRequestTargetPursuit -= PursuitTargetRequested;
         _enemyEventManager.OnDestinationReached -= CarveOnDestinationReached;
         _enemyEventManager.OnOwnerDied -= OnDeath;
         _enemyEventManager.OnAgentDeathComplete -= ToggleGameObject;

@@ -37,10 +37,14 @@ public class EnemyEventManager : EventManager
     private List<ComponentEvents> _cachedListeners;
 
     // Chasing Events
-    public event Action OnRequestStationaryState;
-    public event Action<Vector3?> OnRequestChasingState;
+    public event Action<AlertStatus> OnRequestStationaryState;
+    public event Action OnRequestChasingState;
     public event Action<DestinationType> OnRequestTargetPursuit;
+    public event Action<bool> OnPendingNewDestination;
+    public event Action<bool, bool> OnDestinationRequestStatus;
 
+    public event Action<AlertStatus> OnAlertStatusChanged;
+    public event Action OnDestinationApplied;
 
     /// <summary>
     /// Called From Scene Manager
@@ -170,19 +174,39 @@ public class EnemyEventManager : EventManager
         OnDeathAnimationComplete?.Invoke();
     }
 
-    public void RequestStationaryState()
+    public void RequestStationaryState(AlertStatus status)
     {
-        OnRequestStationaryState?.Invoke();
+        OnRequestStationaryState?.Invoke(status);
     }
 
-    public void RequestChasingState(Vector3? destination = null)
+    public void RequestChasingState()
     {
-        OnRequestChasingState?.Invoke(destination);
+        OnRequestChasingState?.Invoke();
+    }
+
+    public void PendingNewDestination(bool pending)
+    {
+        OnPendingNewDestination?.Invoke(pending);
+    }
+
+    public void DestinationApplied()
+    {
+        OnDestinationApplied?.Invoke();
+    }
+
+    public void AlertStatusChanged(AlertStatus status)
+    {
+        OnAlertStatusChanged?.Invoke(status);
     }
 
     public void RequestTargetPursuit(DestinationType type)
     {
         OnRequestTargetPursuit?.Invoke(type);
+    }
+
+    public void DestinationRequestStatus(bool complete, bool success)
+    {
+        OnDestinationRequestStatus?.Invoke(complete, success);
     }
 
     public void RotateTowardsTarget(bool rotate)

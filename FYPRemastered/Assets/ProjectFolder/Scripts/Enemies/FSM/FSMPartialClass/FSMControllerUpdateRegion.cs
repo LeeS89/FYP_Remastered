@@ -35,7 +35,7 @@ public partial class EnemyFSMController : ComponentEvents
     }
 
     public bool testSeeView = false;
-    public UniformZoneGridManager _gridManager;
+    
     private void LateUpdate()
     {
 

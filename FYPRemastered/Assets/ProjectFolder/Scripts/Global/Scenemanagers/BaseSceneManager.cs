@@ -97,6 +97,9 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
     public virtual void AlertZoneAgents(int zone, EnemyFSMController source) { }
 
     public virtual void EnqueuePathRequest(DestinationRequestData request) { }
+
+    public virtual UniformZoneGridManager GetGridManager() => null;
+
     #endregion
 
 

@@ -18,14 +18,26 @@ public abstract class EnemyState
     protected float _sprintSpeed;
     protected bool _canSeePlayer = false;
     protected bool _shouldReChasePlayer = false;
-   
+
+    protected bool _newDestinationPending = false;
+   // protected WaitUntil _waitUntilDestinationRequestComplete;
+    protected bool _destinationRequestComplete = false;
+    protected bool _destinationRequestSuccess = false;
+
+    protected WaitUntil _waitUntilDestinationApplied;
+    protected bool _destinationApplied = false;
 
     public EnemyState(EnemyEventManager eventManager, GameObject owner)
     {
         _owner = owner;
         _eventManager = eventManager;
         _eventManager.OnPlayerSeen += SetPlayerSeen;
-       
+        _waitUntilDestinationApplied = new WaitUntil(() => _destinationApplied);
+        _alertStatus = AlertStatus.None;
+        _eventManager.OnAlertStatusChanged += UpdateAlertStatus;
+        _eventManager.OnDestinationApplied += SetdestinationApplied;
+        //_waitUntilDestinationRequestComplete = new WaitUntil(() => _destinationRequestComplete);
+
     }
 
     public EnemyState(EnemyEventManager eventManager, NavMeshPath path, GameObject owner) : this(eventManager, owner)
@@ -33,7 +45,27 @@ public abstract class EnemyState
         _path = path;
     }
 
+    protected void UpdateAlertStatus(AlertStatus alertStatus)
+    {
+        _alertStatus = alertStatus;
+    }
+
+    protected void SetdestinationApplied()
+    {
+        _destinationApplied = true;
+    }
    
+    protected void SetNewDestinationPending(bool pending)
+    {
+        _newDestinationPending = pending;
+    }
+
+    protected void SetDestinationRequestStatus(bool complete, bool success)
+    {
+        _destinationRequestSuccess = success;
+        _destinationRequestComplete = complete;
+        //_eventManager.OnDestinationRequestStatus?.Invoke(success, complete);
+    }
 
     protected bool CheckDestinationReached() { /*Debug.LogError("Checking Reached");*/ return _destinationReached; }
 
@@ -47,8 +79,9 @@ public abstract class EnemyState
    
     public virtual void UpdateDistanceRemainingToDestination(float remainingDistance) { _remainingDistance = remainingDistance; }
 
-    public virtual void EnterState(Vector3? destination = null, AlertStatus alertStatus = AlertStatus.None, float stoppingDistance = 0) {  _alertStatus = alertStatus; }
+    public virtual void EnterState(Vector3? destination = null, AlertStatus alertStatus = AlertStatus.None, float stoppingDistance = 0) {  }
 
+    public virtual void EnterState() {  }
     //public virtual void EnterState(Vector3? destination = null) { }
 
     public virtual void UpdateState() { }
@@ -61,6 +94,8 @@ public abstract class EnemyState
     public virtual void OnStateDestroyed()
     {
         _eventManager.OnPlayerSeen -= SetPlayerSeen;
+        _eventManager.OnAlertStatusChanged -= UpdateAlertStatus;
+        _eventManager.OnDestinationApplied -= SetdestinationApplied;
         _eventManager = null;
         ExitState();
     }

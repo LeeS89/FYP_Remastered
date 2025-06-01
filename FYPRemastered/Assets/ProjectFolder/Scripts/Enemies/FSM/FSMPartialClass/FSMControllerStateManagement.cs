@@ -2,15 +2,19 @@ using System;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
+using Random = UnityEngine.Random;
 
 public partial class EnemyFSMController : ComponentEvents
 {
     private WaypointData _wpData;
+    private DestinationRequestData _destinationData;
 
     #region FSM Management
     private void SetupFSM()
     {
+        _gridManager = MoonSceneManager._instance.GetGridManager();
 
+        _destinationData = new DestinationRequestData();
         _path = new NavMeshPath();
         _fovCheckFrequency = _patrolFOVCheckFrequency;
         _fov = new TraceComponent(1);
@@ -20,6 +24,9 @@ public partial class EnemyFSMController : ComponentEvents
         _chasing = new ChasingState(_enemyEventManager, _owningGameObject, _walkSpeed, _sprintSpeed);
         _stationary = new StationaryState(_enemyEventManager, _owningGameObject, _path, _maxFlankingSteps);
         _deathState = new DeathState(_enemyEventManager, _owningGameObject);
+        _destinationManager = new DestinationManager(_enemyEventManager, _gridManager, _maxFlankingSteps);
+
+        
 
         InitializeWaypoints();
         InitializeWeapon();
@@ -67,7 +74,26 @@ public partial class EnemyFSMController : ComponentEvents
         //GameManager._onPlayerMovedinternal += EnemyState.SetPlayerMoved;
     }
 
-    public void ChangeState(EnemyState state, Vector3? destination = null, AlertStatus alertStatus = AlertStatus.None, float stoppingDistance = 0)
+    //public void ChangeState(EnemyState state, Vector3? destination = null, AlertStatus alertStatus = AlertStatus.None, float stoppingDistance = 0)
+    //{
+    //    if (_currentState != null)
+    //    {
+    //        _currentState.ExitState();
+    //    }
+    //    _currentState = state;
+
+    //    _destinationCheckAction = _currentState == _stationary ? StopImmediately : MeasurePathToDestination;
+
+
+
+    //    _currentState.EnterState(destination, alertStatus, stoppingDistance);
+    //    //_enemyEventManager.PlayerSeen(_canSeePlayer);
+    //    //_currentState.EnterState(destination);
+
+    //    //Debug.LogError("Current State: " + _currentState.GetType().Name);
+    //}
+
+    public void ChangeState(EnemyState state)
     {
         if (_currentState != null)
         {
@@ -79,31 +105,31 @@ public partial class EnemyFSMController : ComponentEvents
 
 
 
-        _currentState.EnterState(destination, alertStatus, stoppingDistance);
-        //_enemyEventManager.PlayerSeen(_canSeePlayer);
-        //_currentState.EnterState(destination);
-
-        //Debug.LogError("Current State: " + _currentState.GetType().Name);
+        _currentState.EnterState();
+       
+        Debug.LogError("Current State: " + _currentState.GetType().Name);
     }
 
-    private void StationaryStateRequested(/*AlertStatus alertStatus*/)
+
+
+    private void StationaryStateRequested(AlertStatus alertStatus/* = AlertStatus.None*/)
     {
         if (_currentState == _stationary)
         {
             return;
         }
-
-        ChangeState(_stationary, null, _alertStatus);
+        AlertStatusUpdated(alertStatus);
+        ChangeState(_stationary);
     }
 
-    private void ChasingStateRequested(Vector3? destination = null)
+    private void ChasingStateRequested()
     {
         if (_currentState == _chasing)
         {
             return;
         }
         
-        ChangeState(_chasing, destination);
+        ChangeState(_chasing);
     }
 
     private void PursuitTargetRequested(DestinationType chaseType)
@@ -111,10 +137,7 @@ public partial class EnemyFSMController : ComponentEvents
         switch (chaseType)
         {
             case DestinationType.Chase:
-                /*if (_currentState == _chasing && _chasing.ChaseType == ChaseType.FlankPlayer)
-                {
-                    ChangeState(_chasing, null, _alertStatus);
-                }*/
+                AttemptTargetChase();
                 break;
             case DestinationType.Flank:
                 AttemptTargetFlank();
@@ -124,10 +147,75 @@ public partial class EnemyFSMController : ComponentEvents
                 break;
         }
     }
+
+    private void AttemptTargetChase()
+    {
+        ChasingStateRequested();
+
+        _destinationData.destinationType = DestinationType.Chase;
+        _destinationData.start = LineOfSightUtility.GetClosestPointOnNavMesh(_agent.transform.position);
+        /*Vector3 playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
+        _destinationData.end = LineOfSightUtility.GetClosestPointOnNavMesh(playerPos);*/
+        _destinationData.path = _path;
+
+        _destinationData.externalCallback = (success, point) =>
+        {
+            int _randomStoppingDistance = Random.Range(4, 11);
+            DestinationRequestResult(success, point, AlertStatus.Chasing, _randomStoppingDistance);
+        };
+        _destinationManager.RequestNewDestination(_destinationData);
+
+    }
     
     private void AttemptTargetFlank()
     {
+        // First enter the Chasing state here
+        ChasingStateRequested();
+        // In chasing, before the wile loop in the coroutine, yield wait until => Destination found
+        
+        
+        // Send Destination Request here
+        _destinationData.destinationType = DestinationType.Flank;
+        _destinationData.start = LineOfSightUtility.GetClosestPointOnNavMesh(_agent.transform.position);
+        
+        _destinationData.path = _path;
 
+        _destinationData.externalCallback = (success, point) =>
+        {
+            DestinationRequestResult(success, point, AlertStatus.Flanking);
+        };
+        _destinationManager.RequestNewDestination(_destinationData);
+        // If request fails => Request Player destination
+
+        // If 2nd request fails => Later implement a fallback 
+    }
+
+    private void DestinationRequestResult(bool success, Vector3 destination, AlertStatus status = AlertStatus.None, int stoppingDistance = 0)
+    {
+        if (success)
+        {
+            _destinationData.carvingCallback = () =>
+            {
+                if (_obstacle.enabled)
+                {
+                    _obstacle.enabled = false;
+                }
+            };
+
+            _destinationData.agentActiveCallback = () =>
+            {
+                if (!_agent.enabled)
+                {
+                    ToggleAgent(true);
+                    
+                }
+                AlertStatusUpdated(status);
+                _agent.stoppingDistance = stoppingDistance;
+                _agent.SetDestination(destination);
+                _enemyEventManager.DestinationApplied();
+            };
+            _destinationManager.StartCarvingRoutine(_destinationData);
+        }
     }
 
     private bool CheckIfDestinationIsReached()

@@ -20,7 +20,8 @@ public class PathRequestManager
 
             bool success = HasClearPathToTarget(request.start, request.end, request.path);
 
-            request.externalCallback?.Invoke(success);
+            //request.externalCallback?.Invoke(success);
+            request.internalCallback?.Invoke(success);
 
 
             processed++;

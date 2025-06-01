@@ -1,3 +1,4 @@
+using Oculus.Platform.Models;
 using System;
 using System.Collections;
 using UnityEngine;
@@ -8,6 +9,8 @@ public class ChasingState : EnemyState
 {
     DestinationRequestData _chasePlayerPathRequest;
     private int _randomStoppingDistance;
+
+    
    
     private Vector3 _playerPos;
 
@@ -31,22 +34,22 @@ public class ChasingState : EnemyState
     }
 
 
-    public override void EnterState(Vector3? destination = null, AlertStatus alertStatus = AlertStatus.None, float stoppingDistance = 0)
+    /*public override void EnterState(Vector3? destination = null, AlertStatus alertStatus = AlertStatus.None, float stoppingDistance = 0)
     {
 
-       // GameManager.OnPlayerMoved += SetPlayerMoved;
+        // GameManager.OnPlayerMoved += SetPlayerMoved;
 
         //_eventManager.OnPlayerSeen += SetPlayerSeen;
         //_eventManager.OnDestinationReached += SetDestinationReached;
         _randomStoppingDistance = Random.Range(4, 11);
 
 
-        
+
         if (_coroutine == null)
         {
             //_isChasing = true;
             //_eventManager.SpeedChanged(0.9f, 2f);
-            if(destination == null)
+            if (destination == null)
             {
                 _playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
                 _eventManager.DestinationUpdated(_playerPos, _randomStoppingDistance);
@@ -59,11 +62,41 @@ public class ChasingState : EnemyState
                 _eventManager.RotateTowardsTarget(true);
                 _chaseType = ChaseType.FlankPlayer;
             }
-            
+
             _coroutine = CoroutineRunner.Instance.StartCoroutine(ChasePlayerRoutine());
 
         }
 
+    }*/
+
+    public override void EnterState()
+    {
+       
+        //_randomStoppingDistance = Random.Range(4, 11);
+
+
+
+        if (_coroutine == null)
+        {
+            //_isChasing = true;
+            //_eventManager.SpeedChanged(0.9f, 2f);
+            //if (destination == null)
+            //{
+                //_playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
+                //_eventManager.DestinationUpdated(_playerPos, _randomStoppingDistance);
+                //_chaseType = ChaseType.ChasePlayer;
+                //_coroutine = CoroutineRunner.Instance.StartCoroutine(ChasePlayerRoutine());
+           // }
+           // else
+            //{
+                //_eventManager.DestinationUpdated(destination.Value);
+                //_eventManager.RotateTowardsTarget(true);
+                //_chaseType = ChaseType.FlankPlayer;
+           // }
+
+            _coroutine = CoroutineRunner.Instance.StartCoroutine(ChasePlayerRoutiningNew());
+
+        }
     }
 
 
@@ -111,8 +144,85 @@ public class ChasingState : EnemyState
             yield return null;
 
         }
-        _eventManager.RequestStationaryState();
+        _eventManager.RequestStationaryState(AlertStatus.Alert);
        
+    }
+
+    private IEnumerator ChasePlayerRoutining()
+    {
+        SetDestinationReached(false);
+
+        yield return _waitUntilDestinationApplied;
+        _destinationApplied = false;
+
+        while (!CheckDestinationReached())
+        {
+
+            _eventManager.SpeedChanged(_canSeePlayer ? _walkSpeed : _sprintSpeed, 5f);
+
+            if (_chaseType == ChaseType.ChasePlayer)
+            {
+                _eventManager.RotateTowardsTarget(_canSeePlayer);
+            }
+
+            if (CheckIfPlayerHasMoved())
+            {
+                //_playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
+               
+               // _eventManager.DestinationUpdated(LineOfSightUtility.GetClosestPointOnNavMesh(_playerPos), _randomStoppingDistance);
+                _eventManager.RequestTargetPursuit(DestinationType.Chase);
+
+                yield return _waitUntilDestinationApplied;
+                _destinationApplied = false;
+                //yield return new WaitForSeconds(0.15f);
+            }
+
+            yield return null;
+
+        }
+        _eventManager.RequestStationaryState(AlertStatus.Alert);
+
+    }
+
+    private IEnumerator ChasePlayerRoutiningNew()
+    {
+        SetDestinationReached(false);
+
+        yield return _waitUntilDestinationApplied;
+        _destinationApplied = false;
+
+        if (_alertStatus == AlertStatus.Flanking)
+        {
+            _eventManager.RotateTowardsTarget(true);
+        }
+
+        while (!CheckDestinationReached())
+        {
+
+            _eventManager.SpeedChanged(_canSeePlayer ? _walkSpeed : _sprintSpeed, 5f);
+
+            if (_alertStatus == AlertStatus.Chasing)
+            {
+                _eventManager.RotateTowardsTarget(_canSeePlayer);
+            }
+
+            if (CheckIfPlayerHasMoved())
+            {
+                //_playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
+
+                // _eventManager.DestinationUpdated(LineOfSightUtility.GetClosestPointOnNavMesh(_playerPos), _randomStoppingDistance);
+                _eventManager.RequestTargetPursuit(DestinationType.Chase);
+
+                yield return _waitUntilDestinationApplied;
+                _destinationApplied = false;
+                //yield return new WaitForSeconds(0.15f);
+            }
+
+            yield return null;
+
+        }
+        _eventManager.RequestStationaryState(AlertStatus.Alert);
+
     }
 
     private void CheckNewPath(Vector3 from, Vector3 to, NavMeshPath path, out bool valid, out bool result)
@@ -128,7 +238,7 @@ public class ChasingState : EnemyState
         _chasePlayerPathRequest.start = from;
         _chasePlayerPathRequest.end = to;
         _chasePlayerPathRequest.path = path;
-        _chasePlayerPathRequest.externalCallback = (success) =>
+        _chasePlayerPathRequest.externalCallback = (success, point) =>
         {
             localValid = success;
             localResult = true;

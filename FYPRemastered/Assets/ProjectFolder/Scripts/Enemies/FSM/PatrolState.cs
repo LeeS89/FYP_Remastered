@@ -34,7 +34,7 @@ public class PatrolState : EnemyState
     }
 
     
-    public override void EnterState(Vector3? destination = null, AlertStatus alertStatus = AlertStatus.None, float _ = 0)
+    public override void EnterState(/*Vector3? destination = null, AlertStatus alertStatus = AlertStatus.None, float _ = 0*/)
     {
         _eventManager.OnDestinationReached += SetDestinationReached;
         if (_coroutine == null)

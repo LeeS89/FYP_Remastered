@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.AI;
 
 
 public class DestinationManager
@@ -11,6 +13,7 @@ public class DestinationManager
     private int _maxSteps;
     private List<int> _stepsToTry;
     private List<Vector3> _newPoints;
+ 
     private EnemyEventManager _eventManager;
     
 
@@ -18,6 +21,7 @@ public class DestinationManager
     public DestinationManager(EnemyEventManager eventManager, UniformZoneGridManager gridManager, int maxSteps)
     {
         _eventManager = eventManager;
+        
         _gridManager = gridManager;
         _maxSteps = maxSteps;
         _stepsToTry = new List<int>();
@@ -48,11 +52,40 @@ public class DestinationManager
     private void RequestTargetDestination(DestinationRequestData destinationData)
     {
         // Not yet implemented, to be used for all other destination requests, i.e. Chase, Patrol, etc.
+        CoroutineRunner.Instance.StartCoroutine(AttemptChaseRoutine(destinationData));
     }
 
     private void RequestFlankDestination(DestinationRequestData destinationData)
     {
         CoroutineRunner.Instance.StartCoroutine(AttemptFlankRoutine(destinationData));
+    }
+
+    private IEnumerator AttemptChaseRoutine(DestinationRequestData destinationData)
+    {
+        bool resultReceived = false;
+        bool isValid = false;
+
+        Vector3 playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
+        destinationData.end = LineOfSightUtility.GetClosestPointOnNavMesh(playerPos);
+
+        destinationData.internalCallback = (success) =>
+        {
+            isValid = success;
+            resultReceived = true;
+        };
+
+        _eventManager.PathRequested(destinationData);
+
+        yield return new WaitUntil(() => resultReceived);
+
+        if (isValid)
+        {
+            destinationData.externalCallback?.Invoke(true, playerPos);
+
+            yield break;
+        }
+
+        destinationData.externalCallback?.Invoke(false, Vector3.zero);
     }
 
     private void GetStepsToTry()
@@ -107,7 +140,7 @@ public class DestinationManager
 
                 if (!isValid) continue; // No valid path found, try next point
 
-                destinationData.externalCallback?.Invoke(true);
+                destinationData.externalCallback?.Invoke(true, point);
                 
                 
                 yield break;
@@ -117,14 +150,30 @@ public class DestinationManager
             }
 
         }
-        destinationData.externalCallback?.Invoke(false);
+        destinationData.externalCallback?.Invoke(false, Vector3.zero);
         
        
+    }
+
+    public void StartCarvingRoutine(DestinationRequestData data)
+    {
+        CoroutineRunner.Instance.StartCoroutine(CarvingRoutine(data));
+    }
+
+    private IEnumerator CarvingRoutine(DestinationRequestData data)
+    {
+        data.carvingCallback?.Invoke();
+
+        yield return new WaitForSeconds(0.15f);
+
+        data.agentActiveCallback?.Invoke();
+        
     }
 
     public void OnInstanceDestroyed()
     {
         _gridManager = null;
+        
         _eventManager = null;
         _stepsToTry.Clear();
         _newPoints.Clear();
