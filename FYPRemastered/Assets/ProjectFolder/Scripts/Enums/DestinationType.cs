@@ -3,5 +3,6 @@ using UnityEngine;
 public enum DestinationType
 {
     Chase,
-    Flank
+    Flank,
+    Patrol
 }

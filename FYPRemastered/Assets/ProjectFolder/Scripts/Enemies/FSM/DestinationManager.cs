@@ -1,9 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Drawing;
+
 using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
+using Random = UnityEngine.Random;
 
 
 public class DestinationManager
@@ -13,7 +15,7 @@ public class DestinationManager
     private int _maxSteps;
     private List<int> _stepsToTry;
     private List<Vector3> _newPoints;
- 
+    private List<Vector3> _patrolPointList = new List<Vector3>(1);
     private EnemyEventManager _eventManager;
     
 
@@ -37,27 +39,95 @@ public class DestinationManager
         switch (destinationType)
         {
             case DestinationType.Chase:
-                RequestTargetDestination(destinationData);
+                RequestPlayerDestination(destinationData);
                 break;
             case DestinationType.Flank:
                 RequestFlankDestination(destinationData);
                 break;
             default:
-                RequestTargetDestination(destinationData);
+                _patrolPointList.Clear();
+                _patrolPointList.Add(destinationData.end);
+                RequestPatrolPointDestination(destinationData);
                 break;
         }
     }
 
-
-    private void RequestTargetDestination(DestinationRequestData destinationData)
+    private List<Vector3> GetPatrolPoint()
     {
-        // Not yet implemented, to be used for all other destination requests, i.e. Chase, Patrol, etc.
-        CoroutineRunner.Instance.StartCoroutine(AttemptChaseRoutine(destinationData));
+        return _patrolPointList;
+    }
+
+    private List<Vector3> GetPlayerPoint()
+    {
+        Vector3 playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
+        return new List<Vector3> { playerPos };
+    }
+
+    private List<Vector3> GetFlankPoints()
+    {
+        GetStepsToTry(); // modifies _stepsToTry
+        List<Vector3> points = new List<Vector3>();
+
+        foreach (int step in _stepsToTry)
+        {
+            var stepPoints = _gridManager.GetCandidatePointsAtStep(step);
+            if (stepPoints.Count > 0)
+            {
+                points.AddRange(stepPoints.OrderBy(p => Random.value));
+            }
+        }
+
+        return points;
+    }
+
+
+    
+    private IEnumerator AttemptDestinationRoutine(DestinationRequestData data, Func<List<Vector3>> candidatePointProvider)
+    {
+        var candidates = candidatePointProvider.Invoke();
+
+        foreach (var point in candidates)
+        {
+            bool resultReceived = false;
+            bool isValid = false;
+
+            data.end = LineOfSightUtility.GetClosestPointOnNavMesh(point);
+
+            data.internalCallback = (success) =>
+            {
+                isValid = success;
+                resultReceived = true;
+            };
+
+            _eventManager.PathRequested(data);
+
+            yield return new WaitUntil(() => resultReceived);
+
+            if (!isValid) continue;
+
+            data.externalCallback?.Invoke(true, point);
+            yield break;
+        }
+
+        data.externalCallback?.Invoke(false, Vector3.zero);
+    }
+
+
+    private void RequestPatrolPointDestination(DestinationRequestData destinationData)
+    {
+        CoroutineRunner.Instance.StartCoroutine(AttemptDestinationRoutine(destinationData, GetPatrolPoint));
+    }
+
+    private void RequestPlayerDestination(DestinationRequestData destinationData)
+    {
+        CoroutineRunner.Instance.StartCoroutine(AttemptDestinationRoutine(destinationData, GetPlayerPoint));
+        //CoroutineRunner.Instance.StartCoroutine(AttemptChaseRoutine(destinationData));
     }
 
     private void RequestFlankDestination(DestinationRequestData destinationData)
     {
-        CoroutineRunner.Instance.StartCoroutine(AttemptFlankRoutine(destinationData));
+        CoroutineRunner.Instance.StartCoroutine(AttemptDestinationRoutine(destinationData, GetFlankPoints));
+        //CoroutineRunner.Instance.StartCoroutine(AttemptFlankRoutine(destinationData));
     }
 
     private IEnumerator AttemptChaseRoutine(DestinationRequestData destinationData)
@@ -177,6 +247,8 @@ public class DestinationManager
         _eventManager = null;
         _stepsToTry.Clear();
         _newPoints.Clear();
+        _patrolPointList.Clear();
+        _patrolPointList = null;
         _stepsToTry = null;
         _newPoints = null;
     }

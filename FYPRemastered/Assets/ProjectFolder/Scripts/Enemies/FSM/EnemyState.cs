@@ -47,6 +47,8 @@ public abstract class EnemyState
 
     protected void UpdateAlertStatus(AlertStatus alertStatus)
     {
+        if (_alertStatus == alertStatus) { return; }
+
         _alertStatus = alertStatus;
     }
 

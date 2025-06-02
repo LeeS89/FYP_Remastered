@@ -132,7 +132,18 @@ public partial class EnemyFSMController : ComponentEvents
         ChangeState(_chasing);
     }
 
-    private void PursuitTargetRequested(DestinationType chaseType)
+    private void PatrolStateRequested()
+    {
+        if (_currentState == _patrol)
+        {
+            return;
+        }
+
+        ChangeState(_patrol);
+
+    }
+
+    private void PursuitTargetRequested(DestinationType chaseType, Vector3? position = null)
     {
         switch (chaseType)
         {
@@ -142,10 +153,31 @@ public partial class EnemyFSMController : ComponentEvents
             case DestinationType.Flank:
                 AttemptTargetFlank();
                 break;
+            case DestinationType.Patrol:
+
+                AttemptPatrol(position);
+
+                break;
             default:
                 Debug.LogError("Invalid chase type requested: " + chaseType);
                 break;
         }
+    }
+
+    private void AttemptPatrol(Vector3? position)
+    {
+        PatrolStateRequested();
+
+        _destinationData.destinationType = DestinationType.Patrol;
+        _destinationData.start = LineOfSightUtility.GetClosestPointOnNavMesh(_agent.transform.position);
+        _destinationData.end = LineOfSightUtility.GetClosestPointOnNavMesh(position.Value);
+        _destinationData.path = _path;
+
+        _destinationData.externalCallback = (success, point) =>
+        {
+            DestinationRequestResult(success, point, AlertStatus.None);
+        };
+        _destinationManager.RequestNewDestination(_destinationData);
     }
 
     private void AttemptTargetChase()

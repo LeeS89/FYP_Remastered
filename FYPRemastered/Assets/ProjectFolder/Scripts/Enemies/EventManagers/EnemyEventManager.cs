@@ -39,7 +39,7 @@ public class EnemyEventManager : EventManager
     // Chasing Events
     public event Action<AlertStatus> OnRequestStationaryState;
     public event Action OnRequestChasingState;
-    public event Action<DestinationType> OnRequestTargetPursuit;
+    public event Action<DestinationType, Vector3?> OnRequestTargetPursuit;
     public event Action<bool> OnPendingNewDestination;
     public event Action<bool, bool> OnDestinationRequestStatus;
 
@@ -199,9 +199,9 @@ public class EnemyEventManager : EventManager
         OnAlertStatusChanged?.Invoke(status);
     }
 
-    public void RequestTargetPursuit(DestinationType type)
+    public void RequestTargetPursuit(DestinationType type, Vector3? position = null)
     {
-        OnRequestTargetPursuit?.Invoke(type);
+        OnRequestTargetPursuit?.Invoke(type, position);
     }
 
     public void DestinationRequestStatus(bool complete, bool success)

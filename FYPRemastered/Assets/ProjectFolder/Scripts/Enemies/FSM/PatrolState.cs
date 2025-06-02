@@ -70,6 +70,66 @@ public class PatrolState : EnemyState
         
     }
 
+    IEnumerator TraverseWayPointsNew()
+    {
+        if (_wpPendingUpdate)
+        {
+            _wpPendingUpdate = false;
+            UpdateWaypoints();
+        }
+
+        while (_isPatrolling)
+        {
+            if (_wpPendingUpdate)
+            {
+                _wpPendingUpdate = false;
+                UpdateWaypoints();
+            }
+
+
+            SetDestinationReached(false);
+            index = GetNextDestination();
+
+            
+            //_eventManager.DestinationUpdated(_wayPoints[index]);
+            yield return _waitUntilDestinationApplied;
+            _destinationApplied = false;
+
+            _eventManager.SpeedChanged(_walkSpeed, 2f);
+
+
+            yield return _waitUntilDestinationReached;
+
+
+            _eventManager.SpeedChanged(0f, 10f);
+
+            // Calculating the direction vector from the agent to the destination
+            Vector3 directionToFace = _waypointForwards[index];
+
+            //New rotation based on the direction vector
+            Quaternion targetRotation = Quaternion.LookRotation(directionToFace);
+
+            while (Quaternion.Angle(_owner.transform.rotation, targetRotation) > 2.0f + Mathf.Epsilon)
+            {
+                // Smoothly rotating the agent towards the target rotation
+                _owner.transform.rotation = Quaternion.Slerp(_owner.transform.rotation, targetRotation, Time.deltaTime * 2.0f);
+                yield return null;
+            }
+
+            _eventManager.AnimationTriggered(AnimationAction.Look);
+
+            float _delayTime = Random.Range(0, _randomWaitTime);
+            float elapsedTime = 0.0f;
+
+            while (elapsedTime < _delayTime)
+            {
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+
+        }
+    }
+
 
     IEnumerator TraverseWayPoints()
     {
@@ -128,7 +188,7 @@ public class PatrolState : EnemyState
         }
     }
 
-    public override void UpdateState() { }
+    //public override void UpdateState() { }
     
    
     private int GetNextDestination()
