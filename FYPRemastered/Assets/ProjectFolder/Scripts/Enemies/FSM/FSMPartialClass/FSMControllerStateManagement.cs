@@ -22,7 +22,7 @@ public partial class EnemyFSMController : ComponentEvents
         _animController = new EnemyAnimController(_anim, _enemyEventManager);
         _patrol = new PatrolState(_owningGameObject, _enemyEventManager, _stopAndWaitDelay, _walkSpeed);
         _chasing = new ChasingState(_enemyEventManager, _owningGameObject, _walkSpeed, _sprintSpeed);
-        _stationary = new StationaryState(_enemyEventManager, _owningGameObject, _path, _maxFlankingSteps);
+        _stationary = new StationaryState(_enemyEventManager, _owningGameObject);
         _deathState = new DeathState(_enemyEventManager, _owningGameObject);
         _destinationManager = new DestinationManager(_enemyEventManager, _gridManager, _maxFlankingSteps);
 
@@ -46,7 +46,7 @@ public partial class EnemyFSMController : ComponentEvents
 
     private void InitializeWaypoints()
     {
-        
+
         _blockData = BaseSceneManager._instance.RequestWaypointBlock();
 
         if (_blockData != null)
@@ -56,11 +56,13 @@ public partial class EnemyFSMController : ComponentEvents
 
             _wpData.UpdateData(_blockData._waypointPositions.ToList(), _blockData._waypointForwards.ToList());
 
-            _enemyEventManager.WaypointsUpdated(_wpData);
-            
+            _destinationManager.LoadWaypointData(_wpData);
+            //_enemyEventManager.WaypointsUpdated(_wpData);
+
             BaseSceneManager._instance.RegisterAgentAndZone(this, _blockZone);
         }
     }
+
 
     private void InitializeWeapon()
     {
@@ -71,27 +73,10 @@ public partial class EnemyFSMController : ComponentEvents
             return;
         }
         _gun = new Gun(_bulletSpawnPoint, playerTransform, _enemyEventManager, _owningGameObject);
-        //GameManager._onPlayerMovedinternal += EnemyState.SetPlayerMoved;
+   
     }
 
-    //public void ChangeState(EnemyState state, Vector3? destination = null, AlertStatus alertStatus = AlertStatus.None, float stoppingDistance = 0)
-    //{
-    //    if (_currentState != null)
-    //    {
-    //        _currentState.ExitState();
-    //    }
-    //    _currentState = state;
-
-    //    _destinationCheckAction = _currentState == _stationary ? StopImmediately : MeasurePathToDestination;
-
-
-
-    //    _currentState.EnterState(destination, alertStatus, stoppingDistance);
-    //    //_enemyEventManager.PlayerSeen(_canSeePlayer);
-    //    //_currentState.EnterState(destination);
-
-    //    //Debug.LogError("Current State: " + _currentState.GetType().Name);
-    //}
+   
 
     public void ChangeState(EnemyState state)
     {
@@ -143,7 +128,7 @@ public partial class EnemyFSMController : ComponentEvents
 
     }
 
-    private void PursuitTargetRequested(DestinationType chaseType, Vector3? position = null)
+    private void PursuitTargetRequested(DestinationType chaseType)
     {
         switch (chaseType)
         {
@@ -155,7 +140,7 @@ public partial class EnemyFSMController : ComponentEvents
                 break;
             case DestinationType.Patrol:
 
-                AttemptPatrol(position);
+                AttemptPatrol();
 
                 break;
             default:
@@ -164,13 +149,13 @@ public partial class EnemyFSMController : ComponentEvents
         }
     }
 
-    private void AttemptPatrol(Vector3? position)
+    private void AttemptPatrol()
     {
-        PatrolStateRequested();
+       // PatrolStateRequested();
 
         _destinationData.destinationType = DestinationType.Patrol;
         _destinationData.start = LineOfSightUtility.GetClosestPointOnNavMesh(_agent.transform.position);
-        _destinationData.end = LineOfSightUtility.GetClosestPointOnNavMesh(position.Value);
+        //_destinationData.end = LineOfSightUtility.GetClosestPointOnNavMesh(position.Value);
         _destinationData.path = _path;
 
         _destinationData.externalCallback = (success, point) =>

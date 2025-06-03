@@ -71,12 +71,13 @@ public class MoonSceneManager : BaseSceneManager
         
     }
 
-
+   
     protected override void LoadSceneResources() // Create Resources Component Later
     {
         _normalBulletPrefab = Resources.Load<GameObject>("Bullets/BasicBullet");
         _normalHitPrefab = Resources.Load<ParticleSystem>("ParticlePoolPrefabs/BasicHit");
         _deflectAudioPrefab = Resources.Load<AudioSource>("AudioPoolPrefabs/DeflectAudio");
+        
         _zoneAgentRegistry = new ZoneAgentRegistry();
         LoadWaypoints();
 
@@ -85,6 +86,7 @@ public class MoonSceneManager : BaseSceneManager
         if (!_gridManager)
         {
             Debug.LogError("No Grid Manager found in scene");
+           
             return;
         }
 

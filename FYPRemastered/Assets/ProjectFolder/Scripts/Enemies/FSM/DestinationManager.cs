@@ -1,10 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-
 using System.Linq;
 using UnityEngine;
-using UnityEngine.AI;
 using Random = UnityEngine.Random;
 
 
@@ -15,11 +13,12 @@ public class DestinationManager
     private int _maxSteps;
     private List<int> _stepsToTry;
     private List<Vector3> _newPoints;
-    private List<Vector3> _patrolPointList = new List<Vector3>(1);
-    private EnemyEventManager _eventManager;
-    
-
    
+    private EnemyEventManager _eventManager;
+   
+    private List<WaypointPair> _waypointPairs = new();
+
+
     public DestinationManager(EnemyEventManager eventManager, UniformZoneGridManager gridManager, int maxSteps)
     {
         _eventManager = eventManager;
@@ -30,7 +29,49 @@ public class DestinationManager
         _newPoints = new List<Vector3>();
     }
 
+    private struct WaypointPair
+    {
+        public Vector3 position;
+        public Vector3 forward;
+
+        public WaypointPair(Vector3 pos, Vector3 fwd)
+        {
+            position = pos;
+            forward = fwd;
+        }
+    }
+
+
+    public void LoadWaypointData(WaypointData wpData)
+    {
+       
+        _waypointPairs.Clear();
+
+        for (int i = 0; i < wpData._waypointPositions.Count; i++)
+        {
+            _waypointPairs.Add(new WaypointPair(wpData._waypointPositions[i], wpData._waypointForwards[i]));
+        }
+
+       
+    }
+
+    private void ShuffleWaypointPairs()
+    {
+        for (int i = 0; i < _waypointPairs.Count; i++)
+        {
+            int randIndex = UnityEngine.Random.Range(i, _waypointPairs.Count);
+            (_waypointPairs[i], _waypointPairs[randIndex]) = (_waypointPairs[randIndex], _waypointPairs[i]);
+        }
+    }
+
    
+
+    private List<Vector3> GetWaypointPositions()
+    {
+        return _waypointPairs.Select(p => p.position).ToList();
+    }
+
+
 
     public void RequestNewDestination(DestinationRequestData destinationData) 
     {
@@ -44,18 +85,16 @@ public class DestinationManager
             case DestinationType.Flank:
                 RequestFlankDestination(destinationData);
                 break;
-            default:
-                _patrolPointList.Clear();
-                _patrolPointList.Add(destinationData.end);
+            case DestinationType.Patrol:
                 RequestPatrolPointDestination(destinationData);
+                break;
+            default:
+                Debug.LogError($"Unknown destination type: {destinationType}");
+             
                 break;
         }
     }
 
-    private List<Vector3> GetPatrolPoint()
-    {
-        return _patrolPointList;
-    }
 
     private List<Vector3> GetPlayerPoint()
     {
@@ -105,6 +144,12 @@ public class DestinationManager
 
             if (!isValid) continue;
 
+            if(data.destinationType == DestinationType.Patrol)
+            {
+                var match = _waypointPairs.FirstOrDefault(p => p.position == point);
+                _eventManager.RotateAtPatrolPoint(match.forward);
+            }
+
             data.externalCallback?.Invoke(true, point);
             yield break;
         }
@@ -115,48 +160,23 @@ public class DestinationManager
 
     private void RequestPatrolPointDestination(DestinationRequestData destinationData)
     {
-        CoroutineRunner.Instance.StartCoroutine(AttemptDestinationRoutine(destinationData, GetPatrolPoint));
+        ShuffleWaypointPairs(); 
+        CoroutineRunner.Instance.StartCoroutine(AttemptDestinationRoutine(destinationData, GetWaypointPositions));
     }
 
     private void RequestPlayerDestination(DestinationRequestData destinationData)
     {
         CoroutineRunner.Instance.StartCoroutine(AttemptDestinationRoutine(destinationData, GetPlayerPoint));
-        //CoroutineRunner.Instance.StartCoroutine(AttemptChaseRoutine(destinationData));
+      
     }
 
     private void RequestFlankDestination(DestinationRequestData destinationData)
     {
         CoroutineRunner.Instance.StartCoroutine(AttemptDestinationRoutine(destinationData, GetFlankPoints));
-        //CoroutineRunner.Instance.StartCoroutine(AttemptFlankRoutine(destinationData));
+       
     }
 
-    private IEnumerator AttemptChaseRoutine(DestinationRequestData destinationData)
-    {
-        bool resultReceived = false;
-        bool isValid = false;
-
-        Vector3 playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
-        destinationData.end = LineOfSightUtility.GetClosestPointOnNavMesh(playerPos);
-
-        destinationData.internalCallback = (success) =>
-        {
-            isValid = success;
-            resultReceived = true;
-        };
-
-        _eventManager.PathRequested(destinationData);
-
-        yield return new WaitUntil(() => resultReceived);
-
-        if (isValid)
-        {
-            destinationData.externalCallback?.Invoke(true, playerPos);
-
-            yield break;
-        }
-
-        destinationData.externalCallback?.Invoke(false, Vector3.zero);
-    }
+   
 
     private void GetStepsToTry()
     {
@@ -177,53 +197,7 @@ public class DestinationManager
         }
     }
 
-    private IEnumerator AttemptFlankRoutine(DestinationRequestData destinationData)
-    {
-        GetStepsToTry();
-
-        foreach (int step in _stepsToTry)
-        {
-
-            _newPoints = _gridManager.GetCandidatePointsAtStep(step);
-
-            if (_newPoints.Count == 0) { continue; }
-
-            _newPoints = _newPoints.OrderBy(p => Random.value).ToList();
-
-            foreach (var point in _newPoints)
-            {
-
-                bool resultReceived = false;
-                bool isValid = false;
-                
-                destinationData.end = LineOfSightUtility.GetClosestPointOnNavMesh(point);
-                
-                destinationData.internalCallback = (success) =>
-                {
-                    isValid = success;
-                    resultReceived = true;
-                };
-
-                _eventManager.PathRequested(destinationData);
-
-                yield return new WaitUntil(() => resultReceived);
-
-                if (!isValid) continue; // No valid path found, try next point
-
-                destinationData.externalCallback?.Invoke(true, point);
-                
-                
-                yield break;
-
-                
-
-            }
-
-        }
-        destinationData.externalCallback?.Invoke(false, Vector3.zero);
-        
-       
-    }
+   
 
     public void StartCarvingRoutine(DestinationRequestData data)
     {
@@ -247,8 +221,7 @@ public class DestinationManager
         _eventManager = null;
         _stepsToTry.Clear();
         _newPoints.Clear();
-        _patrolPointList.Clear();
-        _patrolPointList = null;
+       
         _stepsToTry = null;
         _newPoints = null;
     }

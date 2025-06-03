@@ -7,7 +7,7 @@ public class EnemyEventManager : EventManager
 {
     // Nav mesh agent events
     public event Action<bool> OnDestinationReached;
-    public event Action<Vector3, int> OnDestinationUpdated;  
+    //public event Action<Vector3, int> OnDestinationUpdated;  
     public event Action<bool> OnPlayerSeen;
     public event Action<bool> OnRotateTowardsTarget;
     public event Action OnPathInvalid;
@@ -25,7 +25,7 @@ public class EnemyEventManager : EventManager
     public event Action<bool> OnAgentRespawn;
 
     //Patrolling events
-    public event Action<WaypointData> OnWaypointsUpdated;
+    //public event Action<WaypointData> OnWaypointsUpdated;
 
     // Gun Events
     public event Action OnShoot;
@@ -39,12 +39,14 @@ public class EnemyEventManager : EventManager
     // Chasing Events
     public event Action<AlertStatus> OnRequestStationaryState;
     public event Action OnRequestChasingState;
-    public event Action<DestinationType, Vector3?> OnRequestTargetPursuit;
+    public event Action<DestinationType> OnRequestTargetPursuit;
     public event Action<bool> OnPendingNewDestination;
     public event Action<bool, bool> OnDestinationRequestStatus;
 
     public event Action<AlertStatus> OnAlertStatusChanged;
     public event Action OnDestinationApplied;
+    public event Action<Vector3> OnRotateAtPatrolPoint;
+
 
     /// <summary>
     /// Called From Scene Manager
@@ -73,10 +75,10 @@ public class EnemyEventManager : EventManager
     }
 
 
-    public void WaypointsUpdated(WaypointData wpData)
+   /* public void WaypointsUpdated(WaypointData wpData)
     {
         OnWaypointsUpdated?.Invoke(wpData);
-    }
+    }*/
 
     /// <summary>
     /// Animation actions other than Locomotion i.e. Melee, Look around etc
@@ -112,10 +114,10 @@ public class EnemyEventManager : EventManager
         OnDestinationReached?.Invoke(reached);
     }
 
-    public void DestinationUpdated(Vector3 newDestination, int stoppingDistance = 0)
+   /* public void DestinationUpdated(Vector3 newDestination, int stoppingDistance = 0)
     {
         OnDestinationUpdated?.Invoke(newDestination, stoppingDistance);
-    }
+    }*/
 
     public void PlayerSeen(bool seen)
     {
@@ -199,9 +201,14 @@ public class EnemyEventManager : EventManager
         OnAlertStatusChanged?.Invoke(status);
     }
 
-    public void RequestTargetPursuit(DestinationType type, Vector3? position = null)
+    public void RotateAtPatrolPoint(Vector3 point)
     {
-        OnRequestTargetPursuit?.Invoke(type, position);
+        OnRotateAtPatrolPoint?.Invoke(point);
+    }
+
+    public void RequestTargetPursuit(DestinationType type)
+    {
+        OnRequestTargetPursuit?.Invoke(type);
     }
 
     public void DestinationRequestStatus(bool complete, bool success)

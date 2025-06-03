@@ -1,77 +1,18 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-
 using UnityEngine;
-using UnityEngine.AI;
+
 
 public class StationaryState : EnemyState
 {
     private int _agentId = 0;
   
-    
-    private int _maxSteps = 0;
-    private bool _isInState = false;
-
-    private UniformZoneGridManager _gridManager;
-    private DestinationRequestData _chasePlayerPathRequest;
-    private DestinationRequestData _flankePlayerPathRequest;
-
-    private bool _queuedForNewFlankPoint = false;
     private bool _newStateRequestAlreadySent = false;
-    //private bool _initialSeenCheck = true;
-    List<Vector3> _newPoints;
-    List<int> _stepsToTry;
+   
     private bool _isStationary = false;  
 
-    public StationaryState(EnemyEventManager eventManager, GameObject owner, NavMeshPath path, int maxSteps) : base(eventManager, path, owner) 
-    { 
-        _maxSteps = maxSteps;
-        
-        _gridManager = GameObject.FindFirstObjectByType<UniformZoneGridManager>();
-        _chasePlayerPathRequest = new DestinationRequestData();
-        _flankePlayerPathRequest = new DestinationRequestData();
-        _stepsToTry = new List<int>();
-        _newPoints = new List<Vector3>();
-    }
+    public StationaryState(EnemyEventManager eventManager, GameObject owner) : base(eventManager, owner) { }
+    
    
-/*
-    public override void EnterState(Vector3? destination = null, AlertStatus alertStatus = AlertStatus.None, float stoppingDistance = 0)
-    {
-        //_eventManager.OnPlayerSeen += SetPlayerSeen;
-        switch (alertStatus)
-        {
-            case AlertStatus.None:
-
-                break;
-            case AlertStatus.Alert:
-
-                //_eventManager.OnDestinationRequestStatus += SetDestinationRequestStatus; //Delete
-                //_initialSeenCheck = true; // Delete
-                //_queuedForNewFlankPoint = false;
-                _newStateRequestAlreadySent = false;
-                _eventManager.SpeedChanged(0f, 10f);
-                //SetPlayerSeen(_canSeePlayer);
-
-
-                CoroutineRunner.Instance.StartCoroutine(DelayJobStart());
-                if(_coroutine == null)
-                {
-                    _isStationary = true;
-                    _coroutine = CoroutineRunner.Instance.StartCoroutine(PlayervisibilityRoutine());
-                }
-              
-                _eventManager.RotateTowardsTarget(true);
-
-                break;
-            default:
-                _eventManager.DestinationUpdated(_owner.transform.position);
-                _eventManager.SpeedChanged(0f, 10f);
-                break;
-        }
-        _owner.GetComponent<NavMeshAgent>().updateRotation = false;
-       
-    }*/
 
     public override void EnterState()
     {
@@ -85,9 +26,6 @@ public class StationaryState : EnemyState
                 break;
             case AlertStatus.Alert:
 
-                //_eventManager.OnDestinationRequestStatus += SetDestinationRequestStatus; //Delete
-                //_initialSeenCheck = true; // Delete
-                //_queuedForNewFlankPoint = false;
                 _newStateRequestAlreadySent = false;
                 _eventManager.SpeedChanged(0f, 10f);
                 //SetPlayerSeen(_canSeePlayer);
@@ -97,7 +35,7 @@ public class StationaryState : EnemyState
                 if (_coroutine == null)
                 {
                     _isStationary = true;
-                    _coroutine = CoroutineRunner.Instance.StartCoroutine(PlayervisibilityRoutine());
+                    _coroutine = CoroutineRunner.Instance.StartCoroutine(PlayerVisibilityRoutine());
                 }
 
                 _eventManager.RotateTowardsTarget(true);
@@ -108,15 +46,13 @@ public class StationaryState : EnemyState
                 _eventManager.SpeedChanged(0f, 10f);
                 break;
         }
-        //_owner.GetComponent<NavMeshAgent>().updateRotation = false;
-
+      
     }
 
     private IEnumerator DelayJobStart()
     {
         yield return new WaitForSeconds(0.5f);
-        //_isInState = true;
-        //SetPlayerSeen(_canSeePlayer);
+       
         float bufferMultiplier = Random.Range(1.2f, 1.45f);
         _agentId = StationaryChaseManagerJob.Instance.RegisterAgent(LineOfSightUtility.GetClosestPointOnNavMesh(_owner.transform.position), bufferMultiplier, this);
        
@@ -124,66 +60,8 @@ public class StationaryState : EnemyState
 
    
 
-    private IEnumerator AttemptFlankRoutine()
-    {
-        GetStepsToTry();
-
-        foreach (int step in _stepsToTry)
-        {
-
-            _newPoints = _gridManager.GetCandidatePointsAtStep(step);
-
-            if (_newPoints.Count == 0) { continue; }
-
-            _newPoints = _newPoints.OrderBy(p => Random.value).ToList();
-
-            foreach (var point in _newPoints)
-            {
-
-                bool resultReceived = false;
-                bool isValid = false;
-                _flankePlayerPathRequest.start = LineOfSightUtility.GetClosestPointOnNavMesh(_owner.transform.position);
-                _flankePlayerPathRequest.end = LineOfSightUtility.GetClosestPointOnNavMesh(point);
-                _flankePlayerPathRequest.path = _path;
-                _flankePlayerPathRequest.externalCallback = (success, point) =>
-                {
-                    isValid = success;
-                    resultReceived = true;
-                };
-
-                _eventManager.PathRequested(_flankePlayerPathRequest);
-
-                yield return new WaitUntil(() => resultReceived);
-
-                if (!isValid) continue; 
-
-                if (_newStateRequestAlreadySent)
-                {
-
-                    yield break;
-                }
-                else
-                {
-                    if (!_canSeePlayer)
-                    {
-
-                        _newStateRequestAlreadySent = true;
-                        _eventManager.RequestChasingState();
-                        //_eventManager.RequestTargetPursuit(DestinationType.Flank);
-                        yield break;
-                    }
-                }
-
-            }
-
-        }
-        _stepsToTry.Clear();
-        _coroutine = null;
-
-
-    }
-
-    private IEnumerator PlayervisibilityRoutine()
+   
+    private IEnumerator PlayerVisibilityRoutine()
     {
         while (_isStationary)
         {
@@ -227,22 +105,6 @@ public class StationaryState : EnemyState
        
     }
 
-    private void GetStepsToTry()
-    {
-        int randomIndex = Random.Range(4, _maxSteps + 1);
-        int temp = randomIndex;
-        while (temp >= 4)
-        {
-            _stepsToTry.Add(temp);
-            temp--;
-        }
-        temp = randomIndex + 1;
-        while (temp <= _maxSteps)
-        {
-            _stepsToTry.Add(temp);
-            temp++;
-        }
-    }
 
     /// <summary>
     /// Each time a StationaryChaseManagerJob job runs, it calls this function, passing the result of the distance from the player calculation
@@ -287,80 +149,14 @@ public class StationaryState : EnemyState
 
     }
 
-    /// <summary>
-    /// Each time a StationaryChaseManagerJob job runs, it calls this function, passing the result of the distance from the player calculation
-    /// and the players current position.
-    /// If true is passed, a path check is done to determine if the player is reachable.
-    /// </summary>
-    /// <param name="canChase"> passes true if the distance between agent and player is greater than distance on entry * bufferMultiplier </param>
-    /// <param name="targetPosition"></param>
-   /* public override void SetChaseEligibility(bool canChase, Vector3 targetPosition)
-    {
-        if (!_isInState) { return; }
-
-        base.SetChaseEligibility(canChase, targetPosition);
-
-        if (canChase)
-        {
-           
-            if (!_queuedForNewFlankPoint)
-            {
-                _queuedForNewFlankPoint = true;
-                _chasePlayerPathRequest.path = _path;
-                _chasePlayerPathRequest.start = LineOfSightUtility.GetClosestPointOnNavMesh(_owner.transform.position);
-                _chasePlayerPathRequest.end = LineOfSightUtility.GetClosestPointOnNavMesh(targetPosition);
-                _eventManager.PathRequested(_chasePlayerPathRequest);
-
-                _chasePlayerPathRequest.externalCallback = (success) =>
-                {
-                    _shouldReChasePlayer = success;
-                    _queuedForNewFlankPoint = false;
-                };
-
-                if (_shouldReChasePlayer && !_newDestinationAlreadyApplied)
-                {
-                    _newDestinationAlreadyApplied = true;
-                    _eventManager.RequestChasingState();
-                }
-        
-            }
-
-        }
-
-    }*/
-
-    protected override void SetPlayerSeen(bool seen)
-    {
-        /*if (!_isInState) { return; }
-
-        if(_canSeePlayer == seen && !_initialSeenCheck)
-        {
-            _initialSeenCheck = false;
-            return;
-        }*/
-
-        base.SetPlayerSeen(seen);
-
-       /* if (!_canSeePlayer && _coroutine == null)
-        {
-            _coroutine = CoroutineRunner.Instance.StartCoroutine(AttemptFlankRoutine());
-        }*/
-        
-    }
+  
+  
 
    
     public override void ExitState()
     {
-        _eventManager.OnDestinationRequestStatus -= SetDestinationRequestStatus;
-        //_eventManager.OnPlayerSeen -= SetPlayerSeen;
-        //_initialSeenCheck = true;
-        //_isInState = false;
-
-        /*if (_stepsToTry.Count > 0)
-        {
-            _stepsToTry.Clear();
-        }*/
-       
+        //_eventManager.OnDestinationRequestStatus -= SetDestinationRequestStatus;
+      
         _eventManager.RotateTowardsTarget(false);
         
        
@@ -373,15 +169,14 @@ public class StationaryState : EnemyState
         }
 
         StationaryChaseManagerJob.Instance.UnregisterAgent(_agentId);
-        //GameManager.OnPlayerMoved -= SetPlayerMoved;
+     
     }
 
     public override void OnStateDestroyed()
     {
         base.OnStateDestroyed();
-        _path = null;
-        _stepsToTry.Clear();
-        _stepsToTry = null;
+       
+     
     }
 
    

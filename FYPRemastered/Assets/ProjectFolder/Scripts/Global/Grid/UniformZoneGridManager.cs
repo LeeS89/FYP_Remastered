@@ -14,6 +14,8 @@ using TMPro;
 
 public class UniformZoneGridManager : MonoBehaviour
 {
+  
+
     [Header("Cube Placement")]
     public float cellSize = 1f;
     public float sampleRadius = 2f;

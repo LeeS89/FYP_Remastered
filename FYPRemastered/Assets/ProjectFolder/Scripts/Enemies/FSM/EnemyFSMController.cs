@@ -90,7 +90,7 @@ public partial class EnemyFSMController : ComponentEvents
         _enemyEventManager.OnOwnerDied += OnDeath;
         _enemyEventManager.OnAgentDeathComplete += ToggleGameObject;
         _enemyEventManager.OnAgentRespawn += ToggleGameObject;
-        _enemyEventManager.OnDestinationUpdated += UpdateAgentDestination;
+        //_enemyEventManager.OnDestinationUpdated += UpdateAgentDestination;
         _enemyEventManager.OnDestinationReached += CarveOnDestinationReached;
         _enemyEventManager.OnRotateTowardsTarget += ToggleRotationToTarget;
         _enemyEventManager.OnSpeedChanged += UpdateAnimatorSpeedValues;
@@ -107,7 +107,7 @@ public partial class EnemyFSMController : ComponentEvents
     {
         _enemyEventManager.OnRequestChasingState -= ChasingStateRequested;
         _enemyEventManager.OnRequestStationaryState -= StationaryStateRequested;
-        _enemyEventManager.OnDestinationUpdated -= UpdateAgentDestination;
+        //_enemyEventManager.OnDestinationUpdated -= UpdateAgentDestination;
 
         _enemyEventManager.OnRequestTargetPursuit -= PursuitTargetRequested;
         _enemyEventManager.OnDestinationReached -= CarveOnDestinationReached;
@@ -126,7 +126,7 @@ public partial class EnemyFSMController : ComponentEvents
     {
         GameManager.OnPlayerDied += OnPlayerDied;
         GameManager.OnPlayerRespawn += OnPlayerRespawned;
-        //GameManager._onPlayerMovedinternal += EnemyState.SetPlayerMoved;
+        
         GameManager.OnPlayerMoved += EnemyState.SetPlayerMoved;
         BaseSceneManager._instance.OnSceneStarted += OnSceneStarted;
         BaseSceneManager._instance.OnSceneEnded += OnSceneComplete;
@@ -137,7 +137,7 @@ public partial class EnemyFSMController : ComponentEvents
         GameManager.OnPlayerDied -= OnPlayerDied;
         GameManager.OnPlayerRespawn -= OnPlayerRespawned;
         GameManager.OnPlayerMoved -= EnemyState.SetPlayerMoved;
-        //GameManager._onPlayerMovedinternal -= EnemyState.SetPlayerMoved;
+       
         BaseSceneManager._instance.OnSceneStarted -= OnSceneStarted;
         BaseSceneManager._instance.OnSceneEnded -= OnSceneComplete;
     }
@@ -219,11 +219,7 @@ public partial class EnemyFSMController : ComponentEvents
 
     protected override void OnSceneStarted()
     {
-        //Invoke(nameof(InitializeWeapon), 1f);
-        //Begin Patrolling here instead
-        ChangeState(_patrol);
-        //Invoke(nameof(SetupFSM), 1f);
-     
+        PatrolStateRequested();
     }
 
     protected override void OnSceneComplete()

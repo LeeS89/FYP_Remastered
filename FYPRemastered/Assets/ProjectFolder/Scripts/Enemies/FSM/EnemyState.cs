@@ -8,7 +8,7 @@ public abstract class EnemyState
     //protected NavMeshAgent _agent;
     protected Coroutine _coroutine;
     protected EnemyEventManager _eventManager;
-    protected NavMeshPath _path;
+ 
     protected GameObject _owner;
     protected bool _destinationReached = false;
     protected static bool _playerHasMoved = false;
@@ -20,7 +20,7 @@ public abstract class EnemyState
     protected bool _shouldReChasePlayer = false;
 
     protected bool _newDestinationPending = false;
-   // protected WaitUntil _waitUntilDestinationRequestComplete;
+ 
     protected bool _destinationRequestComplete = false;
     protected bool _destinationRequestSuccess = false;
 
@@ -35,15 +35,11 @@ public abstract class EnemyState
         _waitUntilDestinationApplied = new WaitUntil(() => _destinationApplied);
         _alertStatus = AlertStatus.None;
         _eventManager.OnAlertStatusChanged += UpdateAlertStatus;
-        _eventManager.OnDestinationApplied += SetdestinationApplied;
-        //_waitUntilDestinationRequestComplete = new WaitUntil(() => _destinationRequestComplete);
-
+        _eventManager.OnDestinationApplied += SetDestinationApplied;
+        _eventManager.OnDestinationReached += SetDestinationReached;
+      
     }
 
-    public EnemyState(EnemyEventManager eventManager, NavMeshPath path, GameObject owner) : this(eventManager, owner)
-    {
-        _path = path;
-    }
 
     protected void UpdateAlertStatus(AlertStatus alertStatus)
     {
@@ -52,22 +48,18 @@ public abstract class EnemyState
         _alertStatus = alertStatus;
     }
 
-    protected void SetdestinationApplied()
+    protected void SetDestinationApplied()
     {
         _destinationApplied = true;
     }
    
-    protected void SetNewDestinationPending(bool pending)
-    {
-        _newDestinationPending = pending;
-    }
-
-    protected void SetDestinationRequestStatus(bool complete, bool success)
+  
+    /*protected void SetDestinationRequestStatus(bool complete, bool success)
     {
         _destinationRequestSuccess = success;
         _destinationRequestComplete = complete;
         //_eventManager.OnDestinationRequestStatus?.Invoke(success, complete);
-    }
+    }*/
 
     protected bool CheckDestinationReached() { /*Debug.LogError("Checking Reached");*/ return _destinationReached; }
 
@@ -95,9 +87,10 @@ public abstract class EnemyState
 
     public virtual void OnStateDestroyed()
     {
+        _eventManager.OnDestinationReached -= SetDestinationReached;
         _eventManager.OnPlayerSeen -= SetPlayerSeen;
         _eventManager.OnAlertStatusChanged -= UpdateAlertStatus;
-        _eventManager.OnDestinationApplied -= SetdestinationApplied;
+        _eventManager.OnDestinationApplied -= SetDestinationApplied;
         _eventManager = null;
         ExitState();
     }

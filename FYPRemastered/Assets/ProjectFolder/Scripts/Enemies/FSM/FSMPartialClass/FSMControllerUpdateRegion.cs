@@ -149,7 +149,7 @@ public partial class EnemyFSMController : ComponentEvents
         {
             _agent.ResetPath();
         }
-        _enemyEventManager.DestinationReached(true);
+        //_enemyEventManager.DestinationReached(true);
 
 
         _destinationCheckAction = null;
