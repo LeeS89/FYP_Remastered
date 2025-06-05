@@ -1,7 +1,9 @@
 
+using System.Threading.Tasks;
+
 public interface ISceneManager
 {
-    void SetupScene();
+    Task SetupScene();
 
    
 }

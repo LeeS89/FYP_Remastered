@@ -152,7 +152,7 @@ public partial class EnemyFSMController : ComponentEvents
     private void AttemptPatrol()
     {
        // PatrolStateRequested();
-
+       Debug.LogError("Attempting Patrol Destination Request");
         _destinationData.destinationType = DestinationType.Patrol;
         _destinationData.start = LineOfSightUtility.GetClosestPointOnNavMesh(_agent.transform.position);
         //_destinationData.end = LineOfSightUtility.GetClosestPointOnNavMesh(position.Value);
@@ -160,6 +160,7 @@ public partial class EnemyFSMController : ComponentEvents
 
         _destinationData.externalCallback = (success, point) =>
         {
+            Debug.LogError("Patrol Destination Request Result: " + success + " Point: " + point);
             DestinationRequestResult(success, point, AlertStatus.None);
         };
         _destinationManager.RequestNewDestination(_destinationData);

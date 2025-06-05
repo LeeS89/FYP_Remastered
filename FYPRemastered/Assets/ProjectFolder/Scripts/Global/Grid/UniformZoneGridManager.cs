@@ -257,6 +257,12 @@ public class UniformZoneGridManager : MonoBehaviour
         GenerateSamplePointData();*//*
     }*/
 
+    public void SetupGrid(SamplePointDataSO soData) // Future Update => Called from Scene manager after loading the SO through addressable
+    {
+        _samplePointDataSO = soData;
+
+        DeserializeSavedPoints();
+    }
     
 
     public SamplePointDataSO InitializeGrid()

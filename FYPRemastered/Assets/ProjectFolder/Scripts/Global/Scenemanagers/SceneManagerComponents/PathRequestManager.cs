@@ -14,12 +14,14 @@ public class PathRequestManager
     {
         int processed = 0;
 
+        
+
         while (_pathRequests.Count > 0 && processed < _maxConcurrentRequests)
         {
             var request = _pathRequests.Dequeue();
 
             bool success = HasClearPathToTarget(request.start, request.end, request.path);
-
+            Debug.LogError($"Path request from {request.start} to {request.end} success: {success}, please");
             //request.externalCallback?.Invoke(success);
             request.internalCallback?.Invoke(success);
 

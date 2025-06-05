@@ -44,7 +44,7 @@ public class DestinationManager
 
     public void LoadWaypointData(WaypointData wpData)
     {
-       
+        Debug.LogError($"Loading Waypoint Data: {wpData._waypointPositions.Count} waypoints.");
         _waypointPairs.Clear();
 
         for (int i = 0; i < wpData._waypointPositions.Count; i++)
@@ -52,7 +52,6 @@ public class DestinationManager
             _waypointPairs.Add(new WaypointPair(wpData._waypointPositions[i], wpData._waypointForwards[i]));
         }
 
-       
     }
 
     private void ShuffleWaypointPairs()
@@ -125,6 +124,8 @@ public class DestinationManager
     {
         var candidates = candidatePointProvider.Invoke();
 
+        //Debug.LogError($"Attempting destination with {candidates.Count} candidates.");
+
         foreach (var point in candidates)
         {
             bool resultReceived = false;
@@ -136,6 +137,7 @@ public class DestinationManager
             {
                 isValid = success;
                 resultReceived = true;
+               // Debug.LogError($"Destination request result: {success}, at callback");
             };
 
             _eventManager.PathRequested(data);

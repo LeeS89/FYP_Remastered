@@ -15,8 +15,13 @@ MonoBehaviour:
   m_GroupName: Default Local Group
   m_GUID: ab9c3870c9792ed4cb281eb3d2b875d0
   m_SerializeEntries:
-  - m_GUID: 4dee39e88433d0d4aa236aafefbe0151
-    m_Address: SamplePointDataSO
+  - m_GUID: f25ee36fa90530643a56d63e9a3467ca
+    m_Address: BasicBullet
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f33db7fc758f5944180365f8ef5eb197
+    m_Address: BasicHit
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

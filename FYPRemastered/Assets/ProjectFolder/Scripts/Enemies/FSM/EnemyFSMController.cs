@@ -219,6 +219,7 @@ public partial class EnemyFSMController : ComponentEvents
 
     protected override void OnSceneStarted()
     {
+        _sceneStarted = true;
         PatrolStateRequested();
     }
 

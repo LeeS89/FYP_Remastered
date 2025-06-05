@@ -20,6 +20,7 @@ public class ClosestPointToPlayerJob// : MonoBehaviour
 
     public void AddSamplePointData(SamplePointDataSO sampleData)
     {
+        
         _samplePositions = new NativeList<Vector3>(5000, Allocator.Persistent);
         
         foreach (var pos in sampleData.savedPoints)

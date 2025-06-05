@@ -42,6 +42,8 @@ public class PatrolState : EnemyState
 
     IEnumerator TraverseWayPointsNew()
     {
+
+        //yield return new WaitForSeconds(3f);
        
         while (_isPatrolling)
         {
@@ -49,7 +51,7 @@ public class PatrolState : EnemyState
             //SetDestinationReached(false);
          
             _eventManager.RequestTargetPursuit(DestinationType.Patrol);
-        
+            Debug.LogError("Patrol State: Requesting Patrol Destination");
             yield return _waitUntilDestinationApplied;
             _destinationApplied = false;
 

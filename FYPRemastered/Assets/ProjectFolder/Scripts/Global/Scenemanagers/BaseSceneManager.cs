@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
@@ -60,8 +61,8 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
     #endregion
 
     #region Abstract Functions
-    public abstract void SetupScene();
-    protected abstract void LoadSceneResources();
+    public abstract Task SetupScene();
+    protected abstract Task LoadSceneResources();
 
     protected abstract void UnloadSceneResources();
     #endregion

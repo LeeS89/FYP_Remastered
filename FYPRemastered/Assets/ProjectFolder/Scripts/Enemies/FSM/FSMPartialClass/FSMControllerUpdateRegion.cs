@@ -6,6 +6,8 @@ public partial class EnemyFSMController : ComponentEvents
 {
     public bool testRespawn = false;
     public bool _testWaypoint = false;
+
+    public bool _sceneStarted = false;
     #region Updates
     void Update()
     {
@@ -34,11 +36,12 @@ public partial class EnemyFSMController : ComponentEvents
         
     }
 
+    public bool _testEnterPatrol = false;
     public bool testSeeView = false;
     
     private void LateUpdate()
     {
-
+        //if (!_sceneStarted) { return; }
 
         if (testSeeView)
         {
@@ -49,7 +52,11 @@ public partial class EnemyFSMController : ComponentEvents
             //testSeeView = false;
         }
 
-
+       /* if (!_testEnterPatrol)
+        {
+            PatrolStateRequested();
+            _testEnterPatrol = true;
+        }*/
         /*if (!testSeeView)
         {
             UpdateFieldOfViewCheckFrequency();
@@ -115,7 +122,7 @@ public partial class EnemyFSMController : ComponentEvents
         {
             if (_agent.pathStatus != NavMeshPathStatus.PathComplete)
             {
-                _enemyEventManager.PathInvalid();
+                //_enemyEventManager.PathInvalid();
                 //Debug.LogError("Path is invalid, resetting path.");
             }
         }
