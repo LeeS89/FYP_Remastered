@@ -30,7 +30,7 @@ public class PatrolState : EnemyState
     public override void EnterState(/*Vector3? destination = null, AlertStatus alertStatus = AlertStatus.None, float _ = 0*/)
     {
         _eventManager.OnRotateAtPatrolPoint += SetPatrolPointForwardVector;
-      
+        //CoroutineRunner.Instance.StartCoroutine(TestDelay()); // Start the coroutine to test the delay functionality
         if (_coroutine == null)
         {
             _isPatrolling = true;
@@ -38,6 +38,16 @@ public class PatrolState : EnemyState
         }
     }
 
+   /* private IEnumerator TestDelay()
+    {
+        yield return new WaitForSeconds(1f);
+
+        if (_coroutine == null)
+        {
+            _isPatrolling = true;
+            _coroutine = CoroutineRunner.Instance.StartCoroutine(TraverseWayPointsNew());
+        }
+    }*/
   
 
     IEnumerator TraverseWayPointsNew()
@@ -47,11 +57,12 @@ public class PatrolState : EnemyState
        
         while (_isPatrolling)
         {
+            //yield return _waitUntilDestinationReached;
             _eventManager.DestinationReached(false);
             //SetDestinationReached(false);
          
             _eventManager.RequestTargetPursuit(DestinationType.Patrol);
-            Debug.LogError("Patrol State: Requesting Patrol Destination");
+           // Debug.LogError("Patrol State: Requesting Patrol Destination");
             yield return _waitUntilDestinationApplied;
             _destinationApplied = false;
 

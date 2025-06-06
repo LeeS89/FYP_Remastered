@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
@@ -13,7 +14,7 @@ public partial class EnemyFSMController : ComponentEvents
     private void SetupFSM()
     {
         _gridManager = MoonSceneManager._instance.GetGridManager();
-
+         _destinationManager = new DestinationManager(_enemyEventManager, _gridManager, _maxFlankingSteps);
         _destinationData = new DestinationRequestData();
         _path = new NavMeshPath();
         _fovCheckFrequency = _patrolFOVCheckFrequency;
@@ -24,7 +25,7 @@ public partial class EnemyFSMController : ComponentEvents
         _chasing = new ChasingState(_enemyEventManager, _owningGameObject, _walkSpeed, _sprintSpeed);
         _stationary = new StationaryState(_enemyEventManager, _owningGameObject);
         _deathState = new DeathState(_enemyEventManager, _owningGameObject);
-        _destinationManager = new DestinationManager(_enemyEventManager, _gridManager, _maxFlankingSteps);
+       
 
         
 
@@ -152,7 +153,7 @@ public partial class EnemyFSMController : ComponentEvents
     private void AttemptPatrol()
     {
        // PatrolStateRequested();
-       Debug.LogError("Attempting Patrol Destination Request");
+       //Debug.LogError("Attempting Patrol Destination Request");
         _destinationData.destinationType = DestinationType.Patrol;
         _destinationData.start = LineOfSightUtility.GetClosestPointOnNavMesh(_agent.transform.position);
         //_destinationData.end = LineOfSightUtility.GetClosestPointOnNavMesh(position.Value);
@@ -160,8 +161,9 @@ public partial class EnemyFSMController : ComponentEvents
 
         _destinationData.externalCallback = (success, point) =>
         {
-            Debug.LogError("Patrol Destination Request Result: " + success + " Point: " + point);
+            //Debug.LogError("Patrol Destination Request Result: " + success + " Point: " + point);
             DestinationRequestResult(success, point, AlertStatus.None);
+            //StartCoroutine(DestinationRequestResult(success, point, AlertStatus.None));
         };
         _destinationManager.RequestNewDestination(_destinationData);
     }
@@ -180,6 +182,7 @@ public partial class EnemyFSMController : ComponentEvents
         {
             int _randomStoppingDistance = Random.Range(4, 11);
             DestinationRequestResult(success, point, AlertStatus.Chasing, _randomStoppingDistance);
+            //StartCoroutine(DestinationRequestResult(success, point, AlertStatus.Chasing, _randomStoppingDistance));
         };
         _destinationManager.RequestNewDestination(_destinationData);
 
@@ -201,6 +204,7 @@ public partial class EnemyFSMController : ComponentEvents
         _destinationData.externalCallback = (success, point) =>
         {
             DestinationRequestResult(success, point, AlertStatus.Flanking);
+            //StartCoroutine(DestinationRequestResult(success, point, AlertStatus.Flanking));
         };
         _destinationManager.RequestNewDestination(_destinationData);
         // If request fails => Request Player destination
@@ -212,6 +216,7 @@ public partial class EnemyFSMController : ComponentEvents
     {
         if (success)
         {
+          
             _destinationData.carvingCallback = () =>
             {
                 if (_obstacle.enabled)
@@ -233,7 +238,26 @@ public partial class EnemyFSMController : ComponentEvents
                 _enemyEventManager.DestinationApplied();
             };
             _destinationManager.StartCarvingRoutine(_destinationData);
+            
+           /* yield return new WaitUntil(() => _agent.enabled);
+            _agent.SetDestination(destination);
+            _enemyEventManager.DestinationApplied();*/
         }
+    }
+
+
+    private IEnumerator SetNewDestination(Vector3 destination)
+    {
+        if (_obstacle.enabled)
+        {
+            yield return new WaitUntil(() => !_obstacle.enabled);
+        }
+        if (!_agent.enabled)
+        {
+            ToggleAgent(true);
+        }
+
+        _agent.SetDestination(destination);
     }
 
     private bool CheckIfDestinationIsReached()

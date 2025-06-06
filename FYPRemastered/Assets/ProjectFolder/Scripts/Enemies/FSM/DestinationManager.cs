@@ -210,7 +210,8 @@ public class DestinationManager
     {
         data.carvingCallback?.Invoke();
 
-        yield return new WaitForSeconds(0.15f);
+        yield return null;
+        //yield return new WaitForSeconds(0.15f);
 
         data.agentActiveCallback?.Invoke();
         

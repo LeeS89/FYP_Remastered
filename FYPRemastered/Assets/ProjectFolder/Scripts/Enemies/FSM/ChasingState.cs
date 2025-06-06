@@ -18,6 +18,7 @@ public class ChasingState : EnemyState
     {
         if (_coroutine == null)
         {
+            _destinationApplied = false;
             _coroutine = CoroutineRunner.Instance.StartCoroutine(ChasePlayerRoutiningNew());
         }
     }

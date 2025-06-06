@@ -146,9 +146,9 @@ public class MoonSceneManager : BaseSceneManager
             };*/
             //_normalHitPrefab = Resources.Load<ParticleSystem>("ParticlePoolPrefabs/BasicHit");
             _deflectAudioPrefab = Resources.Load<AudioSource>("AudioPoolPrefabs/DeflectAudio");
-            
-            //await Task.Delay(1000); // Wait for resources to load
 
+            //await Task.Delay(1000); // Wait for resources to load
+            _pathRequestManager = new PathRequestManager();
             _zoneAgentRegistry = new ZoneAgentRegistry();
             LoadWaypoints();
 
@@ -164,7 +164,7 @@ public class MoonSceneManager : BaseSceneManager
             _closestPointjob = new ClosestPointToPlayerJob();
             _closestPointjob.AddSamplePointData(_gridManager.InitializeGrid());
 
-            _pathRequestManager = new PathRequestManager();
+           /* _pathRequestManager = new PathRequestManager();*/
         }
         catch (Exception e)
         {
