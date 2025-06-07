@@ -104,7 +104,7 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
         {
             if (!GameManager.Instance.PlayerHasMoved)
             {
-                GameManager.Instance.PlayerHasMoved = true;  // Replace with your actual method
+                GameManager.Instance.PlayerHasMoved = true;  // Replace with actual method
             }
         }
         else
@@ -112,6 +112,7 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
             if (GameManager.Instance.PlayerHasMoved)
             {
                 GameManager.Instance.PlayerHasMoved = false;
+                MoonSceneManager._instance.TestRun();
             }
         }
 

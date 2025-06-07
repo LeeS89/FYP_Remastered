@@ -299,6 +299,20 @@ public class UniformZoneGridManager : MonoBehaviour
 
     public Transform nearestPointTransform;
 
+
+    private void RefreshManualSamplePointsList()
+    {
+        if(manualSamplePoints.Count == 0) { return; }
+
+        for (int i = manualSamplePoints.Count - 1; i >= 0; i--)
+        {
+            if (manualSamplePoints[i] == null || manualSamplePoints[i].gameObject == null)
+            {
+                manualSamplePoints.RemoveAt(i);
+            }
+        }
+    }
+
     /// <summary>
     /// Generates and processes sample point data based on the positions of manually defined points.
     /// </summary>
@@ -311,6 +325,8 @@ public class UniformZoneGridManager : MonoBehaviour
     [ContextMenu("Generate and save data")]
     public void GenerateSamplePointData()
     {
+        RefreshManualSamplePointsList();
+
         savedPoints.Clear();
 
         // Store each cube's position
