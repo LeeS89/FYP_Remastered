@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class ChasingState : EnemyState
@@ -66,7 +67,7 @@ public class ChasingState : EnemyState
 
     }
 
- 
+    
 
   
     public override void ExitState()

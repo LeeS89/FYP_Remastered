@@ -14,7 +14,7 @@ public class MoonSceneManager : BaseSceneManager
     [SerializeField] private WaypointBlockData _waypointBlockData;
     [SerializeField] private WaypointManager _waypointManager;
     
-    public Dictionary<GameObject, float> stats = new Dictionary<GameObject, float>();
+   // public Dictionary<GameObject, float> stats = new Dictionary<GameObject, float>();
 
     // Test Variables
     public EnemyFSMController _enemy;
@@ -61,8 +61,12 @@ public class MoonSceneManager : BaseSceneManager
         
     }
 
+    public SceneResourceManager _resources;
+
     public override async Task SetupScene()
     {
+        //_resources = new SceneResourceManager(new WaypointResources());
+
         await LoadSceneResources();
 
         
@@ -70,41 +74,11 @@ public class MoonSceneManager : BaseSceneManager
         LoadActiveSceneEventManagers();
         
         AssignPools();
-        // await Task.Delay(3000);
-        // await Task.CompletedTask;
-        await WaitUntilNavMeshReady();
-        Debug.LogError("Nav mesh ready");
-       // await Task.Delay(10000); // Wait for NavMesh to be ready before proceeding
-        //SceneStarted();
-        FireSceneStarted();
-
-    }
-
-
-    private void FireSceneStarted()
-    {
+      
         SceneStarted();
+      
     }
 
-    private async Task WaitUntilNavMeshReady()
-    {
-        await Task.Yield(); // Wait 1 frame (optional but good first step)
-
-        // Wait until at least 1 frame passes and NavMesh is ready
-        while (!NavMeshReady())
-        {
-            await Task.Yield(); // Check again on next frame
-        }
-    }
-
-    private bool NavMeshReady()
-    {
-        Vector3 Playerpos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
-       
-        // Option 1: Check if the sample position returns valid result
-        NavMeshHit hit;
-        return NavMesh.SamplePosition(Playerpos, out hit, 2f, NavMesh.AllAreas);
-    }
 
 
 
@@ -151,6 +125,8 @@ public class MoonSceneManager : BaseSceneManager
             _pathRequestManager = new PathRequestManager();
             _zoneAgentRegistry = new ZoneAgentRegistry();
             LoadWaypoints();
+
+            //await _resources.LoadResourcesAsync(); // Load Waypoint Resources
 
             _gridManager = FindFirstObjectByType<UniformZoneGridManager>();
 
@@ -236,11 +212,11 @@ public class MoonSceneManager : BaseSceneManager
         if (_waypointManager == null)
         {
             _waypointManager = FindFirstObjectByType<WaypointManager>();
-            Debug.LogError("Finding Waypoint manager");
+           
         }
         if (_waypointManager != null)
         {
-            Debug.LogError("Waypoint manager found");
+           
             _waypointBlockData = _waypointManager.RetreiveWaypointData();
         }
 
@@ -251,6 +227,7 @@ public class MoonSceneManager : BaseSceneManager
                 blockData._inUse = false;
             }
         }
+        
     }
 
     public override BlockData RequestWaypointBlock()

@@ -17,6 +17,12 @@ public class DestinationManager
     private EnemyEventManager _eventManager;
    
     private List<WaypointPair> _waypointPairs = new();
+    private WaypointPair? currentWaypointPair = null;
+
+    private Coroutine _coroutine;// => For a later optimization, to prevent possible in progress coroutines from continuing
+    private WaitUntil _waitUntilResultReceived;
+    private bool _resultReceived = false;
+    private bool _isValid = false;
 
 
     public DestinationManager(EnemyEventManager eventManager, UniformZoneGridManager gridManager, int maxSteps)
@@ -27,6 +33,7 @@ public class DestinationManager
         _maxSteps = maxSteps;
         _stepsToTry = new List<int>();
         _newPoints = new List<Vector3>();
+        _waitUntilResultReceived = new WaitUntil(() => _resultReceived);
     }
 
     private struct WaypointPair
@@ -44,7 +51,7 @@ public class DestinationManager
 
     public void LoadWaypointData(WaypointData wpData)
     {
-        Debug.LogError($"Loading Waypoint Data: {wpData._waypointPositions.Count} waypoints.");
+        //Debug.LogError($"Loading Waypoint Data: {wpData._waypointPositions.Count} waypoints.");
         _waypointPairs.Clear();
 
         for (int i = 0; i < wpData._waypointPositions.Count; i++)
@@ -103,7 +110,7 @@ public class DestinationManager
 
     private List<Vector3> GetFlankPoints()
     {
-        GetStepsToTry(); // modifies _stepsToTry
+        GetStepsToTry(); 
         List<Vector3> points = new List<Vector3>();
 
         foreach (int step in _stepsToTry)
@@ -124,32 +131,33 @@ public class DestinationManager
     {
         var candidates = candidatePointProvider.Invoke();
 
-        //Debug.LogError($"Attempting destination with {candidates.Count} candidates.");
-
+       
         foreach (var point in candidates)
         {
-            bool resultReceived = false;
-            bool isValid = false;
+            _resultReceived = false;
+            _isValid = false;
 
             data.end = LineOfSightUtility.GetClosestPointOnNavMesh(point);
 
             data.internalCallback = (success) =>
             {
-                isValid = success;
-                resultReceived = true;
-               // Debug.LogError($"Destination request result: {success}, at callback");
+                _isValid = success;
+                _resultReceived = true;
+               
             };
 
             _eventManager.PathRequested(data);
 
-            yield return new WaitUntil(() => resultReceived);
+            yield return _waitUntilResultReceived;
 
-            if (!isValid) continue;
+            if (!_isValid) continue;
 
             if(data.destinationType == DestinationType.Patrol)
             {
                 var match = _waypointPairs.FirstOrDefault(p => p.position == point);
                 _eventManager.RotateAtPatrolPoint(match.forward);
+
+                currentWaypointPair = match;
             }
 
             data.externalCallback?.Invoke(true, point);
@@ -162,9 +170,25 @@ public class DestinationManager
 
     private void RequestPatrolPointDestination(DestinationRequestData destinationData)
     {
-        ShuffleWaypointPairs(); 
+        if (currentWaypointPair.HasValue)
+        {
+            // If there's a previously selected waypoint, remove it, shuffle the list, and then add it back at the end
+            _waypointPairs.Remove(currentWaypointPair.Value);
+            ShuffleWaypointPairs();  // Shuffle the remaining list
+            _waypointPairs.Add(currentWaypointPair.Value);  // Add the selected waypoint to the end
+        }
+        else
+        {
+            ShuffleWaypointPairs();  // Shuffle if no waypoint has been selected yet
+        }
+
         CoroutineRunner.Instance.StartCoroutine(AttemptDestinationRoutine(destinationData, GetWaypointPositions));
     }
+   /* private void RequestPatrolPointDestination(DestinationRequestData destinationData)
+    {
+        ShuffleWaypointPairs(); 
+        CoroutineRunner.Instance.StartCoroutine(AttemptDestinationRoutine(destinationData, GetWaypointPositions));
+    }*/
 
     private void RequestPlayerDestination(DestinationRequestData destinationData)
     {
@@ -219,6 +243,7 @@ public class DestinationManager
 
     public void OnInstanceDestroyed()
     {
+        
         _gridManager = null;
         
         _eventManager = null;
@@ -227,5 +252,6 @@ public class DestinationManager
        
         _stepsToTry = null;
         _newPoints = null;
+        _waitUntilResultReceived = null;
     }
 }

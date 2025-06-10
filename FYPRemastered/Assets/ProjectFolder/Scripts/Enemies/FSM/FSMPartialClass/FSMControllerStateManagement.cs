@@ -7,12 +7,15 @@ using Random = UnityEngine.Random;
 
 public partial class EnemyFSMController : ComponentEvents
 {
+    public ResourceRequest _resourceRequest;
+
     private WaypointData _wpData;
     private DestinationRequestData _destinationData;
 
     #region FSM Management
     private void SetupFSM()
     {
+        _resourceRequest = new ResourceRequest();
         _gridManager = MoonSceneManager._instance.GetGridManager();
          _destinationManager = new DestinationManager(_enemyEventManager, _gridManager, _maxFlankingSteps);
         _destinationData = new DestinationRequestData();
@@ -49,7 +52,39 @@ public partial class EnemyFSMController : ComponentEvents
     {
 
         _blockData = BaseSceneManager._instance.RequestWaypointBlock();
+      /*  _resourceRequest.resourceType = Resourcetype.WaypointBlock;
+        _resourceRequest.waypointCallback = (blockData) =>
+        {
+            if (blockData != null)
+            {
+                _blockData = blockData;
+                SetWayPoints();
+            }
+            else
+            {
+                Debug.LogError("No valid waypoint block data found!");
+            }
+        };
 
+        SceneEventAggregator.Instance.RequestResource(_resourceRequest);*/
+
+        if (_blockData != null)
+        {
+            _blockZone = _blockData._blockZone;
+            Debug.LogError("Block Zone for enemy: " + _blockZone);
+
+            _wpData.UpdateData(_blockData._waypointPositions.ToList(), _blockData._waypointForwards.ToList());
+
+            _destinationManager.LoadWaypointData(_wpData);
+            //_enemyEventManager.WaypointsUpdated(_wpData);
+
+            BaseSceneManager._instance.RegisterAgentAndZone(this, _blockZone);
+        }
+    }
+
+    
+    private void SetWayPoints()
+    {
         if (_blockData != null)
         {
             _blockZone = _blockData._blockZone;
@@ -61,9 +96,10 @@ public partial class EnemyFSMController : ComponentEvents
             //_enemyEventManager.WaypointsUpdated(_wpData);
 
             BaseSceneManager._instance.RegisterAgentAndZone(this, _blockZone);
+
+           
         }
     }
-
 
     private void InitializeWeapon()
     {

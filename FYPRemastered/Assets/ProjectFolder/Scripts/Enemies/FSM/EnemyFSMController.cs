@@ -221,7 +221,7 @@ public partial class EnemyFSMController : ComponentEvents
     {
         _sceneStarted = true;
         PatrolStateRequested();
-        _agent.ResetPath();
+        //_agent.ResetPath();
     }
 
     protected override void OnSceneComplete()

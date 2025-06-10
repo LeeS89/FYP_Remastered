@@ -19,7 +19,12 @@ public class WaypointManager : MonoBehaviour
     [SerializeField] private WaypointBlockData _waypointBlockData;
     [SerializeField] private WaypointBlock _waypointBlock;
 
+    public static WaypointManager Instance { get; private set; }
 
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     // Create block via context menu
     [ContextMenu("Create Block")]
