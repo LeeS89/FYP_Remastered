@@ -93,9 +93,9 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
 
     public virtual void ReturnWaypointBlock(BlockData bd) { }
 
-    public virtual void RegisterAgentAndZone(EnemyFSMController agent, int zone) { }
+   // public virtual void RegisterAgentAndZone(EnemyFSMController agent, int zone) { }
     public virtual void UnregisterAgentAndZone(EnemyFSMController agent, int zone) { }
-    public virtual void AlertZoneAgents(int zone, EnemyFSMController source) { }
+    //public virtual void AlertZoneAgents(int zone, EnemyFSMController source) { }
 
     public virtual void EnqueuePathRequest(DestinationRequestData request) { }
 

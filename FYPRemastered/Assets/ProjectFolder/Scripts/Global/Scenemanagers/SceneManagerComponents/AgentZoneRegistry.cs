@@ -1,12 +1,20 @@
 using System.Collections.Generic;
 using System;
 using UnityEngine;
+using System.Threading.Tasks;
 
-public class ZoneAgentRegistry
+public class AgentZoneRegistry : SceneResources
 {
     private Dictionary<int, List<EnemyFSMController>> _zoneAgents = new();
 
-    public void Register(EnemyFSMController agent, int zone)
+    public override async Task LoadResources()
+    {
+        SceneEventAggregator.Instance.OnAgentZoneRegistered += Register;
+        SceneEventAggregator.Instance.OnAlertZoneAgents += AlertZone;
+        await Task.CompletedTask; 
+    }
+
+    private void Register(EnemyFSMController agent, int zone)
     {
         if (!_zoneAgents.ContainsKey(zone))
             _zoneAgents[zone] = new List<EnemyFSMController>();
@@ -25,7 +33,7 @@ public class ZoneAgentRegistry
             list.Remove(agent);
     }
 
-    public void AlertZone(int zone, EnemyFSMController source)
+    private void AlertZone(int zone, EnemyFSMController source)
     {
         if (!_zoneAgents.TryGetValue(zone, out var agents)) return;
 
@@ -50,4 +58,5 @@ public class ZoneAgentRegistry
     {
         _zoneAgents.Clear();
     }
+
 }

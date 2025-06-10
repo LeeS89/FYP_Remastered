@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 
+
 public class SceneEventAggregator : MonoBehaviour
 {
     public static SceneEventAggregator Instance { get; private set; }
@@ -22,6 +23,7 @@ public class SceneEventAggregator : MonoBehaviour
     public event Action OnSceneStarted;
     public event Action OnSceneEnded;
     public event Action<ResourceRequest> OnResourceRequested;
+    public event Action<ResourceRequest> OnResourceReleased;
 
     public void SceneStarted()
     {
@@ -38,7 +40,16 @@ public class SceneEventAggregator : MonoBehaviour
         // Trigger the event when a resource request is made
         OnResourceRequested?.Invoke(request);
     }
+
+    public void ReleaseResource(ResourceRequest request)
+    {
+        // Trigger the event when a resource is released
+        OnResourceReleased?.Invoke(request);
+    }
     #endregion
+
+
+    #region AI Agent Events
 
     #region Player Flanking Point Events
     /// <summary>
@@ -60,4 +71,21 @@ public class SceneEventAggregator : MonoBehaviour
         OnClosestPointToPlayerJobComplete?.Invoke(pointIndex);
     }
     #endregion Scene Events
+
+    #region Agent Zone Registry Events
+    public event Action<EnemyFSMController, int> OnAgentZoneRegistered;
+    public event Action<int, EnemyFSMController> OnAlertZoneAgents;
+
+    public void RegisterAgentAndZone(EnemyFSMController agent, int zone)
+    {
+        OnAgentZoneRegistered?.Invoke(agent, zone);
+    }
+
+    public void AlertZoneAgents(int zone, EnemyFSMController source)
+    {
+        OnAlertZoneAgents?.Invoke(zone, source);
+    }
+    #endregion
+
+    #endregion
 }

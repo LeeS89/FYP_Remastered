@@ -51,8 +51,8 @@ public partial class EnemyFSMController : ComponentEvents
     private void InitializeWaypoints()
     {
 
-        _blockData = BaseSceneManager._instance.RequestWaypointBlock();
-      /*  _resourceRequest.resourceType = Resourcetype.WaypointBlock;
+        //_blockData = BaseSceneManager._instance.RequestWaypointBlock();
+        _resourceRequest.resourceType = Resourcetype.WaypointBlock;
         _resourceRequest.waypointCallback = (blockData) =>
         {
             if (blockData != null)
@@ -66,9 +66,9 @@ public partial class EnemyFSMController : ComponentEvents
             }
         };
 
-        SceneEventAggregator.Instance.RequestResource(_resourceRequest);*/
+        SceneEventAggregator.Instance.RequestResource(_resourceRequest);
 
-        if (_blockData != null)
+       /* if (_blockData != null)
         {
             _blockZone = _blockData._blockZone;
             Debug.LogError("Block Zone for enemy: " + _blockZone);
@@ -79,7 +79,7 @@ public partial class EnemyFSMController : ComponentEvents
             //_enemyEventManager.WaypointsUpdated(_wpData);
 
             BaseSceneManager._instance.RegisterAgentAndZone(this, _blockZone);
-        }
+        }*/
     }
 
     
@@ -95,7 +95,8 @@ public partial class EnemyFSMController : ComponentEvents
             _destinationManager.LoadWaypointData(_wpData);
             //_enemyEventManager.WaypointsUpdated(_wpData);
 
-            BaseSceneManager._instance.RegisterAgentAndZone(this, _blockZone);
+            SceneEventAggregator.Instance.RegisterAgentAndZone(this, _blockZone);
+            //BaseSceneManager._instance.RegisterAgentAndZone(this, _blockZone);
 
            
         }

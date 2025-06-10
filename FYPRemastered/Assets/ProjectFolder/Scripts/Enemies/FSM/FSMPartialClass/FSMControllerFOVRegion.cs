@@ -98,7 +98,8 @@ public partial class EnemyFSMController : ComponentEvents
         if (!_testAlert)
         {
             _testAlert = true;
-            BaseSceneManager._instance.AlertZoneAgents(_blockZone, this);
+            //BaseSceneManager._instance.AlertZoneAgents(_blockZone, this);
+            SceneEventAggregator.Instance.AlertZoneAgents(_blockZone, this);
 
 
         }

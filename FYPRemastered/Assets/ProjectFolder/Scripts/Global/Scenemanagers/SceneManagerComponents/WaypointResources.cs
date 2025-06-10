@@ -1,9 +1,10 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
-using static ClosestPointToPlayerJob;
+
 
 
 public class WaypointResources : SceneResources
@@ -29,7 +30,7 @@ public class WaypointResources : SceneResources
 
                 if (_waypointBlockData != null)
                 {
-                    // Perform logic if the object is not null
+                   
                     foreach (var blockData in _waypointBlockData.blockDataArray)
                     {
                         blockData._inUse = false;
@@ -42,12 +43,13 @@ public class WaypointResources : SceneResources
             }
             else
             {
-                // Log failure if the operation didn't succeed
+                
                 Debug.LogError("Failed to load the waypoint data from Addressables.");
             }
 
             // Subscribe to the resource requested event
             SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;
+            SceneEventAggregator.Instance.OnResourceReleased += ResourceReleased;
         }
         catch (Exception e)
         {
@@ -62,7 +64,7 @@ public class WaypointResources : SceneResources
 
         if (_waypointBlockData == null)
         {
-            Debug.LogWarning("No Waypoints exist in the scene, please update waypoint manager");
+            Debug.LogWarning("No Waypoint data exists in the scene, please load the correct SO");
 
             request.waypointCallback?.Invoke(null);
             
@@ -74,52 +76,40 @@ public class WaypointResources : SceneResources
             {
                 blockData._inUse = true;
                 request.waypointCallback?.Invoke(blockData);
+                return;
             }
         }
         
     }
 
-   /* private void RequestWaypointBlock(ResourceRequest request)
+    protected override void ResourceReleased(ResourceRequest request)
     {
-        
+        if (request.resourceType != Resourcetype.WaypointBlock) { return; }
 
-        if (_waypointBlockData == null)
+        BlockData bd = request.blockData;
+        if (!_waypointBlockData.blockDataArray.Contains(bd)) { return; }
+
+        int index = Array.FindIndex(_waypointBlockData.blockDataArray, block => block == bd);
+        if (index >= 0)
         {
-            Debug.LogWarning("No Waypoints exist in the scene, please update waypoint manager");
-
-            request.waypointCallback?.Invoke(null);
-            //return null;
+            _waypointBlockData.blockDataArray[index]._inUse = false;
         }
 
-        foreach (var blockData in _waypointBlockData.blockDataArray)
-        {
-            if (!blockData._inUse)
-            {
-                blockData._inUse = true;
-                return blockData;
-            }
-        }
-        return null;
     }
-*/
-   /* private BlockData RequestWaypointBlock()
+
+   /* public void ReturnWaypointBlock(BlockData bd)
     {
-        if (_waypointBlockData == null)
+        if (!_waypointBlockData.blockDataArray.Contains(bd)) { return; }
+
+        int index = Array.FindIndex(_waypointBlockData.blockDataArray, block => block == bd);
+
+        if (index >= 0)
         {
-            Debug.LogWarning("No Waypoints exist in the scene, please update waypoint manager");
-            return null;
+            _waypointBlockData.blockDataArray[index]._inUse = false;
         }
 
-        foreach (var blockData in _waypointBlockData.blockDataArray)
-        {
-            if (!blockData._inUse)
-            {
-                blockData._inUse = true;
-                return blockData;
-            }
-        }
-        return null;
     }*/
+
 
     /* protected void LoadWaypoints() // Create WaypointManager Component Later
      {

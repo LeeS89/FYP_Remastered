@@ -22,7 +22,7 @@ public class MoonSceneManager : BaseSceneManager
     public bool _testJobRun = false;
     /// End Test
 
-    private ZoneAgentRegistry _zoneAgentRegistry;
+    private AgentZoneRegistry _zoneAgentRegistry;
     private ClosestPointToPlayerJob _closestPointjob;
     [SerializeField] private UniformZoneGridManager _gridManager;
 
@@ -65,7 +65,7 @@ public class MoonSceneManager : BaseSceneManager
 
     public override async Task SetupScene()
     {
-        //_resources = new SceneResourceManager(new WaypointResources());
+        _resources = new SceneResourceManager(new WaypointResources(), new AgentZoneRegistry());
 
         await LoadSceneResources();
 
@@ -123,10 +123,10 @@ public class MoonSceneManager : BaseSceneManager
 
             //await Task.Delay(1000); // Wait for resources to load
             _pathRequestManager = new PathRequestManager();
-            _zoneAgentRegistry = new ZoneAgentRegistry();
-            LoadWaypoints();
+            //_zoneAgentRegistry = new AgentZoneRegistry();
+            //LoadWaypoints();
 
-            //await _resources.LoadResourcesAsync(); // Load Waypoint Resources
+            await _resources.LoadResourcesAsync(); // Load Waypoint Resources
 
             _gridManager = FindFirstObjectByType<UniformZoneGridManager>();
 
@@ -230,7 +230,7 @@ public class MoonSceneManager : BaseSceneManager
         
     }
 
-    public override BlockData RequestWaypointBlock()
+ /*   public override BlockData RequestWaypointBlock()
     {
         if (_waypointBlockData == null)
         {
@@ -260,14 +260,14 @@ public class MoonSceneManager : BaseSceneManager
             _waypointBlockData.blockDataArray[index]._inUse = false;
         }
        
-    }
+    }*/
 
 
     #region Agent Zone Registry
    
-    public override void RegisterAgentAndZone(EnemyFSMController agent, int zone) => _zoneAgentRegistry.Register(agent, zone);
+    //public override void RegisterAgentAndZone(EnemyFSMController agent, int zone) => _zoneAgentRegistry.Register(agent, zone);
     public override void UnregisterAgentAndZone(EnemyFSMController agent, int zone) => _zoneAgentRegistry.Unregister(agent, zone);
-    public override void AlertZoneAgents(int zone, EnemyFSMController source) => _zoneAgentRegistry.AlertZone(zone, source);
+    //public override void AlertZoneAgents(int zone, EnemyFSMController source) => _zoneAgentRegistry.AlertZone(zone, source);
     #endregion
 
     #region Agent Path Finding
