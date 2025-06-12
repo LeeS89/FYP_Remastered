@@ -15,7 +15,7 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
     protected PoolManager _bulletPool;
     protected PoolManager _deflectAudioPool;
     protected PoolManager _hitParticlePool;
-    protected PathRequestManager _pathRequestManager;
+    //protected PathRequestManager _pathRequestManager;
 
     protected virtual void Awake()
     {
@@ -97,7 +97,7 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
     public virtual void UnregisterAgentAndZone(EnemyFSMController agent, int zone) { }
     //public virtual void AlertZoneAgents(int zone, EnemyFSMController source) { }
 
-    public virtual void EnqueuePathRequest(DestinationRequestData request) { }
+   // public virtual void EnqueuePathRequest(DestinationRequestData request) { }
 
     public virtual UniformZoneGridManager GetGridManager() => null;
 

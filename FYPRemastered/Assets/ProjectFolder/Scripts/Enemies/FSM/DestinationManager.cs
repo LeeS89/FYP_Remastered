@@ -146,7 +146,8 @@ public class DestinationManager
                
             };
 
-            _eventManager.PathRequested(data);
+            //_eventManager.PathRequested(data);
+            SceneEventAggregator.Instance.PathRequested(data);
 
             yield return _waitUntilResultReceived;
 

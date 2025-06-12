@@ -54,18 +54,20 @@ public class MoonSceneManager : BaseSceneManager
             _testspawn = false;
         }
 
-        if (_pathRequestManager != null && _pathRequestManager.GetPendingRequestCount() > 0)
+       /* if (_pathRequestManager != null && _pathRequestManager.GetPendingRequestCount() > 0)
         {
             _pathRequestManager.ExecutePathRequests();
-        }
+        }*/
         
+        _resources?.UpdateResources(); 
+
     }
 
     public SceneResourceManager _resources;
 
     public override async Task SetupScene()
     {
-        _resources = new SceneResourceManager(new WaypointResources(), new AgentZoneRegistry());
+        _resources = new SceneResourceManager(new WaypointResources(), new AgentZoneRegistry(), new PathRequestManager());
 
         await LoadSceneResources();
 
@@ -122,7 +124,7 @@ public class MoonSceneManager : BaseSceneManager
             _deflectAudioPrefab = Resources.Load<AudioSource>("AudioPoolPrefabs/DeflectAudio");
 
             //await Task.Delay(1000); // Wait for resources to load
-            _pathRequestManager = new PathRequestManager();
+           // _pathRequestManager = new PathRequestManager();
             //_zoneAgentRegistry = new AgentZoneRegistry();
             //LoadWaypoints();
 
@@ -271,7 +273,7 @@ public class MoonSceneManager : BaseSceneManager
     #endregion
 
     #region Agent Path Finding
-    public override void EnqueuePathRequest(DestinationRequestData request) => _pathRequestManager.AddRequest(request);
+    //public override void EnqueuePathRequest(DestinationRequestData request) => _pathRequestManager.AddRequest(request);
     #endregion
 
 }

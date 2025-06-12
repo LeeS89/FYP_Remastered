@@ -1,14 +1,25 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AI;
 
 /// <summary>
 /// Class used to to limit concurrent path calculations to a set number per frame
 /// </summary>
-public class PathRequestManager
+public class PathRequestManager : SceneResources, IUpdateableResource
 {
     private Queue<DestinationRequestData> _pathRequests = new Queue<DestinationRequestData>();
     private int _maxConcurrentRequests = 5;
+
+    public override async Task LoadResources()
+    {
+        SceneEventAggregator.Instance.OnPathRequested += AddRequest;
+
+        await Task.CompletedTask;
+        /* SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;
+         SceneEventAggregator.Instance.OnResourceReleased += ResourceReleased;*/
+        // return base.LoadResources();
+    }
 
     public void ExecutePathRequests()
     {
@@ -38,7 +49,7 @@ public class PathRequestManager
         return path.status == NavMeshPathStatus.PathComplete;
     }
 
-    public void AddRequest(DestinationRequestData request)
+    private void AddRequest(DestinationRequestData request)
     {
         _pathRequests.Enqueue(request);
     }
@@ -46,5 +57,12 @@ public class PathRequestManager
     public int GetPendingRequestCount()
     {
         return _pathRequests.Count;
+    }
+
+    public void UpdateResource()
+    {
+        if (_pathRequests.Count == 0) { return; }
+
+        ExecutePathRequests();
     }
 }

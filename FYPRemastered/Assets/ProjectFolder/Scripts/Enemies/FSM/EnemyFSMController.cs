@@ -148,7 +148,7 @@ public partial class EnemyFSMController : ComponentEvents
 
     private void PathRequested(DestinationRequestData request)
     {
-        BaseSceneManager._instance.EnqueuePathRequest(request);
+       // BaseSceneManager._instance.EnqueuePathRequest(request);
     }
 
     private void ToggleRotationToTarget(bool rotate)

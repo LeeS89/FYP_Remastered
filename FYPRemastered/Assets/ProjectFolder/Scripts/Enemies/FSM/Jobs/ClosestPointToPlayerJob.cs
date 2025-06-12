@@ -4,7 +4,7 @@ using Unity.Jobs;
 using UnityEngine;
 
 
-public class ClosestPointToPlayerJob// : MonoBehaviour
+public class ClosestPointToPlayerJob
 {
     //public static ClosestPointToPlayerJob Instance { get; private set; }
 

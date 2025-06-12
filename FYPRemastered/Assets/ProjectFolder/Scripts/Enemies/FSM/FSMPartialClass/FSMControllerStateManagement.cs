@@ -261,7 +261,7 @@ public partial class EnemyFSMController : ComponentEvents
                     _obstacle.enabled = false;
                 }
             };
-
+            
             _destinationData.agentActiveCallback = () =>
             {
                 if (!_agent.enabled)

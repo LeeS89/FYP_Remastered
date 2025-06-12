@@ -87,5 +87,12 @@ public class SceneEventAggregator : MonoBehaviour
     }
     #endregion
 
+    public event Action<DestinationRequestData> OnPathRequested;
+
+    public void PathRequested(DestinationRequestData request)
+    {
+        OnPathRequested?.Invoke(request);
+    }
+
     #endregion
 }
