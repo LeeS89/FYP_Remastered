@@ -1,4 +1,6 @@
+using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -12,10 +14,13 @@ public class WaypointResources : SceneResources
     private WaypointBlockData _waypointBlockData;
     private WaypointManager _waypointManager;
 
+   
+
     public override async Task LoadResources()
     {
         try
         {
+            NotifyDependancies();
             // Load the asset from Addressables
             var waypointHandle = Addressables.LoadAssetAsync<ScriptableObject>("MoonSceneWP");
 
@@ -56,6 +61,15 @@ public class WaypointResources : SceneResources
             Debug.LogError($"Error loading waypoint resources: {e.Message}");
         }
 
+    }
+
+    protected override void NotifyDependancies()
+    {
+        List<Type> dependancies = new()
+        {
+            typeof(PathRequestManager)
+        };
+        SceneEventAggregator.Instance.AddDependancies(dependancies);
     }
 
     protected override void ResourceRequested(ResourceRequest request)

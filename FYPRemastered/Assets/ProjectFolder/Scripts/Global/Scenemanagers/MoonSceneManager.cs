@@ -26,6 +26,8 @@ public class MoonSceneManager : BaseSceneManager
     private ClosestPointToPlayerJob _closestPointjob;
     [SerializeField] private UniformZoneGridManager _gridManager;
 
+    
+
     private async void Start()
     {
         await SetupScene(); // Will be called by Game Manager once fully tested
@@ -67,11 +69,12 @@ public class MoonSceneManager : BaseSceneManager
 
     public override async Task SetupScene()
     {
-        _resources = new SceneResourceManager(new WaypointResources(), new AgentZoneRegistry(), new PathRequestManager());
-
+        _resources = new SceneResourceManager(new WaypointResources(), new AgentZoneRegistry()/*, new PathRequestManager()*/);
+       
+       
         await LoadSceneResources();
+        await _resources.LoadDependancies(); // Load any additional resources that are dependencies
 
-        
         InitializePools();
         LoadActiveSceneEventManagers();
         
@@ -81,8 +84,7 @@ public class MoonSceneManager : BaseSceneManager
       
     }
 
-
-
+    
 
     protected override async Task LoadSceneResources() // Create Resources Component Later
     {

@@ -1,4 +1,6 @@
+using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 
@@ -24,6 +26,7 @@ public class SceneEventAggregator : MonoBehaviour
     public event Action OnSceneEnded;
     public event Action<ResourceRequest> OnResourceRequested;
     public event Action<ResourceRequest> OnResourceReleased;
+    public event Action<List<Type>> OnDependanciesAdded;
 
     public void SceneStarted()
     {
@@ -37,14 +40,20 @@ public class SceneEventAggregator : MonoBehaviour
 
     public void RequestResource(ResourceRequest request)
     {
-        // Trigger the event when a resource request is made
+        
         OnResourceRequested?.Invoke(request);
     }
 
     public void ReleaseResource(ResourceRequest request)
     {
-        // Trigger the event when a resource is released
+        
         OnResourceReleased?.Invoke(request);
+    }
+
+    public void AddDependancies(List<Type> resourceDependancies)
+    {
+        
+        OnDependanciesAdded?.Invoke(resourceDependancies);
     }
     #endregion
 
