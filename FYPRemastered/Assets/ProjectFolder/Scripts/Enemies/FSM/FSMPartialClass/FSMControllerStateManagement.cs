@@ -16,8 +16,8 @@ public partial class EnemyFSMController : ComponentEvents
     private void SetupFSM()
     {
         _resourceRequest = new ResourceRequest();
-        _gridManager = MoonSceneManager._instance.GetGridManager();
-         _destinationManager = new DestinationManager(_enemyEventManager, _gridManager, _maxFlankingSteps);
+        //_gridManager = MoonSceneManager._instance.GetGridManager();
+         _destinationManager = new DestinationManager(_enemyEventManager, /*_gridManager,*/ _maxFlankingSteps);
         _destinationData = new DestinationRequestData();
         _path = new NavMeshPath();
         _fovCheckFrequency = _patrolFOVCheckFrequency;
@@ -44,7 +44,7 @@ public partial class EnemyFSMController : ComponentEvents
         BlockData temp = _blockData;
         InitializeWaypoints();
         
-        BaseSceneManager._instance.ReturnWaypointBlock(temp);
+       // BaseSceneManager._instance.ReturnWaypointBlock(temp);
         
     }
 

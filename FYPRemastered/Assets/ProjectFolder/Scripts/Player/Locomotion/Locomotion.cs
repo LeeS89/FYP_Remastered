@@ -112,7 +112,8 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
             if (GameManager.Instance.PlayerHasMoved)
             {
                 GameManager.Instance.PlayerHasMoved = false;
-                MoonSceneManager._instance.TestRun();
+                SceneEventAggregator.Instance.RunClosestPointToPlayerJob(); 
+                //MoonSceneManager._instance.TestRun();
             }
         }
 
@@ -167,7 +168,7 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
             if (!_shouldMoveForward)
             {
                
-               MoonSceneManager._instance.TestRun();
+               //MoonSceneManager._instance.TestRun();
             }
        // }
     }

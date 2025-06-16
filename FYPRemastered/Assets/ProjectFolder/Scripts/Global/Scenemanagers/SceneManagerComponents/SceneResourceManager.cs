@@ -9,14 +9,16 @@ public class SceneResourceManager
     private List<SceneResources> _resources;
     private List<SceneResources> _resourceDependancies;
 
-    // Constructor remains the same
+    
     public SceneResourceManager(params SceneResources[] resources)
     {
-        SceneEventAggregator.Instance.OnDependanciesAdded += AddDependencies;
+        //SceneEventAggregator.Instance.OnDependanciesAdded += AddDependencies;
+        SceneEventAggregator.Instance.OnCheckDependancyExists += CheckDependanciesExist;
+        SceneEventAggregator.Instance.OnDependancyAdded += AddDependancy;
         _resources = new List<SceneResources>(resources);
     }
 
-    // Asynchronous method to load resources
+    
     public async Task LoadResourcesAsync()
     {
         
@@ -35,7 +37,7 @@ public class SceneResourceManager
 
     public async Task LoadDependancies()
     {
-        if(_resourceDependancies.Count == 0) { return; }
+        if(_resourceDependancies.Count == 0 || _resourceDependancies == null) { return; }
 
         var loadTasks = new List<Task>();
 
@@ -49,7 +51,27 @@ public class SceneResourceManager
     }
 
 
-    public void AddDependencies(List<Type> dependencyTypes)
+    private bool CheckDependanciesExist(Type type)
+    {
+        if(_resourceDependancies == null) { return false; }
+        // Check if the resource type exists in the dependencies list
+        return _resourceDependancies.Any(r => r.GetType() == type);
+    }
+
+    private void AddDependancy(SceneResources resource)
+    {
+        Debug.LogError($"Adding dependancy: {resource.GetType().Name}");
+        if (_resourceDependancies == null) { _resourceDependancies = new List<SceneResources>(); }
+        // Check if the resource is already in the list
+        if (_resourceDependancies.Any(r => r.GetType() == resource.GetType()))
+        {
+            return;  
+        }
+        // Add the resource instance to the dependencies list
+        _resourceDependancies.Add(resource);
+    }
+
+   /* public void AddDependencies(List<Type> dependencyTypes)
     {
         Debug.LogError($"Adding dependencies: {string.Join(", ", dependencyTypes.Select(t => t.Name))}");
         if (_resourceDependancies == null) { _resourceDependancies = new List<SceneResources>(); }
@@ -66,11 +88,14 @@ public class SceneResourceManager
             var resource = (SceneResources)Activator.CreateInstance(type);
             _resourceDependancies.Add(resource);
         }
-    }
+    }*/
 
+    /// <summary>
+    /// Custom Update method for resources that implement IUpdateableResource.
+    /// </summary>
     public void UpdateResources()
     {
-        // Iterate through each resource and call Update if it exists
+        
         foreach (var resource in _resources)
         {
             if (resource is IUpdateableResource updatableResource)

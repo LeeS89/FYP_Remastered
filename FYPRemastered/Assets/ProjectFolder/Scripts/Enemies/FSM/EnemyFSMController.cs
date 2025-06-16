@@ -74,7 +74,7 @@ public partial class EnemyFSMController : ComponentEvents
     private DestinationManager _destinationManager;
 
     private AlertStatus _alertStatus = AlertStatus.None;
-    [SerializeField] private UniformZoneGridManager _gridManager;
+    //[SerializeField] private UniformZoneGridManager _gridManager;
 
 
     #region Event Registrations

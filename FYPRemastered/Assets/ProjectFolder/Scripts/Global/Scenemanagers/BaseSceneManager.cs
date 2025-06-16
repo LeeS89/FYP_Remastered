@@ -44,14 +44,15 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
     /// This in turn runs the ClosestPointToPlayerJob to find the closest point to player. Once job completes,
     /// OnClosestPointToPlayerJobComplete notifies all interested parties with the index of the closest point to player.
     /// </summary>
-    public event Action OnClosestPointToPlayerChanged;
-    public event Action<int> OnClosestPointToPlayerJobComplete;
+    public event Action OnClosestPointToPlayerChanged; // => Moving to Scene event aggregator
+    public event Action<int> OnClosestPointToPlayerJobComplete; // => Moving to Scene event aggregator
 
     public void ClosestPointToPlayerchanged() // Player will invoke this event, and the scene manager will listen to it
     {
         OnClosestPointToPlayerChanged?.Invoke();
     }
 
+    [Obsolete("Use Scene Event Aggregator instead")]
     public void ClosestPointToPlayerJobComplete(int pointIndex)
     {
         OnClosestPointToPlayerJobComplete?.Invoke(pointIndex);
@@ -86,12 +87,9 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
     #endregion
 
     #region Waypoint and enemy alert phase Functions  
-    protected virtual void LoadWaypoints() { }
+    //protected virtual void LoadWaypoints() { }
 
 
-    public virtual BlockData RequestWaypointBlock() { return null; }
-
-    public virtual void ReturnWaypointBlock(BlockData bd) { }
 
    // public virtual void RegisterAgentAndZone(EnemyFSMController agent, int zone) { }
     public virtual void UnregisterAgentAndZone(EnemyFSMController agent, int zone) { }
@@ -99,7 +97,7 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
 
    // public virtual void EnqueuePathRequest(DestinationRequestData request) { }
 
-    public virtual UniformZoneGridManager GetGridManager() => null;
+    //public virtual UniformZoneGridManager GetGridManager() => null;
 
     #endregion
 
@@ -113,5 +111,5 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
     #endregion
 
     //Testing
-    public virtual void TestRun() { }
+   // public virtual void TestRun() { }
 }

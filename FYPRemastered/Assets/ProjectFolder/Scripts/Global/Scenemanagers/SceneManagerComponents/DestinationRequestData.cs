@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.AI;
 
+[Obsolete("Moving to Resource Request")]
 public class DestinationRequestData
 {
     public DestinationType destinationType;

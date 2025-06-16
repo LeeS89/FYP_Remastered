@@ -1,10 +1,11 @@
+using System.Threading.Tasks;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 
 
-public class ClosestPointToPlayerJob
+public class ClosestPointToPlayerJob : SceneResources
 {
     //public static ClosestPointToPlayerJob Instance { get; private set; }
 
@@ -14,13 +15,19 @@ public class ClosestPointToPlayerJob
     private NativeList<Vector3> _samplePositions;
     private NativeArray<float> _threadDistances;
     private NativeArray<int> _threadIndices;
+    private SamplePointDataSO _samplePointData;
 
-   
-   
+    public ClosestPointToPlayerJob(SamplePointDataSO samplePointData)
+    {
+        _samplePointData = samplePointData;
+        AddSamplePointData(_samplePointData);
+        SceneEventAggregator.Instance.OnRunClosestPointToPlayerJob += RunClosestPointJob;
+    }
+
 
     public void AddSamplePointData(SamplePointDataSO sampleData)
     {
-        
+       
         _samplePositions = new NativeList<Vector3>(5000, Allocator.Persistent);
         
         foreach (var pos in sampleData.savedPoints)
@@ -72,7 +79,8 @@ public class ClosestPointToPlayerJob
                 }
             }
 
-            BaseSceneManager._instance.ClosestPointToPlayerJobComplete(minIndex);
+           // BaseSceneManager._instance.ClosestPointToPlayerJobComplete(minIndex);
+            SceneEventAggregator.Instance.ClosestFlankPointToPlayerJobComplete(minIndex);
             //return minIndex;
             //zoneGridManager.SetNearestIndexToPlayer(minIndex);
         }

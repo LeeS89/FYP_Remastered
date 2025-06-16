@@ -26,7 +26,9 @@ public class SceneEventAggregator : MonoBehaviour
     public event Action OnSceneEnded;
     public event Action<ResourceRequest> OnResourceRequested;
     public event Action<ResourceRequest> OnResourceReleased;
-    public event Action<List<Type>> OnDependanciesAdded;
+    //public event Action<List<Type>> OnDependanciesAdded;
+    public event Action<SceneResources> OnDependancyAdded;
+    public event Func<Type, bool> OnCheckDependancyExists;
 
     public void SceneStarted()
     {
@@ -50,10 +52,22 @@ public class SceneEventAggregator : MonoBehaviour
         OnResourceReleased?.Invoke(request);
     }
 
-    public void AddDependancies(List<Type> resourceDependancies)
+    /*public void AddDependancies(List<Type> resourceDependancies)
     {
         
         OnDependanciesAdded?.Invoke(resourceDependancies);
+    }*/
+
+    public void AddDependancy(SceneResources resource)
+    {
+        // Invoke the event with the resource
+        OnDependancyAdded?.Invoke(resource);
+    }
+
+    public bool CheckDependancyExists(Type dependency)
+    {
+        // Invoke the event and return the result
+        return OnCheckDependancyExists?.Invoke(dependency) ?? false;
     }
     #endregion
 
@@ -68,17 +82,29 @@ public class SceneEventAggregator : MonoBehaviour
     /// OnClosestPointToPlayerJobComplete notifies all interested parties with the index of the closest point to player.
     /// </summary>
     public event Action OnClosestPointToPlayerChanged;
-    public event Action<int> OnClosestPointToPlayerJobComplete;
+    public event Action<int> OnClosestFlankPointToPlayerJobComplete;
+    public event Action OnRunClosestPointToPlayerJob; 
+    //public event Action<ResourceRequest> OnFlankPointsRequested;
 
     public void ClosestPointToPlayerchanged() // Player will invoke this event, and the scene manager will listen to it
     {
         OnClosestPointToPlayerChanged?.Invoke();
     }
 
-    public void ClosestPointToPlayerJobComplete(int pointIndex)
+    public void ClosestFlankPointToPlayerJobComplete(int pointIndex)
     {
-        OnClosestPointToPlayerJobComplete?.Invoke(pointIndex);
+        OnClosestFlankPointToPlayerJobComplete?.Invoke(pointIndex);
     }
+
+    public void RunClosestPointToPlayerJob()
+    {
+        OnRunClosestPointToPlayerJob?.Invoke();
+    }
+
+    /* public void FlankPointsRequested(ResourceRequest request) // Change
+     {
+         OnFlankPointsRequested?.Invoke(request);
+     }*/
     #endregion Scene Events
 
     #region Agent Zone Registry Events

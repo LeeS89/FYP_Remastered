@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: Default Local Group
   m_GUID: ab9c3870c9792ed4cb281eb3d2b875d0
   m_SerializeEntries:
+  - m_GUID: 4dee39e88433d0d4aa236aafefbe0151
+    m_Address: SamplePointDataSO
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 68176bf3450091e468e20392c97f8d1b
     m_Address: MoonSceneWP
     m_ReadOnly: 0

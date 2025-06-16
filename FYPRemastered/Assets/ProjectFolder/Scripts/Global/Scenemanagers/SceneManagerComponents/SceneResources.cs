@@ -5,7 +5,7 @@ public abstract class SceneResources
 {
     public virtual Task LoadResources()
     {
-        // Return a completed task to ensure all code paths return a value
+       
         return Task.CompletedTask;
     }
 

@@ -9,7 +9,7 @@ using Random = UnityEngine.Random;
 public class DestinationManager
 {
 
-    private UniformZoneGridManager _gridManager;
+    //private UniformZoneGridManager _gridManager;
     private int _maxSteps;
     private List<int> _stepsToTry;
     private List<Vector3> _newPoints;
@@ -23,13 +23,15 @@ public class DestinationManager
     private WaitUntil _waitUntilResultReceived;
     private bool _resultReceived = false;
     private bool _isValid = false;
+    private List<Vector3> _points = new List<Vector3>();
+    private ResourceRequest _flankPointRequest;
 
-
-    public DestinationManager(EnemyEventManager eventManager, UniformZoneGridManager gridManager, int maxSteps)
+    public DestinationManager(EnemyEventManager eventManager, /*UniformZoneGridManager gridManager,*/ int maxSteps)
     {
         _eventManager = eventManager;
-        
-        _gridManager = gridManager;
+        _flankPointRequest = new ResourceRequest();
+        _flankPointRequest.resourceType = Resourcetype.FlankPointCandidates;
+       // _gridManager = gridManager;
         _maxSteps = maxSteps;
         _stepsToTry = new List<int>();
         _newPoints = new List<Vector3>();
@@ -89,7 +91,7 @@ public class DestinationManager
                 RequestPlayerDestination(destinationData);
                 break;
             case DestinationType.Flank:
-                RequestFlankDestination(destinationData);
+                CoroutineRunner.Instance.StartCoroutine(RequestFlankDestination(destinationData, _flankPointRequest));
                 break;
             case DestinationType.Patrol:
                 RequestPatrolPointDestination(destinationData);
@@ -110,19 +112,50 @@ public class DestinationManager
 
     private List<Vector3> GetFlankPoints()
     {
-        GetStepsToTry(); 
-        List<Vector3> points = new List<Vector3>();
+        //GetStepsToTry(); 
+        //_points.Clear();
+        //List<Vector3> points = new List<Vector3>();
+
+        /*foreach (int step in _stepsToTry)
+        {
+            var stepPoints = _gridManager.GetCandidatePointsAtStep(step); // => Changing to event in Scene event aggregator
+            if (stepPoints.Count > 0)
+            {
+                _points.AddRange(stepPoints.OrderBy(p => Random.value));
+            }
+        }*/
+
+        return _points;
+    }
+
+    private IEnumerator ValidateFlankPointsRoutine(AIResourceRequest request)
+    {
+        GetStepsToTry();
+        _points.Clear();
 
         foreach (int step in _stepsToTry)
         {
-            var stepPoints = _gridManager.GetCandidatePointsAtStep(step);
+            _resultReceived = false;
+
+            request.FlankPointCandidatesCallback = (points) =>
+            {
+                if (points != null && points.Count > 0)
+                {
+                    _points.AddRange(points.OrderBy(p => Random.value));
+                }
+                _resultReceived = true;
+            };
+
+            SceneEventAggregator.Instance.RequestResource(request);
+
+            yield return _waitUntilResultReceived;
+
+           /* var stepPoints = _gridManager.GetCandidatePointsAtStep(step); // => Changing to event in Scene event aggregator
             if (stepPoints.Count > 0)
             {
-                points.AddRange(stepPoints.OrderBy(p => Random.value));
-            }
+                _points.AddRange(stepPoints.OrderBy(p => Random.value));
+            }*/
         }
-
-        return points;
     }
 
 
@@ -197,10 +230,31 @@ public class DestinationManager
       
     }
 
-    private void RequestFlankDestination(DestinationRequestData destinationData)
+    private IEnumerator RequestFlankDestination(DestinationRequestData destinationData, ResourceRequest request)
     {
+        GetStepsToTry();
+        _points.Clear();
+
+        foreach (int step in _stepsToTry)
+        {
+            _resultReceived = false;
+            request.numSteps = step; // Set the step for the request
+
+            request.FlankPointCandidatesCallback = (points) =>
+            {
+                if (points != null && points.Count > 0)
+                {
+                    _points.AddRange(points.OrderBy(p => Random.value));
+                }
+                _resultReceived = true;
+            };
+
+            SceneEventAggregator.Instance.RequestResource(request);
+
+            yield return _waitUntilResultReceived;
+        }
         CoroutineRunner.Instance.StartCoroutine(AttemptDestinationRoutine(destinationData, GetFlankPoints));
-       
+
     }
 
    
@@ -245,12 +299,13 @@ public class DestinationManager
     public void OnInstanceDestroyed()
     {
         
-        _gridManager = null;
+        //_gridManager = null;
         
         _eventManager = null;
         _stepsToTry.Clear();
         _newPoints.Clear();
-       
+        _points.Clear();
+        _points = null;
         _stepsToTry = null;
         _newPoints = null;
         _waitUntilResultReceived = null;

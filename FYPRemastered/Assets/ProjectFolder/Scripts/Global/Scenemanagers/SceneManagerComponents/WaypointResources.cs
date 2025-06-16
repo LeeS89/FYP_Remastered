@@ -20,7 +20,7 @@ public class WaypointResources : SceneResources
     {
         try
         {
-            NotifyDependancies();
+            //NotifyDependancies();
             // Load the asset from Addressables
             var waypointHandle = Addressables.LoadAssetAsync<ScriptableObject>("MoonSceneWP");
 
@@ -52,6 +52,7 @@ public class WaypointResources : SceneResources
                 Debug.LogError("Failed to load the waypoint data from Addressables.");
             }
 
+            NotifyDependancies();
             // Subscribe to the resource requested event
             SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;
             SceneEventAggregator.Instance.OnResourceReleased += ResourceReleased;
@@ -65,22 +66,30 @@ public class WaypointResources : SceneResources
 
     protected override void NotifyDependancies()
     {
-        List<Type> dependancies = new()
+        bool exists = SceneEventAggregator.Instance.CheckDependancyExists(typeof(PathRequestManager));
+
+        if (exists) { return; }
+
+        SceneEventAggregator.Instance.AddDependancy(new PathRequestManager());
+
+        /*List<Type> dependancies = new()
         {
             typeof(PathRequestManager)
         };
-        SceneEventAggregator.Instance.AddDependancies(dependancies);
+        SceneEventAggregator.Instance.AddDependancies(dependancies);*/
     }
 
     protected override void ResourceRequested(ResourceRequest request)
     {
         if(request.resourceType != Resourcetype.WaypointBlock) { return; }
 
+        AIResourceRequest aiRequest = request as AIResourceRequest;
+
         if (_waypointBlockData == null)
         {
             Debug.LogWarning("No Waypoint data exists in the scene, please load the correct SO");
 
-            request.waypointCallback?.Invoke(null);
+            aiRequest.waypointCallback?.Invoke(null);
             
         }
 
@@ -89,7 +98,7 @@ public class WaypointResources : SceneResources
             if (!blockData._inUse)
             {
                 blockData._inUse = true;
-                request.waypointCallback?.Invoke(blockData);
+                aiRequest.waypointCallback?.Invoke(blockData);
                 return;
             }
         }
@@ -98,7 +107,7 @@ public class WaypointResources : SceneResources
 
     protected override void ResourceReleased(ResourceRequest request)
     {
-        if (request.resourceType != Resourcetype.WaypointBlock) { return; }
+        /*if (request.resourceType != Resourcetype.WaypointBlock) { return; }
 
         BlockData bd = request.blockData;
         if (!_waypointBlockData.blockDataArray.Contains(bd)) { return; }
@@ -107,7 +116,7 @@ public class WaypointResources : SceneResources
         if (index >= 0)
         {
             _waypointBlockData.blockDataArray[index]._inUse = false;
-        }
+        }*/
 
     }
 
