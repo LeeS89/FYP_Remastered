@@ -31,7 +31,7 @@ public class PlayerFlankingResources : SceneResources
                 if (_flankPointDataSO != null)
                 {
                     SceneEventAggregator.Instance.OnClosestFlankPointToPlayerJobComplete += SetNearestIndexToPlayer; // => Dont forget to unsubscribe
-                    SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested; // => Dont forget to unsubscribe
+                    SceneEventAggregator.Instance.OnAIResourceRequested += AIResourceRequested; // => Dont forget to unsubscribe
                     //SceneEventAggregator.Instance.OnFlankPointsRequested += ResourceRequested; // => Dont forget to unsubscribe
                     DeserializeSavedPoints();
                 }
@@ -94,9 +94,9 @@ public class PlayerFlankingResources : SceneResources
         _nearestPointToPlayer = nearestPointIndex;
     }
 
-    protected override void ResourceRequested(ResourceRequest request) // => Add as an aevent in SceneEventAggregator
+    protected override void AIResourceRequested(AIResourceRequest request) // => Add as an aevent in SceneEventAggregator
     {
-        if(request.resourceType != Resourcetype.FlankPointCandidates) { return; }
+        if(request.resourceType != AIResourceType.FlankPointCandidates) { return; }
 
 
         List<Vector3> positions = new List<Vector3>();

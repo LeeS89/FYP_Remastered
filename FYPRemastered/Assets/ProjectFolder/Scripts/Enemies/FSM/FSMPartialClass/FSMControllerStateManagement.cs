@@ -7,7 +7,7 @@ using Random = UnityEngine.Random;
 
 public partial class EnemyFSMController : ComponentEvents
 {
-    public ResourceRequest _resourceRequest;
+    public AIResourceRequest _resourceRequest;
 
     private WaypointData _wpData;
     private DestinationRequestData _destinationData;
@@ -15,7 +15,7 @@ public partial class EnemyFSMController : ComponentEvents
     #region FSM Management
     private void SetupFSM()
     {
-        _resourceRequest = new ResourceRequest();
+        _resourceRequest = new AIResourceRequest();
         //_gridManager = MoonSceneManager._instance.GetGridManager();
          _destinationManager = new DestinationManager(_enemyEventManager, /*_gridManager,*/ _maxFlankingSteps);
         _destinationData = new DestinationRequestData();
@@ -52,7 +52,7 @@ public partial class EnemyFSMController : ComponentEvents
     {
 
         //_blockData = BaseSceneManager._instance.RequestWaypointBlock();
-        _resourceRequest.resourceType = Resourcetype.WaypointBlock;
+        _resourceRequest.resourceType = AIResourceType.WaypointBlock;
         _resourceRequest.waypointCallback = (blockData) =>
         {
             if (blockData != null)

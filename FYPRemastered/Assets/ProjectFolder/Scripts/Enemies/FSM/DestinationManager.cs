@@ -24,13 +24,13 @@ public class DestinationManager
     private bool _resultReceived = false;
     private bool _isValid = false;
     private List<Vector3> _points = new List<Vector3>();
-    private ResourceRequest _flankPointRequest;
+    private AIResourceRequest _flankPointRequest;
 
     public DestinationManager(EnemyEventManager eventManager, /*UniformZoneGridManager gridManager,*/ int maxSteps)
     {
         _eventManager = eventManager;
-        _flankPointRequest = new ResourceRequest();
-        _flankPointRequest.resourceType = Resourcetype.FlankPointCandidates;
+        _flankPointRequest = new AIResourceRequest();
+        _flankPointRequest.resourceType = AIResourceType.FlankPointCandidates;
        // _gridManager = gridManager;
         _maxSteps = maxSteps;
         _stepsToTry = new List<int>();
@@ -230,7 +230,7 @@ public class DestinationManager
       
     }
 
-    private IEnumerator RequestFlankDestination(DestinationRequestData destinationData, ResourceRequest request)
+    private IEnumerator RequestFlankDestination(DestinationRequestData destinationData, AIResourceRequest request)
     {
         GetStepsToTry();
         _points.Clear();

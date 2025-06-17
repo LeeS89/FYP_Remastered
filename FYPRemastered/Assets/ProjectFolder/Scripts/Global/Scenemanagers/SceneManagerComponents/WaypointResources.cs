@@ -1,7 +1,4 @@
-using NUnit.Framework;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -12,9 +9,7 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 public class WaypointResources : SceneResources
 {
     private WaypointBlockData _waypointBlockData;
-    private WaypointManager _waypointManager;
-
-   
+  
 
     public override async Task LoadResources()
     {
@@ -54,7 +49,7 @@ public class WaypointResources : SceneResources
 
             NotifyDependancies();
             // Subscribe to the resource requested event
-            SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;
+            SceneEventAggregator.Instance.OnAIResourceRequested += AIResourceRequested;
             SceneEventAggregator.Instance.OnResourceReleased += ResourceReleased;
         }
         catch (Exception e)
@@ -79,17 +74,16 @@ public class WaypointResources : SceneResources
         SceneEventAggregator.Instance.AddDependancies(dependancies);*/
     }
 
-    protected override void ResourceRequested(ResourceRequest request)
+    protected override void AIResourceRequested(AIResourceRequest request)
     {
-        if(request.resourceType != Resourcetype.WaypointBlock) { return; }
+        if(request.resourceType != AIResourceType.WaypointBlock) { return; }
 
-        AIResourceRequest aiRequest = request as AIResourceRequest;
-
+       
         if (_waypointBlockData == null)
         {
             Debug.LogWarning("No Waypoint data exists in the scene, please load the correct SO");
 
-            aiRequest.waypointCallback?.Invoke(null);
+            request.waypointCallback?.Invoke(null);
             
         }
 
@@ -98,7 +92,7 @@ public class WaypointResources : SceneResources
             if (!blockData._inUse)
             {
                 blockData._inUse = true;
-                aiRequest.waypointCallback?.Invoke(blockData);
+                request.waypointCallback?.Invoke(blockData);
                 return;
             }
         }

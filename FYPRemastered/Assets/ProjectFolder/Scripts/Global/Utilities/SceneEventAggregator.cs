@@ -25,6 +25,7 @@ public class SceneEventAggregator : MonoBehaviour
     public event Action OnSceneStarted;
     public event Action OnSceneEnded;
     public event Action<ResourceRequest> OnResourceRequested;
+    public event Action<AIResourceRequest> OnAIResourceRequested;
     public event Action<ResourceRequest> OnResourceReleased;
     //public event Action<List<Type>> OnDependanciesAdded;
     public event Action<SceneResources> OnDependancyAdded;
@@ -42,8 +43,15 @@ public class SceneEventAggregator : MonoBehaviour
 
     public void RequestResource(ResourceRequest request)
     {
-        
-        OnResourceRequested?.Invoke(request);
+        if (request is AIResourceRequest aiRequest)
+        {
+            OnAIResourceRequested?.Invoke(aiRequest);
+        }
+        else
+        {
+            OnResourceRequested?.Invoke(request);
+        }
+           
     }
 
     public void ReleaseResource(ResourceRequest request)

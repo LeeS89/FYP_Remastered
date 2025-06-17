@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class AIResourceRequest : ProjectileResourcerequest
 {
+    public AIResourceType resourceType { get; set; }
+
     public BlockData blockData { get; set; }
     public Action<BlockData> waypointCallback { get; set; }
 

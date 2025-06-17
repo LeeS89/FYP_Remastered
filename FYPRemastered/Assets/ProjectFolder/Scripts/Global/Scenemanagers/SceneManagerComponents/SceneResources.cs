@@ -11,6 +11,8 @@ public abstract class SceneResources
 
     protected virtual void ResourceRequested(ResourceRequest request) { }
 
+    protected virtual void AIResourceRequested(AIResourceRequest request) { }
+
     protected virtual void ResourceReleased(ResourceRequest request) { }
 
     protected virtual void NotifyDependancies() { }
