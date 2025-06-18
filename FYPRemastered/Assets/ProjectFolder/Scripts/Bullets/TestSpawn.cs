@@ -19,7 +19,7 @@ public class TestSpawn : EventManager
     {
         if(_poolManager == null)
         {
-            BaseSceneManager._instance.GetBulletPool(ref _poolManager);
+            //BaseSceneManager._instance.GetBulletPool(ref _poolManager);
         }
 
         Vector3 _directionToPlayer = TargetingUtility.GetDirectionToTarget(_player, transform, true);

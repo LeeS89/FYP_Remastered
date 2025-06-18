@@ -47,7 +47,7 @@ public class WaypointResources : SceneResources
                 Debug.LogError("Failed to load the waypoint data from Addressables.");
             }
 
-            NotifyDependancies();
+            NotifyClassDependancies();
             // Subscribe to the resource requested event
             SceneEventAggregator.Instance.OnAIResourceRequested += AIResourceRequested;
             SceneEventAggregator.Instance.OnResourceReleased += ResourceReleased;
@@ -59,7 +59,7 @@ public class WaypointResources : SceneResources
 
     }
 
-    protected override void NotifyDependancies()
+    protected override void NotifyClassDependancies()
     {
         bool exists = SceneEventAggregator.Instance.CheckDependancyExists(typeof(PathRequestManager));
 

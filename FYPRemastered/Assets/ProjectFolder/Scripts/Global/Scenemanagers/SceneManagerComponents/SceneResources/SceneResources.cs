@@ -5,7 +5,16 @@ public abstract class SceneResources
 {
     public virtual Task LoadResources()
     {
-       
+        return Task.CompletedTask;
+    }
+
+    protected virtual Task LoadResourceAudio()
+    {
+        return Task.CompletedTask;
+    }
+
+    protected virtual Task LoadResourceParticles()
+    {
         return Task.CompletedTask;
     }
 
@@ -15,5 +24,7 @@ public abstract class SceneResources
 
     protected virtual void ResourceReleased(ResourceRequest request) { }
 
-    protected virtual void NotifyDependancies() { }
+    protected virtual void NotifyClassDependancies() { }
+
+    protected virtual void InitializePools() { }
 }

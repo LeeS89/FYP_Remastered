@@ -8,11 +8,11 @@ public partial class PoolManager
     private AudioSource _audioPrefab;
     private ObjectPool<AudioSource> _audioSourcePool;
 
-    public PoolManager(AudioSource prefab, MonoBehaviour caller, int defaultSize = 5, int maxSize = 10)
+    public PoolManager(AudioSource prefab, /*MonoBehaviour caller,*/ int defaultSize = 5, int maxSize = 10)
         : this(defaultSize, maxSize)
     {
         this._audioPrefab = prefab;
-        this._caller = caller;
+        //this._caller = caller;
         // Initialize the AudioSource pool
         _audioSourcePool = new ObjectPool<AudioSource>(
             CreatePooledAudioSource,
@@ -77,7 +77,8 @@ public partial class PoolManager
     {
         AudioSource obj = pool.Get();
         obj.transform.position = position;
-        _caller.StartCoroutine(ReturnToPoolAfterDelay(obj, obj.clip.length));
+        //_caller.StartCoroutine(ReturnToPoolAfterDelay(obj, obj.clip.length));
+        CoroutineRunner.Instance.StartCoroutine(ReturnToPoolAfterDelay(obj, obj.clip.length));
         return obj;
     }
 

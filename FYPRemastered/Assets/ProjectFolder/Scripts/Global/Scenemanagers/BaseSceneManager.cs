@@ -106,7 +106,7 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
     #region Object Pooling Region
     public virtual void GetImpactParticlePool(ref PoolManager manager) { }
 
-    public virtual void GetBulletPool(ref PoolManager manager) { }
+    //public virtual void GetBulletPool(ref PoolManager manager) { }
 
     #endregion
 

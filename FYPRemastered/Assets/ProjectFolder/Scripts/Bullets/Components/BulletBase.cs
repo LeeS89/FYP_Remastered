@@ -13,6 +13,7 @@ public abstract class BulletBase : ComponentEvents, IPoolable
     [Header("Pools")]
     protected PoolManager _objectPoolManager;
     protected PoolManager _hitParticlePoolManager;
+    protected ResourceRequest _request;
 
     [Header("Status")]
     [SerializeField] protected float _lifespan = 5f;
@@ -73,7 +74,7 @@ public abstract class BulletBase : ComponentEvents, IPoolable
         _bulletEventManager.OnExpired += OnExpired;
        
         _timeOut = _lifespan;
-        
+        _request = new ResourceRequest();///////////////////////////////////////////////// NEW ADDITION /////////////////////////////////////////////////////////
         //StartCoroutine(FireDelay());
 
     }
@@ -198,8 +199,15 @@ public abstract class BulletBase : ComponentEvents, IPoolable
 
     public void SetParentPool(PoolManager manager)
     {
-        _objectPoolManager = manager;
+        //_objectPoolManager = manager;
+        _request.ResourceType = PoolResourceType.NormalBulletPool;
+        _request.poolRequestCallback = (pool) =>
+        {
+            _objectPoolManager = pool;
+            _request.ResourceType = PoolResourceType.None; // Reset resource type after assignment
+        };
 
+        SceneEventAggregator.Instance.RequestResource(_request);
         /*if (!_eventManager.IsAlreadyInitialized)
         {
             _eventManager.BindComponentsToEvents();

@@ -31,6 +31,8 @@ public class Gun
     private float _shootInterval = 2f;
     private float _nextShootTime = 0f;
 
+    private ResourceRequest _request;
+
     #region Constructors
     public Gun(EventManager eventManager, GameObject gunOwner)
     {
@@ -49,6 +51,8 @@ public class Gun
             _enemyEventManager.OnAimingLayerReady += SetAimReady;
             _enemyEventManager.OnFacingTarget += SetIsFacingTarget;
 
+
+            _request = new ResourceRequest();
             _enemyEventManager.OnReload += Reload;
             GameManager.OnPlayerDied += PlayerHasDied;
             GameManager.OnPlayerRespawn += PlayerHasRespawned;
@@ -59,7 +63,15 @@ public class Gun
     public Gun(Transform bulletSpawnPoint, EventManager eventManager, GameObject gunOwner) : this(eventManager, gunOwner)
     {
         _bulletSpawnPoint = bulletSpawnPoint;
-        BaseSceneManager._instance.GetBulletPool(ref _poolManager);
+
+        _request.ResourceType = PoolResourceType.NormalBulletPool;
+        _request.poolRequestCallback = (pool) =>
+        {
+            _poolManager = pool;
+            _request.ResourceType = PoolResourceType.None; // Reset resource type after assignment
+        };
+        SceneEventAggregator.Instance.RequestResource(_request);
+        //BaseSceneManager._instance.GetBulletPool(ref _poolManager);
     }
 
     public Gun(Transform bulletSpawnPoint, Transform target, EventManager eventManager, GameObject gunOwner) : this(bulletSpawnPoint, eventManager, gunOwner)

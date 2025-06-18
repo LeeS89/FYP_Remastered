@@ -25,6 +25,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d17b80f5e1882c04b99e676a1cafe481
+    m_Address: DeflectAudio
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f25ee36fa90530643a56d63e9a3467ca
     m_Address: BasicBullet
     m_ReadOnly: 0

@@ -44,17 +44,17 @@ public class MoonSceneManager : BaseSceneManager
 
     public override async Task SetupScene()
     {
-        _resources = new SceneResourceManager(new WaypointResources(), new PlayerFlankingResources(), new AgentZoneRegistry()/*, new PathRequestManager()*/);
+        _resources = new SceneResourceManager(new BulletResources(), new WaypointResources(), new PlayerFlankingResources(), new AgentZoneRegistry()/*, new PathRequestManager()*/);
        
        
         await LoadSceneResources();
         await _resources.LoadDependancies(); // Load any additional resources that are dependencies
 
-        InitializePools();
+        //InitializePools();
         LoadActiveSceneEventManagers();
-        
-        AssignPools();
-      
+
+        //AssignPools(); ////// LATER - Move to Scene Event Aggregator
+
         SceneStarted();
       
     }
@@ -65,11 +65,11 @@ public class MoonSceneManager : BaseSceneManager
     {
         try
         {
-            var bulletHandle = Addressables.LoadAssetAsync<GameObject>("BasicBullet");
+           /* var bulletHandle = Addressables.LoadAssetAsync<GameObject>("BasicBullet");
             _normalBulletPrefab = await bulletHandle.Task;
 
             var hitHandle = Addressables.LoadAssetAsync<GameObject>("BasicHit");
-            _normalHitPrefab = (await hitHandle.Task).GetComponent<ParticleSystem>();
+            _normalHitPrefab = (await hitHandle.Task).GetComponent<ParticleSystem>();*/
 
             /*Addressables.LoadAssetAsync<GameObject>("BasicBullet").Completed += handle =>
             {
@@ -98,7 +98,7 @@ public class MoonSceneManager : BaseSceneManager
                 }
             };*/
             //_normalHitPrefab = Resources.Load<ParticleSystem>("ParticlePoolPrefabs/BasicHit");
-            _deflectAudioPrefab = Resources.Load<AudioSource>("AudioPoolPrefabs/DeflectAudio");
+            //_deflectAudioPrefab = Resources.Load<AudioSource>("AudioPoolPrefabs/DeflectAudio");
 
 
             await _resources.LoadResourcesAsync(); // Load Waypoint Resources
@@ -126,10 +126,10 @@ public class MoonSceneManager : BaseSceneManager
             return;
         }
 
-        _hitParticlePool = new PoolManager(_normalHitPrefab, this, 40, 80);
+        _hitParticlePool = new PoolManager(_normalHitPrefab, 40, 80);
         //_hitParticlePool.PrewarmPool(PoolContents.Particle, 15);
 
-        _deflectAudioPool = new PoolManager(_deflectAudioPrefab, this, 5, 10);
+        _deflectAudioPool = new PoolManager(_deflectAudioPrefab, 5, 10);
         _deflectAudioPool.PrewarmPool(PoolContents.Audio, 5);
 
         _bulletPool = new PoolManager(_normalBulletPrefab, 40, 80);
@@ -144,10 +144,10 @@ public class MoonSceneManager : BaseSceneManager
         manager = _hitParticlePool;  
     }
 
-    public override void GetBulletPool(ref PoolManager manager)
+    /*public override void GetBulletPool(ref PoolManager manager)
     {
         manager = _bulletPool;
-    }
+    }*/
 
     private void AssignPools()
     {

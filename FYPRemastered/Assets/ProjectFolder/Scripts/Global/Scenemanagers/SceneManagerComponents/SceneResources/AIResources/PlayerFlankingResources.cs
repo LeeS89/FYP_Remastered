@@ -46,7 +46,7 @@ public class PlayerFlankingResources : SceneResources
                 Debug.LogError("Failed to load the flank point data from Addressables.");
             }
 
-            NotifyDependancies(); // => Needs Closest Point Job
+            NotifyClassDependancies(); // => Needs Closest Point Job
             // Subscribe to the resource requested event
             /*SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;*/
             //SceneEventAggregator.Instance.OnResourceReleased += ResourceReleased;
@@ -74,7 +74,7 @@ public class PlayerFlankingResources : SceneResources
         Debug.LogError($"Deserialized {_savedPoints.Count} saved points from SamplePointDataSO.");
     }
 
-    protected override void NotifyDependancies()
+    protected override void NotifyClassDependancies()
     {
         bool exists = SceneEventAggregator.Instance.CheckDependancyExists(typeof(ClosestPointToPlayerJob));
 

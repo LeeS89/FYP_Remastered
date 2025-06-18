@@ -13,7 +13,7 @@ public partial class PoolManager
 {
     private int _defaultSize;
     private int _maxPoolSize;
-    private MonoBehaviour _caller;
+    //private MonoBehaviour _caller;
     private static GameObject _poolContainer;
 
     // Constructor that works for all object types

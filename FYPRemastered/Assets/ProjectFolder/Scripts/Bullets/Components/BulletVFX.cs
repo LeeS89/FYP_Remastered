@@ -10,6 +10,8 @@ public class BulletVFX : ComponentEvents
 
     public ParticleSystem particleMove;
 
+    private ResourceRequest _request;
+
     //public MoonSceneManager _manager;
     public override void RegisterLocalEvents(EventManager eventManager)
     {
@@ -21,9 +23,18 @@ public class BulletVFX : ComponentEvents
         _bulletEventManager.OnBulletParticlePlay += PlayBulletParticle;
         _bulletEventManager.OnBulletParticleStop += StopBulletParticle;
         _bulletEventManager.OnSpawnHitParticle += SpawnHitParticle;
+        _request = new ResourceRequest();
 
-        BaseSceneManager._instance.GetImpactParticlePool(ref _poolManager);
-       
+        _request.ResourceType = PoolResourceType.BasicHitParticlePool;
+        _request.poolRequestCallback = (pool) =>
+        {
+            _poolManager = pool;
+           
+        };
+
+        SceneEventAggregator.Instance.RequestResource(_request);
+        //BaseSceneManager._instance.GetImpactParticlePool(ref _poolManager);
+
     }
 
     public override void UnRegisterLocalEvents(EventManager eventManager)

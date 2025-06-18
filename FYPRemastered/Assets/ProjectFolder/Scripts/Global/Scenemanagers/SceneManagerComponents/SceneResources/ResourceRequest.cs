@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class ResourceRequest
 {  
-    ResourceType resourceType { get; set; }
+    public PoolResourceType ResourceType { get; set; }
 
+    public Action<PoolManager> poolRequestCallback;
 }

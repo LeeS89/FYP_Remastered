@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AIResourceRequest : ProjectileResourcerequest
+public class AIResourceRequest : ProjectileResourceRequest
 {
     public AIResourceType resourceType { get; set; }
 

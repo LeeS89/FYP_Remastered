@@ -8,11 +8,11 @@ public partial class PoolManager
     private ParticleSystem _particlePrefab;
     private ObjectPool<ParticleSystem> _particlePool;
 
-    public PoolManager(ParticleSystem prefab, MonoBehaviour caller, int defaultSize = 5, int maxSize = 10)
+    public PoolManager(ParticleSystem prefab, /*MonoBehaviour caller,*/ int defaultSize = 5, int maxSize = 10)
         : this(defaultSize, maxSize)
     {
         this._particlePrefab = prefab;
-        this._caller = caller;
+        //this._caller = caller;
 
         // Initialize the AudioSource pool
         _particlePool = new ObjectPool<ParticleSystem>(
@@ -78,7 +78,8 @@ public partial class PoolManager
         ParticleSystem obj = pool.Get();
         obj.transform.position = position;
         obj.transform.rotation = rotation;
-        _caller.StartCoroutine(ReturnToPoolAfterDelay(obj, obj.main.duration));
+        //_caller.StartCoroutine(ReturnToPoolAfterDelay(obj, obj.main.duration));
+        CoroutineRunner.Instance.StartCoroutine(ReturnToPoolAfterDelay(obj, obj.main.duration));
         return obj;
     }
 

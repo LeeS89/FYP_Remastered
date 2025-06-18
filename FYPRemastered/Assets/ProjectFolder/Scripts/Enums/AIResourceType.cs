@@ -2,12 +2,18 @@ using UnityEngine;
 
 public enum AIResourceType
 {
+    None,
     WaypointBlock,
     FlankPointCandidates
 }
 
-public enum ResourceType
+public enum PoolResourceType
 {
-    NormalBullet,
-    PoisionBullet
+    None,
+    NormalBulletPool,
+    PoisionBulletPool,
+    DeflectAudioPool,
+    BasicHitParticlePool
 }
+
+
