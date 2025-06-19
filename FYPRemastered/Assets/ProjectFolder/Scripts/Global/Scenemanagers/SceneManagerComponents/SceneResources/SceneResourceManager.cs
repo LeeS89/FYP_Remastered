@@ -16,6 +16,7 @@ public class SceneResourceManager
         SceneEventAggregator.Instance.OnCheckDependancyExists += CheckDependanciesExist;
         SceneEventAggregator.Instance.OnDependancyAdded += AddDependancy;
         _resources = new List<SceneResources>(resources);
+        _resourceDependancies = new List<SceneResources>();
     }
 
     
@@ -53,15 +54,15 @@ public class SceneResourceManager
 
     private bool CheckDependanciesExist(Type type)
     {
-        if(_resourceDependancies == null) { return false; }
+        if(_resources == null) { return false; }
         // Check if the resource type exists in the dependencies list
-        return _resourceDependancies.Any(r => r.GetType() == type);
+        return _resourceDependancies.Any(r => r.GetType() == type) || _resources.Any(s => s.GetType() == type);
     }
 
     private void AddDependancy(SceneResources resource)
     {
-        Debug.LogError($"Adding dependancy: {resource.GetType().Name}");
-        if (_resourceDependancies == null) { _resourceDependancies = new List<SceneResources>(); }
+        //Debug.LogError($"Adding dependancy: {resource.GetType().Name}");
+        //if (_resourceDependancies == null) { _resourceDependancies = new List<SceneResources>(); }
         // Check if the resource is already in the list
         if (_resourceDependancies.Any(r => r.GetType() == resource.GetType()))
         {
@@ -71,24 +72,44 @@ public class SceneResourceManager
         _resourceDependancies.Add(resource);
     }
 
-   /* public void AddDependencies(List<Type> dependencyTypes)
+    public void CheckAllDependancies()
     {
-        Debug.LogError($"Adding dependencies: {string.Join(", ", dependencyTypes.Select(t => t.Name))}");
-        if (_resourceDependancies == null) { _resourceDependancies = new List<SceneResources>(); }
-
-        foreach (var type in dependencyTypes)
+        if (_resources == null || _resources.Count == 0)
         {
-            // Check if the resource is already in the list
-            if (_resourceDependancies.Any(r => r.GetType() == type))
-            {
-                continue;  // Skip if it's already added
-            }
-
-            // Create and add the resource instance dynamically if it doesn't exist
-            var resource = (SceneResources)Activator.CreateInstance(type);
-            _resourceDependancies.Add(resource);
+            Debug.LogWarning("No resources to check.");
+            return;
         }
-    }*/
+        foreach (var resource in _resources)
+        {
+            if (resource == null)
+            {
+                Debug.LogError($"Resource {resource.GetType().Name} is null in resources.");
+            }
+            else
+            {
+                Debug.LogError($"Resource {resource.GetType().Name} is present in resources.");
+            }
+        }
+    }
+
+    /* public void AddDependencies(List<Type> dependencyTypes)
+     {
+         Debug.LogError($"Adding dependencies: {string.Join(", ", dependencyTypes.Select(t => t.Name))}");
+         if (_resourceDependancies == null) { _resourceDependancies = new List<SceneResources>(); }
+
+         foreach (var type in dependencyTypes)
+         {
+             // Check if the resource is already in the list
+             if (_resourceDependancies.Any(r => r.GetType() == type))
+             {
+                 continue;  // Skip if it's already added
+             }
+
+             // Create and add the resource instance dynamically if it doesn't exist
+             var resource = (SceneResources)Activator.CreateInstance(type);
+             _resourceDependancies.Add(resource);
+         }
+     }*/
 
     /// <summary>
     /// Custom Update method for resources that implement IUpdateableResource.

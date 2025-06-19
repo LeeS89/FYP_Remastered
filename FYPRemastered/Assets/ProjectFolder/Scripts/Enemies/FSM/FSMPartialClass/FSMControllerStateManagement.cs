@@ -7,18 +7,18 @@ using Random = UnityEngine.Random;
 
 public partial class EnemyFSMController : ComponentEvents
 {
-    public AIResourceRequest _resourceRequest;
+    public AIDestinationRequestData _resourceRequest;
 
     private WaypointData _wpData;
-    private DestinationRequestData _destinationData;
+    //private DestinationRequestData _destinationData;
 
     #region FSM Management
     private void SetupFSM()
     {
-        _resourceRequest = new AIResourceRequest();
-        //_gridManager = MoonSceneManager._instance.GetGridManager();
+        _resourceRequest = new AIDestinationRequestData();
+        
          _destinationManager = new DestinationManager(_enemyEventManager, /*_gridManager,*/ _maxFlankingSteps);
-        _destinationData = new DestinationRequestData();
+        //_destinationData = new DestinationRequestData();
         _path = new NavMeshPath();
         _fovCheckFrequency = _patrolFOVCheckFrequency;
         _fov = new TraceComponent(1);
@@ -68,18 +68,7 @@ public partial class EnemyFSMController : ComponentEvents
 
         SceneEventAggregator.Instance.RequestResource(_resourceRequest);
 
-       /* if (_blockData != null)
-        {
-            _blockZone = _blockData._blockZone;
-            Debug.LogError("Block Zone for enemy: " + _blockZone);
-
-            _wpData.UpdateData(_blockData._waypointPositions.ToList(), _blockData._waypointForwards.ToList());
-
-            _destinationManager.LoadWaypointData(_wpData);
-            //_enemyEventManager.WaypointsUpdated(_wpData);
-
-            BaseSceneManager._instance.RegisterAgentAndZone(this, _blockZone);
-        }*/
+      
     }
 
     
@@ -189,39 +178,39 @@ public partial class EnemyFSMController : ComponentEvents
 
     private void AttemptPatrol()
     {
-       // PatrolStateRequested();
-       //Debug.LogError("Attempting Patrol Destination Request");
-        _destinationData.destinationType = DestinationType.Patrol;
-        _destinationData.start = LineOfSightUtility.GetClosestPointOnNavMesh(_agent.transform.position);
+        // PatrolStateRequested();
+        //Debug.LogError("Attempting Patrol Destination Request");
+        _resourceRequest.destinationType = AIDestinationType.PatrolDestination;
+        _resourceRequest.start = LineOfSightUtility.GetClosestPointOnNavMesh(_agent.transform.position);
         //_destinationData.end = LineOfSightUtility.GetClosestPointOnNavMesh(position.Value);
-        _destinationData.path = _path;
+        _resourceRequest.path = _path;
 
-        _destinationData.externalCallback = (success, point) =>
+        _resourceRequest.externalCallback = (success, point) =>
         {
             //Debug.LogError("Patrol Destination Request Result: " + success + " Point: " + point);
             DestinationRequestResult(success, point, AlertStatus.None);
             //StartCoroutine(DestinationRequestResult(success, point, AlertStatus.None));
         };
-        _destinationManager.RequestNewDestination(_destinationData);
+        _destinationManager.RequestNewDestination(_resourceRequest);
     }
 
     private void AttemptTargetChase()
     {
         ChasingStateRequested();
 
-        _destinationData.destinationType = DestinationType.Chase;
-        _destinationData.start = LineOfSightUtility.GetClosestPointOnNavMesh(_agent.transform.position);
+        _resourceRequest.destinationType = AIDestinationType.ChaseDestination;
+        _resourceRequest.start = LineOfSightUtility.GetClosestPointOnNavMesh(_agent.transform.position);
         /*Vector3 playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
         _destinationData.end = LineOfSightUtility.GetClosestPointOnNavMesh(playerPos);*/
-        _destinationData.path = _path;
+        _resourceRequest.path = _path;
 
-        _destinationData.externalCallback = (success, point) =>
+        _resourceRequest.externalCallback = (success, point) =>
         {
             int _randomStoppingDistance = Random.Range(4, 11);
             DestinationRequestResult(success, point, AlertStatus.Chasing, _randomStoppingDistance);
             //StartCoroutine(DestinationRequestResult(success, point, AlertStatus.Chasing, _randomStoppingDistance));
         };
-        _destinationManager.RequestNewDestination(_destinationData);
+        _destinationManager.RequestNewDestination(_resourceRequest);
 
     }
     
@@ -230,20 +219,20 @@ public partial class EnemyFSMController : ComponentEvents
         // First enter the Chasing state here
         ChasingStateRequested();
         // In chasing, before the wile loop in the coroutine, yield wait until => Destination found
-        
-        
-        // Send Destination Request here
-        _destinationData.destinationType = DestinationType.Flank;
-        _destinationData.start = LineOfSightUtility.GetClosestPointOnNavMesh(_agent.transform.position);
-        
-        _destinationData.path = _path;
 
-        _destinationData.externalCallback = (success, point) =>
+
+        // Send Destination Request here
+        _resourceRequest.destinationType = AIDestinationType.FlankDestination;
+        _resourceRequest.start = LineOfSightUtility.GetClosestPointOnNavMesh(_agent.transform.position);
+        
+        _resourceRequest.path = _path;
+
+        _resourceRequest.externalCallback = (success, point) =>
         {
             DestinationRequestResult(success, point, AlertStatus.Flanking);
             //StartCoroutine(DestinationRequestResult(success, point, AlertStatus.Flanking));
         };
-        _destinationManager.RequestNewDestination(_destinationData);
+        _destinationManager.RequestNewDestination(_resourceRequest);
         // If request fails => Request Player destination
 
         // If 2nd request fails => Later implement a fallback 
@@ -254,7 +243,7 @@ public partial class EnemyFSMController : ComponentEvents
         if (success)
         {
           
-            _destinationData.carvingCallback = () =>
+            _resourceRequest.carvingCallback = () =>
             {
                 if (_obstacle.enabled)
                 {
@@ -262,7 +251,7 @@ public partial class EnemyFSMController : ComponentEvents
                 }
             };
             
-            _destinationData.agentActiveCallback = () =>
+            _resourceRequest.agentActiveCallback = () =>
             {
                 if (!_agent.enabled)
                 {
@@ -274,7 +263,7 @@ public partial class EnemyFSMController : ComponentEvents
                 _agent.SetDestination(destination);
                 _enemyEventManager.DestinationApplied();
             };
-            _destinationManager.StartCarvingRoutine(_destinationData);
+            _destinationManager.StartCarvingRoutine(_resourceRequest);
             
            /* yield return new WaitUntil(() => _agent.enabled);
             _agent.SetDestination(destination);

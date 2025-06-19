@@ -71,7 +71,7 @@ public class PlayerFlankingResources : SceneResources
         }
 
         _savedPoints = new List<SamplePointData>(_flankPointDataSO.savedPoints); 
-        Debug.LogError($"Deserialized {_savedPoints.Count} saved points from SamplePointDataSO.");
+       
     }
 
     protected override void NotifyClassDependancies()
@@ -94,7 +94,7 @@ public class PlayerFlankingResources : SceneResources
         _nearestPointToPlayer = nearestPointIndex;
     }
 
-    protected override void AIResourceRequested(AIResourceRequest request) // => Add as an aevent in SceneEventAggregator
+    protected override void AIResourceRequested(AIDestinationRequestData request) // => Add as an aevent in SceneEventAggregator
     {
         if(request.resourceType != AIResourceType.FlankPointCandidates) { return; }
 
@@ -116,7 +116,7 @@ public class PlayerFlankingResources : SceneResources
                 positions.Add(_savedPoints[i].position);
             }
         }
-        Debug.LogError($"Flank Point Candidates for step {step}: {positions.Count} positions found.");
+       
         request.FlankPointCandidatesCallback?.Invoke(positions);
 
     }

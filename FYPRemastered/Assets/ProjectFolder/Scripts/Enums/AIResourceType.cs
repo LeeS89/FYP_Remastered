@@ -4,8 +4,17 @@ public enum AIResourceType
 {
     None,
     WaypointBlock,
-    FlankPointCandidates
+    FlankPointCandidates,
+   
 }
+
+public enum AIDestinationType
+{
+    None,
+    ChaseDestination,
+    FlankDestination,
+    PatrolDestination
+} 
 
 public enum PoolResourceType
 {

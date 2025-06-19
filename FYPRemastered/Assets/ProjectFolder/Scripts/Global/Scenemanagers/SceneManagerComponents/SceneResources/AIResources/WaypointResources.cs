@@ -63,10 +63,29 @@ public class WaypointResources : SceneResources
     {
         bool exists = SceneEventAggregator.Instance.CheckDependancyExists(typeof(PathRequestManager));
 
-        if (exists) { return; }
+        if (!exists)
+        {
 
-        SceneEventAggregator.Instance.AddDependancy(new PathRequestManager());
+            SceneEventAggregator.Instance.AddDependancy(new PathRequestManager());
+        }
 
+        exists = SceneEventAggregator.Instance.CheckDependancyExists(typeof(AgentZoneRegistry));
+
+        if (!exists)
+        {
+            SceneEventAggregator.Instance.AddDependancy(new AgentZoneRegistry());
+        }
+
+        exists = SceneEventAggregator.Instance.CheckDependancyExists(typeof(PlayerFlankingResources));
+
+        if (!exists)
+        {
+            SceneEventAggregator.Instance.AddDependancy(new PlayerFlankingResources());
+        }
+        else
+        {
+            Debug.LogError("Player Flanking Resources already exists, not adding again.");
+        }
         /*List<Type> dependancies = new()
         {
             typeof(PathRequestManager)
@@ -74,7 +93,7 @@ public class WaypointResources : SceneResources
         SceneEventAggregator.Instance.AddDependancies(dependancies);*/
     }
 
-    protected override void AIResourceRequested(AIResourceRequest request)
+    protected override void AIResourceRequested(AIDestinationRequestData request)
     {
         if(request.resourceType != AIResourceType.WaypointBlock) { return; }
 

@@ -9,7 +9,6 @@ using Random = UnityEngine.Random;
 public class DestinationManager
 {
 
-    //private UniformZoneGridManager _gridManager;
     private int _maxSteps;
     private List<int> _stepsToTry;
     private List<Vector3> _newPoints;
@@ -24,14 +23,12 @@ public class DestinationManager
     private bool _resultReceived = false;
     private bool _isValid = false;
     private List<Vector3> _points = new List<Vector3>();
-    private AIResourceRequest _flankPointRequest;
 
-    public DestinationManager(EnemyEventManager eventManager, /*UniformZoneGridManager gridManager,*/ int maxSteps)
+
+    public DestinationManager(EnemyEventManager eventManager, int maxSteps)
     {
         _eventManager = eventManager;
-        _flankPointRequest = new AIResourceRequest();
-        _flankPointRequest.resourceType = AIResourceType.FlankPointCandidates;
-       // _gridManager = gridManager;
+      
         _maxSteps = maxSteps;
         _stepsToTry = new List<int>();
         _newPoints = new List<Vector3>();
@@ -53,7 +50,7 @@ public class DestinationManager
 
     public void LoadWaypointData(WaypointData wpData)
     {
-        //Debug.LogError($"Loading Waypoint Data: {wpData._waypointPositions.Count} waypoints.");
+       
         _waypointPairs.Clear();
 
         for (int i = 0; i < wpData._waypointPositions.Count; i++)
@@ -81,23 +78,22 @@ public class DestinationManager
 
 
 
-    public void RequestNewDestination(DestinationRequestData destinationData) 
+    public void RequestNewDestination(AIDestinationRequestData destinationRequest) 
     {
-        DestinationType destinationType = destinationData.destinationType;
-
-        switch (destinationType)
+      
+        switch (destinationRequest.destinationType)
         {
-            case DestinationType.Chase:
-                RequestPlayerDestination(destinationData);
+            case AIDestinationType.ChaseDestination:
+                RequestPlayerDestination(destinationRequest);
                 break;
-            case DestinationType.Flank:
-                CoroutineRunner.Instance.StartCoroutine(RequestFlankDestination(destinationData, _flankPointRequest));
+            case AIDestinationType.FlankDestination:
+                CoroutineRunner.Instance.StartCoroutine(RequestFlankDestination(destinationRequest));
                 break;
-            case DestinationType.Patrol:
-                RequestPatrolPointDestination(destinationData);
+            case AIDestinationType.PatrolDestination:
+                RequestPatrolPointDestination(destinationRequest);
                 break;
             default:
-                Debug.LogError($"Unknown destination type: {destinationType}");
+                Debug.LogError($"Unknown destination type: {destinationRequest.destinationType}");
              
                 break;
         }
@@ -112,55 +108,12 @@ public class DestinationManager
 
     private List<Vector3> GetFlankPoints()
     {
-        //GetStepsToTry(); 
-        //_points.Clear();
-        //List<Vector3> points = new List<Vector3>();
-
-        /*foreach (int step in _stepsToTry)
-        {
-            var stepPoints = _gridManager.GetCandidatePointsAtStep(step); // => Changing to event in Scene event aggregator
-            if (stepPoints.Count > 0)
-            {
-                _points.AddRange(stepPoints.OrderBy(p => Random.value));
-            }
-        }*/
-
         return _points;
     }
 
-    private IEnumerator ValidateFlankPointsRoutine(AIResourceRequest request)
-    {
-        GetStepsToTry();
-        _points.Clear();
-
-        foreach (int step in _stepsToTry)
-        {
-            _resultReceived = false;
-
-            request.FlankPointCandidatesCallback = (points) =>
-            {
-                if (points != null && points.Count > 0)
-                {
-                    _points.AddRange(points.OrderBy(p => Random.value));
-                }
-                _resultReceived = true;
-            };
-
-            SceneEventAggregator.Instance.RequestResource(request);
-
-            yield return _waitUntilResultReceived;
-
-           /* var stepPoints = _gridManager.GetCandidatePointsAtStep(step); // => Changing to event in Scene event aggregator
-            if (stepPoints.Count > 0)
-            {
-                _points.AddRange(stepPoints.OrderBy(p => Random.value));
-            }*/
-        }
-    }
-
-
+   
     
-    private IEnumerator AttemptDestinationRoutine(DestinationRequestData data, Func<List<Vector3>> candidatePointProvider)
+    private IEnumerator AttemptDestinationRoutine(AIDestinationRequestData destinationRequest,/*DestinationRequestData data,*/ Func<List<Vector3>> candidatePointProvider)
     {
         var candidates = candidatePointProvider.Invoke();
 
@@ -170,9 +123,9 @@ public class DestinationManager
             _resultReceived = false;
             _isValid = false;
 
-            data.end = LineOfSightUtility.GetClosestPointOnNavMesh(point);
+            destinationRequest.end = LineOfSightUtility.GetClosestPointOnNavMesh(point);
 
-            data.internalCallback = (success) =>
+            destinationRequest.internalCallback = (success) =>
             {
                 _isValid = success;
                 _resultReceived = true;
@@ -180,29 +133,29 @@ public class DestinationManager
             };
 
             //_eventManager.PathRequested(data);
-            SceneEventAggregator.Instance.PathRequested(data);
+            SceneEventAggregator.Instance.PathRequested(destinationRequest);
 
             yield return _waitUntilResultReceived;
 
             if (!_isValid) continue;
 
-            if(data.destinationType == DestinationType.Patrol)
+            if(destinationRequest.destinationType == AIDestinationType.PatrolDestination)
             {
                 var match = _waypointPairs.FirstOrDefault(p => p.position == point);
                 _eventManager.RotateAtPatrolPoint(match.forward);
 
                 currentWaypointPair = match;
             }
-
-            data.externalCallback?.Invoke(true, point);
+            destinationRequest.resourceType = AIResourceType.None;
+            destinationRequest.externalCallback?.Invoke(true, point);
             yield break;
         }
 
-        data.externalCallback?.Invoke(false, Vector3.zero);
+        destinationRequest.externalCallback?.Invoke(false, Vector3.zero);
     }
 
 
-    private void RequestPatrolPointDestination(DestinationRequestData destinationData)
+    private void RequestPatrolPointDestination(AIDestinationRequestData destinationRequest)
     {
         if (currentWaypointPair.HasValue)
         {
@@ -216,44 +169,43 @@ public class DestinationManager
             ShuffleWaypointPairs();  // Shuffle if no waypoint has been selected yet
         }
 
-        CoroutineRunner.Instance.StartCoroutine(AttemptDestinationRoutine(destinationData, GetWaypointPositions));
+        CoroutineRunner.Instance.StartCoroutine(AttemptDestinationRoutine(destinationRequest, GetWaypointPositions));
     }
-   /* private void RequestPatrolPointDestination(DestinationRequestData destinationData)
-    {
-        ShuffleWaypointPairs(); 
-        CoroutineRunner.Instance.StartCoroutine(AttemptDestinationRoutine(destinationData, GetWaypointPositions));
-    }*/
+  
 
-    private void RequestPlayerDestination(DestinationRequestData destinationData)
+    private void RequestPlayerDestination(AIDestinationRequestData destinationRequest)
     {
-        CoroutineRunner.Instance.StartCoroutine(AttemptDestinationRoutine(destinationData, GetPlayerPoint));
+        CoroutineRunner.Instance.StartCoroutine(AttemptDestinationRoutine(destinationRequest, GetPlayerPoint));
       
     }
 
-    private IEnumerator RequestFlankDestination(DestinationRequestData destinationData, AIResourceRequest request)
+    private IEnumerator RequestFlankDestination(AIDestinationRequestData destinationRequest)
     {
         GetStepsToTry();
         _points.Clear();
 
+        destinationRequest.resourceType = AIResourceType.FlankPointCandidates; // Set the resource type for the request
         foreach (int step in _stepsToTry)
         {
             _resultReceived = false;
-            request.numSteps = step; // Set the step for the request
+            destinationRequest.numSteps = step; // Set the step for the request
 
-            request.FlankPointCandidatesCallback = (points) =>
+            destinationRequest.FlankPointCandidatesCallback = (points) =>
             {
                 if (points != null && points.Count > 0)
                 {
                     _points.AddRange(points.OrderBy(p => Random.value));
                 }
                 _resultReceived = true;
+                
             };
 
-            SceneEventAggregator.Instance.RequestResource(request);
+            SceneEventAggregator.Instance.RequestResource(destinationRequest);
 
             yield return _waitUntilResultReceived;
         }
-        CoroutineRunner.Instance.StartCoroutine(AttemptDestinationRoutine(destinationData, GetFlankPoints));
+       
+        CoroutineRunner.Instance.StartCoroutine(AttemptDestinationRoutine(destinationRequest, GetFlankPoints));
 
     }
 
@@ -280,27 +232,24 @@ public class DestinationManager
 
    
 
-    public void StartCarvingRoutine(DestinationRequestData data)
+    public void StartCarvingRoutine(AIDestinationRequestData destinationRequest)
     {
-        CoroutineRunner.Instance.StartCoroutine(CarvingRoutine(data));
+        CoroutineRunner.Instance.StartCoroutine(CarvingRoutine(destinationRequest));
     }
 
-    private IEnumerator CarvingRoutine(DestinationRequestData data)
+    private IEnumerator CarvingRoutine(AIDestinationRequestData destinationRequest)
     {
-        data.carvingCallback?.Invoke();
+        destinationRequest.carvingCallback?.Invoke();
 
         yield return null;
-        //yield return new WaitForSeconds(0.15f);
-
-        data.agentActiveCallback?.Invoke();
+       
+        destinationRequest.agentActiveCallback?.Invoke();
         
     }
 
     public void OnInstanceDestroyed()
     {
-        
-        //_gridManager = null;
-        
+    
         _eventManager = null;
         _stepsToTry.Clear();
         _newPoints.Clear();

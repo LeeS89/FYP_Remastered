@@ -11,7 +11,7 @@ public class EnemyEventManager : EventManager
     public event Action<bool> OnPlayerSeen;
     public event Action<bool> OnRotateTowardsTarget;
     public event Action OnPathInvalid;
-    public event Action<DestinationRequestData> OnPathRequested;
+    public event Action<AIDestinationRequestData> OnPathRequested;
 
     // Animation events
     public event Action<AnimationAction> OnAnimationTriggered;
@@ -104,7 +104,7 @@ public class EnemyEventManager : EventManager
         OnPathInvalid?.Invoke();
     }
 
-    public void PathRequested(DestinationRequestData request)
+    public void PathRequested(AIDestinationRequestData request)
     {
         OnPathRequested?.Invoke(request);
     }

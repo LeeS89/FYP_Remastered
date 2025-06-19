@@ -8,7 +8,7 @@ using UnityEngine.AI;
 /// </summary>
 public class PathRequestManager : SceneResources, IUpdateableResource
 {
-    private Queue<DestinationRequestData> _pathRequests = new Queue<DestinationRequestData>();
+    private Queue<AIDestinationRequestData> _pathRequests = new Queue<AIDestinationRequestData>();
     private int _maxConcurrentRequests = 5;
 
     public override async Task LoadResources()
@@ -49,7 +49,7 @@ public class PathRequestManager : SceneResources, IUpdateableResource
         return path.status == NavMeshPathStatus.PathComplete;
     }
 
-    private void AddRequest(DestinationRequestData request)
+    private void AddRequest(AIDestinationRequestData request)
     {
         _pathRequests.Enqueue(request);
     }

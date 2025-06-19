@@ -9,14 +9,9 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
     public static BaseSceneManager _instance { get; private set; }
 
     [SerializeField] protected List<EventManager> _eventManagers;
-    [SerializeField] protected ParticleSystem _normalHitPrefab;
-    [SerializeField] protected AudioSource _deflectAudioPrefab;
-    [SerializeField] protected GameObject _normalBulletPrefab;
-    protected PoolManager _bulletPool;
+  
     protected PoolManager _deflectAudioPool;
-    protected PoolManager _hitParticlePool;
-    //protected PathRequestManager _pathRequestManager;
-
+  
     protected virtual void Awake()
     {
         _instance = this;
@@ -38,25 +33,7 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
     }
 
 
-    /// <summary>
-    /// Events used with Enemy AI system to notify when the closest flanking point to player has changed.
-    /// When there is an active Alert status - OnClosestPointToPlayerChanged will be invoked by the player when ever they stop moving
-    /// This in turn runs the ClosestPointToPlayerJob to find the closest point to player. Once job completes,
-    /// OnClosestPointToPlayerJobComplete notifies all interested parties with the index of the closest point to player.
-    /// </summary>
-    public event Action OnClosestPointToPlayerChanged; // => Moving to Scene event aggregator
-    public event Action<int> OnClosestPointToPlayerJobComplete; // => Moving to Scene event aggregator
-
-    public void ClosestPointToPlayerchanged() // Player will invoke this event, and the scene manager will listen to it
-    {
-        OnClosestPointToPlayerChanged?.Invoke();
-    }
-
-    [Obsolete("Use Scene Event Aggregator instead")]
-    public void ClosestPointToPlayerJobComplete(int pointIndex)
-    {
-        OnClosestPointToPlayerJobComplete?.Invoke(pointIndex);
-    }
+   
 
 
     #endregion
@@ -86,30 +63,40 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
     }
     #endregion
 
-    #region Waypoint and enemy alert phase Functions  
+
+
+    #region Obsolete Code
     //protected virtual void LoadWaypoints() { }
-
-
-
-   // public virtual void RegisterAgentAndZone(EnemyFSMController agent, int zone) { }
+    // public virtual void RegisterAgentAndZone(EnemyFSMController agent, int zone) { }
     public virtual void UnregisterAgentAndZone(EnemyFSMController agent, int zone) { }
     //public virtual void AlertZoneAgents(int zone, EnemyFSMController source) { }
 
-   // public virtual void EnqueuePathRequest(DestinationRequestData request) { }
+    // public virtual void EnqueuePathRequest(DestinationRequestData request) { }
 
     //public virtual UniformZoneGridManager GetGridManager() => null;
 
-    #endregion
+    /// <summary>
+    /// Events used with Enemy AI system to notify when the closest flanking point to player has changed.
+    /// When there is an active Alert status - OnClosestPointToPlayerChanged will be invoked by the player when ever they stop moving
+    /// This in turn runs the ClosestPointToPlayerJob to find the closest point to player. Once job completes,
+    /// OnClosestPointToPlayerJobComplete notifies all interested parties with the index of the closest point to player.
+    /// </summary>
+    public event Action OnClosestPointToPlayerChanged; // => Moving to Scene event aggregator
+    public event Action<int> OnClosestPointToPlayerJobComplete; // => Moving to Scene event aggregator
 
+    public void ClosestPointToPlayerchanged() // Player will invoke this event, and the scene manager will listen to it
+    {
+        OnClosestPointToPlayerChanged?.Invoke();
+    }
 
+    [Obsolete("Use Scene Event Aggregator instead")]
+    public void ClosestPointToPlayerJobComplete(int pointIndex)
+    {
+        OnClosestPointToPlayerJobComplete?.Invoke(pointIndex);
+    }
 
-    #region Object Pooling Region
     public virtual void GetImpactParticlePool(ref PoolManager manager) { }
 
     //public virtual void GetBulletPool(ref PoolManager manager) { }
-
     #endregion
-
-    //Testing
-   // public virtual void TestRun() { }
 }
