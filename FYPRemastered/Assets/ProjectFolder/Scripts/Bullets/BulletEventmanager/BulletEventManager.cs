@@ -9,6 +9,7 @@ public class BulletEventManager : EventManager
     public event Action OnFired;
     public event Action OnCollision;
     public event Action<Vector3, Quaternion, float> OnDeflected;
+    public event Func<Vector3> OnGetDirectionToTarget;
     public event Action OnFreeze;
     public event Action OnUnFreeze;
     public event Action<BulletBase/*, BulletType*/> OnBulletParticlePlay;
@@ -100,6 +101,11 @@ public class BulletEventManager : EventManager
     public void Deflected(Vector3 direction, Quaternion rotation, float speed)
     {
         OnDeflected?.Invoke(direction, rotation, speed);
+    }
+
+    public Vector3 GetDirectionToTarget()
+    {
+        return OnGetDirectionToTarget?.Invoke() ?? Vector3.zero;
     }
 
     public void Freeze()

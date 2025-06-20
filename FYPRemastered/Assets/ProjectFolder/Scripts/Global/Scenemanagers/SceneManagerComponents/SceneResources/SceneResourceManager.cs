@@ -13,7 +13,7 @@ public class SceneResourceManager
     public SceneResourceManager(params SceneResources[] resources)
     {
         //SceneEventAggregator.Instance.OnDependanciesAdded += AddDependencies;
-        SceneEventAggregator.Instance.OnCheckDependancyExists += CheckDependanciesExist;
+        SceneEventAggregator.Instance.OnCheckDependencyExists += CheckDependenciesExist;
         SceneEventAggregator.Instance.OnDependancyAdded += AddDependancy;
         _resources = new List<SceneResources>(resources);
         _resourceDependancies = new List<SceneResources>();
@@ -52,7 +52,7 @@ public class SceneResourceManager
     }
 
 
-    private bool CheckDependanciesExist(Type type)
+    private bool CheckDependenciesExist(Type type)
     {
         if(_resources == null) { return false; }
         // Check if the resource type exists in the dependencies list

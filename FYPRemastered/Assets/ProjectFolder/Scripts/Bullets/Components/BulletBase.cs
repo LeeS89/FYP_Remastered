@@ -28,7 +28,7 @@ public abstract class BulletBase : ComponentEvents, IPoolable
     protected BulletEventManager _bulletEventManager;
     protected GameObject _owner;
     protected GameObject _cachedRoot;
-    protected IDeflectable _deflectableComponent;
+    //protected IDeflectable _deflectableComponent;
    
     //[SerializeField] protected BulletType _bulletType;
     [SerializeField] protected CapsuleCollider _capsuleCollider;
@@ -72,7 +72,8 @@ public abstract class BulletBase : ComponentEvents, IPoolable
         _bulletEventManager = (BulletEventManager)_eventManager;
         RegisterDependancies();
         _bulletEventManager.OnExpired += OnExpired;
-       
+        _bulletEventManager.OnGetDirectionToTarget += GetDirectionToTarget;
+
         _timeOut = _lifespan;
         _request = new ResourceRequest();///////////////////////////////////////////////// NEW ADDITION /////////////////////////////////////////////////////////
         //StartCoroutine(FireDelay());
@@ -84,6 +85,7 @@ public abstract class BulletBase : ComponentEvents, IPoolable
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
         _bulletEventManager.OnExpired -= OnExpired;
+        _bulletEventManager.OnGetDirectionToTarget -= GetDirectionToTarget;
         base.UnRegisterLocalEvents(eventManager);
         _bulletEventManager = null;
         UnRegisterDependencies();
@@ -93,17 +95,19 @@ public abstract class BulletBase : ComponentEvents, IPoolable
     protected void RegisterDependancies()
     {
         _cachedRoot = transform.parent.gameObject;
-        _deflectableComponent = _cachedRoot.GetComponentInChildren<IDeflectable>();
-        if (_deflectableComponent != null)
-        {
-            _deflectableComponent.RootComponent = _cachedRoot;
-        }
+      
     }
 
     protected void UnRegisterDependencies()
     {
         _cachedRoot = null;
-        _deflectableComponent = null;
+        
+    }
+
+    protected virtual Vector3 GetDirectionToTarget()
+    {
+        Vector3 directionTotarget = TargetingUtility.GetDirectionToTarget(_owner, _cachedRoot, true);
+        return directionTotarget;
     }
 
     IEnumerator FireDelay()
@@ -119,11 +123,7 @@ public abstract class BulletBase : ComponentEvents, IPoolable
 
     public virtual void Initializebullet()
     {
-        
-        if(_deflectableComponent != null)
-        {
-            _deflectableComponent.ParentOwner = _owner;
-        }
+     
 
         //_isAlive = true;
         SetState(IsAlive);

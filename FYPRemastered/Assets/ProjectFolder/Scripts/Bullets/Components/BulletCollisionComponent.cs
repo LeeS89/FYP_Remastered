@@ -22,31 +22,7 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
     [SerializeField] private float _statusEffectChancePercentage;
 
     private BulletEventManager _bulletEventManager; 
-    private GameObject _parentOwner;
-    private GameObject _rootComponent;
     
-   
-   
-    public GameObject ParentOwner
-    {
-        get => _parentOwner;
-        set
-        {
-            if (value != null)
-            {
-                _parentOwner = value;
-            }
-        }
-    }
-
-    public GameObject RootComponent
-    {
-        get => _rootComponent;
-        set
-        {
-            _rootComponent = value;
-        }
-    }
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
@@ -82,7 +58,9 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
 
     public void Deflect()
     {
-        Vector3 directionTotarget = TargetingUtility.GetDirectionToTarget(_parentOwner, _rootComponent, true);
+       
+        Vector3 directionTotarget = _bulletEventManager.GetDirectionToTarget();
+      
         Quaternion newRotation = Quaternion.LookRotation(directionTotarget);
        
         _bulletEventManager.Deflected(directionTotarget, newRotation, _deflectSpeed);

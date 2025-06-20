@@ -13,7 +13,7 @@ public partial class PoolManager
     {
         this._prefab = prefab;
 
-        // Initialize the GameObject pool
+       
         _gameObjectPool = new ObjectPool<GameObject>(
             CreatePooledGameObject,
             OnGetFromPool,

@@ -29,7 +29,7 @@ public class SceneEventAggregator : MonoBehaviour
     public event Action<ResourceRequest> OnResourceReleased;
     //public event Action<List<Type>> OnDependanciesAdded;
     public event Action<SceneResources> OnDependancyAdded;
-    public event Func<Type, bool> OnCheckDependancyExists;
+    public event Func<Type, bool> OnCheckDependencyExists;
 
     public void SceneStarted()
     {
@@ -74,8 +74,8 @@ public class SceneEventAggregator : MonoBehaviour
 
     public bool CheckDependancyExists(Type dependency)
     {
-        // Invoke the event and return the result
-        return OnCheckDependancyExists?.Invoke(dependency) ?? false;
+        
+        return OnCheckDependencyExists?.Invoke(dependency) ?? false;
     }
     #endregion
 
