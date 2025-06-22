@@ -4,4 +4,6 @@ public interface IDeflectable
 {
     void Deflect();
 
+    void FireBack();
+
 }

@@ -7,8 +7,8 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 public class BulletResources : SceneResources
 {
     private GameObject _normalBulletPrefab;
-    private ParticleSystem _normalHitPrefab;
-    private AudioSource _deflectAudioPrefab;
+    private GameObject _normalHitPrefab;
+    private GameObject _deflectAudioPrefab;
 
     private PoolManager _bulletPool;
     private PoolManager _deflectAudioPool;
@@ -61,7 +61,7 @@ public class BulletResources : SceneResources
 
             if(audioHandle.Status == AsyncOperationStatus.Succeeded)
             {
-                _deflectAudioPrefab = audioHandle.Result.GetComponent<AudioSource>();
+                _deflectAudioPrefab = audioHandle.Result;
             }
 
         }
@@ -82,7 +82,7 @@ public class BulletResources : SceneResources
 
             if (particleHandle.Status == AsyncOperationStatus.Succeeded)
             {
-                _normalHitPrefab = particleHandle.Result.GetComponent<ParticleSystem>();
+                _normalHitPrefab = particleHandle.Result;
                 if (_normalHitPrefab == null)
                 {
                     Debug.LogError("Loaded normal hit particle prefab is null.");
@@ -111,7 +111,7 @@ public class BulletResources : SceneResources
         if (_deflectAudioPrefab != null)
         {
             _deflectAudioPool = new PoolManager(_deflectAudioPrefab, 5, 10);
-            _deflectAudioPool.PrewarmPool(PoolContents.Audio, 5);
+            _deflectAudioPool.PrewarmPool(5);
         }
 
         if (_normalBulletPrefab != null)

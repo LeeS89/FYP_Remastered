@@ -60,8 +60,10 @@ public class WeaponCollisionComponent : EventManager, IImpactAudio
         }
         ContactPoint contact = collision.contacts[0];
         Vector3 impactPosition = contact.point;
-        AudioSource audio = _audioPoolManager.GetAudioSource(impactPosition, transform.rotation);//ParticlePool.GetFromPool<AudioSource>(PoolType.AudioSRC, impactPosition, Quaternion.identity);
-        audio.Play();
+        //AudioPoolExtensions.GetAndPlay(_audioPoolManager, impactPosition, transform.rotation);
+
+        //AudioSource audio = _audioPoolManager.GetAudioSource(impactPosition, transform.rotation);//ParticlePool.GetFromPool<AudioSource>(PoolType.AudioSRC, impactPosition, Quaternion.identity);
+        //audio.Play();
         //_audioSource.PlayOneShot(_clip);
         deflectable.Deflect();
           

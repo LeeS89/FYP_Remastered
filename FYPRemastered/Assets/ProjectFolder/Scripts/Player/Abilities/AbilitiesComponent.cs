@@ -79,7 +79,7 @@ public class AbilitiesComponent : ComponentEvents
         
     }
 
-    private void HandleTraceResults(int j)
+    private void HandleTraceResults(int j) // => Search instead for IDeflectable interface and call FireeBack()
     {
         GameObject obj = _bulletTraceresults[j].transform.parent.gameObject;
 

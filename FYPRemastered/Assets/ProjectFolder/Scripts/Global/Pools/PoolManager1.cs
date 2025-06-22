@@ -1,11 +1,11 @@
-using System.Collections.Generic;
+/*using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
-using UnityEngine.SceneManagement;
+
 
 public partial class PoolManager
 {
-    private GameObject _prefab;
+   *//* private GameObject _prefab;
     private ObjectPool<GameObject> _gameObjectPool;
 
     public PoolManager(GameObject prefab, int defaultSize = 20, int maxSize = 50)
@@ -62,7 +62,7 @@ public partial class PoolManager
 
     private void OnGetFromPool(GameObject obj)
     {
-        obj.SetActive(false); 
+        obj.SetActive(false); ///// SET TO TRUE
     }
 
     private void OnReturnToPool(GameObject obj)
@@ -75,21 +75,22 @@ public partial class PoolManager
         GameObject.Destroy(obj); // Destroy the GameObject when it's no longer needed
     }
 
-    public GameObject GetGameObject(Vector3 position, Quaternion rotation)
+   *//* public GameObject GetGameObject(Vector3 position, Quaternion rotation)
     {
-        return GetObjectFromPool(_gameObjectPool, position, rotation); // Get a GameObject from the pool
-    }
+        return GetObjectFromPool(position, rotation); // Get a GameObject from the pool
+    }*//*
 
-    private GameObject GetObjectFromPool(ObjectPool<GameObject> pool, Vector3 position, Quaternion rotation)
+    public GameObject GetFromPool(Vector3 position, Quaternion rotation)
     {
-        GameObject obj = pool.Get();
+        GameObject obj = _gameObjectPool.Get();
         obj.transform.position = position;
         obj.transform.rotation = rotation;
         return obj;
     }
 
-    public void ReleaseGameObject(GameObject obj)
+   *//* public void ReleaseToPool(GameObject obj)
     {
         ReleaseObjectToPool(_gameObjectPool, obj); // Release a GameObject back to the pool
-    }
+    }*//*
 }
+*/

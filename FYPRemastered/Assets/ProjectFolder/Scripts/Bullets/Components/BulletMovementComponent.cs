@@ -3,6 +3,9 @@ using UnityEngine.UIElements;
 
 public class BulletMovementComponent : ComponentEvents
 {
+    [Header("Deflection Speed")]
+    [SerializeField] private float _deflectSpeed;
+
     private Rigidbody _rb;
     [SerializeField] private float _editableSpeed;
     private float _speed;
@@ -34,7 +37,8 @@ public class BulletMovementComponent : ComponentEvents
             _speed = _editableSpeed;
             _bulletEventManager = _eventManager as BulletEventManager;
             _bulletEventManager.OnFired += Launch;
-            _bulletEventManager.OnDeflected += Deflected;
+            _bulletEventManager.OnReverseDirection += ReverseDirection;
+            //_bulletEventManager.OnDeflected += Deflected;
             _bulletEventManager.OnFreeze += ResetRigidBody;
         }
     }
@@ -42,7 +46,8 @@ public class BulletMovementComponent : ComponentEvents
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
         _bulletEventManager.OnFired -= Launch;
-        _bulletEventManager.OnDeflected -= Deflected;
+        //_bulletEventManager.OnDeflected -= Deflected;
+        _bulletEventManager.OnReverseDirection -= ReverseDirection;
         _bulletEventManager.OnFreeze -= ResetRigidBody;
         _bulletEventManager = null;
         _eventManager = null;
@@ -76,12 +81,17 @@ public class BulletMovementComponent : ComponentEvents
     }
 
     //public bool _deflect = false;
-    public void Deflected(Vector3 direction, Quaternion newRotation, float newSpeed)
+    public void ReverseDirection(/*Vector3 direction, Quaternion newRotation, float newSpeed*/)
     {
-        _speed = newSpeed;
+        Vector3 directionTotarget = _bulletEventManager.GetDirectionToTarget();
+
+        Quaternion newRotation = Quaternion.LookRotation(directionTotarget);
+
+
+        _speed = _deflectSpeed;
         _rb.MoveRotation(newRotation);
 
-        _rb.AddForce(direction * newSpeed, ForceMode.VelocityChange);
+        _rb.AddForce(directionTotarget * _speed, ForceMode.VelocityChange);
         DeflectionProcessed = true;
 
     }

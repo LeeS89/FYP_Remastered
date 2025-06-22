@@ -1,4 +1,4 @@
-using System.Collections;
+/*using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -8,7 +8,7 @@ public partial class PoolManager
     private AudioSource _audioPrefab;
     private ObjectPool<AudioSource> _audioSourcePool;
 
-    public PoolManager(AudioSource prefab, /*MonoBehaviour caller,*/ int defaultSize = 5, int maxSize = 10)
+    public PoolManager(AudioSource prefab, MonoBehaviour caller, int defaultSize = 5, int maxSize = 10)
         : this(defaultSize, maxSize)
     {
         this._audioPrefab = prefab;
@@ -30,7 +30,7 @@ public partial class PoolManager
         int prewarmCount = Mathf.Min(count, _maxPoolSize);
         List<AudioSource> tempList = new List<AudioSource>();
 
-        
+
         for (int i = 0; i < prewarmCount; i++)
         {
             AudioSource obj = _audioSourcePool.Get();
@@ -47,29 +47,29 @@ public partial class PoolManager
 
     private AudioSource CreatePooledAudioSource()
     {
-        AudioSource audio = GameObject.Instantiate( _audioPrefab );
+        AudioSource audio = GameObject.Instantiate(_audioPrefab);
         audio.transform.root.parent = _poolContainer.transform;
-        return audio; 
+        return audio;
     }
 
     private void OnGetFromPool(AudioSource audioSource)
     {
-        audioSource.gameObject.SetActive(true); 
+        audioSource.gameObject.SetActive(true);
     }
 
     private void OnReturnToPool(AudioSource audioSource)
     {
-        audioSource.gameObject.SetActive(false); 
+        audioSource.gameObject.SetActive(false);
     }
 
     private void OnDestroyPooledObject(AudioSource audioSource)
     {
-        GameObject.Destroy(audioSource.gameObject); 
+        GameObject.Destroy(audioSource.gameObject);
     }
 
     public AudioSource GetAudioSource(Vector3 position, Quaternion rotation)
     {
-        return GetObjectFromPool(_audioSourcePool, position, rotation); 
+        return GetObjectFromPool(_audioSourcePool, position, rotation);
     }
 
 
@@ -84,7 +84,7 @@ public partial class PoolManager
 
     private void ReleaseAudioSource(AudioSource audioSource)
     {
-        ReleaseObjectToPool(_audioSourcePool, audioSource); 
+        ReleaseObjectToPool(_audioSourcePool, audioSource);
     }
 
     private IEnumerator ReturnToPoolAfterDelay(AudioSource audio, float delay)
@@ -93,3 +93,4 @@ public partial class PoolManager
         ReleaseAudioSource(audio);
     }
 }
+*/

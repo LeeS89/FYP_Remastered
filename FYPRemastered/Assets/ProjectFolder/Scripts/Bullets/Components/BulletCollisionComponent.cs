@@ -30,7 +30,7 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
         if (_eventManager == null) { return; }
         _bulletEventManager = _eventManager as BulletEventManager;
 
-        _bulletEventManager.OnUnFreeze += Deflect;
+        //_bulletEventManager.OnReverseDirection += Deflect;
         InitializeDamageType();
     }
 
@@ -45,7 +45,7 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
-        _bulletEventManager.OnUnFreeze -= Deflect;
+        //_bulletEventManager.OnReverseDirection -= Deflect;
         base.UnRegisterLocalEvents(eventManager);
         _bulletEventManager = null;
     }
@@ -58,12 +58,23 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
 
     public void Deflect()
     {
+        _bulletEventManager.Deflected();
+        FireBack();
        
-        Vector3 directionTotarget = _bulletEventManager.GetDirectionToTarget();
-      
-        Quaternion newRotation = Quaternion.LookRotation(directionTotarget);
-       
-        _bulletEventManager.Deflected(directionTotarget, newRotation, _deflectSpeed);
+        /* Vector3 directionTotarget = _bulletEventManager.GetDirectionToTarget();
+
+         Quaternion newRotation = Quaternion.LookRotation(directionTotarget);
+
+         _bulletEventManager.Deflected(directionTotarget, newRotation, _deflectSpeed);*/
+    }
+
+    public void FireBack()
+    {
+        /*Vector3 directionTotarget = _bulletEventManager.GetDirectionToTarget();
+
+        Quaternion newRotation = Quaternion.LookRotation(directionTotarget);*/
+        _bulletEventManager.ReverseDirection();
+        //_bulletEventManager.Deflected(directionTotarget, newRotation, _deflectSpeed);
     }
 
 

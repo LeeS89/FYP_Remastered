@@ -213,12 +213,12 @@ public class Gun
         Vector3 _directionToTarget = TargetingUtility.GetDirectionToTarget(_target, _bulletSpawnPoint, true);
         Quaternion bulletRotation = Quaternion.LookRotation(_directionToTarget);
 
-        GameObject obj = _poolManager.GetGameObject(_bulletSpawnPoint.position, bulletRotation);
+        GameObject obj = _poolManager.GetFromPool(_bulletSpawnPoint.position, bulletRotation);
 
         BulletBase bullet = obj.GetComponentInChildren<BulletBase>();
-        bullet.Owner = _owner;
-        obj.SetActive(true);
-        bullet.Initializebullet();
+        //bullet.Owner = _owner;
+        //obj.SetActive(true);
+        bullet.InitializeBullet(_owner);
 
     }
 

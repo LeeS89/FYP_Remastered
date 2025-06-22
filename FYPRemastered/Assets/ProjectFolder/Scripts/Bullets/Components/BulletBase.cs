@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using static UnityEngine.UI.GridLayoutGroup;
 
 /*public enum BulletType
 {
@@ -12,7 +13,7 @@ public abstract class BulletBase : ComponentEvents, IPoolable
 {
     [Header("Pools")]
     protected PoolManager _objectPoolManager;
-    protected PoolManager _hitParticlePoolManager;
+    //protected PoolManager _hitParticlePoolManager;
     protected ResourceRequest _request;
 
     [Header("Status")]
@@ -26,9 +27,10 @@ public abstract class BulletBase : ComponentEvents, IPoolable
 
     [Header("Components")]
     protected BulletEventManager _bulletEventManager;
-    protected GameObject _owner;
+    protected GameObject Owner { get; private set; }
+   
+  
     protected GameObject _cachedRoot;
-    //protected IDeflectable _deflectableComponent;
    
     //[SerializeField] protected BulletType _bulletType;
     [SerializeField] protected CapsuleCollider _capsuleCollider;
@@ -43,18 +45,7 @@ public abstract class BulletBase : ComponentEvents, IPoolable
     public static readonly byte IsFrozen = 1 << 1;
     protected const byte IsCulled = 1 << 2;
 
-
-    public GameObject Owner
-    {
-        get => _owner;
-        set
-        {
-            if (value != null) 
-            {
-                _owner = value;
-            }
-        }
-    }
+    
 
    /* public bool Alive
     {
@@ -71,6 +62,7 @@ public abstract class BulletBase : ComponentEvents, IPoolable
         if (_eventManager == null) { return; }
         _bulletEventManager = (BulletEventManager)_eventManager;
         RegisterDependancies();
+        _bulletEventManager.OnReverseDirection += UnFreeze;
         _bulletEventManager.OnExpired += OnExpired;
         _bulletEventManager.OnGetDirectionToTarget += GetDirectionToTarget;
 
@@ -86,6 +78,7 @@ public abstract class BulletBase : ComponentEvents, IPoolable
     {
         _bulletEventManager.OnExpired -= OnExpired;
         _bulletEventManager.OnGetDirectionToTarget -= GetDirectionToTarget;
+        _bulletEventManager.OnReverseDirection -= UnFreeze;
         base.UnRegisterLocalEvents(eventManager);
         _bulletEventManager = null;
         UnRegisterDependencies();
@@ -106,7 +99,7 @@ public abstract class BulletBase : ComponentEvents, IPoolable
 
     protected virtual Vector3 GetDirectionToTarget()
     {
-        Vector3 directionTotarget = TargetingUtility.GetDirectionToTarget(_owner, _cachedRoot, true);
+        Vector3 directionTotarget = TargetingUtility.GetDirectionToTarget(Owner, _cachedRoot, true);
         return directionTotarget;
     }
 
@@ -121,9 +114,9 @@ public abstract class BulletBase : ComponentEvents, IPoolable
         _bulletEventManager.ParticlePlay(this);
     }
 
-    public virtual void Initializebullet()
+    public virtual void InitializeBullet(GameObject bulletOwner)
     {
-     
+        Owner = bulletOwner;
 
         //_isAlive = true;
         SetState(IsAlive);

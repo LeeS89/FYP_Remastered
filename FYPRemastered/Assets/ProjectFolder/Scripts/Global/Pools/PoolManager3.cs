@@ -1,4 +1,4 @@
-using System.Collections;
+/*using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -8,7 +8,7 @@ public partial class PoolManager
     private ParticleSystem _particlePrefab;
     private ObjectPool<ParticleSystem> _particlePool;
 
-    public PoolManager(ParticleSystem prefab, /*MonoBehaviour caller,*/ int defaultSize = 5, int maxSize = 10)
+    public PoolManager(ParticleSystem prefab, *//*MonoBehaviour caller,*//* int defaultSize = 5, int maxSize = 10)
         : this(defaultSize, maxSize)
     {
         this._particlePrefab = prefab;
@@ -96,3 +96,4 @@ public partial class PoolManager
         //ReturnToPool(type, obj);
     }
 }
+*/

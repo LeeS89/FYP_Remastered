@@ -5,7 +5,8 @@ public class BulletVFX : ComponentEvents
     [SerializeField]
     private ParticleManager _particleManager;
     public ParticleSystem _particle;
-    private PoolManager _poolManager;
+    private PoolManager _particlePoolManager;
+    private PoolManager _audioPoolManager;
     private BulletEventManager _bulletEventManager;
 
     public ParticleSystem particleMove;
@@ -20,6 +21,7 @@ public class BulletVFX : ComponentEvents
         _bulletEventManager = (BulletEventManager)_eventManager;
         
         _particleManager = ParticleManager.instance;
+        _bulletEventManager.OnDeflected += PlayDeflectionAudio;
         _bulletEventManager.OnBulletParticlePlay += PlayBulletParticle;
         _bulletEventManager.OnBulletParticleStop += StopBulletParticle;
         _bulletEventManager.OnSpawnHitParticle += SpawnHitParticle;
@@ -28,8 +30,16 @@ public class BulletVFX : ComponentEvents
         _request.ResourceType = PoolResourceType.BasicHitParticlePool;
         _request.poolRequestCallback = (pool) =>
         {
-            _poolManager = pool;
+            _particlePoolManager = pool;
            
+        };
+
+        SceneEventAggregator.Instance.RequestResource(_request);
+
+        _request.ResourceType = PoolResourceType.DeflectAudioPool;
+        _request.poolRequestCallback = (pool) =>
+        {
+            _audioPoolManager = pool;
         };
 
         SceneEventAggregator.Instance.RequestResource(_request);
@@ -43,6 +53,7 @@ public class BulletVFX : ComponentEvents
 
         _bulletEventManager.Expired();
         _particleManager = null;
+        _bulletEventManager.OnDeflected -= PlayDeflectionAudio;
         _bulletEventManager.OnBulletParticlePlay -= PlayBulletParticle;
         _bulletEventManager.OnBulletParticleStop -= StopBulletParticle;
         _bulletEventManager.OnSpawnHitParticle -= SpawnHitParticle;
@@ -52,11 +63,18 @@ public class BulletVFX : ComponentEvents
         
     }
 
+    private void PlayDeflectionAudio()
+    {
+        AudioPoolExtensions.GetAndPlay(_audioPoolManager, transform.position, transform.rotation);
+    }
    
 
     private void SpawnHitParticle(Vector3 pos, Quaternion rot)
     { 
-        _poolManager.GetParticle(pos, rot);  
+        //GameObject obj = _poolManager.GetFromPool(pos, rot);
+        AudioPoolExtensions.GetAndPlay(_particlePoolManager, pos, rot);
+        //obj.SetActive(true);
+        //_poolManager.GetParticle(pos, rot);  
     }
 
     private void PlayBulletParticle(BulletBase bullet/*, BulletType bulletType*/)
@@ -82,7 +100,7 @@ public class BulletVFX : ComponentEvents
         //particleMove.Pause();
 
         if (_particleManager == null) { return; }
-        _particleManager.Removebullet(bullet);
+        _particleManager.RemoveBullet(bullet);
     }
 
     private void OnDisable()
