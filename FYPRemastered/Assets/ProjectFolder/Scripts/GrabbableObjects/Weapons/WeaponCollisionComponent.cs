@@ -1,31 +1,20 @@
 using UnityEngine;
 using static UnityEngine.ParticleSystem;
 
-public class WeaponCollisionComponent : EventManager, IImpactAudio
+public class WeaponCollisionComponent : EventManager
 {
     [SerializeField] private Transform _traceStart;
     [SerializeField] private Transform _traceEnd;
     [SerializeField] private float _radius = 1f;
     [SerializeField] private LayerMask _layers;
-    private PoolManager _audioPoolManager;
-
+   
     public ParticleSystem _sparks;
 
 
-    public override void BindComponentsToEvents()
-    {
-        InterfaceRegistry.Add<IImpactAudio>(this);
-    }
-
-    public void SetDeflectAudioPool(PoolManager manager)
-    {
-        _audioPoolManager = manager;
-    }
-
-    public override void UnbindComponentsToEvents()
-    {
-        InterfaceRegistry.Remove<IImpactAudio>(this);
-    }
+    public override void BindComponentsToEvents() { }
+   
+    public override void UnbindComponentsToEvents() { }
+    
 
     private void OnCollisionEnter(Collision collision)
     {
@@ -46,27 +35,21 @@ public class WeaponCollisionComponent : EventManager, IImpactAudio
             }
         }*/
 
-        IDeflectable deflectable = null;
-        if (!collision.gameObject.TryGetComponent<IDeflectable>(out deflectable))
+        
+        if (collision.gameObject.TryGetComponent<IDeflectable>(out IDeflectable deflectable))
         {
-            deflectable = collision.gameObject.GetComponentInParent<IDeflectable>() ??
-                          collision.gameObject.GetComponentInChildren<IDeflectable>();
+            ContactPoint contact = collision.contacts[0];
+            Vector3 impactPosition = contact.point;
+            deflectable.Deflect();
+
+            /* deflectable = collision.gameObject.GetComponentInParent<IDeflectable>() ??
+                           collision.gameObject.GetComponentInChildren<IDeflectable>();*/
+        }
+        else
+        {
+            Debug.LogError($"No IDeflectable component found on {collision.gameObject.name}");
         }
        
-        if (deflectable == null)
-        {
-            Debug.LogError("Deflectable is null");
-            return;
-        }
-        ContactPoint contact = collision.contacts[0];
-        Vector3 impactPosition = contact.point;
-        //AudioPoolExtensions.GetAndPlay(_audioPoolManager, impactPosition, transform.rotation);
-
-        //AudioSource audio = _audioPoolManager.GetAudioSource(impactPosition, transform.rotation);//ParticlePool.GetFromPool<AudioSource>(PoolType.AudioSRC, impactPosition, Quaternion.identity);
-        //audio.Play();
-        //_audioSource.PlayOneShot(_clip);
-        deflectable.Deflect();
-          
     }
 
     /*private void OnCollisionStay(Collision collision)

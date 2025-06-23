@@ -1,10 +1,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyStatHandler : StatHandler, IEnemyDamageable
+public class EnemyStatHandler : StatHandler
 {
     public SkinnedMeshRenderer skinnedRenderer;
     public Dictionary<string, Transform> limbBoneMap;
+
+    public Vector3 GetAdjustedHitPoint(Vector3 originalPoint, Vector3 normal)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public SkinnedMeshRenderer GetSkinnedMeshRenderer()
+    {
+        throw new System.NotImplementedException();
+    }
 
     public void HandleHit(Collider hitCollider, Vector3 rawHitPoint)
     {

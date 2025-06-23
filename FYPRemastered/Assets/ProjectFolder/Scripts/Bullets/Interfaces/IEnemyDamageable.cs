@@ -2,5 +2,7 @@ using UnityEngine;
 
 public interface IEnemyDamageable : IDamageable
 {
-    void HandleHit(Collider hitCollider, Vector3 rawHitPoint);
+    SkinnedMeshRenderer GetSkinnedMeshRenderer();
+
+    Vector3 GetAdjustedHitPoint(Vector3 originalPoint, Vector3 normal);
 }

@@ -72,26 +72,26 @@ public class MoonSceneManager : BaseSceneManager
     {
        // Implement Later
     }
-   
 
 
-    private void AssignPools() // => Sort next time
-    {
-        
-        var impactAudioSubscribers = InterfaceRegistry.GetAll<IImpactAudio>();
 
-        foreach(var audioSubscriber in impactAudioSubscribers)
-        {
-            audioSubscriber.SetDeflectAudioPool(_deflectAudioPool);
-        }
 
-    }
 
 
 
     #region Obsolete Code
 
+    private void AssignPools() // => Sort next time
+    {
 
+        var impactAudioSubscribers = InterfaceRegistry.GetAll<IImpactAudio>();
+
+        foreach (var audioSubscriber in impactAudioSubscribers)
+        {
+            audioSubscriber.SetDeflectAudioPool(_deflectAudioPool);
+        }
+
+    }
 
     public override void GetImpactParticlePool(ref PoolManager manager)
     {

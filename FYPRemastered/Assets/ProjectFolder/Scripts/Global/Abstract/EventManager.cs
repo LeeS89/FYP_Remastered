@@ -15,4 +15,11 @@ public abstract class EventManager : MonoBehaviour
     {
         OnOwnerDied?.Invoke();
     }
+
+    public event Action<float, DamageType, float, float, float> OnNotifyDamage;
+
+    public void TakeDamage(float baseDamage, DamageType dType = DamageType.None, float statusEffectChancePercentage = 0, float damageOverTime = 0, float duration = 0)
+    {
+        OnNotifyDamage?.Invoke(baseDamage, dType, statusEffectChancePercentage, damageOverTime, duration);
+    }
 }

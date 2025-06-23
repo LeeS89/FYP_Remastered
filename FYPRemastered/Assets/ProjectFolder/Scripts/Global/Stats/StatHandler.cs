@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class StatHandler : ComponentEvents, IDamageable
+public class StatHandler : ComponentEvents
 {
     [SerializeField] private List<StatEntry> _stats = new List<StatEntry>();
     private StatsComponent _statsComponent;
@@ -14,9 +14,12 @@ public class StatHandler : ComponentEvents, IDamageable
         base.RegisterLocalEvents(eventManager);
         _statsComponent = new StatsComponent(_stats);
 
+        eventManager.OnNotifyDamage += NotifyDamage;
         //float hlth = _statsComponent.Gethealth();
         //Debug.LogError("Health is: "+hlth);
     }
+
+    
 
     public bool _testDamage = false;
     private void Update()
@@ -28,7 +31,7 @@ public class StatHandler : ComponentEvents, IDamageable
         }
     }
 
-    public void TakeDamage(float baseDamage, DamageType dType = DamageType.None, float statusEffectChancePercentage = 0, float damageOverTime = 0, float duration = 0)
+    public void NotifyDamage(float baseDamage, DamageType dType = DamageType.None, float statusEffectChancePercentage = 0, float damageOverTime = 0, float duration = 0)
     {
         if (HealthIsEmpty()) { return; } 
 
@@ -68,7 +71,9 @@ public class StatHandler : ComponentEvents, IDamageable
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
+        eventManager.OnNotifyDamage -= NotifyDamage;
         _statsComponent = null;
+        base.UnRegisterLocalEvents(eventManager);
     }
 
     protected override void RegisterGlobalEvents()

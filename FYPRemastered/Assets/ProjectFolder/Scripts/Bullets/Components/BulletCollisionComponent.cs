@@ -4,8 +4,8 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class BulletCollisionComponent : ComponentEvents, IDeflectable
 {
-    [Header("Deflection Speed")]
-    [SerializeField] private float _deflectSpeed;
+   /* [Header("Deflection Speed")]
+    [SerializeField] private float _deflectSpeed;*/
 
     [Header("Game Object Collider")]
     [SerializeField] private CapsuleCollider _collider;
@@ -95,8 +95,9 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
        
         ContactPoint contact = collision.contacts[0];
         Vector3 impactPosition = contact.point;
-        
-        _bulletEventManager.SpawnHitParticle(impactPosition, Quaternion.identity);
+        Vector3 hitNormal = contact.normal;
+
+       // _bulletEventManager.SpawnHitParticle(impactPosition, Quaternion.identity);
 
         if ((_ignoreMask & (1 << collision.gameObject.layer)) != 0)
         {
@@ -105,7 +106,10 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
             return; 
         }
 
-        CheckForDamageableInterface(collision);
+        if(!CheckForDamageableInterface(collision, contact, impactPosition, hitNormal))
+        {
+            _bulletEventManager.SpawnHitParticle(impactPosition, Quaternion.identity);
+        }
         
         
        
@@ -113,19 +117,30 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
         
     }
 
-    private void CheckForDamageableInterface(Collision collision)
+    private bool CheckForDamageableInterface(Collision collision, ContactPoint cPoint, Vector3 hitPoint, Vector3 hitNormal)
     {
-        IDamageable damageable = null;
-        if (!collision.gameObject.TryGetComponent<IDamageable>(out damageable))
+        Vector3 spawnPoint = hitPoint;
+
+        if (collision.gameObject.TryGetComponent<IDamageable>(out IDamageable damageable))
         {
-            damageable = collision.gameObject.GetComponentInParent<IDamageable>() ??
-                         collision.gameObject.GetComponentInChildren<IDamageable>();
+            if(damageable is IEnemyDamageable enemyDamageable)
+            {
+                spawnPoint = enemyDamageable.GetAdjustedHitPoint(hitPoint, hitNormal);
+            }
+
+            damageable.NotifyDamage(_baseDamage, _damageType, _statusEffectChancePercentage, _damageOverTime, _dOTDuration);
+            /* damageable = collision.gameObject.GetComponentInParent<IDamageable>() ??
+                          collision.gameObject.GetComponentInChildren<IDamageable>();*/
+
+            _bulletEventManager.SpawnHitParticle(spawnPoint, Quaternion.identity);
+            return true;
         }
+       
 
-        if (damageable == null) { return; }
+        //if (damageable == null) { return; }
 
+        return false;
         
-        damageable.TakeDamage(_baseDamage, _damageType, _statusEffectChancePercentage, _damageOverTime, _dOTDuration);
 
         //return;
 
