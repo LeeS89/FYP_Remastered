@@ -46,20 +46,12 @@ public class MoonSceneManager : BaseSceneManager
         _resources = new SceneResourceManager(new BulletResources(), new WaypointResources());
 
 
-       
         await _resources.LoadResourcesAsync();
         await _resources.LoadDependancies(); // Load any additional resources that are dependencies
 
-        
         LoadActiveSceneEventManagers();
 
-        //AssignPools(); ////// LATER - Move to Scene Event Aggregator
-
         SceneStarted();
-
-/*#if UNITY_EDITOR
-        _resources.CheckAllDependancies(); // Check if all resources are loaded and ready
-#endif*/
 
     }
 

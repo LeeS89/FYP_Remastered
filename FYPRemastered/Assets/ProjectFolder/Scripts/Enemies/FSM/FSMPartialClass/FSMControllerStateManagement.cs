@@ -155,17 +155,17 @@ public partial class EnemyFSMController : ComponentEvents
 
     }
 
-    private void PursuitTargetRequested(DestinationType chaseType)
+    private void PursuitTargetRequested(AIDestinationType chaseType)
     {
         switch (chaseType)
         {
-            case DestinationType.Chase:
+            case AIDestinationType.ChaseDestination:
                 AttemptTargetChase();
                 break;
-            case DestinationType.Flank:
+            case AIDestinationType.FlankDestination:
                 AttemptTargetFlank();
                 break;
-            case DestinationType.Patrol:
+            case AIDestinationType.PatrolDestination:
 
                 AttemptPatrol();
 
@@ -176,20 +176,24 @@ public partial class EnemyFSMController : ComponentEvents
         }
     }
 
+    private bool IsStaleRequest(AIDestinationType expectedType)
+    {
+        return expectedType != _resourceRequest.destinationType;
+    }
+
     private void AttemptPatrol()
     {
-        // PatrolStateRequested();
-        //Debug.LogError("Attempting Patrol Destination Request");
+       
         _resourceRequest.destinationType = AIDestinationType.PatrolDestination;
         _resourceRequest.start = LineOfSightUtility.GetClosestPointOnNavMesh(_agent.transform.position);
-        //_destinationData.end = LineOfSightUtility.GetClosestPointOnNavMesh(position.Value);
+        
         _resourceRequest.path = _path;
 
         _resourceRequest.externalCallback = (success, point) =>
         {
-            //Debug.LogError("Patrol Destination Request Result: " + success + " Point: " + point);
+            if (IsStaleRequest(AIDestinationType.PatrolDestination)) { return; }
             DestinationRequestResult(success, point, AlertStatus.None);
-            //StartCoroutine(DestinationRequestResult(success, point, AlertStatus.None));
+           
         };
         _destinationManager.RequestNewDestination(_resourceRequest);
     }

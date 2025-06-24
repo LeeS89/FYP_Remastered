@@ -7,14 +7,14 @@ public class BulletEventManager : EventManager
     private List<ComponentEvents> _cachedListeners;
     public event Action OnExpired;
     public event Action OnFired;
-    public event Action OnCollision;
-    public event Action/*<Vector3, Quaternion, float>*/ OnDeflected;
+    public event Action<Collision> OnCollision;
+    public event Action OnDeflected;
     public event Func<Vector3> OnGetDirectionToTarget;
     public event Action OnFreeze;
     public event Action OnReverseDirection;
     public event Action<BulletBase/*, BulletType*/> OnBulletParticlePlay;
     public event Action<BulletBase/*, BulletType*/> OnBulletParticleStop;
-    public event Action<Vector3, Quaternion> OnSpawnHitParticle;
+    
     public event Action<bool> OnCull;
    
 
@@ -46,7 +46,7 @@ public class BulletEventManager : EventManager
 
         foreach(var listener in _cachedListeners)
         {
-            //Debug.LogError($"Registered listener: {listener.GetType().Name} on {((MonoBehaviour)listener).gameObject.name}");
+          
             listener.RegisterLocalEvents(this);
         }
        
@@ -75,10 +75,6 @@ public class BulletEventManager : EventManager
         OnBulletParticleStop?.Invoke(bullet/*, bulletType*/);
     }
 
-    public void SpawnHitParticle(Vector3 position, Quaternion rotation)
-    {
-        OnSpawnHitParticle?.Invoke(position, rotation);
-    }
 
     public void Cull(bool cull = false)
     {
@@ -87,20 +83,12 @@ public class BulletEventManager : EventManager
 
     public void Fired()
     {
-        if (OnFired != null)
-        {
-            OnFired?.Invoke();
-        }
-        else
-        {
-            Debug.LogError("Event Is Null");
-        }
-
+        OnFired?.Invoke();
     }
 
-    public void Deflected(/*Vector3 direction, Quaternion rotation, float speed*/)
+    public void Deflected()
     {
-        OnDeflected?.Invoke(/*direction, rotation, speed*/);
+        OnDeflected?.Invoke();
     }
 
     public Vector3 GetDirectionToTarget()
@@ -118,9 +106,9 @@ public class BulletEventManager : EventManager
         OnReverseDirection?.Invoke();
     }
 
-    public void Collision()
+    public void Collision(Collision collision)
     {
-        OnCollision?.Invoke();
+        OnCollision?.Invoke(collision);
     }
 
     public void Expired()

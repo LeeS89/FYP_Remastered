@@ -11,7 +11,7 @@ public class EnemyEventManager : EventManager
     public event Action<bool> OnPlayerSeen;
     public event Action<bool> OnRotateTowardsTarget;
     public event Action OnPathInvalid;
-    public event Action<AIDestinationRequestData> OnPathRequested;
+    //public event Action<AIDestinationRequestData> OnPathRequested;
 
     // Animation events
     public event Action<AnimationAction> OnAnimationTriggered;
@@ -39,7 +39,7 @@ public class EnemyEventManager : EventManager
     // Chasing Events
     public event Action<AlertStatus> OnRequestStationaryState;
     public event Action OnRequestChasingState;
-    public event Action<DestinationType> OnRequestTargetPursuit;
+    public event Action<AIDestinationType> OnRequestTargetPursuit;
     public event Action<bool> OnPendingNewDestination;
     public event Action<bool, bool> OnDestinationRequestStatus;
 
@@ -104,20 +104,13 @@ public class EnemyEventManager : EventManager
         OnPathInvalid?.Invoke();
     }
 
-    public void PathRequested(AIDestinationRequestData request)
-    {
-        OnPathRequested?.Invoke(request);
-    }
-
+   
     public void DestinationReached(bool reached)
     {
         OnDestinationReached?.Invoke(reached);
     }
 
-   /* public void DestinationUpdated(Vector3 newDestination, int stoppingDistance = 0)
-    {
-        OnDestinationUpdated?.Invoke(newDestination, stoppingDistance);
-    }*/
+   
 
     public void PlayerSeen(bool seen)
     {
@@ -206,7 +199,7 @@ public class EnemyEventManager : EventManager
         OnRotateAtPatrolPoint?.Invoke(point);
     }
 
-    public void RequestTargetPursuit(DestinationType type)
+    public void RequestTargetPursuit(AIDestinationType type)
     {
         OnRequestTargetPursuit?.Invoke(type);
     }

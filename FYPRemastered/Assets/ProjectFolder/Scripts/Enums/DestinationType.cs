@@ -1,8 +1,8 @@
 using UnityEngine;
 
-public enum DestinationType
+/*public enum DestinationType
 {
     Chase,
     Flank,
     Patrol
-}
+}*/

@@ -91,55 +91,56 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
 
     private void OnCollisionEnter(Collision collision)
     {
-       
-       
+
+
         ContactPoint contact = collision.contacts[0];
         Vector3 impactPosition = contact.point;
         Vector3 hitNormal = contact.normal;
 
-       // _bulletEventManager.SpawnHitParticle(impactPosition, Quaternion.identity);
+        // _bulletEventManager.SpawnHitParticle(impactPosition, Quaternion.identity);
 
         if ((_ignoreMask & (1 << collision.gameObject.layer)) != 0)
         {
             _collider.excludeLayers = _ignoreMask;
-            
-            return; 
+
+            return;
         }
 
-        if(!CheckForDamageableInterface(collision, contact, impactPosition, hitNormal))
-        {
-            _bulletEventManager.SpawnHitParticle(impactPosition, Quaternion.identity);
-        }
+        CheckForDamageableInterface(collision, contact, impactPosition, hitNormal);
         
-        
-       
+        _bulletEventManager.Collision(collision);
+        //_bulletEventManager.SpawnHitParticle(impactPosition, Quaternion.identity);
+
+
+
+
         _bulletEventManager.Expired();
-        
+
     }
 
-    private bool CheckForDamageableInterface(Collision collision, ContactPoint cPoint, Vector3 hitPoint, Vector3 hitNormal)
+    private void CheckForDamageableInterface(Collision collision, ContactPoint cPoint, Vector3 hitPoint, Vector3 hitNormal)
     {
         Vector3 spawnPoint = hitPoint;
 
         if (collision.gameObject.TryGetComponent<IDamageable>(out IDamageable damageable))
         {
-            if(damageable is IEnemyDamageable enemyDamageable)
+           /* if(damageable is IEnemyDamageable enemyDamageable)
             {
                 spawnPoint = enemyDamageable.GetAdjustedHitPoint(hitPoint, hitNormal);
-            }
+            }*/
 
             damageable.NotifyDamage(_baseDamage, _damageType, _statusEffectChancePercentage, _damageOverTime, _dOTDuration);
             /* damageable = collision.gameObject.GetComponentInParent<IDamageable>() ??
                           collision.gameObject.GetComponentInChildren<IDamageable>();*/
 
-            _bulletEventManager.SpawnHitParticle(spawnPoint, Quaternion.identity);
-            return true;
+           // _bulletEventManager.SpawnHitParticle(spawnPoint, Quaternion.identity);
+            //return true;
         }
        
 
         //if (damageable == null) { return; }
 
-        return false;
+       // return false;
         
 
         //return;

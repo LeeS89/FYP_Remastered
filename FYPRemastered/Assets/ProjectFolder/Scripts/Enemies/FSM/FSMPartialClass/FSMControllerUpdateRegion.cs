@@ -7,7 +7,7 @@ public partial class EnemyFSMController : ComponentEvents
     public bool testRespawn = false;
     public bool _testWaypoint = false;
 
-    public bool _sceneStarted = false;
+    public bool _updateEnaboled = false;
     #region Updates
     void Update()
     {
@@ -41,38 +41,9 @@ public partial class EnemyFSMController : ComponentEvents
     
     private void LateUpdate()
     {
-        //if (!_sceneStarted) { return; }
+        if (!_agentIsActive) { return; }
 
-        if (testSeeView)
-        {
-            Debug.LogError("Current State: " + _currentState.GetType().Name);
-            //Vector3 newPoint = _gridManager.GetRandomPointXStepsFromPlayer(4);
-            //_enemyEventManager.DestinationUpdated(newPoint);
-            ////ChangeState(_stationary);
-            //testSeeView = false;
-        }
-
-       /* if (!_testEnterPatrol)
-        {
-            PatrolStateRequested();
-            _testEnterPatrol = true;
-        }*/
-        /*if (!testSeeView)
-        {
-            UpdateFieldOfViewCheckFrequency();
-        }
-        else
-        {
-            if (_canSeePlayer)
-            {
-                //_animController.SetAlertStatus(false);
-                _enemyEventManager.PlayerSeen(false);
-                _canSeePlayer = false;
-                _enemyEventManager.ChangeAnimatorLayerWeight(1, 1, 0, 0.5f, false);
-                ChangeState(_patrol);
-            }
-        }*/
-
+      
         if (!_playerIsDead && _agentIsActive)
         {
             UpdateFieldOfViewCheckFrequency();

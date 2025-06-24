@@ -17,19 +17,19 @@ public class TestSpawn : EventManager
 
     private void FireBullet()
     {
-        if(_poolManager == null)
+       /* if(_poolManager == null)
         {
             //BaseSceneManager._instance.GetBulletPool(ref _poolManager);
-        }
+        }*/
 
         Vector3 _directionToPlayer = TargetingUtility.GetDirectionToTarget(_player, transform, true);
         Quaternion bulletRotation = Quaternion.LookRotation(_directionToPlayer);
 
-        GameObject obj = _poolManager.GetFromPool(transform.position, bulletRotation);
+      /*  GameObject obj = _poolManager.GetFromPool(transform.position, bulletRotation);
        
         BulletBase bullet = obj.GetComponentInChildren<BulletBase>();
        // bullet.Owner = transform.parent.gameObject;
-        obj.SetActive(true); ///////////////////////////////////////////////////////////////// Change
+        obj.SetActive(true); ///////////////////////////////////////////////////////////////// Change*/
        // bullet.Initializebullet();
         
     }

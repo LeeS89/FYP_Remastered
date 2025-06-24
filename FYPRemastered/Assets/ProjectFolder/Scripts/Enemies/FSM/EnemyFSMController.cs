@@ -16,7 +16,7 @@ public partial class EnemyFSMController : ComponentEvents
     private EnemyAnimController _animController;
     private Action _destinationCheckAction;
     private EnemyState _currentState;
-    private bool _agentIsActive = true;
+    private bool _agentIsActive = false;
     private bool _playerIsDead = false;
     private bool _rotatingTowardsTarget = false;
 
@@ -95,9 +95,6 @@ public partial class EnemyFSMController : ComponentEvents
         _enemyEventManager.OnRotateTowardsTarget += ToggleRotationToTarget;
         _enemyEventManager.OnSpeedChanged += UpdateAnimatorSpeedValues;
 
-        _enemyEventManager.OnPathRequested += PathRequested;
-
-     
         RegisterGlobalEvents();
         SetupFSM();
 
@@ -117,7 +114,7 @@ public partial class EnemyFSMController : ComponentEvents
         _enemyEventManager.OnRotateTowardsTarget -= ToggleRotationToTarget;
         _enemyEventManager.OnSpeedChanged -= UpdateAnimatorSpeedValues;
 
-        _enemyEventManager.OnPathRequested -= PathRequested;
+       
         base.UnRegisterLocalEvents(eventManager);
         _enemyEventManager = null;
     }
@@ -146,10 +143,6 @@ public partial class EnemyFSMController : ComponentEvents
 
     #region Animation Updates
 
-    private void PathRequested(AIDestinationRequestData request)
-    {
-       // BaseSceneManager._instance.EnqueuePathRequest(request);
-    }
 
     private void ToggleRotationToTarget(bool rotate)
     {
@@ -219,8 +212,8 @@ public partial class EnemyFSMController : ComponentEvents
 
     protected override void OnSceneStarted()
     {
-        _sceneStarted = true;
         PatrolStateRequested();
+        _agentIsActive = true;
         //_agent.ResetPath();
     }
 

@@ -72,7 +72,7 @@ public class StationaryState : EnemyState
                 if (!_canSeePlayer && !_newStateRequestAlreadySent)
                 {
                     _newStateRequestAlreadySent = true;
-                    _eventManager.RequestTargetPursuit(DestinationType.Flank);
+                    _eventManager.RequestTargetPursuit(AIDestinationType.FlankDestination);
                     _isStationary = false;
                     yield break;
                 }
@@ -121,7 +121,7 @@ public class StationaryState : EnemyState
         if (canChase && !_newStateRequestAlreadySent)
         {
             _newStateRequestAlreadySent = true;
-            _eventManager.RequestTargetPursuit(DestinationType.Chase);
+            _eventManager.RequestTargetPursuit(AIDestinationType.ChaseDestination);
 
            /* if (!_queuedForNewFlankPoint)
             {

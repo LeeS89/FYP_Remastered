@@ -113,7 +113,7 @@ public class DestinationManager
 
    
     
-    private IEnumerator AttemptDestinationRoutine(AIDestinationRequestData destinationRequest,/*DestinationRequestData data,*/ Func<List<Vector3>> candidatePointProvider)
+    private IEnumerator AttemptDestinationRoutine(AIDestinationRequestData destinationRequest, Func<List<Vector3>> candidatePointProvider)
     {
         var candidates = candidatePointProvider.Invoke();
 
@@ -132,7 +132,7 @@ public class DestinationManager
                
             };
 
-            //_eventManager.PathRequested(data);
+           
             SceneEventAggregator.Instance.PathRequested(destinationRequest);
 
             yield return _waitUntilResultReceived;

@@ -24,7 +24,8 @@ public class BulletVFX : ComponentEvents
         _bulletEventManager.OnDeflected += PlayDeflectionAudio;
         _bulletEventManager.OnBulletParticlePlay += PlayBulletParticle;
         _bulletEventManager.OnBulletParticleStop += StopBulletParticle;
-        _bulletEventManager.OnSpawnHitParticle += SpawnHitParticle;
+        _bulletEventManager.OnCollision += SpawnHitParticle;
+        //_bulletEventManager.OnSpawnHitParticle += SpawnHitParticle;
         _request = new ResourceRequest();
 
         _request.ResourceType = PoolResourceType.BasicHitParticlePool;
@@ -56,7 +57,8 @@ public class BulletVFX : ComponentEvents
         _bulletEventManager.OnDeflected -= PlayDeflectionAudio;
         _bulletEventManager.OnBulletParticlePlay -= PlayBulletParticle;
         _bulletEventManager.OnBulletParticleStop -= StopBulletParticle;
-        _bulletEventManager.OnSpawnHitParticle -= SpawnHitParticle;
+        _bulletEventManager.OnCollision -= SpawnHitParticle;
+        //_bulletEventManager.OnSpawnHitParticle -= SpawnHitParticle;
         base.UnRegisterLocalEvents(eventManager);
         _bulletEventManager = null;
 
@@ -69,10 +71,13 @@ public class BulletVFX : ComponentEvents
     }
    
 
-    private void SpawnHitParticle(Vector3 pos, Quaternion rot)
-    { 
+    private void SpawnHitParticle(Collision collision)
+    {
+        ContactPoint contact = collision.contacts[0];
+        Vector3 pos = contact.point;
+        //Vector3 hitNormal = contact.normal;
         //GameObject obj = _poolManager.GetFromPool(pos, rot);
-        AudioPoolExtensions.GetAndPlay(_particlePoolManager, pos, rot);
+        AudioPoolExtensions.GetAndPlay(_particlePoolManager, pos, Quaternion.identity);
         //obj.SetActive(true);
         //_poolManager.GetParticle(pos, rot);  
     }
