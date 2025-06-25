@@ -8,7 +8,7 @@ using Random = UnityEngine.Random;
 public partial class EnemyFSMController : ComponentEvents
 {
     public AIDestinationRequestData _resourceRequest;
-
+    public GameObject _testFlankCubes;
     private WaypointData _wpData;
     //private DestinationRequestData _destinationData;
 
@@ -17,12 +17,12 @@ public partial class EnemyFSMController : ComponentEvents
     {
         _resourceRequest = new AIDestinationRequestData();
         
-         _destinationManager = new DestinationManager(_enemyEventManager, /*_gridManager,*/ _maxFlankingSteps);
+         _destinationManager = new DestinationManager(_enemyEventManager, /*_gridManager,*/ _maxFlankingSteps, _testFlankCubes);
         //_destinationData = new DestinationRequestData();
         _path = new NavMeshPath();
         _fovCheckFrequency = _patrolFOVCheckFrequency;
-        _fov = new TraceComponent(1);
-        _fovTraceResults = new Collider[1];
+        _fov = new TraceComponent(5);
+        _fovTraceResults = new Collider[5];
         _animController = new EnemyAnimController(_anim, _enemyEventManager);
         _patrol = new PatrolState(_owningGameObject, _enemyEventManager, _stopAndWaitDelay, _walkSpeed);
         _chasing = new ChasingState(_enemyEventManager, _owningGameObject, _walkSpeed, _sprintSpeed);
@@ -210,6 +210,7 @@ public partial class EnemyFSMController : ComponentEvents
 
         _resourceRequest.externalCallback = (success, point) =>
         {
+            if (IsStaleRequest(AIDestinationType.ChaseDestination)) { return; }
             int _randomStoppingDistance = Random.Range(4, 11);
             DestinationRequestResult(success, point, AlertStatus.Chasing, _randomStoppingDistance);
             //StartCoroutine(DestinationRequestResult(success, point, AlertStatus.Chasing, _randomStoppingDistance));
@@ -233,6 +234,7 @@ public partial class EnemyFSMController : ComponentEvents
 
         _resourceRequest.externalCallback = (success, point) =>
         {
+            if (IsStaleRequest(AIDestinationType.FlankDestination)) { return; }
             DestinationRequestResult(success, point, AlertStatus.Flanking);
             //StartCoroutine(DestinationRequestResult(success, point, AlertStatus.Flanking));
         };

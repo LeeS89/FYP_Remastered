@@ -190,8 +190,21 @@ public class GameManager : MonoBehaviour
         
         return playerPart;
     }
-    
-   // public static event Action<bool> _onPlayerMovedinternal;
+
+    public Collider GetPlayerCollider(PlayerPart part)
+    {
+        if (!Player || !PlayerDefenceCollider) { return null; }
+        Collider playerPart = part switch
+        {
+            PlayerPart.Position => Player.GetComponent<Collider>(),
+            PlayerPart.DefenceCollider => PlayerDefenceCollider.GetComponent<Collider>(),
+            _ => null
+        };
+        
+        return playerPart;
+    }
+
+    // public static event Action<bool> _onPlayerMovedinternal;
     private static Coroutine _playerMovedCoroutine;
 
    /* public static event Action<bool> OnPlayerMoved

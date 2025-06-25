@@ -1,3 +1,4 @@
+using ArmnomadsGames;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -108,23 +109,77 @@ public static class LineOfSightUtility
             return false;
         }
 
-        Vector3 top = boxCollider.bounds.center;
+        Vector3 center = boxCollider.bounds.center + Vector3.up * boxCollider.bounds.extents.y;
 
-        if (Physics.Linecast(from.position, top, out RaycastHit hit, blockingMask))
+        if (Physics.Linecast(from.position, center, out RaycastHit hit, blockingMask))
         {
-            if (hit.collider == target)
+            if (hit.collider == target || hit.collider == target.transform.root)
             {
-                Debug.DrawLine(from.position, top, Color.green);
+                Debug.DrawLine(from.position, center, Color.green);
                 canShoot = angleToTarget <= shootAngle * 0.5f;
                 return true;
             }
             else
             {
+                Debug.LogError($"Hit object: {hit.collider.gameObject.name}");
                 Debug.DrawLine(from.position, hit.point, Color.red);
                 canShoot = false;
                 return false;
             }
         }
+
+        canShoot = false;
+        return false;
+    }
+
+    public static bool HasLineOfSight(
+        Transform from, 
+        Collider[] targets, 
+        float viewAngle, 
+        float shootAngle, 
+        LayerMask blockingMask,
+        LayerMask targetMask,
+        out bool canShoot
+        )
+    {
+
+        foreach(var target in targets)
+        {
+            if(target == null) { continue; }
+
+           /* Vector3 directionToTarget = (target.bounds.center - from.position).normalized;
+            //float angleToTarget = Vector3.Angle(from.forward, directionToTarget);
+
+
+            Vector3 flatForward = new Vector3(from.forward.x, 0, from.forward.z).normalized;
+            Vector3 flatDirectionToTarget = new Vector3(directionToTarget.x, 0, directionToTarget.z).normalized;
+
+            float flatAngle = Vector3.Angle(flatForward, flatDirectionToTarget);*/
+
+
+
+            if (!IsWithinAimingAngles(from,target.bounds.center, viewAngle * 0.5f, viewAngle *0.5f))
+            {
+                //Debug.DrawRay(from.position, directionToTarget * 10f, Color.yellow);
+                continue;
+            }
+
+            Vector3 centerOfTarget = target.bounds.center;
+            Vector3 topOfTarget = target.bounds.center + Vector3.up * target.bounds.extents.y;
+
+            if (Physics.Linecast(from.position, topOfTarget, out RaycastHit hit, blockingMask | targetMask))
+            {
+                if (((1 << hit.collider.gameObject.layer) & targetMask) != 0)
+                {
+                    Debug.DrawLine(from.position, centerOfTarget, Color.green);
+                    Debug.LogError($"Hit target: {hit.collider.gameObject.name}");
+                    canShoot = IsWithinAimingAngles(from, target.bounds.center, shootAngle * 0.5f, 30);
+                    return true;
+                }
+            }
+        }
+
+
 
         canShoot = false;
         return false;
@@ -154,5 +209,33 @@ public static class LineOfSightUtility
 
         // If no point is found, fallback to original position (or handle differently)
         return position;
+    }
+
+    /// <summary>
+    /// Checks if the target is within both the horizontal and vertical aim cones of the source.
+    /// Optimized to avoid expensive math like Vector3.Distance.
+    /// </summary>
+    /// <param name="from">The transform representing the source of the aim (e.g., AI head or weapon).</param>
+    /// <param name="targetPosition">World position of the target.</param>
+    /// <param name="horizontalThreshold">Half of the allowed horizontal aim angle (degrees).</param>
+    /// <param name="verticalThreshold">Half of the allowed vertical aim angle (degrees).</param>
+    /// <returns>True if within both horizontal and vertical thresholds.</returns>
+    public static bool IsWithinAimingAngles(Transform from, Vector3 targetPosition, float horizontalThreshold, float verticalThreshold)
+    {
+        Vector3 directionToTarget = (targetPosition - from.position).normalized;
+
+        // Horizontal (XZ-plane)
+        Vector3 flatForward = new Vector3(from.forward.x, 0f, from.forward.z).normalized;
+        Vector3 flatDirection = new Vector3(directionToTarget.x, 0f, directionToTarget.z).normalized;
+        float horizontalAngle = Vector3.Angle(flatForward, flatDirection);
+
+        // Vertical (Y-axis offset relative to flat distance)
+        float dx = targetPosition.x - from.position.x;
+        float dz = targetPosition.z - from.position.z;
+        float yOffset = targetPosition.y - from.position.y;
+
+        float verticalAngle = Mathf.Atan2(yOffset, Mathf.Sqrt(dx * dx + dz * dz)) * Mathf.Rad2Deg;
+
+        return horizontalAngle <= horizontalThreshold && Mathf.Abs(verticalAngle) <= verticalThreshold;
     }
 }

@@ -24,11 +24,13 @@ public class DestinationManager
     private bool _isValid = false;
     private List<Vector3> _points = new List<Vector3>();
 
+    /// TESTING
+    private GameObject testCube;
 
-    public DestinationManager(EnemyEventManager eventManager, int maxSteps)
+    public DestinationManager(EnemyEventManager eventManager, int maxSteps, GameObject cube)
     {
         _eventManager = eventManager;
-      
+        testCube = cube;
         _maxSteps = maxSteps;
         _stepsToTry = new List<int>();
         _newPoints = new List<Vector3>();
@@ -120,6 +122,12 @@ public class DestinationManager
        
         foreach (var point in candidates)
         {
+
+            /*if(destinationRequest.destinationType == AIDestinationType.FlankDestination)
+            {
+                if (!ValidateTargetVisibilityFromPoint(point)) { continue; }
+            }*/
+
             _resultReceived = false;
             _isValid = false;
 
@@ -152,6 +160,34 @@ public class DestinationManager
         }
 
         destinationRequest.externalCallback?.Invoke(false, Vector3.zero);
+    }
+
+    private bool ValidateTargetVisibilityFromPoint(Vector3 point)
+    {
+        int mask = LayerMask.GetMask("Default", "Water", "PlayerDefence");
+        Collider playerCollider = GameManager.Instance.GetPlayerCollider(PlayerPart.Position);
+        Vector3[] testPoints = new Vector3[]
+        {
+            playerCollider.bounds.center,
+            playerCollider.bounds.center + Vector3.up * playerCollider.bounds.extents.y, // top
+            playerCollider.bounds.center - Vector3.up * playerCollider.bounds.extents.y, // bottom
+            playerCollider.bounds.center + Vector3.right * playerCollider.bounds.extents.x, // right shoulder
+            playerCollider.bounds.center - Vector3.right * playerCollider.bounds.extents.x  // left shoulder
+        };
+
+        foreach (var colPoint in testPoints)
+        {
+            if(Physics.Linecast(point, colPoint, out RaycastHit hit, mask))
+            {
+                if(hit.collider == playerCollider)
+                {
+                    Debug.DrawLine(point, colPoint, Color.green, 25f);
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
 
@@ -204,7 +240,13 @@ public class DestinationManager
 
             yield return _waitUntilResultReceived;
         }
-       
+
+        foreach (var point in _points)
+        {
+
+            GameObject obj = UnityEngine.Object.Instantiate(testCube, point, Quaternion.identity);
+        }
+
         CoroutineRunner.Instance.StartCoroutine(AttemptDestinationRoutine(destinationRequest, GetFlankPoints));
 
     }

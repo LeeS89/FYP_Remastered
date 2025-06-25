@@ -5,17 +5,21 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
-public class PlayerFlankingResources : SceneResources
+public class PlayerFlankingResources : SceneResources, IUpdateableResource
 {
     private SamplePointDataSO _flankPointDataSO;
     private List<SamplePointData> _savedPoints;
     private int _nearestPointToPlayer = 0;
+    Collider playerCollider;
+    /*Vector3 top;*/
 
     public override async Task LoadResources()
     {
         try
         {
-           // NotifyDependancies(); // => Needs Closest Point Job
+            playerCollider = GameManager.Instance.GetPlayerCollider(PlayerPart.DefenceCollider);
+            
+            // NotifyDependancies(); // => Needs Closest Point Job
             // Load the asset from Addressables
             var flankPointHandle = Addressables.LoadAssetAsync<ScriptableObject>("SamplePointDataSO");
 
@@ -119,5 +123,37 @@ public class PlayerFlankingResources : SceneResources
        
         request.FlankPointCandidatesCallback?.Invoke(positions);
 
+    }
+
+    public void UpdateResource()
+    {
+        return;
+        if(_savedPoints == null || _savedPoints.Count == 0) { return; }
+        Vector3 top = playerCollider.bounds.center + Vector3.up * playerCollider.bounds.extents.y;
+        /*Collider playerPos = GameManager.Instance.GetPlayerCollider(PlayerPart.DefenceCollider);
+        center = playerPos.bounds.center + Vector3.up * playerPos.bounds.extents.y;*/
+        //Transform playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.DefenceCollider);
+        int mask = LayerMask.GetMask("Default", "Water", "PlayerDefence");
+        //Debug.LogError("MASK IS: "+mask);
+        foreach (var point in _savedPoints)
+        {
+            if(Physics.Linecast(point.position, top, out RaycastHit hit, mask))
+            {
+                //Debug.LogError("Hit layer: " + LayerMask.LayerToName(hit.collider.gameObject.layer) + "GameObject name: "+hit.collider.gameObject.name);
+               
+                if (hit.collider == playerCollider)
+                {
+                    //Debug.LogError("Hit Player Defence Collider");
+                    Debug.DrawLine(point.position, top, Color.green);
+                }
+                else
+                {
+                    Debug.DrawLine(point.position, top, Color.red);
+                }
+            }
+            
+        }
+
+        
     }
 }
