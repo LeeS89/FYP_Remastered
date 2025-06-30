@@ -48,6 +48,7 @@ public partial class EnemyFSMController : ComponentEvents
     [SerializeField] private LayerMask _fovLayerMask;
     [SerializeField] private LayerMask _lineOfSightMask;
     [SerializeField] private Collider[] _fovTraceResults;
+    [SerializeField] private int _maxFovTraceResults = 5;
     private float _fovCheckFrequency;
     private float _nextCheckTime = 0f;
     private TraceComponent _fov;

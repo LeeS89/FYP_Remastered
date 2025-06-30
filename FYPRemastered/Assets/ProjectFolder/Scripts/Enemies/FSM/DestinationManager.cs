@@ -9,7 +9,7 @@ using Random = UnityEngine.Random;
 public class DestinationManager
 {
 
-    private int _maxSteps;
+    private int _maxFlankingSteps;
     private List<int> _stepsToTry;
     private List<Vector3> _newPoints;
    
@@ -23,19 +23,27 @@ public class DestinationManager
     private bool _resultReceived = false;
     private bool _isValid = false;
     private List<Vector3> _points = new List<Vector3>();
+    /*private LayerMask _flankBlockingMask;
+    private LayerMask _flankTargetMask;*/
 
     /// TESTING
     private GameObject testCube;
 
-    public DestinationManager(EnemyEventManager eventManager, int maxSteps, GameObject cube)
+    public DestinationManager(EnemyEventManager eventManager, int maxFlankingSteps, GameObject cube)
     {
         _eventManager = eventManager;
         testCube = cube;
-        _maxSteps = maxSteps;
+        _maxFlankingSteps = maxFlankingSteps;
         _stepsToTry = new List<int>();
         _newPoints = new List<Vector3>();
         _waitUntilResultReceived = new WaitUntil(() => _resultReceived);
     }
+
+   /* public DestinationManager(EnemyEventManager eventManager, int maxFlankingSteps, GameObject cube, LayerMask flankBlockingMask, LayerMask flankTargetMask) : this(eventManager, maxFlankingSteps, cube)
+    {
+        _flankBlockingMask = flankBlockingMask;
+        _flankTargetMask = flankTargetMask;
+    }*/
 
     private struct WaypointPair
     {
@@ -164,7 +172,7 @@ public class DestinationManager
 
     private bool ValidateTargetVisibilityFromPoint(Vector3 point)
     {
-        int mask = LayerMask.GetMask("Default", "Water", "PlayerDefence");
+        int mask = LayerMask.GetMask("Default", "Water", "PlayerDefence", "Player");
         Collider playerCollider = GameManager.Instance.GetPlayerCollider(PlayerPart.Position);
         Vector3[] testPoints = new Vector3[]
         {
@@ -230,7 +238,15 @@ public class DestinationManager
             {
                 if (points != null && points.Count > 0)
                 {
-                    _points.AddRange(points.OrderBy(p => Random.value));
+                    foreach (var point in points)
+                    {
+                        if (!LineOfSightUtility.HasLineOfSight(point, destinationRequest.flankTargetColliders, destinationRequest.flankBlockingMask, destinationRequest.flankTargetMask)) { continue; }
+
+                        _points.Add(point);
+                    }
+
+
+                    //_points.AddRange(points.OrderBy(p => Random.value));
                 }
                 _resultReceived = true;
                 
@@ -257,7 +273,7 @@ public class DestinationManager
     {
         _stepsToTry.Clear();
 
-        int randomIndex = Random.Range(4, _maxSteps + 1);
+        int randomIndex = Random.Range(4, _maxFlankingSteps + 1);
         int temp = randomIndex;
         while (temp >= 4) // 4 will eventually be changed to a passed minSteps parameter
         {
@@ -265,7 +281,7 @@ public class DestinationManager
             temp--;
         }
         temp = randomIndex + 1;
-        while (temp <= _maxSteps)
+        while (temp <= _maxFlankingSteps)
         {
             _stepsToTry.Add(temp);
             temp++;

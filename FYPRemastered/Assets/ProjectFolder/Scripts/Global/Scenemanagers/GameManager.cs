@@ -204,6 +204,22 @@ public class GameManager : MonoBehaviour
         return playerPart;
     }
 
+    private Collider[] _cachedPlayerColliders;
+
+    public Collider[] GetCachedPlayerColliders()
+    {
+        if (_cachedPlayerColliders == null || _cachedPlayerColliders.Length == 0)
+        {
+            _cachedPlayerColliders = new Collider[]
+            {
+                Player.GetComponent<Collider>(),
+                PlayerDefenceCollider.GetComponent<Collider>()
+            };
+        }
+
+        return _cachedPlayerColliders;
+    }
+
     // public static event Action<bool> _onPlayerMovedinternal;
     private static Coroutine _playerMovedCoroutine;
 

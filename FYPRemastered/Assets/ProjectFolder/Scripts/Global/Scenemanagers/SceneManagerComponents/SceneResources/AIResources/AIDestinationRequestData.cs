@@ -13,6 +13,9 @@ public class AIDestinationRequestData : ProjectileResourceRequest
 
     public int numSteps { get; set; }
     public Action<List<Vector3>> FlankPointCandidatesCallback { get; set; }
+    public LayerMask flankTargetMask { get; set; }
+    public LayerMask flankBlockingMask { get; set; }
+    public Collider[] flankTargetColliders;
 
     public AIDestinationType destinationType;
     public Vector3 start;

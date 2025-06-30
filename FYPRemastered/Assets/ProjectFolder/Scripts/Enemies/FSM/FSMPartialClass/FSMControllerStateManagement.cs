@@ -17,12 +17,12 @@ public partial class EnemyFSMController : ComponentEvents
     {
         _resourceRequest = new AIDestinationRequestData();
         
-         _destinationManager = new DestinationManager(_enemyEventManager, /*_gridManager,*/ _maxFlankingSteps, _testFlankCubes);
+         _destinationManager = new DestinationManager(_enemyEventManager,_maxFlankingSteps, _testFlankCubes);
         //_destinationData = new DestinationRequestData();
         _path = new NavMeshPath();
         _fovCheckFrequency = _patrolFOVCheckFrequency;
-        _fov = new TraceComponent(5);
-        _fovTraceResults = new Collider[5];
+        _fov = new TraceComponent(_maxFovTraceResults);
+        _fovTraceResults = new Collider[_maxFovTraceResults];
         _animController = new EnemyAnimController(_anim, _enemyEventManager);
         _patrol = new PatrolState(_owningGameObject, _enemyEventManager, _stopAndWaitDelay, _walkSpeed);
         _chasing = new ChasingState(_enemyEventManager, _owningGameObject, _walkSpeed, _sprintSpeed);
@@ -50,7 +50,9 @@ public partial class EnemyFSMController : ComponentEvents
 
     private void InitializeWaypoints()
     {
-
+        _resourceRequest.flankBlockingMask = _lineOfSightMask;
+        _resourceRequest.flankTargetMask = _fovLayerMask;
+        _resourceRequest.flankTargetColliders = GameManager.Instance.GetCachedPlayerColliders();
         //_blockData = BaseSceneManager._instance.RequestWaypointBlock();
         _resourceRequest.resourceType = AIResourceType.WaypointBlock;
         _resourceRequest.waypointCallback = (blockData) =>

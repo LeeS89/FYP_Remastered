@@ -173,7 +173,7 @@ public static class LineOfSightUtility
                 {
                     Debug.DrawLine(from.position, centerOfTarget, Color.green);
                     Debug.LogError($"Hit target: {hit.collider.gameObject.name}");
-                    canShoot = IsWithinAimingAngles(from, target.bounds.center, shootAngle * 0.5f, 30);
+                    canShoot = IsWithinAimingAngles(from, target.bounds.center, shootAngle * 0.5f, shootAngle);
                     return true;
                 }
             }
@@ -184,6 +184,47 @@ public static class LineOfSightUtility
         canShoot = false;
         return false;
     }
+
+
+    public static bool HasLineOfSight(Vector3 from, Collider[] targets, LayerMask blockingMask, LayerMask targetMask)
+    {
+
+        foreach (var target in targets)
+        {
+
+            Bounds bounds = target.bounds;
+            Vector3 center = bounds.center;
+            Vector3 extents = bounds.extents;
+
+            Vector3[] testPoints = new Vector3[]
+            {
+                center,
+                center + Vector3.up * extents.y,
+                center - Vector3.up * extents.y,
+                center + Vector3.right * extents.x,
+                center - Vector3.right * extents.x
+            };
+
+            foreach (var colPoint in testPoints)
+            {
+                if (Physics.Linecast(from, colPoint, out RaycastHit hit, blockingMask | targetMask))
+                {
+                    if (((1 << hit.collider.gameObject.layer) & targetMask) != 0)
+                    {
+                        Debug.DrawLine(from, colPoint, Color.green, 25f);
+                        return true;
+                    }
+                    else
+                    {
+                        Debug.DrawLine(from, hit.point, Color.red, 25f);
+                        return false;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
 
     public static float GetNavMeshPathDistance(Vector3 from, Vector3 to, NavMeshPath path)
     {
