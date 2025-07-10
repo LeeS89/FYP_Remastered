@@ -5,6 +5,9 @@ public class EnemyAnimController
 {
     private Animator _anim;
     private EnemyEventManager _eventManager;
+    private float _lastDirection = float.MinValue;
+    private float _lastSpeed = float.MinValue;
+    private const float Threshold = 0.01f; // Threshold to avoid unnecessary updates
 
     public EnemyAnimController(Animator anim, EnemyEventManager eventManager)
     {
@@ -23,6 +26,24 @@ public class EnemyAnimController
         _eventManager.OnAnimationTriggered += PlayAnimationType;
         _eventManager.OnChangeAnimatorLayerWeight += ChangeLayerWeight;
     }
+
+
+    public void UpdateBlendTreeParams(float speed, float direction)
+    {
+        //if(Mathf.Abs(speed - _lastSpeed) > Threshold)
+       // {
+            _anim.SetFloat("speed", speed);
+            _lastSpeed = speed;
+      //  }
+
+       // if(Mathf.Abs(direction - _lastDirection) > Threshold)
+       // {
+            _anim.SetFloat("direction", direction);
+            _lastDirection = direction;
+        //}
+    }
+
+
 
     public void SetAlertStatus(bool alert)
     {

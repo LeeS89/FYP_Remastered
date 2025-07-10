@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 366cb8250a8fd0e409fc1fb8870974c6
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 183631
+  packageName: Spark Burst impact VFX
+  packageVersion: 1.001
+  assetPath: Assets/mitaywalle/SparkBurstImpactVFX/Legacy/Prefabs/spark_volumetric_loop.prefab
+  uploadId: 424871

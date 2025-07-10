@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 7458116e2b41df7428369b87b3fbf686
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 183631
+  packageName: Spark Burst impact VFX
+  packageVersion: 1.001
+  assetPath: Assets/mitaywalle/SparkBurstImpactVFX/SRP/Prefabs/spark_srp_directional_loop.prefab
+  uploadId: 424871

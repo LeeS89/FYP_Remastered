@@ -4,6 +4,7 @@ using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 
+
 public class StationaryChaseManagerJob : MonoBehaviour
 {
     public static StationaryChaseManagerJob Instance { get; private set; }
@@ -20,6 +21,7 @@ public class StationaryChaseManagerJob : MonoBehaviour
 
     private float _jobInterval = 0.2f;
     private float _nextJobTime = 0f;
+    private Queue<int> _removeQueue = new Queue<int>();
 
     private void Awake()
     {
@@ -65,6 +67,7 @@ public class StationaryChaseManagerJob : MonoBehaviour
 
         _agentIndexMap[agentId] = index;
         _agentStates[agentId] = state;
+        
 
         return agentId;
     }
@@ -105,11 +108,26 @@ public class StationaryChaseManagerJob : MonoBehaviour
 
     public void UnregisterAgent(int agentId)
     {
-        if (_agentIndexMap.TryGetValue(agentId, out int index))
+        _removeQueue.Enqueue(agentId);
+
+        
+    }
+
+    private void SafeRemove()
+    {
+        if(_removeQueue.Count == 0) { return; }
+
+        while (_removeQueue.Count > 0)
         {
-            RemoveAgentAtIndex(index);
-            _agentIndexMap.Remove(agentId);
-            _agentStates.Remove(agentId);
+            int agentId = _removeQueue.Dequeue();
+            
+
+            if (_agentIndexMap.TryGetValue(agentId, out int index))
+            {
+                RemoveAgentAtIndex(index);
+                _agentIndexMap.Remove(agentId);
+                _agentStates.Remove(agentId);
+            }
         }
     }
 
@@ -139,6 +157,7 @@ public class StationaryChaseManagerJob : MonoBehaviour
                 state.SetChaseEligibility(_shouldReChase[index], job.playerPosition);
             }
         }
+        SafeRemove();
     }
 
 

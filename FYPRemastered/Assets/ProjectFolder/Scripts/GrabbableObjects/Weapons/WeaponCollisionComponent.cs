@@ -1,53 +1,126 @@
 using UnityEngine;
+using static UnityEngine.ParticleSystem;
 
-public class WeaponCollisionComponent : EventManager, IImpactAudio
+public class WeaponCollisionComponent : EventManager
 {
     [SerializeField] private Transform _traceStart;
     [SerializeField] private Transform _traceEnd;
     [SerializeField] private float _radius = 1f;
     [SerializeField] private LayerMask _layers;
-    private PoolManager _audioPoolManager;
+   
+    public ParticleSystem _sparks;
 
 
-    public override void BindComponentsToEvents()
-    {
-        InterfaceRegistry.Add<IImpactAudio>(this);
-    }
-
-    public void SetDeflectAudioPool(PoolManager manager)
-    {
-        _audioPoolManager = manager;
-    }
-
-    public override void UnbindComponentsToEvents()
-    {
-        InterfaceRegistry.Remove<IImpactAudio>(this);
-    }
+    public override void BindComponentsToEvents() { }
+   
+    public override void UnbindComponentsToEvents() { }
+    
 
     private void OnCollisionEnter(Collision collision)
     {
-        IDeflectable deflectable = null;
-        if (!collision.gameObject.TryGetComponent<IDeflectable>(out deflectable))
+
+        /*if (collision.gameObject.tag == "Finish")
         {
-            deflectable = collision.gameObject.GetComponentInParent<IDeflectable>() ??
-                          collision.gameObject.GetComponentInChildren<IDeflectable>();
+
+            if (!isImpacting)
+            {
+                // Get the first contact point (where the collision happened)
+                ContactPoint contactP = collision.contacts[0];  // Get the first contact point
+                impactPoint = contactP.point;  // Store the impact point
+
+                // Set the emission point for sparks to the contact point
+                emitParams.position = impactPoint;
+                _sparks.Emit(emitParams, 1);  // Emit a spark at the impact point
+                isImpacting = true;  // Mark the lightsaber as in contact
+            }
+        }*/
+
+        
+        if (collision.gameObject.TryGetComponent<IDeflectable>(out IDeflectable deflectable))
+        {
+            ContactPoint contact = collision.contacts[0];
+            Vector3 impactPosition = contact.point;
+            deflectable.Deflect();
+
+            /* deflectable = collision.gameObject.GetComponentInParent<IDeflectable>() ??
+                           collision.gameObject.GetComponentInChildren<IDeflectable>();*/
+        }
+        else
+        {
+            Debug.LogError($"No IDeflectable component found on {collision.gameObject.name}");
         }
        
-        if (deflectable == null)
-        {
-            Debug.LogError("Deflectable is null");
-            return;
-        }
-        ContactPoint contact = collision.contacts[0];
-        Vector3 impactPosition = contact.point;
-        AudioSource audio = _audioPoolManager.GetAudioSource(impactPosition, transform.rotation);//ParticlePool.GetFromPool<AudioSource>(PoolType.AudioSRC, impactPosition, Quaternion.identity);
-        audio.Play();
-        //_audioSource.PlayOneShot(_clip);
-        deflectable.Deflect();
-          
     }
 
-    
+    /*private void OnCollisionStay(Collision collision)
+    {
+        if (collision.gameObject.tag == "Finish")
+        {
+            if (isImpacting)
+            {
+                // Continuously update the impact point while the collision persists
+                ContactPoint contact = collision.contacts[0];  // Get the first contact point
+                impactPoint = contact.point;  // Update the impact point
+
+                // Emit sparks at the current impact point
+                emitParams.position = impactPoint;
+                _sparks.Emit(emitParams, 1);  // Continuously emit spark particles at the new impact point
+            }
+        }
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.gameObject.tag == "Finish")
+        {
+            isImpacting = false;  // Reset the impact state when the collision ends
+        }
+    }*/
+
+    bool isImpacting = false;
+    private ParticleSystem.EmitParams emitParams = new ParticleSystem.EmitParams();
+    private Vector3 impactPoint;
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Finish"))
+        {
+
+            if (!isImpacting)
+            {
+                // Get the point of contact between the lightsaber and the collider
+                impactPoint = other.ClosestPoint(transform.position);  // Calculate impact point
+
+                // Set the impact point in the particle system
+                emitParams.position = impactPoint;  // Start the sparks at the impact point
+                _sparks.Emit(emitParams, 1);  // Emit a spark at the impact point
+                isImpacting = true;  // Mark the lightsaber as in contact
+            }
+        }
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.CompareTag("Finish"))
+        {
+            if (isImpacting)
+            {
+                // Continuously update the impact point during the collision
+                impactPoint = other.ClosestPoint(transform.position);  // Update impact point
+
+                // Update the position of the sparks to always follow the impact point
+                emitParams.position = impactPoint;
+                _sparks.Emit(emitParams, 1);  // Continuously emit spark particles at the new impact point
+            }
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Finish"))
+        {
+            isImpacting = false;
+        }
+    }
 
 
     #region Old Code

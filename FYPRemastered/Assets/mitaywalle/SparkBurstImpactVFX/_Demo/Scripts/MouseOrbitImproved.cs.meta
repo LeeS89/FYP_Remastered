@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 05f07a1a9deafd14db490ed30c722e63
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 183631
+  packageName: Spark Burst impact VFX
+  packageVersion: 1.001
+  assetPath: Assets/mitaywalle/SparkBurstImpactVFX/_Demo/Scripts/MouseOrbitImproved.cs
+  uploadId: 424871

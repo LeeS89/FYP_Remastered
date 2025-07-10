@@ -4,8 +4,8 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class BulletCollisionComponent : ComponentEvents, IDeflectable
 {
-    [Header("Deflection Speed")]
-    [SerializeField] private float _deflectSpeed;
+   /* [Header("Deflection Speed")]
+    [SerializeField] private float _deflectSpeed;*/
 
     [Header("Game Object Collider")]
     [SerializeField] private CapsuleCollider _collider;
@@ -22,31 +22,7 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
     [SerializeField] private float _statusEffectChancePercentage;
 
     private BulletEventManager _bulletEventManager; 
-    private GameObject _parentOwner;
-    private GameObject _rootComponent;
     
-   
-   
-    public GameObject ParentOwner
-    {
-        get => _parentOwner;
-        set
-        {
-            if (value != null)
-            {
-                _parentOwner = value;
-            }
-        }
-    }
-
-    public GameObject RootComponent
-    {
-        get => _rootComponent;
-        set
-        {
-            _rootComponent = value;
-        }
-    }
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
@@ -54,7 +30,7 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
         if (_eventManager == null) { return; }
         _bulletEventManager = _eventManager as BulletEventManager;
 
-        _bulletEventManager.OnUnFreeze += Deflect;
+        //_bulletEventManager.OnReverseDirection += Deflect;
         InitializeDamageType();
     }
 
@@ -69,7 +45,7 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
-        _bulletEventManager.OnUnFreeze -= Deflect;
+        //_bulletEventManager.OnReverseDirection -= Deflect;
         base.UnRegisterLocalEvents(eventManager);
         _bulletEventManager = null;
     }
@@ -82,10 +58,23 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
 
     public void Deflect()
     {
-        Vector3 directionTotarget = TargetingUtility.GetDirectionToTarget(_parentOwner, _rootComponent, true);
-        Quaternion newRotation = Quaternion.LookRotation(directionTotarget);
+        _bulletEventManager.Deflected();
+        FireBack();
        
-        _bulletEventManager.Deflected(directionTotarget, newRotation, _deflectSpeed);
+        /* Vector3 directionTotarget = _bulletEventManager.GetDirectionToTarget();
+
+         Quaternion newRotation = Quaternion.LookRotation(directionTotarget);
+
+         _bulletEventManager.Deflected(directionTotarget, newRotation, _deflectSpeed);*/
+    }
+
+    public void FireBack()
+    {
+        /*Vector3 directionTotarget = _bulletEventManager.GetDirectionToTarget();
+
+        Quaternion newRotation = Quaternion.LookRotation(directionTotarget);*/
+        _bulletEventManager.ReverseDirection();
+        //_bulletEventManager.Deflected(directionTotarget, newRotation, _deflectSpeed);
     }
 
 
@@ -102,40 +91,66 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
 
     private void OnCollisionEnter(Collision collision)
     {
-       
+
+
         ContactPoint contact = collision.contacts[0];
         Vector3 impactPosition = contact.point;
-        
-        _bulletEventManager.SpawnHitParticle(impactPosition, Quaternion.identity);
+        Vector3 hitNormal = contact.normal;
+
+        // _bulletEventManager.SpawnHitParticle(impactPosition, Quaternion.identity);
 
         if ((_ignoreMask & (1 << collision.gameObject.layer)) != 0)
         {
             _collider.excludeLayers = _ignoreMask;
-            
-            return; 
+
+            return;
         }
 
-        CheckForDamageableInterface(collision);
+        CheckForDamageableInterface(collision, contact, impactPosition, hitNormal);
         
-        
-        //_parentOwner = null;
+        _bulletEventManager.Collision(collision);
+        //_bulletEventManager.SpawnHitParticle(impactPosition, Quaternion.identity);
+
+
+
+
         _bulletEventManager.Expired();
-        
+
     }
 
-    private void CheckForDamageableInterface(Collision collision)
+    private void CheckForDamageableInterface(Collision collision, ContactPoint cPoint, Vector3 hitPoint, Vector3 hitNormal)
     {
-        IDamageable damageable = null;
-        if (!collision.gameObject.TryGetComponent<IDamageable>(out damageable))
+        Vector3 spawnPoint = hitPoint;
+
+        if (collision.gameObject.TryGetComponent<IDamageable>(out IDamageable damageable))
         {
-            damageable = collision.gameObject.GetComponentInParent<IDamageable>() ??
-                         collision.gameObject.GetComponentInChildren<IDamageable>();
+           /* if(damageable is IEnemyDamageable enemyDamageable)
+            {
+                spawnPoint = enemyDamageable.GetAdjustedHitPoint(hitPoint, hitNormal);
+            }*/
+
+            damageable.NotifyDamage(_baseDamage, _damageType, _statusEffectChancePercentage, _damageOverTime, _dOTDuration);
+            /* damageable = collision.gameObject.GetComponentInParent<IDamageable>() ??
+                          collision.gameObject.GetComponentInChildren<IDamageable>();*/
+
+           // _bulletEventManager.SpawnHitParticle(spawnPoint, Quaternion.identity);
+            //return true;
         }
+       
 
-        if (damageable == null) { return; }
+        //if (damageable == null) { return; }
 
+       // return false;
         
-        damageable.TakeDamage(_baseDamage, _damageType, _statusEffectChancePercentage, _damageOverTime, _dOTDuration);
+
+        //return;
+
+        /*if (damageable is IEnemyDamageable enemy)
+        {
+            Vector3 impactPoint = collision.contacts[0].point;
+            Collider hitCollider = collision.collider;
+            enemy.HandleHit(hitCollider, impactPoint);
+        }*/
 
     }
 

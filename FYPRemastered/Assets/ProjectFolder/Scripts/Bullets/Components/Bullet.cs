@@ -1,4 +1,6 @@
 
+using UnityEngine;
+
 public class Bullet : BulletBase
 {
     public bool testFreeze = false;
@@ -14,7 +16,7 @@ public class Bullet : BulletBase
             ClearState(IsFrozen);
             //_isFrozen = false;
         }
-        _objectPoolManager.ReleaseGameObject(_cachedRoot);
+        _objectPoolManager.ReleaseObjectToPool(_cachedRoot);
 
         
     }
@@ -37,9 +39,9 @@ public class Bullet : BulletBase
 
     }
 
-    public override void Initializebullet()
+    public override void InitializeBullet(GameObject bulletOwner)
     {
-        base.Initializebullet();
+        base.InitializeBullet(bulletOwner);
        
     }
 
@@ -50,27 +52,26 @@ public class Bullet : BulletBase
         if (BulletDistanceJob.Instance.AddFrozenBullet(this))
         {
             SetState(IsFrozen);
-            //_eventManager.Freeze();
-           // _timeOut = _lifespan;
+         
             //_capsuleCollider.enabled = false;
         }
-        else
+       /* else
         {
             ClearState(IsFrozen);
         }
 
-        if (!HasState(IsFrozen)) { return; }
-        SetState(IsFrozen);
+        if (!HasState(IsFrozen)) { return; }*/
+        //SetState(IsFrozen);
         _bulletEventManager.Freeze();
         _timeOut = _lifespan;
     }
 
-    public override void UnFreeze()
+    public override void UnFreeze() // => Move to IDeflectable interface & Change to ReverseDirection() 
     {
         if (!HasState(IsFrozen)) { return; }
 
         RemoveFromJob();
-        _bulletEventManager.UnFreeze();
+        //_bulletEventManager.ReverseDirection();
     }
 
     protected override void RemoveFromJob()

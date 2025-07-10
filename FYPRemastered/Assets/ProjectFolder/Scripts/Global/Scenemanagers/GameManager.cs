@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public enum CharacterType
 {
@@ -22,6 +23,8 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
     public static event Action OnPlayerDied;
     public static event Action OnPlayerRespawn;
+    public static event Action<bool> OnPlayerMoved;
+
     private bool _playerHasMoved = false;
     
     public bool PlayerHasMoved
@@ -32,7 +35,8 @@ public class GameManager : MonoBehaviour
             {
                 _playerHasMoved = value;
             }
-            _onPlayerMovedinternal?.Invoke(_playerHasMoved);
+            PlayerMoved(_playerHasMoved);
+            //_onPlayerMovedinternal?.Invoke(_playerHasMoved);
         }
         get => _playerHasMoved;
         
@@ -40,6 +44,7 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
+        SceneManager.sceneLoaded += OnSceneLoaded;
         if(Instance == null)
         {
             Instance = this;
@@ -50,13 +55,22 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
-
+/*
     private void Start()
     {
         Application.targetFrameRate = 90;
+    }*/
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        SetPlayer();
+        //Debug.LogWarning("Scene Has Loaded In background Wohoo!!, for scene name: "+SceneManager.GetActiveScene().name);
     }
 
-    
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
 
     public void CharacterDied(CharacterType type, GameObject obj = null)
     {
@@ -97,18 +111,19 @@ public class GameManager : MonoBehaviour
             if (playerObj != null)
             {
                 Player = playerObj;
-                //Debug.LogError("Player assigned in GameManager: " + PlayerTransform.name);
+                Debug.LogWarning("Player has been Set");
             }
             else
             {
-                Debug.LogWarning("Player not found! Ensure the Player has the correct tag.");
+                Debug.LogError("Player not found! Ensure the Player has the correct tag.");
+                return;
             }
 
-            if(PlayerDefenceCollider == null)
+            if (PlayerDefenceCollider == null)
             {
                 GameObject playerDef = GameObject.FindGameObjectWithTag("MainCamera");
 
-                if(playerDef != null)
+                if (playerDef != null)
                 {
                     PlayerDefenceCollider = playerDef;
                 }
@@ -118,6 +133,48 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
+    }
+
+    public void SetPlayer(GameObject player)
+    {
+        if (player != null)
+        {
+           // GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+
+            if (player != null)
+            {
+                Player = player;
+                Debug.LogWarning("Player has been Set");
+            }
+            else
+            {
+                Debug.LogWarning("Player not found! Ensure the Player has the correct tag.");
+                return;
+            }
+
+            if (PlayerDefenceCollider == null)
+            {
+                foreach (Transform child in player.transform)
+                {
+                    if (child.CompareTag("MainCamera"))
+                    {
+                        PlayerDefenceCollider = child.gameObject;
+                        break;
+                    }
+                }
+                    //GameObject playerDef = GameObject.FindGameObjectWithTag("MainCamera");
+
+               /* if (playerDef != null)
+                {
+                    PlayerDefenceCollider = playerDef;
+                }
+                else
+                {
+                    Debug.LogError("Player Defence Collider Not found - Ensure Correct Tag is assigned");
+                }*/
+            }
+        }
+       
     }
 
     public Transform _test;
@@ -134,10 +191,39 @@ public class GameManager : MonoBehaviour
         return playerPart;
     }
 
-    public static event Action<bool> _onPlayerMovedinternal;
+    public Collider GetPlayerCollider(PlayerPart part)
+    {
+        if (!Player || !PlayerDefenceCollider) { return null; }
+        Collider playerPart = part switch
+        {
+            PlayerPart.Position => Player.GetComponent<Collider>(),
+            PlayerPart.DefenceCollider => PlayerDefenceCollider.GetComponent<Collider>(),
+            _ => null
+        };
+        
+        return playerPart;
+    }
+
+    private Collider[] _cachedPlayerColliders;
+
+    public Collider[] GetCachedPlayerColliders()
+    {
+        if (_cachedPlayerColliders == null || _cachedPlayerColliders.Length == 0)
+        {
+            _cachedPlayerColliders = new Collider[]
+            {
+                Player.GetComponent<Collider>(),
+                PlayerDefenceCollider.GetComponent<Collider>()
+            };
+        }
+
+        return _cachedPlayerColliders;
+    }
+
+    // public static event Action<bool> _onPlayerMovedinternal;
     private static Coroutine _playerMovedCoroutine;
 
-    public static event Action<bool> OnPlayerMoved
+   /* public static event Action<bool> OnPlayerMoved
     {
         add
         {
@@ -159,12 +245,12 @@ public class GameManager : MonoBehaviour
                 _playerMovedCoroutine = null;
             }
         }
-    }
+    }*/
 
    
 
 
-    private IEnumerator PlayerMovedroutine()
+    /*private IEnumerator PlayerMovedroutine()
     {
         while (true)
         {
@@ -172,10 +258,11 @@ public class GameManager : MonoBehaviour
 
             _onPlayerMovedinternal?.Invoke(_playerHasMoved);
         }
-    }
+    }*/
 
-    public void PlayerMoved()
+    public void PlayerMoved(bool playerMoved)
     {
-        _onPlayerMovedinternal?.Invoke(_playerHasMoved);
+        OnPlayerMoved?.Invoke(playerMoved);
+        //_onPlayerMovedinternal?.Invoke(_playerHasMoved);
     }
 }

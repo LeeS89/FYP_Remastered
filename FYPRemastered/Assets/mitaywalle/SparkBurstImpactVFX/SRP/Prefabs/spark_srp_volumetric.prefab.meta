@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 58b3459f8290bec44b66b9a4742e4546
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 183631
+  packageName: Spark Burst impact VFX
+  packageVersion: 1.001
+  assetPath: Assets/mitaywalle/SparkBurstImpactVFX/SRP/Prefabs/spark_srp_volumetric.prefab
+  uploadId: 424871

@@ -1,9 +1,13 @@
 ﻿using UnityEngine;
+using UnityEngine.AI;
 
 
 public partial class EnemyFSMController : ComponentEvents
 {
     public bool testRespawn = false;
+    public bool _testWaypoint = false;
+
+    public bool _updateEnaboled = false;
     #region Updates
     void Update()
     {
@@ -22,43 +26,33 @@ public partial class EnemyFSMController : ComponentEvents
             //_playerIsDead = false;
             testRespawn = false;
         }
+
+        if (_testWaypoint)
+        {
+            ChangeWaypoints();
+            _testWaypoint = false;
+        }
+
+        UpdateAgentSpeed();
     }
 
+    public bool _testEnterPatrol = false;
     public bool testSeeView = false;
-    public UniformZoneGridManager _gridManager;
+    
     private void LateUpdate()
     {
+        if (!_agentIsActive) { return; }
 
-        if (testSeeView)
-        {
-            Vector3 newPoint = _gridManager.GetRandomPointXStepsFromPlayer(4);
-            _enemyEventManager.DestinationUpdated(newPoint);
-            //ChangeState(_stationary);
-            testSeeView = false;
-        }
-
-        
-        /*if (!testSeeView)
-        {
-            UpdateFieldOfViewCheckFrequency();
-        }
-        else
-        {
-            if (_canSeePlayer)
-            {
-                //_animController.SetAlertStatus(false);
-                _enemyEventManager.PlayerSeen(false);
-                _canSeePlayer = false;
-                _enemyEventManager.ChangeAnimatorLayerWeight(1, 1, 0, 0.5f, false);
-                ChangeState(_patrol);
-            }
-        }*/
-
+      
         if (!_playerIsDead && _agentIsActive)
         {
             UpdateFieldOfViewCheckFrequency();
         }
 
+        if (_gun != null)
+        {
+            _gun.UpdateGun();
+        }
 
         /*if (_testDeath)
         {
@@ -73,24 +67,36 @@ public partial class EnemyFSMController : ComponentEvents
         {
             _currentState.LateUpdateState();
         }
+
+        CheckCurrentPathValidity();
+
+
         //MeasurePathToDestination();
         _destinationCheckAction?.Invoke();
 
-
-        if(_currentState != _stationary && _canSeePlayer)
+        if (_rotatingTowardsTarget)
         {
-            if (_agent.updateRotation)
-            {
-                _agent.updateRotation = false;
-            }
-           
+
             RotateTowardsPlayer();
-            UpdateAnimatorDirection();
+            //UpdateAnimatorDirection();
         }
 
-        if (!_movementChanged) { return; }
+        UpdateAnimator();
+        //if (!_movementChanged) { return; }
 
-        UpdateAnimatorSpeed();
+        //UpdateAgentSpeed();
+    }
+
+    private void CheckCurrentPathValidity()
+    {
+        if (_agent.hasPath)
+        {
+            if (_agent.pathStatus != NavMeshPathStatus.PathComplete)
+            {
+                //_enemyEventManager.PathInvalid();
+                //Debug.LogError("Path is invalid, resetting path.");
+            }
+        }
     }
 
     private void MeasurePathToDestination()
@@ -101,7 +107,7 @@ public partial class EnemyFSMController : ComponentEvents
         {
             if (CheckIfDestinationIsReached())
             {
-
+                
                 _agent.ResetPath();
                 _enemyEventManager.DestinationReached(true);
 
@@ -121,7 +127,7 @@ public partial class EnemyFSMController : ComponentEvents
         {
             _agent.ResetPath();
         }
-        _enemyEventManager.DestinationReached(true);
+        //_enemyEventManager.DestinationReached(true);
 
 
         _destinationCheckAction = null;
@@ -157,14 +163,19 @@ public partial class EnemyFSMController : ComponentEvents
                 transform.rotation,
                 targetRotation,
                 1f); // forces it to land exactly, still smooth
+            //_enemyEventManager.FacingTarget(true);
             return;
         }
+        /*else
+        {
+            _enemyEventManager.FacingTarget(false);
+        }*/
 
-        // ✅ Smoothly rotate toward target
-        transform.rotation = Quaternion.Slerp(
-            transform.rotation,
-            targetRotation,
-            Time.deltaTime * 5f); // adjust speed as needed
+            // ✅ Smoothly rotate toward target
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation,
+                targetRotation,
+                Time.deltaTime * 5f); // adjust speed as needed
     }
 
     #endregion

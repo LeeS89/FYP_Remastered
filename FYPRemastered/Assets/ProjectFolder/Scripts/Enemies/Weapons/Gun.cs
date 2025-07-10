@@ -26,6 +26,12 @@ public class Gun
     private bool _reloading = false;
     private int _ammo = 5;
     private GameObject _owner;
+    private bool _isFacingTarget = false;
+
+    private float _shootInterval = 2f;
+    private float _nextShootTime = 0f;
+
+    private ResourceRequest _request;
 
     #region Constructors
     public Gun(EventManager eventManager, GameObject gunOwner)
@@ -43,7 +49,10 @@ public class Gun
             _enemyEventManager.OnShoot += SpawnBullet;
             _enemyEventManager.OnPlayerSeen += UpdateTargetVisibility;
             _enemyEventManager.OnAimingLayerReady += SetAimReady;
-           
+            _enemyEventManager.OnFacingTarget += SetIsFacingTarget;
+
+
+            _request = new ResourceRequest();
             _enemyEventManager.OnReload += Reload;
             GameManager.OnPlayerDied += PlayerHasDied;
             GameManager.OnPlayerRespawn += PlayerHasRespawned;
@@ -54,7 +63,15 @@ public class Gun
     public Gun(Transform bulletSpawnPoint, EventManager eventManager, GameObject gunOwner) : this(eventManager, gunOwner)
     {
         _bulletSpawnPoint = bulletSpawnPoint;
-        BaseSceneManager._instance.GetBulletPool(ref _poolManager);
+
+        _request.ResourceType = PoolResourceType.NormalBulletPool;
+        _request.poolRequestCallback = (pool) =>
+        {
+            _poolManager = pool;
+            _request.ResourceType = PoolResourceType.None; // Reset resource type after assignment
+        };
+        SceneEventAggregator.Instance.RequestResource(_request);
+        //BaseSceneManager._instance.GetBulletPool(ref _poolManager);
     }
 
     public Gun(Transform bulletSpawnPoint, Transform target, EventManager eventManager, GameObject gunOwner) : this(bulletSpawnPoint, eventManager, gunOwner)
@@ -106,6 +123,11 @@ public class Gun
     {
         return !_reloading;
     }
+
+    private void SetIsFacingTarget(bool isFacingTarget)
+    {
+        _isFacingTarget = isFacingTarget;
+    }
     #endregion
 
 
@@ -116,7 +138,7 @@ public class Gun
 
         _targetSeen = targetSeen;
 
-        if (_targetSeen && !_isShooting)
+        /*if (_targetSeen && !_isShooting)
         {
             _isShooting = true;
             CoroutineRunner.Instance.StartCoroutine(FiringSequence());
@@ -125,7 +147,7 @@ public class Gun
         {
             _isShooting = false;
             CoroutineRunner.Instance.StopCoroutine(FiringSequence());
-        }
+        }*/
     }
 
     private IEnumerator FiringSequence()
@@ -151,8 +173,24 @@ public class Gun
         }
     }
 
+    public void UpdateGun()
+    {
+        if (!_targetSeen) { return; }
+
+        if (Time.time >= _nextShootTime)
+        {
+            if (!_playerHasDied && _isAimReady && !_reloading && _isFacingTarget)
+            {
+                Shoot();
+            }
+            _nextShootTime = Time.time + _shootInterval;
+        }
+    }
+
     private void Shoot()
     {
+        if (!_isFacingTarget) { return; }
+
         if (_ammo-- > 0)
         {
             _enemyEventManager.AnimationTriggered(AnimationAction.Shoot);
@@ -175,12 +213,12 @@ public class Gun
         Vector3 _directionToTarget = TargetingUtility.GetDirectionToTarget(_target, _bulletSpawnPoint, true);
         Quaternion bulletRotation = Quaternion.LookRotation(_directionToTarget);
 
-        GameObject obj = _poolManager.GetGameObject(_bulletSpawnPoint.position, bulletRotation);
+        GameObject obj = _poolManager.GetFromPool(_bulletSpawnPoint.position, bulletRotation);
 
         BulletBase bullet = obj.GetComponentInChildren<BulletBase>();
-        bullet.Owner = _owner;
-        obj.SetActive(true);
-        bullet.Initializebullet();
+        //bullet.Owner = _owner;
+        //obj.SetActive(true);
+        bullet.InitializeBullet(_owner);
 
     }
 
@@ -194,7 +232,8 @@ public class Gun
         _enemyEventManager.OnShoot -= SpawnBullet;
         _enemyEventManager.OnPlayerSeen -= UpdateTargetVisibility;
         _enemyEventManager.OnAimingLayerReady -= SetAimReady;
-        
+        _enemyEventManager.OnFacingTarget -= SetIsFacingTarget;
+
         _enemyEventManager.OnReload -= Reload;
         GameManager.OnPlayerDied -= PlayerHasDied;
         GameManager.OnPlayerRespawn -= PlayerHasRespawned;

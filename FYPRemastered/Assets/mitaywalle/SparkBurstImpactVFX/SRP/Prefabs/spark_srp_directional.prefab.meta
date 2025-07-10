@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: b8b117d67395ff345bf6a6db3128c593
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 183631
+  packageName: Spark Burst impact VFX
+  packageVersion: 1.001
+  assetPath: Assets/mitaywalle/SparkBurstImpactVFX/SRP/Prefabs/spark_srp_directional.prefab
+  uploadId: 424871

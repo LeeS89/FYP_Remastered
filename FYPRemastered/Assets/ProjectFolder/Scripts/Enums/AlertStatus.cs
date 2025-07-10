@@ -3,7 +3,9 @@ public enum AlertStatus
 {
     None,
     Suspicious,
-    Alert
+    Alert,
+    Flanking,
+    Chasing
 }
 
 public enum FieldOfViewFrequencyStatus

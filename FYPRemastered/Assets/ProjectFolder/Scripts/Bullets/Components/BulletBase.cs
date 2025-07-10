@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using static UnityEngine.UI.GridLayoutGroup;
 
 /*public enum BulletType
 {
@@ -12,7 +13,8 @@ public abstract class BulletBase : ComponentEvents, IPoolable
 {
     [Header("Pools")]
     protected PoolManager _objectPoolManager;
-    protected PoolManager _hitParticlePoolManager;
+    //protected PoolManager _hitParticlePoolManager;
+    protected ResourceRequest _request;
 
     [Header("Status")]
     [SerializeField] protected float _lifespan = 5f;
@@ -25,9 +27,10 @@ public abstract class BulletBase : ComponentEvents, IPoolable
 
     [Header("Components")]
     protected BulletEventManager _bulletEventManager;
-    protected GameObject _owner;
+    protected GameObject Owner { get; private set; }
+   
+  
     protected GameObject _cachedRoot;
-    protected IDeflectable _deflectableComponent;
    
     //[SerializeField] protected BulletType _bulletType;
     [SerializeField] protected CapsuleCollider _capsuleCollider;
@@ -42,18 +45,7 @@ public abstract class BulletBase : ComponentEvents, IPoolable
     public static readonly byte IsFrozen = 1 << 1;
     protected const byte IsCulled = 1 << 2;
 
-
-    public GameObject Owner
-    {
-        get => _owner;
-        set
-        {
-            if (value != null) 
-            {
-                _owner = value;
-            }
-        }
-    }
+    
 
    /* public bool Alive
     {
@@ -70,10 +62,12 @@ public abstract class BulletBase : ComponentEvents, IPoolable
         if (_eventManager == null) { return; }
         _bulletEventManager = (BulletEventManager)_eventManager;
         RegisterDependancies();
+        _bulletEventManager.OnReverseDirection += UnFreeze;
         _bulletEventManager.OnExpired += OnExpired;
-       
+        _bulletEventManager.OnGetDirectionToTarget += GetDirectionToTarget;
+
         _timeOut = _lifespan;
-        
+        _request = new ResourceRequest();///////////////////////////////////////////////// NEW ADDITION /////////////////////////////////////////////////////////
         //StartCoroutine(FireDelay());
 
     }
@@ -83,6 +77,8 @@ public abstract class BulletBase : ComponentEvents, IPoolable
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
         _bulletEventManager.OnExpired -= OnExpired;
+        _bulletEventManager.OnGetDirectionToTarget -= GetDirectionToTarget;
+        _bulletEventManager.OnReverseDirection -= UnFreeze;
         base.UnRegisterLocalEvents(eventManager);
         _bulletEventManager = null;
         UnRegisterDependencies();
@@ -92,17 +88,19 @@ public abstract class BulletBase : ComponentEvents, IPoolable
     protected void RegisterDependancies()
     {
         _cachedRoot = transform.parent.gameObject;
-        _deflectableComponent = _cachedRoot.GetComponentInChildren<IDeflectable>();
-        if (_deflectableComponent != null)
-        {
-            _deflectableComponent.RootComponent = _cachedRoot;
-        }
+      
     }
 
     protected void UnRegisterDependencies()
     {
         _cachedRoot = null;
-        _deflectableComponent = null;
+        
+    }
+
+    protected virtual Vector3 GetDirectionToTarget()
+    {
+        Vector3 directionTotarget = TargetingUtility.GetDirectionToTarget(Owner, _cachedRoot, true);
+        return directionTotarget;
     }
 
     IEnumerator FireDelay()
@@ -116,13 +114,9 @@ public abstract class BulletBase : ComponentEvents, IPoolable
         _bulletEventManager.ParticlePlay(this);
     }
 
-    public virtual void Initializebullet()
+    public virtual void InitializeBullet(GameObject bulletOwner)
     {
-        
-        if(_deflectableComponent != null)
-        {
-            _deflectableComponent.ParentOwner = _owner;
-        }
+        Owner = bulletOwner;
 
         //_isAlive = true;
         SetState(IsAlive);
@@ -198,8 +192,15 @@ public abstract class BulletBase : ComponentEvents, IPoolable
 
     public void SetParentPool(PoolManager manager)
     {
-        _objectPoolManager = manager;
+        //_objectPoolManager = manager;
+        _request.ResourceType = PoolResourceType.NormalBulletPool;
+        _request.poolRequestCallback = (pool) =>
+        {
+            _objectPoolManager = pool;
+            _request.ResourceType = PoolResourceType.None; // Reset resource type after assignment
+        };
 
+        SceneEventAggregator.Instance.RequestResource(_request);
         /*if (!_eventManager.IsAlreadyInitialized)
         {
             _eventManager.BindComponentsToEvents();

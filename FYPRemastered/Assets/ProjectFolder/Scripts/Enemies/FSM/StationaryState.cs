@@ -1,113 +1,110 @@
 ﻿using System.Collections;
 using UnityEngine;
-using UnityEngine.AI;
+
 
 public class StationaryState : EnemyState
 {
     private int _agentId = 0;
-    private bool _isStationary = false;
-    private float intervalTimer = 0;
-    private float checkInterval = 2.5f;
-    private bool _pathCheckComplete = false;
+  
+    private bool _newStateRequestAlreadySent = false;
+   
+    private bool _isStationary = false;  
+
+    public StationaryState(EnemyEventManager eventManager, GameObject owner) : base(eventManager, owner) { }
     
-    private WaitUntil _waitUntilPathCheckComplete;
-   
-    public StationaryState(EnemyEventManager eventManager, GameObject owner, NavMeshPath path) : base(eventManager, path, owner) 
-    { 
-      
-        _waitUntilPathCheckComplete = new WaitUntil(() => _pathCheckComplete);
-    }
    
 
-    public override void EnterState(Vector3? destination = null, AlertStatus alertStatus = AlertStatus.None, float stoppingDistance = 0)
+    public override void EnterState()
     {
-        //base.EnterState(alertStatus);
-
-        switch (alertStatus)
+        //_eventManager.OnPlayerSeen += SetPlayerSeen;
+        Debug.LogError("Entering Stationary State with Alert Status: " + _alertStatus);
+        switch (_alertStatus)
         {
+
             case AlertStatus.None:
-                
+
                 break;
             case AlertStatus.Alert:
-               
+
+                _newStateRequestAlreadySent = false;
                 _eventManager.SpeedChanged(0f, 10f);
-               
-                /*_stateEntryDistanceFromPlayer = Vector3.Distance(_owner.transform.position, GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position);*/
-                //_stateEntryDistanceFromPlayer = (GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position - _owner.transform.position).sqrMagnitude;
-               /* Debug.LogError("Distance on entry: " + _stateEntryDistanceFromPlayer);*/
+                //SetPlayerSeen(_canSeePlayer);
+
+
+                CoroutineRunner.Instance.StartCoroutine(DelayJobStart());
                 if (_coroutine == null)
                 {
                     _isStationary = true;
-                    _coroutine = CoroutineRunner.Instance.StartCoroutine(PlayerProximityRoutine());
-
-                    
+                    _coroutine = CoroutineRunner.Instance.StartCoroutine(PlayerVisibilityRoutine());
                 }
-               
+
+                _eventManager.RotateTowardsTarget(true);
+
                 break;
             default:
-                _eventManager.DestinationUpdated(_owner.transform.position);
+                //_eventManager.DestinationUpdated(_owner.transform.position);
                 _eventManager.SpeedChanged(0f, 10f);
                 break;
         }
-        _owner.GetComponent<NavMeshAgent>().updateRotation = false;
+      
+    }
+
+    private IEnumerator DelayJobStart()
+    {
+        yield return new WaitForSeconds(0.5f);
+       
+        float bufferMultiplier = Random.Range(1.2f, 1.45f);
+        _agentId = StationaryChaseManagerJob.Instance.RegisterAgent(LineOfSightUtility.GetClosestPointOnNavMesh(_owner.transform.position), bufferMultiplier, this);
        
     }
 
-    private IEnumerator PlayerProximityRoutine()
+   
+
+   
+    private IEnumerator PlayerVisibilityRoutine()
     {
-       
-        yield return new WaitForSeconds(0.5f); // Small buffer before coroutine starts running
-
-        /// When the agent registers with the StationaryChaseManagerJob, this calculates the agents distance from the player
-        /// and if the distance between the agent and player becomes > that distance multiplied by the bufferMultiplier, the agent will start chasing again
-        float bufferMultiplier = Random.Range(1.2f, 1.45f);
-        _agentId = StationaryChaseManagerJob.Instance.RegisterAgent(LineOfSightUtility.GetClosestPointOnNavMesh(_owner.transform.position), bufferMultiplier, this);
-
-
         while (_isStationary)
         {
-           
-            yield return _waitUntilPathCheckComplete;
-            _pathCheckComplete = false;
-
-            if (_shouldUpdateDestination)
+            if (!_canSeePlayer)
             {
-                _isStationary = false;
-                _eventManager.RequestChasingState();
+                yield return new WaitForSeconds(1f);
 
-                yield break;
-            }
-
-            if (intervalTimer >= checkInterval)
-            {
-                intervalTimer = 0f;
-
-                if (!_canSeePlayer)
+                if (!_canSeePlayer && !_newStateRequestAlreadySent)
                 {
+                    _newStateRequestAlreadySent = true;
+                    _eventManager.RequestTargetPursuit(AIDestinationType.FlankDestination);
                     _isStationary = false;
-                    UniformZoneGridManager _gridManager = GameObject.FindFirstObjectByType<UniformZoneGridManager>();
-                    Vector3 newPoint = _gridManager.GetRandomPointXStepsFromPlayer(4);
-                    _eventManager.RequestChasingState(newPoint);
                     yield break;
                 }
             }
 
-            /* if (!_canSeePlayer)
-             {
-                 _isStationary = false;
-                 UniformZoneGridManager _gridManager = GameObject.FindFirstObjectByType<UniformZoneGridManager>();
-                 Vector3 newPoint = _gridManager.GetRandomPointXStepsFromPlayer(4);
-                 _eventManager.RequestChasingState(newPoint);
-                 //_eventManager.DestinationUpdated(newPoint);
-                 yield break;
-                 //yield return new WaitForSeconds(25f);
-             }*/
-
             yield return null;
-
         }
 
+
+/*
+        if (!_canSeePlayer && !_destinationRequestComplete)
+        {
+
+            //_newDestinationAlreadyApplied = true;
+            //_eventManager.RequestChasingState(point);
+            _eventManager.RequestTargetPursuit(DestinationType.Flank);
+
+            yield return _waitUntilDestinationRequestComplete;
+            _destinationRequestComplete = false;
+
+            if (_destinationRequestSuccess)
+            {
+                yield break;
+            }
+
+            yield return new WaitForSeconds(0.5f);
+            //yield break;
+        }*/
+
+       
     }
+
 
     /// <summary>
     /// Each time a StationaryChaseManagerJob job runs, it calls this function, passing the result of the distance from the player calculation
@@ -115,95 +112,72 @@ public class StationaryState : EnemyState
     /// If true is passed, a path check is done to determine if the player is reachable.
     /// </summary>
     /// <param name="canChase"> passes true if the distance between agent and player is greater than distance on entry * bufferMultiplier </param>
-    /// <param name="playerPosition"></param>
-    public override void SetChaseEligibility(bool canChase, Vector3 playerPosition)
+    /// <param name="targetPosition"></param>
+    public override void SetChaseEligibility(bool canChase, Vector3 targetPosition)
     {
-        base.SetChaseEligibility(canChase, playerPosition);
 
-        if (canChase)
+        base.SetChaseEligibility(canChase, targetPosition);
+
+        if (canChase && !_newStateRequestAlreadySent)
         {
-           _shouldUpdateDestination = HasClearPathToTarget(LineOfSightUtility.GetClosestPointOnNavMesh(_owner.transform.position), playerPosition, _path);
-                  
+            _newStateRequestAlreadySent = true;
+            _eventManager.RequestTargetPursuit(AIDestinationType.ChaseDestination);
+
+           /* if (!_queuedForNewFlankPoint)
+            {
+                _queuedForNewFlankPoint = true;
+                _chasePlayerPathRequest.path = _path;
+                _chasePlayerPathRequest.start = LineOfSightUtility.GetClosestPointOnNavMesh(_owner.transform.position);
+                _chasePlayerPathRequest.end = LineOfSightUtility.GetClosestPointOnNavMesh(targetPosition);
+                _eventManager.PathRequested(_chasePlayerPathRequest);
+
+                _chasePlayerPathRequest.externalCallback = (success) =>
+                {
+                    _shouldReChasePlayer = success;
+                    _queuedForNewFlankPoint = false;
+                };
+
+                if (_shouldReChasePlayer && !_newDestinationAlreadyApplied)
+                {
+                    _newDestinationAlreadyApplied = true;
+                    _eventManager.RequestChasingState();
+                }
+
+            }*/
+
         }
 
-        _pathCheckComplete = true;
     }
 
+  
+  
 
-
+   
     public override void ExitState()
     {
+        //_eventManager.OnDestinationRequestStatus -= SetDestinationRequestStatus;
+      
+        _eventManager.RotateTowardsTarget(false);
+        
+       
+        _shouldReChasePlayer = false;
         if (_coroutine != null)
         {
-            StationaryChaseManagerJob.Instance.UnregisterAgent(_agentId);
-            _owner.GetComponent<NavMeshAgent>().updateRotation = true;
-           
             _isStationary = false;
-            _pathCheckComplete = false;
-            _shouldUpdateDestination = false;
             CoroutineRunner.Instance.StopCoroutine(_coroutine);
             _coroutine = null;
         }
-        //GameManager.OnPlayerMoved -= SetPlayerMoved;
+
+        StationaryChaseManagerJob.Instance.UnregisterAgent(_agentId);
+     
     }
 
     public override void OnStateDestroyed()
     {
         base.OnStateDestroyed();
-        _path = null;
+       
+     
     }
 
-    public override void UpdateState()
-    {
-        throw new System.NotImplementedException();
-    }
-
-    public override void LateUpdateState()
-    {
-        intervalTimer += Time.deltaTime;
-
-        if (_owner == null || GameManager.Instance == null)
-            return;
-
-        RotateTowardsPlayer();
-    }
-
-    private void RotateTowardsPlayer()
-    {
-        Transform player = GameManager.Instance.GetPlayerPosition(PlayerPart.Position);
-        if (player == null)
-            return;
-
-        Vector3 toPlayer = player.position - _owner.transform.position;
-        toPlayer.y = 0f;
-
-        if (toPlayer.sqrMagnitude < 0.001f)
-            return;
-
-        Vector3 forward = _owner.transform.forward;
-        forward.y = 0f;
-
-        float dot = Vector3.Dot(forward.normalized, toPlayer.normalized);
-        float angle = Mathf.Acos(dot) * Mathf.Rad2Deg;
-
-        const float precisionThreshold = 1f; // degrees
-
-        Quaternion targetRotation = Quaternion.LookRotation(toPlayer);
-
-        if (angle < precisionThreshold)
-        {
-            // ✅ Close enough — complete the rotation smoothly
-            _owner.transform.rotation = Quaternion.Slerp(
-                _owner.transform.rotation,
-                targetRotation,
-                1f); // forces it to land exactly, still smooth
-            return;
-        }
-
-        // ✅ Smoothly rotate toward target
-        _owner.transform.rotation = Quaternion.Slerp(
-            _owner.transform.rotation,
-            targetRotation,
-            Time.deltaTime * 5f); // adjust speed as needed
-    }
+   
 }
