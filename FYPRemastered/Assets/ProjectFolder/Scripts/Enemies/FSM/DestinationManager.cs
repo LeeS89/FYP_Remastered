@@ -240,7 +240,8 @@ public class DestinationManager
                 {
                     foreach (var point in points)
                     {
-                        if (!LineOfSightUtility.HasLineOfSight(point, destinationRequest.flankTargetColliders, destinationRequest.flankBlockingMask, destinationRequest.flankTargetMask)) { continue; }
+                        Vector3 startPoint = point + Vector3.up;
+                        if (!LineOfSightUtility.HasLineOfSight(startPoint, destinationRequest.flankTargetColliders, destinationRequest.flankBlockingMask, destinationRequest.flankTargetMask)) { continue; }
 
                         _points.Add(point);
                     }

@@ -155,24 +155,41 @@ public partial class EnemyFSMController : ComponentEvents
         _rotatingTowardsTarget = rotate;
     }
 
-    private void ApplyAnimatorSpeedValues()
+    private void UpdateAgentSpeed()
     {
       
         float smoothedSpeed = Mathf.Lerp(_agent.speed, _targetSpeed, _lerpSpeed * Time.deltaTime);
         _agent.speed = smoothedSpeed;
 
        
-        // Update animator 
-        _animController.UpdateSpeed(smoothedSpeed);
+        
+        //_animController.UpdateSpeed(smoothedSpeed);
 
         if (Mathf.Abs(_agent.speed - _targetSpeed) <= 0.001f)
         {
            
             _agent.speed = _targetSpeed;
-            _animController.UpdateSpeed(_targetSpeed);
+           // _animController.UpdateSpeed(_targetSpeed);
             _movementChanged = false;
         }
        
+    }
+
+    private void UpdateAnimator()
+    {
+        Vector3 moveDir = _agent.velocity.normalized;
+        Vector3 forward = transform.forward;
+        float directionAngle = Vector3.SignedAngle(forward, moveDir, Vector3.up);
+        float normalizedDirection = directionAngle / 90f; // Normalize to -1 to 1 range
+
+        float dot = Vector3.Dot(forward, moveDir);
+        float speed = _agent.speed;
+        if(dot < 0)
+        {
+            speed *= -1;
+        }
+
+        _animController.UpdateBlendTreeParams(speed, normalizedDirection);
     }
 
    
@@ -202,8 +219,8 @@ public partial class EnemyFSMController : ComponentEvents
             _previousDirection = normalizedDirection; // Store the new direction
         }
 
-        // Update the speed as usual
-        //animator.SetFloat("speed", _agent.velocity.magnitude);
+       
+       
     } 
     #endregion
 

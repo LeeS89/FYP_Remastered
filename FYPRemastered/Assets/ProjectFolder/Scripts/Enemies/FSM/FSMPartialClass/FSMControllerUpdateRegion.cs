@@ -33,7 +33,7 @@ public partial class EnemyFSMController : ComponentEvents
             _testWaypoint = false;
         }
 
-        
+        UpdateAgentSpeed();
     }
 
     public bool _testEnterPatrol = false;
@@ -78,13 +78,13 @@ public partial class EnemyFSMController : ComponentEvents
         {
 
             RotateTowardsPlayer();
-            UpdateAnimatorDirection();
+            //UpdateAnimatorDirection();
         }
-      
 
-        if (!_movementChanged) { return; }
+        UpdateAnimator();
+        //if (!_movementChanged) { return; }
 
-        ApplyAnimatorSpeedValues();
+        //UpdateAgentSpeed();
     }
 
     private void CheckCurrentPathValidity()
