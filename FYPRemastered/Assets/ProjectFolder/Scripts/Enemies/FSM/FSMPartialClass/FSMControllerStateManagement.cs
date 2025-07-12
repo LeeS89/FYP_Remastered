@@ -21,8 +21,9 @@ public partial class EnemyFSMController : ComponentEvents
         //_destinationData = new DestinationRequestData();
         _path = new NavMeshPath();
         _fovCheckFrequency = _patrolFOVCheckFrequency;
-        _fov = new TraceComponent(_maxFovTraceResults);
+        _fov = new AITraceComponent();
         _fovTraceResults = new Collider[_maxFovTraceResults];
+        _traceHitPoints = new Vector3[_maxFovTraceResults];
         _animController = new EnemyAnimController(_anim, _enemyEventManager);
         _patrol = new PatrolState(_owningGameObject, _enemyEventManager, _stopAndWaitDelay, _walkSpeed);
         _chasing = new ChasingState(_enemyEventManager, _owningGameObject, _walkSpeed, _sprintSpeed);

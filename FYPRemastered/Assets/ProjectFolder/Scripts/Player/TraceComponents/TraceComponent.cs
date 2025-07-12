@@ -5,7 +5,7 @@ using UnityEngine;
 public class TraceComponent
 {
    
-    private Collider[] _overlapResults;
+  /*  protected Collider[] _overlapResults;
 
 
 
@@ -13,8 +13,8 @@ public class TraceComponent
     {
         this._overlapResults = new Collider[maxSize];
     }
-
-    public int CheckForTarget(Transform traceLocation, out Collider[] hitResults, float sphereRadius = 0.2f, LayerMask traceLayer = default, bool debug = false)
+*/
+    public int CheckTargetProximity(Transform traceLocation, Collider[] hitResults, float sphereRadius = 0.2f, LayerMask traceLayer = default, bool debug = false)
     {
        
         //Vector3 start = location.position - location.forward * (capsuleHeight / 2f);  // Bottom of capsule
@@ -35,16 +35,23 @@ public class TraceComponent
         if (foundObject)
         {
 
-            int hits = Physics.OverlapSphereNonAlloc(traceLocation.position, sphereRadius, _overlapResults, traceLayer);
-            hitResults = _overlapResults;
-            return hits;
+            return Physics.OverlapSphereNonAlloc(traceLocation.position, sphereRadius, hitResults, traceLayer);
+            //hitResults = _overlapResults;
+            //return hits;
             
         }
 
-        hitResults = Array.Empty<Collider>();
+        for (int i = 0; i < hitResults.Length; i++)
+        {
+            hitResults[i] = null;
+        }
+        // Clear the results if no objects were found
         return 0;
 
     }
 
+   
 
 }
+
+

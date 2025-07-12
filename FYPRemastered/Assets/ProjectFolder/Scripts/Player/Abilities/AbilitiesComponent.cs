@@ -23,7 +23,7 @@ public class AbilitiesComponent : ComponentEvents
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
-        traceComp = new TraceComponent(_maxTraceResults);
+        traceComp = new TraceComponent();
         _bulletTraceresults = new Collider[_maxTraceResults];
         _bullets = new List<BulletBase>();
     }
@@ -68,7 +68,7 @@ public class AbilitiesComponent : ComponentEvents
 
     private void SweepForBullets()
     {
-        int numBullets = traceComp.CheckForTarget(_traceLocation, out _bulletTraceresults, _sphereRadius, _traceLayer);
+        int numBullets = traceComp.CheckTargetProximity(_traceLocation, _bulletTraceresults, _sphereRadius, _traceLayer);
         
         if(numBullets <= 0) { return; }
         

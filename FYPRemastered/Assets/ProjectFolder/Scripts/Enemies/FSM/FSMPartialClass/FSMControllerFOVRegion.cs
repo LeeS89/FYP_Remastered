@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public partial class EnemyFSMController : ComponentEvents
 {
@@ -24,11 +25,11 @@ public partial class EnemyFSMController : ComponentEvents
                 break;
         }
 
-        PerformFieldOfViewCheck();
+        RunFieldOfViewCheck();
     }
 
 
-    private void PerformFieldOfViewCheck()
+    private void RunFieldOfViewCheck()
     {
         if (Time.time >= _nextCheckTime && _fov != null)
         {
@@ -36,9 +37,9 @@ public partial class EnemyFSMController : ComponentEvents
             bool playerSeen = false;
 
             // CheckForTarget first performs a Physics.CheckSphere. If check passes, an overlapsphere is performed which returns the targets collider information
-            _fov.CheckForTarget(_fovLocation, out _fovTraceResults, _fovTraceRadius, _fovLayerMask, true);
+            int numTargetsDetected = _fov.CheckTargetProximity(_fovLocation, _fovTraceResults, _fovTraceRadius, _fovLayerMask, true);
 
-            if (_fovTraceResults.Length > 0)
+            if (numTargetsDetected > 0)
             {
 
                 playerSeen = LineOfSightUtility.HasLineOfSight(_fovLocation, _fovTraceResults, _angle, _shootAngleThreshold, _lineOfSightMask, _fovLayerMask, out _canShootPlayer);
@@ -61,6 +62,20 @@ public partial class EnemyFSMController : ComponentEvents
 
         }
     }
+
+
+    private bool EvaluateFieldOfView(Collider target)
+    {
+        if(target == null) { return false; }
+
+        if (!_fov.IsWithinView(_fovLocation, target.bounds.center, _angle * 0.5f, _angle * 0.5f)) { return false; }
+        
+
+        return false;
+    }
+
+
+
     private static bool _testAlert = false;
     private void UpdateFieldOfViewResults(bool playerSeen)
     {

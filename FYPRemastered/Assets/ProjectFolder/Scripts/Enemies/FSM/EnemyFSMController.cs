@@ -48,10 +48,11 @@ public partial class EnemyFSMController : ComponentEvents
     [SerializeField] private LayerMask _fovLayerMask;
     [SerializeField] private LayerMask _lineOfSightMask;
     [SerializeField] private Collider[] _fovTraceResults;
+    [SerializeField] private Vector3[] _traceHitPoints;
     [SerializeField] private int _maxFovTraceResults = 5;
     private float _fovCheckFrequency;
     private float _nextCheckTime = 0f;
-    private TraceComponent _fov;
+    private AITraceComponent _fov;
     private FieldOfViewFrequencyStatus _fieldOfViewStatus = FieldOfViewFrequencyStatus.Normal;
     public bool _canSeePlayer = false; // Make Private Later
     private bool _canShootPlayer;
@@ -73,7 +74,7 @@ public partial class EnemyFSMController : ComponentEvents
     private EnemyEventManager _enemyEventManager;
     
     private DestinationManager _destinationManager;
-
+    
     private AlertStatus _alertStatus = AlertStatus.None;
     //[SerializeField] private UniformZoneGridManager _gridManager;
 
@@ -144,6 +145,7 @@ public partial class EnemyFSMController : ComponentEvents
 
     #region Animation Updates
 
+   
 
     private void ToggleRotationToTarget(bool rotate)
     {
