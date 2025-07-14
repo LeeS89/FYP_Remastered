@@ -15,15 +15,24 @@ public class Gun
     
 
     [Header("Firing Sequence Conditions")]
+    private WaitUntil _waitUntilCanFire;
     private WaitUntil _waitUntilAimIsReady;
     private Func<bool> _hasAimAnimationCompleted;
     private WaitUntil _waitUntilFinishedReloading;
-    private Func<bool> _reloadComplete;
+
+
+    private WaitUntil _testWaitUntil;
+    private bool _testBool = false;
+    //private Func<bool> _reloadComplete;
+
+    private bool _meleeTriggered = false;
+    private bool _isReloading = false;
+
     private bool _targetSeen = false;
     private bool _isShooting = false;
     private bool _isAimReady = false;
     private bool _playerHasDied = false;
-    private bool _reloading = false;
+    //private bool _reloading = false;
     private int _ammo = 5;
     private GameObject _owner;
     private bool _isFacingTarget = false;
@@ -41,15 +50,19 @@ public class Gun
         {
             _enemyEventManager = enemyEventManager;
             _owner = gunOwner;
-            _hasAimAnimationCompleted = IsAimReady;
-            _waitUntilAimIsReady = new WaitUntil(_hasAimAnimationCompleted);
-            _reloadComplete = IsReloading;
-            _waitUntilFinishedReloading = new WaitUntil(_reloadComplete);
+           // _hasAimAnimationCompleted = IsAimReady;
+            _waitUntilCanFire = new WaitUntil(CanFire);
+
+            _testWaitUntil = new WaitUntil(() => _testBool);
+            // _waitUntilAimIsReady = new WaitUntil(_hasAimAnimationCompleted);
+            //_reloadComplete = IsReloading;
+            //_waitUntilFinishedReloading = new WaitUntil(_reloadComplete);
 
             _enemyEventManager.OnShoot += SpawnBullet;
             _enemyEventManager.OnPlayerSeen += UpdateTargetVisibility;
             _enemyEventManager.OnAimingLayerReady += SetAimReady;
             _enemyEventManager.OnFacingTarget += SetIsFacingTarget;
+            _enemyEventManager.OnMelee += SetMeleeTriggered;
 
 
             _request = new ResourceRequest();
@@ -107,22 +120,27 @@ public class Gun
         _isAimReady = isReady;
     }
 
-    private bool IsAimReady()
+    private void SetMeleeTriggered(bool meleeTriggered)
     {
-        return _isAimReady;
+        _meleeTriggered = meleeTriggered;
     }
+
+    /*  private bool IsAimReady()
+      {
+          return _isAimReady;
+      }*/
 
     private void Reload(bool isReloading)
     {
-        _reloading = isReloading;
+        _isReloading = isReloading;
     }
 
    
 
-    private bool IsReloading()
+   /* private bool IsReloading()
     {
         return !_reloading;
-    }
+    }*/
 
     private void SetIsFacingTarget(bool isFacingTarget)
     {
@@ -138,7 +156,7 @@ public class Gun
 
         _targetSeen = targetSeen;
 
-        /*if (_targetSeen && !_isShooting)
+       /* if (_targetSeen && !_isShooting)
         {
             _isShooting = true;
             CoroutineRunner.Instance.StartCoroutine(FiringSequence());
@@ -150,19 +168,49 @@ public class Gun
         }*/
     }
 
+    private enum FireState
+    {
+        Ready,
+        Reloading,
+        Meleeing,
+        NotAiming,
+        Dead
+    }
+
+    private FireState GetFireState()
+    {
+        if (_playerHasDied) return FireState.Dead;
+        if (_meleeTriggered) return FireState.Meleeing;
+        if (_isReloading) return FireState.Reloading;
+        if (!_isAimReady || !_isFacingTarget) return FireState.NotAiming;
+        return FireState.Ready;
+    }
+
+    private bool CanFire()
+    {
+        return GetFireState() == FireState.Ready;
+    }
+
+   /* private bool CanFire()
+    {
+        return !_playerHasDied && _isAimReady && _isFacingTarget && !_isReloading && !_meleeTriggered;
+    }*/
+
     private IEnumerator FiringSequence()
     {
+        if (_testBool)
+        {
+            Debug.LogWarning("GunCoroutine started again");
+        }
+
         while (_isShooting)
         {
-            //if (!IsAimReady())
-            //{
-            yield return _waitUntilAimIsReady;
-            //}
 
-            // if (IsReloading())
-            // {
-            yield return _waitUntilFinishedReloading;
-            // }
+           // yield return _testWaitUntil;
+           // yield return _waitUntilAimIsReady;
+
+            yield return _waitUntilCanFire;
+            // yield return _waitUntilFinishedReloading;
 
             if (!_playerHasDied)
             {
@@ -175,11 +223,12 @@ public class Gun
 
     public void UpdateGun()
     {
+    
         if (!_targetSeen) { return; }
 
         if (Time.time >= _nextShootTime)
         {
-            if (!_playerHasDied && _isAimReady && !_reloading && _isFacingTarget)
+            if (CanFire())
             {
                 Shoot();
             }
@@ -234,6 +283,8 @@ public class Gun
         _enemyEventManager.OnAimingLayerReady -= SetAimReady;
         _enemyEventManager.OnFacingTarget -= SetIsFacingTarget;
 
+
+        _enemyEventManager.OnMelee -= SetMeleeTriggered;
         _enemyEventManager.OnReload -= Reload;
         GameManager.OnPlayerDied -= PlayerHasDied;
         GameManager.OnPlayerRespawn -= PlayerHasRespawned;
@@ -241,7 +292,7 @@ public class Gun
         _enemyEventManager = null;
         _hasAimAnimationCompleted = null;
         _waitUntilAimIsReady = null;
-        _reloadComplete = null;
+        //_reloadComplete = null;
         _waitUntilFinishedReloading = null;
 
     }

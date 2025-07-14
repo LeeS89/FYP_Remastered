@@ -100,7 +100,21 @@ public static class TargetingUtility
     }
 
 
+    public static Vector3 GetDirectionToTarget(Vector3 target, Vector3 from, bool getRandomOffset = false)
+    {
+        if (target == null || from == null)
+        {
+            return Vector3.zero;
+        }
 
-    
+        //Vector3 targetLocation = GetObjectLocation(target, getRandomOffset);
+        //Vector3 fromLocation = GetObjectLocation(from);
+
+        return (target - from).normalized;
+    }
+
+
+
+
 
 }

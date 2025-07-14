@@ -1,3 +1,4 @@
+using System.Xml;
 using UnityEngine;
 
 public class EnemyAnimationEvents : ComponentEvents
@@ -15,12 +16,23 @@ public class EnemyAnimationEvents : ComponentEvents
         _enemyEventManager.Shoot();
     }
 
-    public void OnReloadComplete(int reloadingInt)
+    public void MeleeTriggered(int meleeState)
     {
-        int clampedValue = Mathf.Clamp(reloadingInt, 0, 1);
-        bool isReloading = reloadingInt != 0;
+        bool inProgress = meleeState == 1;
+
+        _enemyEventManager.Melee(inProgress);
+    }
+
+    public void OnReloadComplete(int reloadState)
+    {
+        // 0 = reload ended, 1 = reload started
+        bool isReloading = reloadState == 1;
 
         _enemyEventManager.Reload(isReloading);
+        /* int clampedValue = Mathf.Clamp(reloadingInt, 0, 1);
+         bool isReloading = reloadingInt != 0;
+
+         _enemyEventManager.Reload(isReloading);*/
     }
 
     public void DeathAnimationComplete()

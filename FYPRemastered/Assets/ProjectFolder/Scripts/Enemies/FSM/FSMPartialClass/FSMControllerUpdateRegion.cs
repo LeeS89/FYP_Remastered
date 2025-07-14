@@ -38,11 +38,26 @@ public partial class EnemyFSMController : ComponentEvents
 
     public bool _testEnterPatrol = false;
     public bool testSeeView = false;
-    
+    public bool _testMelee = false;
+  
+
     private void LateUpdate()
     {
         if (!_agentIsActive) { return; }
 
+        if (_testMelee)
+        {
+            if (_agent.pathPending)
+            {
+                Debug.LogWarning("Agent path is pending, skipping update.");
+            }
+        }
+
+       /* if (_testMelee)
+        {
+            _enemyEventManager.AnimationTriggered(AnimationAction.Melee);
+            _testMelee = false;
+        }*/
       
         if (!_playerIsDead && _agentIsActive)
         {

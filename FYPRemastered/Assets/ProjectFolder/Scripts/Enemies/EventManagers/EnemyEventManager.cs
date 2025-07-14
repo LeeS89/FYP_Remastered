@@ -34,6 +34,8 @@ public class EnemyEventManager : EventManager
 
     public event Action<bool> OnFacingTarget;
 
+    public event Action<bool> OnMelee;
+
     private List<ComponentEvents> _cachedListeners;
 
     // Chasing Events
@@ -152,6 +154,11 @@ public class EnemyEventManager : EventManager
     public void Reload(bool isReloading)
     {
         OnReload?.Invoke(isReloading);
+    }
+
+    public void Melee(bool isMelee)
+    {
+        OnMelee?.Invoke(isMelee);
     }
 
     public void DeathComplete(bool status)

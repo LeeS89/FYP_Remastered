@@ -50,6 +50,8 @@ public partial class EnemyFSMController : ComponentEvents
     [SerializeField] private Collider[] _fovTraceResults;
     [SerializeField] private Vector3[] _traceHitPoints;
     [SerializeField] private int _maxFovTraceResults = 5;
+    [SerializeField] private float _waistHeight = 1.0f;
+    [SerializeField] private float _eyeHeight = 1.8f;
     private float _fovCheckFrequency;
     private float _nextCheckTime = 0f;
     private AITraceComponent _fov;

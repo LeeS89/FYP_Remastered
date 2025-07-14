@@ -41,11 +41,20 @@ public partial class EnemyFSMController : ComponentEvents
 
             if (numTargetsDetected > 0)
             {
+                for(int i = 0; i < numTargetsDetected; i++)
+                {
+                    if (EvaluateFieldOfView(_fovTraceResults[i]))
+                    {
+                        playerSeen = true;
+                        CheckIfTargetWithinShootAngle(_fovTraceResults[i]);
+                        break;
+                    }
+                    
+                }
+                //playerSeen = LineOfSightUtility.HasLineOfSight(_fovLocation, _fovTraceResults, _angle, _shootAngleThreshold, _lineOfSightMask, _fovLayerMask, out _canShootPlayer);
 
-                playerSeen = LineOfSightUtility.HasLineOfSight(_fovLocation, _fovTraceResults, _angle, _shootAngleThreshold, _lineOfSightMask, _fovLayerMask, out _canShootPlayer);
 
-
-                _enemyEventManager.FacingTarget(_canShootPlayer);
+                //_enemyEventManager.FacingTarget(_canShootPlayer);
                
                 if (_fieldOfViewStatus != FieldOfViewFrequencyStatus.Heightened)
                     _fieldOfViewStatus = FieldOfViewFrequencyStatus.Heightened;
@@ -63,15 +72,52 @@ public partial class EnemyFSMController : ComponentEvents
         }
     }
 
+    private void CheckIfTargetWithinShootAngle(Collider target)
+    {
+        if(target == null) { return; }
 
+        bool canShootTarget = _fov.IsWithinView(_fovLocation, target.ClosestPointOnBounds(_fovLocation.position), _shootAngleThreshold *0.5f, _shootAngleThreshold *1.25f);
+        
+
+        _enemyEventManager.FacingTarget(canShootTarget);
+    }
+
+    /// <summary>
+    /// First checks if the target is within FOV cone, then performs a capsule cast from waist to eye level to check for target colliders
+    /// If target collider(s) are hit, performs a line of sight check to see if the target is visible.
+    /// </summary>
+    /// <param name="target"></param>
+    /// <returns></returns>
     private bool EvaluateFieldOfView(Collider target)
     {
         if(target == null) { return false; }
 
-        if (!_fov.IsWithinView(_fovLocation, target.bounds.center, _angle * 0.5f, _angle * 0.5f)) { return false; }
-        
+        if (!_fov.IsWithinView(_fovLocation, target.bounds.center, _angle * 0.5f, _angle * 0.75f)) { return false; }
+
+        Vector3 waistPos = transform.position + Vector3.up * _waistHeight;
+        Vector3 eyePos = transform.position + Vector3.up * _eyeHeight;
+        Vector3 sweepCenter = (waistPos + eyePos) * 0.5f;
+        Vector3 directionTotarget = TargetingUtility.GetDirectionToTarget(target.bounds.center, sweepCenter);
+
+        int hitCount = _fov.EvaluateViewCone(waistPos, eyePos, 0.4f, directionTotarget, _fovTraceRadius, _fovLayerMask, _traceHitPoints);
+        if (hitCount == 0) { return false; }
+
+        AddFallbackPoints(target, _traceHitPoints, ref hitCount);
+
+        for (int i = 0; i < hitCount; i++)
+        {
+            if (!_fov.HasLineOfSight(_fovLocation, _traceHitPoints[i], _lineOfSightMask, _fovLayerMask)) { continue; }
+            return true;
+        }
 
         return false;
+    }
+
+    private void AddFallbackPoints(Collider target, Vector3[] hitPoints, ref int startIndex)
+    {
+        hitPoints[startIndex++] = target.bounds.center + Vector3.up * target.bounds.extents.y;
+        hitPoints[startIndex++] = target.bounds.center - Vector3.right * target.bounds.extents.x;
+        hitPoints[startIndex++] = target.bounds.center + Vector3.right * target.bounds.extents.x;
     }
 
 

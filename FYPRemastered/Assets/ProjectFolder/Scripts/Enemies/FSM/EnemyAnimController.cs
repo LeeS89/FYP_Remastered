@@ -87,6 +87,11 @@ public class EnemyAnimController
         _anim.SetTrigger("shoot");
     }
 
+    public void MeleeAttack()
+    {
+        _anim.SetTrigger("melee");
+    }
+
    
 
     private void PlayAnimationType(AnimationAction action)
@@ -104,6 +109,9 @@ public class EnemyAnimController
                 break;
             case AnimationAction.Reload:
                 Reload();
+                break;
+            case AnimationAction.Melee:
+                MeleeAttack();
                 break;
             default:
                 Debug.LogWarning("No Animation Type Selected");

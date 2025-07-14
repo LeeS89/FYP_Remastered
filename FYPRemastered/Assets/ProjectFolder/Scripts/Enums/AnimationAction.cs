@@ -6,5 +6,6 @@ public enum AnimationAction
     Shoot,
     Dead,
     Look,
-    Reload
+    Reload,
+    Melee
 }

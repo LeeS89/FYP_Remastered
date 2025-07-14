@@ -15,6 +15,7 @@ public class TraceVisuals : MonoBehaviour
         Vector3 eyePos = transform.position + Vector3.up * eyeHeight;
        // Debug.DrawLine(waistPos, waistPos + direction * maxDistance, Color.yellow);
         DebugExtension.DebugWireSphere(waistPos, Color.yellow, 0.1f);
-        DebugExtension.DebugWireSphere(eyePos, Color.cyan, 0.1f);
+        DebugExtension.DebugWireSphere(eyePos, Color.black, 0.1f);
+        DebugExtension.DebugCapsule(waistPos, eyePos, Color.cyan, 0.4f);
     }
 }
