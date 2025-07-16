@@ -52675,16 +52675,16 @@ AnimationClip:
   m_HasMotionFloatCurves: 1
   m_Events:
   - time: 0
-    functionName: OnReloadComplete
+    functionName: OnAnimationEventReceived
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
-    intParameter: 1
+    intParameter: 4
     messageOptions: 0
   - time: 1.8333334
-    functionName: OnReloadComplete
+    functionName: OnAnimationEventCompleteOrInterupted
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
-    intParameter: 0
+    intParameter: 4
     messageOptions: 0

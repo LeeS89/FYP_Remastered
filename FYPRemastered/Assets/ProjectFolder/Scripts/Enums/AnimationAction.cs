@@ -9,3 +9,13 @@ public enum AnimationAction
     Reload,
     Melee
 }
+
+public enum AnimationActionComplete
+{
+    None,
+    Shoot,
+    Dead,
+    Look,
+    Reload,
+    Melee
+}

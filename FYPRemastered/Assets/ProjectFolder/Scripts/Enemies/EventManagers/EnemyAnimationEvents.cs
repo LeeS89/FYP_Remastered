@@ -39,4 +39,50 @@ public class EnemyAnimationEvents : ComponentEvents
     {
         _enemyEventManager.DeathAnimationComplete();
     }
+
+    public AnimationAction currentAction = AnimationAction.None;
+
+
+    private void OnAnimationEventReceived(AnimationAction action)
+    {
+        if (currentAction != AnimationAction.None)
+        {
+            OnAnimationEventCompleteOrInterupted(currentAction);
+        }
+
+        currentAction = action;
+
+        switch (action)
+        {
+            case AnimationAction.Reload:
+                _enemyEventManager.Reload(true);
+                break;
+            case AnimationAction.Melee:
+                _enemyEventManager.Melee(true);
+                break;
+            default:
+                Debug.Log("No action specified");
+                break;
+        }
+
+
+    }
+
+    private void OnAnimationEventCompleteOrInterupted(AnimationAction completedAction)
+    {
+        currentAction = AnimationAction.None;
+
+        switch (completedAction)
+        {
+            case AnimationAction.Reload:
+                _enemyEventManager.Reload(false);
+                break;
+            case AnimationAction.Melee:
+                _enemyEventManager.Melee(false);
+                break;
+            default:
+                Debug.Log("No action specified");
+                break;
+        }
+    }
 }

@@ -1,19 +1,16 @@
 using System;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Experimental.XR.Interaction;
 
 public class TraceComponent
 {
-   
-  /*  protected Collider[] _overlapResults;
-
-
-
-    public TraceComponent(int maxSize)
+  
+    public bool IsTargetInCloseProximity(Vector3 position, float radius, int layerMask)
     {
-        this._overlapResults = new Collider[maxSize];
+        return Physics.CheckSphere(position, radius, layerMask);
     }
-*/
+
     public int CheckTargetProximity(Transform traceLocation, Collider[] hitResults, float sphereRadius = 0.2f, LayerMask traceLayer = default, bool debug = false)
     {
        

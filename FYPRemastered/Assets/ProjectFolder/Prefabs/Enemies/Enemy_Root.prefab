@@ -106,6 +106,7 @@ GameObject:
   - component: {fileID: 3074888559223914219}
   - component: {fileID: 5165514309955864409}
   - component: {fileID: 3309944096030598539}
+  - component: {fileID: 6577363309883393908}
   m_Layer: 4
   m_Name: Enemy_Root
   m_TagString: Untagged
@@ -241,6 +242,7 @@ MonoBehaviour:
   _testEnterPatrol: 0
   testSeeView: 0
   _testMelee: 0
+  _testRotation: 0
 --- !u!208 &7963726222172396574
 NavMeshObstacle:
   m_ObjectHideFlags: 0
@@ -311,6 +313,20 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.035965, y: 1.7152128, z: 0.61201286}
   m_Center: {x: 0.0787549, y: 1.2108064, z: 0.014566898}
+--- !u!114 &6577363309883393908
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 295630588504063347}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a627cb63bedc98449ad4c83ebb278033, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  waistPos: {x: 0, y: 0, z: 0}
+  eyePos: {x: 0, y: 0, z: 0}
 --- !u!1 &613288840807163240
 GameObject:
   m_ObjectHideFlags: 0
@@ -449,7 +465,7 @@ Animator:
   m_Controller: {fileID: 9100000, guid: 504447ab33f0378439defc97f07cf019, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
-  m_ApplyRootMotion: 1
+  m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_AnimatePhysics: 0

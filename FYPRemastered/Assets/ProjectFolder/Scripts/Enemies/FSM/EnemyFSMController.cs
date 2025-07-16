@@ -167,13 +167,13 @@ public partial class EnemyFSMController : ComponentEvents
 
        
         
-        //_animController.UpdateSpeed(smoothedSpeed);
+       // _animController.UpdateSpeed(smoothedSpeed);
 
         if (Mathf.Abs(_agent.speed - _targetSpeed) <= 0.001f)
         {
            
             _agent.speed = _targetSpeed;
-           // _animController.UpdateSpeed(_targetSpeed);
+            //_animController.UpdateSpeed(_targetSpeed);
             _movementChanged = false;
         }
        
@@ -181,7 +181,10 @@ public partial class EnemyFSMController : ComponentEvents
 
     private void UpdateAnimator()
     {
-        Vector3 moveDir = _agent.velocity.normalized;
+        
+        Vector3 moveDir = _agent.velocity;
+        moveDir.y = 0f;
+        moveDir.Normalize();
         Vector3 forward = transform.forward;
         float directionAngle = Vector3.SignedAngle(forward, moveDir, Vector3.up);
         float normalizedDirection = directionAngle / 90f; // Normalize to -1 to 1 range

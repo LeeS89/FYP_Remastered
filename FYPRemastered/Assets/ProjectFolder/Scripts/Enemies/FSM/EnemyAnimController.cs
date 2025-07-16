@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class EnemyAnimController
@@ -18,7 +19,7 @@ public class EnemyAnimController
 
     private void BindToEvents()
     {
-        if(_eventManager == null)
+        if (_eventManager == null)
         {
             Debug.LogError("No Valid Event Manager Passed");
             return;
@@ -31,15 +32,15 @@ public class EnemyAnimController
     public void UpdateBlendTreeParams(float speed, float direction)
     {
         //if(Mathf.Abs(speed - _lastSpeed) > Threshold)
-       // {
-            _anim.SetFloat("speed", speed);
-            _lastSpeed = speed;
-      //  }
+        // {
+        _anim.SetFloat("speed", speed);
+        _lastSpeed = speed;
+        //  }
 
-       // if(Mathf.Abs(direction - _lastDirection) > Threshold)
-       // {
-            _anim.SetFloat("direction", direction);
-            _lastDirection = direction;
+        // if(Mathf.Abs(direction - _lastDirection) > Threshold)
+        // {
+        _anim.SetFloat("direction", direction);
+        _lastDirection = direction;
         //}
     }
 
@@ -50,10 +51,10 @@ public class EnemyAnimController
         _anim.SetBool("alert", alert);
     }
 
-   /* public void EnemyDied()
-    {
-        _anim.SetTrigger("dead");
-    }*/
+    /* public void EnemyDied()
+     {
+         _anim.SetTrigger("dead");
+     }*/
 
     public void UpdateSpeed(float speed)
     {
@@ -68,7 +69,7 @@ public class EnemyAnimController
     public void LookAround()
     {
         _anim.SetTrigger("look");
-       
+
     }
 
     public void Reload()
@@ -92,7 +93,7 @@ public class EnemyAnimController
         _anim.SetTrigger("melee");
     }
 
-   
+
 
     private void PlayAnimationType(AnimationAction action)
     {
@@ -130,7 +131,7 @@ public class EnemyAnimController
         if (!layerReady) { _eventManager.AimingLayerReady(false); } // Aiming animation is no longer playing -> Can no longer shoot
 
         float time = 0f;
-        while(time < duration)
+        while (time < duration)
         {
             float t = time / duration;
             _anim.SetLayerWeight(layer, Mathf.Lerp(from, to, t));
@@ -141,4 +142,11 @@ public class EnemyAnimController
 
         if (layerReady) { _eventManager.AimingLayerReady(layerReady); } // Aiming animation is finished -> Can now start Shooting
     }
+
+
+   
+
+
+
 }
+ 
