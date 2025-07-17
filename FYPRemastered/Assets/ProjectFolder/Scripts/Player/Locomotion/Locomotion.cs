@@ -1,4 +1,5 @@
 using Oculus.Interaction;
+using System.Collections;
 using UnityEngine;
 
 public class Locomotion : ComponentEvents//, IPlayerEvents
@@ -48,6 +49,7 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
             Debug.LogWarning("Character controller not found, please ensure component exists before use");
         }
         _playerEventManager = _eventManager as PlayerEventManager;
+        _playerEventManager.OnKnockbackTriggered += ApplyKnockback;
         _playerEventManager.OnPlayerRotate += HandleRotation;
         _playerEventManager.OnPlayerHeightUpdated += AdjustPlayerHeight;
         _playerEventManager.OnPlayerMove += SetShouldMoveforward;
@@ -65,6 +67,7 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
         _playerEventManager.OnPlayerRotate -= HandleRotation;
         _playerEventManager.OnPlayerHeightUpdated -= AdjustPlayerHeight;
         _playerEventManager.OnPlayerMove -= SetShouldMoveforward;
+        _playerEventManager.OnKnockbackTriggered -= ApplyKnockback;
         UnRegisterGlobalEvents();
         base.UnRegisterLocalEvents(eventManager);
         _playerEventManager = null;
@@ -91,11 +94,20 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
     //public bool _testMove = false;
     private Vector3 _lastPosition;
     public float movementThreshold = 0.01f;
+
+    public bool _testKnockback = false;
+
     private void Update()
     {
         if (!InputEnabled) { return; }
 
         ApplyPlayerMovement();
+
+        if (_testKnockback)
+        {
+            ApplyKnockback(-transform.forward, 7f, 0.3f);
+            _testKnockback = false;
+        }
 
 #if UNITY_EDITOR
         float movedDistance = Vector3.Distance(transform.position, _lastPosition);
@@ -175,18 +187,49 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
 
 
 
-    private void ApplyPlayerMovement()
+    private void ApplyPlayerMovement(Vector3? overrideVelocity = null)
     {
         if (_controller == null) { return; }
 
-        _effectiveMoveSpeed = _shouldMoveForward ? _moveSpeed : 0f;
+        Vector3 finalVelocity;
 
-        _moveDirection = transform.forward;
-        velocity = _moveDirection * _effectiveMoveSpeed;
-        velocity.y = ApplyGravity();
+        if (overrideVelocity.HasValue)
+        {
+            finalVelocity = overrideVelocity.Value;
+        }
+        else
+        {
+            _effectiveMoveSpeed = _shouldMoveForward ? _moveSpeed : 0f;
 
-        _controller.Move(velocity * Time.deltaTime);
+            _moveDirection = transform.forward;
+            finalVelocity = _moveDirection * _effectiveMoveSpeed;
+            finalVelocity.y = ApplyGravity();
+        }
 
+        _controller.Move(finalVelocity * Time.deltaTime);
+
+    }
+
+    private void ApplyKnockback(Vector3 direction, float force, float duration)
+    {
+        StartCoroutine(HandleKnockback(direction, force, duration));
+    }
+
+    private IEnumerator HandleKnockback(Vector3 direction, float force, float duration)
+    {
+        InputEnabled = false;
+
+        float timer = 0f;
+        Vector3 knockbackVelocity = direction * force;
+
+        while(timer < duration)
+        {
+            ApplyPlayerMovement(knockbackVelocity);
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        InputEnabled = true;
     }
 
     private float ApplyGravity()

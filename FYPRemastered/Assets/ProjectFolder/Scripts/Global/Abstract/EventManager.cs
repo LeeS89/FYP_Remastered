@@ -44,4 +44,11 @@ public abstract class EventManager : MonoBehaviour
     {
         OnReload?.Invoke(isReloading);
     }
+
+    public event Action<Vector3, float, float> OnKnockbackTriggered;
+
+    public void Knockbacktriggered(Vector3 direction, float force, float duration)
+    {
+        OnKnockbackTriggered?.Invoke(direction, force, duration);
+    }
 }

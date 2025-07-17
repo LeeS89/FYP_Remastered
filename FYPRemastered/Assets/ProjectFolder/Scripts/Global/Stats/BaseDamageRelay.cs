@@ -2,6 +2,11 @@ using UnityEngine;
 
 public class BaseDamageRelay : ComponentEvents, IDamageable
 {
+    public void Knockback(float damage, Vector3 direction, float force, float duration)
+    {
+        _eventManager.Knockbacktriggered(direction, force, duration);
+        NotifyDamage(damage);
+    }
 
     public void NotifyDamage(float baseDamage, DamageType dType = DamageType.None, float statusEffectChancePercentage = 0, float damageOverTime = 0, float duration = 0)
     {
