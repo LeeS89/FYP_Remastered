@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AbilitiesComponent : ComponentEvents
+public class AbilitiesComponent : BaseAbilities
 {
     [Header("Trace Center")]
     [SerializeField] private Transform _traceLocation;

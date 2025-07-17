@@ -65,7 +65,7 @@ public partial class EnemyFSMController : ComponentEvents
     [Header("Gun Parameters")]
     [SerializeField] private Transform _bulletSpawnPoint;
     [SerializeField] private GameObject _owningGameObject;
-    private Gun _gun;
+    private GunBase _gun;
 
 
     [Header("Agent and animation speed values")]
@@ -237,6 +237,7 @@ public partial class EnemyFSMController : ComponentEvents
 
     protected override void OnSceneStarted()
     {
+        InitializeWeapon();
         PatrolStateRequested();
         _agentIsActive = true;
         //_agent.ResetPath();

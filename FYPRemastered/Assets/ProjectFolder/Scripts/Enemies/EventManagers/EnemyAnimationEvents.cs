@@ -20,7 +20,7 @@ public class EnemyAnimationEvents : ComponentEvents
     {
         bool inProgress = meleeState == 1;
 
-        _enemyEventManager.Melee(inProgress);
+        _enemyEventManager.MeleeTriggered(inProgress);
     }
 
     public void OnReloadComplete(int reloadState)
@@ -28,7 +28,7 @@ public class EnemyAnimationEvents : ComponentEvents
         // 0 = reload ended, 1 = reload started
         bool isReloading = reloadState == 1;
 
-        _enemyEventManager.Reload(isReloading);
+        //_enemyEventManager.Reload(isReloading);
         /* int clampedValue = Mathf.Clamp(reloadingInt, 0, 1);
          bool isReloading = reloadingInt != 0;
 
@@ -58,7 +58,7 @@ public class EnemyAnimationEvents : ComponentEvents
                 _enemyEventManager.Reload(true);
                 break;
             case AnimationAction.Melee:
-                _enemyEventManager.Melee(true);
+                _enemyEventManager.MeleeTriggered(true);
                 break;
             default:
                 Debug.Log("No action specified");
@@ -78,7 +78,7 @@ public class EnemyAnimationEvents : ComponentEvents
                 _enemyEventManager.Reload(false);
                 break;
             case AnimationAction.Melee:
-                _enemyEventManager.Melee(false);
+                _enemyEventManager.MeleeTriggered(false);
                 break;
             default:
                 Debug.Log("No action specified");

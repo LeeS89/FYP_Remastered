@@ -69,10 +69,10 @@ public partial class EnemyFSMController : ComponentEvents
             UpdateFieldOfViewCheckFrequency();
         }
 
-        if (_gun != null)
+        /*if (_gun != null)
         {
             _gun.UpdateGun();
-        }
+        }*/
 
         /*if (_testDeath)
         {

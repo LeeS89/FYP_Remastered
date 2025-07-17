@@ -22,4 +22,26 @@ public abstract class EventManager : MonoBehaviour
     {
         OnNotifyDamage?.Invoke(baseDamage, dType, statusEffectChancePercentage, damageOverTime, duration);
     }
+
+    //GunSetup(GameObject gunOwner, EventManager eventManager, Transform bulletSpawnLocaiton, int clipCapacity, Transform target = null)
+    public event Action<GameObject, EventManager,Transform, int, Transform> OnSetupGun;
+
+    public void SetupGun(GameObject gunOwner, EventManager eventManager, Transform bulletSpawnLocation, int clipCapacity, Transform target = null)
+    {
+        OnSetupGun?.Invoke(gunOwner, eventManager, bulletSpawnLocation, clipCapacity, target);
+    }
+
+    public event Action OnOutOfAmmo;
+
+    public void OutOfAmmo()
+    {
+        OnOutOfAmmo?.Invoke();
+    }
+
+    public event Action<bool> OnReload;
+
+    public void Reload(bool isReloading)
+    {
+        OnReload?.Invoke(isReloading);
+    }
 }

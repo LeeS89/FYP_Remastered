@@ -34,7 +34,7 @@ public partial class EnemyFSMController : ComponentEvents
         
 
         InitializeWaypoints();
-        InitializeWeapon();
+        //InitializeWeapon();
 
        // ChangeState(_patrol);
 
@@ -102,7 +102,9 @@ public partial class EnemyFSMController : ComponentEvents
             Debug.LogError("Player transform not found!");
             return;
         }
-        _gun = new Gun(_bulletSpawnPoint, playerTransform, _enemyEventManager, _owningGameObject);
+
+        _eventManager.SetupGun(_owningGameObject, _enemyEventManager, _bulletSpawnPoint, 5, playerTransform);
+        //_gun = new GunBase(_bulletSpawnPoint, playerTransform, _enemyEventManager, _owningGameObject);
    
     }
 

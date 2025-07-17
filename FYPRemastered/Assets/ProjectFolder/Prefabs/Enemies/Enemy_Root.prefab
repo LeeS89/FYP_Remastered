@@ -105,8 +105,8 @@ GameObject:
   - component: {fileID: 7963726222172396574}
   - component: {fileID: 3074888559223914219}
   - component: {fileID: 5165514309955864409}
+  - component: {fileID: 726394843645409294}
   - component: {fileID: 3309944096030598539}
-  - component: {fileID: 6577363309883393908}
   m_Layer: 4
   m_Name: Enemy_Root
   m_TagString: Untagged
@@ -292,6 +292,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _visualMesh: {fileID: 0}
+--- !u!114 &726394843645409294
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 295630588504063347}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc1926754bea8b54497f81a58b8ee2ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _clipCapacity: 5
 --- !u!65 &3309944096030598539
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -313,20 +326,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.035965, y: 1.7152128, z: 0.61201286}
   m_Center: {x: 0.0787549, y: 1.2108064, z: 0.014566898}
---- !u!114 &6577363309883393908
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 295630588504063347}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a627cb63bedc98449ad4c83ebb278033, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  waistPos: {x: 0, y: 0, z: 0}
-  eyePos: {x: 0, y: 0, z: 0}
 --- !u!1 &613288840807163240
 GameObject:
   m_ObjectHideFlags: 0
@@ -502,6 +501,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a644d48c8dd6c04eb26f8256d4901fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  currentAction: 0
 --- !u!1 &1426057146467855863
 GameObject:
   m_ObjectHideFlags: 0

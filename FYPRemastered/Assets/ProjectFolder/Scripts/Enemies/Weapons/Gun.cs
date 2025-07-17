@@ -58,7 +58,7 @@ public class Gun
             //_reloadComplete = IsReloading;
             //_waitUntilFinishedReloading = new WaitUntil(_reloadComplete);
 
-            _enemyEventManager.OnShoot += SpawnBullet;
+            _enemyEventManager.OnShoot += Shoot;
             _enemyEventManager.OnPlayerSeen += UpdateTargetVisibility;
             _enemyEventManager.OnAimingLayerReady += SetAimReady;
             _enemyEventManager.OnFacingTarget += SetIsFacingTarget;
@@ -214,7 +214,7 @@ public class Gun
 
             if (!_playerHasDied)
             {
-                Shoot();
+                Shoots();
             }
 
             yield return new WaitForSeconds(2f);
@@ -230,13 +230,13 @@ public class Gun
         {
             if (CanFire())
             {
-                Shoot();
+                Shoots();
             }
             _nextShootTime = Time.time + _shootInterval;
         }
     }
 
-    private void Shoot()
+    public void Shoots()
     {
         if (!_isFacingTarget) { return; }
 
@@ -256,7 +256,7 @@ public class Gun
     /// <summary>
     /// Called From Animation Event
     /// </summary>
-    private void SpawnBullet()
+    public void Shoot()
     {
        
         Vector3 _directionToTarget = TargetingUtility.GetDirectionToTarget(_target, _bulletSpawnPoint, true);
@@ -278,7 +278,7 @@ public class Gun
         _isAimReady = false;
         _isShooting = false;
         CoroutineRunner.Instance.StopCoroutine(FiringSequence());
-        _enemyEventManager.OnShoot -= SpawnBullet;
+        _enemyEventManager.OnShoot -= Shoot;
         _enemyEventManager.OnPlayerSeen -= UpdateTargetVisibility;
         _enemyEventManager.OnAimingLayerReady -= SetAimReady;
         _enemyEventManager.OnFacingTarget -= SetIsFacingTarget;

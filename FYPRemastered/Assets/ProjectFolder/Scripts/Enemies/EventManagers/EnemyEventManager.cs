@@ -30,7 +30,7 @@ public class EnemyEventManager : EventManager
     // Gun Events
     public event Action OnShoot;
 
-    public event Action<bool> OnReload;
+    //public event Action<bool> OnReload;
 
     public event Action<bool> OnFacingTarget;
 
@@ -151,12 +151,12 @@ public class EnemyEventManager : EventManager
     }
 
    
-    public void Reload(bool isReloading)
+   /* public void Reload(bool isReloading)
     {
         OnReload?.Invoke(isReloading);
-    }
+    }*/
 
-    public void Melee(bool isMelee)
+    public void MeleeTriggered(bool isMelee)
     {
         OnMelee?.Invoke(isMelee);
     }
