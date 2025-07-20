@@ -211,12 +211,12 @@ public static class LineOfSightUtility
                 {
                     if (((1 << hit.collider.gameObject.layer) & targetMask) != 0)
                     {
-                        Debug.DrawLine(from, colPoint, Color.green, 25f);
+                        //Debug.DrawLine(from, colPoint, Color.green, 25f);
                         return true;
                     }
                     else
                     {
-                        Debug.DrawLine(from, hit.point, Color.red, 25f);
+                       // Debug.DrawLine(from, hit.point, Color.red, 25f);
                         return false;
                     }
                 }

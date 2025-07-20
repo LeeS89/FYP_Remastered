@@ -80,9 +80,18 @@ public class BaseAbilities : ComponentEvents
         return FireConditions.Ready;
     }
 
+    public bool _testShootStatus = false;
+
     protected virtual bool CanShoot()
     {
-        return GetFireState() == FireConditions.Ready;
+        FireConditions test = GetFireState();
+        if (_testShootStatus)
+        {
+            Debug.LogError("CanShoot called, test value: " + test);
+        }
+        
+        return test == FireConditions.Ready;
+        //return GetFireState() == FireConditions.Ready;
     }
 
     protected virtual void OutOfAmmo() { }

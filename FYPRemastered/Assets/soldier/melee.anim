@@ -35401,14 +35401,21 @@ AnimationClip:
   m_HasMotionFloatCurves: 1
   m_Events:
   - time: 0
-    functionName: OnAnimationEventReceived
+    functionName: SetMelee
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 5
     messageOptions: 0
+  - time: 0.2
+    functionName: MeleeAttackPerformed
+    data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
   - time: 0.6666667
-    functionName: OnAnimationEventCompleteOrInterupted
+    functionName: ResetMelee
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0

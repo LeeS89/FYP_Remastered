@@ -44,7 +44,7 @@ public class StatHandler : ComponentEvents
                 ApplyElementalDamage(dType, statusEffectChancePercentage, damageOverTime, duration);
                 break;
             default:
-                Debug.LogWarning("No Damage Type Received");
+                ApplyInstantDamage(baseDamage);
                 break;
         }
         

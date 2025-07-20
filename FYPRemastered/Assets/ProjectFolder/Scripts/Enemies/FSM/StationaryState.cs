@@ -8,9 +8,14 @@ public class StationaryState : EnemyState
   
     private bool _newStateRequestAlreadySent = false;
    
-    private bool _isStationary = false;  
+    private bool _isStationary = false;
 
-    public StationaryState(EnemyEventManager eventManager, GameObject owner) : base(eventManager, owner) { }
+    private bool _canFlankTarget = true;
+
+    public StationaryState(EnemyEventManager eventManager, GameObject owner) : base(eventManager, owner)
+    {
+        _eventManager.OnPursuitConditionChanged += SetCanFlankTarget;
+    }
     
    
 
@@ -58,18 +63,21 @@ public class StationaryState : EnemyState
        
     }
 
-   
+    private void SetCanFlankTarget(bool canFlank)
+    {
+        _canFlankTarget = canFlank;
+    }
 
-   
+
     private IEnumerator PlayerVisibilityRoutine()
     {
         while (_isStationary)
         {
-            if (!_canSeePlayer)
+            if (_canFlankTarget && !_canSeePlayer)
             {
                 yield return new WaitForSeconds(1f);
 
-                if (!_canSeePlayer && !_newStateRequestAlreadySent)
+                if (_canFlankTarget && !_canSeePlayer && !_newStateRequestAlreadySent)
                 {
                     _newStateRequestAlreadySent = true;
                     _eventManager.RequestTargetPursuit(AIDestinationType.FlankDestination);
@@ -174,6 +182,7 @@ public class StationaryState : EnemyState
 
     public override void OnStateDestroyed()
     {
+        _eventManager.OnPursuitConditionChanged -= SetCanFlankTarget;
         base.OnStateDestroyed();
        
      

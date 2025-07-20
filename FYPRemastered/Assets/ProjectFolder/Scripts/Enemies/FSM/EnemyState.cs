@@ -31,7 +31,7 @@ public abstract class EnemyState
     {
         _owner = owner;
         _eventManager = eventManager;
-        _eventManager.OnPlayerSeen += SetPlayerSeen;
+        _eventManager.OnTargetSeen += SetPlayerSeen;
         _waitUntilDestinationApplied = new WaitUntil(() => _destinationApplied);
         _alertStatus = AlertStatus.None;
         _eventManager.OnAlertStatusChanged += UpdateAlertStatus;
@@ -88,7 +88,7 @@ public abstract class EnemyState
     public virtual void OnStateDestroyed()
     {
         _eventManager.OnDestinationReached -= SetDestinationReached;
-        _eventManager.OnPlayerSeen -= SetPlayerSeen;
+        _eventManager.OnTargetSeen -= SetPlayerSeen;
         _eventManager.OnAlertStatusChanged -= UpdateAlertStatus;
         _eventManager.OnDestinationApplied -= SetDestinationApplied;
         _eventManager = null;

@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Xml;
 using UnityEngine;
 
@@ -5,11 +6,107 @@ public class EnemyAnimationEvents : ComponentEvents
 {
     private EnemyEventManager _enemyEventManager;
 
+    [SerializeField] private Transform lookTarget; // Pull from event later
+    [SerializeField] private float maxPitchAngle = 30f;
+    [SerializeField] private float aimSpeed = 5f;
+
+    private Animator animator;
+   
+   
+    private float _targetLookWeight = 0f;
+    private float _currentLookWeight = 0f;
+    private Coroutine _lookWeightCoroutine;
+    [SerializeField] private float _blendSpeed = 5f;
+
+    [Header("Weights")]
+    [Range(0f, 1f)] public float lookAtWeight = 1f;
+    [Range(0f, 1f)] public float bodyWeight = 0.3f;
+    [Range(0f, 1f)] public float headWeight = 0.7f;
+    [Range(0f, 1f)] public float eyesWeight = 0f;
+    [Range(0f, 1f)] public float clampWeight = 0.5f;
+
+
+
+
+
+
+
     public override void RegisterLocalEvents(EventManager eventManager)
     {
         base.RegisterLocalEvents(eventManager);
         _enemyEventManager = _eventManager as EnemyEventManager;
+        _enemyEventManager.OnTargetSeen += AimTowardsTarget;
+        animator = GetComponent<Animator>();
+       
     }
+
+    public bool ShouldAim = true;
+
+    private void OnAnimatorIK(int layerIndex)
+    {
+        if (animator == null || lookTarget == null)
+            return;
+
+        animator.SetLookAtWeight(
+            _currentLookWeight,
+            bodyWeight,
+            headWeight,
+            eyesWeight,
+            clampWeight
+        );
+
+        animator.SetLookAtPosition(lookTarget.position);
+       
+    }
+
+  
+
+    public bool _testMelee = false;
+
+    public void SetMelee()
+    {
+        ShouldAim = false;
+    }
+
+    public void ResetMelee()
+    {
+        ShouldAim = true;
+    }
+
+    public void MeleeAttackPerformed()
+    {
+        _enemyEventManager.MeleeAttackPerformed();
+    }
+
+    private void AimTowardsTarget(bool targetInSight)
+    {
+        float newtargetWeight = targetInSight ? 1f : 0f;
+
+        if(Mathf.Approximately(_targetLookWeight, newtargetWeight)) { return; }
+
+        _targetLookWeight = newtargetWeight;
+
+        if(_lookWeightCoroutine != null)
+        {
+            StopCoroutine(_lookWeightCoroutine);
+        }
+
+        _lookWeightCoroutine = StartCoroutine(BlendLookWeight(_targetLookWeight));
+    }
+
+    private IEnumerator BlendLookWeight(float targetWeight)
+    {
+        while (!Mathf.Approximately(_currentLookWeight, targetWeight))
+        {
+            _currentLookWeight = Mathf.Lerp(_currentLookWeight, targetWeight, Time.deltaTime * _blendSpeed);
+            yield return null;
+        }
+
+        _currentLookWeight = targetWeight;
+        _lookWeightCoroutine = null;
+    }
+
+   
 
     public void OnShoot()
     {

@@ -72,6 +72,27 @@ public partial class EnemyFSMController : ComponentEvents
         }
     }
 
+    void OnDrawGizmos()
+    {
+        if (_fovLocation == null) return;
+
+        Gizmos.color = Color.green;
+
+        // Horizontal FOV
+        Vector3 right = Quaternion.Euler(0, _angle * 0.5f, 0) * _fovLocation.forward;
+        Vector3 left = Quaternion.Euler(0, -_angle * 0.5f, 0) * _fovLocation.forward;
+
+        Gizmos.DrawRay(_fovLocation.position, right * 5f);
+        Gizmos.DrawRay(_fovLocation.position, left * 5f);
+
+        // Vertical FOV
+        Vector3 up = Quaternion.Euler(-_angle * 0.75f, 0, 0) * _fovLocation.forward;
+        Vector3 down = Quaternion.Euler(_angle * 0.75f, 0, 0) * _fovLocation.forward;
+
+        Gizmos.DrawRay(_fovLocation.position, up * 5f);
+        Gizmos.DrawRay(_fovLocation.position, down * 5f);
+    }
+
     private void CheckIfTargetWithinShootAngle(Collider target)
     {
         if(target == null) { return; }
@@ -81,6 +102,8 @@ public partial class EnemyFSMController : ComponentEvents
 
         _enemyEventManager.FacingTarget(canShootTarget);
     }
+
+    public bool _capsuleResultTest = false;
 
     /// <summary>
     /// First checks if the target is within FOV cone, then performs a capsule cast from waist to eye level to check for target colliders
@@ -92,7 +115,14 @@ public partial class EnemyFSMController : ComponentEvents
     {
         if(target == null) { return false; }
 
-        if (!_fov.IsWithinView(_fovLocation, target.bounds.center, _angle * 0.5f, _angle * 0.75f)) { return false; }
+        if (!_fov.IsWithinView(_fovLocation, target.bounds.center, _angle * 0.5f, _angle * 0.75f)) 
+        {
+            if (_capsuleResultTest)
+            {
+                Debug.LogError("Failed Angle Check");
+            }
+            return false; 
+        }
 
         Vector3 waistPos = transform.position + Vector3.up * _waistHeight;
         Vector3 eyePos = transform.position + Vector3.up * _eyeHeight;
@@ -100,13 +130,20 @@ public partial class EnemyFSMController : ComponentEvents
         Vector3 directionTotarget = TargetingUtility.GetDirectionToTarget(target.bounds.center, sweepCenter);
 
         int hitCount = _fov.EvaluateViewCone(waistPos, eyePos, 0.4f, directionTotarget, _fovTraceRadius, _fovLayerMask, _traceHitPoints);
-        if (hitCount == 0) { return false; }
+        if (hitCount == 0) 
+        {
+            if (_capsuleResultTest)
+            {
+                Debug.LogError("Capsule cast failed");
+            }
+            return false; 
+        }
 
         AddFallbackPoints(target, _traceHitPoints, ref hitCount);
 
         for (int i = 0; i < hitCount; i++)
         {
-            if (!_fov.HasLineOfSight(_fovLocation, _traceHitPoints[i], _lineOfSightMask, _fovLayerMask)) { continue; }
+            if (!_fov.HasLineOfSight(_fovLocation, _traceHitPoints[i], _lineOfSightMask, _fovLayerMask, transform, _bulletSpawnPoint, _capsuleResultTest)) { continue; }
             return true;
         }
 
@@ -136,7 +173,7 @@ public partial class EnemyFSMController : ComponentEvents
             //_alertStatus = AlertStatus.Alert;
             EnterAlertPhase();
 
-            _enemyEventManager.PlayerSeen(_canSeePlayer);
+            _enemyEventManager.TargetSeen(_canSeePlayer);
             //_enemyEventManager.ChangeAnimatorLayerWeight(1, 0, 1, 0.5f, true);
             // Alert Group Here (Moon Scene Manager)
 
@@ -144,7 +181,7 @@ public partial class EnemyFSMController : ComponentEvents
         else
         {
         //    //_animController.SetAlertStatus(false);
-            _enemyEventManager.PlayerSeen(false);
+            _enemyEventManager.TargetSeen(false);
             //_enemyEventManager.ChangeAnimatorLayerWeight(1, 1, 0, 0.5f, false);
         }
 

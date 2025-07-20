@@ -8,7 +8,7 @@ public class EnemyEventManager : EventManager
     // Nav mesh agent events
     public event Action<bool> OnDestinationReached;
     //public event Action<Vector3, int> OnDestinationUpdated;  
-    public event Action<bool> OnPlayerSeen;
+    public event Action<bool> OnTargetSeen;
     public event Action<bool> OnRotateTowardsTarget;
     public event Action OnPathInvalid;
     //public event Action<AIDestinationRequestData> OnPathRequested;
@@ -35,6 +35,7 @@ public class EnemyEventManager : EventManager
     public event Action<bool> OnFacingTarget;
 
     public event Action<bool> OnMelee;
+    public event Action OnMeleeAttackPerformed;
 
     private List<ComponentEvents> _cachedListeners;
 
@@ -49,6 +50,8 @@ public class EnemyEventManager : EventManager
     public event Action OnDestinationApplied;
     public event Action<Vector3> OnRotateAtPatrolPoint;
 
+
+    public event Action<bool> OnPursuitConditionChanged;
 
     /// <summary>
     /// Called From Scene Manager
@@ -77,10 +80,16 @@ public class EnemyEventManager : EventManager
     }
 
 
-   /* public void WaypointsUpdated(WaypointData wpData)
+
+    public void PursuitConditionChanged(bool permission)
     {
-        OnWaypointsUpdated?.Invoke(wpData);
-    }*/
+        OnPursuitConditionChanged?.Invoke(permission);
+    }
+
+    /* public void WaypointsUpdated(WaypointData wpData)
+     {
+         OnWaypointsUpdated?.Invoke(wpData);
+     }*/
 
     /// <summary>
     /// Animation actions other than Locomotion i.e. Melee, Look around etc
@@ -114,9 +123,9 @@ public class EnemyEventManager : EventManager
 
    
 
-    public void PlayerSeen(bool seen)
+    public void TargetSeen(bool seen)
     {
-        OnPlayerSeen?.Invoke(seen);
+        OnTargetSeen?.Invoke(seen);
     }
 
     public void FacingTarget(bool facingTarget)
@@ -159,6 +168,11 @@ public class EnemyEventManager : EventManager
     public void MeleeTriggered(bool isMelee)
     {
         OnMelee?.Invoke(isMelee);
+    }
+
+    public void MeleeAttackPerformed()
+    {
+        OnMeleeAttackPerformed?.Invoke();
     }
 
     public void DeathComplete(bool status)

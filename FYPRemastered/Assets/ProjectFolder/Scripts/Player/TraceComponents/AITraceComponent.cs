@@ -2,28 +2,55 @@ using UnityEngine;
 
 public class AITraceComponent : TraceComponent
 {
+    public int CheckTargetWithinCombatRange(Vector3 traceLocation, Collider[] hitResults, float sphereRadius = 0.2f, LayerMask traceLayer = default)
+    {
+
+        //Vector3 start = location.position - location.forward * (capsuleHeight / 2f);  // Bottom of capsule
+        //Vector3 end = location.position + location.forward * (capsuleHeight / 2f);    // Top of capsule
+
+
+        return Physics.OverlapSphereNonAlloc(traceLocation, sphereRadius, hitResults, traceLayer);
+        //hitResults = _overlapResults;
+        //return hits;
+
+/*
+        for (int i = 0; i < hitResults.Length; i++)
+        {
+            hitResults[i] = null;
+        }
+        // Clear the results if no objects were found
+        return 0;*/
+
+    }
 
 
     public bool IsWithinView(Transform from, Vector3 targetPosition, float horizontalThreshold, float verticalThreshold)
     {
-        Vector3 directionToTarget = (targetPosition - from.position).normalized;
+        Vector3 localDir = from.InverseTransformDirection(targetPosition - from.position).normalized;
+        
+        float horizontalAngle = Mathf.Atan2(localDir.x, localDir.z) * Mathf.Rad2Deg;
+        float verticalAngle = Mathf.Atan2(localDir.y, localDir.z) * Mathf.Rad2Deg;
 
-        // Horizontal (XZ-plane)
-        Vector3 flatForward = new Vector3(from.forward.x, 0f, from.forward.z).normalized;
-        Vector3 flatDirection = new Vector3(directionToTarget.x, 0f, directionToTarget.z).normalized;
-        float horizontalAngle = Vector3.Angle(flatForward, flatDirection);
+        return Mathf.Abs(horizontalAngle) <= horizontalThreshold && Mathf.Abs(verticalAngle) <= verticalThreshold;
+        /* Vector3 directionToTarget = (targetPosition - from.position).normalized;
 
-        // Vertical (Y-axis offset relative to flat distance)
-        float dx = targetPosition.x - from.position.x;
-        float dz = targetPosition.z - from.position.z;
-        float yOffset = targetPosition.y - from.position.y;
+         // Horizontal (XZ-plane)
+         Vector3 flatForward = new Vector3(from.forward.x, 0f, from.forward.z).normalized;
+         Vector3 flatDirection = new Vector3(directionToTarget.x, 0f, directionToTarget.z).normalized;
+         float horizontalAngle = Vector3.Angle(flatForward, flatDirection);
 
-        float verticalAngle = Mathf.Atan2(yOffset, Mathf.Sqrt(dx * dx + dz * dz)) * Mathf.Rad2Deg;
+         // Vertical (Y-axis offset relative to flat distance)
+         float dx = targetPosition.x - from.position.x;
+         float dz = targetPosition.z - from.position.z;
+         float yOffset = targetPosition.y - from.position.y;
 
-        return horizontalAngle <= horizontalThreshold && Mathf.Abs(verticalAngle) <= verticalThreshold;
+         float verticalAngle = Mathf.Atan2(yOffset, Mathf.Sqrt(dx * dx + dz * dz)) * Mathf.Rad2Deg;
+
+         return horizontalAngle <= horizontalThreshold && Mathf.Abs(verticalAngle) <= verticalThreshold;*/
     }
 
-  
+
+   
 
 
     public int EvaluateViewCone(Vector3 start, Vector3 end, float radius, Vector3 direction, float maxdistance, LayerMask targetMask, Vector3[] hitPoints)
@@ -47,11 +74,12 @@ public class AITraceComponent : TraceComponent
         return hitCount;
     }
 
-    public bool HasLineOfSight(
+  /*  public bool HasLineOfSight(
        Transform from,
        Vector3 target,
        LayerMask blockingMask,
-       LayerMask targetMask
+       LayerMask targetMask,
+       bool debug = false
        )
     {
 
@@ -65,11 +93,88 @@ public class AITraceComponent : TraceComponent
 
                 return true;
             }
+            else if(((1 << hit.collider.gameObject.layer) & blockingMask) != 0)
+            {
+                if (debug)
+                {
+                    Debug.DrawLine(from.position, target, Color.red, 25f);
+                    Debug.LogError($"Hit target blocking mask: {hit.collider.gameObject.name}");
+                    return false;
+                }
+            }
+        }
+
+
+        return false;
+    }*/
+
+
+    public bool HasLineOfSight(
+       Transform from,
+       Vector3 target,
+       LayerMask blockingMask,
+       LayerMask targetMask,
+       Transform ownerTransform,
+       Transform fallbackFrom = null,
+       bool debug = false
+       )
+    {
+        RaycastHit hitInfo;
+        bool targetWasHit;
+
+        CheckHit(from, target, out hitInfo, out targetWasHit, blockingMask);
+
+        if (!targetWasHit) { return false; }
+
+        if(fallbackFrom != null)
+        {
+            if(hitInfo.collider.transform.root == from.root)
+            {
+                targetWasHit = false;
+                CheckHit(fallbackFrom, target, out hitInfo, out targetWasHit, blockingMask);
+                if (!targetWasHit) { return false; }
+
+                if (((1 << hitInfo.collider.gameObject.layer) & targetMask) != 0)
+                {
+                    Debug.DrawLine(fallbackFrom.position, target, Color.green);
+                    Debug.LogError($"Hit target from fallback: {hitInfo.collider.gameObject.name}");
+                    return true;
+                }
+               
+            }
+        }
+
+        if (((1 << hitInfo.collider.gameObject.layer) & targetMask) != 0)
+        {
+            Debug.DrawLine(fallbackFrom.position, target, Color.green);
+            Debug.LogError($"Hit target from fallback: {hitInfo.collider.gameObject.name}");
+            return true;
         }
 
 
         return false;
     }
 
-  
+    private void CheckHit(
+       Transform from,
+       Vector3 target,
+       out RaycastHit hit,
+       out bool hitTarget,
+       LayerMask blockingMask   
+       )
+    {
+
+
+        if (Physics.Linecast(from.position, target, out hit, blockingMask))
+        {
+            hitTarget = true;
+        }
+        else
+        {
+            hitTarget = false;
+        }
+
+
+    }
+
 }
