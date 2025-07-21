@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public class SpecialActionsComponent : BaseAbilities
+public class CombatComponent : BaseAbilities
 {
     protected EnemyEventManager _enemyEventManager;
 
@@ -130,6 +130,17 @@ public class SpecialActionsComponent : BaseAbilities
         GameManager.OnPlayerRespawn -= OnPlayerRespawned;
     }
 
+
+    private void BeginMeleeSweep()
+    {
+        ToggleMeleeCheckRoutine(true);
+    }
+
+    private void ResetMeleeSweep()
+    {
+        ToggleMeleeCheckRoutine(false);
+    }
+
     private void ToggleMeleeCheckRoutine(bool conditionMet)
     {
         if (conditionMet)
@@ -184,7 +195,7 @@ public class SpecialActionsComponent : BaseAbilities
 
             if (target.gameObject.TryGetComponent(out IDamageable damageable))
             {
-                damageable.Knockback(500, transform.forward, 7f, 0.3f);
+                damageable.Knockback(500, transform.forward, 10f, 0.3f);
                 break;
             }
         }
@@ -204,8 +215,8 @@ public class SpecialActionsComponent : BaseAbilities
 
     protected override FireConditions GetFireState()
     {
-        Debug.LogError("Calling overridden GetFirestate");
         if (_targetDead) return FireConditions.TargetDied;
+        if(!_targetInView) return FireConditions.TargetNotInView;
         if (_meleeTriggered) return FireConditions.Meleeing;
         if(!_isAimReady || !_isfacingTarget) return FireConditions.NotAiming;
         return base.GetFireState();

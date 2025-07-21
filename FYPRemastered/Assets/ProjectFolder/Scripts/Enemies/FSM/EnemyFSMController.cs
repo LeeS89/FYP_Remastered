@@ -65,7 +65,7 @@ public partial class EnemyFSMController : ComponentEvents
     [Header("Gun Parameters")]
     [SerializeField] private Transform _bulletSpawnPoint;
     [SerializeField] private GameObject _owningGameObject;
-    private GunBase _gun;
+    //private GunBase _gun;
 
 
     [Header("Agent and animation speed values")]

@@ -51,11 +51,7 @@ public partial class EnemyFSMController : ComponentEvents
                     }
                     
                 }
-                //playerSeen = LineOfSightUtility.HasLineOfSight(_fovLocation, _fovTraceResults, _angle, _shootAngleThreshold, _lineOfSightMask, _fovLayerMask, out _canShootPlayer);
-
-
-                //_enemyEventManager.FacingTarget(_canShootPlayer);
-               
+              
                 if (_fieldOfViewStatus != FieldOfViewFrequencyStatus.Heightened)
                     _fieldOfViewStatus = FieldOfViewFrequencyStatus.Heightened;
             }

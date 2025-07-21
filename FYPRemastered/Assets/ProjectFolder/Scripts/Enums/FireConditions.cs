@@ -7,5 +7,6 @@ public enum FireConditions
     Meleeing,
     NotAiming,
     TargetDied,
-    OwnerDied
+    OwnerDied,
+    TargetNotInView
 }
