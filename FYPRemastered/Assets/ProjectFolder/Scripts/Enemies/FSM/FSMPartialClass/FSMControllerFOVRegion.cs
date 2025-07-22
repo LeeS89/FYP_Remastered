@@ -6,6 +6,7 @@ public partial class EnemyFSMController : ComponentEvents
     #region Field Of View functions
     private void UpdateFieldOfViewCheckFrequency()
     {
+        return;
         switch (_fieldOfViewStatus)
         {
             case FieldOfViewFrequencyStatus.Normal:
@@ -169,7 +170,7 @@ public partial class EnemyFSMController : ComponentEvents
             //_alertStatus = AlertStatus.Alert;
             EnterAlertPhase();
 
-            _enemyEventManager.TargetSeen(_canSeePlayer);
+            //_enemyEventManager.TargetSeen(_canSeePlayer);
             //_enemyEventManager.ChangeAnimatorLayerWeight(1, 0, 1, 0.5f, true);
             // Alert Group Here (Moon Scene Manager)
 
@@ -177,7 +178,7 @@ public partial class EnemyFSMController : ComponentEvents
         else
         {
         //    //_animController.SetAlertStatus(false);
-            _enemyEventManager.TargetSeen(false);
+            //_enemyEventManager.TargetSeen(false);
             //_enemyEventManager.ChangeAnimatorLayerWeight(1, 1, 0, 0.5f, false);
         }
 

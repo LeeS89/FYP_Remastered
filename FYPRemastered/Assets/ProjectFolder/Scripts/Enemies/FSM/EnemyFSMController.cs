@@ -99,6 +99,10 @@ public partial class EnemyFSMController : ComponentEvents
         _enemyEventManager.OnRotateTowardsTarget += ToggleRotationToTarget;
         _enemyEventManager.OnSpeedChanged += UpdateAnimatorSpeedValues;
 
+
+        _enemyEventManager.OnTargetSeen += UpdateFieldOfViewResults;
+
+
         RegisterGlobalEvents();
         SetupFSM();
 

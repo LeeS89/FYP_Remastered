@@ -234,6 +234,7 @@ MonoBehaviour:
   _bulletSpawnPoint: {fileID: 1520609376679817542}
   _owningGameObject: {fileID: 0}
   _testDeath: 0
+  _capsuleResultTest: 0
   _testFlankCubes: {fileID: 6064443228721452630, guid: 5f1d9bc0501d93140b8d583d719a72de, type: 3}
   testRespawn: 0
   _testWaypoint: 0
@@ -304,13 +305,29 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _clipCapacity: 5
+  _testShootStatus: 0
   _meleeCheckInterval: 0.2
   _meleeCheckRadius: 1.5
   _fovLocation: {fileID: 3514716611913536367}
-  _fovTraceResults: []
+  _detectionPhaseResults: []
+  _meleeResults: []
+  _evaluationPhaseResults: []
+  _maxFovTraceResults: 5
   _meleeCheckMask:
     serializedVersion: 2
     m_Bits: 520
+  _fovTargetMask:
+    serializedVersion: 2
+    m_Bits: 520
+  _fovBlockingMask:
+    serializedVersion: 2
+    m_Bits: 539
+  _waistHeight: 1
+  _eyeHeight: 1.8
+  _detectionPhaseRadius: 25
+  _horizontalTargetViewAngle: 75
+  _verticalTargetViewAngle: 75
+  _shootAngleThreshold: 30
   _testMelee: 0
 --- !u!65 &3309944096030598539
 BoxCollider:
@@ -508,11 +525,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a644d48c8dd6c04eb26f8256d4901fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spineBone: {fileID: 355675493814327436}
   lookTarget: {fileID: 0}
   maxPitchAngle: 30
   aimSpeed: 5
-  _IKTest: 0
+  _blendSpeed: 5
   lookAtWeight: 1
   bodyWeight: 0.3
   headWeight: 0.7
