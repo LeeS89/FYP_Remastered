@@ -328,6 +328,8 @@ MonoBehaviour:
   _horizontalTargetViewAngle: 75
   _verticalTargetViewAngle: 75
   _shootAngleThreshold: 30
+  _fovEvaluationRadius: 0.4
+  _bulletSpawnPoint: {fileID: 1520609376679817542}
   _testMelee: 0
 --- !u!65 &3309944096030598539
 BoxCollider:

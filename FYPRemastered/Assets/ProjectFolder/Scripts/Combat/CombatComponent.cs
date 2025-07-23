@@ -37,8 +37,10 @@ public class CombatComponent : BaseAbilities
     [Range(0, 360)] public float _horizontalTargetViewAngle;
     [Range(0, 360)] public float _verticalTargetViewAngle;
     [Range(0, 360)] public float _shootAngleThreshold;
-    
- 
+
+    private FieldOfViewHandler _fovhandler;
+    private FieldOfViewParams _fovParams;
+    [SerializeField] private float _fovEvaluationRadius = 0.4f;
     //[SerializeField] protected bool _targetSeen = false;
 
     protected void SetMeleeTriggered(bool isMelee)
@@ -83,6 +85,12 @@ public class CombatComponent : BaseAbilities
         _evaluationPhaseResults = new Vector3[_maxFovTraceResults];
         _meleeCheckWait = new WaitForSeconds(_meleeCheckInterval);
 
+
+        InitializeFOVParams();
+        _fovhandler = new FieldOfViewHandler(_aiTraceComponent, _fovParams);
+
+
+
         _enemyEventManager.OnMeleeAttackPerformed += EvaluateMeleeAttackResults;
         _enemyEventManager.OnShoot += ShootGun;
         _enemyEventManager.OnMelee += SetMeleeTriggered;
@@ -114,6 +122,26 @@ public class CombatComponent : BaseAbilities
         GameManager.OnPlayerDied += OnPlayerDied;
         GameManager.OnPlayerRespawn += OnPlayerRespawned;   
 
+    }
+    public Transform _bulletSpawnPoint;
+    private void InitializeFOVParams()
+    {
+        _fovParams = new FieldOfViewParams
+        (
+            _fovLocation,
+            transform,
+            _bulletSpawnPoint,
+            _detectionPhaseRadius,
+            _waistHeight,
+            _eyeHeight,
+            _fovEvaluationRadius,
+            _horizontalTargetViewAngle * 0.5f,
+            _horizontalTargetViewAngle * 0.75f,
+            _fovBlockingMask,
+            _fovTargetMask,
+            _maxFovTraceResults
+
+        );
     }
 
     public bool _testMelee = false;
@@ -240,8 +268,35 @@ public class CombatComponent : BaseAbilities
     }
 
 
+    private void OnFieldOfViewComplete(bool seen, bool inShootingAngle)
+    {
+        UpdateFOVResults(seen);
+        SetFacingtarget(inShootingAngle);
+    }
+
     protected void CheckFieldOfView()
     {
+
+        //bool targetSpotted = _fovhandler.RunFieldOfViewSweep(true);
+        if(_fovhandler == null || _aiTraceComponent == null) { return; }
+        _fovhandler.RunFieldOfViewSweep(OnFieldOfViewComplete, true);
+       /* _fovhandler.RunFieldOfViewSweep((seen, inShootingAngle) =>
+        {
+            UpdateFOVResults(seen);
+            SetFacingtarget(inShootingAngle);
+        }, true);*/
+       /* if (!targetSpotted)
+        {
+            UpdateFOVResults(false);
+            SetFacingtarget(false);
+            return;
+        }
+
+        UpdateFOVResults(true);
+        bool targetInShootingrange = this.TargetWithinShootingRange(_aiTraceComponent, _fovLocation, _detectionPhaseResults[i].ClosestPointOnBounds(_fovLocation.position), _shootAngleThreshold * 0.5f, _shootAngleThreshold * 1.25f);
+        SetFacingtarget(targetInShootingrange);*/
+
+        return;
         _fovPhaseParams = new FOVPhaseParams();
         SetDetectionPhaseParams(ref _fovPhaseParams);
         bool targetSeen = false;
