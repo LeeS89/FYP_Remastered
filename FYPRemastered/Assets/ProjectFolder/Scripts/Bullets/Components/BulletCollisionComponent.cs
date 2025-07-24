@@ -92,8 +92,9 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
     private void OnCollisionEnter(Collision collision)
     {
 
-
-        ContactPoint contact = collision.contacts[0];
+        ContactPoint contact = collision.GetContact(0);
+         //collision.GetContact(0, out contact);
+        // ContactPoint contact = collision.contacts[0];
         Vector3 impactPosition = contact.point;
         Vector3 hitNormal = contact.normal;
 

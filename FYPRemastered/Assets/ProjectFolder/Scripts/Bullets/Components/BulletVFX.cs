@@ -27,21 +27,23 @@ public class BulletVFX : ComponentEvents
         _bulletEventManager.OnCollision += SpawnHitParticle;
         //_bulletEventManager.OnSpawnHitParticle += SpawnHitParticle;
         _request = new ResourceRequest();
-
+       
         _request.ResourceType = PoolResourceType.BasicHitParticlePool;
-        _request.poolRequestCallback = (pool) =>
-        {
-            _particlePoolManager = pool;
-           
-        };
+        _request.poolRequestCallback = OnPoolReceived;
+        //_request.poolRequestCallback = (pool) =>
+        //{
+
+        //        _particlePoolManager = pool;
+
+        //};
 
         SceneEventAggregator.Instance.RequestResource(_request);
 
         _request.ResourceType = PoolResourceType.DeflectAudioPool;
-        _request.poolRequestCallback = (pool) =>
+      /*  _request.poolRequestCallback = (pool) =>
         {
             _audioPoolManager = pool;
-        };
+        };*/
 
         SceneEventAggregator.Instance.RequestResource(_request);
         //BaseSceneManager._instance.GetImpactParticlePool(ref _poolManager);
@@ -63,6 +65,20 @@ public class BulletVFX : ComponentEvents
         _bulletEventManager = null;
 
         
+    }
+
+    private void OnPoolReceived(PoolManager pool)
+    {
+        switch (_request.ResourceType)
+        {
+            case PoolResourceType.BasicHitParticlePool:
+                _particlePoolManager = pool;
+                break;
+                case PoolResourceType.DeflectAudioPool:
+                _audioPoolManager = pool;
+                break;
+        }
+        //_audioPoolManager = pool;
     }
 
     private void PlayDeflectionAudio()

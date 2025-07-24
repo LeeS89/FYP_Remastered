@@ -124,7 +124,7 @@ public partial class EnemyFSMController : ComponentEvents
 
         _currentState.EnterState();
        
-        Debug.LogError("Current State: " + _currentState.GetType().Name);
+       // Debug.LogError("Current State: " + _currentState.GetType().Name);
     }
 
 

@@ -41,6 +41,8 @@ public class CombatComponent : BaseAbilities
     private FieldOfViewHandler _fovhandler;
     private FieldOfViewParams _fovParams;
     [SerializeField] private float _fovEvaluationRadius = 0.4f;
+
+    WeaponBase _weapon;
     //[SerializeField] protected bool _targetSeen = false;
 
     protected void SetMeleeTriggered(bool isMelee)
@@ -89,14 +91,14 @@ public class CombatComponent : BaseAbilities
         InitializeFOVParams();
         _fovhandler = new FieldOfViewHandler(_aiTraceComponent, _fovParams);
 
-
+        
 
         _enemyEventManager.OnMeleeAttackPerformed += EvaluateMeleeAttackResults;
-        _enemyEventManager.OnShoot += ShootGun;
-        _enemyEventManager.OnMelee += SetMeleeTriggered;
-        _enemyEventManager.OnAimingLayerReady += SetAimReady;
-        _enemyEventManager.OnTargetSeen += UpdateTargetVisibility;
-        _enemyEventManager.OnFacingTarget += SetFacingtarget;
+        //_enemyEventManager.OnShoot += ShootGun;
+       // _enemyEventManager.OnMelee += SetMeleeTriggered;
+       // _enemyEventManager.OnAimingLayerReady += SetAimReady;
+       // _enemyEventManager.OnTargetSeen += UpdateTargetVisibility;
+        //_enemyEventManager.OnFacingTarget += SetFacingtarget;
     }
 
    
@@ -107,11 +109,11 @@ public class CombatComponent : BaseAbilities
         _detectionPhaseResults = null;
         _meleeResults = null;
         _enemyEventManager.OnMeleeAttackPerformed -= EvaluateMeleeAttackResults;
-        _enemyEventManager.OnShoot -= ShootGun;
+        //_enemyEventManager.OnShoot -= ShootGun;
         _enemyEventManager.OnMelee -= SetMeleeTriggered;
-        _enemyEventManager.OnAimingLayerReady -= SetAimReady;
-        _enemyEventManager.OnTargetSeen -= UpdateTargetVisibility;
-        _enemyEventManager.OnFacingTarget -= SetFacingtarget;
+       // _enemyEventManager.OnAimingLayerReady -= SetAimReady;
+        //_enemyEventManager.OnTargetSeen -= UpdateTargetVisibility;
+        //_enemyEventManager.OnFacingTarget -= SetFacingtarget;
         base.UnRegisterLocalEvents(_enemyEventManager);
         //_enemyEventManager = null;
     }
@@ -155,15 +157,16 @@ public class CombatComponent : BaseAbilities
             _testMelee = false;
         }
 
-        if(_gun == null) { return; }
+        if(_weapon == null) { return; }
 
         if(Time.time >= _nextShootTime)
         {
             CheckFieldOfView();
-            if (CanShoot())
+           /* if (CanShoot())
             {
                 _enemyEventManager.AnimationTriggered(AnimationAction.Shoot);
-            }
+            }*/
+           _weapon.TryShootGun();
             _nextShootTime = Time.time + _shootInterval;
         }
     }
@@ -250,12 +253,24 @@ public class CombatComponent : BaseAbilities
 
     public override void GunSetup(GameObject owner, EventManager eventManager, Transform bulletSpawnLocaiton, int clipCapacity, Transform target)
     {
-        base.GunSetup(owner, _enemyEventManager, bulletSpawnLocaiton, clipCapacity, target);
+        _weapon = new WeaponBase();
+
+        _weapon.EquipGun(owner, _enemyEventManager , bulletSpawnLocaiton, clipCapacity, target);
+        // base.GunSetup(owner, _enemyEventManager, bulletSpawnLocaiton, clipCapacity, target);
     }
 
     protected override void OutOfAmmo()
     {
         _enemyEventManager.AnimationTriggered(AnimationAction.Reload);
+    }
+
+    protected override void ReloadingGun(bool isReloading)
+    {
+        _isReloading = isReloading;
+        if (_isReloading)
+        {
+            //_weapon.Reload();
+        }
     }
 
     protected override FireConditions GetFireState()
@@ -270,68 +285,31 @@ public class CombatComponent : BaseAbilities
 
     private void OnFieldOfViewComplete(bool seen, bool inShootingAngle)
     {
-        UpdateFOVResults(seen);
-        SetFacingtarget(inShootingAngle);
+        //UpdateFOVResults(seen);
+        _enemyEventManager.TargetSeen(seen);
+        _enemyEventManager.FacingTarget(inShootingAngle);
+        //SetFacingtarget(inShootingAngle);
     }
 
     protected void CheckFieldOfView()
     {
-
-        //bool targetSpotted = _fovhandler.RunFieldOfViewSweep(true);
         if(_fovhandler == null || _aiTraceComponent == null) { return; }
         _fovhandler.RunFieldOfViewSweep(OnFieldOfViewComplete, true);
-       /* _fovhandler.RunFieldOfViewSweep((seen, inShootingAngle) =>
-        {
-            UpdateFOVResults(seen);
-            SetFacingtarget(inShootingAngle);
-        }, true);*/
-       /* if (!targetSpotted)
-        {
-            UpdateFOVResults(false);
-            SetFacingtarget(false);
-            return;
-        }
-
-        UpdateFOVResults(true);
-        bool targetInShootingrange = this.TargetWithinShootingRange(_aiTraceComponent, _fovLocation, _detectionPhaseResults[i].ClosestPointOnBounds(_fovLocation.position), _shootAngleThreshold * 0.5f, _shootAngleThreshold * 1.25f);
-        SetFacingtarget(targetInShootingrange);*/
-
-        return;
-        _fovPhaseParams = new FOVPhaseParams();
-        SetDetectionPhaseParams(ref _fovPhaseParams);
-        bool targetSeen = false;
-        int detectedCount = this.RunDetectionPhase(_fovPhaseParams);
-        
-        if (detectedCount == 0)
-        {
-            UpdateFOVResults(targetSeen);
-            return;
-        }
-
-        for(int i = 0; i < detectedCount; i++)
-        {
-            int hitCount;
-            SetEvaluationPhaseParams(ref _fovPhaseParams, _detectionPhaseResults[i]);
-            this.RunEvaluationPhase(_fovPhaseParams, out hitCount);
-
-            if(hitCount == 0) { continue; }
-
-            SetTargetingPhaseParams(ref _fovPhaseParams);
-
-            if(this.RunTargetingPhase(_fovPhaseParams, hitCount))
-            {
-                UpdateFOVResults(true);
-                bool facingTarget = this.TargetWithinShootingRange( _aiTraceComponent, _fovLocation, _detectionPhaseResults[i].ClosestPointOnBounds(_fovLocation.position), _shootAngleThreshold * 0.5f, _shootAngleThreshold * 1.25f);
-                SetFacingtarget(facingTarget);
-                
-                return;
-            }
-
-        }
-        
-        
-
     }
+
+
+    protected void UpdateFOVResults(bool targetSeen)
+    {
+        _enemyEventManager.TargetSeen(targetSeen);
+
+        if (!targetSeen)
+        {
+            _enemyEventManager.FacingTarget(false);
+            // SetFacingtarget(false);
+        }
+    }
+
+    #region Redundant Code
 
     protected void SetDetectionPhaseParams(ref FOVPhaseParams fovParams)
     {
@@ -368,13 +346,45 @@ public class CombatComponent : BaseAbilities
         fovParams.shootOrigin = _bulletSpawnLocation;
     }
     
-    protected void UpdateFOVResults(bool targetSeen)
-    {
-        _enemyEventManager.TargetSeen(targetSeen);
+   
 
-        if (!targetSeen)
+
+
+
+   /* protected void OldFOV()
+    {
+        _fovPhaseParams = new FOVPhaseParams();
+        SetDetectionPhaseParams(ref _fovPhaseParams);
+        bool targetSeen = false;
+        int detectedCount = this.RunDetectionPhase(_fovPhaseParams);
+
+        if (detectedCount == 0)
         {
-            SetFacingtarget(false);
+            UpdateFOVResults(targetSeen);
+            return;
         }
-    }
+
+        for (int i = 0; i < detectedCount; i++)
+        {
+            int hitCount;
+            SetEvaluationPhaseParams(ref _fovPhaseParams, _detectionPhaseResults[i]);
+            this.RunEvaluationPhase(_fovPhaseParams, out hitCount);
+
+            if (hitCount == 0) { continue; }
+
+            SetTargetingPhaseParams(ref _fovPhaseParams);
+
+            if (this.RunTargetingPhase(_fovPhaseParams, hitCount))
+            {
+                UpdateFOVResults(true);
+                bool facingTarget = this.TargetWithinShootingRange(_aiTraceComponent, _fovLocation, _detectionPhaseResults[i].ClosestPointOnBounds(_fovLocation.position), _shootAngleThreshold * 0.5f, _shootAngleThreshold * 1.25f);
+                SetFacingtarget(facingTarget);
+
+                return;
+            }
+
+        }
+
+    }*/
+    #endregion
 }

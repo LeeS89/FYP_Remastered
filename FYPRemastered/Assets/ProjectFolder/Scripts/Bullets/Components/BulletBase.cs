@@ -192,7 +192,9 @@ public abstract class BulletBase : ComponentEvents, IPoolable
 
     public void SetParentPool(PoolManager manager)
     {
-        //_objectPoolManager = manager;
+        _objectPoolManager = manager;
+
+        return;
         _request.ResourceType = PoolResourceType.NormalBulletPool;
         _request.poolRequestCallback = (pool) =>
         {

@@ -31,6 +31,13 @@ public abstract class EventManager : MonoBehaviour
         OnSetupGun?.Invoke(gunOwner, eventManager, bulletSpawnLocation, clipCapacity, target);
     }
 
+    public event Action<FireConditions> OnTryShoot;
+
+    public void TryShoot(FireConditions conditions)
+    {
+        OnTryShoot?.Invoke(conditions);
+    }
+
     public event Action OnOutOfAmmo;
 
     public void OutOfAmmo()

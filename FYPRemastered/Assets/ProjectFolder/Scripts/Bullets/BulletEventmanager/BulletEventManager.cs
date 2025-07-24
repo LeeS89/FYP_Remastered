@@ -33,6 +33,7 @@ public class BulletEventManager : EventManager
 
     private void Awake()
     {
+       
         BindComponentsToEvents();
     }
 

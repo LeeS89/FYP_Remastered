@@ -105,7 +105,7 @@ public class BulletResources : SceneResources
         if (_normalHitPrefab != null)
         {
             _hitParticlePool = new PoolManager(_normalHitPrefab, 40, 80);
-            //_hitParticlePool.PrewarmPool(PoolContents.Particle, 15);
+            _hitParticlePool.PrewarmPool(5);
         }
 
         if (_deflectAudioPrefab != null)
@@ -117,7 +117,7 @@ public class BulletResources : SceneResources
         if (_normalBulletPrefab != null)
         {
             _bulletPool = new PoolManager(_normalBulletPrefab, 40, 80);
-            //_bulletPool.PrewarmPool(PoolContents.Object, 40);
+           // _bulletPool.PrewarmPool(5);
         }
     }
 

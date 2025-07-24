@@ -34,15 +34,15 @@ public class BaseAbilities : ComponentEvents
     {
         base.RegisterLocalEvents(eventManager);
         _request = new ResourceRequest();
-        _eventManager.OnOutOfAmmo += OutOfAmmo;
-        _eventManager.OnReload += ReloadingGun;
+        /*_eventManager.OnOutOfAmmo += OutOfAmmo;
+        _eventManager.OnReload += ReloadingGun;*/
         _eventManager.OnSetupGun += GunSetup;
     }
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
-        _eventManager.OnReload -= ReloadingGun;
-        _eventManager.OnOutOfAmmo -= OutOfAmmo;
+       /* _eventManager.OnReload -= ReloadingGun;
+        _eventManager.OnOutOfAmmo -= OutOfAmmo;*/
         _eventManager.OnSetupGun -= GunSetup;
         base.UnRegisterLocalEvents(eventManager);
     }
@@ -57,9 +57,9 @@ public class BaseAbilities : ComponentEvents
         _request.poolRequestCallback = (pool) =>
         {
             _bulletPoolManager = pool;
-            _gun = new GunBase(BulletSpawnLocation, TargetTransform, eventManager, _owner, _bulletPoolManager, clipCapacity);
+            _gun = new GunBase(BulletSpawnLocation, TargetTransform, _eventManager, _owner, _bulletPoolManager, clipCapacity);
             _request.ResourceType = PoolResourceType.None;
-            Debug.LogError("Gun set up called");
+            //Debug.LogError("Gun set up called");
         };
         SceneEventAggregator.Instance.RequestResource(_request);
 
@@ -85,7 +85,7 @@ public class BaseAbilities : ComponentEvents
     protected virtual bool CanShoot()
     {   
         FireConditions fireState = GetFireState();
-        Debug.LogError("Fire State: " + fireState);
+       // Debug.LogError("Fire State: " + fireState);
         return fireState == FireConditions.Ready;
         //return GetFireState() == FireConditions.Ready;
     }

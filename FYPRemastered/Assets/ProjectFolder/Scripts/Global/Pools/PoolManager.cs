@@ -45,7 +45,7 @@ public class PoolManager
             poolable.SetParentPool(this);
         }
         newObject.transform.root.parent = _poolContainer.transform;
-        //Debug.LogError("Pre warmed bullet call create pooled object!!!");
+       
         return newObject;
     }
 
