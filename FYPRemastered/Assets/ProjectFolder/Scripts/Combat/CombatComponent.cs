@@ -6,43 +6,63 @@ public class CombatComponent : BaseAbilities
 {
     protected EnemyEventManager _enemyEventManager;
 
+    [Header ("Field of view Origin")]
+    [SerializeField] public Transform _fovLocation;
+    [Header("Max Field of view targets")]
+    [SerializeField] private int _maxFovTraceResults = 5;
+    [Header("Field of view proximity phase radius")]
+    [SerializeField] protected float _proximityRadius = 5f;
+
+    [Header("Field of view evaluation phase")]
+    [Header("start and end points + radius of capsule cast in FOV evaluation phase")]
+    [SerializeField] private float _waistHeight = 1.0f;
+    [SerializeField] private float _eyeHeight = 1.8f;
+    [SerializeField] private float _fovEvaluationRadius = 0.4f;
+
+    [Header ("Field of view angle with horizontal & vertical multipliers")]
+    [Range(0, 360)] public float _fovViewangle;
+    [Range(0, 2)] public float _horizontalAngleMultiplier;
+    [Range(0, 2)] public float _verticalAngleMultiplier;
+    
+
+    [Header ("Field of view region - Melee target, FOV obstruction, and FOV target masks")]
+    [SerializeField] private LayerMask _meleeCheckMask;
+    [SerializeField] private LayerMask _fovTargetMask;
+    [SerializeField] private LayerMask _fovBlockingMask;
+
+    [Header ("Melee attack check interval")]
+    [SerializeField] private float _meleeCheckInterval = 0.2f;
+
+    [Header ("Melee trigger radius")]
+    [SerializeField] private float _meleeCheckRadius = 1.5f;
     protected bool _meleeTriggered = false;
-    protected bool _isAimReady = false;
-    protected bool _isfacingTarget = false;
+    private Coroutine _meleeCheckCoroutine;
+    private WaitForSeconds _meleeCheckWait;
+    private bool _evaluatingMeleeCheck = false;
+
     protected bool _targetInView = false;
     protected bool _targetDead = false;
 
     private float _shootInterval = 2f;
     private float _nextShootTime = 0f;
 
-    private Coroutine _meleeCheckCoroutine;
-    private WaitForSeconds _meleeCheckWait;
-    private bool _evaluatingMeleeCheck = false;
-    [SerializeField] private float _meleeCheckInterval = 0.2f;
-    public float _meleeCheckRadius = 1.5f;
-    private AITraceComponent _aiTraceComponent;
-    [SerializeField] public Transform _fovLocation;
-    [SerializeField] private Collider[] _detectionPhaseResults;
-    [SerializeField] private Collider[] _meleeResults;
-    [SerializeField] private Vector3[] _evaluationPhaseResults;
-    [SerializeField] private int _maxFovTraceResults = 5;
-    public LayerMask _meleeCheckMask;
-    public LayerMask _fovTargetMask;
-    public LayerMask _fovBlockingMask;
-    private FOVPhaseParams _fovPhaseParams;
-    [SerializeField] private float _waistHeight = 1.0f;
-    [SerializeField] private float _eyeHeight = 1.8f;
-
-    [SerializeField] protected float _detectionPhaseRadius = 5f;
-    [Range(0, 360)] public float _horizontalTargetViewAngle;
-    [Range(0, 360)] public float _verticalTargetViewAngle;
     [Range(0, 360)] public float _shootAngleThreshold;
+
+
+    private AITraceComponent _aiTraceComponent;
+    
+  
+    [SerializeField] private Collider[] _meleeResults;
+  
+    
+    
+    
 
     private FieldOfViewHandler _fovhandler;
     private FieldOfViewParams _fovParams;
-    [SerializeField] private float _fovEvaluationRadius = 0.4f;
+    
 
-    WeaponBase _weapon;
+    WeaponHandlerBase _weapon;
     //[SerializeField] protected bool _targetSeen = false;
 
     protected void SetMeleeTriggered(bool isMelee)
@@ -50,21 +70,14 @@ public class CombatComponent : BaseAbilities
         _meleeTriggered = isMelee;
     }
 
-    protected void SetAimReady(bool isReady)
-    {
-        _isAimReady = isReady;
-    }
+   
 
     protected void UpdateTargetVisibility(bool targetInView)
     {
         _targetInView = targetInView;
     }
 
-    protected void SetFacingtarget(bool isFacingTarget)
-    {
-        _isfacingTarget = isFacingTarget;
-    }
-
+   
   
     protected override void OnPlayerDied()
     {
@@ -82,9 +95,9 @@ public class CombatComponent : BaseAbilities
         base.RegisterLocalEvents(_enemyEventManager);
 
         _aiTraceComponent = new AITraceComponent();
-        _detectionPhaseResults = new Collider[_maxFovTraceResults];
+      
         _meleeResults = new Collider[2];
-        _evaluationPhaseResults = new Vector3[_maxFovTraceResults];
+      
         _meleeCheckWait = new WaitForSeconds(_meleeCheckInterval);
 
 
@@ -95,7 +108,7 @@ public class CombatComponent : BaseAbilities
 
         _enemyEventManager.OnMeleeAttackPerformed += EvaluateMeleeAttackResults;
         //_enemyEventManager.OnShoot += ShootGun;
-       // _enemyEventManager.OnMelee += SetMeleeTriggered;
+        _enemyEventManager.OnMelee += SetMeleeTriggered;
        // _enemyEventManager.OnAimingLayerReady += SetAimReady;
        // _enemyEventManager.OnTargetSeen += UpdateTargetVisibility;
         //_enemyEventManager.OnFacingTarget += SetFacingtarget;
@@ -106,7 +119,7 @@ public class CombatComponent : BaseAbilities
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
         _meleeCheckWait = null;
-        _detectionPhaseResults = null;
+       // _detectionPhaseResults = null;
         _meleeResults = null;
         _enemyEventManager.OnMeleeAttackPerformed -= EvaluateMeleeAttackResults;
         //_enemyEventManager.OnShoot -= ShootGun;
@@ -133,12 +146,14 @@ public class CombatComponent : BaseAbilities
             _fovLocation,
             transform,
             _bulletSpawnPoint,
-            _detectionPhaseRadius,
+            _proximityRadius,
             _waistHeight,
             _eyeHeight,
             _fovEvaluationRadius,
-            _horizontalTargetViewAngle * 0.5f,
-            _horizontalTargetViewAngle * 0.75f,
+            _fovViewangle * _horizontalAngleMultiplier,
+            _fovViewangle * _verticalAngleMultiplier,
+            _shootAngleThreshold * 0.5f,
+            _shootAngleThreshold * 1.25f,
             _fovBlockingMask,
             _fovTargetMask,
             _maxFovTraceResults
@@ -253,34 +268,17 @@ public class CombatComponent : BaseAbilities
 
     public override void GunSetup(GameObject owner, EventManager eventManager, Transform bulletSpawnLocaiton, int clipCapacity, Transform target)
     {
-        _weapon = new WeaponBase();
+        _weapon = new WeaponHandlerBase();
 
         _weapon.EquipGun(owner, _enemyEventManager , bulletSpawnLocaiton, clipCapacity, target);
         // base.GunSetup(owner, _enemyEventManager, bulletSpawnLocaiton, clipCapacity, target);
     }
 
-    protected override void OutOfAmmo()
-    {
-        _enemyEventManager.AnimationTriggered(AnimationAction.Reload);
-    }
+   
 
-    protected override void ReloadingGun(bool isReloading)
-    {
-        _isReloading = isReloading;
-        if (_isReloading)
-        {
-            //_weapon.Reload();
-        }
-    }
+   
 
-    protected override FireConditions GetFireState()
-    {
-        if (_targetDead) return FireConditions.TargetDied;
-        if(!_targetInView) return FireConditions.TargetNotInView;
-        if (_meleeTriggered) return FireConditions.Meleeing;
-        if(!_isAimReady || !_isfacingTarget) return FireConditions.NotAiming;
-        return base.GetFireState();
-    }
+    
 
 
     private void OnFieldOfViewComplete(bool seen, bool inShootingAngle)
@@ -298,32 +296,43 @@ public class CombatComponent : BaseAbilities
     }
 
 
-    protected void UpdateFOVResults(bool targetSeen)
+    void OnDrawGizmos()
     {
-        _enemyEventManager.TargetSeen(targetSeen);
+        if (_fovLocation == null) return;
 
-        if (!targetSeen)
-        {
-            _enemyEventManager.FacingTarget(false);
-            // SetFacingtarget(false);
-        }
+        Gizmos.color = Color.green;
+
+        // Horizontal FOV
+        Vector3 right = Quaternion.Euler(0, _fovViewangle * _horizontalAngleMultiplier, 0) * _fovLocation.forward;
+        Vector3 left = Quaternion.Euler(0, -_fovViewangle * _horizontalAngleMultiplier, 0) * _fovLocation.forward;
+
+        Gizmos.DrawRay(_fovLocation.position, right * 5f);
+        Gizmos.DrawRay(_fovLocation.position, left * 5f);
+
+        // Vertical FOV
+        Vector3 up = Quaternion.Euler(-_fovViewangle * _verticalAngleMultiplier, 0, 0) * _fovLocation.forward;
+        Vector3 down = Quaternion.Euler(_fovViewangle * _verticalAngleMultiplier, 0, 0) * _fovLocation.forward;
+
+        Gizmos.DrawRay(_fovLocation.position, up * 5f);
+        Gizmos.DrawRay(_fovLocation.position, down * 5f);
     }
+
 
     #region Redundant Code
 
     protected void SetDetectionPhaseParams(ref FOVPhaseParams fovParams)
     {
-        fovParams.traceComponent = _aiTraceComponent;
-        fovParams.detectionOrigin = _fovLocation;
-        fovParams.detectionResults = _detectionPhaseResults;
-        fovParams.detectionRadius = _detectionPhaseRadius;
-        fovParams.detectionTargetMask = _fovTargetMask;
+        //fovParams.traceComponent = _aiTraceComponent;
+        //fovParams.detectionOrigin = _fovLocation;
+        //fovParams.detectionResults = _detectionPhaseResults;
+        //fovParams.detectionRadius = _detectionPhaseRadius;
+        //fovParams.detectionTargetMask = _fovTargetMask;
 
     }
 
     protected void SetEvaluationPhaseParams(ref FOVPhaseParams fovParams, Collider targetCollider)
     {
-        Vector3 waistPos = transform.position + Vector3.up * _waistHeight;
+        /*Vector3 waistPos = transform.position + Vector3.up * _waistHeight;
         Vector3 eyePos = transform.position + Vector3.up * _eyeHeight;
         Vector3 sweepCenter = (waistPos + eyePos) * 0.5f;
         Vector3 directionTotarget = TargetingUtility.GetDirectionToTarget(targetCollider.bounds.center, sweepCenter);
@@ -336,7 +345,7 @@ public class CombatComponent : BaseAbilities
         fovParams.targetCollider = targetCollider;
         fovParams.evaluationTargetPosition = targetCollider.bounds.center;
         fovParams.horizontalViewAngle = _horizontalTargetViewAngle * 0.5f;
-        fovParams.verticalViewAngle = _verticalTargetViewAngle * 0.75f;
+        fovParams.verticalViewAngle = _verticalTargetViewAngle * 0.75f;*/
     }
 
     protected void SetTargetingPhaseParams(ref FOVPhaseParams fovParams)
@@ -345,46 +354,89 @@ public class CombatComponent : BaseAbilities
         fovParams.ownerOrigin = transform;
         fovParams.shootOrigin = _bulletSpawnLocation;
     }
-    
-   
 
 
-
-
-   /* protected void OldFOV()
+    protected override void OutOfAmmo()
     {
-        _fovPhaseParams = new FOVPhaseParams();
-        SetDetectionPhaseParams(ref _fovPhaseParams);
-        bool targetSeen = false;
-        int detectedCount = this.RunDetectionPhase(_fovPhaseParams);
+        _enemyEventManager.AnimationTriggered(AnimationAction.Reload);
+    }
+    protected void UpdateFOVResults(bool targetSeen)
+    {
+        _enemyEventManager.TargetSeen(targetSeen);
 
-        if (detectedCount == 0)
+        if (!targetSeen)
         {
-            UpdateFOVResults(targetSeen);
-            return;
+            _enemyEventManager.FacingTarget(false);
+            // SetFacingtarget(false);
         }
+    }
 
-        for (int i = 0; i < detectedCount; i++)
+    protected override void ReloadingGun(bool isReloading)
+    {
+        _isReloading = isReloading;
+        if (_isReloading)
         {
-            int hitCount;
-            SetEvaluationPhaseParams(ref _fovPhaseParams, _detectionPhaseResults[i]);
-            this.RunEvaluationPhase(_fovPhaseParams, out hitCount);
-
-            if (hitCount == 0) { continue; }
-
-            SetTargetingPhaseParams(ref _fovPhaseParams);
-
-            if (this.RunTargetingPhase(_fovPhaseParams, hitCount))
-            {
-                UpdateFOVResults(true);
-                bool facingTarget = this.TargetWithinShootingRange(_aiTraceComponent, _fovLocation, _detectionPhaseResults[i].ClosestPointOnBounds(_fovLocation.position), _shootAngleThreshold * 0.5f, _shootAngleThreshold * 1.25f);
-                SetFacingtarget(facingTarget);
-
-                return;
-            }
-
+            //_weapon.Reload();
         }
+    }
 
-    }*/
+    protected void SetAimReady(bool isReady)
+    {
+        _isAimReady = isReady;
+    }
+
+    /* protected void OldFOV()
+     {
+         _fovPhaseParams = new FOVPhaseParams();
+         SetDetectionPhaseParams(ref _fovPhaseParams);
+         bool targetSeen = false;
+         int detectedCount = this.RunDetectionPhase(_fovPhaseParams);
+
+         if (detectedCount == 0)
+         {
+             UpdateFOVResults(targetSeen);
+             return;
+         }
+
+         for (int i = 0; i < detectedCount; i++)
+         {
+             int hitCount;
+             SetEvaluationPhaseParams(ref _fovPhaseParams, _detectionPhaseResults[i]);
+             this.RunEvaluationPhase(_fovPhaseParams, out hitCount);
+
+             if (hitCount == 0) { continue; }
+
+             SetTargetingPhaseParams(ref _fovPhaseParams);
+
+             if (this.RunTargetingPhase(_fovPhaseParams, hitCount))
+             {
+                 UpdateFOVResults(true);
+                 bool facingTarget = this.TargetWithinShootingRange(_aiTraceComponent, _fovLocation, _detectionPhaseResults[i].ClosestPointOnBounds(_fovLocation.position), _shootAngleThreshold * 0.5f, _shootAngleThreshold * 1.25f);
+                 SetFacingtarget(facingTarget);
+
+                 return;
+             }
+
+         }
+
+     }*/
+
+    protected bool _isAimReady = false;
+    protected bool _isfacingTarget = false;
+
+    protected void SetFacingtarget(bool isFacingTarget)
+    {
+        _isfacingTarget = isFacingTarget;
+    }
+
+
+    protected override FireConditions GetFireState()
+    {
+        if (_targetDead) return FireConditions.TargetDied;
+        if (!_targetInView) return FireConditions.TargetNotInView;
+        if (_meleeTriggered) return FireConditions.Meleeing;
+        if (!_isAimReady || !_isfacingTarget) return FireConditions.NotAiming;
+        return base.GetFireState();
+    }
     #endregion
 }

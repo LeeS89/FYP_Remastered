@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class WeaponBase
+public class WeaponHandlerBase
 {
     protected GunBase _gun;
     protected GameObject _owner;

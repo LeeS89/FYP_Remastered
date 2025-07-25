@@ -306,13 +306,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _clipCapacity: 5
   _testShootStatus: 0
-  _meleeCheckInterval: 0.2
-  _meleeCheckRadius: 1.5
   _fovLocation: {fileID: 3514716611913536367}
-  _detectionPhaseResults: []
-  _meleeResults: []
-  _evaluationPhaseResults: []
   _maxFovTraceResults: 5
+  _proximityRadius: 25
+  _waistHeight: 1
+  _eyeHeight: 1.8
+  _fovEvaluationRadius: 0.4
+  _fovViewangle: 75
+  _horizontalAngleMultiplier: 0.5
+  _verticalAngleMultiplier: 0.75
   _meleeCheckMask:
     serializedVersion: 2
     m_Bits: 520
@@ -322,13 +324,10 @@ MonoBehaviour:
   _fovBlockingMask:
     serializedVersion: 2
     m_Bits: 539
-  _waistHeight: 1
-  _eyeHeight: 1.8
-  _detectionPhaseRadius: 25
-  _horizontalTargetViewAngle: 75
-  _verticalTargetViewAngle: 75
+  _meleeCheckInterval: 0.2
+  _meleeCheckRadius: 1.5
   _shootAngleThreshold: 30
-  _fovEvaluationRadius: 0.4
+  _meleeResults: []
   _bulletSpawnPoint: {fileID: 1520609376679817542}
   _testMelee: 0
 --- !u!65 &3309944096030598539

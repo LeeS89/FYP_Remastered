@@ -69,26 +69,7 @@ public partial class EnemyFSMController : ComponentEvents
         }
     }
 
-    void OnDrawGizmos()
-    {
-        if (_fovLocation == null) return;
-
-        Gizmos.color = Color.green;
-
-        // Horizontal FOV
-        Vector3 right = Quaternion.Euler(0, _angle * 0.5f, 0) * _fovLocation.forward;
-        Vector3 left = Quaternion.Euler(0, -_angle * 0.5f, 0) * _fovLocation.forward;
-
-        Gizmos.DrawRay(_fovLocation.position, right * 5f);
-        Gizmos.DrawRay(_fovLocation.position, left * 5f);
-
-        // Vertical FOV
-        Vector3 up = Quaternion.Euler(-_angle * 0.75f, 0, 0) * _fovLocation.forward;
-        Vector3 down = Quaternion.Euler(_angle * 0.75f, 0, 0) * _fovLocation.forward;
-
-        Gizmos.DrawRay(_fovLocation.position, up * 5f);
-        Gizmos.DrawRay(_fovLocation.position, down * 5f);
-    }
+   
 
     private void CheckIfTargetWithinShootAngle(Collider target)
     {

@@ -10,6 +10,8 @@ public class FieldOfViewHandler
     private Transform _fallbackFOVOrigin;
     private float _horizontalViewAngle;
     private float _verticalViewAngle;
+    private float _horizontalShootAngle;
+    private float _verticalShootAngle;
     private float _proximityRadius;
     private float _evaluationCapsuleStartHeight;
     private float _evaluationCapsuleEndHeight;
@@ -31,6 +33,8 @@ public class FieldOfViewHandler
         _fallbackFOVOrigin = fovParams.shootOrigin;
         _horizontalViewAngle = fovParams.horizontalViewAngle;
         _verticalViewAngle = fovParams.verticalViewAngle;
+        _horizontalShootAngle = fovParams.horizontalShootAngle;
+        _verticalShootAngle = fovParams.verticalShootAngle;
         _proximityRadius = fovParams.proximityRadius;
         _evaluationCapsuleStartHeight = fovParams.evaluationCapsuleStartHeight;
         _evaluationCapsuleEndHeight = fovParams.evaluationCapsuleEndHeight;
@@ -111,7 +115,7 @@ public class FieldOfViewHandler
 
         return false;
     }
-    float _shootAngleThreshold = 30f; // Example value, adjust as needed
+   // float _shootAngleThreshold = 30f; // Example value, adjust as needed
     public void RunFieldOfViewSweep(Action<bool, bool> onFOVResult, bool addFallbackPoints = false)
     {
 
@@ -145,7 +149,7 @@ public class FieldOfViewHandler
                 // bool facingTarget = this.TargetWithinShootingRange(_aiTraceComponent, _fovLocation, _detectionPhaseResults[i].ClosestPointOnBounds(_fovLocation.position), _shootAngleThreshold * 0.5f, _shootAngleThreshold * 1.25f);
                 // SetFacingtarget(facingTarget);
                 seen = true;
-                inShootAngle = TargetWithinShootingRange(_aiTraceComponent, _fovOrigin, _proximityDetectionResults[i].ClosestPointOnBounds(_fovOrigin.position), _shootAngleThreshold * 0.5f, _shootAngleThreshold * 1.25f);
+                inShootAngle = TargetWithinShootingRange(_aiTraceComponent, _fovOrigin, _proximityDetectionResults[i].ClosestPointOnBounds(_fovOrigin.position), _horizontalShootAngle, _verticalShootAngle);
                 onFOVResult?.Invoke(seen, inShootAngle);
                 return;
                 //return true;

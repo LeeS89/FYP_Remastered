@@ -11,6 +11,8 @@ public readonly struct FieldOfViewParams
     public readonly float evaluationCapsuleRadius;
     public readonly float horizontalViewAngle;
     public readonly float verticalViewAngle;
+    public readonly float horizontalShootAngle;
+    public readonly float verticalShootAngle;
 
     public readonly LayerMask obstructionMask;
     public readonly LayerMask targetMask;
@@ -26,6 +28,8 @@ public readonly struct FieldOfViewParams
         float evaluationCapsuleRadius,
         float horizontalViewAngle,
         float verticalViewAngle,
+        float horizontalShootAngle,
+        float verticalShootAngle,
         LayerMask obstructionMask,
         LayerMask targetMask,
         int maxTraceTargets
@@ -40,6 +44,8 @@ public readonly struct FieldOfViewParams
         this.evaluationCapsuleRadius = evaluationCapsuleRadius;
         this.horizontalViewAngle = horizontalViewAngle;
         this.verticalViewAngle = verticalViewAngle;
+        this.horizontalShootAngle = horizontalShootAngle;
+        this.verticalShootAngle = verticalShootAngle;
         this.obstructionMask = obstructionMask;
         this.targetMask = targetMask;
         this.maxTraceTargets = maxTraceTargets;

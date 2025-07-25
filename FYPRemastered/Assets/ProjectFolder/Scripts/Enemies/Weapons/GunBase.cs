@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public class GunBase
+public class GunBase //: IWeapon
 {
     /// <summary>
     /// ///////////////////////////////////////////////////////////////////////
@@ -150,5 +150,45 @@ public class GunBase
         //_reloadComplete = null;
 
 
+    }
+
+    public void Equip(EventManager eventManager)
+    {
+        _eventManager = eventManager;
+    }
+
+    public void Unequip()
+    {
+        _eventManager = null;
+    }
+
+    public void BeginUse(MonoBehaviour runner)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void EndUse(MonoBehaviour runner)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void UpdateWeapon()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Fire()
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool CanFire()
+    {
+        throw new NotImplementedException();
+    }
+
+    public FireConditions GetFireState()
+    {
+        throw new NotImplementedException();
     }
 }
