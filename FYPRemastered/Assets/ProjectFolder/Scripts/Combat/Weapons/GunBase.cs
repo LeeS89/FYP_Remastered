@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public class GunBase //: IWeapon
+public class GunBase //: IRangedWeapon
 {
     /// <summary>
     /// ///////////////////////////////////////////////////////////////////////
@@ -188,6 +188,31 @@ public class GunBase //: IWeapon
     }
 
     public FireConditions GetFireState()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Beginfire(MonoBehaviour runner)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void EndFire(MonoBehaviour runner)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void ChangeFireRate(FireRate fireRate)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void SetFireRate(FireRate fireRate)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void SetAmmoType(AmmoType type)
     {
         throw new NotImplementedException();
     }

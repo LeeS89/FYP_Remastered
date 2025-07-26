@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public enum WeaponType
+public enum AmmoType
 {
     NormalGun,
     PoisonGun,
