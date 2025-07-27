@@ -27,8 +27,7 @@ public class EnemyEventManager : EventManager
     //Patrolling events
     //public event Action<WaypointData> OnWaypointsUpdated;
 
-    // Gun Events
-    public event Action OnShoot;
+   
 
     //public event Action<bool> OnReload;
 
@@ -132,10 +131,7 @@ public class EnemyEventManager : EventManager
     {
         OnFacingTarget?.Invoke(facingTarget);
     }
-    public void Shoot()
-    {
-        OnShoot?.Invoke();
-    }
+  
 
     /// <summary>
     /// Used to switch between aiming and non-aiming layers

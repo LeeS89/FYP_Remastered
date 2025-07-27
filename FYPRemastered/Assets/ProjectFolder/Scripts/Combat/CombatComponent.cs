@@ -181,7 +181,7 @@ public class CombatComponent : BaseAbilities
             {
                 _enemyEventManager.AnimationTriggered(AnimationAction.Shoot);
             }*/
-           _weapon.TryShootGun();
+           _weapon.TryFireRangedWeapon();
             _nextShootTime = Time.time + _shootInterval;
         }
     }
@@ -268,9 +268,9 @@ public class CombatComponent : BaseAbilities
 
     public override void GunSetup(GameObject owner, EventManager eventManager, Transform bulletSpawnLocaiton, int clipCapacity, Transform target)
     {
-        _weapon = new WeaponHandlerBase();
+        //_weapon = new WeaponHandlerBase();
 
-        _weapon.EquipGun(owner, _enemyEventManager , bulletSpawnLocaiton, clipCapacity, target);
+        _weapon.EquipWeapon(owner, _enemyEventManager , bulletSpawnLocaiton, clipCapacity, target);
         // base.GunSetup(owner, _enemyEventManager, bulletSpawnLocaiton, clipCapacity, target);
     }
 

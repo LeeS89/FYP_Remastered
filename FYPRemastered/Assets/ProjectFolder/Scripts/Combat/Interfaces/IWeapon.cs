@@ -3,14 +3,14 @@ using UnityEngine;
 public interface IWeapon
 {
     void Equip();
-    void Unequip();
+    void UnEquip();
    
     void UpdateWeapon();
 
 
     void OnInstanceDestroyed();
 
-
+    
     // Agent only
     /// void ChangeWeapon(WeaponType type);   
     ///

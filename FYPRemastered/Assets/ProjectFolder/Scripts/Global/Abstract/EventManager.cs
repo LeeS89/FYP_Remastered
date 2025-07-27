@@ -58,4 +58,12 @@ public abstract class EventManager : MonoBehaviour
     {
         OnKnockbackTriggered?.Invoke(direction, force, duration);
     }
+
+    // Gun Events
+    public event Action OnFireRangedWeapon;
+
+    public void FireRangedWeapon()
+    {
+        OnFireRangedWeapon?.Invoke();
+    }
 }

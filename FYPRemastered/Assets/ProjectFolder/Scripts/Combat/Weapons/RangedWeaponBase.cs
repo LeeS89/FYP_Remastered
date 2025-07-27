@@ -4,7 +4,7 @@ public abstract class RangedWeaponBase : IRangedWeapon
 {
     protected Transform _bulletSpawnPoint;
    // protected EventManager _eventManager;
-    protected FireRate _fireRate;
+   // protected FireRate _fireRate;
     protected ResourceRequest _request;
     protected int _clipCapacity;
     protected PoolManager _bulletPoolManager;
@@ -14,6 +14,8 @@ public abstract class RangedWeaponBase : IRangedWeapon
 
 
     public abstract void Reload();
+
+    #region Ammo Region
     public virtual void SetAmmoType(AmmoType type)
     {
         GetPoolManager(type);
@@ -30,7 +32,7 @@ public abstract class RangedWeaponBase : IRangedWeapon
         {
             switch (type)
             {
-                case AmmoType.NormalGun:
+                case AmmoType.Normal:
                     _request.ResourceType = PoolResourceType.NormalBulletPool;
                     break;
                 default:
@@ -43,45 +45,64 @@ public abstract class RangedWeaponBase : IRangedWeapon
         }
     }
 
-    public virtual bool IsEquipped { get; protected set; }
+  //  protected virtual void OutOfAmmo() { }
 
-    public virtual void Beginfire(MonoBehaviour runner) { }
-    public virtual bool CanFire() { return GetFireState() == FireConditions.Ready; }
-    public virtual FireConditions GetFireState()
+    #endregion
+
+    public virtual bool IsEquipped { get; protected set; } // Possibly redundant
+
+
+    #region Firing Region
+   
+    public virtual void Fire(Vector3? directionOverride = null)
     {
-        if (IsReloading) return FireConditions.Reloading;
-        return FireConditions.Ready;
+        if (_clipCount > 0)
+        {
+
+            _clipCount--;
+
+            Vector3 direction = directionOverride ?? _bulletSpawnPoint.forward; // fallback direction
+            Quaternion bulletRotation = Quaternion.LookRotation(direction);
+            
+            GameObject obj = _bulletPoolManager.GetFromPool(_bulletSpawnPoint.position, bulletRotation);
+
+            BulletBase bullet = obj.GetComponentInChildren<BulletBase>();
+
+            bullet.InitializeBullet(_gunOwner);
+        }
+
+        if (_clipCount == 0)
+        {
+            NotifyReload();
+           // OutOfAmmo();
+        }
     }
-    public virtual void EndFire(MonoBehaviour runner) { }
-    public virtual void Fire() { }
+
+    #endregion
 
     public virtual void Equip() => IsEquipped = true;
-    public virtual void Unequip() => IsEquipped = false;
+    public virtual void UnEquip() => IsEquipped = false;
     public virtual void UpdateWeapon() { }
 
 
 
 
     public virtual void SetBulletSpawnPoint(Transform bulletSpawnPoint) { _bulletSpawnPoint = bulletSpawnPoint; }
-    public virtual void SetFireRate(FireRate fireRate) { _fireRate = fireRate; }
+   
 
-    public virtual void InjectFireRateOffsets(float[] offsets) { }
 
-    public virtual void Initialize(EventManager eventManager, Transform spawnPoint, FireRate fireRate, int clipCapacity) { }
+    public virtual void Initialize(EventManager eventManager, Transform spawnPoint, AmmoType type, FireRate fireRate, int clipCapacity) { }
 
     public virtual void OnInstanceDestroyed()
     {
-        //_eventManager = null;
         _bulletSpawnPoint = null;
         _request = null;
         _gunOwner = null;
         _bulletPoolManager = null;
     }
 
-    public virtual bool IsReloading { get; protected set; }
-    protected virtual void ReloadStateChanged(bool isReloading)
-    {
-        IsReloading = isReloading;
-    }
+   
+
+    protected virtual void NotifyReload() { }
 
 }

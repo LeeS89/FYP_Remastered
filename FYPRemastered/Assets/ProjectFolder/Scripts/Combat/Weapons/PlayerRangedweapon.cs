@@ -2,15 +2,14 @@ using UnityEngine;
 
 public abstract class PlayerRangedweapon : IRangedWeapon
 {
-    public virtual void Beginfire(MonoBehaviour runner) { }
-    
+   
 
     public virtual bool CanFire()
     {
         throw new System.NotImplementedException();
     }
 
-    public virtual void EndFire(MonoBehaviour runner) { }
+  
     
 
     public virtual void Equip(EventManager eventManager)
@@ -23,7 +22,7 @@ public abstract class PlayerRangedweapon : IRangedWeapon
         throw new System.NotImplementedException();
     }
 
-    public void Fire()
+    public void Fire(Vector3? directionOverride = null)
     {
         throw new System.NotImplementedException();
     }
@@ -33,10 +32,12 @@ public abstract class PlayerRangedweapon : IRangedWeapon
         throw new System.NotImplementedException();
     }
 
-    public void Initialize(EventManager eventManager, Transform spawnPoint, FireRate fireRate, int clipCapacity)
+    public void Initialize(EventManager eventManager, Transform spawnPoint, AmmoType type, FireRate fireRate, int clipCapacity)
     {
         throw new System.NotImplementedException();
     }
+
+  
 
     public void InjectFireRateOffsets(float[] offsets)
     {
@@ -63,12 +64,9 @@ public abstract class PlayerRangedweapon : IRangedWeapon
         throw new System.NotImplementedException();
     }
 
-    public void SetFireRate(FireRate fireRate)
-    {
-        throw new System.NotImplementedException();
-    }
+   
 
-    public void Unequip()
+    public void UnEquip()
     {
         throw new System.NotImplementedException();
     }

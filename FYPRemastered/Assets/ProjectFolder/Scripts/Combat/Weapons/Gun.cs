@@ -58,7 +58,7 @@ public class Gun
             //_reloadComplete = IsReloading;
             //_waitUntilFinishedReloading = new WaitUntil(_reloadComplete);
 
-            _enemyEventManager.OnShoot += Shoot;
+            _enemyEventManager.OnFireRangedWeapon += Shoot;
             _enemyEventManager.OnTargetSeen += UpdateTargetVisibility;
             _enemyEventManager.OnAimingLayerReady += SetAimReady;
             _enemyEventManager.OnFacingTarget += SetIsFacingTarget;
@@ -278,7 +278,7 @@ public class Gun
         _isAimReady = false;
         _isShooting = false;
         CoroutineRunner.Instance.StopCoroutine(FiringSequence());
-        _enemyEventManager.OnShoot -= Shoot;
+        _enemyEventManager.OnFireRangedWeapon -= Shoot;
         _enemyEventManager.OnTargetSeen -= UpdateTargetVisibility;
         _enemyEventManager.OnAimingLayerReady -= SetAimReady;
         _enemyEventManager.OnFacingTarget -= SetIsFacingTarget;

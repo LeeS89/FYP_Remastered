@@ -110,7 +110,7 @@ public class EnemyAnimationEvents : ComponentEvents
 
     public void OnShoot()
     {
-        _enemyEventManager.Shoot();
+        _enemyEventManager.FireRangedWeapon();
     }
 
     public void MeleeTriggered(int meleeState)

@@ -2,152 +2,96 @@ using UnityEngine;
 
 public class WeaponHandlerBase
 {
-    protected GunBase _gun;
+    protected IWeapon _equippedWeapon;
+    protected RangedWeaponBase _rangedWeapon;
     protected GameObject _owner;
-    protected EnemyEventManager _eventManager;
     protected Transform _bulletSpawnPoint;
     protected int _clipCapacity;
-    protected Transform _target;
-    protected PoolManager _bulletPoolManager;
-    protected ResourceRequest _request;
+    protected FireRate _fireRate;
 
-    protected bool _meleeTriggered = false;
-    protected bool _isAimReady = false;
-    protected bool _isfacingTarget = false;
-    protected bool _targetInView = false;
-    protected bool _targetDead = false;
-    protected bool _ownerHasDied = false;
-    protected bool _isReloading = false;
-
-
-    public virtual void EquipGun(GameObject gunOwner, EnemyEventManager eventManager, Transform bulletSpawnLocaiton, int clipCapacity, Transform target = null)
+    public WeaponHandlerBase(GameObject owner)
     {
-        if(_gun != null) { return; }
-
-        _eventManager = eventManager;
-
-        //_eventManager.OnTryShoot += TryShootgun;
-        _eventManager.OnShoot += ShootGun;
-        _eventManager.OnAimingLayerReady += SetAimReady;
-        _eventManager.OnFacingTarget += SetFacingtarget;
-        _eventManager.OnMelee += SetMeleeTriggered;
-        _eventManager.OnTargetSeen += UpdateTargetVisibility;
-        _eventManager.OnOutOfAmmo += OutOfAmmo;
-        _eventManager.OnReload += ReloadingGun;
-
-        GameManager.OnPlayerDied += OnTargetDied;
-        GameManager.OnPlayerRespawn += OnTargetRespawned;
-
-        _request = new ResourceRequest();
-        _owner = gunOwner;
-        
-        _bulletSpawnPoint = bulletSpawnLocaiton;
-        _clipCapacity = clipCapacity;
-        _target = target;
-
-        _request.ResourceType = PoolResourceType.NormalBulletPool;
-        _request.poolRequestCallback = SetBulletPool;
-
-        SceneEventAggregator.Instance.RequestResource(_request);
-
-        _gun = new GunBase(_bulletSpawnPoint, _target, _eventManager, _owner, _bulletPoolManager, _clipCapacity);
+        _owner = owner;
     }
 
+    #region Firing conditions region
 
+    public virtual bool IsOwnerDead { get; protected set; }
+    public virtual bool IsReloading { get; protected set; }
 
-    protected void SetMeleeTriggered(bool isMelee)
-    {
-        _meleeTriggered = isMelee;
-    }
+    protected virtual void ReloadStateChanged(bool isReloading) => IsReloading = isReloading;
 
-    protected void SetAimReady(bool isReady)
-    {
-        _isAimReady = isReady;
-    }
-
-    protected void UpdateTargetVisibility(bool targetInView)
-    {
-        _targetInView = targetInView;
-    }
-
-    protected void SetFacingtarget(bool isFacingTarget)
-    {
-        _isfacingTarget = isFacingTarget;
-    }
-
-
-    protected virtual void OnTargetDied()
-    {
-        _targetDead = true;
-    }
-
-    protected virtual void OnTargetRespawned()
-    {
-        _targetDead = false;
-    }
-
-
-
-
-
-
-
-
-
-    protected virtual void SetBulletPool(PoolManager pool)
-    {
-        _bulletPoolManager = pool;
-    }
-
-    public virtual void ShootGun()
-    {
-        _gun.Shoot();
-    }
-
-    public virtual void TryShootGun()
-    {
-        if (CanShoot() && _gun != null)
-        {
-            _eventManager.AnimationTriggered(AnimationAction.Shoot);
-        }
-    }
-
-    /*protected virtual void Reload()
-    {
-        _gun.Reload();
-    }*/
-
-    protected virtual void OutOfAmmo()
-    {
-        _eventManager.AnimationTriggered(AnimationAction.Reload);
-    }
-
-    protected virtual void ReloadingGun(bool isReloading)
-    {
-        _isReloading = isReloading;
-        if (_isReloading)
-        {
-            _gun.Reload();
-        }
-    }
+    protected virtual void OwnerDied(bool ownerDead) => IsOwnerDead = ownerDead;
 
     protected virtual FireConditions GetFireState()
     {
-        if (_ownerHasDied) return FireConditions.OwnerDied;
-        if (_isReloading) return FireConditions.Reloading;
-        if (_targetDead) return FireConditions.TargetDied;
-        if (!_targetInView) return FireConditions.TargetNotInView;
-        if (_meleeTriggered) return FireConditions.Meleeing;
-        if (!_isAimReady || !_isfacingTarget) return FireConditions.NotAiming;
+        if (IsOwnerDead) return FireConditions.OwnerDied;
+        if (IsReloading) return FireConditions.Reloading;
         return FireConditions.Ready;
-        //return base.GetFireState();
     }
 
-    protected virtual bool CanShoot()
+    protected virtual bool CanFire()
     {
-        FireConditions fireState = GetFireState();
-        // Debug.LogError("Fire State: " + fireState);
-        return fireState == FireConditions.Ready;
-        //return GetFireState() == FireConditions.Ready;
+        return GetFireState() == FireConditions.Ready;
+    }
+
+
+    protected virtual void OutOfAmmo() { }
+    #endregion
+
+
+    #region Fire weapon region
+    public virtual void FireRangedweapon() { }
+
+    protected virtual void SetFireRate(FireRate fireRate) { _fireRate = fireRate; }
+
+    public virtual void TryFireRangedWeapon() { }
+    #endregion
+
+    #region Ranged weapon params
+    public virtual void SetRangedAmmoType(AmmoType type)
+    {
+        if (_equippedWeapon is IRangedWeapon rw)
+        {
+            rw.SetAmmoType(type);
+        }
+    }
+
+    public virtual void SetBulletSpawnPoint(Transform bulletSpawnPoint) { _bulletSpawnPoint = bulletSpawnPoint; }
+    #endregion
+
+    #region Weapon Equip region
+
+    public virtual void EquipWeapon(WeaponType type)
+    {
+        _equippedWeapon?.UnEquip();
+        //if (_equippedWeapon != null) { _equippedWeapon.UnEquip(); }
+
+        switch (type)
+        {
+            case WeaponType.Ranged:
+                _equippedWeapon = _rangedWeapon;
+                break;
+            default:
+                Debug.LogWarning("No Weapon Type selected");
+                break;
+        }
+
+        _equippedWeapon?.Equip();
+    }
+
+    // Not yet used
+    public virtual void EquipWeapon(GameObject owner, EnemyEventManager eventManager, Transform bulletSpawnLocaiton, int clipCapacity, Transform target = null) { }
+    #endregion
+
+    public virtual void OnInstanceDestroyed()
+    {
+        _equippedWeapon?.UnEquip();
+        _equippedWeapon?.OnInstanceDestroyed();
+        _equippedWeapon = null;
+        _rangedWeapon = null;
+        _bulletSpawnPoint = null;
+
+        _owner = null;
     }
 }
