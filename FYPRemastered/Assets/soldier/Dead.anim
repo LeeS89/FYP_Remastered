@@ -53827,7 +53827,7 @@ AnimationClip:
   m_HasMotionFloatCurves: 1
   m_Events:
   - time: 1
-    functionName: DeathanimationComplete
+    functionName: DeathAnimationComplete
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0

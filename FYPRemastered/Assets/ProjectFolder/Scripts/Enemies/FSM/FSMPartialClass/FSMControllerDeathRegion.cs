@@ -1,7 +1,7 @@
 public partial class EnemyFSMController : ComponentEvents
 {
     #region Death Region
-    private void OnDeath()
+    private void OnDeath(bool isDead)
     {
         if (_agentIsActive) { _agentIsActive = false; }
 

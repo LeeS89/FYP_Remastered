@@ -24,4 +24,14 @@ public class BaseDamageRelay : ComponentEvents, IDamageable
             duration
         );
     }
+
+    public bool _testDeath = false;
+    private void Update()
+    {
+        if (_testDeath)
+        {
+            NotifyDamage(1000, DamageType.Normal); // Simulate a death by applying a large amount of damage
+            _testDeath = false;
+        }
+    }
 }

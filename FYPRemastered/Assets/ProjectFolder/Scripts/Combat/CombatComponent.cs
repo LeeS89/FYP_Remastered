@@ -40,9 +40,6 @@ public class CombatComponent : BaseAbilities
     private WaitForSeconds _meleeCheckWait;
     private bool _evaluatingMeleeCheck = false;
 
-    protected bool _targetInView = false;
-    protected bool _targetDead = false;
-
     private float _shootInterval = 2f;
     private float _nextShootTime = 0f;
 
@@ -53,41 +50,43 @@ public class CombatComponent : BaseAbilities
     
   
     [SerializeField] private Collider[] _meleeResults;
-  
-    
-    
-    
+
+
+   
+
 
     private FieldOfViewHandler _fovhandler;
     private FieldOfViewParams _fovParams;
     
 
-    WeaponHandlerBase _weapon;
+    AgentWeaponHandler _weaponHandler;
     //[SerializeField] protected bool _targetSeen = false;
 
-    protected void SetMeleeTriggered(bool isMelee)
+    private void OwnerDeathStatusChanged(bool isDead)
     {
-        _meleeTriggered = isMelee;
+        IsOwnerDead = isDead;
+
+        if (isDead)
+        {
+            OnFieldOfViewComplete(false, false);
+            _weaponHandler?.UnEquipWeapon();
+        }
+        else
+        {
+            _weaponHandler?.EquipWeapon(WeaponType.Ranged);
+        }
     }
+ 
+    public bool IsOwnerDead { get; protected set; }
 
-   
+    public bool IsTargetDead { get; protected set; }
 
-    protected void UpdateTargetVisibility(bool targetInView)
-    {
-        _targetInView = targetInView;
-    }
+    protected void TargetDeath() => IsTargetDead = true;
+    protected void TargetRespawn() => IsTargetDead = false;
 
-   
+    protected void SetMeleeTriggered(bool isMelee) => _meleeTriggered = isMelee;
+
   
-    protected override void OnPlayerDied()
-    {
-        _targetDead = true;
-    }
-
-    protected override void OnPlayerRespawned()
-    {
-        _targetDead = false;
-    }
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
@@ -102,16 +101,21 @@ public class CombatComponent : BaseAbilities
 
 
         InitializeFOVParams();
-        _fovhandler = new FieldOfViewHandler(_aiTraceComponent, _fovParams);
+        _fovhandler = new FieldOfViewHandler(_aiTraceComponent, OnFieldOfViewComplete, _fovParams, true);
 
-        
+        _enemyEventManager.OnOwnerDeathStatusUpdated += OwnerDeathStatusChanged;
+     
 
         _enemyEventManager.OnMeleeAttackPerformed += EvaluateMeleeAttackResults;
-        //_enemyEventManager.OnShoot += ShootGun;
+   
         _enemyEventManager.OnMelee += SetMeleeTriggered;
-       // _enemyEventManager.OnAimingLayerReady += SetAimReady;
-       // _enemyEventManager.OnTargetSeen += UpdateTargetVisibility;
-        //_enemyEventManager.OnFacingTarget += SetFacingtarget;
+
+        Transform player = GameManager.Instance.GetPlayerPosition(PlayerPart.DefenceCollider);
+
+        _weaponHandler = new AgentWeaponHandler(_enemyEventManager, gameObject, _bulletSpawnPoint, player, 20);
+
+        RegisterGlobalEvents();
+       
     }
 
    
@@ -119,25 +123,34 @@ public class CombatComponent : BaseAbilities
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
         _meleeCheckWait = null;
-       // _detectionPhaseResults = null;
+    
         _meleeResults = null;
         _enemyEventManager.OnMeleeAttackPerformed -= EvaluateMeleeAttackResults;
-        //_enemyEventManager.OnShoot -= ShootGun;
+    
         _enemyEventManager.OnMelee -= SetMeleeTriggered;
-       // _enemyEventManager.OnAimingLayerReady -= SetAimReady;
-        //_enemyEventManager.OnTargetSeen -= UpdateTargetVisibility;
-        //_enemyEventManager.OnFacingTarget -= SetFacingtarget;
+        _enemyEventManager.OnOwnerDeathStatusUpdated -= OwnerDeathStatusChanged;
+       
         base.UnRegisterLocalEvents(_enemyEventManager);
-        //_enemyEventManager = null;
+    
     }
 
     protected override void RegisterGlobalEvents()
     {
         base.RegisterGlobalEvents();
-        GameManager.OnPlayerDied += OnPlayerDied;
-        GameManager.OnPlayerRespawn += OnPlayerRespawned;   
+        BaseSceneManager._instance.OnSceneStarted += OnSceneStarted;
+        GameManager.OnPlayerDied += TargetDeath;
+        GameManager.OnPlayerRespawn += TargetRespawn;   
 
     }
+    protected override void UnRegisterGlobalEvents()
+    {
+        base.UnRegisterGlobalEvents();
+        BaseSceneManager._instance.OnSceneStarted -= OnSceneStarted;
+        GameManager.OnPlayerDied -= TargetDeath;
+        GameManager.OnPlayerRespawn -= TargetRespawn;
+    }
+
+
     public Transform _bulletSpawnPoint;
     private void InitializeFOVParams()
     {
@@ -165,6 +178,8 @@ public class CombatComponent : BaseAbilities
 
     private void LateUpdate()
     {
+        if (IsOwnerDead || IsTargetDead) { return; }
+
         if (_testMelee)
         {
             _evaluatingMeleeCheck = true;
@@ -172,26 +187,42 @@ public class CombatComponent : BaseAbilities
             _testMelee = false;
         }
 
-        if(_weapon == null) { return; }
+        FieldOfViewEvaluation();
+        UpdateWeaponHandler();
+       
+    }
 
-        if(Time.time >= _nextShootTime)
+    private void UpdateWeaponHandler()
+    {
+        if (_weaponHandler == null /*|| !_canUpdateWeapon*/) { return; }
+
+        _weaponHandler.UpdateEquippedWeapon();
+    }
+
+    private bool _updateFOV = false;
+
+    private void FieldOfViewEvaluation()
+    {
+        if (!_updateFOV || _fovhandler == null) { return; }
+
+        _fovhandler.UpdateFieldOfView();
+
+
+       /* if (Time.time >= _nextShootTime)
         {
             CheckFieldOfView();
-           /* if (CanShoot())
-            {
-                _enemyEventManager.AnimationTriggered(AnimationAction.Shoot);
-            }*/
-           _weapon.TryFireRangedWeapon();
+            *//* if (CanShoot())
+             {
+                 _enemyEventManager.AnimationTriggered(AnimationAction.Shoot);
+             }*//*
+            //_weapon.TryFireRangedWeapon();
             _nextShootTime = Time.time + _shootInterval;
-        }
+        }*/
     }
 
-    protected override void UnRegisterGlobalEvents()
-    {
-        base.UnRegisterGlobalEvents();
-        GameManager.OnPlayerDied -= OnPlayerDied;
-        GameManager.OnPlayerRespawn -= OnPlayerRespawned;
-    }
+    public bool _canUpdateWeapon = false;
+
+    
 
 
     private void BeginMeleeSweep()
@@ -270,13 +301,17 @@ public class CombatComponent : BaseAbilities
     {
         //_weapon = new WeaponHandlerBase();
 
-        _weapon.EquipWeapon(owner, _enemyEventManager , bulletSpawnLocaiton, clipCapacity, target);
+        _weaponHandler.EquipWeapon(owner, _enemyEventManager , bulletSpawnLocaiton, clipCapacity, target);
         // base.GunSetup(owner, _enemyEventManager, bulletSpawnLocaiton, clipCapacity, target);
     }
 
-   
 
-   
+
+    protected override void OnSceneStarted()
+    {
+        _canUpdateWeapon = true;
+        _updateFOV = true;
+    }
 
     
 
@@ -292,7 +327,7 @@ public class CombatComponent : BaseAbilities
     protected void CheckFieldOfView()
     {
         if(_fovhandler == null || _aiTraceComponent == null) { return; }
-        _fovhandler.RunFieldOfViewSweep(OnFieldOfViewComplete, true);
+        _fovhandler.RunFieldOfViewSweep(/*OnFieldOfViewComplete, true*/);
     }
 
 
@@ -432,8 +467,8 @@ public class CombatComponent : BaseAbilities
 
     protected override FireConditions GetFireState()
     {
-        if (_targetDead) return FireConditions.TargetDied;
-        if (!_targetInView) return FireConditions.TargetNotInView;
+       // if (_targetDead) return FireConditions.TargetDied;
+      //  if (!_targetInView) return FireConditions.TargetNotInView;
         if (_meleeTriggered) return FireConditions.Meleeing;
         if (!_isAimReady || !_isfacingTarget) return FireConditions.NotAiming;
         return base.GetFireState();

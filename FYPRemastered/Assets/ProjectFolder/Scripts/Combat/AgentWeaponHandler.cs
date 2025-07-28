@@ -14,7 +14,12 @@ public class AgentWeaponHandler : WeaponHandlerBase
     public virtual bool IsFacingTarget { get; protected set; }
     public virtual bool IsTargetDead { get; protected set; }
     public virtual bool IsMeleeTriggered { get; protected set; }
-  
+
+    protected Coroutine _firingCoroutine;
+    protected WaitUntil _waitUntilShotReady;
+    protected WaitForSeconds _shotInterval;
+    protected bool _shotIsReady = false;
+
 
 
     public AgentWeaponHandler(EnemyEventManager eventManager, GameObject owner, Transform bulletSpawnPoint, Transform target, int clipCapacity) : base(owner)
@@ -25,6 +30,8 @@ public class AgentWeaponHandler : WeaponHandlerBase
         _clipCapacity = clipCapacity;
 
         _rangedWeapon = new AgentRangedWeapon(_bulletSpawnPoint, _target, _eventManager, _owner, _clipCapacity);
+      //  _waitUntilShotReady = new WaitUntil(() => _shotIsReady);
+        _shotInterval = new WaitForSeconds(0.25f);
 
         _eventManager.OnFireRangedWeapon += FireRangedweapon;
         _eventManager.OnAimingLayerReady += AimStateChanged;
@@ -39,6 +46,53 @@ public class AgentWeaponHandler : WeaponHandlerBase
 
         EquipWeapon(WeaponType.Ranged);
         //_equippedWeapon = _rangedWeapon;
+    }
+
+    public override void EquipWeapon(WeaponType type)
+    {
+        base.EquipWeapon(type);
+        Debug.LogError("Weapon Equipped");
+
+        if(_equippedWeapon is IRangedWeapon)
+        {
+            BeginFiringSequence();
+        }
+    }
+
+    public override void UnEquipWeapon()
+    {
+        Debug.LogError("Weapon UnEquipped now");
+        if (_firingCoroutine != null)
+        {
+            CoroutineRunner.Instance.StopCoroutine(_firingCoroutine);
+            _firingCoroutine = null;
+        }
+        base.UnEquipWeapon();
+    }
+
+    /// <summary>
+    /// FBF Update relay
+    /// </summary>
+    public override void UpdateEquippedWeapon()
+    {
+        if(_equippedWeapon == null) { return; }
+
+        if(_equippedWeapon is not IRangedWeapon || !IsTargetInView) 
+        {
+            if(_firingCoroutine != null)
+            {
+                CoroutineRunner.Instance.StopCoroutine(_firingCoroutine);
+                _firingCoroutine = null;
+            }
+            return;
+        }
+        else
+        {
+            if(IsTargetInView && _firingCoroutine == null)
+            {
+                _firingCoroutine = this.StartSingleFireRoutine(_shotInterval, TryFireRangedWeapon);
+            }
+        }
     }
 
     #region Firing condition Setters
@@ -84,6 +138,7 @@ public class AgentWeaponHandler : WeaponHandlerBase
         {
             _eventManager.AnimationTriggered(AnimationAction.Shoot);
         }
+        _shotIsReady = false;
     }
 
   
@@ -98,9 +153,15 @@ public class AgentWeaponHandler : WeaponHandlerBase
         if (_equippedWeapon is IRangedWeapon rw)
         {
             base.ReloadStateChanged(isReloading);
-            if (IsReloading)
+            if (isReloading)
             {
                 rw.Reload();
+
+                /*if(_firingCoroutine != null)
+                {
+                    CoroutineRunner.Instance.StopCoroutine(_firingCoroutine);
+                    _firingCoroutine = null;
+                }*/
             }
         }
     }

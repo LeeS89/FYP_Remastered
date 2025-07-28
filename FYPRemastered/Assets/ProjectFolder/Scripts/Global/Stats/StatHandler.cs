@@ -65,7 +65,7 @@ public class StatHandler : ComponentEvents
         if(_statsComponent.ModifyStat(StatType.Health, -damage) == 0f)
         {
             GameManager.Instance.CharacterDied(_characterType);
-            _eventManager.OwnerDied();
+            _eventManager.OwnerDeathStatusUpdated(true);
         }
     }
 

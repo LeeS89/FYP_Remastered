@@ -54,7 +54,7 @@ public partial class EnemyFSMController : ComponentEvents
     [SerializeField] private float _eyeHeight = 1.8f;
     private float _fovCheckFrequency;
     private float _nextCheckTime = 0f;
-    private AITraceComponent _fov;
+   // private AITraceComponent _fov;
     private FieldOfViewFrequencyStatus _fieldOfViewStatus = FieldOfViewFrequencyStatus.Normal;
     public bool _canSeePlayer = false; // Make Private Later
     private bool _canShootPlayer;
@@ -91,7 +91,7 @@ public partial class EnemyFSMController : ComponentEvents
         _enemyEventManager.OnRequestChasingState += ChasingStateRequested;
         _enemyEventManager.OnRequestStationaryState += StationaryStateRequested;
         _enemyEventManager.OnRequestTargetPursuit += PursuitTargetRequested;
-        _enemyEventManager.OnOwnerDied += OnDeath;
+        _enemyEventManager.OnOwnerDeathStatusUpdated += OnDeath;
         _enemyEventManager.OnAgentDeathComplete += ToggleGameObject;
         _enemyEventManager.OnAgentRespawn += ToggleGameObject;
         //_enemyEventManager.OnDestinationUpdated += UpdateAgentDestination;
@@ -116,7 +116,7 @@ public partial class EnemyFSMController : ComponentEvents
 
         _enemyEventManager.OnRequestTargetPursuit -= PursuitTargetRequested;
         _enemyEventManager.OnDestinationReached -= CarveOnDestinationReached;
-        _enemyEventManager.OnOwnerDied -= OnDeath;
+        _enemyEventManager.OnOwnerDeathStatusUpdated -= OnDeath;
         _enemyEventManager.OnAgentDeathComplete -= ToggleGameObject;
         _enemyEventManager.OnAgentRespawn -= ToggleGameObject;
         _enemyEventManager.OnRotateTowardsTarget -= ToggleRotationToTarget;
@@ -257,7 +257,7 @@ public partial class EnemyFSMController : ComponentEvents
         _patrol = null;
         _chasing = null;
         _stationary = null;
-        _fov = null;
+       // _fov = null;
         _fovTraceResults = null;
         _animController = null;
         _deathState = null;

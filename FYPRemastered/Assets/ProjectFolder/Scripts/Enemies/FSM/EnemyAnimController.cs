@@ -74,12 +74,14 @@ public class EnemyAnimController
 
     public void Reload()
     {
-        _anim.SetTrigger("reload");
+        _anim.SetBool("reloading", true);
+        //_anim.SetTrigger("reload");
     }
 
 
     public void DeadAnimation()
     {
+        Debug.LogError("Death animation should play now");
         _anim.SetTrigger("dead");
     }
 

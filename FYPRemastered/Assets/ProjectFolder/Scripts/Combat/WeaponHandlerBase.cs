@@ -80,6 +80,18 @@ public class WeaponHandlerBase
         _equippedWeapon?.Equip();
     }
 
+
+    public virtual void UnEquipWeapon()
+    {
+        _equippedWeapon?.UnEquip();
+        _equippedWeapon = null;
+    }
+
+    protected virtual void BeginFiringSequence() { } 
+    protected virtual void EndFiringSequence() { }
+
+    public virtual void UpdateEquippedWeapon() { }
+
     // Not yet used
     public virtual void EquipWeapon(GameObject owner, EnemyEventManager eventManager, Transform bulletSpawnLocaiton, int clipCapacity, Transform target = null) { }
     #endregion

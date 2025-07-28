@@ -9,11 +9,11 @@ public abstract class EventManager : MonoBehaviour
 
     public abstract void UnbindComponentsToEvents();
 
-    public event Action OnOwnerDied;
+    public event Action<bool> OnOwnerDeathStatusUpdated;
 
-    public void OwnerDied()
+    public void OwnerDeathStatusUpdated(bool isDead)
     {
-        OnOwnerDied?.Invoke();
+        OnOwnerDeathStatusUpdated?.Invoke(isDead);
     }
 
     public event Action<float, DamageType, float, float, float> OnNotifyDamage;

@@ -33,6 +33,7 @@ public class AgentRangedWeapon : RangedWeaponBase
 
     protected override void NotifyReload()
     {
+        Debug.LogError("Reloading weapon");
         _eventManager.OutOfAmmo();
        // _eventManager.AnimationTriggered(AnimationAction.Reload);
     }

@@ -21,7 +21,7 @@ public partial class EnemyFSMController : ComponentEvents
         //_destinationData = new DestinationRequestData();
         _path = new NavMeshPath();
         _fovCheckFrequency = _patrolFOVCheckFrequency;
-        _fov = new AITraceComponent();
+       // _fov = new AITraceComponent();
         _fovTraceResults = new Collider[_maxFovTraceResults];
         _traceHitPoints = new Vector3[_maxFovTraceResults];
         _animController = new EnemyAnimController(_anim, _enemyEventManager);
@@ -124,7 +124,7 @@ public partial class EnemyFSMController : ComponentEvents
 
         _currentState.EnterState();
        
-       // Debug.LogError("Current State: " + _currentState.GetType().Name);
+        Debug.LogError("Current State: " + _currentState.GetType().Name);
     }
 
 
@@ -327,6 +327,9 @@ public partial class EnemyFSMController : ComponentEvents
                 }
                 break;
         }
+
+        Debug.LogError("Resetting FSM to state: " + contextState.GetType().Name);
+
         if (_currentState != contextState)
         {
             ChangeState(contextState);

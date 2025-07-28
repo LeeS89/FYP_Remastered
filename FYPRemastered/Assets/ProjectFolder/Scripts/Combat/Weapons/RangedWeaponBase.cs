@@ -28,6 +28,7 @@ public abstract class RangedWeaponBase : IRangedWeapon
 
     protected virtual void GetPoolManager(AmmoType type)
     {
+
         if (_request != null)
         {
             switch (type)
@@ -80,8 +81,25 @@ public abstract class RangedWeaponBase : IRangedWeapon
 
     #endregion
 
-    public virtual void Equip() => IsEquipped = true;
-    public virtual void UnEquip() => IsEquipped = false;
+    public virtual void Equip()
+    {
+        if(_request == null)
+        {
+            _request = new ResourceRequest();
+        }
+
+
+        IsEquipped = true;
+        if(_bulletPoolManager == null)
+        {
+            SetAmmoType(AmmoType.Normal);
+        }
+    }
+    public virtual void UnEquip()
+    {
+        IsEquipped = false;
+        _bulletPoolManager = null;
+    }
     public virtual void UpdateWeapon() { }
 
 

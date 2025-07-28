@@ -19,13 +19,26 @@ public class FieldOfViewHandler
     private LayerMask _obstructionMask;
     private LayerMask _targetMask;
     private AITraceComponent _aiTraceComponent;
+    private float _fovCheckFrequency;
+    private FieldOfViewFrequencyStatus _fieldOfViewStatus = FieldOfViewFrequencyStatus.Normal;
+    [SerializeField] private float _normalFOVCheckFrequency = 1f;
+    [SerializeField] private float _heightenedFOVCheckFrequency = 0.1f;
+    private Action<bool, bool> _onFOVResultCallback;
+    private bool _addFallbackPoints = false;
+    private float _nextCheckTime = 0f;
+
 
     public FieldOfViewHandler(
-        AITraceComponent traceComponent, 
-        in FieldOfViewParams fovParams 
+        AITraceComponent traceComponent,
+        Action<bool, bool> onFOVResultCallback,
+        in FieldOfViewParams fovParams,
+        bool addFallbackPoints = false
        )
     {
         _aiTraceComponent = traceComponent;
+        _onFOVResultCallback = onFOVResultCallback;
+        _addFallbackPoints = addFallbackPoints;
+
         _proximityDetectionResults = new Collider[fovParams.maxTraceTargets];
         _evaluationHitPoints = new Vector3[fovParams.maxTraceTargets];
         _fovOrigin = fovParams.fovOrigin;
@@ -41,6 +54,36 @@ public class FieldOfViewHandler
         _evaluationCapsuleRadius = fovParams.evaluationCapsuleRadius;
         _obstructionMask = fovParams.obstructionMask;
         _targetMask = fovParams.targetMask;
+    }
+
+
+    public void UpdateFieldOfView()
+    {
+       
+        switch (_fieldOfViewStatus)
+        {
+            case FieldOfViewFrequencyStatus.Normal:
+                if (_fovCheckFrequency != _normalFOVCheckFrequency)
+                {
+                    _fovCheckFrequency = _normalFOVCheckFrequency;
+                }
+                break;
+            case FieldOfViewFrequencyStatus.Heightened:
+                if (_fovCheckFrequency != _heightenedFOVCheckFrequency)
+                {
+                    _fovCheckFrequency = _heightenedFOVCheckFrequency;
+                }
+                break;
+            default:
+                _fovCheckFrequency = _normalFOVCheckFrequency;
+                break;
+        }
+        if (Time.time >= _nextCheckTime)
+        {
+            _nextCheckTime = Time.time + _fovCheckFrequency;
+            RunFieldOfViewSweep();
+        }
+       // RunFieldOfViewCheck();
     }
 
 
@@ -115,8 +158,12 @@ public class FieldOfViewHandler
 
         return false;
     }
+
+
+   
+
    // float _shootAngleThreshold = 30f; // Example value, adjust as needed
-    public void RunFieldOfViewSweep(Action<bool, bool> onFOVResult, bool addFallbackPoints = false)
+    public void RunFieldOfViewSweep(/*Action<bool, bool> onFOVResult, bool addFallbackPoints = false*/)
     {
 
         bool seen = false;
@@ -128,16 +175,19 @@ public class FieldOfViewHandler
        
         if (detectedCount == 0)
         {
-            onFOVResult?.Invoke(seen, inShootAngle);
-            //UpdateFOVResults(targetSeen);
-            //return false;
+            _onFOVResultCallback?.Invoke(seen, inShootAngle);
+            if (_fieldOfViewStatus != FieldOfViewFrequencyStatus.Normal)
+                _fieldOfViewStatus = FieldOfViewFrequencyStatus.Normal;
         }
+
+        if (_fieldOfViewStatus != FieldOfViewFrequencyStatus.Heightened)
+            _fieldOfViewStatus = FieldOfViewFrequencyStatus.Heightened;
 
         for (int i = 0; i < detectedCount; i++)
         {
             int hitCount;
             
-            RunEvaluationPhase(_proximityDetectionResults[i], out hitCount, addFallbackPoints);
+            RunEvaluationPhase(_proximityDetectionResults[i], out hitCount, _addFallbackPoints);
 
             if (hitCount == 0) { continue; }
 
@@ -150,13 +200,13 @@ public class FieldOfViewHandler
                 // SetFacingtarget(facingTarget);
                 seen = true;
                 inShootAngle = TargetWithinShootingRange(_aiTraceComponent, _fovOrigin, _proximityDetectionResults[i].ClosestPointOnBounds(_fovOrigin.position), _horizontalShootAngle, _verticalShootAngle);
-                onFOVResult?.Invoke(seen, inShootAngle);
+                _onFOVResultCallback?.Invoke(seen, inShootAngle);
                 return;
                 //return true;
             }
 
         }
-        onFOVResult?.Invoke(seen, inShootAngle);
+        _onFOVResultCallback?.Invoke(seen, inShootAngle);
         //return false;
 
     }

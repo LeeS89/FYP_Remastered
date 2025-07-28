@@ -41,8 +41,15 @@ public partial class EnemyFSMController : ComponentEvents
     public bool _testMelee = false;
     public bool _testRotation = false;
 
+    
+
     private void LateUpdate()
     {
+        if (_currentState != null)
+        {
+            _currentState.LateUpdateState();
+        }
+
         if (!_agentIsActive) { return; }
 
         if (_testRotation)
@@ -66,7 +73,7 @@ public partial class EnemyFSMController : ComponentEvents
 
         if (!_playerIsDead && _agentIsActive)
         {
-            UpdateFieldOfViewCheckFrequency();
+            //UpdateFieldOfViewCheckFrequency();
         }
 
         /*if (_gun != null)
@@ -83,10 +90,10 @@ public partial class EnemyFSMController : ComponentEvents
             //_testDeath = false;
         }*/
 
-        if (_currentState != null)
+       /* if (_currentState != null)
         {
             _currentState.LateUpdateState();
-        }
+        }*/
 
         CheckCurrentPathValidity();
 

@@ -36,14 +36,14 @@ public class BaseAbilities : ComponentEvents
         _request = new ResourceRequest();
         /*_eventManager.OnOutOfAmmo += OutOfAmmo;
         _eventManager.OnReload += ReloadingGun;*/
-        _eventManager.OnSetupGun += GunSetup;
+        //_eventManager.OnSetupGun += GunSetup;
     }
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
        /* _eventManager.OnReload -= ReloadingGun;
         _eventManager.OnOutOfAmmo -= OutOfAmmo;*/
-        _eventManager.OnSetupGun -= GunSetup;
+     //   _eventManager.OnSetupGun -= GunSetup;
         base.UnRegisterLocalEvents(eventManager);
     }
 
