@@ -38,26 +38,14 @@ public partial class EnemyFSMController : ComponentEvents
     private StationaryState _stationary;
     [SerializeField] private int _maxFlankingSteps = 0;
 
-    [Header("Field of View Component Parameters")]
-    [SerializeField] public Transform _fovLocation; // Make Private Later
-    [SerializeField] private float _patrolFOVCheckFrequency = 1f;
-    [SerializeField] private float _alertFOVCheckFrequency = 0.1f;
-    [SerializeField] public float _fovTraceRadius = 5f; // Make Private Later
-    [Range(0, 360)]  public float _angle; // Make Private Later
-    [Range(0, 360)]  [SerializeField] private float _shootAngleThreshold = 30f;
-    [SerializeField] private LayerMask _fovLayerMask;
+   
+
+
+    [SerializeField] private LayerMask _fovLayerMask; // Delete later once I fix Flank FOV
     [SerializeField] private LayerMask _lineOfSightMask;
-    [SerializeField] private Collider[] _fovTraceResults;
-    [SerializeField] private Vector3[] _traceHitPoints;
-    [SerializeField] private int _maxFovTraceResults = 5;
-    [SerializeField] private float _waistHeight = 1.0f;
-    [SerializeField] private float _eyeHeight = 1.8f;
-    private float _fovCheckFrequency;
-    private float _nextCheckTime = 0f;
-   // private AITraceComponent _fov;
-    private FieldOfViewFrequencyStatus _fieldOfViewStatus = FieldOfViewFrequencyStatus.Normal;
+   
     public bool _canSeePlayer = false; // Make Private Later
-    private bool _canShootPlayer;
+   // private bool _canShootPlayer;
 
     [Header("Death State")]
     private DeathState _deathState;
@@ -71,7 +59,7 @@ public partial class EnemyFSMController : ComponentEvents
     [Header("Agent and animation speed values")]
     private float _targetSpeed = 0f;
     private float _lerpSpeed = 0f;
-    private bool _movementChanged = false;
+   // private bool _movementChanged = false;
     private float _previousDirection = 0f;
     private EnemyEventManager _enemyEventManager;
     
@@ -165,22 +153,32 @@ public partial class EnemyFSMController : ComponentEvents
 
     private void UpdateAgentSpeed()
     {
-      
+
+       // if (!_movementChanged) { return; }
         float smoothedSpeed = Mathf.Lerp(_agent.speed, _targetSpeed, _lerpSpeed * Time.deltaTime);
         _agent.speed = smoothedSpeed;
 
-       
-        
-       // _animController.UpdateSpeed(smoothedSpeed);
+        float _currentSpeed = _agent.speed;
 
-        if (Mathf.Abs(_agent.speed - _targetSpeed) <= 0.001f)
+        if (Mathf.Approximately(_agent.speed, _targetSpeed))
         {
-           
             _agent.speed = _targetSpeed;
-            //_animController.UpdateSpeed(_targetSpeed);
-            _movementChanged = false;
         }
-       
+      /*  if (Mathf.Abs(_agent.speed - _targetSpeed) <= 0f)
+        {
+            _movementChanged = false;
+        }*/
+
+        // _animController.UpdateSpeed(smoothedSpeed);
+
+        /* if (Mathf.Abs(_agent.speed - _targetSpeed) <= 0.001f)
+         {
+
+             _agent.speed = _targetSpeed;
+             //_animController.UpdateSpeed(_targetSpeed);
+            // _movementChanged = false;
+         }*/
+
     }
 
     private void UpdateAnimator()
@@ -195,20 +193,21 @@ public partial class EnemyFSMController : ComponentEvents
 
         float dot = Vector3.Dot(forward, moveDir);
         float speed = _agent.speed;
-        if(dot < 0)
+       /* if(dot < 0)
         {
             speed *= -1;
-        }
+        }*/
 
-        _animController.UpdateBlendTreeParams(speed, normalizedDirection);
+        _animController.UpdateBlendTreeParams(speed, 0f);
     }
 
-   
+  // bool _movementChanged = false;
     private void UpdateAnimatorSpeedValues(float speed, float lerpSpeed)
     {
-        _targetSpeed = speed;
         _lerpSpeed = lerpSpeed;
-        _movementChanged = true;
+        _targetSpeed = speed;
+        
+      //  _movementChanged = true;
     }
 
     private void UpdateAnimatorDirection()
@@ -258,7 +257,7 @@ public partial class EnemyFSMController : ComponentEvents
         _chasing = null;
         _stationary = null;
        // _fov = null;
-        _fovTraceResults = null;
+       // _fovTraceResults = null;
         _animController = null;
         _deathState = null;
     }

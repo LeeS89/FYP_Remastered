@@ -12,7 +12,8 @@ public class DeathState : EnemyState
 
     public override void EnterState(/*Vector3? destination = null, AlertStatus alertStatus = AlertStatus.None, float _ = 0*/)
     {
-        Debug.LogError("Entering Death State");
+        _eventManager.ChangeAnimatorLayerWeight(EnemyAnimController.AnimationLayer.Alert, 1, 0, 0.5f);
+        _eventManager.ChangeAnimatorLayerWeight(EnemyAnimController.AnimationLayer.Combat, 1, 0, 0.5f);
         _eventManager.OnDeathAnimationComplete += DeathAnimationComplete;
         _eventManager.AnimationTriggered(AnimationAction.Dead);
         _deathAnimationComplete = false;
@@ -33,7 +34,7 @@ public class DeathState : EnemyState
     {
         if (!_deathAnimationComplete) { return; }
 
-        Debug.LogError("Death Animation Complete, starting countdown to disable game object");
+     
 
         if (_countdown > 0)
         {

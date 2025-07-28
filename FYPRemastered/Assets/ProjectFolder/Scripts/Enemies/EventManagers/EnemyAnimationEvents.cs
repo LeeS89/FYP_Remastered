@@ -137,6 +137,11 @@ public class EnemyAnimationEvents : ComponentEvents
         _enemyEventManager.DeathAnimationComplete();
     }
 
+   /* public void FadeLookLayer()
+    {
+        _enemyEventManager.ChangeAnimatorLayerWeight(EnemyAnimController.AnimationLayer.LookAround, 1, 0, 0.5f);
+    }*/
+
     public AnimationAction currentAction = AnimationAction.None;
 
 

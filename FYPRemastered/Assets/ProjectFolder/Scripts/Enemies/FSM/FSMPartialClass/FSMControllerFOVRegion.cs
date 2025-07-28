@@ -55,7 +55,7 @@ public partial class EnemyFSMController : ComponentEvents
         if (_currentState != _chasing && _alertStatus == AlertStatus.None)
         {
             //BaseSceneManager._instance.AlertZoneAgents(_blockZone, this);
-            _enemyEventManager.ChangeAnimatorLayerWeight(1, 0, 1, 0.5f, true);
+            _enemyEventManager.ChangeAnimatorLayerWeight(EnemyAnimController.AnimationLayer.Alert, 0, 1, 0.5f, true);
             AlertStatusUpdated(AlertStatus.Alert);
             //_alertStatus = AlertStatus.Alert;
 
@@ -97,7 +97,7 @@ public partial class EnemyFSMController : ComponentEvents
 
 
     #region Redundant Code
-    private void UpdateFieldOfViewCheckFrequency()
+   /* private void UpdateFieldOfViewCheckFrequency()
     {
         return;
         switch (_fieldOfViewStatus)
@@ -121,7 +121,7 @@ public partial class EnemyFSMController : ComponentEvents
 
         //RunFieldOfViewCheck();
     }
-
+*/
 
     /*private void RunFieldOfViewCheck()
     {
@@ -162,7 +162,7 @@ public partial class EnemyFSMController : ComponentEvents
         }
     }*/
 
-    private void CheckIfTargetWithinShootAngle(Collider target)
+   /* private void CheckIfTargetWithinShootAngle(Collider target)
     {
         if (target == null) { return; }
 
@@ -171,25 +171,25 @@ public partial class EnemyFSMController : ComponentEvents
 
         //_enemyEventManager.FacingTarget(canShootTarget);
     }
-
+*/
     /// <summary>
     /// First checks if the target is within FOV cone, then performs a capsule cast from waist to eye level to check for target colliders
     /// If target collider(s) are hit, performs a line of sight check to see if the target is visible.
     /// </summary>
     /// <param name="target"></param>
     /// <returns></returns>
-    private bool EvaluateFieldOfView(Collider target)
+   /* private bool EvaluateFieldOfView(Collider target)
     {
         if (target == null) { return false; }
 
-       /* if (!_fov.IsWithinView(_fovLocation, target.bounds.center, _angle * 0.5f, _angle * 0.75f))
+       *//* if (!_fov.IsWithinView(_fovLocation, target.bounds.center, _angle * 0.5f, _angle * 0.75f))
         {
             if (_capsuleResultTest)
             {
                 Debug.LogError("Failed Angle Check");
             }
             return false;
-        }*/
+        }*//*
 
         Vector3 waistPos = transform.position + Vector3.up * _waistHeight;
         Vector3 eyePos = transform.position + Vector3.up * _eyeHeight;
@@ -215,13 +215,13 @@ public partial class EnemyFSMController : ComponentEvents
         }
 
         return false;
-    }
+    }*/
 
-    private void AddFallbackPoints(Collider target, Vector3[] hitPoints, ref int startIndex)
-    {
-        hitPoints[startIndex++] = target.bounds.center + Vector3.up * target.bounds.extents.y;
-        hitPoints[startIndex++] = target.bounds.center - Vector3.right * target.bounds.extents.x;
-        hitPoints[startIndex++] = target.bounds.center + Vector3.right * target.bounds.extents.x;
-    }
+    //private void AddFallbackPoints(Collider target, Vector3[] hitPoints, ref int startIndex)
+    //{
+    //    hitPoints[startIndex++] = target.bounds.center + Vector3.up * target.bounds.extents.y;
+    //    hitPoints[startIndex++] = target.bounds.center - Vector3.right * target.bounds.extents.x;
+    //    hitPoints[startIndex++] = target.bounds.center + Vector3.right * target.bounds.extents.x;
+    //}
     #endregion
 }

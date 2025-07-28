@@ -33,21 +33,27 @@ public partial class EnemyFSMController : ComponentEvents
             _testWaypoint = false;
         }
 
-        UpdateAgentSpeed();
+       // UpdateAgentSpeed();
     }
 
     public bool _testEnterPatrol = false;
     public bool testSeeView = false;
     public bool _testMelee = false;
     public bool _testRotation = false;
+    public bool _testLook = false;
 
-    
 
     private void LateUpdate()
     {
         if (_currentState != null)
         {
             _currentState.LateUpdateState();
+        }
+
+        if (_testLook)
+        {
+            _enemyEventManager.AnimationTriggered(AnimationAction.Look);
+            _testLook = false;
         }
 
         if (!_agentIsActive) { return; }
@@ -107,7 +113,8 @@ public partial class EnemyFSMController : ComponentEvents
             RotateTowardsPlayer();
            // UpdateAnimatorDirection();
         }
-       // UpdateAnimatorDirection();
+        // UpdateAnimatorDirection();
+        UpdateAgentSpeed();
         UpdateAnimator();
         //if (!_movementChanged) { return; }
 

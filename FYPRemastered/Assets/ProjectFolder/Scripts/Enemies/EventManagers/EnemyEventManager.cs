@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
+using static EnemyAnimController;
 
 public class EnemyEventManager : EventManager
 {
@@ -16,7 +17,7 @@ public class EnemyEventManager : EventManager
     // Animation events
     public event Action<AnimationAction> OnAnimationTriggered;
     public event Action<float, float> OnSpeedChanged;
-    public event Action<int, float, float, float, bool> OnChangeAnimatorLayerWeight;
+    public event Action<AnimationLayer, float, float, float, bool> OnChangeAnimatorLayerWeight;
     public event Action<bool> OnAimingLayerReady;
     public event Action OnDeathAnimationComplete;
 
@@ -141,7 +142,7 @@ public class EnemyEventManager : EventManager
     /// <param name="to"></param>
     /// <param name="duration"></param>
     /// <param name="layerReady"></param>
-    public void ChangeAnimatorLayerWeight(int layer, float from, float to, float duration, bool layerReady)
+    public void ChangeAnimatorLayerWeight(AnimationLayer layer, float from, float to, float duration, bool layerReady = false)
     {
         OnChangeAnimatorLayerWeight?.Invoke(layer, from, to, duration, layerReady);
     }

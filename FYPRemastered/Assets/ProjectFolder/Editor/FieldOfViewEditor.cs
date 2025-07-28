@@ -6,13 +6,13 @@ public class FieldOfViewEditor : Editor
 {
     private void OnSceneGUI()
     {
-        EnemyFSMController fov = (EnemyFSMController)target;
+       /* CombatComponent fov = (CombatComponent)target;
 
         if (fov._fovLocation == null) return;
 
         Vector3 origin = fov._fovLocation.position;
-        float viewRadius = fov._fovTraceRadius;
-        float viewAngle = fov._angle;
+        float viewRadius = fov._proximityRadius;
+        float viewAngle = fov._fovViewangle;
 
         // Draw vision radius
         Handles.color = Color.white;
@@ -25,7 +25,7 @@ public class FieldOfViewEditor : Editor
         // Draw FOV cone boundaries
         Handles.color = Color.red;
         Handles.DrawLine(origin, origin + viewAngle01 * viewRadius);
-        Handles.DrawLine(origin, origin + viewAngle02 * viewRadius);
+        Handles.DrawLine(origin, origin + viewAngle02 * viewRadius);*/
 
         // Optional: show line to player if visible
         /*if (fov._canSeePlayer && fov.playerRef != null)

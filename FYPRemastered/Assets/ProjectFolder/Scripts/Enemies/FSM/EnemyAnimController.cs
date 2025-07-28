@@ -68,6 +68,7 @@ public class EnemyAnimController
 
     public void LookAround()
     {
+       // _eventManager.ChangeAnimatorLayerWeight(EnemyAnimController.AnimationLayer.LookAround, 0, 1, 1f);
         _anim.SetTrigger("look");
 
     }
@@ -123,12 +124,12 @@ public class EnemyAnimController
     }
 
 
-    private void ChangeLayerWeight(int layer, float from, float to, float duration, bool layerReady)
+   /* private void ChangeLayerWeight(int layer, float from, float to, float duration, bool layerReady = false)
     {
         CoroutineRunner.Instance.StartCoroutine(FadeLayerWeight(layer, from, to, duration, layerReady));
-    }
+    }*/
 
-    private IEnumerator FadeLayerWeight(int layer, float from, float to, float duration, bool layerReady)
+  /*  private IEnumerator FadeLayerWeight(int layer, float from, float to, float duration, bool layerReady)
     {
         if (!layerReady) { _eventManager.AimingLayerReady(false); } // Aiming animation is no longer playing -> Can no longer shoot
 
@@ -143,10 +144,47 @@ public class EnemyAnimController
         _anim.SetLayerWeight(layer, to);
 
         if (layerReady) { _eventManager.AimingLayerReady(layerReady); } // Aiming animation is finished -> Can now start Shooting
+    }*/
+
+    private void ChangeLayerWeight(AnimationLayer layer, float from, float to, float duration, bool layerReady = false)
+    {
+        CoroutineRunner.Instance.StartCoroutine(FadeLayerWeight(layer, from, to, duration, layerReady));
+    }
+
+    private IEnumerator FadeLayerWeight(AnimationLayer layer, float from, float to, float duration, bool layerReady = false)
+    {
+
+        if(layer == AnimationLayer.Alert)
+        {
+            if (!layerReady) { _eventManager.AimingLayerReady(false); } // Aiming animation is no longer playing -> Can no longer shoot
+        }
+       
+
+        float time = 0f;
+        while (time < duration)
+        {
+            float t = time / duration;
+            _anim.SetLayerWeight((int)layer, Mathf.Lerp(from, to, t));
+            time += Time.deltaTime;
+            yield return null;
+        }
+        _anim.SetLayerWeight((int)layer, to);
+
+        if (layer == AnimationLayer.Alert)
+        {
+            if (layerReady) { _eventManager.AimingLayerReady(true); } // Aiming animation is finished -> Can now start Shooting
+        }
+
+      
     }
 
 
-   
+    public enum AnimationLayer
+    {
+        Alert = 1,
+        Combat = 2,
+        LookAround = 3
+    }
 
 
 

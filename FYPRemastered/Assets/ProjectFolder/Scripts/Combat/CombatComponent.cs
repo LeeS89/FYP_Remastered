@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using UnityEditor;
 using UnityEngine;
 
 public class CombatComponent : BaseAbilities
@@ -11,7 +12,7 @@ public class CombatComponent : BaseAbilities
     [Header("Max Field of view targets")]
     [SerializeField] private int _maxFovTraceResults = 5;
     [Header("Field of view proximity phase radius")]
-    [SerializeField] protected float _proximityRadius = 5f;
+    [SerializeField] public float _proximityRadius = 5f; // Make Protected later
 
     [Header("Field of view evaluation phase")]
     [Header("start and end points + radius of capsule cast in FOV evaluation phase")]
@@ -335,7 +336,7 @@ public class CombatComponent : BaseAbilities
     {
         if (_fovLocation == null) return;
 
-        Gizmos.color = Color.green;
+       /* Gizmos.color = Color.green;
 
         // Horizontal FOV
         Vector3 right = Quaternion.Euler(0, _fovViewangle * _horizontalAngleMultiplier, 0) * _fovLocation.forward;
@@ -349,8 +350,54 @@ public class CombatComponent : BaseAbilities
         Vector3 down = Quaternion.Euler(_fovViewangle * _verticalAngleMultiplier, 0, 0) * _fovLocation.forward;
 
         Gizmos.DrawRay(_fovLocation.position, up * 5f);
-        Gizmos.DrawRay(_fovLocation.position, down * 5f);
+        Gizmos.DrawRay(_fovLocation.position, down * 5f);*/
+
+
+
+
+
+
+        Vector3 origin = _fovLocation.position;
+        float viewRadius = _proximityRadius;
+        //float viewAngle = _fovViewangle;
+
+        // Draw vision radius
+        Handles.color = Color.white;
+       // Handles.DrawWireArc(origin, Vector3.up, Vector3.forward, 360, viewRadius);
+       // Handles.DrawWireArc(origin, Vector3.right, Vector3.forward, 360, viewRadius);
+       // DebugExtension.DrawCircle(origin, Vector3.up, viewRadius);
+        DebugExtension.DebugWireSphere(origin, Color.white, viewRadius);
+
+        // Horizontal FOV
+        Vector3 right = Quaternion.Euler(0, _fovViewangle * _horizontalAngleMultiplier, 0) * _fovLocation.forward;
+        Vector3 left = Quaternion.Euler(0, -_fovViewangle * _horizontalAngleMultiplier, 0) * _fovLocation.forward;
+        Gizmos.color = Color.green;
+        Gizmos.DrawRay(_fovLocation.position, right * _proximityRadius);
+        Gizmos.DrawRay(_fovLocation.position, left * _proximityRadius);
+
+        // Vertical FOV
+        Vector3 up = Quaternion.Euler(-_fovViewangle * _verticalAngleMultiplier, 0, 0) * _fovLocation.forward;
+        Vector3 down = Quaternion.Euler(_fovViewangle * _verticalAngleMultiplier, 0, 0) * _fovLocation.forward;
+
+        Gizmos.DrawRay(_fovLocation.position, up * _proximityRadius);
+        Gizmos.DrawRay(_fovLocation.position, down * _proximityRadius); 
+
+        /* // Calculate direction vectors
+         Vector3 viewAngle01 = DirectionFromAngle(_fovLocation.eulerAngles.y, -_fovViewangle / 2);
+         Vector3 viewAngle02 = DirectionFromAngle(_fovLocation.eulerAngles.y, _fovViewangle / 2);
+
+         Vector3 viewAngle03 = DirectionFromAngle(_fovLocation.eulerAngles.z, -_fovViewangle / 2);
+         Vector3 viewAngle04 = DirectionFromAngle(_fovLocation.eulerAngles.z, _fovViewangle / 2);
+
+         // Draw FOV cone boundaries
+         Handles.color = Color.red;
+         Handles.DrawLine(origin, origin + viewAngle01 * viewRadius);
+         Handles.DrawLine(origin, origin + viewAngle02 * viewRadius);
+         Handles.DrawLine(origin, origin + viewAngle03 * viewRadius);
+         Handles.DrawLine(origin, origin + viewAngle04 * viewRadius);*/
     }
+
+   
 
 
     #region Redundant Code
