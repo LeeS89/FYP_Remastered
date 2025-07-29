@@ -44,8 +44,7 @@ public partial class EnemyFSMController : ComponentEvents
     [SerializeField] private LayerMask _fovLayerMask; // Delete later once I fix Flank FOV
     [SerializeField] private LayerMask _lineOfSightMask;
    
-    public bool _canSeePlayer = false; // Make Private Later
-   // private bool _canShootPlayer;
+  
 
     [Header("Death State")]
     private DeathState _deathState;
@@ -66,8 +65,7 @@ public partial class EnemyFSMController : ComponentEvents
     private DestinationManager _destinationManager;
     
     private AlertStatus _alertStatus = AlertStatus.None;
-    //[SerializeField] private UniformZoneGridManager _gridManager;
-
+    
 
     #region Event Registrations
     public override void RegisterLocalEvents(EventManager eventManager)
@@ -88,7 +86,7 @@ public partial class EnemyFSMController : ComponentEvents
         _enemyEventManager.OnSpeedChanged += UpdateAnimatorSpeedValues;
 
 
-        _enemyEventManager.OnTargetSeen += UpdateFieldOfViewResults;
+        _enemyEventManager.OnTargetSeen += TargetInViewStatusUpdated;
 
 
         RegisterGlobalEvents();
@@ -101,7 +99,7 @@ public partial class EnemyFSMController : ComponentEvents
         _enemyEventManager.OnRequestChasingState -= ChasingStateRequested;
         _enemyEventManager.OnRequestStationaryState -= StationaryStateRequested;
         //_enemyEventManager.OnDestinationUpdated -= UpdateAgentDestination;
-
+        _enemyEventManager.OnTargetSeen -= TargetInViewStatusUpdated;
         _enemyEventManager.OnRequestTargetPursuit -= PursuitTargetRequested;
         _enemyEventManager.OnDestinationReached -= CarveOnDestinationReached;
         _enemyEventManager.OnOwnerDeathStatusUpdated -= OnDeath;

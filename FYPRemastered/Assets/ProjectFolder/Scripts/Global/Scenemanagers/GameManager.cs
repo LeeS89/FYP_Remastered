@@ -206,7 +206,7 @@ public class GameManager : MonoBehaviour
 
     private Collider[] _cachedPlayerColliders;
 
-    public Collider[] GetCachedPlayerColliders()
+    public Collider[] GetPlayerTargetPoints()
     {
         if (_cachedPlayerColliders == null || _cachedPlayerColliders.Length == 0)
         {

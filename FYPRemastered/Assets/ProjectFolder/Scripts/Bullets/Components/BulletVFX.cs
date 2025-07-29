@@ -83,7 +83,7 @@ public class BulletVFX : ComponentEvents
 
     private void PlayDeflectionAudio()
     {
-        AudioPoolExtensions.GetAndPlay(_audioPoolManager, transform.position, transform.rotation);
+        PoolExtensions.GetAndPlay(_audioPoolManager, transform.position, transform.rotation);
     }
    
 
@@ -93,7 +93,7 @@ public class BulletVFX : ComponentEvents
         Vector3 pos = contact.point;
         //Vector3 hitNormal = contact.normal;
         //GameObject obj = _poolManager.GetFromPool(pos, rot);
-        AudioPoolExtensions.GetAndPlay(_particlePoolManager, pos, Quaternion.identity);
+        PoolExtensions.GetAndPlay(_particlePoolManager, pos, Quaternion.identity);
         //obj.SetActive(true);
         //_poolManager.GetParticle(pos, rot);  
     }

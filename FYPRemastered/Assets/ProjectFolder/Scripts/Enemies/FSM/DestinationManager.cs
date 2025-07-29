@@ -23,28 +23,89 @@ public class DestinationManager
     private bool _resultReceived = false;
     private bool _isValid = false;
     private List<Vector3> _points = new List<Vector3>();
-    /*private LayerMask _flankBlockingMask;
-    private LayerMask _flankTargetMask;*/
+
+    private AIDestinationRequestData _destinationRequest;
+    private LayerMask _flankBlockingMask;
+    private LayerMask _flankTargetMask;
+    private BlockData _blockData;
+    private Collider[] _targetColliders;
+    private WaypointData _wpData;
 
     /// TESTING
     private GameObject testCube;
 
-    public DestinationManager(EnemyEventManager eventManager, int maxFlankingSteps, GameObject cube)
+    public DestinationManager(EnemyEventManager eventManager, int maxFlankingSteps, GameObject cube = null, LayerMask flankPointBlockingMask = default, LayerMask flankPointTargetMask = default)
     {
         _eventManager = eventManager;
         testCube = cube;
         _maxFlankingSteps = maxFlankingSteps;
         _stepsToTry = new List<int>();
         _newPoints = new List<Vector3>();
+        _flankBlockingMask = flankPointBlockingMask;
+        _flankTargetMask = flankPointTargetMask;
+        _targetColliders = GameManager.Instance.GetPlayerTargetPoints();
         _waitUntilResultReceived = new WaitUntil(() => _resultReceived);
+        _destinationRequest = new AIDestinationRequestData();
     }
 
-   /* public DestinationManager(EnemyEventManager eventManager, int maxFlankingSteps, GameObject cube, LayerMask flankBlockingMask, LayerMask flankTargetMask) : this(eventManager, maxFlankingSteps, cube)
+    #region new Implementation
+    private void InitializeWaypoints()
     {
-        _flankBlockingMask = flankBlockingMask;
-        _flankTargetMask = flankTargetMask;
-    }*/
+        _destinationRequest.resourceType = AIResourceType.WaypointBlock;
+        _destinationRequest.waypointCallback = SetWayPoints;
+    }
 
+    private void SetWayPoints(BlockData data)
+    {
+        _blockData = data;
+
+        if (_blockData == null)
+        {
+            Debug.LogError("Waypoint block data is null. Cannot set waypoints.");
+            return;
+        }
+
+        LoadWaypointData(_blockData);
+    }
+
+    public void LoadWaypointData(BlockData wpData)
+    {
+
+        _waypointPairs.Clear();
+
+        for (int i = 0; i < wpData._waypointPositions.Length; i++)
+        {
+            _waypointPairs.Add(new WaypointPair(wpData._waypointPositions[i], wpData._waypointForwards[i]));
+        }
+
+    }
+
+
+    private void DestinationRequested(AIDestinationType destType)
+    {
+        switch (destType)
+        {
+            case AIDestinationType.ChaseDestination:
+                
+                break;
+            case AIDestinationType.FlankDestination:
+                break;
+            case AIDestinationType.PatrolDestination:
+                break;
+            default:
+                break;
+        }
+    }
+    #endregion
+
+
+    /* public DestinationManager(EnemyEventManager eventManager, int maxFlankingSteps, GameObject cube, LayerMask flankBlockingMask, LayerMask flankTargetMask) : this(eventManager, maxFlankingSteps, cube)
+     {
+         _flankBlockingMask = flankBlockingMask;
+         _flankTargetMask = flankTargetMask;
+     }*/
+
+   
     private struct WaypointPair
     {
         public Vector3 position;
@@ -57,7 +118,7 @@ public class DestinationManager
         }
     }
 
-
+    
     public void LoadWaypointData(WaypointData wpData)
     {
        
@@ -170,33 +231,7 @@ public class DestinationManager
         destinationRequest.externalCallback?.Invoke(false, Vector3.zero);
     }
 
-    private bool ValidateTargetVisibilityFromPoint(Vector3 point)
-    {
-        int mask = LayerMask.GetMask("Default", "Water", "PlayerDefence", "Player");
-        Collider playerCollider = GameManager.Instance.GetPlayerCollider(PlayerPart.Position);
-        Vector3[] testPoints = new Vector3[]
-        {
-            playerCollider.bounds.center,
-            playerCollider.bounds.center + Vector3.up * playerCollider.bounds.extents.y, // top
-            playerCollider.bounds.center - Vector3.up * playerCollider.bounds.extents.y, // bottom
-            playerCollider.bounds.center + Vector3.right * playerCollider.bounds.extents.x, // right shoulder
-            playerCollider.bounds.center - Vector3.right * playerCollider.bounds.extents.x  // left shoulder
-        };
-
-        foreach (var colPoint in testPoints)
-        {
-            if(Physics.Linecast(point, colPoint, out RaycastHit hit, mask))
-            {
-                if(hit.collider == playerCollider)
-                {
-                    Debug.DrawLine(point, colPoint, Color.green, 25f);
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
+   
 
 
     private void RequestPatrolPointDestination(AIDestinationRequestData destinationRequest)
@@ -308,7 +343,7 @@ public class DestinationManager
 
     public void OnInstanceDestroyed()
     {
-    
+        _targetColliders = null;
         _eventManager = null;
         _stepsToTry.Clear();
         _newPoints.Clear();
@@ -317,5 +352,38 @@ public class DestinationManager
         _stepsToTry = null;
         _newPoints = null;
         _waitUntilResultReceived = null;
+        _destinationRequest = null;
     }
+
+
+
+    #region Obsolete 
+    private bool ValidateTargetVisibilityFromPoint(Vector3 point)
+    {
+        int mask = LayerMask.GetMask("Default", "Water", "PlayerDefence", "Player");
+        Collider playerCollider = GameManager.Instance.GetPlayerCollider(PlayerPart.Position);
+        Vector3[] testPoints = new Vector3[]
+        {
+            playerCollider.bounds.center,
+            playerCollider.bounds.center + Vector3.up * playerCollider.bounds.extents.y, // top
+            playerCollider.bounds.center - Vector3.up * playerCollider.bounds.extents.y, // bottom
+            playerCollider.bounds.center + Vector3.right * playerCollider.bounds.extents.x, // right shoulder
+            playerCollider.bounds.center - Vector3.right * playerCollider.bounds.extents.x  // left shoulder
+        };
+
+        foreach (var colPoint in testPoints)
+        {
+            if (Physics.Linecast(point, colPoint, out RaycastHit hit, mask))
+            {
+                if (hit.collider == playerCollider)
+                {
+                    Debug.DrawLine(point, colPoint, Color.green, 25f);
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+    #endregion
 }
