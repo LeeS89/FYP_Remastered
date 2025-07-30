@@ -61,7 +61,7 @@ public class PatrolState : EnemyState
             _eventManager.DestinationReached(false);
             //SetDestinationReached(false);
          
-            _eventManager.RequestTargetPursuit(AIDestinationType.PatrolDestination);
+            _eventManager.DestinationRequested(AIDestinationType.PatrolDestination);
            // Debug.LogError("Patrol State: Requesting Patrol Destination");
             yield return _waitUntilDestinationApplied;
             _destinationApplied = false;

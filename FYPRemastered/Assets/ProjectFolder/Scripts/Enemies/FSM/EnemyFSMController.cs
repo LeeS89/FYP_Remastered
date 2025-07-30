@@ -76,7 +76,7 @@ public partial class EnemyFSMController : ComponentEvents
 
         _enemyEventManager.OnRequestChasingState += ChasingStateRequested;
         _enemyEventManager.OnRequestStationaryState += StationaryStateRequested;
-        _enemyEventManager.OnRequestTargetPursuit += PursuitTargetRequested;
+       // _enemyEventManager.OnDestinationRequested += PursuitTargetRequested;
         _enemyEventManager.OnOwnerDeathStatusUpdated += OnDeath;
         _enemyEventManager.OnAgentDeathComplete += ToggleGameObject;
         _enemyEventManager.OnAgentRespawn += ToggleGameObject;
@@ -100,7 +100,7 @@ public partial class EnemyFSMController : ComponentEvents
         _enemyEventManager.OnRequestStationaryState -= StationaryStateRequested;
         //_enemyEventManager.OnDestinationUpdated -= UpdateAgentDestination;
         _enemyEventManager.OnTargetSeen -= TargetInViewStatusUpdated;
-        _enemyEventManager.OnRequestTargetPursuit -= PursuitTargetRequested;
+       // _enemyEventManager.OnDestinationRequested -= PursuitTargetRequested;
         _enemyEventManager.OnDestinationReached -= CarveOnDestinationReached;
         _enemyEventManager.OnOwnerDeathStatusUpdated -= OnDeath;
         _enemyEventManager.OnAgentDeathComplete -= ToggleGameObject;

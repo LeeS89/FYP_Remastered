@@ -53,7 +53,7 @@ public class ChasingState : EnemyState
 
             if (CheckIfPlayerHasMoved())
             {
-                _eventManager.RequestTargetPursuit(AIDestinationType.ChaseDestination);
+                _eventManager.DestinationRequested(AIDestinationType.ChaseDestination);
 
                 yield return _waitUntilDestinationApplied;
                 _destinationApplied = false;

@@ -10,16 +10,17 @@ public partial class EnemyFSMController : ComponentEvents
     public AIDestinationRequestData _resourceRequest;
     public GameObject _testFlankCubes;
     private WaypointData _wpData;
+
     //private DestinationRequestData _destinationData;
 
     #region FSM Management
     private void SetupFSM()
     {
         _resourceRequest = new AIDestinationRequestData();
-        
-         _destinationManager = new DestinationManager(_enemyEventManager,_maxFlankingSteps, _testFlankCubes);
-        //_destinationData = new DestinationRequestData();
         _path = new NavMeshPath();
+        _destinationManager = new DestinationManager(_enemyEventManager,_maxFlankingSteps, new NavMeshPath(), _testFlankCubes, transform, OnDestinationRequestComplete, _lineOfSightMask, _fovLayerMask);
+        //_destinationData = new DestinationRequestData();
+        
      
         _animController = new EnemyAnimController(_anim, _enemyEventManager);
         _patrol = new PatrolState(_owningGameObject, _enemyEventManager, _stopAndWaitDelay, _walkSpeed);
@@ -30,7 +31,7 @@ public partial class EnemyFSMController : ComponentEvents
 
         
 
-        InitializeWaypoints();
+       // InitializeWaypoints();
         //InitializeWeapon();
 
        // ChangeState(_patrol);
@@ -63,6 +64,7 @@ public partial class EnemyFSMController : ComponentEvents
             else
             {
                 Debug.LogError("No valid waypoint block data found!");
+                
             }
         };
 
@@ -81,7 +83,7 @@ public partial class EnemyFSMController : ComponentEvents
 
             _wpData.UpdateData(_blockData._waypointPositions.ToList(), _blockData._waypointForwards.ToList());
 
-            _destinationManager.LoadWaypointData(_wpData);
+            //_destinationManager.LoadWaypointData(_wpData);
             //_enemyEventManager.WaypointsUpdated(_wpData);
 
             SceneEventAggregator.Instance.RegisterAgentAndZone(this, _blockZone);
@@ -186,6 +188,7 @@ public partial class EnemyFSMController : ComponentEvents
     private void AttemptPatrol()
     {
        
+
         _resourceRequest.destinationType = AIDestinationType.PatrolDestination;
         _resourceRequest.start = LineOfSightUtility.GetClosestPointOnNavMesh(_agent.transform.position);
         
@@ -271,7 +274,7 @@ public partial class EnemyFSMController : ComponentEvents
                 _agent.SetDestination(destination);
                 _enemyEventManager.DestinationApplied();
             };
-            _destinationManager.StartCarvingRoutine(_resourceRequest);
+            _destinationManager.StartCarvingRoutine(_resourceRequest); // Move to extension function
             
            /* yield return new WaitUntil(() => _agent.enabled);
             _agent.SetDestination(destination);
@@ -279,7 +282,54 @@ public partial class EnemyFSMController : ComponentEvents
         }
     }
 
+    private void OnDestinationRequestComplete(bool success, Vector3 destination, AIDestinationType destType)
+    {
+        if (!success) { return; }
 
+        AlertStatus status = AlertStatus.None;
+        int stoppingDistance = 0; 
+
+        switch (destType)
+        {
+            case AIDestinationType.PatrolDestination:
+                break;
+            case AIDestinationType.ChaseDestination:
+                ChasingStateRequested();
+                stoppingDistance = Random.Range(4, 11);
+                status = AlertStatus.Chasing;
+                break;
+            case AIDestinationType.FlankDestination:
+                ChasingStateRequested();
+                status = AlertStatus.Flanking;
+                break;
+            default:
+                StationaryStateRequested(AlertStatus.None);
+                return;
+        }
+        _resourceRequest.carvingCallback = () =>
+        {
+            if (_obstacle.enabled)
+            {
+                _obstacle.enabled = false;
+            }
+        };
+
+        _resourceRequest.agentActiveCallback = () =>
+        {
+            if (!_agent.enabled)
+            {
+                ToggleAgent(true);
+
+            }
+            AlertStatusUpdated(status);
+            _agent.stoppingDistance = stoppingDistance;
+            _agent.SetDestination(destination);
+            _enemyEventManager.DestinationApplied();
+        };
+        _destinationManager.StartCarvingRoutine(_resourceRequest);
+
+
+    }
   
 
     private bool CheckIfDestinationIsReached()

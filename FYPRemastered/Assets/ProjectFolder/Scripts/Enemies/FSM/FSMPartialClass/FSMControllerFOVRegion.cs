@@ -43,7 +43,8 @@ public partial class EnemyFSMController : ComponentEvents
             AlertStatusUpdated(AlertStatus.Alert);
             //_alertStatus = AlertStatus.Alert;
 
-            PursuitTargetRequested(AIDestinationType.ChaseDestination);
+            _enemyEventManager.DestinationRequested(AIDestinationType.ChaseDestination);
+            //PursuitTargetRequested(AIDestinationType.ChaseDestination);
             //ChangeState(_chasing);
         }
        
