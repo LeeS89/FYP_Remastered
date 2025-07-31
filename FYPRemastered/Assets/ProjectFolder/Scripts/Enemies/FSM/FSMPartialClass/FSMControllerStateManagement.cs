@@ -294,6 +294,7 @@ public partial class EnemyFSMController : ComponentEvents
             case AIDestinationType.PatrolDestination:
                 break;
             case AIDestinationType.ChaseDestination:
+                Debug.LogError("Player pos on received coroutine: " + destination);
                 ChasingStateRequested();
                 stoppingDistance = Random.Range(4, 11);
                 status = AlertStatus.Chasing;

@@ -25,7 +25,9 @@ public class DestinationManager
     private WaitUntil _waitUntilResultReceived;
     private bool _resultReceived = false;
     private bool _isValid = false;
-    private List<Vector3> _points = new List<Vector3>();
+    private List<Vector3> _waypoints = new List<Vector3>();
+    private List<Vector3> _flankPoints = new List<Vector3>();
+    private List<Vector3> _playerPoints = new List<Vector3>();
 
     private AIDestinationRequestData _destinationRequest;
     private LayerMask _flankBlockingMask;
@@ -37,6 +39,7 @@ public class DestinationManager
     private readonly Action<bool, Vector3, AIDestinationType> _onRequestComplete;
     private Transform _owner;
 
+    AIDestinationType _globalDestinationType = AIDestinationType.None;
     private int _requestToken = 0;
    // private int _currentCallbackToken = 0;
 
@@ -107,7 +110,7 @@ public class DestinationManager
             _destinationRequest._requestID.Clear();
             _destinationRequest.internalCallback = null;
             _destinationRequest.FlankPointCandidatesCallback = null;
-            _points.Clear();
+            _waypoints.Clear();
             _runningRoutine = null;
         }
        
@@ -118,7 +121,7 @@ public class DestinationManager
                 AddPlayerDestinationToCandidatePoints();
                 break;
             case AIDestinationType.FlankDestination:
-                _runningRoutine = CoroutineRunner.Instance.StartCoroutine(FlankDestinationRoutine());
+                /*_runningRoutine = */CoroutineRunner.Instance.StartCoroutine(FlankDestinationRoutine());
                 break;
             case AIDestinationType.PatrolDestination:
                 AddWaypointsToCandidatePoints();
@@ -131,8 +134,8 @@ public class DestinationManager
         Debug.LogError("Request id at Entry point stage: " + _currentCallbackToken);
         _destinationRequest._requestID.Enqueue(_currentCallbackToken);
         // Skip immediate destination handling; flank points are gathered asynchronously before routing
-        if (destType == AIDestinationType.FlankDestination) { return; } 
-        _runningRoutine = CoroutineRunner.Instance.StartCoroutine(DestinationRoutine(GetCandidatePoints, destType, _currentCallbackToken));
+        if (destType == AIDestinationType.FlankDestination) { return; }
+        _runningRoutine = CoroutineRunner.Instance.StartCoroutine(DestinationRoutine(/*GetCandidatePoints, */destType, _currentCallbackToken));
     }
 
     private IEnumerator FlankDestinationRoutine()
@@ -155,7 +158,7 @@ public class DestinationManager
                         Vector3 startPoint = point + Vector3.up;
                         if (!LineOfSightUtility.HasLineOfSight(startPoint, _destinationRequest.flankTargetColliders, _destinationRequest.flankBlockingMask, _destinationRequest.flankTargetMask)) { continue; }
 
-                        _points.Add(point);
+                        _flankPoints.Add(point);
                     }
 
 
@@ -170,13 +173,13 @@ public class DestinationManager
             yield return _waitUntilResultReceived;
         }
 
-        foreach (var point in _points)
+        foreach (var point in _flankPoints)
         {
 
             GameObject obj = UnityEngine.Object.Instantiate(testCube, point, Quaternion.identity);
         }
 
-        _runningRoutine = CoroutineRunner.Instance.StartCoroutine(DestinationRoutine(GetFlankPoints, AIDestinationType.FlankDestination));
+        _runningRoutine = CoroutineRunner.Instance.StartCoroutine(DestinationRoutine(/*GetFlankPoints, */AIDestinationType.FlankDestination));
 
     }
 
@@ -197,7 +200,7 @@ public class DestinationManager
 
         foreach (var pair in _waypointPairs)
         {
-            _points.Add(pair.position);
+            _waypoints.Add(pair.position);
         }
        
     }
@@ -222,21 +225,29 @@ public class DestinationManager
     private void AddPlayerDestinationToCandidatePoints()
     {
         Vector3 playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
-        _points.Add(playerPos);
+
+        _playerPoints.Add(playerPos);
+        //_waypoints.Add(playerPos);
         //return new List<Vector3> { playerPos };
     }
 
-    private List<Vector3> GetCandidatePoints()
+    private List<Vector3> GetCandidatePoints(AIDestinationType destType)
     {
-        return _points;
+        return destType switch
+        {
+            AIDestinationType.PatrolDestination => _waypoints,
+            AIDestinationType.ChaseDestination => _playerPoints,
+            AIDestinationType.FlankDestination => _flankPoints,
+            _ => _waypoints
+        };
+
     }
 
-    private IEnumerator DestinationRoutine(Func<List<Vector3>> candidatePointProvider, AIDestinationType destType, int requestID = 0)
+    private IEnumerator DestinationRoutine(/*Func<List<Vector3>> candidatePointProvider, */AIDestinationType destType, int requestID = 0)
     {
-       
 
-        var candidates = candidatePointProvider.Invoke();
-
+        var candidates = GetCandidatePoints(destType);
+        //var candidates = candidatePointProvider.Invoke();
 
         foreach (var point in candidates)
         {
@@ -246,10 +257,10 @@ public class DestinationManager
 
             _destinationRequest.start = LineOfSightUtility.GetClosestPointOnNavMesh(_owner.position);
             _destinationRequest.end = LineOfSightUtility.GetClosestPointOnNavMesh(point);
-
-            // Skip if a new request interrupted this one
+           
+           /* // Skip if a new request interrupted this one
             if (requestID != _requestToken)
-                yield break;
+                yield break;*/
 
             _destinationRequest.internalCallback = PathRequestInternalCallback;
            
@@ -257,9 +268,9 @@ public class DestinationManager
 
             yield return _waitUntilResultReceived;
 
-            // Skip if a new request interrupted this one
+            /*// Skip if a new request interrupted this one
             if (requestID != _requestToken)
-                yield break;
+                yield break;*/
 
             if (!_isValid) continue;
 
@@ -276,22 +287,23 @@ public class DestinationManager
             _destinationRequest.resourceType = AIResourceType.None;
             _onRequestComplete?.Invoke(true, point, destType);
             _runningRoutine = null;
-            
+            candidates.Clear();
             yield break;
         }
         // Skip if a new request interrupted this one
         if (requestID != _requestToken)
             yield break;
         _onRequestComplete?.Invoke(false, Vector3.zero, destType);
+        candidates.Clear();
         _runningRoutine = null;
         
     }
 
     private void PathRequestInternalCallback(bool status, int requestID)
     {
-        Debug.LogError("Request id at callback stage: " + requestID);
+       /* Debug.LogError("Request id at callback stage: " + requestID);
         if (requestID != _requestToken)
-            return;
+            return;*/
 
         _isValid = status;
         _resultReceived = true;
@@ -379,7 +391,7 @@ public class DestinationManager
 
     private List<Vector3> GetFlankPoints()
     {
-        return _points;
+        return _waypoints;
     }
 
    
@@ -457,7 +469,7 @@ public class DestinationManager
     private IEnumerator RequestFlankDestination(AIDestinationRequestData destinationRequest)
     {
         GetStepsToTry();
-        _points.Clear();
+        _waypoints.Clear();
 
         destinationRequest.resourceType = AIResourceType.FlankPointCandidates; // Set the resource type for the request
         foreach (int step in _stepsToTry)
@@ -474,7 +486,7 @@ public class DestinationManager
                         Vector3 startPoint = point + Vector3.up;
                         if (!LineOfSightUtility.HasLineOfSight(startPoint, destinationRequest.flankTargetColliders, destinationRequest.flankBlockingMask, destinationRequest.flankTargetMask)) { continue; }
 
-                        _points.Add(point);
+                        _waypoints.Add(point);
                     }
 
 
@@ -489,7 +501,7 @@ public class DestinationManager
             yield return _waitUntilResultReceived;
         }
 
-        foreach (var point in _points)
+        foreach (var point in _waypoints)
         {
 
             GameObject obj = UnityEngine.Object.Instantiate(testCube, point, Quaternion.identity);
@@ -545,8 +557,8 @@ public class DestinationManager
         _eventManager = null;
         _stepsToTry.Clear();
         _newPoints.Clear();
-        _points.Clear();
-        _points = null;
+        _waypoints.Clear();
+        _waypoints = null;
         _stepsToTry = null;
         _newPoints = null;
         _waitUntilResultReceived = null;
