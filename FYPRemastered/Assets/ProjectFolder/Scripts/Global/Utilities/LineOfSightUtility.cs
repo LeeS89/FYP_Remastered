@@ -279,4 +279,5 @@ public static class LineOfSightUtility
 
         return horizontalAngle <= horizontalThreshold && Mathf.Abs(verticalAngle) <= verticalThreshold;
     }
+
 }

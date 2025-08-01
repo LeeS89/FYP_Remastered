@@ -19,14 +19,19 @@ public partial class EnemyFSMController : ComponentEvents
         if (TargetInView)
         {
             EnterAlertPhase();
+            CallForBackup();
         }
     }
 
    
+    private void CallForBackup()
+    {
+        SceneEventAggregator.Instance.AlertZoneAgents(_blockZone, this);
+    }
 
     public void EnterAlertPhase()
     {
-
+/*
         if (!_testAlert)
         {
             _testAlert = true;
@@ -34,7 +39,7 @@ public partial class EnemyFSMController : ComponentEvents
             SceneEventAggregator.Instance.AlertZoneAgents(_blockZone, this);
 
 
-        }
+        }*/
 
         if (_currentState != _chasing && _alertStatus == AlertStatus.None)
         {

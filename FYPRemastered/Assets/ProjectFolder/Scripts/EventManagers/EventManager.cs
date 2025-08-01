@@ -24,12 +24,12 @@ public abstract class EventManager : MonoBehaviour
     }
 
     //GunSetup(GameObject gunOwner, EventManager eventManager, Transform bulletSpawnLocaiton, int clipCapacity, Transform target = null)
-    public event Action<GameObject, EventManager,Transform, int, Transform> OnSetupGun;
+    /*public event Action<GameObject, EventManager,Transform, int, Transform> OnSetupGun;
 
     public void SetupGun(GameObject gunOwner, EventManager eventManager, Transform bulletSpawnLocation, int clipCapacity, Transform target = null)
     {
         OnSetupGun?.Invoke(gunOwner, eventManager, bulletSpawnLocation, clipCapacity, target);
-    }
+    }*/
 
     public event Action<FireConditions> OnTryShoot;
 

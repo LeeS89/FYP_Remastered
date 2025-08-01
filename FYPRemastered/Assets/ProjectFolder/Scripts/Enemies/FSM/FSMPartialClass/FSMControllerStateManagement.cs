@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Linq;
 using UnityEngine;
@@ -9,19 +8,14 @@ public partial class EnemyFSMController : ComponentEvents
 {
     public AIDestinationRequestData _resourceRequest;
     public GameObject _testFlankCubes;
-    private WaypointData _wpData;
-
-    //private DestinationRequestData _destinationData;
-
+    
     #region FSM Management
     private void SetupFSM()
     {
         _resourceRequest = new AIDestinationRequestData();
-        _path = new NavMeshPath();
-        _destinationManager = new DestinationManager(_enemyEventManager,_maxFlankingSteps, new NavMeshPath(), _testFlankCubes, transform, OnDestinationRequestComplete, _lineOfSightMask, _fovLayerMask);
-        //_destinationData = new DestinationRequestData();
         
-     
+        _destinationManager = new DestinationManager(_enemyEventManager,_maxFlankingSteps, new NavMeshPath(), _testFlankCubes, transform, OnDestinationRequestComplete, _lineOfSightMask, _fovLayerMask);
+       
         _animController = new EnemyAnimController(_anim, _enemyEventManager);
         _patrol = new PatrolState(_owningGameObject, _enemyEventManager, _stopAndWaitDelay, _walkSpeed);
         _chasing = new ChasingState(_enemyEventManager, _owningGameObject, _walkSpeed, _sprintSpeed);
@@ -30,87 +24,24 @@ public partial class EnemyFSMController : ComponentEvents
        
 
         
-
-       // InitializeWaypoints();
+        _blockZone = _destinationManager.GetCurrentZone();
+        SceneEventAggregator.Instance.RegisterAgentAndZone(this, _blockZone);
+        // InitializeWaypoints();
         //InitializeWeapon();
 
-       // ChangeState(_patrol);
+        // ChangeState(_patrol);
 
     }
 
-    private void ChangeWaypoints()
-    {
-        BlockData temp = _blockData;
-        InitializeWaypoints();
-        
-       // BaseSceneManager._instance.ReturnWaypointBlock(temp);
-        
-    }
-
-    private void InitializeWaypoints()
-    {
-        _resourceRequest.flankBlockingMask = _lineOfSightMask;
-        _resourceRequest.flankTargetMask = _fovLayerMask;
-        _resourceRequest.flankTargetColliders = GameManager.Instance.GetPlayerTargetPoints();
-        //_blockData = BaseSceneManager._instance.RequestWaypointBlock();
-        _resourceRequest.resourceType = AIResourceType.WaypointBlock;
-        _resourceRequest.waypointCallback = (blockData) =>
-        {
-            if (blockData != null)
-            {
-                _blockData = blockData;
-                SetWayPoints();
-            }
-            else
-            {
-                Debug.LogError("No valid waypoint block data found!");
-                
-            }
-        };
-
-        SceneEventAggregator.Instance.RequestResource(_resourceRequest);
-
-      
-    }
-
-    
-    private void SetWayPoints()
-    {
-        if (_blockData != null)
-        {
-            _blockZone = _blockData._blockZone;
-            //Debug.LogError("Block Zone for enemy: " + _blockZone);
-
-            _wpData.UpdateData(_blockData._waypointPositions.ToList(), _blockData._waypointForwards.ToList());
-
-            //_destinationManager.LoadWaypointData(_wpData);
-            //_enemyEventManager.WaypointsUpdated(_wpData);
-
-            SceneEventAggregator.Instance.RegisterAgentAndZone(this, _blockZone);
-            //BaseSceneManager._instance.RegisterAgentAndZone(this, _blockZone);
-
-           
-        }
-    }
-
-    private void InitializeWeapon()
-    {
-        Transform playerTransform = GameManager.Instance.GetPlayerPosition(PlayerPart.DefenceCollider);
-        if (playerTransform == null)
-        {
-            Debug.LogError("Player transform not found!");
-            return;
-        }
-
-        _eventManager.SetupGun(_owningGameObject, _enemyEventManager, _bulletSpawnPoint, 5, playerTransform);
-        //_gun = new GunBase(_bulletSpawnPoint, playerTransform, _enemyEventManager, _owningGameObject);
    
-    }
+
+  
 
    
 
     public void ChangeState(EnemyState state)
     {
+       
         if (_currentState != null)
         {
             _currentState.ExitState();
@@ -123,12 +54,49 @@ public partial class EnemyFSMController : ComponentEvents
 
         _currentState.EnterState();
        
+        //Debug.LogError("Current State: " + _currentState.GetType().Name);
+    }
+
+    public void ChangeStates(EnemyState state)
+    {
+        if(_currentState == state) { return; }
+
+        switch (state)
+        {
+            case PatrolState patrol:
+                break;
+            case StationaryState stationary:
+                /*if(_currentState == _chasing)
+                {
+                    stationary.Alertstatus = AlertStatus.Alert;
+                }*/
+                break;
+            case ChasingState chasingState:
+                break;
+            case DeathState deathState:
+                break;
+            default:
+                break;
+        }
+
+        if (_currentState != null)
+        {
+            _currentState.ExitState();
+        }
+        _currentState = state;
+
+        _destinationCheckAction = _currentState == _stationary ? StopImmediately : MeasurePathToDestination;
+
+
+
+        _currentState.EnterState();
+
         Debug.LogError("Current State: " + _currentState.GetType().Name);
     }
 
 
 
-    private void StationaryStateRequested(AlertStatus alertStatus/* = AlertStatus.None*/)
+    private void StationaryStateRequested(AlertStatus alertStatus)
     {
         if (_currentState == _stationary)
         {
@@ -159,128 +127,11 @@ public partial class EnemyFSMController : ComponentEvents
 
     }
 
-    private void PursuitTargetRequested(AIDestinationType chaseType)
-    {
-        switch (chaseType)
-        {
-            case AIDestinationType.ChaseDestination:
-                AttemptTargetChase();
-                break;
-            case AIDestinationType.FlankDestination:
-                AttemptTargetFlank();
-                break;
-            case AIDestinationType.PatrolDestination:
-
-                AttemptPatrol();
-
-                break;
-            default:
-                Debug.LogError("Invalid chase type requested: " + chaseType);
-                break;
-        }
-    }
-
-    private bool IsStaleRequest(AIDestinationType expectedType)
-    {
-        return expectedType != _resourceRequest.destinationType;
-    }
-
-    private void AttemptPatrol()
-    {
-       
-
-        _resourceRequest.destinationType = AIDestinationType.PatrolDestination;
-        _resourceRequest.start = LineOfSightUtility.GetClosestPointOnNavMesh(_agent.transform.position);
-        
-        _resourceRequest.path = _path;
-
-        _resourceRequest.externalCallback = (success, point) =>
-        {
-            if (IsStaleRequest(AIDestinationType.PatrolDestination)) { return; }
-            DestinationRequestResult(success, point, AlertStatus.None);
-           
-        };
-        _destinationManager.RequestNewDestination(_resourceRequest);
-    }
-
-    private void AttemptTargetChase()
-    {
-        ChasingStateRequested();
-
-        _resourceRequest.destinationType = AIDestinationType.ChaseDestination;
-        _resourceRequest.start = LineOfSightUtility.GetClosestPointOnNavMesh(_agent.transform.position);
-        /*Vector3 playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
-        _destinationData.end = LineOfSightUtility.GetClosestPointOnNavMesh(playerPos);*/
-        _resourceRequest.path = _path;
-
-        _resourceRequest.externalCallback = (success, point) =>
-        {
-            if (IsStaleRequest(AIDestinationType.ChaseDestination)) { return; }
-            int _randomStoppingDistance = Random.Range(4, 11);
-            DestinationRequestResult(success, point, AlertStatus.Chasing, _randomStoppingDistance);
-            //StartCoroutine(DestinationRequestResult(success, point, AlertStatus.Chasing, _randomStoppingDistance));
-        };
-        _destinationManager.RequestNewDestination(_resourceRequest);
-
-    }
     
-    private void AttemptTargetFlank()
-    {
-        // First enter the Chasing state here
-        ChasingStateRequested();
-        // In chasing, before the wile loop in the coroutine, yield wait until => Destination found
 
+   
 
-        // Send Destination Request here
-        _resourceRequest.destinationType = AIDestinationType.FlankDestination;
-        _resourceRequest.start = LineOfSightUtility.GetClosestPointOnNavMesh(_agent.transform.position);
-        
-        _resourceRequest.path = _path;
-
-        _resourceRequest.externalCallback = (success, point) =>
-        {
-            if (IsStaleRequest(AIDestinationType.FlankDestination)) { return; }
-            DestinationRequestResult(success, point, AlertStatus.Flanking);
-            //StartCoroutine(DestinationRequestResult(success, point, AlertStatus.Flanking));
-        };
-        _destinationManager.RequestNewDestination(_resourceRequest);
-        // If request fails => Request Player destination
-
-        // If 2nd request fails => Later implement a fallback 
-    }
-
-    private void DestinationRequestResult(bool success, Vector3 destination, AlertStatus status = AlertStatus.None, int stoppingDistance = 0)
-    {
-        if (success)
-        {
-          
-            _resourceRequest.carvingCallback = () =>
-            {
-                if (_obstacle.enabled)
-                {
-                    _obstacle.enabled = false;
-                }
-            };
-            
-            _resourceRequest.agentActiveCallback = () =>
-            {
-                if (!_agent.enabled)
-                {
-                    ToggleAgent(true);
-                    
-                }
-                AlertStatusUpdated(status);
-                _agent.stoppingDistance = stoppingDistance;
-                _agent.SetDestination(destination);
-                _enemyEventManager.DestinationApplied();
-            };
-            _destinationManager.StartCarvingRoutine(_resourceRequest); // Move to extension function
-            
-           /* yield return new WaitUntil(() => _agent.enabled);
-            _agent.SetDestination(destination);
-            _enemyEventManager.DestinationApplied();*/
-        }
-    }
+   
 
     private void OnDestinationRequestComplete(bool success, Vector3 destination, AIDestinationType destType)
     {
@@ -294,7 +145,7 @@ public partial class EnemyFSMController : ComponentEvents
             case AIDestinationType.PatrolDestination:
                 break;
             case AIDestinationType.ChaseDestination:
-                Debug.LogError("Player pos on received coroutine: " + destination);
+                
                 ChasingStateRequested();
                 stoppingDistance = Random.Range(4, 11);
                 status = AlertStatus.Chasing;
@@ -385,6 +236,21 @@ public partial class EnemyFSMController : ComponentEvents
 
 
     #region Obsolete
+    private WaypointData _wpData;
+    private void InitializeWeapon()
+    {
+        Transform playerTransform = GameManager.Instance.GetPlayerPosition(PlayerPart.DefenceCollider);
+        if (playerTransform == null)
+        {
+            Debug.LogError("Player transform not found!");
+            return;
+        }
+
+        // _eventManager.SetupGun(_owningGameObject, _enemyEventManager, _bulletSpawnPoint, 5, playerTransform);
+        //_gun = new GunBase(_bulletSpawnPoint, playerTransform, _enemyEventManager, _owningGameObject);
+
+    }
+
     private IEnumerator SetNewDestination(Vector3 destination)
     {
         if (_obstacle.enabled)
@@ -397,6 +263,184 @@ public partial class EnemyFSMController : ComponentEvents
         }
 
         _agent.SetDestination(destination);
+    }
+
+    private void PursuitTargetRequested(AIDestinationType chaseType)
+    {
+        switch (chaseType)
+        {
+            case AIDestinationType.ChaseDestination:
+                AttemptTargetChase();
+                break;
+            case AIDestinationType.FlankDestination:
+                AttemptTargetFlank();
+                break;
+            case AIDestinationType.PatrolDestination:
+
+                AttemptPatrol();
+
+                break;
+            default:
+                Debug.LogError("Invalid chase type requested: " + chaseType);
+                break;
+        }
+    }
+
+    private void ChangeWaypoints()
+    {
+        BlockData temp = _blockData;
+        InitializeWaypoints();
+
+        // BaseSceneManager._instance.ReturnWaypointBlock(temp);
+
+    }
+
+    private void InitializeWaypoints()
+    {
+        _resourceRequest.flankBlockingMask = _lineOfSightMask;
+        _resourceRequest.flankTargetMask = _fovLayerMask;
+        _resourceRequest.flankTargetColliders = GameManager.Instance.GetPlayerTargetPoints();
+        //_blockData = BaseSceneManager._instance.RequestWaypointBlock();
+        _resourceRequest.resourceType = AIResourceType.WaypointBlock;
+        _resourceRequest.waypointCallback = (blockData) =>
+        {
+            if (blockData != null)
+            {
+                _blockData = blockData;
+                SetWayPoints();
+            }
+            else
+            {
+                Debug.LogError("No valid waypoint block data found!");
+
+            }
+        };
+
+        SceneEventAggregator.Instance.RequestResource(_resourceRequest);
+
+
+    }
+
+
+    private void SetWayPoints()
+    {
+        if (_blockData != null)
+        {
+            _blockZone = _blockData._blockZone;
+            //Debug.LogError("Block Zone for enemy: " + _blockZone);
+
+            _wpData.UpdateData(_blockData._waypointPositions.ToList(), _blockData._waypointForwards.ToList());
+
+            //_destinationManager.LoadWaypointData(_wpData);
+            //_enemyEventManager.WaypointsUpdated(_wpData);
+
+            SceneEventAggregator.Instance.RegisterAgentAndZone(this, _blockZone);
+            //BaseSceneManager._instance.RegisterAgentAndZone(this, _blockZone);
+
+
+        }
+    }
+
+    private void AttemptPatrol()
+    {
+
+
+        _resourceRequest.destinationType = AIDestinationType.PatrolDestination;
+        _resourceRequest.start = LineOfSightUtility.GetClosestPointOnNavMesh(_agent.transform.position);
+
+        //_resourceRequest.path = _path;
+
+        _resourceRequest.externalCallback = (success, point) =>
+        {
+            if (IsStaleRequest(AIDestinationType.PatrolDestination)) { return; }
+            DestinationRequestResult(success, point, AlertStatus.None);
+
+        };
+        _destinationManager.RequestNewDestination(_resourceRequest);
+    }
+
+    private void AttemptTargetChase()
+    {
+        ChasingStateRequested();
+
+        _resourceRequest.destinationType = AIDestinationType.ChaseDestination;
+        _resourceRequest.start = LineOfSightUtility.GetClosestPointOnNavMesh(_agent.transform.position);
+        /*Vector3 playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
+        _destinationData.end = LineOfSightUtility.GetClosestPointOnNavMesh(playerPos);*/
+        /* _resourceRequest.path = _path;*/
+
+        _resourceRequest.externalCallback = (success, point) =>
+        {
+            if (IsStaleRequest(AIDestinationType.ChaseDestination)) { return; }
+            int _randomStoppingDistance = Random.Range(4, 11);
+            DestinationRequestResult(success, point, AlertStatus.Chasing, _randomStoppingDistance);
+            //StartCoroutine(DestinationRequestResult(success, point, AlertStatus.Chasing, _randomStoppingDistance));
+        };
+        _destinationManager.RequestNewDestination(_resourceRequest);
+
+    }
+
+    private void AttemptTargetFlank()
+    {
+        // First enter the Chasing state here
+        ChasingStateRequested();
+        // In chasing, before the wile loop in the coroutine, yield wait until => Destination found
+
+
+        // Send Destination Request here
+        _resourceRequest.destinationType = AIDestinationType.FlankDestination;
+        _resourceRequest.start = LineOfSightUtility.GetClosestPointOnNavMesh(_agent.transform.position);
+
+        /*_resourceRequest.path = _path;*/
+
+        _resourceRequest.externalCallback = (success, point) =>
+        {
+            if (IsStaleRequest(AIDestinationType.FlankDestination)) { return; }
+            DestinationRequestResult(success, point, AlertStatus.Flanking);
+            //StartCoroutine(DestinationRequestResult(success, point, AlertStatus.Flanking));
+        };
+        _destinationManager.RequestNewDestination(_resourceRequest);
+        // If request fails => Request Player destination
+
+        // If 2nd request fails => Later implement a fallback 
+    }
+
+    private void DestinationRequestResult(bool success, Vector3 destination, AlertStatus status = AlertStatus.None, int stoppingDistance = 0)
+    {
+        if (success)
+        {
+
+            _resourceRequest.carvingCallback = () =>
+            {
+                if (_obstacle.enabled)
+                {
+                    _obstacle.enabled = false;
+                }
+            };
+
+            _resourceRequest.agentActiveCallback = () =>
+            {
+                if (!_agent.enabled)
+                {
+                    ToggleAgent(true);
+
+                }
+                AlertStatusUpdated(status);
+                _agent.stoppingDistance = stoppingDistance;
+                _agent.SetDestination(destination);
+                _enemyEventManager.DestinationApplied();
+            };
+            _destinationManager.StartCarvingRoutine(_resourceRequest); // Move to extension function
+
+            /* yield return new WaitUntil(() => _agent.enabled);
+             _agent.SetDestination(destination);
+             _enemyEventManager.DestinationApplied();*/
+        }
+    }
+
+    private bool IsStaleRequest(AIDestinationType expectedType)
+    {
+        return expectedType != _resourceRequest.destinationType;
     }
     #endregion
 }
