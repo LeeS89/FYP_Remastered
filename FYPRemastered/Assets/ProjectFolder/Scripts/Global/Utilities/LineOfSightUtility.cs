@@ -186,7 +186,7 @@ public static class LineOfSightUtility
     }
 
 
-    public static bool HasLineOfSight(Vector3 from, Collider[] targets, LayerMask blockingMask, LayerMask targetMask)
+    public static bool HasLineOfSight(Vector3 from, Collider[] targets, Vector3 secondaryTarget, LayerMask blockingMask, LayerMask targetMask, LayerMask secondaryTargetMask)
     {
 
         foreach (var target in targets)
@@ -212,16 +212,32 @@ public static class LineOfSightUtility
                     if (((1 << hit.collider.gameObject.layer) & targetMask) != 0)
                     {
                         //Debug.DrawLine(from, colPoint, Color.green, 25f);
-                        return true;
+                        if(HasLineOfSight(from, secondaryTarget, blockingMask, secondaryTargetMask))
+                        {
+                            return true;    
+                        }
+                       // return true;
                     }
-                    else
+                    /*else
                     {
                        // Debug.DrawLine(from, hit.point, Color.red, 25f);
                         return false;
-                    }
+                    }*/
                 }
             }
         }
+        return false;
+    }
+
+    private static bool HasLineOfSight(Vector3 from, Vector3 to, LayerMask blockingMask, LayerMask targetMask)
+    {
+        if(Physics.Linecast(from, to, out RaycastHit hit, blockingMask | targetMask))
+        {
+            //if(((1 << hit.collider.gameObject.layer) & targetMask) != 0)
+            return ((1 << hit.collider.gameObject.layer) & targetMask) != 0;
+        }
+
+       
         return false;
     }
 

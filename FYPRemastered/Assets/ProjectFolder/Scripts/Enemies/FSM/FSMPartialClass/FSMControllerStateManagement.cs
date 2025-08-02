@@ -14,7 +14,7 @@ public partial class EnemyFSMController : ComponentEvents
     {
         _resourceRequest = new AIDestinationRequestData();
         
-        _destinationManager = new DestinationManager(_enemyEventManager,_maxFlankingSteps, new NavMeshPath(), _testFlankCubes, transform, OnDestinationRequestComplete, _lineOfSightMask, _fovLayerMask);
+        _destinationManager = new DestinationManager(_enemyEventManager,_maxFlankingSteps, new NavMeshPath(), _testFlankCubes, transform, OnDestinationRequestComplete, _losBlockingMask, _losTargetMask, _losBackupTargetMask);
        
         _animController = new EnemyAnimController(_anim, _enemyEventManager);
         _patrol = new PatrolState(_owningGameObject, _enemyEventManager, _stopAndWaitDelay, _walkSpeed);
@@ -24,7 +24,7 @@ public partial class EnemyFSMController : ComponentEvents
        
 
         
-        _blockZone = _destinationManager.GetCurrentZone();
+        _blockZone = _destinationManager.CurrentWaypointZone;
         SceneEventAggregator.Instance.RegisterAgentAndZone(this, _blockZone);
         // InitializeWaypoints();
         //InitializeWeapon();
@@ -297,8 +297,8 @@ public partial class EnemyFSMController : ComponentEvents
 
     private void InitializeWaypoints()
     {
-        _resourceRequest.flankBlockingMask = _lineOfSightMask;
-        _resourceRequest.flankTargetMask = _fovLayerMask;
+        //_resourceRequest.flankBlockingMask = _lineOfSightMask;
+        _resourceRequest.flankTargetMask = _losTargetMask;
         _resourceRequest.flankTargetColliders = GameManager.Instance.GetPlayerTargetPoints();
         //_blockData = BaseSceneManager._instance.RequestWaypointBlock();
         _resourceRequest.resourceType = AIResourceType.WaypointBlock;

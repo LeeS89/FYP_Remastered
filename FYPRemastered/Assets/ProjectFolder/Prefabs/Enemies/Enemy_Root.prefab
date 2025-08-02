@@ -213,28 +213,18 @@ MonoBehaviour:
   _blockZone: 0
   _sprintSpeed: 3.6
   _maxFlankingSteps: 12
-  _fovLocation: {fileID: 3514716611913536367}
-  _patrolFOVCheckFrequency: 1
-  _alertFOVCheckFrequency: 0.1
-  _fovTraceRadius: 25
-  _angle: 75
-  _shootAngleThreshold: 30
-  _fovLayerMask:
+  _losTargetMask:
     serializedVersion: 2
     m_Bits: 520
-  _lineOfSightMask:
+  _losBlockingMask:
     serializedVersion: 2
-    m_Bits: 539
-  _fovTraceResults: []
-  _traceHitPoints: []
-  _maxFovTraceResults: 5
-  _waistHeight: 1
-  _eyeHeight: 1.8
-  _canSeePlayer: 0
+    m_Bits: 537
+  _losBackupTargetMask:
+    serializedVersion: 2
+    m_Bits: 16
   _bulletSpawnPoint: {fileID: 1520609376679817542}
   _owningGameObject: {fileID: 0}
   _testDeath: 0
-  _capsuleResultTest: 0
   _testFlankCubes: {fileID: 6064443228721452630, guid: 5f1d9bc0501d93140b8d583d719a72de, type: 3}
   testRespawn: 0
   _testWaypoint: 0
@@ -243,6 +233,7 @@ MonoBehaviour:
   testSeeView: 0
   _testMelee: 0
   _testRotation: 0
+  _testLook: 0
 --- !u!208 &7963726222172396574
 NavMeshObstacle:
   m_ObjectHideFlags: 0
@@ -291,6 +282,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9c3409325ab68f47ab7a782d5d93874, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _testDeath: 0
   _visualMesh: {fileID: 0}
 --- !u!114 &726394843645409294
 MonoBehaviour:
@@ -330,6 +322,7 @@ MonoBehaviour:
   _meleeResults: []
   _bulletSpawnPoint: {fileID: 1520609376679817542}
   _testMelee: 0
+  _canUpdateWeapon: 0
 --- !u!65 &3309944096030598539
 BoxCollider:
   m_ObjectHideFlags: 0

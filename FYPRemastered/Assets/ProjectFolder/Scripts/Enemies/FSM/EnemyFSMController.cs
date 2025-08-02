@@ -41,10 +41,11 @@ public partial class EnemyFSMController : ComponentEvents
    
 
 
-    [SerializeField] private LayerMask _fovLayerMask; // Delete later once I fix Flank FOV
-    [SerializeField] private LayerMask _lineOfSightMask;
-   
-  
+    [SerializeField] private LayerMask _losTargetMask; // Delete later once I fix Flank FOV
+    [SerializeField] private LayerMask _losBlockingMask;
+    [SerializeField] private LayerMask _losBackupTargetMask;
+
+
 
     [Header("Death State")]
     private DeathState _deathState;

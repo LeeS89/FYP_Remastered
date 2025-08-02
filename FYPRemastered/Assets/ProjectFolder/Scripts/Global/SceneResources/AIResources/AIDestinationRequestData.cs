@@ -12,7 +12,7 @@ public class AIDestinationRequestData : ProjectileResourceRequest
 
 
     public int numSteps { get; set; }
-    public Action<List<Vector3>> FlankPointCandidatesCallback { get; set; }
+    public Action</*List<Vector3>*/bool> FlankPointCandidatesCallback { get; set; }
     public LayerMask flankTargetMask { get; set; }
     public LayerMask flankBlockingMask { get; set; }
     public Collider[] flankTargetColliders;
@@ -28,6 +28,7 @@ public class AIDestinationRequestData : ProjectileResourceRequest
     public Action carvingCallback; // Callback for carving operations, if needed
     public Action agentActiveCallback;
 
+    public List<Vector3> flankPointCandidates;
    /* public Queue<int> _requestID = new Queue<int>();
 
     public int TryDequeueRequestID()
@@ -45,8 +46,10 @@ public class AIDestinationRequestData : ProjectileResourceRequest
     public override void OnInstanceDestroyed()
     {
         base.OnInstanceDestroyed();
-      //  _requestID.Clear();
-     //   _requestID = null;
+        //  _requestID.Clear();
+        //   _requestID = null;
+
+        flankPointCandidates = null;
         blockData = null;
         internalCallback = null;
         externalCallback = null;

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.UIElements;
 
 public class PlayerFlankingResources : SceneResources, IUpdateableResource
 {
@@ -98,18 +99,19 @@ public class PlayerFlankingResources : SceneResources, IUpdateableResource
         _nearestPointToPlayer = nearestPointIndex;
     }
 
-    protected override void AIResourceRequested(AIDestinationRequestData request) // => Add as an aevent in SceneEventAggregator
+    protected override void AIResourceRequested(AIDestinationRequestData request) 
     {
         if(request.resourceType != AIResourceType.FlankPointCandidates) { return; }
 
 
-        List<Vector3> positions = new List<Vector3>();
+       // List<Vector3> positions = new List<Vector3>();
         int step = request.numSteps; 
 
         if (_savedPoints == null || _savedPoints.Count == 0 ||
             _nearestPointToPlayer < 0 || _nearestPointToPlayer >= _savedPoints.Count)
         {
-            request.FlankPointCandidatesCallback?.Invoke(null);
+            //request.FlankPointCandidatesCallback?.Invoke(null);
+            request.FlankPointCandidatesCallback?.Invoke(false);
             return;
         }
 
@@ -117,11 +119,13 @@ public class PlayerFlankingResources : SceneResources, IUpdateableResource
         {
             foreach (int i in indices)
             {
-                positions.Add(_savedPoints[i].position);
+                request.flankPointCandidates.Add(_savedPoints[i].position);
+                //positions.Add(_savedPoints[i].position);
             }
         }
-       
-        request.FlankPointCandidatesCallback?.Invoke(positions);
+
+        request.FlankPointCandidatesCallback?.Invoke(request.flankPointCandidates.Count > 0);
+        //request.FlankPointCandidatesCallback?.Invoke(positions);
 
     }
 

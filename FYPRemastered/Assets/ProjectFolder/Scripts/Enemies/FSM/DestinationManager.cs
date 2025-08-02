@@ -18,6 +18,7 @@ public class DestinationManager
     private List<int> _stepsToTry;
     private LayerMask _flankBlockingMask;
     private LayerMask _flankTargetMask;
+    private LayerMask _flankBackupTargetMask;
     ///////////////////////////////////
 
     // Coroutine stuff
@@ -31,9 +32,10 @@ public class DestinationManager
 
     // Waypoint Data
     private BlockData _blockData;
+    public int CurrentWaypointZone { get; private set; } = 0;
     private List<WaypointPair> _waypointPairs = new();
     private WaypointPair? currentWaypointPair = null;
-    private int _currentWaypointZone = 0;
+    ///private int _currentWaypointZone = 0;
     ///////////////////////////////////////////////
 
     // Path Calculation Request callback function and data provided to request
@@ -49,7 +51,7 @@ public class DestinationManager
     /// TESTING
     private GameObject testCube;
 
-    public DestinationManager(EnemyEventManager eventManager, int maxFlankingSteps, NavMeshPath path, GameObject cube, Transform owner, Action<bool, Vector3, AIDestinationType> callback, LayerMask flankPointBlockingMask, LayerMask flankPointTargetMask)
+    public DestinationManager(EnemyEventManager eventManager, int maxFlankingSteps, NavMeshPath path, GameObject cube, Transform owner, Action<bool, Vector3, AIDestinationType> callback, LayerMask flankPointBlockingMask, LayerMask flankPointTargetMask, LayerMask flankBackupTargetMask)
     {
         _eventManager = eventManager;
         testCube = cube;
@@ -63,6 +65,7 @@ public class DestinationManager
         _candidatePoints = new List<Vector3>();
          _flankBlockingMask = flankPointBlockingMask;
         _flankTargetMask = flankPointTargetMask;
+        _flankBackupTargetMask = flankBackupTargetMask;
         _flankCandidateLOSColliders = GameManager.Instance.GetPlayerTargetPoints();
         _waitUntilResultReceived = new WaitUntil(() => _resultReceived);
         _destinationRequest = new AIDestinationRequestData();
@@ -76,6 +79,7 @@ public class DestinationManager
     #region Waypoint Initialization
     private void InitializeWaypoints()
     {
+        _destinationRequest.flankPointCandidates = _candidatePoints;
         _destinationRequest.path = _path;
         _destinationRequest.resourceType = AIResourceType.WaypointBlock;
         _destinationRequest.waypointCallback = SetWayPoints;
@@ -92,7 +96,8 @@ public class DestinationManager
             return;
         }
 
-        _currentWaypointZone = _blockData._blockZone;
+        CurrentWaypointZone = _blockData._blockZone;
+      //  _currentWaypointZone = _blockData._blockZone;
         LoadWaypointData(_blockData);
     }
 
@@ -131,8 +136,6 @@ public class DestinationManager
             (_waypointPairs[i], _waypointPairs[randIndex]) = (_waypointPairs[randIndex], _waypointPairs[i]);
         }
     }
-
-    public int GetCurrentZone() => _currentWaypointZone;
 
     #endregion
 
@@ -273,20 +276,37 @@ public class DestinationManager
 
     }
 
-    private void OnReceivedFlankPointCandidates(List<Vector3> points)
+    private void OnReceivedFlankPointCandidates(/*List<Vector3> points*/bool success)
     {
-        if (points != null && points.Count > 0)
-        {
-            foreach (var point in points)
-            {
-                Vector3 startPoint = point + Vector3.up;
-                if (!LineOfSightUtility.HasLineOfSight(startPoint, _flankCandidateLOSColliders, _flankBlockingMask, _flankTargetMask)) { continue; }
+        ///// Later implementation => Based on returned bool => decide what happens when it fails
+        Debug.LogError("Flank Candidates before filtering: "+_candidatePoints.Count);
+       // foreach (var point in _candidatePoints)
+       // {
+           // Vector3 startPoint = point + Vector3.up;
+            Vector3 losTargetPoint = _owner.position + Vector3.up * 0.9f;
+            // if (!LineOfSightUtility.HasLineOfSight(startPoint, _flankCandidateLOSColliders, _flankBlockingMask, _flankTargetMask)) { continue; }
+            
+            _candidatePoints.RemoveAll(p => !LineOfSightUtility.HasLineOfSight(p + Vector3.up, _flankCandidateLOSColliders, losTargetPoint, _flankBlockingMask, _flankTargetMask, _flankBackupTargetMask));
+        //   if (!LineOfSightUtility.HasLineOfSight(startPoint, _flankCandidateLOSColliders, losTargetPoint, _flankBlockingMask, _flankTargetMask, _flankBackupTargetMask)) { continue; }
+        Debug.LogError("Flank Candidates after filtering: " + _candidatePoints.Count);
+        // _candidatePoints.Add(point);
+        // }
 
-                _candidatePoints.Add(point);
-            }
+        //_points.AddRange(points.OrderBy(p => Random.value));
 
-            //_points.AddRange(points.OrderBy(p => Random.value));
-        }
+
+        /* if (points != null && points.Count > 0)
+         {
+             foreach (var point in points)
+             {
+                 Vector3 startPoint = point + Vector3.up;
+                 if (!LineOfSightUtility.HasLineOfSight(startPoint, _flankCandidateLOSColliders, _flankBlockingMask, _flankTargetMask)) { continue; }
+
+                 _candidatePoints.Add(point);
+             }
+
+             //_points.AddRange(points.OrderBy(p => Random.value));
+         }*/
         _resultReceived = true;
     }
 
@@ -400,8 +420,8 @@ public class DestinationManager
         _candidatePoints = null;
       
         _stepsToTry = null;
-       
-        _waitUntilResultReceived = null;
+        /*_destinationRequest.flankPointCandidates = null;*/
+         _waitUntilResultReceived = null;
         _destinationRequest = null;
         _destinationQueue.Clear();
         _destinationQueue = null;
@@ -499,7 +519,7 @@ public class DestinationManager
             _resultReceived = false;
             destinationRequest.numSteps = step; // Set the step for the request
 
-            destinationRequest.FlankPointCandidatesCallback = (points) =>
+       /*     destinationRequest.FlankPointCandidatesCallback = (points) =>
             {
                 if (points != null && points.Count > 0)
                 {
@@ -516,7 +536,7 @@ public class DestinationManager
                 }
                 _resultReceived = true;
 
-            };
+            };*/
 
             SceneEventAggregator.Instance.RequestResource(destinationRequest);
 
