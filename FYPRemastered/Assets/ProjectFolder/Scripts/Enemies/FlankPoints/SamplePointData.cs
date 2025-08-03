@@ -11,4 +11,12 @@ public class SamplePointData
     [NonSerialized] public Dictionary<int, List<int>> reachableSteps = new Dictionary<int, List<int>>();
 
     public List<StepEntry> serializedReachableSteps = new();
+
+
+    /// <summary>
+    /// /////////////////////////////////////// NEW
+    /// </summary>
+    public List<StepEntry> stepLinks = new();
+
+    [NonSerialized] public bool inUse = false;
 }

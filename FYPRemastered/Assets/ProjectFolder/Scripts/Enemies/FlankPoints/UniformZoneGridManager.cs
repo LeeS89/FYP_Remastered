@@ -41,7 +41,7 @@ public class UniformZoneGridManager : MonoBehaviour
     /// <summary>
     /// Scans the navmesh objects and places cubes at regular intervals.
     /// </summary>
-    [ContextMenu("Auto Place Sample Cubes on NavMesh")]
+    [ContextMenu("Auto Place Sample Cubes on NavMesh")]//////////////////////////////////////////////////////////////////////////////////////
     public void AutoPlaceCubesOnNavMesh()
     {
         if (markerPrefab == null || _samplePointDataSO == null)
@@ -83,7 +83,7 @@ public class UniformZoneGridManager : MonoBehaviour
         CollectSampleCubes();
     }
 
-    private void CheckForDuplicates()
+    private void CheckForDuplicates()////////////////////////////////////////////////////////////////////////
     {
         List<GameObject> temp = new List<GameObject>();
 
@@ -99,7 +99,7 @@ public class UniformZoneGridManager : MonoBehaviour
         _navMeshObjects.AddRange(temp);
     }
 
-    private void ReloadStoredCubes()
+    private void ReloadStoredCubes()/////////////////////////////////////////////////////////////////////////////////
     {
         if (_samplePointDataSO == null || _samplePointDataSO.savedPoints.Count == 0)
         {
@@ -117,7 +117,7 @@ public class UniformZoneGridManager : MonoBehaviour
         SaveScriptableObject(); // Clear the data in the ScriptableObject after loading
     }
 
-    private void SaveScriptableObject()
+    private void SaveScriptableObject()////////////////////////////////////////////////////////////////////////////
     {
         if (Application.isEditor && !Application.isPlaying)
         {
@@ -128,7 +128,7 @@ public class UniformZoneGridManager : MonoBehaviour
         }
     }
 
-    private void GenerateNewCubes(List<GameObject> objetcsToScan)
+    private void GenerateNewCubes(List<GameObject> objetcsToScan)/////////////////////////////////////////////////////////////////////////////////
     {
         foreach (GameObject obj in objetcsToScan)
         {
@@ -173,7 +173,7 @@ public class UniformZoneGridManager : MonoBehaviour
         Debug.LogError($"Placed {manualSamplePoints.Count} sample cubes on NavMesh.");
     }
 
-    private void RemoveOverlappingCubes()
+    private void RemoveOverlappingCubes()//////////////////////////////////////////////////////////////////////
     {
 #if UNITY_EDITOR
         HashSet<Transform> destroyed = new HashSet<Transform>();
@@ -229,7 +229,7 @@ public class UniformZoneGridManager : MonoBehaviour
     /// <summary>
     /// Removes all existing sample cubes from the scene.
     /// </summary>
-    [ContextMenu("Clear Sample Cubes")]
+    [ContextMenu("Clear Sample Cubes")]/////////////////////////////////////////////////////////////////////////////////////
     private void ClearExistingSampleCubes()
     {
         for (int i = transform.childCount - 1; i >= 0; i--)
@@ -323,7 +323,7 @@ public class UniformZoneGridManager : MonoBehaviour
     /// also identifies the nearest point  to the player and logs its index and position. If no player reference is set,
     /// a warning is logged.</remarks>
     [ContextMenu("Generate and save data")]
-    public void GenerateSamplePointData()
+    public void GenerateSamplePointData()/////////////////////////////////////////////////////////////////////////////////////////////
     {
         RefreshManualSamplePointsList();
 

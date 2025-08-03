@@ -8,6 +8,7 @@ using UnityEngine.UIElements;
 
 public class PlayerFlankingResources : SceneResources, IUpdateableResource
 {
+    private AsyncOperationHandle<SamplePointDataSO> _flankPointHandle;
     private SamplePointDataSO _flankPointDataSO;
     private List<SamplePointData> _savedPoints;
     private int _nearestPointToPlayer = 0;
@@ -22,23 +23,25 @@ public class PlayerFlankingResources : SceneResources, IUpdateableResource
             
             // NotifyDependancies(); // => Needs Closest Point Job
             // Load the asset from Addressables
-            var flankPointHandle = Addressables.LoadAssetAsync<ScriptableObject>("SamplePointDataSO");
+            //var flankPointHandle = Addressables.LoadAssetAsync<ScriptableObject>("SamplePointDataSO");
+            _flankPointHandle = Addressables.LoadAssetAsync<SamplePointDataSO>("FlankPointData");
 
             // Wait for the asset to be loaded
-            await flankPointHandle.Task;
+            await _flankPointHandle.Task;
 
             // Check if the loading succeeded
-            if (flankPointHandle.Status == AsyncOperationStatus.Succeeded)
+            if (_flankPointHandle.Status == AsyncOperationStatus.Succeeded)
             {
                 // Asset is loaded successfully, cast it to the correct type
-                _flankPointDataSO = (SamplePointDataSO)flankPointHandle.Result;
+                _flankPointDataSO = _flankPointHandle.Result;
 
                 if (_flankPointDataSO != null)
                 {
                     SceneEventAggregator.Instance.OnClosestFlankPointToPlayerJobComplete += SetNearestIndexToPlayer; // => Dont forget to unsubscribe
                     SceneEventAggregator.Instance.OnAIResourceRequested += AIResourceRequested; // => Dont forget to unsubscribe
+                    _savedPoints = new List<SamplePointData>(_flankPointDataSO.savedPoints);
                     //SceneEventAggregator.Instance.OnFlankPointsRequested += ResourceRequested; // => Dont forget to unsubscribe
-                    DeserializeSavedPoints();
+                    //DeserializeSavedPoints(); // Disabled for new approach
                 }
                 else
                 {
@@ -61,6 +64,27 @@ public class PlayerFlankingResources : SceneResources, IUpdateableResource
             Debug.LogError($"Error loading player flanking resources: {e.Message}");
         }
      
+    }
+
+    public override async Task UnLoadResources()
+    {
+        try
+        {
+            playerCollider = null;
+            _savedPoints.Clear();
+            _savedPoints = null;
+            _flankPointDataSO = null;
+            if (_flankPointHandle.IsValid())
+            {
+                Addressables.Release(_flankPointHandle);
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Error unloading player flanking resources: {e.Message}");
+        }
+
+        await Task.CompletedTask;
     }
 
     private void DeserializeSavedPoints()
@@ -103,29 +127,65 @@ public class PlayerFlankingResources : SceneResources, IUpdateableResource
     {
         if(request.resourceType != AIResourceType.FlankPointCandidates) { return; }
 
-
-       // List<Vector3> positions = new List<Vector3>();
-        int step = request.numSteps; 
+        //NEW
+        int step = request.numSteps;
 
         if (_savedPoints == null || _savedPoints.Count == 0 ||
             _nearestPointToPlayer < 0 || _nearestPointToPlayer >= _savedPoints.Count)
         {
-            //request.FlankPointCandidatesCallback?.Invoke(null);
             request.FlankPointCandidatesCallback?.Invoke(false);
             return;
         }
 
-        if (_savedPoints[_nearestPointToPlayer].reachableSteps.TryGetValue(step, out var indices))
+        SamplePointData playerPoint = _savedPoints[_nearestPointToPlayer];
+
+        StepEntry stepEntry = null;
+        for (int i = 0; i < playerPoint.stepLinks.Count; i++)
         {
-            foreach (int i in indices)
+            if (playerPoint.stepLinks[i].step == step)
             {
-                request.flankPointCandidates.Add(_savedPoints[i].position);
-                //positions.Add(_savedPoints[i].position);
+                stepEntry = playerPoint.stepLinks[i];
+                break;
+            }
+        }
+
+        if (stepEntry != null)
+        {
+            foreach (int index in stepEntry.reachableIndices)
+            {
+                if (index >= 0 && index < _savedPoints.Count)
+                {
+                    var point = _savedPoints[index];
+                    if (!point.inUse)
+                        request.flankPointCandidates.Add(point.position);
+                }
             }
         }
 
         request.FlankPointCandidatesCallback?.Invoke(request.flankPointCandidates.Count > 0);
-        //request.FlankPointCandidatesCallback?.Invoke(positions);
+        ///// END NEW
+
+        /* int step = request.numSteps; 
+
+         if (_savedPoints == null || _savedPoints.Count == 0 ||
+             _nearestPointToPlayer < 0 || _nearestPointToPlayer >= _savedPoints.Count)
+         {
+
+             request.FlankPointCandidatesCallback?.Invoke(false);
+             return;
+         }
+
+         if (_savedPoints[_nearestPointToPlayer].reachableSteps.TryGetValue(step, out var indices))
+         {
+             foreach (int i in indices)
+             {
+                 request.flankPointCandidates.Add(_savedPoints[i].position);
+
+             }
+         }
+
+         request.FlankPointCandidatesCallback?.Invoke(request.flankPointCandidates.Count > 0);
+        */
 
     }
 

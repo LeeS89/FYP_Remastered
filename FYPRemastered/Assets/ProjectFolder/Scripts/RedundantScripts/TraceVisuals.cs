@@ -1,4 +1,4 @@
-using Meta.XR.Simulator.Editor;
+
 using UnityEngine;
 
 public class TraceVisuals : MonoBehaviour

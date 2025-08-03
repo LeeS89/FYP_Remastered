@@ -96,15 +96,7 @@ public class ClosestPointToPlayerJob : SceneResources
             _threadIndices.Dispose();
     }
 
-   /* private void OnDestroy()
-    {
-        if (_samplePositions.IsCreated)
-            _samplePositions.Dispose();
-        if (_threadDistances.IsCreated)
-            _threadDistances.Dispose();
-        if (_threadIndices.IsCreated)
-            _threadIndices.Dispose();
-    }*/
+
 
     [BurstCompile]
     public struct ClosestPointJob : IJobParallelFor

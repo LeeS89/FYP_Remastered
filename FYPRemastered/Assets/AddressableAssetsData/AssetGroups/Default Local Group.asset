@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: Default Local Group
   m_GUID: ab9c3870c9792ed4cb281eb3d2b875d0
   m_SerializeEntries:
+  - m_GUID: 0b2b569202ea4f34f9cf0be8d1ac73d5
+    m_Address: FlankPointData
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4dee39e88433d0d4aa236aafefbe0151
     m_Address: SamplePointDataSO
     m_ReadOnly: 0

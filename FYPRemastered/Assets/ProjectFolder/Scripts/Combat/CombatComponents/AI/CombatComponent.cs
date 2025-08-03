@@ -342,10 +342,12 @@ public class CombatComponent : BaseAbilities
         //float viewAngle = _fovViewangle;
 
         // Draw vision radius
+#if UNITY_EDITOR
         Handles.color = Color.white;
-       // Handles.DrawWireArc(origin, Vector3.up, Vector3.forward, 360, viewRadius);
-       // Handles.DrawWireArc(origin, Vector3.right, Vector3.forward, 360, viewRadius);
-       // DebugExtension.DrawCircle(origin, Vector3.up, viewRadius);
+#endif
+        // Handles.DrawWireArc(origin, Vector3.up, Vector3.forward, 360, viewRadius);
+        // Handles.DrawWireArc(origin, Vector3.right, Vector3.forward, 360, viewRadius);
+        // DebugExtension.DrawCircle(origin, Vector3.up, viewRadius);
         DebugExtension.DebugWireSphere(origin, Color.white, viewRadius);
 
         // Horizontal FOV

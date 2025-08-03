@@ -27,4 +27,6 @@ public abstract class SceneResources
     protected virtual void NotifyClassDependancies() { }
 
     protected virtual void InitializePools() { }
+
+    public virtual Task UnLoadResources() => Task.CompletedTask; 
 }
