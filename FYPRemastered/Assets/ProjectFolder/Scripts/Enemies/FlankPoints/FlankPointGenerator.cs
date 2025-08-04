@@ -18,7 +18,7 @@ public class FlankPointGenerator : MonoBehaviour
 
     [SerializeField] private Transform player;
 
-    private List<Transform> manualSamplePoints = new();
+    [SerializeField] private List<Transform> manualSamplePoints = new();
 
     [ContextMenu("Auto Place Cubes on NavMesh")]
     public void AutoPlaceCubesOnNavMesh()
@@ -221,11 +221,11 @@ public class FlankPointGenerator : MonoBehaviour
     {
         RefreshManualSamplePointsList();
 
-        List<SamplePointData> flankPoints = new();
+        List<FlankPointData> flankPoints = new();
 
         foreach (Transform point in manualSamplePoints)
         {
-            flankPoints.Add(new SamplePointData
+            flankPoints.Add(new FlankPointData
             {
                 position = point.position,
                 stepLinks = new List<StepEntry>()
@@ -324,10 +324,11 @@ public class FlankPointGenerator : MonoBehaviour
             Debug.LogWarning("No cube selected.");
             return;
         }
-
+       
         Vector3 selectedPos = UnityEditor.Selection.activeTransform.position;
 
         int index = _samplePointDataSO.savedPoints.FindIndex(p => Vector3.Distance(p.position, selectedPos) < 0.01f);
+        Debug.LogError("Index of selected: " + index);
         if (index == -1)
         {
             Debug.LogWarning("Selected point not found in saved list.");

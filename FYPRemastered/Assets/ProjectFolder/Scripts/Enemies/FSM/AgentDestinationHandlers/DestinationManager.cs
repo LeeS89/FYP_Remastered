@@ -1,0 +1,687 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+using UnityEngine.AI;
+using Random = UnityEngine.Random;
+
+
+public class DestinationManager
+{
+    private EnemyEventManager _eventManager;
+    private Transform _owner;
+    AIDestinationType _globalDestinationType = AIDestinationType.None;
+
+    // Flank Data
+    private int _maxFlankingSteps;
+    private List<int> _stepsToTry; ///// Remove
+    private LayerMask _flankBlockingMask;
+    private LayerMask _flankTargetMask;
+    private LayerMask _flankBackupTargetMask;
+    ///////////////////////////////////
+
+    // Coroutine stuff
+    private Coroutine _runningRoutine;// => For a later optimization, to prevent possible in progress coroutines from continuing
+    private WaitUntil _waitUntilResultReceived;
+    private List<Vector3> _candidatePoints = new List<Vector3>();
+    private Queue<AIDestinationType> _destinationQueue;
+    private bool _resultReceived = false;
+    private bool _isValid = false;
+    ////////////////////////////////////
+
+    // Waypoint Data
+    private BlockData _blockData;
+    public int CurrentWaypointZone { get; private set; } = 0;
+    private List<WaypointPair> _waypointPairs = new();
+    private WaypointPair? currentWaypointPair = null;
+    ///private int _currentWaypointZone = 0;
+    ///////////////////////////////////////////////
+
+    // Path Calculation Request callback function and data provided to request
+    private NavMeshPath _path;
+    private readonly Action<bool, Vector3, AIDestinationType> _onRequestComplete;
+    private AIDestinationRequestData _destinationRequest;
+    /////////////////////////////////////////////
+
+    private Collider[] _flankCandidateLOSColliders;
+    private DestinationManagerHelper _candidatePointProvider;
+   
+
+    /// TESTING
+    private GameObject testCube;
+
+    public DestinationManager(EnemyEventManager eventManager, int maxFlankingSteps, NavMeshPath path, GameObject cube, Transform owner, Action<bool, Vector3, AIDestinationType> callback, LayerMask flankPointBlockingMask, LayerMask flankPointTargetMask, LayerMask flankBackupTargetMask)
+    {
+        _eventManager = eventManager;
+        testCube = cube;
+        _path = path;
+        _owner = owner;
+
+        _onRequestComplete = callback;
+        _maxFlankingSteps = maxFlankingSteps;
+        _stepsToTry = new List<int>();
+       
+        _candidatePoints = new List<Vector3>();
+         _flankBlockingMask = flankPointBlockingMask;
+        _flankTargetMask = flankPointTargetMask;
+        _flankBackupTargetMask = flankBackupTargetMask;
+        _flankCandidateLOSColliders = GameManager.Instance.GetPlayerTargetPoints();
+        _waitUntilResultReceived = new WaitUntil(() => _resultReceived);
+        _destinationRequest = new AIDestinationRequestData();
+        _eventManager.OnDestinationRequested += DestinationRequested;
+
+        _destinationQueue = new Queue<AIDestinationType>();
+
+        InitializeWaypoints();
+    }
+
+    #region Waypoint Initialization
+    private void InitializeWaypoints()
+    {
+        _destinationRequest.flankPointCandidates = _candidatePoints;
+        _destinationRequest.path = _path;
+        _destinationRequest.resourceType = AIResourceType.WaypointBlock;
+        _destinationRequest.waypointCallback = SetWayPoints;
+        SceneEventAggregator.Instance.RequestResource(_destinationRequest);
+    }
+
+    private void SetWayPoints(BlockData data)
+    {
+        _blockData = data;
+        _destinationRequest.resourceType = AIResourceType.None;
+        if (_blockData == null)
+        {
+            Debug.LogError("Waypoint block data is null. Cannot set waypoints.");
+            return;
+        }
+
+        CurrentWaypointZone = _blockData._blockZone;
+      //  _currentWaypointZone = _blockData._blockZone;
+        LoadWaypointData(_blockData);
+    }
+
+    public void LoadWaypointData(BlockData wpData)
+    {
+
+        _waypointPairs.Clear();
+
+        for (int i = 0; i < wpData._waypointPositions.Length; i++)
+        {
+            _waypointPairs.Add(new WaypointPair(wpData._waypointPositions[i], wpData._waypointForwards[i]));
+        }
+
+    }
+
+    private struct WaypointPair
+    {
+        public Vector3 position;
+        public Vector3 forward;
+
+        public WaypointPair(Vector3 pos, Vector3 fwd)
+        {
+            position = pos;
+            forward = fwd;
+        }
+    }
+
+
+
+
+    private void ShuffleWaypointPairs()
+    {
+        for (int i = 0; i < _waypointPairs.Count; i++)
+        {
+            int randIndex = UnityEngine.Random.Range(i, _waypointPairs.Count);
+            (_waypointPairs[i], _waypointPairs[randIndex]) = (_waypointPairs[randIndex], _waypointPairs[i]);
+        }
+    }
+
+    #endregion
+
+
+
+
+    private void DestinationRequested(AIDestinationType destType)
+    {
+       
+       _globalDestinationType = destType;
+        _destinationQueue.Enqueue(destType);
+
+        if(_runningRoutine == null)
+        {
+            _runningRoutine = CoroutineRunner.Instance.StartCoroutine(ProcessDestinationQueue());
+        }
+
+      
+    }
+
+    #region Destination Request Processing
+    private IEnumerator ProcessDestinationQueue()
+    {
+        while (_destinationQueue.Count > 0)
+        {
+            var request = _destinationQueue.Dequeue();
+
+            if (request == AIDestinationType.FlankDestination)
+            {
+                yield return CoroutineRunner.Instance.StartCoroutine(FlankDestinationRoutine());
+                yield return CoroutineRunner.Instance.StartCoroutine(DestinationRoutine(request));
+            }
+            else
+            {
+                yield return CoroutineRunner.Instance.StartCoroutine(DestinationRoutine(request));
+            }
+            _candidatePoints.Clear();
+        }
+        _runningRoutine = null;
+    }
+
+    private IEnumerator DestinationRoutine(AIDestinationType destType)
+    {
+
+        var candidates = GetCandidatePoints(destType);
+
+
+        foreach (var point in candidates)
+        {
+
+            _resultReceived = false;
+            _isValid = false;
+
+            _destinationRequest.start = LineOfSightUtility.GetClosestPointOnNavMesh(_owner.position);
+            _destinationRequest.end = LineOfSightUtility.GetClosestPointOnNavMesh(point);
+
+
+            _destinationRequest.internalCallback = PathRequestInternalCallback;
+
+            SceneEventAggregator.Instance.PathRequested(_destinationRequest);
+
+            yield return _waitUntilResultReceived;
+
+
+            if (destType != _globalDestinationType)
+            {
+                yield break;
+            }
+
+            if (!_isValid) continue;
+
+
+            if (destType == AIDestinationType.PatrolDestination)
+            {
+                var match = _waypointPairs.FirstOrDefault(p => p.position == point);
+                _eventManager.RotateAtPatrolPoint(match.forward);
+
+                currentWaypointPair = match;
+            }
+
+
+
+            _destinationRequest.resourceType = AIResourceType.None;
+            _onRequestComplete?.Invoke(true, point, destType);
+
+            yield break;
+        }
+
+        if (destType != _globalDestinationType)
+        {
+            yield break;
+        }
+
+        _onRequestComplete?.Invoke(false, Vector3.zero, destType);
+
+
+    }
+
+    private IEnumerator FlankDestinationRoutine()
+    {
+        GetStepsToTry();
+
+        _destinationRequest.resourceType = AIResourceType.FlankPointCandidates;
+        foreach (int step in _stepsToTry)
+        {
+            _resultReceived = false;
+            _destinationRequest.numSteps = step; // Set the step for the request
+
+            _destinationRequest.FlankPointCandidatesCallback = OnReceivedFlankPointCandidates; /*(points) =>
+            {
+                if (points != null && points.Count > 0)
+                {
+                    foreach (var point in points)
+                    {
+                        Vector3 startPoint = point + Vector3.up;
+                        if (!LineOfSightUtility.HasLineOfSight(startPoint, _flankCandidateLOSColliders, _flankBlockingMask, _flankTargetMask)) { continue; }
+
+                        _candidatePoints.Add(point);
+                    }
+
+
+                    //_points.AddRange(points.OrderBy(p => Random.value));
+                }
+                _resultReceived = true;
+
+            };*/
+
+            SceneEventAggregator.Instance.RequestResource(_destinationRequest);
+
+            yield return _waitUntilResultReceived;
+        }
+
+        foreach (var point in _candidatePoints)
+        {
+
+            GameObject obj = UnityEngine.Object.Instantiate(testCube, point, Quaternion.identity);
+        }
+
+    }
+
+    private void OnReceivedFlankPointCandidates(/*List<Vector3> points*/bool success)
+    {
+        ///// Later implementation => Based on returned bool => decide what happens when it fails
+        Debug.LogError("Flank Candidates before filtering: "+_candidatePoints.Count);
+       // foreach (var point in _candidatePoints)
+       // {
+           // Vector3 startPoint = point + Vector3.up;
+            Vector3 losTargetPoint = _owner.position + Vector3.up * 0.9f;
+            // if (!LineOfSightUtility.HasLineOfSight(startPoint, _flankCandidateLOSColliders, _flankBlockingMask, _flankTargetMask)) { continue; }
+            
+            _candidatePoints.RemoveAll(p => !LineOfSightUtility.HasLineOfSight(p + Vector3.up, _flankCandidateLOSColliders, losTargetPoint, _flankBlockingMask, _flankTargetMask, _flankBackupTargetMask));
+        //   if (!LineOfSightUtility.HasLineOfSight(startPoint, _flankCandidateLOSColliders, losTargetPoint, _flankBlockingMask, _flankTargetMask, _flankBackupTargetMask)) { continue; }
+        Debug.LogError("Flank Candidates after filtering: " + _candidatePoints.Count);
+        // _candidatePoints.Add(point);
+        // }
+
+        //_points.AddRange(points.OrderBy(p => Random.value));
+
+
+        /* if (points != null && points.Count > 0)
+         {
+             foreach (var point in points)
+             {
+                 Vector3 startPoint = point + Vector3.up;
+                 if (!LineOfSightUtility.HasLineOfSight(startPoint, _flankCandidateLOSColliders, _flankBlockingMask, _flankTargetMask)) { continue; }
+
+                 _candidatePoints.Add(point);
+             }
+
+             //_points.AddRange(points.OrderBy(p => Random.value));
+         }*/
+        _resultReceived = true;
+    }
+
+    private void PathRequestInternalCallback(bool status)
+    {
+
+        _isValid = status;
+        _resultReceived = true;
+    }
+
+
+    private IEnumerator ProcessDestinationQueueNew()
+    {
+        while (_destinationQueue.Count > 0)
+        {
+            var request = _destinationQueue.Dequeue();
+
+            if (request == AIDestinationType.FlankDestination)
+            {
+                yield return CoroutineRunner.Instance.StartCoroutine(_candidatePointProvider.FlankDestinationRoutine());
+                yield return CoroutineRunner.Instance.StartCoroutine(EvaluateDestinationRoutine(_candidatePointProvider.GetFlankCandidates(), DestinationManagerHelper.GetFlankPointCandidatePosition, DestinationManagerHelper.MarkFlankPointInUse, request));
+            }
+            else
+            {
+                yield return CoroutineRunner.Instance.StartCoroutine(DestinationRoutine(request));
+            }
+            _candidatePoints.Clear();
+        }
+        _runningRoutine = null;
+    }
+
+    IEnumerator EvaluateDestinationRoutine<T>(
+    List<T> candidates,
+    Func<T, Vector3> getPositionFunc,
+    Action<T> markInUseFunc = null,
+    AIDestinationType destType = AIDestinationType.None)
+    {
+        foreach (var candidate in candidates)
+        {
+            Vector3 point = getPositionFunc(candidate);
+
+            _resultReceived = false;
+            _isValid = false;
+
+            _destinationRequest.start = LineOfSightUtility.GetClosestPointOnNavMesh(_owner.position);
+            _destinationRequest.end = LineOfSightUtility.GetClosestPointOnNavMesh(point);
+            _destinationRequest.internalCallback = PathRequestInternalCallback;
+
+            SceneEventAggregator.Instance.PathRequested(_destinationRequest);
+
+            yield return _waitUntilResultReceived;
+
+            if (!_isValid) continue;
+
+            if (destType == AIDestinationType.PatrolDestination)
+            {
+                var match = _waypointPairs.FirstOrDefault(p => p.position == point);
+                _eventManager.RotateAtPatrolPoint(match.forward);
+                currentWaypointPair = match;
+            }
+
+            // Mark selected point as in-use
+            markInUseFunc?.Invoke(candidate);
+
+            _destinationRequest.resourceType = AIResourceType.None;
+            _onRequestComplete?.Invoke(true, point, destType);
+            yield break;
+        }
+
+        _onRequestComplete?.Invoke(false, Vector3.zero, destType);
+    }
+    #endregion
+
+
+    #region Populating Candidate Points for processing
+    private void AddWaypointsToCandidatePoints()
+    {
+        if (currentWaypointPair.HasValue)
+        {
+
+            _waypointPairs.Remove(currentWaypointPair.Value);
+            ShuffleWaypointPairs();
+            _waypointPairs.Add(currentWaypointPair.Value);
+        }
+        else
+        {
+            ShuffleWaypointPairs();
+        }
+
+
+        foreach (var pair in _waypointPairs)
+        {
+            _candidatePoints.Add(pair.position);
+        }
+
+    }
+
+    private void AddPlayerDestinationToCandidatePoints()
+    {
+        Vector3 playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
+
+        _candidatePoints.Add(playerPos);
+    }
+
+    private List<Vector3> GetCandidatePoints(AIDestinationType destType)
+    {
+
+        // when destType == AIDestinationType.FlankDestination, _candidatePoints is populated in the Flank coroutine
+        if (destType == AIDestinationType.ChaseDestination)
+        {
+            AddPlayerDestinationToCandidatePoints();
+        }
+        else if (destType == AIDestinationType.PatrolDestination)
+        {
+            AddWaypointsToCandidatePoints();
+        }
+
+        return _candidatePoints;
+
+    }
+
+
+
+    private void GetStepsToTry()
+    {
+        _stepsToTry.Clear();
+
+        int randomIndex = Random.Range(4, _maxFlankingSteps + 1);
+        int temp = randomIndex;
+        while (temp >= 4) // 4 will eventually be changed to a passed minSteps parameter
+        {
+            _stepsToTry.Add(temp);
+            temp--;
+        }
+        temp = randomIndex + 1;
+        while (temp <= _maxFlankingSteps)
+        {
+            _stepsToTry.Add(temp);
+            temp++;
+        }
+    }
+    #endregion
+
+
+
+
+
+
+    public void StartCarvingRoutine(AIDestinationRequestData destinationRequest)
+    {
+        CoroutineRunner.Instance.StartCoroutine(CarvingRoutine(destinationRequest));
+    }
+
+    private IEnumerator CarvingRoutine(AIDestinationRequestData destinationRequest)
+    {
+        destinationRequest.carvingCallback?.Invoke();
+
+        yield return null;
+       
+        destinationRequest.agentActiveCallback?.Invoke();
+        
+    }
+
+    public void OnInstanceDestroyed()
+    {
+        _owner = null;
+        _path = null;
+        _flankCandidateLOSColliders = null;
+        _eventManager = null;
+        _stepsToTry.Clear();
+        
+        _candidatePoints.Clear();
+        _candidatePoints = null;
+      
+        _stepsToTry = null;
+        /*_destinationRequest.flankPointCandidates = null;*/
+         _waitUntilResultReceived = null;
+        _destinationRequest = null;
+        _destinationQueue.Clear();
+        _destinationQueue = null;
+    }
+
+
+
+    #region Obsolete 
+    private bool ValidateTargetVisibilityFromPoint(Vector3 point)
+    {
+        int mask = LayerMask.GetMask("Default", "Water", "PlayerDefence", "Player");
+        Collider playerCollider = GameManager.Instance.GetPlayerCollider(PlayerPart.Position);
+        Vector3[] testPoints = new Vector3[]
+        {
+            playerCollider.bounds.center,
+            playerCollider.bounds.center + Vector3.up * playerCollider.bounds.extents.y, // top
+            playerCollider.bounds.center - Vector3.up * playerCollider.bounds.extents.y, // bottom
+            playerCollider.bounds.center + Vector3.right * playerCollider.bounds.extents.x, // right shoulder
+            playerCollider.bounds.center - Vector3.right * playerCollider.bounds.extents.x  // left shoulder
+        };
+
+        foreach (var colPoint in testPoints)
+        {
+            if (Physics.Linecast(point, colPoint, out RaycastHit hit, mask))
+            {
+                if (hit.collider == playerCollider)
+                {
+                    Debug.DrawLine(point, colPoint, Color.green, 25f);
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public void RequestNewDestination(AIDestinationRequestData destinationRequest)
+    {
+
+        switch (destinationRequest.destinationType)
+        {
+            case AIDestinationType.ChaseDestination:
+                RequestPlayerDestination(destinationRequest);
+                break;
+            case AIDestinationType.FlankDestination:
+                CoroutineRunner.Instance.StartCoroutine(RequestFlankDestination(destinationRequest));
+                break;
+            case AIDestinationType.PatrolDestination:
+                RequestPatrolPointDestination(destinationRequest);
+                break;
+            default:
+                Debug.LogError($"Unknown destination type: {destinationRequest.destinationType}");
+
+                break;
+        }
+    }
+
+    public void LoadWaypointData(WaypointData wpData)
+    {
+
+        _waypointPairs.Clear();
+
+        for (int i = 0; i < wpData._waypointPositions.Count; i++)
+        {
+            _waypointPairs.Add(new WaypointPair(wpData._waypointPositions[i], wpData._waypointForwards[i]));
+        }
+
+    }
+
+    private void RequestPatrolPointDestination(AIDestinationRequestData destinationRequest)
+    {
+        if (currentWaypointPair.HasValue)
+        {
+            // If there's a previously selected waypoint, remove it, shuffle the list, and then add it back at the end
+            _waypointPairs.Remove(currentWaypointPair.Value);
+            ShuffleWaypointPairs();  // Shuffle the remaining list
+            _waypointPairs.Add(currentWaypointPair.Value);  // Add the selected waypoint to the end
+        }
+        else
+        {
+            ShuffleWaypointPairs();  // Shuffle if no waypoint has been selected yet
+        }
+
+        CoroutineRunner.Instance.StartCoroutine(AttemptDestinationRoutine(destinationRequest, GetWaypointPositions));
+    }
+
+    private IEnumerator RequestFlankDestination(AIDestinationRequestData destinationRequest)
+    {
+        GetStepsToTry();
+        //_waypoints.Clear();
+
+        destinationRequest.resourceType = AIResourceType.FlankPointCandidates; // Set the resource type for the request
+        foreach (int step in _stepsToTry)
+        {
+            _resultReceived = false;
+            destinationRequest.numSteps = step; // Set the step for the request
+
+       /*     destinationRequest.FlankPointCandidatesCallback = (points) =>
+            {
+                if (points != null && points.Count > 0)
+                {
+                    foreach (var point in points)
+                    {
+                        Vector3 startPoint = point + Vector3.up;
+                        if (!LineOfSightUtility.HasLineOfSight(startPoint, destinationRequest.flankTargetColliders, destinationRequest.flankBlockingMask, destinationRequest.flankTargetMask)) { continue; }
+
+                        _candidatePoints.Add(point);
+                    }
+
+
+                    //_points.AddRange(points.OrderBy(p => Random.value));
+                }
+                _resultReceived = true;
+
+            };*/
+
+            SceneEventAggregator.Instance.RequestResource(destinationRequest);
+
+            yield return _waitUntilResultReceived;
+        }
+
+        foreach (var point in _candidatePoints)
+        {
+
+            GameObject obj = UnityEngine.Object.Instantiate(testCube, point, Quaternion.identity);
+        }
+
+        CoroutineRunner.Instance.StartCoroutine(AttemptDestinationRoutine(destinationRequest, GetFlankPoints));
+
+    }
+
+    private void RequestPlayerDestination(AIDestinationRequestData destinationRequest)
+    {
+        CoroutineRunner.Instance.StartCoroutine(AttemptDestinationRoutine(destinationRequest, GetPlayerPoint));
+
+    }
+
+    private IEnumerator AttemptDestinationRoutine(AIDestinationRequestData destinationRequest, Func<List<Vector3>> candidatePointProvider)
+    {
+        var candidates = candidatePointProvider.Invoke();
+
+
+        foreach (var point in candidates)
+        {
+
+
+            _resultReceived = false;
+            _isValid = false;
+
+            destinationRequest.end = LineOfSightUtility.GetClosestPointOnNavMesh(point);
+
+            destinationRequest.internalCallback = (success) =>
+            {
+                _isValid = success;
+                _resultReceived = true;
+
+            };
+
+
+            SceneEventAggregator.Instance.PathRequested(destinationRequest);
+
+            yield return _waitUntilResultReceived;
+
+            if (!_isValid) continue;
+
+            if (destinationRequest.destinationType == AIDestinationType.PatrolDestination)
+            {
+                var match = _waypointPairs.FirstOrDefault(p => p.position == point);
+                _eventManager.RotateAtPatrolPoint(match.forward);
+
+                currentWaypointPair = match;
+            }
+            destinationRequest.resourceType = AIResourceType.None;
+            destinationRequest.externalCallback?.Invoke(true, point);
+            yield break;
+        }
+
+        destinationRequest.externalCallback?.Invoke(false, Vector3.zero);
+    }
+    private List<Vector3> GetWaypointPositions()
+    {
+        return _waypointPairs.Select(p => p.position).ToList();
+    }
+
+
+
+
+
+
+    private List<Vector3> GetPlayerPoint()
+    {
+        Vector3 playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
+        return new List<Vector3> { playerPos };
+    }
+
+    private List<Vector3> GetFlankPoints()
+    {
+        return _candidatePoints;
+    }
+    #endregion
+}

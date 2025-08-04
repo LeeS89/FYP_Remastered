@@ -32,7 +32,7 @@ public class UniformZoneGridManager : MonoBehaviour
     public SamplePointDataSO _samplePointDataSO; // ScriptableObject to save data
 
     [HideInInspector] public List<Transform> manualSamplePoints = new List<Transform>();
-    public List<SamplePointData> savedPoints = new List<SamplePointData>();
+    public List<FlankPointData> savedPoints = new List<FlankPointData>();
 
 
     //public ClosestPointToPlayerJob _playerJob;
@@ -289,7 +289,7 @@ public class UniformZoneGridManager : MonoBehaviour
             }
         }
 
-        savedPoints = new List<SamplePointData>(_samplePointDataSO.savedPoints); // Optional: sync to local list
+        savedPoints = new List<FlankPointData>(_samplePointDataSO.savedPoints); // Optional: sync to local list
     }
 
     [Header("Runtime Info (Debug / Optional)")]
@@ -332,7 +332,7 @@ public class UniformZoneGridManager : MonoBehaviour
         // Store each cube's position
         foreach (Transform point in manualSamplePoints)
         {
-            savedPoints.Add(new SamplePointData
+            savedPoints.Add(new FlankPointData
             {
                 position = point.position
             });
@@ -375,7 +375,7 @@ public class UniformZoneGridManager : MonoBehaviour
 
         foreach (var point in savedPoints)
         {
-            var copy = new SamplePointData
+            var copy = new FlankPointData
             {
                 position = point.position,
                 serializedReachableSteps = new List<StepEntry>()

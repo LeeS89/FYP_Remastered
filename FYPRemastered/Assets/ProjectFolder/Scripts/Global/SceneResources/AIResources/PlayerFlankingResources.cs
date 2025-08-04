@@ -10,7 +10,7 @@ public class PlayerFlankingResources : SceneResources, IUpdateableResource
 {
     private AsyncOperationHandle<SamplePointDataSO> _flankPointHandle;
     private SamplePointDataSO _flankPointDataSO;
-    private List<SamplePointData> _savedPoints;
+    private List<FlankPointData> _savedPoints;
     private int _nearestPointToPlayer = 0;
     Collider playerCollider;
     /*Vector3 top;*/
@@ -39,7 +39,7 @@ public class PlayerFlankingResources : SceneResources, IUpdateableResource
                 {
                     SceneEventAggregator.Instance.OnClosestFlankPointToPlayerJobComplete += SetNearestIndexToPlayer; // => Dont forget to unsubscribe
                     SceneEventAggregator.Instance.OnAIResourceRequested += AIResourceRequested; // => Dont forget to unsubscribe
-                    _savedPoints = new List<SamplePointData>(_flankPointDataSO.savedPoints);
+                    _savedPoints = new List<FlankPointData>(_flankPointDataSO.savedPoints);
                     //SceneEventAggregator.Instance.OnFlankPointsRequested += ResourceRequested; // => Dont forget to unsubscribe
                     //DeserializeSavedPoints(); // Disabled for new approach
                 }
@@ -99,7 +99,7 @@ public class PlayerFlankingResources : SceneResources, IUpdateableResource
             }
         }
 
-        _savedPoints = new List<SamplePointData>(_flankPointDataSO.savedPoints); 
+        _savedPoints = new List<FlankPointData>(_flankPointDataSO.savedPoints); 
        
     }
 
@@ -137,7 +137,7 @@ public class PlayerFlankingResources : SceneResources, IUpdateableResource
             return;
         }
 
-        SamplePointData playerPoint = _savedPoints[_nearestPointToPlayer];
+        FlankPointData playerPoint = _savedPoints[_nearestPointToPlayer];
 
         StepEntry stepEntry = null;
         for (int i = 0; i < playerPoint.stepLinks.Count; i++)
@@ -157,7 +157,11 @@ public class PlayerFlankingResources : SceneResources, IUpdateableResource
                 {
                     var point = _savedPoints[index];
                     if (!point.inUse)
+                    {
+                        // request.flankCandidates.Add(point); NEW
                         request.flankPointCandidates.Add(point.position);
+                    }
+                       
                 }
             }
         }

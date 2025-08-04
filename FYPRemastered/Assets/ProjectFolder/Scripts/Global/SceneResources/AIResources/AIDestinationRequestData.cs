@@ -28,7 +28,8 @@ public class AIDestinationRequestData : ProjectileResourceRequest
     public Action carvingCallback; // Callback for carving operations, if needed
     public Action agentActiveCallback;
 
-    public List<Vector3> flankPointCandidates;
+    public List<Vector3> flankPointCandidates; // OLD
+    public List<FlankPointData> flankCandidates; // NEW
    /* public Queue<int> _requestID = new Queue<int>();
 
     public int TryDequeueRequestID()
@@ -48,8 +49,8 @@ public class AIDestinationRequestData : ProjectileResourceRequest
         base.OnInstanceDestroyed();
         //  _requestID.Clear();
         //   _requestID = null;
-
-        flankPointCandidates = null;
+        flankCandidates = null; // NEW
+        flankPointCandidates = null; // OLD
         blockData = null;
         internalCallback = null;
         externalCallback = null;
