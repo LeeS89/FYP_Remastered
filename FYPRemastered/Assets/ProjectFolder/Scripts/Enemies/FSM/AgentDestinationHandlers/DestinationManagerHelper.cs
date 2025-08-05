@@ -1,5 +1,7 @@
+using Meta.XR.BuildingBlocks.Editor;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 
@@ -7,8 +9,8 @@ public class DestinationManagerHelper
 {
     private FlankPointData _currentFlankPoint;
     private AIDestinationRequestData _requestData;
-    private List<FlankPointData> _candidateFlankPointDestinations;
-    private List<Vector3> _candidateDestinations;
+    private List<FlankPointData> _candidateFlankPointPositions;
+    private List<Vector3> _candidatePositions;
 
     private Transform _ownerTransform;
     private List<int> _stepsToTry;
@@ -22,23 +24,88 @@ public class DestinationManagerHelper
     private WaitUntil _waitUntilResultReceived;
     private GameObject _debugCube;
 
+    // Waypoint Data
+    private BlockData _blockData;
+    public int CurrentWaypointZone { get; private set; } = 0;
+    private List<WaypointPair> _waypointPairs = new();
+    private WaypointPair? currentWaypointPair = null; 
+
     public DestinationManagerHelper(AIDestinationRequestData requestData, Transform owner, int maxflankSteps, LayerMask flankBlockingMask, LayerMask flankTargetMask, LayerMask flankBackupTargetMask, GameObject debugCube = null)
     {
         _requestData = requestData;
         _ownerTransform = owner;
         _maxFlankingSteps = maxflankSteps;
-        _flankBackupTargetMask = flankBlockingMask;
+        _flankBlockingMask = flankBlockingMask;
         _flankTargetMask = flankTargetMask;
         _flankBackupTargetMask = flankBackupTargetMask;
 
         _debugCube = debugCube;
 
         _stepsToTry = new List<int>();
-        _candidateFlankPointDestinations = new List<FlankPointData>();
-        _candidateDestinations = new List<Vector3>();
+        _candidateFlankPointPositions = new List<FlankPointData>();
+        _candidatePositions = new List<Vector3>();
         _flankCandidateLOSColliders = GameManager.Instance.GetPlayerTargetPoints();
         _waitUntilResultReceived = new WaitUntil(() => _resultReceived);
-        _requestData.flankCandidates = _candidateFlankPointDestinations;
+
+       
+
+    }
+
+    private struct WaypointPair
+    {
+        public Vector3 position;
+        public Vector3 forward;
+
+        public WaypointPair(Vector3 pos, Vector3 fwd)
+        {
+            position = pos;
+            forward = fwd;
+        }
+    }
+
+    public void InitializeWaypoints()
+    {
+        _requestData.flankCandidates = _candidateFlankPointPositions;
+
+        _requestData.resourceType = AIResourceType.WaypointBlock;
+        _requestData.waypointCallback = SetWayPoints;
+        SceneEventAggregator.Instance.RequestResource(_requestData);
+    }
+
+    private void SetWayPoints(BlockData data)
+    {
+        _blockData = data;
+        _requestData.resourceType = AIResourceType.None;
+        if (_blockData == null)
+        {
+            Debug.LogError("Waypoint block data is null. Cannot set waypoints.");
+            return;
+        }
+
+        CurrentWaypointZone = _blockData._blockZone;
+        //  _currentWaypointZone = _blockData._blockZone;
+        LoadWaypointData(_blockData);
+    }
+
+    private void LoadWaypointData(BlockData wpData)
+    {
+
+        _waypointPairs.Clear();
+
+        for (int i = 0; i < wpData._waypointPositions.Length; i++)
+        {
+            _waypointPairs.Add(new WaypointPair(wpData._waypointPositions[i], wpData._waypointForwards[i]));
+        }
+
+    }
+
+    private void ShuffleWaypointPairs()
+    {
+        for (int i = 0; i < _waypointPairs.Count; i++)
+        {
+            int randIndex = UnityEngine.Random.Range(i, _waypointPairs.Count);
+            (_waypointPairs[i], _waypointPairs[randIndex]) = (_waypointPairs[randIndex], _waypointPairs[i]);
+        }
     }
 
     public static Vector3 GetFlankPointCandidatePosition(FlankPointData candidate) => candidate.position;
@@ -47,9 +114,74 @@ public class DestinationManagerHelper
 
     public static void MarkFlankPointInUse(FlankPointData point) => point.inUse = true;
 
-    public List<FlankPointData> GetFlankCandidates() => _candidateFlankPointDestinations;
+    public void SetCurrentFlankPoint(FlankPointData currentFP)
+    {
+        _currentFlankPoint = currentFP;
+    }
 
-    public void ReleaseFlankPoint()
+    public List<FlankPointData> GetFlankCandidates() => _candidateFlankPointPositions;
+
+    public Vector3 GetWaypointForward(Vector3 point)
+    {
+        for (int i = 0; i < _waypointPairs.Count; i++)
+        {
+            if (_waypointPairs[i].position == point)
+            {
+                currentWaypointPair = _waypointPairs[i];
+                return _waypointPairs[i].forward;
+            }
+                
+        }
+
+        return Vector3.forward;
+        //return _waypointPairs.FirstOrDefault(p => p.position == point).forward;
+    }
+
+    public List<Vector3> GetCandidates(AIDestinationType destType)
+    {
+        // when destType == AIDestinationType.FlankDestination, _candidatePositions is populated in the Flank coroutine
+        if (destType == AIDestinationType.ChaseDestination)
+        {
+            AddPlayerDestinationToCandidatePoints();
+        }
+        else if (destType == AIDestinationType.PatrolDestination)
+        {
+            AddWaypointsToCandidatePoints();
+        }
+
+        return _candidatePositions;
+    }
+
+    private void AddWaypointsToCandidatePoints()
+    {
+        if (currentWaypointPair.HasValue)
+        {
+            // To prevent picking the current waypoint
+            _waypointPairs.Remove(currentWaypointPair.Value);
+            ShuffleWaypointPairs();
+            _waypointPairs.Add(currentWaypointPair.Value);
+        }
+        else
+        {
+            ShuffleWaypointPairs();
+        }
+
+
+        foreach (var pair in _waypointPairs)
+        {
+            _candidatePositions.Add(pair.position);
+        }
+
+    }
+
+    private void AddPlayerDestinationToCandidatePoints()
+    {
+        Vector3 playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
+
+        _candidatePositions.Add(playerPos);
+    }
+
+    public void ReleaseCurrentFlankPointIfExists()
     {
         if(_currentFlankPoint != null)
         {
@@ -61,7 +193,9 @@ public class DestinationManagerHelper
    
     public void ClearCandidates()
     {
+        if(_candidateFlankPointPositions.Count > 0) _candidateFlankPointPositions.Clear();
 
+        if(_candidatePositions.Count > 0) _candidatePositions.Clear();
     }
 
 
@@ -85,7 +219,7 @@ public class DestinationManagerHelper
 #if UNITY_EDITOR
         if(_debugCube == null) { yield break; }
 
-        foreach (var point in _candidateFlankPointDestinations)
+        foreach (var point in _candidateFlankPointPositions)
         {
             Vector3 pos = point.position;
             GameObject obj = UnityEngine.Object.Instantiate(_debugCube, pos, Quaternion.identity);
@@ -96,17 +230,18 @@ public class DestinationManagerHelper
 
     private void OnReceivedFlankPointCandidates(/*List<Vector3> points*/bool success)
     {
+        
         ///// Later implementation => Based on returned bool => decide what happens when it fails
-        Debug.LogError("Flank Candidates before filtering: " + _candidateFlankPointDestinations.Count);
+       // Debug.LogError("Flank Candidates before filtering: " + _candidateFlankPointPositions.Count);
         // foreach (var point in _candidatePoints)
         // {
         // Vector3 startPoint = point + Vector3.up;
         Vector3 losTargetPoint = _ownerTransform.position + Vector3.up * 0.9f;
         // if (!LineOfSightUtility.HasLineOfSight(startPoint, _flankCandidateLOSColliders, _flankBlockingMask, _flankTargetMask)) { continue; }
 
-        _candidateFlankPointDestinations.RemoveAll(p => !LineOfSightUtility.HasLineOfSight(p.position + Vector3.up, _flankCandidateLOSColliders, losTargetPoint, _flankBlockingMask, _flankTargetMask, _flankBackupTargetMask));
+        _candidateFlankPointPositions.RemoveAll(p => !LineOfSightUtility.HasLineOfSight(p.position + Vector3.up, _flankCandidateLOSColliders, losTargetPoint, _flankBlockingMask, _flankTargetMask, _flankBackupTargetMask));
         //   if (!LineOfSightUtility.HasLineOfSight(startPoint, _flankCandidateLOSColliders, losTargetPoint, _flankBlockingMask, _flankTargetMask, _flankBackupTargetMask)) { continue; }
-        Debug.LogError("Flank Candidates after filtering: " + _candidateFlankPointDestinations.Count);
+       // Debug.LogError("Flank Candidates after filtering: " + _candidateFlankPointPositions.Count);
        
         _resultReceived = true;
     }
@@ -133,18 +268,21 @@ public class DestinationManagerHelper
 
     public void OnInstanceDestroyed()
     {
-        _candidateDestinations.Clear();
-        _candidateDestinations = null;
+        _candidatePositions.Clear();
+        _candidatePositions = null;
         _flankCandidateLOSColliders = null;
         _ownerTransform = null;
         _stepsToTry.Clear();
         _stepsToTry = null;
         _requestData = null;
         _currentFlankPoint = null;
-        _candidateFlankPointDestinations.Clear();
-        _candidateFlankPointDestinations = null;
+        _candidateFlankPointPositions.Clear();
+        _candidateFlankPointPositions = null;
         _waitUntilResultReceived = null;
-
+        _blockData = null;
         _debugCube = null;
+        currentWaypointPair = null;
+        _waypointPairs.Clear();
+        _waypointPairs = null;
     }
 }

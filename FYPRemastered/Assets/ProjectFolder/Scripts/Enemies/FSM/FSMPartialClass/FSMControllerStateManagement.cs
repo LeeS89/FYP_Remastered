@@ -24,7 +24,8 @@ public partial class EnemyFSMController : ComponentEvents
        
 
         
-        _blockZone = _destinationManager.CurrentWaypointZone;
+        _blockZone = _destinationManager.GetCurrentWPZone();
+        Debug.LogError("WP ZOne: "+_blockZone);
         SceneEventAggregator.Instance.RegisterAgentAndZone(this, _blockZone);
         // InitializeWaypoints();
         //InitializeWeapon();

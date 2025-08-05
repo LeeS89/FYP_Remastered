@@ -158,15 +158,15 @@ public class PlayerFlankingResources : SceneResources, IUpdateableResource
                     var point = _savedPoints[index];
                     if (!point.inUse)
                     {
-                        // request.flankCandidates.Add(point); NEW
-                        request.flankPointCandidates.Add(point.position);
+                        request.flankCandidates.Add(point);// NEW
+                       // request.flankPointCandidates.Add(point.position);
                     }
                        
                 }
             }
         }
 
-        request.FlankPointCandidatesCallback?.Invoke(request.flankPointCandidates.Count > 0);
+        request.FlankPointCandidatesCallback?.Invoke(request.flankCandidates.Count > 0);
         ///// END NEW
 
         /* int step = request.numSteps; 
