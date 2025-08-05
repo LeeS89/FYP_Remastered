@@ -6,7 +6,16 @@ using UnityEngine;
 using UnityEngine.AI;
 using Random = UnityEngine.Random;
 
-
+/// <summary>
+/// Processes destination requests from AI agents via event sent from FSMController class
+/// Based on type of destination requested i.e Chase, Flank, Patrol, the request retrieves the 
+/// relevant candidate destinations from the DestinationManagerHelper class
+/// Requests are queued and processed 1 at a time.
+/// Onve a point is chosen and validated, an event is fired, providing the calling agent with the Vector3 and request type 
+/// A Chase or patrol point is valid if it is reachable, while a flank point is only valid if it is both reachable and proides a clear LOS to the player 
+/// When a point is being evaluated, it gets queued for path finding, and the request waits until the path request returns success/ failure.
+/// The final callback to the calling agent only gets fired once a point is validated and that reequests type matches to most recently queued destination type to prevent rapid Destination setting
+/// </summary>
 public class DestinationManager
 {
     private EnemyEventManager _eventManager;

@@ -337,6 +337,8 @@ public class FlankPointGenerator : MonoBehaviour
 
         var point = _samplePointDataSO.savedPoints[index];
 
+        Debug.LogError("Is block in use: "+ _samplePointDataSO.savedPoints[index].inUse);
+
         foreach (Transform cube in manualSamplePoints)
         {
             DestroyImmediate(cube.GetComponentInChildren<TextMesh>()); // Clean previous labels

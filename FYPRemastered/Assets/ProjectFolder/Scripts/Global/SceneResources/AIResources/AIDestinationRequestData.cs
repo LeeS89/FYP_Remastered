@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
+/// <summary>
+/// This class acts as a middle man betweeen AI requesting potential destinations, and Resource classes providing the necessary data via callbacks
+/// to functions from the sending class
+/// </summary>
 public class AIDestinationRequestData : ProjectileResourceRequest
 {
     public AIResourceType resourceType { get; set; }
@@ -30,27 +34,13 @@ public class AIDestinationRequestData : ProjectileResourceRequest
 
     public List<Vector3> flankPointCandidates; // OLD
     public List<FlankPointData> flankCandidates; // NEW
-   /* public Queue<int> _requestID = new Queue<int>();
-
-    public int TryDequeueRequestID()
-    {
-        if (_requestID.Count > 0)
-        {
-           
-            return _requestID.Dequeue();
-        }
-
-       // id = -1;
-        return -1;
-    }*/
+  
 
     public override void OnInstanceDestroyed()
     {
         base.OnInstanceDestroyed();
-        //  _requestID.Clear();
-        //   _requestID = null;
+       
         flankCandidates = null; // NEW
-        flankPointCandidates = null; // OLD
         blockData = null;
         internalCallback = null;
         externalCallback = null;

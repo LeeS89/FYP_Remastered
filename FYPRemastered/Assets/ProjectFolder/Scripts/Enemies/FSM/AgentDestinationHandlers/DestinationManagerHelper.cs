@@ -1,34 +1,51 @@
-using Meta.XR.BuildingBlocks.Editor;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
-
+/// <summary>
+/// An extenstion of the Destination manager class
+/// Retrieves and provides candidate destinations to the Destination manager for processing
+/// Flank candidates refer to a specific point in the scene which gives the AI a clear LOS to the player
+/// When ever they lose sight of the player from stationary state
+/// Flank points are pre calculated and stored in an SO
+/// </summary>
 public class DestinationManagerHelper
 {
-    private FlankPointData _currentFlankPoint;
-    private AIDestinationRequestData _requestData;
-    private List<FlankPointData> _candidateFlankPointPositions;
-    private List<Vector3> _candidatePositions;
-
+    
     private Transform _ownerTransform;
-    private List<int> _stepsToTry;
-    private bool _resultReceived = false;
+
+    // Candidate destination container & Resource request instance
+    private List<Vector3> _candidatePositions;
+    private AIDestinationRequestData _requestData;
+
+
+    // Flank point variables
+    private int _maxFlankingSteps = 0;
+    private FlankPointData _currentFlankPoint;
+    private List<FlankPointData> _candidateFlankPointPositions;
+    private List<int> _stepsToTry; // Flank point Candidates x steps from the nearest point to the player
+    
+    private Collider[] _flankCandidateLOSColliders;
+
+    // Layermasks for validating potential flank points. A valid flank point means a clear LOS from the flank point to the player
+    // With a backup target mask being the owning gameobjects mask - used for extra validation 
     private LayerMask _flankBlockingMask;
     private LayerMask _flankTargetMask;
     private LayerMask _flankBackupTargetMask;
-    private Collider[] _flankCandidateLOSColliders;
 
-    private int _maxFlankingSteps = 0;
+    // Coroutine stuff
     private WaitUntil _waitUntilResultReceived;
-    private GameObject _debugCube;
+    private bool _resultReceived = false;
 
     // Waypoint Data
     private BlockData _blockData;
     public int CurrentWaypointZone { get; private set; } = 0;
     private List<WaypointPair> _waypointPairs = new();
-    private WaypointPair? currentWaypointPair = null; 
+    private WaypointPair? currentWaypointPair = null;
+
+    // Debug Stuff
+    private GameObject _debugCube;
+
 
     public DestinationManagerHelper(AIDestinationRequestData requestData, Transform owner, int maxflankSteps, LayerMask flankBlockingMask, LayerMask flankTargetMask, LayerMask flankBackupTargetMask, GameObject debugCube = null)
     {
@@ -48,9 +65,104 @@ public class DestinationManagerHelper
         _waitUntilResultReceived = new WaitUntil(() => _resultReceived);
 
        
+    }
+
+    
+    private void ShuffleCandidateList<T>(List<T> candidates)
+    {
+
+        for (int i = 0; i < candidates.Count; i++)
+        {
+            int randIndex = UnityEngine.Random.Range(i, candidates.Count);
+            (candidates[i], candidates[randIndex]) = (candidates[randIndex], candidates[i]);
+        }
+    }
+
+    public void ClearCandidates()
+    {
+        if (_candidateFlankPointPositions.Count > 0) _candidateFlankPointPositions.Clear();
+
+        if (_candidatePositions.Count > 0) _candidatePositions.Clear();
+    }
+
+    #region Flank Candidate region
+    public static Vector3 GetFlankPointCandidatePosition(FlankPointData candidate) => candidate.position;
+
+    
+
+    public static void MarkFlankPointInUse(FlankPointData point) => point.inUse = true;
+
+    public List<FlankPointData> GetFlankCandidates()
+    {
+        ShuffleCandidateList(_candidateFlankPointPositions);
+        return _candidateFlankPointPositions;
+    }
+
+    public void SetCurrentFlankPoint(FlankPointData currentFP)
+    {
+        _currentFlankPoint = currentFP;
+    }
+
+    private void GetStepsToTry()
+    {
+        _stepsToTry.Clear();
+
+        int randomIndex = Random.Range(4, _maxFlankingSteps + 1);
+        int temp = randomIndex;
+        while (temp >= 4) // 4 will eventually be changed to a passed minSteps parameter
+        {
+            _stepsToTry.Add(temp);
+            temp--;
+        }
+        temp = randomIndex + 1;
+        while (temp <= _maxFlankingSteps)
+        {
+            _stepsToTry.Add(temp);
+            temp++;
+        }
+    }
+
+    public void ReleaseCurrentFlankPointIfExists()
+    {
+        if (_currentFlankPoint != null)
+        {
+            _currentFlankPoint.inUse = false;
+            _currentFlankPoint = null;
+        }
 
     }
 
+    public IEnumerator FlankDestinationRoutine()
+    {
+        GetStepsToTry();
+
+        _requestData.resourceType = AIResourceType.FlankPointCandidates;
+        foreach (int step in _stepsToTry)
+        {
+            _resultReceived = false;
+            _requestData.numSteps = step;
+
+            _requestData.FlankPointCandidatesCallback = OnReceivedFlankPointCandidates;
+
+
+            SceneEventAggregator.Instance.RequestResource(_requestData);
+
+            yield return _waitUntilResultReceived;
+        }
+#if UNITY_EDITOR
+        if (_debugCube == null) { yield break; }
+
+        foreach (var point in _candidateFlankPointPositions)
+        {
+            Vector3 pos = point.position;
+            GameObject obj = UnityEngine.Object.Instantiate(_debugCube, pos, Quaternion.identity);
+        }
+#endif
+
+    }
+    #endregion
+
+    #region waypoint Region
     private struct WaypointPair
     {
         public Vector3 position;
@@ -83,7 +195,6 @@ public class DestinationManagerHelper
         }
 
         CurrentWaypointZone = _blockData._blockZone;
-        //  _currentWaypointZone = _blockData._blockZone;
         LoadWaypointData(_blockData);
     }
 
@@ -99,28 +210,6 @@ public class DestinationManagerHelper
 
     }
 
-    private void ShuffleWaypointPairs()
-    {
-        for (int i = 0; i < _waypointPairs.Count; i++)
-        {
-            int randIndex = UnityEngine.Random.Range(i, _waypointPairs.Count);
-            (_waypointPairs[i], _waypointPairs[randIndex]) = (_waypointPairs[randIndex], _waypointPairs[i]);
-        }
-    }
-
-    public static Vector3 GetFlankPointCandidatePosition(FlankPointData candidate) => candidate.position;
-
-    public static Vector3 ReturnSelf(Vector3 v) => v;
-
-    public static void MarkFlankPointInUse(FlankPointData point) => point.inUse = true;
-
-    public void SetCurrentFlankPoint(FlankPointData currentFP)
-    {
-        _currentFlankPoint = currentFP;
-    }
-
-    public List<FlankPointData> GetFlankCandidates() => _candidateFlankPointPositions;
-
     public Vector3 GetWaypointForward(Vector3 point)
     {
         for (int i = 0; i < _waypointPairs.Count; i++)
@@ -130,12 +219,30 @@ public class DestinationManagerHelper
                 currentWaypointPair = _waypointPairs[i];
                 return _waypointPairs[i].forward;
             }
-                
+
         }
 
         return Vector3.forward;
-        //return _waypointPairs.FirstOrDefault(p => p.position == point).forward;
+
     }
+    #endregion
+
+
+
+    /* private void ShuffleWaypointPairs()
+     {
+         for (int i = 0; i < _waypointPairs.Count; i++)
+         {
+             int randIndex = UnityEngine.Random.Range(i, _waypointPairs.Count);
+             (_waypointPairs[i], _waypointPairs[randIndex]) = (_waypointPairs[randIndex], _waypointPairs[i]);
+         }
+     }*/
+
+
+
+    #region Candidate point retrieval region 
+
+    public static Vector3 ReturnSelf(Vector3 v) => v;
 
     public List<Vector3> GetCandidates(AIDestinationType destType)
     {
@@ -158,12 +265,12 @@ public class DestinationManagerHelper
         {
             // To prevent picking the current waypoint
             _waypointPairs.Remove(currentWaypointPair.Value);
-            ShuffleWaypointPairs();
+            ShuffleCandidateList(_waypointPairs);
             _waypointPairs.Add(currentWaypointPair.Value);
         }
         else
         {
-            ShuffleWaypointPairs();
+            ShuffleCandidateList(_waypointPairs);
         }
 
 
@@ -181,58 +288,11 @@ public class DestinationManagerHelper
         _candidatePositions.Add(playerPos);
     }
 
-    public void ReleaseCurrentFlankPointIfExists()
-    {
-        if(_currentFlankPoint != null)
-        {
-            _currentFlankPoint.inUse = false;
-            _currentFlankPoint = null;
-        }
-
-    }
-   
-    public void ClearCandidates()
-    {
-        if(_candidateFlankPointPositions.Count > 0) _candidateFlankPointPositions.Clear();
-
-        if(_candidatePositions.Count > 0) _candidatePositions.Clear();
-    }
-
-
-    public IEnumerator FlankDestinationRoutine()
-    {
-        GetStepsToTry();
-
-        _requestData.resourceType = AIResourceType.FlankPointCandidates;
-        foreach (int step in _stepsToTry)
-        {
-            _resultReceived = false;
-            _requestData.numSteps = step; // Set the step for the request
-
-            _requestData.FlankPointCandidatesCallback = OnReceivedFlankPointCandidates; 
-
-
-            SceneEventAggregator.Instance.RequestResource(_requestData);
-
-            yield return _waitUntilResultReceived;
-        }
-#if UNITY_EDITOR
-        if(_debugCube == null) { yield break; }
-
-        foreach (var point in _candidateFlankPointPositions)
-        {
-            Vector3 pos = point.position;
-            GameObject obj = UnityEngine.Object.Instantiate(_debugCube, pos, Quaternion.identity);
-        }
-#endif
-
-    }
-
     private void OnReceivedFlankPointCandidates(/*List<Vector3> points*/bool success)
     {
-        
+
         ///// Later implementation => Based on returned bool => decide what happens when it fails
-       // Debug.LogError("Flank Candidates before filtering: " + _candidateFlankPointPositions.Count);
+        // Debug.LogError("Flank Candidates before filtering: " + _candidateFlankPointPositions.Count);
         // foreach (var point in _candidatePoints)
         // {
         // Vector3 startPoint = point + Vector3.up;
@@ -241,31 +301,14 @@ public class DestinationManagerHelper
 
         _candidateFlankPointPositions.RemoveAll(p => !LineOfSightUtility.HasLineOfSight(p.position + Vector3.up, _flankCandidateLOSColliders, losTargetPoint, _flankBlockingMask, _flankTargetMask, _flankBackupTargetMask));
         //   if (!LineOfSightUtility.HasLineOfSight(startPoint, _flankCandidateLOSColliders, losTargetPoint, _flankBlockingMask, _flankTargetMask, _flankBackupTargetMask)) { continue; }
-       // Debug.LogError("Flank Candidates after filtering: " + _candidateFlankPointPositions.Count);
-       
+        // Debug.LogError("Flank Candidates after filtering: " + _candidateFlankPointPositions.Count);
+
         _resultReceived = true;
     }
-
-    private void GetStepsToTry()
-    {
-        _stepsToTry.Clear();
-
-        int randomIndex = Random.Range(4, _maxFlankingSteps + 1);
-        int temp = randomIndex;
-        while (temp >= 4) // 4 will eventually be changed to a passed minSteps parameter
-        {
-            _stepsToTry.Add(temp);
-            temp--;
-        }
-        temp = randomIndex + 1;
-        while (temp <= _maxFlankingSteps)
-        {
-            _stepsToTry.Add(temp);
-            temp++;
-        }
-    }
+    #endregion
 
 
+   
     public void OnInstanceDestroyed()
     {
         _candidatePositions.Clear();
