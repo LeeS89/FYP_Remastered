@@ -1,9 +1,9 @@
 public partial class EnemyFSMController : ComponentEvents
 {
     #region Death Region
-    private void OnDeath(bool isDead)
+    private void OnDeathStatusUpdated(bool isDead)
     {
-        if (_agentIsActive) { _agentIsActive = false; }
+        if (AgentIsAlive) { AgentIsAlive = false; }
 
         ResetFSM(_deathState);
     }

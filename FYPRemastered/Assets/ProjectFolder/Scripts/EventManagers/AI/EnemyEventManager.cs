@@ -53,6 +53,7 @@ public class EnemyEventManager : EventManager
 
     public event Action<bool> OnPursuitConditionChanged;
 
+    public event Action<bool, bool> OnFieldOfViewCallback;
     /// <summary>
     /// Called From Scene Manager
     /// </summary>
@@ -79,7 +80,10 @@ public class EnemyEventManager : EventManager
         throw new System.NotImplementedException();
     }
 
-
+    public void FieldOfViewCallback(bool seen, bool inShootingangle)
+    {
+        OnFieldOfViewCallback(seen, inShootingangle);
+    }
 
     public void PursuitConditionChanged(bool permission)
     {

@@ -5,6 +5,7 @@ public enum AIResourceType
     None,
     WaypointBlock,
     FlankPointCandidates,
+    FlankPointEvaluationMasks
    
 }
 

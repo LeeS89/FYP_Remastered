@@ -23,20 +23,22 @@ public class FieldOfViewHandler
     private FieldOfViewFrequencyStatus _fieldOfViewStatus = FieldOfViewFrequencyStatus.Normal;
     [SerializeField] private float _normalFOVCheckFrequency = 1f;
     [SerializeField] private float _heightenedFOVCheckFrequency = 0.1f;
-    private Action<bool, bool> _onFOVResultCallback;
+   // private Action<bool, bool> _onFOVResultCallback;
     private bool _addFallbackPoints = false;
     private float _nextCheckTime = 0f;
-
+    private EnemyEventManager _eventManager;
 
     public FieldOfViewHandler(
         AITraceComponent traceComponent,
-        Action<bool, bool> onFOVResultCallback,
+        EnemyEventManager eventManager,
+        /*Action<bool, bool> onFOVResultCallback,*/
         in FieldOfViewParams fovParams,
         bool addFallbackPoints = false
        )
     {
+        _eventManager = eventManager;
         _aiTraceComponent = traceComponent;
-        _onFOVResultCallback = onFOVResultCallback;
+        //_onFOVResultCallback = onFOVResultCallback;
         _addFallbackPoints = addFallbackPoints;
 
         _proximityDetectionResults = new Collider[fovParams.maxTraceTargets];
@@ -175,7 +177,8 @@ public class FieldOfViewHandler
        
         if (detectedCount == 0)
         {
-            _onFOVResultCallback?.Invoke(seen, inShootAngle);
+            _eventManager.FieldOfViewCallback(seen, inShootAngle);
+            //_onFOVResultCallback?.Invoke(seen, inShootAngle);
             if (_fieldOfViewStatus != FieldOfViewFrequencyStatus.Normal)
                 _fieldOfViewStatus = FieldOfViewFrequencyStatus.Normal;
         }
@@ -200,13 +203,15 @@ public class FieldOfViewHandler
                 // SetFacingtarget(facingTarget);
                 seen = true;
                 inShootAngle = TargetWithinShootingRange(_aiTraceComponent, _fovOrigin, _proximityDetectionResults[i].ClosestPointOnBounds(_fovOrigin.position), _horizontalShootAngle, _verticalShootAngle);
-                _onFOVResultCallback?.Invoke(seen, inShootAngle);
+                _eventManager.FieldOfViewCallback(seen, inShootAngle);
+                //_onFOVResultCallback?.Invoke(seen, inShootAngle);
                 return;
                 //return true;
             }
 
         }
-        _onFOVResultCallback?.Invoke(seen, inShootAngle);
+        _eventManager.FieldOfViewCallback(seen, inShootAngle);
+        //_onFOVResultCallback?.Invoke(seen, inShootAngle);
         //return false;
 
     }

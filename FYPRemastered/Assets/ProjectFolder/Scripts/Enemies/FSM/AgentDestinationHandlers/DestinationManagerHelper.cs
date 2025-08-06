@@ -47,15 +47,12 @@ public class DestinationManagerHelper
     private GameObject _debugCube;
 
 
-    public DestinationManagerHelper(AIDestinationRequestData requestData, Transform owner, int maxflankSteps, LayerMask flankBlockingMask, LayerMask flankTargetMask, LayerMask flankBackupTargetMask, GameObject debugCube = null)
+    public DestinationManagerHelper(AIDestinationRequestData requestData, Transform owner, int maxflankSteps, GameObject debugCube = null)
     {
         _requestData = requestData;
         _ownerTransform = owner;
         _maxFlankingSteps = maxflankSteps;
-        _flankBlockingMask = flankBlockingMask;
-        _flankTargetMask = flankTargetMask;
-        _flankBackupTargetMask = flankBackupTargetMask;
-
+      
         _debugCube = debugCube;
 
         _stepsToTry = new List<int>();
@@ -64,7 +61,23 @@ public class DestinationManagerHelper
         _flankCandidateLOSColliders = GameManager.Instance.GetPlayerTargetPoints();
         _waitUntilResultReceived = new WaitUntil(() => _resultReceived);
 
-       
+        GetFlankEvaluationMasks();  
+    }
+
+    private void GetFlankEvaluationMasks()
+    {
+        _requestData.resourceType = AIResourceType.FlankPointEvaluationMasks;
+        _requestData.flankPointEvaluationMasksRetrievalCallback = OnRetrieveFlankPointEvaluationMasks;
+        SceneEventAggregator.Instance.RequestResource(_requestData);
+    }
+
+    private void OnRetrieveFlankPointEvaluationMasks(LayerMask blockingMask, LayerMask targetMask, LayerMask secondaryTargetMask)
+    {
+        _requestData.resourceType = AIResourceType.None;
+        _flankBlockingMask = blockingMask;
+        _flankTargetMask = targetMask;
+        _flankBackupTargetMask = secondaryTargetMask;
+
     }
 
     

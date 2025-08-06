@@ -32,6 +32,8 @@ public class AIDestinationRequestData : ProjectileResourceRequest
     public Action carvingCallback; // Callback for carving operations, if needed
     public Action agentActiveCallback;
 
+    public Action<LayerMask, LayerMask, LayerMask> flankPointEvaluationMasksRetrievalCallback;
+
     public List<Vector3> flankPointCandidates; // OLD
     public List<FlankPointData> flankCandidates; // NEW
   

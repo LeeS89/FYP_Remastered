@@ -51,8 +51,8 @@ public class CombatComponent : BaseAbilities
   
     [SerializeField] private Collider[] _meleeResults;
 
+    private Action<bool, bool> _fovCallback;
 
-   
 
 
     private FieldOfViewHandler _fovhandler;
@@ -98,10 +98,12 @@ public class CombatComponent : BaseAbilities
         _meleeResults = new Collider[2];
       
         _meleeCheckWait = new WaitForSeconds(_meleeCheckInterval);
-
+        _fovCallback = OnFieldOfViewComplete;
 
         InitializeFOVParams();
-        _fovhandler = new FieldOfViewHandler(_aiTraceComponent, OnFieldOfViewComplete, _fovParams, true);
+        _fovhandler = new FieldOfViewHandler(_aiTraceComponent, _enemyEventManager, _fovParams, true);
+
+        _enemyEventManager.OnFieldOfViewCallback += OnFieldOfViewComplete;
 
         _enemyEventManager.OnOwnerDeathStatusUpdated += OwnerDeathStatusChanged;
      
@@ -129,7 +131,8 @@ public class CombatComponent : BaseAbilities
     
         _enemyEventManager.OnMelee -= SetMeleeTriggered;
         _enemyEventManager.OnOwnerDeathStatusUpdated -= OwnerDeathStatusChanged;
-       
+        _enemyEventManager.OnFieldOfViewCallback -= OnFieldOfViewComplete;
+
         base.UnRegisterLocalEvents(_enemyEventManager);
     
     }

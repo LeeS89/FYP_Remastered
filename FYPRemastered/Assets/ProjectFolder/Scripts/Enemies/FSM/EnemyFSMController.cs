@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.SceneManagement;
 
 
 public partial class EnemyFSMController : ComponentEvents
@@ -12,11 +11,11 @@ public partial class EnemyFSMController : ComponentEvents
     [SerializeField] private NavMeshObstacle _obstacle;
     [SerializeField] private Animator _anim;
     [SerializeField, Tooltip("Do Not Change - Synchronized with Walking animation")] private float _walkSpeed;
-    //private NavMeshPath _path;
+    
     private EnemyAnimController _animController;
     private Action _destinationCheckAction;
     private EnemyState _currentState;
-    private bool _agentIsActive = false;
+    
     private bool _playerIsDead = false;
     private bool _rotatingTowardsTarget = false;
 
@@ -24,8 +23,7 @@ public partial class EnemyFSMController : ComponentEvents
     [SerializeField] private float _stopAndWaitDelay;
     [SerializeField] private List<Vector3> _wayPoints;
     [SerializeField] private List<Vector3> _wayPointForwards;
-    //[SerializeField] private WaypointManager _waypointManager;
-    //private GameObject _waypointBlock;
+   
     private BlockData _blockData;
     public int _blockZone = 0;
     private PatrolState _patrol;
@@ -66,7 +64,13 @@ public partial class EnemyFSMController : ComponentEvents
     private DestinationManager _destinationManager;
     
     private AlertStatus _alertStatus = AlertStatus.None;
-    
+
+   // private bool _agentIsAlive = false;
+
+    public bool AgentIsAlive { get; private set; }
+
+
+
 
     #region Event Registrations
     public override void RegisterLocalEvents(EventManager eventManager)
@@ -77,11 +81,11 @@ public partial class EnemyFSMController : ComponentEvents
 
         _enemyEventManager.OnRequestChasingState += ChasingStateRequested;
         _enemyEventManager.OnRequestStationaryState += StationaryStateRequested;
-       // _enemyEventManager.OnDestinationRequested += PursuitTargetRequested;
-        _enemyEventManager.OnOwnerDeathStatusUpdated += OnDeath;
+      
+        _enemyEventManager.OnOwnerDeathStatusUpdated += OnDeathStatusUpdated;
         _enemyEventManager.OnAgentDeathComplete += ToggleGameObject;
         _enemyEventManager.OnAgentRespawn += ToggleGameObject;
-        //_enemyEventManager.OnDestinationUpdated += UpdateAgentDestination;
+       
         _enemyEventManager.OnDestinationReached += CarveOnDestinationReached;
         _enemyEventManager.OnRotateTowardsTarget += ToggleRotationToTarget;
         _enemyEventManager.OnSpeedChanged += UpdateAnimatorSpeedValues;
@@ -99,11 +103,11 @@ public partial class EnemyFSMController : ComponentEvents
     {
         _enemyEventManager.OnRequestChasingState -= ChasingStateRequested;
         _enemyEventManager.OnRequestStationaryState -= StationaryStateRequested;
-        //_enemyEventManager.OnDestinationUpdated -= UpdateAgentDestination;
+       
         _enemyEventManager.OnTargetSeen -= TargetInViewStatusUpdated;
-       // _enemyEventManager.OnDestinationRequested -= PursuitTargetRequested;
+      
         _enemyEventManager.OnDestinationReached -= CarveOnDestinationReached;
-        _enemyEventManager.OnOwnerDeathStatusUpdated -= OnDeath;
+        _enemyEventManager.OnOwnerDeathStatusUpdated -= OnDeathStatusUpdated;
         _enemyEventManager.OnAgentDeathComplete -= ToggleGameObject;
         _enemyEventManager.OnAgentRespawn -= ToggleGameObject;
         _enemyEventManager.OnRotateTowardsTarget -= ToggleRotationToTarget;
@@ -241,7 +245,7 @@ public partial class EnemyFSMController : ComponentEvents
     {
         //InitializeWeapon();
         PatrolStateRequested();
-        _agentIsActive = true;
+        AgentIsAlive = true;
         //_agent.ResetPath();
     }
 
@@ -255,8 +259,7 @@ public partial class EnemyFSMController : ComponentEvents
         _patrol = null;
         _chasing = null;
         _stationary = null;
-       // _fov = null;
-       // _fovTraceResults = null;
+     
         _animController = null;
         _deathState = null;
     }
@@ -264,7 +267,7 @@ public partial class EnemyFSMController : ComponentEvents
     protected override void OnPlayerDied()
     {
         _playerIsDead = true;
-        if (!_agentIsActive) { return; }
+        if (!AgentIsAlive) { return; }
 
         
         ResetFSM(_patrol);
@@ -277,42 +280,5 @@ public partial class EnemyFSMController : ComponentEvents
     }
     #endregion
 
-    #region Test Functions
-    public bool _testDeath = false;
-
-    public float GetStraightLineDistance(Vector3 from, Vector3 to)
-    {
-        return Vector3.Distance(from, to);
-    }
-
-    public float GetNavMeshPathDistance(Vector3 from, Vector3 to)
-    {
-        NavMeshPath path = new NavMeshPath();
-        if (NavMesh.CalculatePath(from, to, NavMesh.AllAreas, path))
-        {
-            float distance = 0f;
-            for (int i = 1; i < path.corners.Length; i++)
-            {
-                distance += Vector3.Distance(path.corners[i - 1], path.corners[i]);
-            }
-            return distance;
-        }
-        return float.PositiveInfinity; // No valid path
-    }
-
-
-    void CompareDistances(Vector3 enemyPosition, Vector3 playerPosition)
-    {
-        if (_agent.hasPath && !_agent.pathPending)
-        {
-            float disRem = _agent.remainingDistance;
-            float straightLineDist = GetStraightLineDistance(enemyPosition, _agent.destination);
-            float navMeshDist = GetNavMeshPathDistance(enemyPosition, _agent.destination);
-
-            Debug.LogError($"Straight-Line Distance: {straightLineDist}");
-            Debug.LogError($"NavMesh Path Distance: {navMeshDist}");
-            Debug.LogError($"remaining Distance: {disRem}");
-        }
-    }
-    #endregion
+   
 }

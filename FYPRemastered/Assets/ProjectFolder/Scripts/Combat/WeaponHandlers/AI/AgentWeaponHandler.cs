@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class AgentWeaponHandler : WeaponHandlerBase
@@ -20,7 +21,7 @@ public class AgentWeaponHandler : WeaponHandlerBase
     protected WaitForSeconds _shotInterval;
     protected bool _shotIsReady = false;
 
-
+    protected Action _fireSequenceCallback;
 
     public AgentWeaponHandler(EnemyEventManager eventManager, GameObject owner, Transform bulletSpawnPoint, Transform target, int clipCapacity) : base(owner)
     {
@@ -28,6 +29,8 @@ public class AgentWeaponHandler : WeaponHandlerBase
         _bulletSpawnPoint = bulletSpawnPoint;
         _target = target;
         _clipCapacity = clipCapacity;
+
+        _fireSequenceCallback = TryFireRangedWeapon;
 
         _rangedWeapon = new AgentRangedWeapon(_bulletSpawnPoint, _target, _eventManager, _owner, _clipCapacity);
       //  _waitUntilShotReady = new WaitUntil(() => _shotIsReady);
@@ -51,7 +54,7 @@ public class AgentWeaponHandler : WeaponHandlerBase
     public override void EquipWeapon(WeaponType type)
     {
         base.EquipWeapon(type);
-        Debug.LogError("Weapon Equipped");
+       // Debug.LogError("Weapon Equipped");
 
         if(_equippedWeapon is IRangedWeapon)
         {
@@ -90,7 +93,7 @@ public class AgentWeaponHandler : WeaponHandlerBase
         {
             if(IsTargetInView && _firingCoroutine == null)
             {
-                _firingCoroutine = this.StartSingleFireRoutine(_shotInterval, TryFireRangedWeapon);
+                _firingCoroutine = this.StartSingleFireRoutine(_shotInterval/*, _fireSequenceCallback*/);
             }
         }
     }

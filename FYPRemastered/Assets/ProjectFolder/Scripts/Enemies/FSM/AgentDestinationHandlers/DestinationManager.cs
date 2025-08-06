@@ -47,11 +47,13 @@ public class DestinationManager
     /// TESTING
     private GameObject testCube; // OLD
 
-    public DestinationManager(EnemyEventManager eventManager, int maxFlankingSteps, NavMeshPath path, GameObject cube, Transform owner, Action<bool, Vector3, AIDestinationType> callback, LayerMask flankPointBlockingMask, LayerMask flankPointTargetMask, LayerMask flankBackupTargetMask)
+    public DestinationManager(EnemyEventManager eventManager, int maxFlankingSteps, GameObject cube, Transform owner, Action<bool, Vector3, AIDestinationType> callback)
     {
         _eventManager = eventManager;
+        _eventManager.OnOwnerDeathStatusUpdated += OwnerDeathStatusUpdated;
+
         testCube = cube;
-        _path = path;
+        _path = new NavMeshPath();
         _owner = owner;
 
         _onRequestComplete = callback;
@@ -63,29 +65,44 @@ public class DestinationManager
         _destinationQueue = new Queue<AIDestinationType>();
 
         _destinationRequest.path = _path;
-        _candidatePointProvider = new DestinationManagerHelper(_destinationRequest, _owner, maxFlankingSteps, flankPointBlockingMask, flankPointTargetMask, flankBackupTargetMask, testCube);
+        _candidatePointProvider = new DestinationManagerHelper(_destinationRequest, _owner, maxFlankingSteps, testCube);
         _candidatePointProvider?.InitializeWaypoints();
     }
 
     public int GetCurrentWPZone() => _candidatePointProvider.CurrentWaypointZone;
 
-   
 
+    public bool OwnerIsDead { get; private set; } = false;
 
+    private void OwnerDeathStatusUpdated(bool isDead)
+    {
+        OwnerIsDead = isDead;
 
+        if (OwnerIsDead && _runningRoutine != null)
+        {
+            CoroutineRunner.Instance.StopCoroutine(_runningRoutine);
+            _runningRoutine = null;
+            _destinationQueue.Clear();
+
+            CoroutineRunner.Instance.StopCoroutine(_candidatePointProvider.FlankDestinationRoutine());
+            _candidatePointProvider?.ReleaseCurrentFlankPointIfExists();
+            _candidatePointProvider?.ClearCandidates();
+        }
+    }
 
     private void DestinationRequested(AIDestinationType destType)
     {
-       
-       _globalDestinationType = destType;
+        if (OwnerIsDead) { return; }
+
+        _globalDestinationType = destType;
         _destinationQueue.Enqueue(destType);
 
-        if(_runningRoutine == null)
+        if (_runningRoutine == null)
         {
             _runningRoutine = CoroutineRunner.Instance.StartCoroutine(ProcessDestinationQueue());
         }
 
-      
+
     }
 
     
@@ -165,7 +182,7 @@ public class DestinationManager
                 _candidatePointProvider.SetCurrentFlankPoint(flankPoint);
             }
 
-                // Mark selected point as in-use
+               
              markInUseFunc?.Invoke(candidate);
 
             _destinationRequest.resourceType = AIResourceType.None;
@@ -207,6 +224,7 @@ public class DestinationManager
 
     public void OnInstanceDestroyed()
     {
+        _eventManager.OnOwnerDeathStatusUpdated -= OwnerDeathStatusUpdated;
         _candidatePointProvider.OnInstanceDestroyed();
         _candidatePointProvider = null;
         _owner = null;

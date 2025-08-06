@@ -125,9 +125,35 @@ public class PlayerFlankingResources : SceneResources, IUpdateableResource
 
     protected override void AIResourceRequested(AIDestinationRequestData request) 
     {
-        if(request.resourceType != AIResourceType.FlankPointCandidates) { return; }
+        if(request.resourceType != AIResourceType.FlankPointCandidates 
+            && request.resourceType != AIResourceType.FlankPointEvaluationMasks) { return; }
 
-        //NEW
+        
+        if(request.resourceType == AIResourceType.FlankPointCandidates)
+        {
+            ProcessFlankPointCandidateRequest(request);
+        }else if(request.resourceType == AIResourceType.FlankPointEvaluationMasks)
+        {
+            ProcessFlankPointEvaluationMasksRequest(request);
+        }
+        else
+        {
+            Debug.LogError("Incorrect resource type provided, please provide either AIResourceType.FlankPointCandidates or AIResourceType.FlankPointEvaluationMasks");
+        }
+        
+    }
+
+    private void ProcessFlankPointEvaluationMasksRequest(AIDestinationRequestData request)
+    {
+        LayerMask blockingMask = _flankPointDataSO.flankBlockingMask;
+        LayerMask targetMask = _flankPointDataSO.flankTargetMask;
+        LayerMask secondaryTargetMask = _flankPointDataSO.flankSecondaryTargetMask;
+
+        request.flankPointEvaluationMasksRetrievalCallback?.Invoke(blockingMask, targetMask, secondaryTargetMask);
+    }
+
+    private void ProcessFlankPointCandidateRequest(AIDestinationRequestData request)
+    {
         int step = request.numSteps;
 
         if (_savedPoints == null || _savedPoints.Count == 0 ||
@@ -158,39 +184,14 @@ public class PlayerFlankingResources : SceneResources, IUpdateableResource
                     var point = _savedPoints[index];
                     if (!point.inUse)
                     {
-                        request.flankCandidates.Add(point);// NEW
-                       // request.flankPointCandidates.Add(point.position);
+                        request.flankCandidates.Add(point);
                     }
-                       
+
                 }
             }
         }
 
         request.FlankPointCandidatesCallback?.Invoke(request.flankCandidates.Count > 0);
-        ///// END NEW
-
-        /* int step = request.numSteps; 
-
-         if (_savedPoints == null || _savedPoints.Count == 0 ||
-             _nearestPointToPlayer < 0 || _nearestPointToPlayer >= _savedPoints.Count)
-         {
-
-             request.FlankPointCandidatesCallback?.Invoke(false);
-             return;
-         }
-
-         if (_savedPoints[_nearestPointToPlayer].reachableSteps.TryGetValue(step, out var indices))
-         {
-             foreach (int i in indices)
-             {
-                 request.flankPointCandidates.Add(_savedPoints[i].position);
-
-             }
-         }
-
-         request.FlankPointCandidatesCallback?.Invoke(request.flankPointCandidates.Count > 0);
-        */
-
     }
 
     public void UpdateResource()

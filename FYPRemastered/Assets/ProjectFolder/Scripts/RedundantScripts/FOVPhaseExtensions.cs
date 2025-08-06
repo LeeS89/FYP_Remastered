@@ -1,4 +1,4 @@
-using System.Runtime.CompilerServices;
+/*using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public static class FOVPhaseExtensions
@@ -92,3 +92,4 @@ public static class FOVPhaseExtensions
         hitPoints[startIndex++] = target.bounds.center + Vector3.right * target.bounds.extents.x;
     }
 }
+*/

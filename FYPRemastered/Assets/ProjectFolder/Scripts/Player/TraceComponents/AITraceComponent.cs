@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class AITraceComponent : TraceComponent
 {
+    private RaycastHit[] _hitBuffer = new RaycastHit[10];
+
+
     public int CheckTargetWithinCombatRange(Vector3 traceLocation, Collider[] hitResults, float sphereRadius = 0.2f, LayerMask traceLayer = default)
     {
 
@@ -53,12 +56,25 @@ public class AITraceComponent : TraceComponent
    
 
 
-    public int EvaluateViewCone(Vector3 start, Vector3 end, float radius, Vector3 direction, float maxdistance, LayerMask targetMask, Vector3[] hitPoints)
+    public int EvaluateViewCone(Vector3 start, Vector3 end, float radius, Vector3 direction, float maxDistance, LayerMask targetMask, Vector3[] hitPoints)
     {
-        RaycastHit[] hits = Physics.CapsuleCastAll(start, end, radius, direction.normalized, maxdistance, targetMask);
 
-        int hitCount = 0;
+        int hitCount = Physics.CapsuleCastNonAlloc(start, end, radius, direction, _hitBuffer, maxDistance, targetMask);
+        
+        int processedCount = Mathf.Min(hitCount, hitPoints.Length);
 
+        for (int i = 0; i < processedCount; i++)
+        {
+            hitPoints[i] = _hitBuffer[i].point;
+        }
+
+        return processedCount;
+
+
+       /* RaycastHit[] hits = Physics.CapsuleCastAll(start, end, radius, direction.normalized, maxDistance, targetMask);
+
+
+       // int hitCount = 0;
         
 
         foreach (var hit in hits)
@@ -71,7 +87,7 @@ public class AITraceComponent : TraceComponent
 
         }
 
-        return hitCount;
+        return hitCount;*/
     }
 
   /*  public bool HasLineOfSight(

@@ -261,7 +261,7 @@ public class FlankPointGenerator : MonoBehaviour
         SaveScriptableObject();
 
 #if UNITY_EDITOR
-       // ClearExistingSampleCubes();
+        ClearExistingSampleCubes();
         UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
         UnityEditor.SceneManagement.EditorSceneManager.SaveScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
 #endif

@@ -6,7 +6,7 @@ public partial class EnemyFSMController : ComponentEvents
 {
     public bool testRespawn = false;
     public bool _testWaypoint = false;
-
+    public bool _testDeath = false;
     public bool _updateEnaboled = false;
     #region Updates
     void Update()
@@ -27,18 +27,16 @@ public partial class EnemyFSMController : ComponentEvents
             testRespawn = false;
         }
 
-        if (_testWaypoint)
+        /*if (_testWaypoint)
         {
             ChangeWaypoints();
             _testWaypoint = false;
-        }
+        }*/
 
        // UpdateAgentSpeed();
     }
 
-    public bool _testEnterPatrol = false;
-    public bool testSeeView = false;
-    public bool _testMelee = false;
+  
     public bool _testRotation = false;
     public bool _testLook = false;
 
@@ -56,50 +54,23 @@ public partial class EnemyFSMController : ComponentEvents
             _testLook = false;
         }
 
-        if (!_agentIsActive) { return; }
+        if (!AgentIsAlive) { return; }
 
         if (_testRotation)
         {
             _agent.updateRotation = false;
         }
 
-        /* if (_testMelee)
-         {
-             if (_agent.pathPending)
-             {
-                 Debug.LogWarning("Agent path is pending, skipping update.");
-             }
-         }*/
+       
 
-        if (_testMelee)
-        {
-            _enemyEventManager.AnimationTriggered(AnimationAction.Melee);
-            _testMelee = false;
-        }
 
-        if (!_playerIsDead && _agentIsActive)
+        if (!_playerIsDead && AgentIsAlive)
         {
             //UpdateFieldOfViewCheckFrequency();
         }
 
-        /*if (_gun != null)
-        {
-            _gun.UpdateGun();
-        }*/
-
-        /*if (_testDeath)
-        {
-            //_animController.LookAround();
-            //_agent.enabled = false;
-            //_animController.EnemyDied();
-            CompareDistances(transform.position, _player.position);
-            //_testDeath = false;
-        }*/
-
-       /* if (_currentState != null)
-        {
-            _currentState.LateUpdateState();
-        }*/
+        
+       
 
         CheckCurrentPathValidity();
 
@@ -205,7 +176,7 @@ public partial class EnemyFSMController : ComponentEvents
             _enemyEventManager.FacingTarget(false);
         }*/
 
-            // ✅ Smoothly rotate toward target
+           
             transform.rotation = Quaternion.Slerp(
                 transform.rotation,
                 targetRotation,
