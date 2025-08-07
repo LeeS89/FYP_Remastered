@@ -131,6 +131,7 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
 
         _lastPosition = transform.position;
 #endif
+   //     SceneEventAggregator.Instance.RunClosestPointToPlayerJob();
         /*if (_testMove)
         {
             GameManager.Instance.PlayerHasMoved = true;
@@ -147,6 +148,30 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
         {
             SetShouldMoveforward(false);
         }*/
+    }
+
+    private void LateUpdate()
+    {
+        float movedDistance = Vector3.Distance(transform.position, _lastPosition);
+
+        if (movedDistance > movementThreshold)
+        {
+            if (!GameManager.Instance.PlayerHasMoved)
+            {
+                GameManager.Instance.PlayerHasMoved = true;  // Replace with actual method
+            }
+        }
+        else
+        {
+            if (GameManager.Instance.PlayerHasMoved)
+            {
+                GameManager.Instance.PlayerHasMoved = false;
+                SceneEventAggregator.Instance.RunClosestPointToPlayerJob();
+                //MoonSceneManager._instance.TestRun();
+            }
+        }
+
+        _lastPosition = transform.position;
     }
 
     private void HandleRotation(Quaternion targetRotation)
@@ -248,6 +273,7 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
 
     protected override void OnSceneStarted()
     {
+       
         InputEnabled = true;
         _lastPosition = transform.position;
     }

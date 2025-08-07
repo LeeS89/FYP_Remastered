@@ -162,7 +162,7 @@ public class DestinationManagerHelper
 
             yield return _waitUntilResultReceived;
         }
-#if UNITY_EDITOR
+//#if UNITY_EDITOR
         if (_debugCube == null) { yield break; }
 
         foreach (var point in _candidateFlankPointPositions)
@@ -170,7 +170,7 @@ public class DestinationManagerHelper
             Vector3 pos = point.position;
             GameObject obj = UnityEngine.Object.Instantiate(_debugCube, pos, Quaternion.identity);
         }
-#endif
+//#endif
 
     }
     #endregion

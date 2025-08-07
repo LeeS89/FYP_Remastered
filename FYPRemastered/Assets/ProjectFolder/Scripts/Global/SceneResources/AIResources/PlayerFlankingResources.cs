@@ -120,6 +120,7 @@ public class PlayerFlankingResources : SceneResources, IUpdateableResource
 
     private void SetNearestIndexToPlayer(int nearestPointIndex)
     {
+        
         _nearestPointToPlayer = nearestPointIndex;
     }
 

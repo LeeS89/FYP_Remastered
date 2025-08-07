@@ -73,11 +73,11 @@ public class StationaryState : EnemyState
     {
         while (_isStationary)
         {
-            if (_canFlankTarget && !_canSeePlayer)
+            if (/*_canFlankTarget && */!_canSeePlayer)
             {
                 yield return new WaitForSeconds(1f);
 
-                if (_canFlankTarget && !_canSeePlayer && !_newStateRequestAlreadySent)
+                if (/*_canFlankTarget && */!_canSeePlayer && !_newStateRequestAlreadySent)
                 {
                     _newStateRequestAlreadySent = true;
                     _eventManager.DestinationRequested(AIDestinationType.FlankDestination);
