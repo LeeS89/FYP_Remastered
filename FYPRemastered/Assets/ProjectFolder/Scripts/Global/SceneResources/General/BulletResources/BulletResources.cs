@@ -8,7 +8,7 @@ public class BulletResources : SceneResources
 {
     private GameObject _normalBulletPrefab;
     private GameObject _normalHitPrefab;
-    private GameObject _deflectAudioPrefab;
+    public GameObject DeflectAudioSourcePrefabGO { get; private set; }
 
     private PoolManager _bulletPool;
     private PoolManager _deflectAudioPool;
@@ -61,7 +61,7 @@ public class BulletResources : SceneResources
 
             if(audioHandle.Status == AsyncOperationStatus.Succeeded)
             {
-                _deflectAudioPrefab = audioHandle.Result;
+                DeflectAudioSourcePrefabGO = audioHandle.Result;
             }
 
         }
@@ -108,9 +108,9 @@ public class BulletResources : SceneResources
             _hitParticlePool.PrewarmPool(5);
         }
 
-        if (_deflectAudioPrefab != null)
+        if (DeflectAudioSourcePrefabGO != null)
         {
-            _deflectAudioPool = new PoolManager(_deflectAudioPrefab, 5, 10);
+            _deflectAudioPool = new PoolManager(DeflectAudioSourcePrefabGO, 5, 10);
             _deflectAudioPool.PrewarmPool(5);
         }
 
