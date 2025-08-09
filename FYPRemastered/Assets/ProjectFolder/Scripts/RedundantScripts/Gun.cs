@@ -3,7 +3,7 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 
-
+[Obsolete]
 public class Gun
 {
     [Header("Bullet Params")]
@@ -80,7 +80,7 @@ public class Gun
         _request.ResourceType = PoolResourceType.NormalBulletPool;
         _request.poolRequestCallback = (pool) =>
         {
-            _poolManager = pool;
+            //_poolManager = pool;
             _request.ResourceType = PoolResourceType.None; // Reset resource type after assignment
         };
         SceneEventAggregator.Instance.RequestResource(_request);

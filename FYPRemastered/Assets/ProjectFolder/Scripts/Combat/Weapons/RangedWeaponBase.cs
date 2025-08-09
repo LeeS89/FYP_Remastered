@@ -7,7 +7,7 @@ public abstract class RangedWeaponBase : IRangedWeapon
    // protected FireRate _fireRate;
     protected ResourceRequest _request;
     protected int _clipCapacity;
-    protected PoolManager _bulletPoolManager;
+    protected IPoolManager _bulletPoolManager;
     protected GameObject _gunOwner;
     protected int _clipCount;
 
@@ -21,7 +21,7 @@ public abstract class RangedWeaponBase : IRangedWeapon
         GetPoolManager(type);
     }
 
-    protected virtual void SetBulletPool(PoolManager poolManager)
+    protected virtual void SetBulletPool(IPoolManager poolManager)
     {
        _bulletPoolManager = poolManager;
     }
@@ -65,7 +65,7 @@ public abstract class RangedWeaponBase : IRangedWeapon
             Vector3 direction = directionOverride ?? _bulletSpawnPoint.forward; // fallback direction
             Quaternion bulletRotation = Quaternion.LookRotation(direction);
             
-            GameObject obj = _bulletPoolManager.GetFromPool(_bulletSpawnPoint.position, bulletRotation);
+            GameObject obj = _bulletPoolManager.Get(_bulletSpawnPoint.position, bulletRotation) as GameObject;
 
             BulletBase bullet = obj.GetComponentInChildren<BulletBase>();
 

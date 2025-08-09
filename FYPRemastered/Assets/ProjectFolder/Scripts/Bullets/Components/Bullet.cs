@@ -16,7 +16,7 @@ public class Bullet : BulletBase
             ClearState(IsFrozen);
             //_isFrozen = false;
         }
-        _objectPoolManager.ReleaseObjectToPool(_cachedRoot);
+        _objectPoolManager.Release(_cachedRoot);
 
         
     }

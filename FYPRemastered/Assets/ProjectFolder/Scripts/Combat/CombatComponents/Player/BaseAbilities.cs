@@ -6,7 +6,7 @@ public class BaseAbilities : ComponentEvents
     protected Transform _bulletSpawnLocation;
     protected Transform _targetTransform;
     protected GameObject _owner;
-    protected PoolManager _bulletPoolManager;
+    protected IPoolManager _bulletPoolManager;
     protected ResourceRequest _request;
     protected bool _ownerHasDied = false;
     protected bool _isReloading = false;

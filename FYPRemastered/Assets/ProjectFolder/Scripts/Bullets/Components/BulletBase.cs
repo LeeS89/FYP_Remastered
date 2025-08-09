@@ -12,7 +12,7 @@ using static UnityEngine.UI.GridLayoutGroup;
 public abstract class BulletBase : ComponentEvents, IPoolable
 {
     [Header("Pools")]
-    protected PoolManager _objectPoolManager;
+    protected IPoolManager _objectPoolManager;
     //protected PoolManager _hitParticlePoolManager;
     protected ResourceRequest _request;
 
@@ -190,7 +190,7 @@ public abstract class BulletBase : ComponentEvents, IPoolable
         }
     }
 
-    public void SetParentPool(PoolManager manager)
+    public void SetParentPool(IPoolManager manager)
     {
         _objectPoolManager = manager;
 
@@ -198,7 +198,7 @@ public abstract class BulletBase : ComponentEvents, IPoolable
         _request.ResourceType = PoolResourceType.NormalBulletPool;
         _request.poolRequestCallback = (pool) =>
         {
-            _objectPoolManager = pool;
+           // _objectPoolManager = pool;
             _request.ResourceType = PoolResourceType.None; // Reset resource type after assignment
         };
 

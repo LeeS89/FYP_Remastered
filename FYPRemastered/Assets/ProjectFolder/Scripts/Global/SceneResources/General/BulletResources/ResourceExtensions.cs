@@ -3,41 +3,92 @@ using UnityEngine;
 
 public static class ResourceExtensions
 {
-    public static PoolManagerNew<T> CreatePool<T>(this BulletResources manager) where T : UnityEngine.Object
-    { 
-       // Type type = typeof(T);
+    public static PoolManagerNew<T> CreatePool<T>(this BulletResources manager, T prefab) where T : UnityEngine.Object
+    {
+        if (prefab == null) throw new ArgumentNullException(nameof(prefab));
 
-        return typeof(T) switch
+        return prefab switch
+        {
+            AudioSource a => (PoolManagerNew<T>)(object) CreateNewAudioPool(manager, a),
+            ParticleSystem p => (PoolManagerNew<T>)(object) CreateNewParticlePool(manager, p),
+            GameObject g => (PoolManagerNew<T>)(object) CreateNewGOPool(manager, g),
+
+            _ => throw new NotSupportedException($"No pool for {typeof(T).Name}")
+        };
+
+       /* return typeof(T) switch
            {
                var t when t == typeof(AudioSource)
-               => (PoolManagerNew<T>)(object)CreateNewAudioPool(manager),
+               => (PoolManagerNew<T>)(object)CreateNewAudioPool(manager, prefab as AudioSource),
 
                var t when t == typeof(ParticleSystem)
-               => (PoolManagerNew<T>)(object)CreateNewPool<T>(manager),
+               => (PoolManagerNew<T>)(object)CreateNewParticlePool(manager, prefab as ParticleSystem),
 
                _ => throw new NotSupportedException($"No pool for {typeof(T).Name}")
-           };
+           };*/
     }
-    //return null;
+   
 
 
-    private static PoolManagerNew<AudioSource> CreateNewAudioPool(BulletResources manager, AudioClip clip = null)
+    private static PoolManagerNew<AudioSource> CreateNewAudioPool(this BulletResources manager, AudioSource prefab)
     {
-        return new PoolManagerNew<AudioSource>(
+
+        var poolRoot = new GameObject($"PoolRoot_{prefab.name}").transform;
+
+        PoolManagerNew<AudioSource> pool = null;
+
+        pool = new PoolManagerNew<AudioSource>(
           createFunc: () =>
           {
-              GameObject go = new GameObject("PooledAudio");
-              AudioSource source = go.AddComponent<AudioSource>();
-              if (clip != null)
+              var inst = UnityEngine.Object.Instantiate(prefab, poolRoot, false);
+              inst.playOnAwake = false;
+              IPoolable poolable = inst.GetComponentInChildren<IPoolable>();
+              if (poolable != null)
               {
-                  source.clip = clip;
+                  poolable.SetParentPool(pool);
               }
-              source.playOnAwake = false;
-              return source;
+              return inst;
+            
           },
-          onGet: source =>
+          onGet: inst =>
           {
+              inst.gameObject.SetActive(false);
+              
+          },
+          onRelease: source =>
+          {
+              source.Stop();
               source.gameObject.SetActive(false);
+          }
+      );
+        return pool;
+
+    }
+
+    private static PoolManagerNew<ParticleSystem> CreateNewParticlePool(BulletResources manager, ParticleSystem prefab)
+    {
+
+        var poolRoot = new GameObject($"PoolRoot_{prefab.name}").transform;
+        PoolManagerNew<ParticleSystem> pool = null;
+
+        pool = new PoolManagerNew<ParticleSystem>(
+          createFunc: () =>
+          {
+              var inst = UnityEngine.Object.Instantiate(prefab, poolRoot, false);
+              var main = inst.main;
+              main.playOnAwake = false;
+              IPoolable poolable = inst.GetComponentInChildren<IPoolable>();
+              if (poolable != null)
+              {
+                  poolable.SetParentPool(pool);
+              }
+
+              return inst;
+              
+          },
+          onGet: inst =>
+          {
+              inst.gameObject.SetActive(false);
               //source.Play();
           },
           onRelease: source =>
@@ -46,8 +97,53 @@ public static class ResourceExtensions
               source.gameObject.SetActive(false);
           }
       );
+        return pool;
 
     }
+
+
+
+    private static PoolManagerNew<GameObject> CreateNewGOPool(BulletResources manager, GameObject prefab)
+    {
+
+        var poolRoot = new GameObject($"PoolRoot_{prefab.name}").transform;
+        PoolManagerNew<GameObject> pool = null;
+
+        pool = new PoolManagerNew<GameObject>(
+          createFunc: () =>
+          {
+              var inst = UnityEngine.Object.Instantiate(prefab, poolRoot, false);
+              IPoolable poolable = inst.GetComponentInChildren<IPoolable>();
+              if (poolable != null)
+              {
+                  poolable.SetParentPool(pool);
+              }
+              return inst;
+             
+          },
+          onGet: inst =>
+          {
+              inst.gameObject.SetActive(false);
+              //source.Play();
+          },
+          onRelease: inst =>
+          {
+              inst.gameObject.SetActive(false);
+          }
+      );
+        return pool;
+
+    }
+
+
+
+
+    //////////////////////////// END
+
+
+
+
+
 
     private static PoolManagerNew<AudioSource> CreateNewAudioPools(BulletResources manager, AudioSource source)
     {

@@ -5,8 +5,8 @@ public class BulletVFX : ComponentEvents
     [SerializeField]
     private ParticleManager _particleManager;
     public ParticleSystem _particle;
-    private PoolManager _particlePoolManager;
-    private PoolManager _audioPoolManager;
+    private IPoolManager _particlePoolManager;
+    private IPoolManager _audioPoolManager;
     private BulletEventManager _bulletEventManager;
 
     public ParticleSystem particleMove;
@@ -67,7 +67,7 @@ public class BulletVFX : ComponentEvents
         
     }
 
-    private void OnPoolReceived(PoolManager pool)
+    private void OnPoolReceived(IPoolManager pool)
     {
         switch (_request.ResourceType)
         {
@@ -89,7 +89,8 @@ public class BulletVFX : ComponentEvents
 
     private void SpawnHitParticle(Collision collision)
     {
-        ContactPoint contact = collision.contacts[0];
+        ContactPoint contact = collision.GetContact(0);
+       // ContactPoint contact = collision.contacts[0];
         Vector3 pos = contact.point;
         //Vector3 hitNormal = contact.normal;
         //GameObject obj = _poolManager.GetFromPool(pos, rot);

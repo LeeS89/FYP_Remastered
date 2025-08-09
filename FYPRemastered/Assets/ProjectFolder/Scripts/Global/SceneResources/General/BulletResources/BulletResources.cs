@@ -10,10 +10,14 @@ public class BulletResources : SceneResources
     private GameObject _normalHitPrefab;
     public GameObject DeflectAudioSourcePrefabGO { get; private set; }
 
-    private PoolManager _bulletPool;
+   /* private PoolManager _bulletPool;
     private PoolManager _deflectAudioPool;
-    private PoolManager _hitParticlePool;
-    
+    private PoolManager _hitParticlePool;*/
+
+    private PoolManagerNew<GameObject> _bulletPool;
+    private PoolManagerNew<AudioSource> _deflectAudioPool;
+    private PoolManagerNew<ParticleSystem> _hitParticlePool;
+
 
     public override async Task LoadResources()
     {
@@ -104,20 +108,25 @@ public class BulletResources : SceneResources
         
         if (_normalHitPrefab != null)
         {
-            _hitParticlePool = new PoolManager(_normalHitPrefab, 40, 80);
-            _hitParticlePool.PrewarmPool(5);
+            _hitParticlePool = this.CreatePool<ParticleSystem>(_normalHitPrefab.GetComponent<ParticleSystem>());
+            _hitParticlePool.PreWarmPool(40);
+            /*_hitParticlePool = new PoolManager(_normalHitPrefab, 40, 80);
+            _hitParticlePool.PrewarmPool(5);*/
         }
 
         if (DeflectAudioSourcePrefabGO != null)
         {
-            _deflectAudioPool = new PoolManager(DeflectAudioSourcePrefabGO, 5, 10);
-            _deflectAudioPool.PrewarmPool(5);
+            _deflectAudioPool = this.CreatePool<AudioSource>(DeflectAudioSourcePrefabGO.GetComponent<AudioSource>());
+            _deflectAudioPool.PreWarmPool(20);
+            /*_deflectAudioPool = new PoolManager(DeflectAudioSourcePrefabGO, 5, 10);
+            _deflectAudioPool.PrewarmPool(5);*/
         }
 
         if (_normalBulletPrefab != null)
         {
-            _bulletPool = new PoolManager(_normalBulletPrefab, 40, 80);
-           // _bulletPool.PrewarmPool(5);
+            _bulletPool = this.CreatePool<GameObject>(_normalBulletPrefab);
+            //_bulletPool = new PoolManager(_normalBulletPrefab, 40, 80);
+            // _bulletPool.PrewarmPool(5);
         }
     }
 

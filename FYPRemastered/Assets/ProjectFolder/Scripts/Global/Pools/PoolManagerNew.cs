@@ -1,12 +1,13 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
 
-public class PoolManagerNew<T> where T : UnityEngine.Object
+public class PoolManagerNew<T> : IPoolManager where T : UnityEngine.Object
 {
     private ObjectPool<T> _pool;
     private int _maxSize;
+
+    public Type ItemType => typeof(T);
 
     public PoolManagerNew(Func<T> createFunc, Action<T> onGet, Action<T> onRelease, Action<T> onDestroy = null, int defaultCapacity = 10, int maxSize = 50)
     {
@@ -39,7 +40,7 @@ public class PoolManagerNew<T> where T : UnityEngine.Object
 
         return item;
     }
-    public void Release(T obj) => _pool.Release(obj); 
+   // public void Release(T obj) => _pool.Release(obj); 
 
     public void PreWarmPool(int count)
     {
@@ -50,21 +51,19 @@ public class PoolManagerNew<T> where T : UnityEngine.Object
             var item = _pool.Get();
             _pool.Release(item);
         }
-        /* int preWarmCount = Mathf.Min(count, _maxSize);
-         var tempList = new List<T>(preWarmCount);
+       
+    }
 
-         for(int i = 0; i < preWarmCount; i++)
-         {
-             var item = _pool.Get();
-             tempList.Add(item);
-         }
+    UnityEngine.Object IPoolManager.Get(Vector3 position, Quaternion rotation)
+    {
+        return Get(position, rotation);
+    }
 
-         foreach(var item in tempList)
-         {
-             _pool.Release(item);
-         }*/
-
-        /*tempList.Clear();
-        tempList = null;*/
+    void IPoolManager.Release(UnityEngine.Object obj)
+    {
+        if(obj is T t) _pool.Release(t);
+        else throw new InvalidOperationException(
+            $"Cannot release object of type {obj.GetType()} to pool of type {typeof(T)}");
+        
     }
 }

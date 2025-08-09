@@ -135,6 +135,7 @@ public class AITraceComponent : TraceComponent
        bool debug = false
        )
     {
+       // Debug.LogError("LOS CALLED");
         RaycastHit hitInfo;
         bool targetWasHit;
 
@@ -152,8 +153,7 @@ public class AITraceComponent : TraceComponent
 
                 if (((1 << hitInfo.collider.gameObject.layer) & targetMask) != 0)
                 {
-                   // Debug.DrawLine(fallbackFrom.position, target, Color.green);
-                   // Debug.LogError($"Hit target from fallback: {hitInfo.collider.gameObject.name}");
+                   
                     return true;
                 }
                
@@ -162,7 +162,7 @@ public class AITraceComponent : TraceComponent
 
         if (((1 << hitInfo.collider.gameObject.layer) & targetMask) != 0)
         {
-            Debug.DrawLine(fallbackFrom.position, target, Color.green);
+            //Debug.DrawLine(fallbackFrom.position, target, Color.green);
           
             return true;
         }

@@ -42,7 +42,7 @@ public class PoolManager
         IPoolable poolable = newObject.GetComponentInChildren<IPoolable>();
         if (poolable != null)
         {
-            poolable.SetParentPool(this);
+            //poolable.SetParentPool(this);
         }
         newObject.transform.root.parent = _poolContainer.transform;
        

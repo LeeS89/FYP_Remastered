@@ -2,6 +2,6 @@ using UnityEngine;
 
 public interface IPoolable
 {
-    void SetParentPool(PoolManager manager);
+    void SetParentPool(IPoolManager manager);
     
 }
