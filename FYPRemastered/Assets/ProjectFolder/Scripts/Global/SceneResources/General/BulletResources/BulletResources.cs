@@ -1,11 +1,16 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
-public class BulletResources : SceneResources
+public class BulletResources : SceneResources, IUpdateableResource
 {
+    private int _maxTrackedPoolObjects = 256;
+    private List<PoolObjectTracker> _jobs;
+
     private GameObject _normalBulletPrefab;
     private GameObject _normalHitPrefab;
     public GameObject DeflectAudioSourcePrefabGO { get; private set; }
@@ -105,10 +110,13 @@ public class BulletResources : SceneResources
 
     protected override void InitializePools()
     {
-        
+        _jobs = new List<PoolObjectTracker>();
+        _jobs.EnsureCapacity(_maxTrackedPoolObjects);
+
         if (_normalHitPrefab != null)
         {
-            _hitParticlePool = this.CreatePool<ParticleSystem>(_normalHitPrefab.GetComponent<ParticleSystem>());
+            //_hitParticlePool = this.CreatePool<ParticleSystem>(_normalHitPrefab.GetComponent<ParticleSystem>());
+            _hitParticlePool = new PoolManagerNew<ParticleSystem>(this, _normalHitPrefab.GetComponent<ParticleSystem>());
             _hitParticlePool.PreWarmPool(40);
             /*_hitParticlePool = new PoolManager(_normalHitPrefab, 40, 80);
             _hitParticlePool.PrewarmPool(5);*/
@@ -116,7 +124,8 @@ public class BulletResources : SceneResources
 
         if (DeflectAudioSourcePrefabGO != null)
         {
-            _deflectAudioPool = this.CreatePool<AudioSource>(DeflectAudioSourcePrefabGO.GetComponent<AudioSource>());
+            //_deflectAudioPool = this.CreatePool<AudioSource>(DeflectAudioSourcePrefabGO.GetComponent<AudioSource>());
+            _deflectAudioPool = new PoolManagerNew<AudioSource>(this, DeflectAudioSourcePrefabGO.GetComponent<AudioSource>());
             _deflectAudioPool.PreWarmPool(20);
             /*_deflectAudioPool = new PoolManager(DeflectAudioSourcePrefabGO, 5, 10);
             _deflectAudioPool.PrewarmPool(5);*/
@@ -124,10 +133,13 @@ public class BulletResources : SceneResources
 
         if (_normalBulletPrefab != null)
         {
-            _bulletPool = this.CreatePool<GameObject>(_normalBulletPrefab);
+            //_bulletPool = this.CreatePool<GameObject>(_normalBulletPrefab);
+            _bulletPool = new PoolManagerNew<GameObject>(this, _normalBulletPrefab);
             //_bulletPool = new PoolManager(_normalBulletPrefab, 40, 80);
             // _bulletPool.PrewarmPool(5);
         }
+
+       
     }
 
     protected override void ResourceRequested(ResourceRequest request)
@@ -151,5 +163,37 @@ public class BulletResources : SceneResources
         }
     }
 
+    public bool SchedulePoolObjectRelease(IPoolManager pool, UnityEngine.Object item, float seconds)
+    {
+        if(_jobs.Count == _maxTrackedPoolObjects) { return false; }
+        _jobs.Add(new PoolObjectTracker(pool, item, seconds));
+        return true;
+    }
 
+    public void UpdateResource()
+    {
+        if(_jobs == null || _jobs.Count == 0) { return; }
+
+        float dt = Time.deltaTime;
+
+        for (int i = _jobs.Count - 1; i >= 0; i--)
+        {
+            var job = _jobs[i];
+            job.TimeRemaining -= dt;
+            _jobs[i] = job;
+           
+            if (job.TimeRemaining <= 0f)
+            {
+                job.Pool.Release(job.Item);
+
+                int last = _jobs.Count - 1;
+                if (i != last)
+                {
+                    _jobs[i] = _jobs[last];
+                }
+                _jobs.RemoveAt(last);
+            }
+
+        }
+    }
 }

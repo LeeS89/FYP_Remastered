@@ -1,4 +1,4 @@
-using System;
+/*using System;
 using UnityEngine;
 
 public static class ResourceExtensions
@@ -16,7 +16,7 @@ public static class ResourceExtensions
             _ => throw new NotSupportedException($"No pool for {typeof(T).Name}")
         };
 
-       /* return typeof(T) switch
+       *//* return typeof(T) switch
            {
                var t when t == typeof(AudioSource)
                => (PoolManagerNew<T>)(object)CreateNewAudioPool(manager, prefab as AudioSource),
@@ -25,7 +25,7 @@ public static class ResourceExtensions
                => (PoolManagerNew<T>)(object)CreateNewParticlePool(manager, prefab as ParticleSystem),
 
                _ => throw new NotSupportedException($"No pool for {typeof(T).Name}")
-           };*/
+           };*//*
     }
    
 
@@ -53,7 +53,8 @@ public static class ResourceExtensions
           onGet: inst =>
           {
               inst.gameObject.SetActive(false);
-              
+             // manager.SchedulePoolObjectRelease(pool, inst, inst.clip.length);
+
           },
           onRelease: source =>
           {
@@ -89,6 +90,7 @@ public static class ResourceExtensions
           onGet: inst =>
           {
               inst.gameObject.SetActive(false);
+             // manager.SchedulePoolObjectRelease(pool, inst, inst.main.duration);
               //source.Play();
           },
           onRelease: source =>
@@ -123,7 +125,7 @@ public static class ResourceExtensions
           },
           onGet: inst =>
           {
-              inst.gameObject.SetActive(false);
+              inst.SetActive(false);
               //source.Play();
           },
           onRelease: inst =>
@@ -200,3 +202,4 @@ public static class ResourceExtensions
         return null;
     }
 }
+*/
