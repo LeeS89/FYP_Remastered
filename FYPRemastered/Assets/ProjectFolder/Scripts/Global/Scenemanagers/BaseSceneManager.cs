@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
 {
@@ -32,7 +33,16 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
         OnSceneEnded?.Invoke();
     }
 
+    protected virtual void RegisterDamageables()
+    {
+       
+        var damageables = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None).OfType<IDamageable>();
+        foreach(var d in damageables)
+        {
+            DamageManager.Register(((MonoBehaviour)d).gameObject, d);
+        }
 
+    }
    
 
 

@@ -145,7 +145,7 @@ public class AITraceComponent : TraceComponent
 
         if(fallbackFrom != null)
         {
-            if(hitInfo.collider.transform.root == from.root)
+            if(hitInfo.transform.root == from)
             {
                 targetWasHit = false;
                 CheckHit(fallbackFrom, target, out hitInfo, out targetWasHit, blockingMask);

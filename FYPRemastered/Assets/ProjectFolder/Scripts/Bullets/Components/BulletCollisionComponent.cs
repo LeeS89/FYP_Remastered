@@ -123,20 +123,26 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
     {
         Vector3 spawnPoint = hitPoint;
 
-        if (collision.gameObject.TryGetComponent<IDamageable>(out IDamageable damageable))
+        if(DamageManager.TryGetDamageable(collision.gameObject, out var damageable))
         {
-           /* if(damageable is IEnemyDamageable enemyDamageable)
+            damageable.NotifyDamage(_baseDamage, _damageType, _statusEffectChancePercentage, _damageOverTime, _dOTDuration);
+        }
+
+        
+      /*  if (collision.gameObject.TryGetComponent<IDamageable>(out IDamageable damageable))
+        {
+           *//* if(damageable is IEnemyDamageable enemyDamageable)
             {
                 spawnPoint = enemyDamageable.GetAdjustedHitPoint(hitPoint, hitNormal);
-            }*/
+            }*//*
 
             damageable.NotifyDamage(_baseDamage, _damageType, _statusEffectChancePercentage, _damageOverTime, _dOTDuration);
-            /* damageable = collision.gameObject.GetComponentInParent<IDamageable>() ??
-                          collision.gameObject.GetComponentInChildren<IDamageable>();*/
+            *//* damageable = collision.gameObject.GetComponentInParent<IDamageable>() ??
+                          collision.gameObject.GetComponentInChildren<IDamageable>();*//*
 
            // _bulletEventManager.SpawnHitParticle(spawnPoint, Quaternion.identity);
             //return true;
-        }
+        }*/
        
 
         //if (damageable == null) { return; }

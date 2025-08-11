@@ -9,25 +9,25 @@ public static class ResourceExtensions
 
         return prefab switch
         {
-            AudioSource a => (PoolManagerNew<T>)(object) CreateNewAudioPool(manager, a),
-            ParticleSystem p => (PoolManagerNew<T>)(object) CreateNewParticlePool(manager, p),
-            GameObject g => (PoolManagerNew<T>)(object) CreateNewGOPool(manager, g),
+            AudioSource a => (PoolManagerNew<T>)(object)CreateNewAudioPool(manager, a),
+            ParticleSystem p => (PoolManagerNew<T>)(object)CreateNewParticlePool(manager, p),
+            GameObject g => (PoolManagerNew<T>)(object)CreateNewGOPool(manager, g),
 
             _ => throw new NotSupportedException($"No pool for {typeof(T).Name}")
         };
 
-       *//* return typeof(T) switch
-           {
-               var t when t == typeof(AudioSource)
-               => (PoolManagerNew<T>)(object)CreateNewAudioPool(manager, prefab as AudioSource),
+        return typeof(T) switch
+        {
+            var t when t == typeof(AudioSource)
+            => (PoolManagerNew<T>)(object)CreateNewAudioPool(manager, prefab as AudioSource),
 
-               var t when t == typeof(ParticleSystem)
-               => (PoolManagerNew<T>)(object)CreateNewParticlePool(manager, prefab as ParticleSystem),
+            var t when t == typeof(ParticleSystem)
+            => (PoolManagerNew<T>)(object)CreateNewParticlePool(manager, prefab as ParticleSystem),
 
-               _ => throw new NotSupportedException($"No pool for {typeof(T).Name}")
-           };*//*
+            _ => throw new NotSupportedException($"No pool for {typeof(T).Name}")
+        };
     }
-   
+
 
 
     private static PoolManagerNew<AudioSource> CreateNewAudioPool(this BulletResources manager, AudioSource prefab)
@@ -48,12 +48,12 @@ public static class ResourceExtensions
                   poolable.SetParentPool(pool);
               }
               return inst;
-            
+
           },
           onGet: inst =>
           {
               inst.gameObject.SetActive(false);
-             // manager.SchedulePoolObjectRelease(pool, inst, inst.clip.length);
+              // manager.SchedulePoolObjectRelease(pool, inst, inst.clip.length);
 
           },
           onRelease: source =>
@@ -85,12 +85,12 @@ public static class ResourceExtensions
               }
 
               return inst;
-              
+
           },
           onGet: inst =>
           {
               inst.gameObject.SetActive(false);
-             // manager.SchedulePoolObjectRelease(pool, inst, inst.main.duration);
+              // manager.SchedulePoolObjectRelease(pool, inst, inst.main.duration);
               //source.Play();
           },
           onRelease: source =>
@@ -121,7 +121,7 @@ public static class ResourceExtensions
                   poolable.SetParentPool(pool);
               }
               return inst;
-             
+
           },
           onGet: inst =>
           {
@@ -154,14 +154,14 @@ public static class ResourceExtensions
           {
               GameObject go = new GameObject("PooledAudio");
               source = go.AddComponent<AudioSource>();
-              
+
               source.playOnAwake = false;
               return source;
           },
           onGet: source =>
           {
               source.gameObject.SetActive(false);
-            
+
           },
           onRelease: source =>
           {
@@ -179,7 +179,7 @@ public static class ResourceExtensions
           {
               GameObject go = new GameObject("PooledAudio");
               AudioSource source = go.AddComponent<AudioSource>();
-              
+
               source.playOnAwake = false;
               return source;
           },

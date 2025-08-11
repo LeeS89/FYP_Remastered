@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Scripting;
 
 public enum CharacterType
 {
@@ -55,11 +56,20 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
-/*
-    private void Start()
+
+    void Update()
     {
-        Application.targetFrameRate = 90;
-    }*/
+       /* if (GarbageCollector.isIncremental)
+        {
+            // 0.5–1.0 ms per frame is a good VR budget
+            GarbageCollector.CollectIncremental(1_000_000); // nanoseconds
+        }*/
+    }
+    /*
+        private void Start()
+        {
+            Application.targetFrameRate = 90;
+        }*/
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {

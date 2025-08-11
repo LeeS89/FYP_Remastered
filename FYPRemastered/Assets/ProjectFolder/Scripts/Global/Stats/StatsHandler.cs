@@ -38,7 +38,19 @@ public class StatsHandler
 
     public float ModifyStat(StatType stat, float amount)
     {
-        StatEntry entry = _stats.Find(s => s.statType == stat);
+        for(int i = 0; i < _stats.Count; i++)
+        {
+            var entry = _stats[i];
+            if (entry.statType == stat)
+            {
+                entry.value += amount;
+                entry.value = Mathf.Clamp(entry.value, 0, GetMaxStatValue(stat));
+                return entry.value;
+            }
+        }
+        return -1;
+
+        /*StatEntry entry = _stats.Find(s => s.statType == stat);
         if (entry != null)
         {
             entry.value += amount;
@@ -46,7 +58,7 @@ public class StatsHandler
             return entry.value;
             
         }
-        return -1;
+        return -1;*//// CURRENT IMPLEMENTATION
     }
 
     private float GetMaxStatValue(StatType stat)
@@ -64,8 +76,18 @@ public class StatsHandler
 
     public float GetStat(StatType stat)
     {
-        StatEntry entry = _stats.Find(s => s.statType == stat);
-        return entry != null ? entry.value : 0;
+        for (int i = 0; i < _stats.Count; i++)
+        {
+            var entry = _stats[i];
+            if (entry.statType == stat)
+            {
+                return entry.value;
+            }
+        }
+
+        return 0;
+        /* StatEntry entry = _stats.Find(s => s.statType == stat);
+         return entry != null ? entry.value : 0;*/ // CURRENT IMPLEMENTATION
     }
 
     /*public float Gethealth()

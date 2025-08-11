@@ -47,7 +47,8 @@ public class MoonSceneManager : BaseSceneManager
 
 
         await _resources.LoadResourcesAsync();
-        await _resources.LoadDependancies(); // Load any additional resources that are dependencies
+        await _resources.LoadDependancies(); 
+        RegisterDamageables();
 
         LoadActiveSceneEventManagers();
 
@@ -63,6 +64,8 @@ public class MoonSceneManager : BaseSceneManager
     protected override void UnloadSceneResources()
     {
        // Implement Later
+       // Clear Damageables
+       // ensure all resource class' fields are cleared
     }
 
 

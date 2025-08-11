@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Pool;
 
@@ -10,45 +9,23 @@ public sealed class PoolManagerNew<T> : IPoolManager where T : UnityEngine.Objec
     private int _maxSize;
     private Transform _poolContainer;
     private T _prefab;
+    private Dictionary<T,Transform> _transformCache = new();
     BulletResources _manager;
 
     public Type ItemType => typeof(T);
 
- /*   public PoolManagerNew(Func<T> createFunc, Action<T> onGet, Action<T> onRelease, Action<T> onDestroy = null, int defaultCapacity = 10, int maxSize = 50)
-    {
-        _maxSize = maxSize;
-
-        _pool = new ObjectPool<T>(
-            createFunc,
-            onGet,
-            onRelease,
-            onDestroy,
-            false,
-            defaultCapacity,
-            _maxSize);
-    }*/
-
-
+ 
     ///////  NEW CONSTRUCTOR
     public PoolManagerNew(BulletResources manager, T prefab, int defaultCapacity = 10, int maxSize = 50)
     {
         _prefab = prefab ?? throw new ArgumentNullException(nameof(prefab));
         _poolContainer = new GameObject($"PoolContainer_{prefab.name}").transform;
         _manager = manager ?? throw new ArgumentNullException(nameof(manager));
+        _maxSize = maxSize;
 
         _pool = new ObjectPool<T>(
             CreatePooledObject,
-            item =>
-            {
-                if (item is GameObject go)
-                {
-                    go.SetActive(false);
-                }
-                else if (item is Component c)
-                {
-                    c.gameObject.SetActive(false);
-                }
-            },
+            OnGet,
             item => 
             {
                 if (item is GameObject go)
@@ -59,8 +36,8 @@ public sealed class PoolManagerNew<T> : IPoolManager where T : UnityEngine.Objec
                 {
                     c.gameObject.SetActive(false);
                 }
-            }, // No specific release action needed
-            null, // No destroy action needed
+            }, 
+            null, 
             false,
             defaultCapacity,
             maxSize);
@@ -77,7 +54,7 @@ public sealed class PoolManagerNew<T> : IPoolManager where T : UnityEngine.Objec
         {
             var ps = item as ParticleSystem;
             ps.gameObject.SetActive(false);
-            _manager.SchedulePoolObjectRelease(this, ps.gameObject, ps.main.duration);
+            _manager.SchedulePoolObjectRelease(this, ps, ps.main.duration);
         }else if(typeof(T) == typeof(GameObject))
         {
             var go = item as GameObject;
@@ -93,19 +70,25 @@ public sealed class PoolManagerNew<T> : IPoolManager where T : UnityEngine.Objec
         {
             var a = inst as AudioSource;
             a.playOnAwake = false;
+
+            _transformCache[inst] = a.transform;
         }
         else if (typeof(T) == typeof(ParticleSystem))
         {
             var p = inst as ParticleSystem;
             var main = p.main;
             main.playOnAwake = false;
+            _transformCache[inst] = p.transform;
 
         }
         else if (typeof(T) == typeof(GameObject))
         {
-            var poolable = inst.GetComponentInChildren<IPoolable>();
+            var go = inst as GameObject;
+            var poolable = go.GetComponentInChildren<IPoolable>();
             if (poolable != null)
                 poolable.SetParentPool(this);
+
+            _transformCache[inst] = go.transform;
         }
 
         return inst;
@@ -119,6 +102,8 @@ public sealed class PoolManagerNew<T> : IPoolManager where T : UnityEngine.Objec
     {
         var item = _pool.Get();
 
+        var tr = _transformCache[item];
+
         GameObject go = item switch
         {
             Component c => c.gameObject,
@@ -127,12 +112,12 @@ public sealed class PoolManagerNew<T> : IPoolManager where T : UnityEngine.Objec
                      $"{typeof(T)} is not a Component or GameObject")
         };
 
-        go.transform.SetPositionAndRotation(position, rotation);
+        tr.SetPositionAndRotation(position, rotation);
         go.SetActive(true);
 
         return item;
     }
-   // public void Release(T obj) => _pool.Release(obj); 
+  
 
     public void PreWarmPool(int count)
     {
@@ -143,7 +128,7 @@ public sealed class PoolManagerNew<T> : IPoolManager where T : UnityEngine.Objec
             var item = _pool.Get();
             tempList.Add(item);
         }
-
+        Debug.LogError("Pool Count: "+tempList.Count);
         foreach (var item in tempList)
         {
             _pool.Release(item);
