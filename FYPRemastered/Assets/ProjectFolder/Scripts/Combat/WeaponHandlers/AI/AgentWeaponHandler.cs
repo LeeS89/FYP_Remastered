@@ -44,8 +44,8 @@ public class AgentWeaponHandler : WeaponHandlerBase
         _eventManager.OnOutOfAmmo += OutOfAmmo;
         _eventManager.OnReload += ReloadStateChanged;
 
-        GameManager.OnPlayerDied += TargetDead;
-        GameManager.OnPlayerRespawn += TargetRespawned;
+        GameManager.OnPlayerDeathStatusChanged += TargetDead;
+       
 
         EquipWeapon(WeaponType.Ranged);
         //_equippedWeapon = _rangedWeapon;
@@ -100,8 +100,8 @@ public class AgentWeaponHandler : WeaponHandlerBase
 
     #region Firing condition Setters
 
-    protected void TargetDead() => IsTargetDead = true;
-    protected void TargetRespawned() => IsTargetDead = false;
+    protected void TargetDead(bool isDead) => IsTargetDead = isDead;
+    //protected void TargetRespawned() => IsTargetDead = false;
 
     protected void MeleeTriggered(bool isMelee) => IsMeleeTriggered = isMelee;
   
@@ -181,8 +181,8 @@ public class AgentWeaponHandler : WeaponHandlerBase
         _eventManager.OnOutOfAmmo -= OutOfAmmo;
         _eventManager.OnReload -= ReloadStateChanged;
 
-        GameManager.OnPlayerDied -= TargetDead;
-        GameManager.OnPlayerRespawn -= TargetRespawned;
+        GameManager.OnPlayerDeathStatusChanged -= TargetDead;
+        
         base.OnInstanceDestroyed();
     }
 
@@ -202,8 +202,8 @@ public class AgentWeaponHandler : WeaponHandlerBase
         _eventManager.OnOutOfAmmo += OutOfAmmo;
         _eventManager.OnReload += ReloadStateChanged;
 
-        GameManager.OnPlayerDied += TargetDead;
-        GameManager.OnPlayerRespawn += TargetRespawned;
+        GameManager.OnPlayerDeathStatusChanged += TargetDead;
+       
 
         // _request = new ResourceRequest();
         _owner = owner;

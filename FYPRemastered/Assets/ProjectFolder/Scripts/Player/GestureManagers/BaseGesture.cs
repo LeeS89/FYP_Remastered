@@ -31,10 +31,14 @@ public abstract class BaseGesture : ComponentEvents//, IPlayerEvents
     protected override void OnSceneComplete() { }
 
 
-    protected override void OnPlayerDied() { InputEnabled = false; }
+    protected override void OnPlayerDeathStatusUpdated(bool isDead)
+    {
+        base.OnPlayerDeathStatusUpdated(isDead);
+        InputEnabled = PlayerIsDead; 
+    }
 
 
-    protected override void OnPlayerRespawned() {  InputEnabled = true; }
+   // protected override void OnPlayerRespawned() {  InputEnabled = true; }
 
     protected override void RegisterGlobalEvents() { }
 

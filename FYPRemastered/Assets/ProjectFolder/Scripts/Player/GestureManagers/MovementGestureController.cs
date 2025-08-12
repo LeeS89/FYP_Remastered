@@ -62,14 +62,14 @@ public class MovementGestureController : BaseGesture
     {
         BaseSceneManager._instance.OnSceneStarted += OnSceneStarted;
         BaseSceneManager._instance.OnSceneEnded += OnSceneComplete;
-        GameManager.OnPlayerRespawn += OnPlayerRespawned;
-        GameManager.OnPlayerDied += OnPlayerDied;
+        
+        GameManager.OnPlayerDeathStatusChanged += OnPlayerDeathStatusUpdated;
     }
 
     protected override void UnRegisterGlobalEvents()
     {
-        GameManager.OnPlayerRespawn -= OnPlayerRespawned;
-        GameManager.OnPlayerDied -= OnPlayerDied;
+        
+        GameManager.OnPlayerDeathStatusChanged -= OnPlayerDeathStatusUpdated;
         BaseSceneManager._instance.OnSceneStarted -= OnSceneStarted;
         BaseSceneManager._instance.OnSceneEnded -= OnSceneComplete;
     }
@@ -149,10 +149,14 @@ public class MovementGestureController : BaseGesture
         }
     }
 
-    protected override void OnPlayerDied()
+    protected override void OnPlayerDeathStatusUpdated(bool isDead)
     {
-        base.OnPlayerDied();
-        ResetStates();
+        base.OnPlayerDeathStatusUpdated(isDead);
+
+        if (PlayerIsDead)
+        {
+            ResetStates();
+        }  
     }
 
 
@@ -175,8 +179,5 @@ public class MovementGestureController : BaseGesture
 
 
 
-    protected override void OnPlayerRespawned()
-    {
-        base.OnPlayerRespawned();
-    }
+  
 }

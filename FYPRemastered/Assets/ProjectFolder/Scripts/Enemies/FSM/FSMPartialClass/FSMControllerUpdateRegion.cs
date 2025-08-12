@@ -13,7 +13,7 @@ public partial class EnemyFSMController : ComponentEvents
     {
         if (_testDeath)
         {
-            GameManager.Instance.CharacterDied(CharacterType.Player);
+            GameManager.Instance.CharacterDeathStatusChanged(CharacterType.Player);
             //_animController.DeadAnimation();
             //ChangeState(_chasing);
             //CarveOnDestinationReached(true);
@@ -22,7 +22,7 @@ public partial class EnemyFSMController : ComponentEvents
 
         if (testRespawn)
         {
-            GameManager.PlayerRespawned();
+            GameManager.Instance.PlayerDeathStatusChanged(false);
             //_playerIsDead = false;
             testRespawn = false;
         }
@@ -50,7 +50,7 @@ public partial class EnemyFSMController : ComponentEvents
 
         if (_testLook)
         {
-            _enemyEventManager.AnimationTriggered(AnimationAction.Look);
+            _agentEventManager.AnimationTriggered(AnimationAction.Look);
             _testLook = false;
         }
 
@@ -64,7 +64,7 @@ public partial class EnemyFSMController : ComponentEvents
        
 
 
-        if (!_playerIsDead && AgentIsAlive)
+        if (!PlayerIsDead && AgentIsAlive)
         {
             //UpdateFieldOfViewCheckFrequency();
         }
@@ -114,7 +114,7 @@ public partial class EnemyFSMController : ComponentEvents
             {
                 
                 _agent.ResetPath();
-                _enemyEventManager.DestinationReached(true);
+                _agentEventManager.DestinationReached(true);
 
 
             }

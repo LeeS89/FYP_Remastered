@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Linq;
 using UnityEngine;
-using UnityEngine.AI;
 using Random = UnityEngine.Random;
 
 public partial class EnemyFSMController : ComponentEvents
@@ -14,13 +11,13 @@ public partial class EnemyFSMController : ComponentEvents
     {
         _resourceRequest = new AIDestinationRequestData();
         
-        _destinationManager = new DestinationManager(_enemyEventManager,_maxFlankingSteps, _testFlankCubes, transform, OnDestinationRequestComplete);
+        _destinationManager = new DestinationManager(_agentEventManager,_maxFlankingSteps, _testFlankCubes, transform, OnDestinationRequestComplete);
        
-        _animController = new EnemyAnimController(_anim, _enemyEventManager);
-        _patrol = new PatrolState(_owningGameObject, _enemyEventManager, _stopAndWaitDelay, _walkSpeed);
-        _chasing = new ChasingState(_enemyEventManager, _owningGameObject, _walkSpeed, _sprintSpeed);
-        _stationary = new StationaryState(_enemyEventManager, _owningGameObject);
-        _deathState = new DeathState(_enemyEventManager, _owningGameObject);
+        _animController = new EnemyAnimController(_anim, _agentEventManager);
+        _patrol = new PatrolState(_owningGameObject, _agentEventManager, _patrolPointWaitDelay, _walkSpeed);
+        _chasing = new ChasingState(_agentEventManager, _owningGameObject, _walkSpeed, _sprintSpeed);
+        _stationary = new StationaryState(_agentEventManager, _owningGameObject);
+        _deathState = new DeathState(_agentEventManager, _owningGameObject);
        
 
         
@@ -177,7 +174,7 @@ public partial class EnemyFSMController : ComponentEvents
             AlertStatusUpdated(status);
             _agent.stoppingDistance = stoppingDistance;
             _agent.SetDestination(destination);
-            _enemyEventManager.DestinationApplied();
+            _agentEventManager.DestinationApplied();
         };
         _destinationManager.StartCarvingRoutine(_resourceRequest);
 
@@ -200,6 +197,8 @@ public partial class EnemyFSMController : ComponentEvents
             // UpdateFieldOfViewResults(false);
 
         }
+
+        _agentEventManager.ChangeAnimatorLayerWeight(EnemyAnimController.AnimationLayer.Alert, 1, 0, 0.5f, true);
 
         switch (contextState)
         {

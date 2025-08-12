@@ -42,8 +42,8 @@ public class RotationTracker : ComponentEvents//, IPlayerEvents
     {
         BaseSceneManager._instance.OnSceneStarted += OnSceneStarted;
         BaseSceneManager._instance.OnSceneEnded += OnSceneComplete;
-        GameManager.OnPlayerRespawn += OnPlayerRespawned;
-        GameManager.OnPlayerDied += OnPlayerDied;
+        
+        GameManager.OnPlayerDeathStatusChanged += OnPlayerDeathStatusUpdated;
 
     }
 
@@ -51,8 +51,8 @@ public class RotationTracker : ComponentEvents//, IPlayerEvents
     {
         BaseSceneManager._instance.OnSceneStarted -= OnSceneStarted;
         BaseSceneManager._instance.OnSceneEnded -= OnSceneComplete;
-        GameManager.OnPlayerRespawn -= OnPlayerRespawned;
-        GameManager.OnPlayerDied -= OnPlayerDied;
+       
+        GameManager.OnPlayerDeathStatusChanged -= OnPlayerDeathStatusUpdated;
     }
 
 
@@ -117,13 +117,14 @@ public class RotationTracker : ComponentEvents//, IPlayerEvents
         //UnRegisterGlobalEvents();
     }
 
-    protected override void OnPlayerDied()
+    protected override void OnPlayerDeathStatusUpdated(bool isDead)
     {
-        InputEnabled = false;
+        base.OnPlayerDeathStatusUpdated(isDead);
+        InputEnabled = PlayerIsDead;
     }
 
-    protected override void OnPlayerRespawned()
+   /* protected override void OnPlayerRespawned()
     {
         InputEnabled = true;
-    }
+    }*/
 }

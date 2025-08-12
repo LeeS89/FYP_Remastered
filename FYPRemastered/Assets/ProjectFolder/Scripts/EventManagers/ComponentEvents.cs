@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class ComponentEvents : MonoBehaviour
+public abstract class ComponentEvents : MonoBehaviour
 {
     protected EventManager _eventManager;
 
@@ -16,7 +16,11 @@ public class ComponentEvents : MonoBehaviour
 
     protected virtual void OnSceneComplete() { }
 
-    protected virtual void OnPlayerDied() { }
+    protected virtual void OnPlayerDeathStatusUpdated(bool isDead) => PlayerIsDead = isDead;
+    public bool PlayerIsDead { get; protected set; }
 
-    protected virtual void OnPlayerRespawned() { }
+    // protected virtual void OnPlayerDied() { }
+
+
+    // protected virtual void OnPlayerRespawned() { }
 }

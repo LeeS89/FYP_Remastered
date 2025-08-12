@@ -44,11 +44,11 @@ public partial class EnemyFSMController : ComponentEvents
         if (_currentState != _chasing && _alertStatus == AlertStatus.None)
         {
             //BaseSceneManager._instance.AlertZoneAgents(_blockZone, this);
-            _enemyEventManager.ChangeAnimatorLayerWeight(EnemyAnimController.AnimationLayer.Alert, 0, 1, 0.5f, true);
+            _agentEventManager.ChangeAnimatorLayerWeight(EnemyAnimController.AnimationLayer.Alert, 0, 1, 0.5f, true);
             AlertStatusUpdated(AlertStatus.Alert);
             //_alertStatus = AlertStatus.Alert;
 
-            _enemyEventManager.DestinationRequested(AIDestinationType.ChaseDestination);
+            _agentEventManager.DestinationRequested(AIDestinationType.ChaseDestination);
             //PursuitTargetRequested(AIDestinationType.ChaseDestination);
             //ChangeState(_chasing);
         }
@@ -58,7 +58,7 @@ public partial class EnemyFSMController : ComponentEvents
     private void AlertStatusUpdated(AlertStatus status)
     {
         _alertStatus = status;
-        _enemyEventManager.AlertStatusChanged(status);
+        _agentEventManager.AlertStatusChanged(status);
     }
     #endregion
 

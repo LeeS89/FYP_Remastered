@@ -79,10 +79,10 @@ public class CombatComponent : BaseAbilities
  
     public bool IsOwnerDead { get; protected set; }
 
-    public bool IsTargetDead { get; protected set; }
+   /* public bool IsTargetDead { get; protected set; }
 
     protected void TargetDeath() => IsTargetDead = true;
-    protected void TargetRespawn() => IsTargetDead = false;
+    protected void TargetRespawn() => IsTargetDead = false;*/
 
     protected void SetMeleeTriggered(bool isMelee) => _meleeTriggered = isMelee;
 
@@ -141,16 +141,16 @@ public class CombatComponent : BaseAbilities
     {
         base.RegisterGlobalEvents();
         BaseSceneManager._instance.OnSceneStarted += OnSceneStarted;
-        GameManager.OnPlayerDied += TargetDeath;
-        GameManager.OnPlayerRespawn += TargetRespawn;   
+        GameManager.OnPlayerDeathStatusChanged += OnPlayerDeathStatusUpdated;
+       
 
     }
     protected override void UnRegisterGlobalEvents()
     {
         base.UnRegisterGlobalEvents();
         BaseSceneManager._instance.OnSceneStarted -= OnSceneStarted;
-        GameManager.OnPlayerDied -= TargetDeath;
-        GameManager.OnPlayerRespawn -= TargetRespawn;
+        GameManager.OnPlayerDeathStatusChanged -= OnPlayerDeathStatusUpdated;
+        
     }
 
 
@@ -181,7 +181,7 @@ public class CombatComponent : BaseAbilities
 
     private void LateUpdate()
     {
-        if (IsOwnerDead || IsTargetDead) { return; }
+        if (IsOwnerDead || PlayerIsDead) { return; }
 
         if (_testMelee)
         {
@@ -221,6 +221,19 @@ public class CombatComponent : BaseAbilities
             //_weapon.TryFireRangedWeapon();
             _nextShootTime = Time.time + _shootInterval;
         }*/
+    }
+
+    protected override void OnPlayerDeathStatusUpdated(bool isDead)
+    {
+        base.OnPlayerDeathStatusUpdated(isDead);
+        if (PlayerIsDead)
+        {
+            _enemyEventManager.TargetSeen(false);
+            _enemyEventManager.FacingTarget(false);
+            
+            ResetMeleeSweep();
+        }
+        
     }
 
     public bool _canUpdateWeapon = false;
@@ -321,7 +334,7 @@ public class CombatComponent : BaseAbilities
 
     private void OnFieldOfViewComplete(bool seen, bool inShootingAngle)
     {
-        //UpdateFOVResults(seen);
+      
         _enemyEventManager.TargetSeen(seen);
         _enemyEventManager.FacingTarget(inShootingAngle);
         //SetFacingtarget(inShootingAngle);

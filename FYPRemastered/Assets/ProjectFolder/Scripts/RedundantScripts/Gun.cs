@@ -67,8 +67,8 @@ public class Gun
 
             _request = new ResourceRequest();
             _enemyEventManager.OnReload += Reload;
-            GameManager.OnPlayerDied += PlayerHasDied;
-            GameManager.OnPlayerRespawn += PlayerHasRespawned;
+          /*  GameManager.OnPlayerDeathStatusChanged += PlayerHasDied;
+            GameManager.OnPlayerRespawn += PlayerHasRespawned;*/
            
         }
     }
@@ -286,8 +286,8 @@ public class Gun
 
         _enemyEventManager.OnMelee -= SetMeleeTriggered;
         _enemyEventManager.OnReload -= Reload;
-        GameManager.OnPlayerDied -= PlayerHasDied;
-        GameManager.OnPlayerRespawn -= PlayerHasRespawned;
+       /* GameManager.OnPlayerDeathStatusChanged -= PlayerHasDied;
+        GameManager.OnPlayerRespawn -= PlayerHasRespawned;*/
         _poolManager = null;
         _enemyEventManager = null;
         _hasAimAnimationCompleted = null;

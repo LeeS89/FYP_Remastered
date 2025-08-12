@@ -1,6 +1,6 @@
-public partial class EnemyFSMController : ComponentEvents
+/*public partial class EnemyFSMController : ComponentEvents
 {
-    #region Death Region
+   *//* #region Death Region
     private void OnDeathStatusUpdated(bool isDead)
     {
         if (AgentIsAlive) { AgentIsAlive = false; }
@@ -25,6 +25,7 @@ public partial class EnemyFSMController : ComponentEvents
         gameObject.SetActive(status);
     }
 
-    #endregion
+    #endregion*//*
 
 }
+*/

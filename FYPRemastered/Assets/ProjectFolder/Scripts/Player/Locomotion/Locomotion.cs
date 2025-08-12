@@ -79,14 +79,14 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
     {
         BaseSceneManager._instance.OnSceneStarted += OnSceneStarted;
         BaseSceneManager._instance.OnSceneEnded += OnSceneComplete;
-        GameManager.OnPlayerDied += OnPlayerDied;
-        GameManager.OnPlayerRespawn += OnPlayerRespawned;
+        GameManager.OnPlayerDeathStatusChanged += OnPlayerDeathStatusUpdated;
+        
     }
 
     protected override void UnRegisterGlobalEvents()
     {
-        GameManager.OnPlayerDied -= OnPlayerDied;
-        GameManager.OnPlayerRespawn -= OnPlayerRespawned;
+        GameManager.OnPlayerDeathStatusChanged -= OnPlayerDeathStatusUpdated;
+        
         BaseSceneManager._instance.OnSceneStarted -= OnSceneStarted;
         BaseSceneManager._instance.OnSceneEnded -= OnSceneComplete;
     }
@@ -287,19 +287,26 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
         }
     }
 
-    protected override void OnPlayerDied()
+    protected override void OnPlayerDeathStatusUpdated(bool isDead)
     {
-        InputEnabled = false;
-        if(_shouldMoveForward)
+        base.OnPlayerDeathStatusUpdated(isDead);
+
+        InputEnabled = PlayerIsDead;
+        if (PlayerIsDead)
         {
-            _shouldMoveForward = false;
+            if (_shouldMoveForward)
+            {
+                _shouldMoveForward = false;
+            }
         }
+       
+       
     }
 
-    protected override void OnPlayerRespawned()
+  /*  protected override void OnPlayerRespawned()
     {
         InputEnabled = true;
     }
-
+*/
    
 }

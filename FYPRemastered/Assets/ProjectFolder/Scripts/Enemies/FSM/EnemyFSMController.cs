@@ -10,30 +10,30 @@ public partial class EnemyFSMController : ComponentEvents
     [SerializeField] private NavMeshAgent _agent;
     [SerializeField] private NavMeshObstacle _obstacle;
     [SerializeField] private Animator _anim;
-    [SerializeField, Tooltip("Do Not Change - Synchronized with Walking animation")] private float _walkSpeed;
-    
+    [SerializeField, Tooltip("Do Not Change - Synchronized with Walking animation")] private float _walkSpeed; // In base
+
     private EnemyAnimController _animController;
     private Action _destinationCheckAction;
     private EnemyState _currentState;
     
-    private bool _playerIsDead = false;
+   // private bool _playerIsDead = false;
     private bool _rotatingTowardsTarget = false;
 
     [Header("Patrol State - Random number between 0 and stopAndWaitDelay to wait at each way point")]
-    [SerializeField] private float _stopAndWaitDelay;
+    [SerializeField] private float _patrolPointWaitDelay; /// In base
     [SerializeField] private List<Vector3> _wayPoints;
     [SerializeField] private List<Vector3> _wayPointForwards;
    
     private BlockData _blockData;
     public int _blockZone = 0;
-    private PatrolState _patrol;
+    private PatrolState _patrol; // In base
 
     [Header("Chasing State Params")]
-    [SerializeField, Tooltip("Do Not Change - Synchronized with sprinting animation")] private float _sprintSpeed;
-    private ChasingState _chasing;
+    [SerializeField, Tooltip("Do Not Change - Synchronized with sprinting animation")] private float _sprintSpeed; // In base
+    private ChasingState _chasing; // In base
 
     [Header("Stationary State Params")]
-    private StationaryState _stationary;
+    private StationaryState _stationary; /// In base
     [SerializeField] private int _maxFlankingSteps = 0;
 
    
@@ -50,7 +50,7 @@ public partial class EnemyFSMController : ComponentEvents
 
     [Header("Gun Parameters")]
     [SerializeField] private Transform _bulletSpawnPoint;
-    [SerializeField] private GameObject _owningGameObject;
+    [SerializeField] private GameObject _owningGameObject; // In base
     //private GunBase _gun;
 
 
@@ -59,8 +59,8 @@ public partial class EnemyFSMController : ComponentEvents
     private float _lerpSpeed = 0f;
    // private bool _movementChanged = false;
     private float _previousDirection = 0f;
-    private EnemyEventManager _enemyEventManager;
-    
+    private EnemyEventManager _agentEventManager; // In base
+
     private DestinationManager _destinationManager;
     
     private AlertStatus _alertStatus = AlertStatus.None;
@@ -76,22 +76,22 @@ public partial class EnemyFSMController : ComponentEvents
     public override void RegisterLocalEvents(EventManager eventManager)
     {
         base.RegisterLocalEvents(eventManager);
-        _enemyEventManager = _eventManager as EnemyEventManager;
+        _agentEventManager = _eventManager as EnemyEventManager;
         _owningGameObject = gameObject;
 
-        _enemyEventManager.OnRequestChasingState += ChasingStateRequested;
-        _enemyEventManager.OnRequestStationaryState += StationaryStateRequested;
+        _agentEventManager.OnRequestChasingState += ChasingStateRequested;
+        _agentEventManager.OnRequestStationaryState += StationaryStateRequested;
       
-        _enemyEventManager.OnOwnerDeathStatusUpdated += OnDeathStatusUpdated;
-        _enemyEventManager.OnAgentDeathComplete += ToggleGameObject;
-        _enemyEventManager.OnAgentRespawn += ToggleGameObject;
+        _agentEventManager.OnOwnerDeathStatusUpdated += OnDeathStatusUpdated;
+        _agentEventManager.OnAgentDeathComplete += ToggleGameObject;
+        _agentEventManager.OnAgentRespawn += ToggleGameObject;
        
-        _enemyEventManager.OnDestinationReached += CarveOnDestinationReached;
-        _enemyEventManager.OnRotateTowardsTarget += ToggleRotationToTarget;
-        _enemyEventManager.OnSpeedChanged += UpdateAnimatorSpeedValues;
+        _agentEventManager.OnDestinationReached += CarveOnDestinationReached;
+        _agentEventManager.OnRotateTowardsTarget += ToggleRotationToTarget;
+        _agentEventManager.OnSpeedChanged += UpdateAnimatorSpeedValues;
 
 
-        _enemyEventManager.OnTargetSeen += TargetInViewStatusUpdated;
+        _agentEventManager.OnTargetSeen += TargetInViewStatusUpdated;
 
 
         RegisterGlobalEvents();
@@ -101,27 +101,26 @@ public partial class EnemyFSMController : ComponentEvents
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
-        _enemyEventManager.OnRequestChasingState -= ChasingStateRequested;
-        _enemyEventManager.OnRequestStationaryState -= StationaryStateRequested;
+        _agentEventManager.OnRequestChasingState -= ChasingStateRequested;
+        _agentEventManager.OnRequestStationaryState -= StationaryStateRequested;
        
-        _enemyEventManager.OnTargetSeen -= TargetInViewStatusUpdated;
+        _agentEventManager.OnTargetSeen -= TargetInViewStatusUpdated;
       
-        _enemyEventManager.OnDestinationReached -= CarveOnDestinationReached;
-        _enemyEventManager.OnOwnerDeathStatusUpdated -= OnDeathStatusUpdated;
-        _enemyEventManager.OnAgentDeathComplete -= ToggleGameObject;
-        _enemyEventManager.OnAgentRespawn -= ToggleGameObject;
-        _enemyEventManager.OnRotateTowardsTarget -= ToggleRotationToTarget;
-        _enemyEventManager.OnSpeedChanged -= UpdateAnimatorSpeedValues;
+        _agentEventManager.OnDestinationReached -= CarveOnDestinationReached;
+        _agentEventManager.OnOwnerDeathStatusUpdated -= OnDeathStatusUpdated;
+        _agentEventManager.OnAgentDeathComplete -= ToggleGameObject;
+        _agentEventManager.OnAgentRespawn -= ToggleGameObject;
+        _agentEventManager.OnRotateTowardsTarget -= ToggleRotationToTarget;
+        _agentEventManager.OnSpeedChanged -= UpdateAnimatorSpeedValues;
 
        
         base.UnRegisterLocalEvents(eventManager);
-        _enemyEventManager = null;
+        _agentEventManager = null;
     }
 
     protected override void RegisterGlobalEvents()
     {
-        GameManager.OnPlayerDied += OnPlayerDied;
-        GameManager.OnPlayerRespawn += OnPlayerRespawned;
+        GameManager.OnPlayerDeathStatusChanged += OnPlayerDeathStatusUpdated;
         
         GameManager.OnPlayerMoved += EnemyState.SetPlayerMoved;
         BaseSceneManager._instance.OnSceneStarted += OnSceneStarted;
@@ -130,8 +129,8 @@ public partial class EnemyFSMController : ComponentEvents
 
     protected override void UnRegisterGlobalEvents()
     {
-        GameManager.OnPlayerDied -= OnPlayerDied;
-        GameManager.OnPlayerRespawn -= OnPlayerRespawned;
+        GameManager.OnPlayerDeathStatusChanged -= OnPlayerDeathStatusUpdated;
+       
         GameManager.OnPlayerMoved -= EnemyState.SetPlayerMoved;
        
         BaseSceneManager._instance.OnSceneStarted -= OnSceneStarted;
@@ -234,10 +233,38 @@ public partial class EnemyFSMController : ComponentEvents
 
        
        
-    } 
+    }
     #endregion
 
-   
+
+    #region Death Region
+    private void OnDeathStatusUpdated(bool isDead)
+    {
+        if (AgentIsAlive) { AgentIsAlive = false; }
+
+        ResetFSM(_deathState);
+    }
+
+    private void DisableAgent()
+    {
+        if (_agent.enabled)
+        {
+            _agent.enabled = false;
+        }
+        if (_obstacle.enabled)
+        {
+            _obstacle.enabled = false;
+        }
+    }
+
+    private void ToggleGameObject(bool status)
+    {
+        gameObject.SetActive(status);
+    }
+
+    #endregion
+
+
 
     #region Global Events
 
@@ -264,20 +291,22 @@ public partial class EnemyFSMController : ComponentEvents
         _deathState = null;
     }
 
-    protected override void OnPlayerDied()
+    protected override void OnPlayerDeathStatusUpdated(bool isDead)
     {
-        _playerIsDead = true;
-        if (!AgentIsAlive) { return; }
+        base.OnPlayerDeathStatusUpdated(isDead);
+        
+        //_playerIsDead = true;
+        if (!AgentIsAlive || !PlayerIsDead) { return; }
 
         
         ResetFSM(_patrol);
         
     }
 
-    protected override void OnPlayerRespawned()
+    /*protected override void OnPlayerRespawned()
     {
         _playerIsDead = false;
-    }
+    }*/
     #endregion
 
    

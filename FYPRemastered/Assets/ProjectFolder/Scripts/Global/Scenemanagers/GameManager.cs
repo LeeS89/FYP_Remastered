@@ -22,8 +22,8 @@ public class GameManager : MonoBehaviour
     public GameObject PlayerDefenceCollider { get; private set; }
 
     public static GameManager Instance { get; private set; }
-    public static event Action OnPlayerDied;
-    public static event Action OnPlayerRespawn;
+    public static event Action<bool> OnPlayerDeathStatusChanged;
+    //public static event Action OnPlayerRespawn;
     public static event Action<bool> OnPlayerMoved;
 
     private bool _playerHasMoved = false;
@@ -82,12 +82,12 @@ public class GameManager : MonoBehaviour
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
-    public void CharacterDied(CharacterType type, GameObject obj = null)
+    public void CharacterDeathStatusChanged(CharacterType type, GameObject obj = null, bool isDead = false)
     {
         switch (type)
         {
             case CharacterType.Player:
-                PlayerDied();
+                PlayerDeathStatusChanged(isDead);
                 break;
             case CharacterType.Enemy:
                 EnemyDied(obj);
@@ -95,10 +95,10 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void PlayerDied()
+    public void PlayerDeathStatusChanged(bool isDead) // Make Private later
     {
         //Debug.LogError("Player Died");
-        OnPlayerDied?.Invoke();
+        OnPlayerDeathStatusChanged?.Invoke(isDead);
         
     }
 
@@ -107,10 +107,10 @@ public class GameManager : MonoBehaviour
         // Not yet Implemented
     }
 
-    public static void PlayerRespawned()
+   /* public static void PlayerRespawned()
     {
         OnPlayerRespawn?.Invoke();
-    }
+    }*/
 
     public void SetPlayer()
     {
