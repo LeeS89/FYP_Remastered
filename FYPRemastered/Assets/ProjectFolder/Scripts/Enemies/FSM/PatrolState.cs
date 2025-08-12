@@ -27,7 +27,7 @@ public class PatrolState : EnemyState
     }
 
     
-    public override void EnterState(/*Vector3? destination = null, AlertStatus alertStatus = AlertStatus.None, float _ = 0*/)
+    public override void EnterState(AlertStatus alertStatus = AlertStatus.None)
     {
         _eventManager.OnRotateAtPatrolPoint += SetPatrolPointForwardVector;
         //CoroutineRunner.Instance.StartCoroutine(TestDelay()); // Start the coroutine to test the delay functionality

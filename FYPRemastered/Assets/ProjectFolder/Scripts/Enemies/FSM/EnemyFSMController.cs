@@ -4,39 +4,25 @@ using UnityEngine;
 using UnityEngine.AI;
 
 
-public partial class EnemyFSMController : ComponentEvents
+public partial class EnemyFSMController : FSMControllerBase
 {
     [Header("Agent and Animation Components")]
     [SerializeField] private NavMeshAgent _agent;
     [SerializeField] private NavMeshObstacle _obstacle;
     [SerializeField] private Animator _anim;
-    [SerializeField, Tooltip("Do Not Change - Synchronized with Walking animation")] private float _walkSpeed; // In base
+   
 
     private EnemyAnimController _animController;
     private Action _destinationCheckAction;
-    private EnemyState _currentState;
     
-   // private bool _playerIsDead = false;
+    
     private bool _rotatingTowardsTarget = false;
 
     [Header("Patrol State - Random number between 0 and stopAndWaitDelay to wait at each way point")]
-    [SerializeField] private float _patrolPointWaitDelay; /// In base
-    [SerializeField] private List<Vector3> _wayPoints;
-    [SerializeField] private List<Vector3> _wayPointForwards;
-   
-    private BlockData _blockData;
-    public int _blockZone = 0;
-    private PatrolState _patrol; // In base
 
-    [Header("Chasing State Params")]
-    [SerializeField, Tooltip("Do Not Change - Synchronized with sprinting animation")] private float _sprintSpeed; // In base
-    private ChasingState _chasing; // In base
+    //[SerializeField] private List<Vector3> _wayPoints;
+    //[SerializeField] private List<Vector3> _wayPointForwards; ////// TEST from destination manager later
 
-    [Header("Stationary State Params")]
-    private StationaryState _stationary; /// In base
-    [SerializeField] private int _maxFlankingSteps = 0;
-
-   
 
 
     [SerializeField] private LayerMask _losTargetMask; // Delete later once I fix Flank FOV
@@ -45,44 +31,23 @@ public partial class EnemyFSMController : ComponentEvents
 
 
 
-    [Header("Death State")]
-    private DeathState _deathState;
-
-    [Header("Gun Parameters")]
-    [SerializeField] private Transform _bulletSpawnPoint;
-    [SerializeField] private GameObject _owningGameObject; // In base
-    //private GunBase _gun;
-
-
     [Header("Agent and animation speed values")]
     private float _targetSpeed = 0f;
     private float _lerpSpeed = 0f;
    // private bool _movementChanged = false;
     private float _previousDirection = 0f;
-    private EnemyEventManager _agentEventManager; // In base
+  
 
-    private DestinationManager _destinationManager;
     
     private AlertStatus _alertStatus = AlertStatus.None;
 
-   // private bool _agentIsAlive = false;
-
-    public bool AgentIsAlive { get; private set; }
-
-
-
-
+ 
     #region Event Registrations
     public override void RegisterLocalEvents(EventManager eventManager)
     {
         base.RegisterLocalEvents(eventManager);
-        _agentEventManager = _eventManager as EnemyEventManager;
-        _owningGameObject = gameObject;
-
-        _agentEventManager.OnRequestChasingState += ChasingStateRequested;
+    
         _agentEventManager.OnRequestStationaryState += StationaryStateRequested;
-      
-        _agentEventManager.OnOwnerDeathStatusUpdated += OnDeathStatusUpdated;
         _agentEventManager.OnAgentDeathComplete += ToggleGameObject;
         _agentEventManager.OnAgentRespawn += ToggleGameObject;
        
@@ -101,40 +66,35 @@ public partial class EnemyFSMController : ComponentEvents
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
-        _agentEventManager.OnRequestChasingState -= ChasingStateRequested;
+
         _agentEventManager.OnRequestStationaryState -= StationaryStateRequested;
        
         _agentEventManager.OnTargetSeen -= TargetInViewStatusUpdated;
       
         _agentEventManager.OnDestinationReached -= CarveOnDestinationReached;
-        _agentEventManager.OnOwnerDeathStatusUpdated -= OnDeathStatusUpdated;
+       
         _agentEventManager.OnAgentDeathComplete -= ToggleGameObject;
         _agentEventManager.OnAgentRespawn -= ToggleGameObject;
         _agentEventManager.OnRotateTowardsTarget -= ToggleRotationToTarget;
         _agentEventManager.OnSpeedChanged -= UpdateAnimatorSpeedValues;
 
-       
         base.UnRegisterLocalEvents(eventManager);
-        _agentEventManager = null;
+     
     }
 
     protected override void RegisterGlobalEvents()
     {
-        GameManager.OnPlayerDeathStatusChanged += OnPlayerDeathStatusUpdated;
-        
+        base.RegisterGlobalEvents();
         GameManager.OnPlayerMoved += EnemyState.SetPlayerMoved;
-        BaseSceneManager._instance.OnSceneStarted += OnSceneStarted;
-        BaseSceneManager._instance.OnSceneEnded += OnSceneComplete;
     }
 
     protected override void UnRegisterGlobalEvents()
     {
-        GameManager.OnPlayerDeathStatusChanged -= OnPlayerDeathStatusUpdated;
+        base.UnRegisterGlobalEvents();
        
         GameManager.OnPlayerMoved -= EnemyState.SetPlayerMoved;
        
-        BaseSceneManager._instance.OnSceneStarted -= OnSceneStarted;
-        BaseSceneManager._instance.OnSceneEnded -= OnSceneComplete;
+        
     }
     #endregion
 
@@ -186,6 +146,8 @@ public partial class EnemyFSMController : ComponentEvents
     private void UpdateAnimator()
     {
         
+        if(_animController == null) { return; }
+
         Vector3 moveDir = _agent.velocity;
         moveDir.y = 0f;
         moveDir.Normalize();
@@ -238,11 +200,18 @@ public partial class EnemyFSMController : ComponentEvents
 
 
     #region Death Region
-    private void OnDeathStatusUpdated(bool isDead)
+    protected override void OwnerDeathStatusChanged(bool isDead)
     {
-        if (AgentIsAlive) { AgentIsAlive = false; }
+        base.OwnerDeathStatusChanged(isDead);
 
-        ResetFSM(_deathState);
+        if (OwnerIsDead)
+        {
+            ResetFSM(_deathState);
+        }
+        // Implement Respawn here
+        //if (AgentIsAlive) { AgentIsAlive = false; }
+
+        
     }
 
     private void DisableAgent()
@@ -271,24 +240,17 @@ public partial class EnemyFSMController : ComponentEvents
     protected override void OnSceneStarted()
     {
         //InitializeWeapon();
-        PatrolStateRequested();
-        AgentIsAlive = true;
+        ChangeState(_patrol);
+       
+        OwnerIsDead = false;
+        //AgentIsAlive = true;
         //_agent.ResetPath();
     }
 
     protected override void OnSceneComplete()
     {
-        if (_currentState != null)
-        {
-            _currentState.ExitState();
-            _currentState = null;
-        }
-        _patrol = null;
-        _chasing = null;
-        _stationary = null;
-     
         _animController = null;
-        _deathState = null;
+        base.OnSceneComplete(); 
     }
 
     protected override void OnPlayerDeathStatusUpdated(bool isDead)
@@ -296,17 +258,13 @@ public partial class EnemyFSMController : ComponentEvents
         base.OnPlayerDeathStatusUpdated(isDead);
         
         //_playerIsDead = true;
-        if (!AgentIsAlive || !PlayerIsDead) { return; }
+        if (OwnerIsDead || !PlayerIsDead) { return; }
 
         
         ResetFSM(_patrol);
         
     }
 
-    /*protected override void OnPlayerRespawned()
-    {
-        _playerIsDead = false;
-    }*/
     #endregion
 
    

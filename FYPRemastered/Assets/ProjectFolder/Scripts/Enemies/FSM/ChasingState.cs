@@ -5,7 +5,6 @@ using UnityEngine;
 public class ChasingState : EnemyState
 {
   
-
     public ChasingState(EnemyEventManager eventManager, GameObject owner, float walkSpeed, float sprintSpeed) : base(eventManager, owner)
     {
        
@@ -15,7 +14,7 @@ public class ChasingState : EnemyState
     }
 
 
-    public override void EnterState()
+    public override void EnterState(AlertStatus alertStatus = AlertStatus.None)
     {
         if (_coroutine == null)
         {

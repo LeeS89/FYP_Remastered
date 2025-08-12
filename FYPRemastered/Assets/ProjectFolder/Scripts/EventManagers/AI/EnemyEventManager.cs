@@ -41,7 +41,7 @@ public class EnemyEventManager : EventManager
 
     // Chasing Events
     public event Action<AlertStatus> OnRequestStationaryState;
-    public event Action OnRequestChasingState;
+   // public event Action OnRequestChasingState;
     public event Action<AIDestinationType> OnDestinationRequested;
     public event Action<bool> OnPendingNewDestination;
     public event Action<bool, bool> OnDestinationRequestStatus;
@@ -196,10 +196,10 @@ public class EnemyEventManager : EventManager
         OnRequestStationaryState?.Invoke(status);
     }
 
-    public void RequestChasingState()
+   /* public void RequestChasingState()
     {
         OnRequestChasingState?.Invoke();
-    }
+    }*/
 
     public void PendingNewDestination(bool pending)
     {

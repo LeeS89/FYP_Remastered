@@ -116,15 +116,21 @@ public class SceneEventAggregator : MonoBehaviour
     #endregion Scene Events
 
     #region Agent Zone Registry Events
-    public event Action<EnemyFSMController, int> OnAgentZoneRegistered;
-    public event Action<int, EnemyFSMController> OnAlertZoneAgents;
+    public event Action<FSMControllerBase, int> OnAgentZoneRegistered;
+    public event Action<FSMControllerBase, int> OnAgentZoneUnRegistered;
+    public event Action<int, FSMControllerBase> OnAlertZoneAgents;
 
-    public void RegisterAgentAndZone(EnemyFSMController agent, int zone)
+    public void RegisterAgentAndZone(FSMControllerBase agent, int zone)
     {
         OnAgentZoneRegistered?.Invoke(agent, zone);
     }
 
-    public void AlertZoneAgents(int zone, EnemyFSMController source)
+    public void UnRegisterAgentAndZone(FSMControllerBase agent, int zone)
+    {
+        OnAgentZoneUnRegistered?.Invoke(agent, zone);
+    }
+
+    public void AlertZoneAgents(int zone, FSMControllerBase source)
     {
         OnAlertZoneAgents?.Invoke(zone, source);
     }

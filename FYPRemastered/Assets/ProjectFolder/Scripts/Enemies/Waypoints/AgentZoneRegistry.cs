@@ -5,19 +5,30 @@ using System.Threading.Tasks;
 
 public class AgentZoneRegistry : SceneResources
 {
-    private Dictionary<int, List<EnemyFSMController>> _zoneAgents = new();
+    private Dictionary<int, List<FSMControllerBase>> _zoneAgents = new();
 
     public override async Task LoadResources()
     {
         SceneEventAggregator.Instance.OnAgentZoneRegistered += Register;
         SceneEventAggregator.Instance.OnAlertZoneAgents += AlertZone;
+        SceneEventAggregator.Instance.OnAgentZoneUnRegistered += Unregister;
         await Task.CompletedTask; 
     }
 
-    private void Register(EnemyFSMController agent, int zone)
+    public override async Task UnLoadResources()
+    {
+        SceneEventAggregator.Instance.OnAgentZoneRegistered -= Register;
+        SceneEventAggregator.Instance.OnAlertZoneAgents -= AlertZone;
+        SceneEventAggregator.Instance.OnAgentZoneUnRegistered += Unregister;
+        ClearAll();
+        _zoneAgents = null;
+        await Task.CompletedTask;
+    }
+
+    private void Register(FSMControllerBase agent, int zone)
     {
         if (!_zoneAgents.ContainsKey(zone))
-            _zoneAgents[zone] = new List<EnemyFSMController>();
+            _zoneAgents[zone] = new List<FSMControllerBase>();
 
         if (!_zoneAgents[zone].Contains(agent))
         {
@@ -27,13 +38,13 @@ public class AgentZoneRegistry : SceneResources
             
     }
 
-    public void Unregister(EnemyFSMController agent, int zone)
+    public void Unregister(FSMControllerBase agent, int zone)
     {
         if (_zoneAgents.TryGetValue(zone, out var list))
             list.Remove(agent);
     }
 
-    private void AlertZone(int zone, EnemyFSMController source)
+    private void AlertZone(int zone, FSMControllerBase source)
     {
         if (!_zoneAgents.TryGetValue(zone, out var agents)) return;
 
@@ -46,12 +57,12 @@ public class AgentZoneRegistry : SceneResources
         }
     }
 
-    public IReadOnlyList<EnemyFSMController> GetAgentsInZone(int zone)
+    public IReadOnlyList<FSMControllerBase> GetAgentsInZone(int zone)
     {
         if (_zoneAgents.TryGetValue(zone, out var agents))
             return agents;
 
-        return Array.Empty<EnemyFSMController>();
+        return Array.Empty<FSMControllerBase>();
     }
 
     public void ClearAll()

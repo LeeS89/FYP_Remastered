@@ -1,82 +1,23 @@
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public partial class EnemyFSMController : ComponentEvents
+public partial class EnemyFSMController : FSMControllerBase
 {
-    public AIDestinationRequestData _resourceRequest;
-    public GameObject _testFlankCubes;
-    
+   
     #region FSM Management
-    private void SetupFSM()
+    protected override void SetupFSM()
     {
-        _resourceRequest = new AIDestinationRequestData();
-        
-        _destinationManager = new DestinationManager(_agentEventManager,_maxFlankingSteps, _testFlankCubes, transform, OnDestinationRequestComplete);
-       
+        base.SetupFSM();
         _animController = new EnemyAnimController(_anim, _agentEventManager);
-        _patrol = new PatrolState(_owningGameObject, _agentEventManager, _patrolPointWaitDelay, _walkSpeed);
-        _chasing = new ChasingState(_agentEventManager, _owningGameObject, _walkSpeed, _sprintSpeed);
-        _stationary = new StationaryState(_agentEventManager, _owningGameObject);
-        _deathState = new DeathState(_agentEventManager, _owningGameObject);
        
-
-        
-        _blockZone = _destinationManager.GetCurrentWPZone();
-        Debug.LogError("WP ZOne: "+_blockZone);
-        SceneEventAggregator.Instance.RegisterAgentAndZone(this, _blockZone);
-        // InitializeWaypoints();
-        //InitializeWeapon();
-
-        // ChangeState(_patrol);
-
     }
 
    
-
-  
-
-   
-
-    public void ChangeState(EnemyState state)
+    protected override void ChangeState(EnemyState state, AlertStatus status = AlertStatus.None)
     {
        
-        if (_currentState != null)
-        {
-            _currentState.ExitState();
-        }
-        _currentState = state;
-
-        _destinationCheckAction = _currentState == _stationary ? StopImmediately : MeasurePathToDestination;
-
-
-
-        _currentState.EnterState();
-       
-        //Debug.LogError("Current State: " + _currentState.GetType().Name);
-    }
-
-    public void ChangeStates(EnemyState state)
-    {
         if(_currentState == state) { return; }
 
-        switch (state)
-        {
-            case PatrolState patrol:
-                break;
-            case StationaryState stationary:
-                /*if(_currentState == _chasing)
-                {
-                    stationary.Alertstatus = AlertStatus.Alert;
-                }*/
-                break;
-            case ChasingState chasingState:
-                break;
-            case DeathState deathState:
-                break;
-            default:
-                break;
-        }
-
         if (_currentState != null)
         {
             _currentState.ExitState();
@@ -85,57 +26,30 @@ public partial class EnemyFSMController : ComponentEvents
 
         _destinationCheckAction = _currentState == _stationary ? StopImmediately : MeasurePathToDestination;
 
-
-
-        _currentState.EnterState();
-
-        Debug.LogError("Current State: " + _currentState.GetType().Name);
+        _currentState.EnterState(status);
+ 
     }
 
 
-
-    private void StationaryStateRequested(AlertStatus alertStatus)
+    protected override void StationaryStateRequested(AlertStatus alertStatus)
     {
         if (_currentState == _stationary)
         {
             return;
         }
-        AlertStatusUpdated(alertStatus);
-        ChangeState(_stationary);
+        ChangeState(_stationary, alertStatus);
     }
 
-    private void ChasingStateRequested()
+ 
+
+    protected override void OnDestinationRequestComplete(bool success, Vector3 destination, AIDestinationType destType)
     {
-        if (_currentState == _chasing)
+        if (!success)
         {
+            ChangeState(_stationary);
             return;
         }
         
-        ChangeState(_chasing);
-    }
-
-    private void PatrolStateRequested()
-    {
-        if (_currentState == _patrol)
-        {
-            return;
-        }
-
-        ChangeState(_patrol);
-
-    }
-
-    
-
-   
-
-   
-
-    private void OnDestinationRequestComplete(bool success, Vector3 destination, AIDestinationType destType)
-    {
-        if (!success) { return; }
-
-        AlertStatus status = AlertStatus.None;
         int stoppingDistance = 0; 
 
         switch (destType)
@@ -143,17 +57,14 @@ public partial class EnemyFSMController : ComponentEvents
             case AIDestinationType.PatrolDestination:
                 break;
             case AIDestinationType.ChaseDestination:
-                
-                ChasingStateRequested();
+                ChangeState(_chasing, AlertStatus.Chasing);
                 stoppingDistance = Random.Range(4, 11);
-                status = AlertStatus.Chasing;
                 break;
             case AIDestinationType.FlankDestination:
-                ChasingStateRequested();
-                status = AlertStatus.Flanking;
+                ChangeState(_chasing, AlertStatus.Flanking);
                 break;
             default:
-                StationaryStateRequested(AlertStatus.None);
+                ChangeState(_stationary);
                 return;
         }
         _resourceRequest.carvingCallback = () =>
@@ -171,7 +82,7 @@ public partial class EnemyFSMController : ComponentEvents
                 ToggleAgent(true);
 
             }
-            AlertStatusUpdated(status);
+      
             _agent.stoppingDistance = stoppingDistance;
             _agent.SetDestination(destination);
             _agentEventManager.DestinationApplied();
@@ -210,7 +121,7 @@ public partial class EnemyFSMController : ComponentEvents
                 break;
             default: // ResetFSM called when this agent is respawning
                 contextState = _patrol;
-                if (!AgentIsAlive)
+                if (OwnerIsDead)
                 {
                     HandleAgentRespawn();
                 }
@@ -229,7 +140,8 @@ public partial class EnemyFSMController : ComponentEvents
     {
         ToggleGameObject(true);
         _agent.enabled = true;
-        AgentIsAlive = true;
+        OwnerIsDead = false;
+        //AgentIsAlive = true;
     }
     #endregion
 }

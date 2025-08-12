@@ -10,20 +10,14 @@ public class StationaryState : EnemyState
    
     private bool _isStationary = false;
 
-    private bool _canFlankTarget = true;
-
-    public StationaryState(EnemyEventManager eventManager, GameObject owner) : base(eventManager, owner)
-    {
-        _eventManager.OnPursuitConditionChanged += SetCanFlankTarget;
-    }
+    public StationaryState(EnemyEventManager eventManager, GameObject owner) : base(eventManager, owner) { }
     
-   
 
-    public override void EnterState()
+    public override void EnterState(AlertStatus alertStatus = AlertStatus.None)
     {
         //_eventManager.OnPlayerSeen += SetPlayerSeen;
-        Debug.LogError("Entering Stationary State with Alert Status: " + _alertStatus);
-        switch (_alertStatus)
+        Debug.LogError("Entering Stationary State with Alert Status: " + alertStatus);
+        switch (alertStatus)
         {
 
             case AlertStatus.None:
@@ -63,21 +57,15 @@ public class StationaryState : EnemyState
        
     }
 
-    private void SetCanFlankTarget(bool canFlank)
-    {
-        _canFlankTarget = canFlank;
-    }
-
-
     private IEnumerator PlayerVisibilityRoutine()
     {
         while (_isStationary)
         {
-            if (/*_canFlankTarget && */!_canSeePlayer)
+            if (!_canSeePlayer)
             {
                 yield return new WaitForSeconds(1f);
 
-                if (/*_canFlankTarget && */!_canSeePlayer && !_newStateRequestAlreadySent)
+                if (!_canSeePlayer && !_newStateRequestAlreadySent)
                 {
                     _newStateRequestAlreadySent = true;
                     _eventManager.DestinationRequested(AIDestinationType.FlankDestination);
@@ -89,28 +77,6 @@ public class StationaryState : EnemyState
             yield return null;
         }
 
-
-/*
-        if (!_canSeePlayer && !_destinationRequestComplete)
-        {
-
-            //_newDestinationAlreadyApplied = true;
-            //_eventManager.RequestChasingState(point);
-            _eventManager.RequestTargetPursuit(DestinationType.Flank);
-
-            yield return _waitUntilDestinationRequestComplete;
-            _destinationRequestComplete = false;
-
-            if (_destinationRequestSuccess)
-            {
-                yield break;
-            }
-
-            yield return new WaitForSeconds(0.5f);
-            //yield break;
-        }*/
-
-       
     }
 
 
@@ -182,7 +148,7 @@ public class StationaryState : EnemyState
 
     public override void OnStateDestroyed()
     {
-        _eventManager.OnPursuitConditionChanged -= SetCanFlankTarget;
+       
         base.OnStateDestroyed();
        
      

@@ -13,7 +13,7 @@ public abstract class EnemyState
     protected bool _destinationReached = false;
     protected static bool _playerHasMoved = false;
     protected float _remainingDistance;
-    protected AlertStatus _alertStatus;
+    protected AlertStatus _alertStatus = AlertStatus.None;
     protected float _walkSpeed;
     protected float _sprintSpeed;
     protected bool _canSeePlayer = false;
@@ -34,7 +34,7 @@ public abstract class EnemyState
         _eventManager.OnTargetSeen += SetPlayerSeen;
         _waitUntilDestinationApplied = new WaitUntil(() => _destinationApplied);
         _alertStatus = AlertStatus.None;
-        _eventManager.OnAlertStatusChanged += UpdateAlertStatus;
+        //_eventManager.OnAlertStatusChanged += UpdateAlertStatus;
         _eventManager.OnDestinationApplied += SetDestinationApplied;
         _eventManager.OnDestinationReached += SetDestinationReached;
       
@@ -73,9 +73,9 @@ public abstract class EnemyState
    
     public virtual void UpdateDistanceRemainingToDestination(float remainingDistance) { _remainingDistance = remainingDistance; }
 
-    public virtual void EnterState(Vector3? destination = null, AlertStatus alertStatus = AlertStatus.None, float stoppingDistance = 0) {  }
+  //  public virtual void EnterState(Vector3? destination = null, AlertStatus alertStatus = AlertStatus.None, float stoppingDistance = 0) {  }
 
-    public virtual void EnterState() {  }
+    public virtual void EnterState(AlertStatus alertStatus = AlertStatus.None) {  }
     //public virtual void EnterState(Vector3? destination = null) { }
 
     public virtual void UpdateState() { }
@@ -87,12 +87,13 @@ public abstract class EnemyState
 
     public virtual void OnStateDestroyed()
     {
+        ExitState();
         _eventManager.OnDestinationReached -= SetDestinationReached;
         _eventManager.OnTargetSeen -= SetPlayerSeen;
-        _eventManager.OnAlertStatusChanged -= UpdateAlertStatus;
+        //_eventManager.OnAlertStatusChanged -= UpdateAlertStatus;
         _eventManager.OnDestinationApplied -= SetDestinationApplied;
         _eventManager = null;
-        ExitState();
+        
     }
 
 

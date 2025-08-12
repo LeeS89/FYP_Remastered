@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public partial class EnemyFSMController : ComponentEvents
+public partial class EnemyFSMController : FSMControllerBase
 {
     #region Field Of View functions
 
@@ -24,12 +24,12 @@ public partial class EnemyFSMController : ComponentEvents
     }
 
    
-    private void CallForBackup()
+    protected override void CallForBackup()
     {
-        SceneEventAggregator.Instance.AlertZoneAgents(_blockZone, this);
+        SceneEventAggregator.Instance.AlertZoneAgents(AgentZone, this);
     }
 
-    public void EnterAlertPhase()
+    public override void EnterAlertPhase()
     {
 /*
         if (!_testAlert)
@@ -41,7 +41,7 @@ public partial class EnemyFSMController : ComponentEvents
 
         }*/
 
-        if (_currentState != _chasing && _alertStatus == AlertStatus.None)
+        if (_currentState != _chasing && _alertStatus == AlertStatus.None) /// Need to change Alert status param to something else
         {
             //BaseSceneManager._instance.AlertZoneAgents(_blockZone, this);
             _agentEventManager.ChangeAnimatorLayerWeight(EnemyAnimController.AnimationLayer.Alert, 0, 1, 0.5f, true);

@@ -2,7 +2,7 @@
 using UnityEngine.AI;
 
 
-public partial class EnemyFSMController : ComponentEvents
+public partial class EnemyFSMController : FSMControllerBase
 {
     public bool testRespawn = false;
     public bool _testWaypoint = false;
@@ -54,7 +54,7 @@ public partial class EnemyFSMController : ComponentEvents
             _testLook = false;
         }
 
-        if (!AgentIsAlive) { return; }
+        if (OwnerIsDead) { return; }
 
         if (_testRotation)
         {
@@ -64,7 +64,7 @@ public partial class EnemyFSMController : ComponentEvents
        
 
 
-        if (!PlayerIsDead && AgentIsAlive)
+        if (!PlayerIsDead && !OwnerIsDead)
         {
             //UpdateFieldOfViewCheckFrequency();
         }
