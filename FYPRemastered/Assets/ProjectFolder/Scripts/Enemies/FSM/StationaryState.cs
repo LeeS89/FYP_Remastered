@@ -16,7 +16,7 @@ public class StationaryState : EnemyState
     public override void EnterState(AlertStatus alertStatus = AlertStatus.None)
     {
         //_eventManager.OnPlayerSeen += SetPlayerSeen;
-        Debug.LogError("Entering Stationary State with Alert Status: " + alertStatus);
+      //  Debug.LogError("Entering Stationary State with Alert Status: " + alertStatus);
         switch (alertStatus)
         {
 

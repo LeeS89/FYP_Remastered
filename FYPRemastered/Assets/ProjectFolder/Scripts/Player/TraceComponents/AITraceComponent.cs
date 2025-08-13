@@ -60,7 +60,7 @@ public class AITraceComponent : TraceComponent
     {
 
         int hitCount = Physics.CapsuleCastNonAlloc(start, end, radius, direction, _hitBuffer, maxDistance, targetMask);
-        
+
         int processedCount = Mathf.Min(hitCount, hitPoints.Length);
 
         for (int i = 0; i < processedCount; i++)
@@ -70,16 +70,16 @@ public class AITraceComponent : TraceComponent
 
         return processedCount;
 
+/*
+        RaycastHit[] hits = Physics.CapsuleCastAll(start, end, radius, direction.normalized, maxDistance, targetMask);
 
-       /* RaycastHit[] hits = Physics.CapsuleCastAll(start, end, radius, direction.normalized, maxDistance, targetMask);
 
+         int hitCount = 0;
 
-       // int hitCount = 0;
-        
 
         foreach (var hit in hits)
         {
-           
+
             if (hitCount < hitPoints.Length)
             {
                 hitPoints[hitCount++] = hit.point;

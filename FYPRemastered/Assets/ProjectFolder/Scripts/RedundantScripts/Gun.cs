@@ -61,7 +61,7 @@ public class Gun
             _enemyEventManager.OnFireRangedWeapon += Shoot;
             _enemyEventManager.OnTargetSeen += UpdateTargetVisibility;
             _enemyEventManager.OnAimingLayerReady += SetAimReady;
-            _enemyEventManager.OnFacingTarget += SetIsFacingTarget;
+            //_enemyEventManager.OnFacingTarget += SetIsFacingTarget;
             _enemyEventManager.OnMelee += SetMeleeTriggered;
 
 
@@ -281,7 +281,7 @@ public class Gun
         _enemyEventManager.OnFireRangedWeapon -= Shoot;
         _enemyEventManager.OnTargetSeen -= UpdateTargetVisibility;
         _enemyEventManager.OnAimingLayerReady -= SetAimReady;
-        _enemyEventManager.OnFacingTarget -= SetIsFacingTarget;
+      //  _enemyEventManager.OnFacingTarget -= SetIsFacingTarget;
 
 
         _enemyEventManager.OnMelee -= SetMeleeTriggered;

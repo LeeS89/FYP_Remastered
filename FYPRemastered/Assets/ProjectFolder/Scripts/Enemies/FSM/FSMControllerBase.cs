@@ -1,57 +1,66 @@
 using UnityEngine;
+using UnityEngine.AI;
 
 public abstract class FSMControllerBase : ComponentEvents
 {
+    [Header("AI Components")]
+    [SerializeField] protected NavMeshAgent _agent;
+    [SerializeField] protected NavMeshObstacle _obstacle;
+
+    [Header("FSM States")]
+    protected PatrolState _patrol;
+    protected StationaryState _stationary;
+    protected DeathState _deathState;
+    protected ChasingState _chasing;
+    protected EnemyState _currentState;
+
+    [Header("Event Manager & Resource request handler")]
     protected EnemyEventManager _agentEventManager;
     protected AIDestinationRequestData _resourceRequest;
 
-    protected PatrolState _patrol;
-    protected StationaryState _stationary;
-    
-    protected DeathState _deathState;
-    protected EnemyState _currentState;
-
-    protected float _patrolPointWaitDelay;
+    [Header("Agent Speed Params")]
     [SerializeField, Tooltip("Do Not Change - Synchronized with Walking animation")]
     protected float _walkSpeed;
-
-    [Header("Chasing State Params")]
     [SerializeField, Tooltip("Do Not Change - Synchronized with sprinting animation")]
     protected float _sprintSpeed;
-    protected ChasingState _chasing;
 
-    protected DestinationManager _destinationManager;
+    [Header("")]
+
+    [Header("Patrol State - Random number between 0 and stopAndWaitDelay to wait at each way point")]
+    protected float _patrolPointWaitDelay;
+
+    [Header("Target Flanking Params")]
     [SerializeField] protected int _maxFlankingSteps = 0;
     [SerializeField] protected GameObject _debugFlankCubes;
+
+    protected DestinationManager _destinationManager;
+    
     public int AgentZone { get; protected set; } = 0;
 
+   
     protected GameObject OwningAgent => gameObject;
-
-    protected virtual void OwnerDeathStatusChanged(bool isDead) => OwnerIsDead = isDead;
-    public bool OwnerIsDead { get; protected set; }
-
-    protected abstract void ChangeState(EnemyState state, AlertStatus status = AlertStatus.None);
-
-    protected virtual void StationaryStateRequested(AlertStatus alertStatus) { }
-  
-    protected virtual void OnDestinationRequestComplete(bool success, Vector3 destination, AIDestinationType destType) { }
-
-    protected virtual void CheckIfDestinationReached() { }
-
-    protected virtual void CallForBackup() { }
-
-    public virtual void EnterAlertPhase() { }
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
         base.RegisterLocalEvents(eventManager);
         _agentEventManager = eventManager as EnemyEventManager;
         _agentEventManager.OnOwnerDeathStatusUpdated += OwnerDeathStatusChanged;
+        _agentEventManager.OnTargetSeen += TargetInViewStatusUpdated;
+        _agentEventManager.OnRequestStationaryState += StationaryStateRequested;
+        _agentEventManager.OnDestinationReached += CarveOnDestinationReached;
+        _agentEventManager.OnAgentDeathComplete += ToggleGameObject;
+        _agentEventManager.OnSpeedChanged += UpdateAgentSpeedValues;
+        _agentEventManager.OnRotateTowardsTarget += ToggleAgentControlledRotationToTarget;
     }
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
-        
+        _agentEventManager.OnRotateTowardsTarget -= ToggleAgentControlledRotationToTarget;
+        _agentEventManager.OnSpeedChanged -= UpdateAgentSpeedValues;
+        _agentEventManager.OnAgentDeathComplete -= ToggleGameObject;
+        _agentEventManager.OnDestinationReached -= CarveOnDestinationReached;
+        _agentEventManager.OnRequestStationaryState -= StationaryStateRequested;
+        _agentEventManager.OnTargetSeen -= TargetInViewStatusUpdated;
         _agentEventManager.OnOwnerDeathStatusUpdated -= OwnerDeathStatusChanged;
         _agentEventManager = null;
         base.UnRegisterLocalEvents(eventManager);
@@ -62,13 +71,14 @@ public abstract class FSMControllerBase : ComponentEvents
         BaseSceneManager._instance.OnSceneStarted += OnSceneStarted;
         BaseSceneManager._instance.OnSceneEnded += OnSceneComplete;
         GameManager.OnPlayerDeathStatusChanged += OnPlayerDeathStatusUpdated;
+        GameManager.OnPlayerMoved += EnemyState.SetPlayerMoved;
     }
 
     protected override void UnRegisterGlobalEvents()
     {
+        GameManager.OnPlayerMoved -= EnemyState.SetPlayerMoved;
         SceneEventAggregator.Instance.UnRegisterAgentAndZone(this, AgentZone);
         BaseSceneManager._instance.OnSceneStarted -= OnSceneStarted;
-        
         GameManager.OnPlayerDeathStatusChanged -= OnPlayerDeathStatusUpdated;
     }
 
@@ -86,6 +96,37 @@ public abstract class FSMControllerBase : ComponentEvents
 
     }
 
+
+    protected virtual void OwnerDeathStatusChanged(bool isDead) => OwnerIsDead = isDead;
+    public bool OwnerIsDead { get; protected set; }
+
+    protected abstract void ChangeState(EnemyState state, AlertStatus status = AlertStatus.None);
+
+    protected virtual void StationaryStateRequested(AlertStatus alertStatus) { }
+  
+    protected virtual void OnDestinationRequestComplete(bool success, Vector3 destination, AIDestinationType destType) { }
+
+    protected virtual void CheckIfDestinationReached() { }
+
+    protected virtual void CarveOnDestinationReached(bool reached) { }
+
+    protected virtual void TargetInViewStatusUpdated(bool inView) { }
+
+    protected virtual void CallForBackup() { }
+
+    public virtual void EnterAlertPhase() { }
+
+    protected virtual void ToggleGameObject(bool status) => gameObject.SetActive(status);
+
+    protected virtual void ToggleNMObstacle(bool status) { }
+
+    protected virtual void UpdateAgentSpeedValues(float speed, float lerpSpeed) { }
+
+    protected virtual void ToggleAgentControlledRotationToTarget(bool rotate) { }
+
+    public abstract void ResetFSM(EnemyState contextState = null);
+
+
     protected override void OnSceneComplete()
     {
         if (_currentState != null)
@@ -93,10 +134,10 @@ public abstract class FSMControllerBase : ComponentEvents
             _currentState.ExitState();
             _currentState = null;
         }
-        _patrol.OnStateDestroyed();
-        _chasing.OnStateDestroyed();
-        _stationary.OnStateDestroyed();
-        _deathState.OnStateDestroyed();
+        _patrol?.OnStateDestroyed();
+        _chasing?.OnStateDestroyed();
+        _stationary?.OnStateDestroyed();
+        _deathState?.OnStateDestroyed();
 
         _patrol = null;
         _chasing = null;

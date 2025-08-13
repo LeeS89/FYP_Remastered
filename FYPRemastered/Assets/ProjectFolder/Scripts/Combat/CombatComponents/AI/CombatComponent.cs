@@ -329,12 +329,15 @@ public class CombatComponent : BaseAbilities
         _updateFOV = true;
     }
 
-    
 
+    public bool _testSeen = false;
 
     private void OnFieldOfViewComplete(bool seen, bool inShootingAngle)
     {
-      
+        if (!seen && _testSeen)
+        {
+            Debug.LogError("Cannot see player");
+        }
         _enemyEventManager.TargetSeen(seen);
         _enemyEventManager.FacingTarget(inShootingAngle);
         //SetFacingtarget(inShootingAngle);

@@ -23,7 +23,7 @@ public class EnemyEventManager : EventManager
 
     // Death/Respawn events
     public event Action<bool> OnAgentDeathComplete;
-    public event Action<bool> OnAgentRespawn;
+    public event Action OnAgentRespawn;
 
     //Patrolling events
     //public event Action<WaypointData> OnWaypointsUpdated;
@@ -181,9 +181,9 @@ public class EnemyEventManager : EventManager
         OnAgentDeathComplete?.Invoke(status);
     }
 
-    public void AgentRespawn(bool status)
+    public void AgentRespawn()
     {
-        OnAgentRespawn?.Invoke(status);
+        OnAgentRespawn?.Invoke();
     }
 
     public void DeathAnimationComplete()

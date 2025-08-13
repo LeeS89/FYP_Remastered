@@ -1,35 +1,20 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
 
 public partial class EnemyFSMController : FSMControllerBase
 {
-    [Header("Agent and Animation Components")]
-    [SerializeField] private NavMeshAgent _agent;
-    [SerializeField] private NavMeshObstacle _obstacle;
+    [Header("Animation Components")]
     [SerializeField] private Animator _anim;
-   
-
     private EnemyAnimController _animController;
+
+    // Depending on wether _currentState is == _startionary or a moving state,
+    // this action will either stop the agent immediately or measure the path to the destination
     private Action _destinationCheckAction;
     
-    
+    // When true, the agent will aloways face its target
     private bool _rotatingTowardsTarget = false;
-
-    [Header("Patrol State - Random number between 0 and stopAndWaitDelay to wait at each way point")]
-
-    //[SerializeField] private List<Vector3> _wayPoints;
-    //[SerializeField] private List<Vector3> _wayPointForwards; ////// TEST from destination manager later
-
-
-
-    [SerializeField] private LayerMask _losTargetMask; // Delete later once I fix Flank FOV
-    [SerializeField] private LayerMask _losBlockingMask;
-    [SerializeField] private LayerMask _losBackupTargetMask;
-
-
 
     [Header("Agent and animation speed values")]
     private float _targetSpeed = 0f;
@@ -37,8 +22,6 @@ public partial class EnemyFSMController : FSMControllerBase
    // private bool _movementChanged = false;
     private float _previousDirection = 0f;
   
-
-    
     private AlertStatus _alertStatus = AlertStatus.None;
 
  
@@ -47,55 +30,11 @@ public partial class EnemyFSMController : FSMControllerBase
     {
         base.RegisterLocalEvents(eventManager);
     
-        _agentEventManager.OnRequestStationaryState += StationaryStateRequested;
-        _agentEventManager.OnAgentDeathComplete += ToggleGameObject;
-        _agentEventManager.OnAgentRespawn += ToggleGameObject;
-       
-        _agentEventManager.OnDestinationReached += CarveOnDestinationReached;
-        _agentEventManager.OnRotateTowardsTarget += ToggleRotationToTarget;
-        _agentEventManager.OnSpeedChanged += UpdateAnimatorSpeedValues;
-
-
-        _agentEventManager.OnTargetSeen += TargetInViewStatusUpdated;
-
-
         RegisterGlobalEvents();
         SetupFSM();
 
     }
 
-    public override void UnRegisterLocalEvents(EventManager eventManager)
-    {
-
-        _agentEventManager.OnRequestStationaryState -= StationaryStateRequested;
-       
-        _agentEventManager.OnTargetSeen -= TargetInViewStatusUpdated;
-      
-        _agentEventManager.OnDestinationReached -= CarveOnDestinationReached;
-       
-        _agentEventManager.OnAgentDeathComplete -= ToggleGameObject;
-        _agentEventManager.OnAgentRespawn -= ToggleGameObject;
-        _agentEventManager.OnRotateTowardsTarget -= ToggleRotationToTarget;
-        _agentEventManager.OnSpeedChanged -= UpdateAnimatorSpeedValues;
-
-        base.UnRegisterLocalEvents(eventManager);
-     
-    }
-
-    protected override void RegisterGlobalEvents()
-    {
-        base.RegisterGlobalEvents();
-        GameManager.OnPlayerMoved += EnemyState.SetPlayerMoved;
-    }
-
-    protected override void UnRegisterGlobalEvents()
-    {
-        base.UnRegisterGlobalEvents();
-       
-        GameManager.OnPlayerMoved -= EnemyState.SetPlayerMoved;
-       
-        
-    }
     #endregion
 
 
@@ -103,14 +42,20 @@ public partial class EnemyFSMController : FSMControllerBase
 
    
 
-    private void ToggleRotationToTarget(bool rotate)
+    protected override void ToggleAgentControlledRotationToTarget(bool rotate)
     {
-        if(_rotatingTowardsTarget == rotate)
-        {
-            return;
-        }
+        if (_rotatingTowardsTarget == rotate) return;
+       
         _agent.updateRotation = !rotate;
         _rotatingTowardsTarget = rotate;
+    }
+
+    protected override void UpdateAgentSpeedValues(float speed, float lerpSpeed)
+    {
+        _lerpSpeed = lerpSpeed;
+        _targetSpeed = speed;
+
+        //  _movementChanged = true;
     }
 
     private void UpdateAgentSpeed()
@@ -143,10 +88,52 @@ public partial class EnemyFSMController : FSMControllerBase
 
     }
 
+    [SerializeField] private float dampTime = 0.1f;    // How long it takes to reach the target
+    private float _speedVelocity;                      // Internal ref for SmoothDamp
+    private float _directionVelocity;                  // Internal ref for SmoothDamp
+    private float _currentSpeed;                       // Smoothed speed value
+    private float _currentDirection;
+
     private void UpdateAnimator()
     {
-        
-        if(_animController == null) { return; }
+        if (_animController == null || _agent == null)
+            return;
+
+        // Project velocity onto the XZ plane
+        Vector3 velocity = _agent.velocity;
+        velocity.y = 0f;
+
+        // Dead-zone: treat micro-movement as zero
+        if (velocity.sqrMagnitude < 0.01f)
+        {
+            // Smoothly return to idle/forward-facing
+            _currentSpeed = Mathf.SmoothDamp(_currentSpeed, 0f, ref _speedVelocity, dampTime);
+            _currentDirection = Mathf.SmoothDamp(_currentDirection, 0f, ref _directionVelocity, dampTime);
+            _animController.UpdateBlendTreeParams(_currentSpeed, _currentDirection);
+            return;
+        }
+
+        // Compute raw speed (magnitude) and raw direction (-1 to +1)
+        float rawSpeed = velocity.magnitude;
+        Vector3 forward = transform.forward;
+        Vector3 dirNorm = velocity.normalized;
+
+        // Invert speed if moving backwards
+        if (Vector3.Dot(forward, dirNorm) < 0f)
+            rawSpeed *= -1f;
+
+        // Signed angle between facing and movement direction, then normalize
+        float angle = Vector3.SignedAngle(forward, dirNorm, Vector3.up);
+        float rawDirection = Mathf.Clamp(angle / 90f, -1f, 1f);
+
+        // Smoothly interpolate toward the raw values
+        _currentSpeed = Mathf.SmoothDamp(_currentSpeed, rawSpeed, ref _speedVelocity, dampTime);
+        _currentDirection = Mathf.SmoothDamp(_currentDirection, rawDirection, ref _directionVelocity, dampTime);
+
+        // Send the smoothed values to your blend tree
+        _animController.UpdateBlendTreeParams(_currentSpeed, _currentDirection);
+
+        /*if(_animController == null) { return; }
 
         Vector3 moveDir = _agent.velocity;
         moveDir.y = 0f;
@@ -157,22 +144,16 @@ public partial class EnemyFSMController : FSMControllerBase
 
         float dot = Vector3.Dot(forward, moveDir);
         float speed = _agent.speed;
-       /* if(dot < 0)
+        if (dot < 0)
         {
             speed *= -1;
-        }*/
+        }
 
-        _animController.UpdateBlendTreeParams(speed, 0f);
+        _animController.UpdateBlendTreeParams(speed, normalizedDirection);*/
     }
 
-  // bool _movementChanged = false;
-    private void UpdateAnimatorSpeedValues(float speed, float lerpSpeed)
-    {
-        _lerpSpeed = lerpSpeed;
-        _targetSpeed = speed;
-        
-      //  _movementChanged = true;
-    }
+    // bool _movementChanged = false;
+
 
     private void UpdateAnimatorDirection()
     {
@@ -214,22 +195,36 @@ public partial class EnemyFSMController : FSMControllerBase
         
     }
 
-    private void DisableAgent()
+    private void DisableAgentAndObstacle()
     {
-        if (_agent.enabled)
-        {
-            _agent.enabled = false;
-        }
-        if (_obstacle.enabled)
-        {
-            _obstacle.enabled = false;
-        }
+        ToggleAgent(false);
+        ToggleNMObstacle(false);
     }
 
-    private void ToggleGameObject(bool status)
+    protected override void ToggleNMObstacle(bool status) 
     {
-        gameObject.SetActive(status);
+        if(_obstacle.enabled == status) { return; }
+        _obstacle.enabled = status;
     }
+
+    protected override void CarveOnDestinationReached(bool reached)
+    {
+        //if(_currentState == _patrol) { return; }
+        if (!reached) { return; }
+        ToggleAgent(false);
+        ToggleNMObstacle(true);
+        //_obstacle.enabled = true;
+    }
+
+
+
+    private void ToggleAgent(bool agentEnabled)
+    {
+        if (_agent.enabled == agentEnabled) { return; }
+
+        _agent.enabled = agentEnabled;
+    }
+
 
     #endregion
 

@@ -16,6 +16,8 @@ public class ChasingState : EnemyState
 
     public override void EnterState(AlertStatus alertStatus = AlertStatus.None)
     {
+        UpdateAlertStatus(alertStatus);
+
         if (_coroutine == null)
         {
             _destinationApplied = false;

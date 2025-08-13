@@ -43,6 +43,26 @@ public class EnemyAnimController
         _lastDirection = direction;
         //}
     }
+/*
+    private void UpdateAnimator(float speed)
+    {
+
+        Vector3 moveDir = _agent.velocity;
+        moveDir.y = 0f;
+        moveDir.Normalize();
+        Vector3 forward = transform.forward;
+        float directionAngle = Vector3.SignedAngle(forward, moveDir, Vector3.up);
+        float normalizedDirection = directionAngle / 90f; // Normalize to -1 to 1 range
+
+        float dot = Vector3.Dot(forward, moveDir);
+        float speed = _agent.speed;
+        *//* if(dot < 0)
+         {
+             speed *= -1;
+         }*//*
+
+        UpdateBlendTreeParams(speed, 0f);
+    }*/
 
 
 

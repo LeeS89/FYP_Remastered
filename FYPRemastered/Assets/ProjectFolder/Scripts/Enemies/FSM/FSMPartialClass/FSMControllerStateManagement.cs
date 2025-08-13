@@ -99,7 +99,7 @@ public partial class EnemyFSMController : FSMControllerBase
         return _agent.remainingDistance <= (_agent.stoppingDistance + 0.25f);
     }
 
-    public void ResetFSM(EnemyState contextState = null)
+    public override void ResetFSM(EnemyState contextState = null)
     {
         if (TargetInView)
         {
@@ -117,7 +117,7 @@ public partial class EnemyFSMController : FSMControllerBase
 
                 break;
             case DeathState: // ResetFSM called when this agent dies
-                DisableAgent();
+                DisableAgentAndObstacle();
                 break;
             default: // ResetFSM called when this agent is respawning
                 contextState = _patrol;
@@ -139,8 +139,13 @@ public partial class EnemyFSMController : FSMControllerBase
     private void HandleAgentRespawn()
     {
         ToggleGameObject(true);
-        _agent.enabled = true;
+        ToggleAgent(true);
+        //_agent.enabled = true;
         OwnerIsDead = false;
+        _agentEventManager.ChangeAnimatorLayerWeight(EnemyAnimController.AnimationLayer.Combat, 0, 1, 0.5f);
+        OwnerDeathStatusChanged(false);
+        _agentEventManager.AgentRespawn();
+        _alertStatus = AlertStatus.None;
         //AgentIsAlive = true;
     }
     #endregion

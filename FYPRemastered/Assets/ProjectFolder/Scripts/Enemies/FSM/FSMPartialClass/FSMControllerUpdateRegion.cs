@@ -38,7 +38,7 @@ public partial class EnemyFSMController : FSMControllerBase
 
   
     public bool _testRotation = false;
-    public bool _testLook = false;
+   
 
 
     private void LateUpdate()
@@ -46,12 +46,6 @@ public partial class EnemyFSMController : FSMControllerBase
         if (_currentState != null)
         {
             _currentState.LateUpdateState();
-        }
-
-        if (_testLook)
-        {
-            _agentEventManager.AnimationTriggered(AnimationAction.Look);
-            _testLook = false;
         }
 
         if (OwnerIsDead) { return; }
@@ -127,14 +121,12 @@ public partial class EnemyFSMController : FSMControllerBase
     /// </summary>
     private void StopImmediately()
     {
-        //_agent.SetDestination(LineOfSightUtility.GetClosestPointOnNavMesh(_agent.transform.position));
+  
         if (_agent.hasPath)
         {
             _agent.ResetPath();
         }
-        //_enemyEventManager.DestinationReached(true);
-
-
+ 
         _destinationCheckAction = null;
     }
 
@@ -163,7 +155,7 @@ public partial class EnemyFSMController : FSMControllerBase
 
         if (angle < precisionThreshold)
         {
-            // ✅ Close enough — complete the rotation smoothly
+            // Close enough — complete the rotation smoothly
             transform.rotation = Quaternion.Slerp(
                 transform.rotation,
                 targetRotation,
@@ -175,9 +167,9 @@ public partial class EnemyFSMController : FSMControllerBase
         {
             _enemyEventManager.FacingTarget(false);
         }*/
+       // _agentEventManager.FacingTarget(false);
 
-           
-            transform.rotation = Quaternion.Slerp(
+        transform.rotation = Quaternion.Slerp(
                 transform.rotation,
                 targetRotation,
                 Time.deltaTime * 5f); // adjust speed as needed
