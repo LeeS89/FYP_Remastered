@@ -82,7 +82,7 @@ public class MovementGestureController : BaseGesture
         {
             if (_playerEventManager != null)
             {
-                _playerEventManager.PlayerMove(true);
+                _playerEventManager.MovementGesturePerformedOrReleased(true);
             }
         }
         SetHandActive(_side, true);
@@ -95,7 +95,7 @@ public class MovementGestureController : BaseGesture
         {
             if (_playerEventManager != null)
             {
-                _playerEventManager.PlayerMove(false);
+                _playerEventManager.MovementGesturePerformedOrReleased(false);
             }
         }
         SetHandActive(_side, false);
@@ -165,6 +165,7 @@ public class MovementGestureController : BaseGesture
         if(_handInControl != HandSide.None) { _handInControl = HandSide.None; }
         if (_leftHandActive) {  _leftHandActive = false; }
         if(_rightHandActive) { _rightHandActive = false; }
+        _playerEventManager.MovementGesturePerformedOrReleased(false);
     }
 
     protected override void OnSceneStarted()

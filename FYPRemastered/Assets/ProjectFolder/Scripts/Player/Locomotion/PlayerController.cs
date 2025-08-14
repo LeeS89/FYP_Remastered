@@ -48,7 +48,7 @@ public class PlayerController : ComponentEvents
         _playerEventManager.OnKnockbackTriggered += ApplyKnockback;
         _playerEventManager.OnPlayerRotate += HandleRotation;
         _playerEventManager.OnPlayerHeightUpdated += AdjustPlayerHeight;
-        _playerEventManager.OnPlayerMove += SetShouldMoveforward;
+        _playerEventManager.OnMovementGesturePerformedOrReleased += SetShouldMoveforward;
 
         RegisterGlobalEvents();
     }
@@ -62,7 +62,7 @@ public class PlayerController : ComponentEvents
         }
         _playerEventManager.OnPlayerRotate -= HandleRotation;
         _playerEventManager.OnPlayerHeightUpdated -= AdjustPlayerHeight;
-        _playerEventManager.OnPlayerMove -= SetShouldMoveforward;
+        _playerEventManager.OnMovementGesturePerformedOrReleased -= SetShouldMoveforward;
         _playerEventManager.OnKnockbackTriggered -= ApplyKnockback;
         UnRegisterGlobalEvents();
         base.UnRegisterLocalEvents(eventManager);

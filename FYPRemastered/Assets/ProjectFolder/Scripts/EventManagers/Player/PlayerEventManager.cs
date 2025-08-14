@@ -6,10 +6,12 @@ public class PlayerEventManager : EventManager
 {
     public event Action<Quaternion> OnPlayerRotate;
     public event Action<Vector3> OnPlayerHeightUpdated;
-    public event Action<bool> OnPlayerMove;
+    public event Action<bool> OnMovementGesturePerformedOrReleased;
     public event Action<Transform, string> OnTryGrab;
     public event Action<HandSide, bool> OnGrab;
     public event Action<HandSide, bool> OnReleaseGrabbable;
+
+    public event Action<Vector3> OnMovementUpdated;
     
     //public event Action<HandGrabInteractor, bool> OnGrabbedObject; 
     //public static Dictionary<HandGrabInteractor, bool> _lastGrabbingStates = new Dictionary<HandGrabInteractor, bool>();
@@ -49,12 +51,9 @@ public class PlayerEventManager : EventManager
     }
 
     #region Locomotion events
-    public void PlayerMove(bool move)
+    public void MovementGesturePerformedOrReleased(bool performed)
     {
-        if (OnPlayerMove != null)
-        {
-            OnPlayerMove?.Invoke(move);
-        }
+        OnMovementGesturePerformedOrReleased?.Invoke(performed);
     }
 
     public void PlayerRotate(Quaternion targetrotation)
@@ -83,35 +82,32 @@ public class PlayerEventManager : EventManager
         }
     }
 
-   /* public void GrabbedObject(HandGrabInteractor handInteractor, bool isGrabbing)
+    /* public void GrabbedObject(HandGrabInteractor handInteractor, bool isGrabbing)
+     {
+         if (_lastGrabbingStates.TryGetValue(handInteractor, out bool lastState))
+         {
+             if (lastState == isGrabbing) return; // No change, do nothing
+         }
+
+         // Store the updated grabbing state
+         _lastGrabbingStates[handInteractor] = isGrabbing;
+
+
+         OnGrabbedObject?.Invoke(handInteractor, isGrabbing);
+     }*/
+
+    public void MovementUpdated(Vector3 movement)
     {
-        if (_lastGrabbingStates.TryGetValue(handInteractor, out bool lastState))
-        {
-            if (lastState == isGrabbing) return; // No change, do nothing
-        }
-
-        // Store the updated grabbing state
-        _lastGrabbingStates[handInteractor] = isGrabbing;
-
-    
-        OnGrabbedObject?.Invoke(handInteractor, isGrabbing);
-    }*/
-
-
+        OnMovementUpdated?.Invoke(movement);
+    }
     public void Grab(HandSide uniqueID, bool grabbingState)
     {
-        if (OnGrab != null)
-        {
-            OnGrab?.Invoke(uniqueID, grabbingState);
-        }
+        OnGrab?.Invoke(uniqueID, grabbingState);
     }
 
     public void ReleaseGrabbable(HandSide uniqueID, bool grabbingState)
     {
-        if (OnReleaseGrabbable != null)
-        {
-            OnReleaseGrabbable?.Invoke(uniqueID, grabbingState);
-        }
+        OnReleaseGrabbable?.Invoke(uniqueID, grabbingState);
     }
 
     

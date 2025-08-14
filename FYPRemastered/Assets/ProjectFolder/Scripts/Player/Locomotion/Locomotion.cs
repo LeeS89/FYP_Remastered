@@ -49,7 +49,7 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
         _playerEventManager.OnKnockbackTriggered += ApplyKnockback;
         _playerEventManager.OnPlayerRotate += HandleRotation;
         _playerEventManager.OnPlayerHeightUpdated += AdjustPlayerHeight;
-        _playerEventManager.OnPlayerMove += SetShouldMoveforward;
+        _playerEventManager.OnMovementGesturePerformedOrReleased += SetShouldMoveforward;
         
         RegisterGlobalEvents();
     }
@@ -63,7 +63,7 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
         }
         _playerEventManager.OnPlayerRotate -= HandleRotation;
         _playerEventManager.OnPlayerHeightUpdated -= AdjustPlayerHeight;
-        _playerEventManager.OnPlayerMove -= SetShouldMoveforward;
+        _playerEventManager.OnMovementGesturePerformedOrReleased -= SetShouldMoveforward;
         _playerEventManager.OnKnockbackTriggered -= ApplyKnockback;
         UnRegisterGlobalEvents();
         base.UnRegisterLocalEvents(eventManager);
