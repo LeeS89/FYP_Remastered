@@ -192,7 +192,7 @@ public class FieldOfViewHandler
             
             RunEvaluationPhase(_proximityDetectionResults[i], out hitCount, _addFallbackPoints);
 
-            if (hitCount == 0) { continue; }
+            if (hitCount == 0 && CombatComponent._testFOV) { Debug.LogError("CapsuleCast hit nothing"); continue; }
 
            // SetTargetingPhaseParams(ref _fovPhaseParams);
 
@@ -207,6 +207,11 @@ public class FieldOfViewHandler
                 //_onFOVResultCallback?.Invoke(seen, inShootAngle);
                 return;
                 //return true;
+            }
+            else
+            {
+                if(CombatComponent._testFOV)
+                //Debug.LogError("No hits in Targetting phase");
             }
 
         }

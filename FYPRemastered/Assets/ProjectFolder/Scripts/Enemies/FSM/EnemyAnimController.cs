@@ -43,9 +43,53 @@ public class EnemyAnimController
         _lastDirection = direction;
         //}
     }
-/*
-    private void UpdateAnimator(float speed)
+
+    [SerializeField] private float dampTime = 0.1f;    // How long it takes to reach the target
+    private float _speedVelocity;                      // Internal ref for SmoothDamp
+    private float _directionVelocity;                  // Internal ref for SmoothDamp
+    private float _currentSpeed;                       // Smoothed speed value
+    private float _currentDirection;
+
+    public void UpdateAnimator(Vector3 velocity, Vector3 forward)
     {
+       /* if (_animController == null || _agent == null)
+            return;*/
+
+        // Project velocity onto the XZ plane
+        //Vector3 velocity = _agent.velocity;
+        velocity.y = 0f;
+
+        // Dead-zone: treat micro-movement as zero
+        if (velocity.sqrMagnitude < 0.01f)
+        {
+            // Smoothly return to idle/forward-facing
+            _currentSpeed = Mathf.SmoothDamp(_currentSpeed, 0f, ref _speedVelocity, dampTime);
+            _currentDirection = Mathf.SmoothDamp(_currentDirection, 0f, ref _directionVelocity, dampTime);
+            UpdateBlendTreeParams(_currentSpeed, _currentDirection);
+            return;
+        }
+
+        // Compute raw speed (magnitude) and raw direction (-1 to +1)
+        float rawSpeed = velocity.magnitude;
+        //Vector3 forward = transform.forward;
+        Vector3 dirNorm = velocity.normalized;
+
+        // Invert speed if moving backwards
+        if (Vector3.Dot(forward, dirNorm) < 0f)
+            rawSpeed *= -1f;
+
+        // Signed angle between facing and movement direction, then normalize
+        float angle = Vector3.SignedAngle(forward, dirNorm, Vector3.up);
+        float rawDirection = Mathf.Clamp(angle / 90f, -1f, 1f);
+
+        // Smoothly interpolate toward the raw values
+        _currentSpeed = Mathf.SmoothDamp(_currentSpeed, rawSpeed, ref _speedVelocity, dampTime);
+        _currentDirection = Mathf.SmoothDamp(_currentDirection, rawDirection, ref _directionVelocity, dampTime);
+
+        // Send the smoothed values to your blend tree
+        UpdateBlendTreeParams(_currentSpeed, _currentDirection);
+
+        /*if(_animController == null) { return; }
 
         Vector3 moveDir = _agent.velocity;
         moveDir.y = 0f;
@@ -56,13 +100,13 @@ public class EnemyAnimController
 
         float dot = Vector3.Dot(forward, moveDir);
         float speed = _agent.speed;
-        *//* if(dot < 0)
-         {
-             speed *= -1;
-         }*//*
+        if (dot < 0)
+        {
+            speed *= -1;
+        }
 
-        UpdateBlendTreeParams(speed, 0f);
-    }*/
+        _animController.UpdateBlendTreeParams(speed, normalizedDirection);*/
+    }
 
 
 

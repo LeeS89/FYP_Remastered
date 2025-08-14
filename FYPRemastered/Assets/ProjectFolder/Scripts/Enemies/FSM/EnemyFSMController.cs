@@ -1,9 +1,10 @@
 using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
 using UnityEngine.AI;
 
 
-public partial class EnemyFSMController : FSMControllerBase
+public sealed class EnemyFSMController : FSMControllerBase
 {
     [Header("Animation Components")]
     [SerializeField] private Animator _anim;
@@ -19,13 +20,10 @@ public partial class EnemyFSMController : FSMControllerBase
     [Header("Agent and animation speed values")]
     private float _targetSpeed = 0f;
     private float _lerpSpeed = 0f;
-   // private bool _movementChanged = false;
-    private float _previousDirection = 0f;
-  
     private AlertStatus _alertStatus = AlertStatus.None;
 
- 
-    #region Event Registrations
+
+    #region Agent and FSM Setup / Scene Initialization
     public override void RegisterLocalEvents(EventManager eventManager)
     {
         base.RegisterLocalEvents(eventManager);
@@ -35,33 +33,44 @@ public partial class EnemyFSMController : FSMControllerBase
 
     }
 
-    #endregion
-
-
-    #region Animation Updates
-
-   
-
-    protected override void ToggleAgentControlledRotationToTarget(bool rotate)
+    protected override void SetupFSM()
     {
-        if (_rotatingTowardsTarget == rotate) return;
-       
-        _agent.updateRotation = !rotate;
-        _rotatingTowardsTarget = rotate;
+        base.SetupFSM();
+        _animController = new EnemyAnimController(_anim, _agentEventManager);
+
     }
 
+    protected override void OnSceneStarted()
+    {
+        //InitializeWeapon();
+        ChangeState(_patrol);
+
+        OwnerIsDead = false;
+        //AgentIsAlive = true;
+        //_agent.ResetPath();
+    }
+
+    #endregion
+
+    #region Scene End/ Agent & Component Cleanup
+    protected override void OnSceneComplete()
+    {
+        _animController = null;
+        base.OnSceneComplete();
+    }
+    #endregion
+
+    #region Agent speed Updates
     protected override void UpdateAgentSpeedValues(float speed, float lerpSpeed)
     {
         _lerpSpeed = lerpSpeed;
         _targetSpeed = speed;
 
-        //  _movementChanged = true;
     }
 
     private void UpdateAgentSpeed()
     {
 
-       // if (!_movementChanged) { return; }
         float smoothedSpeed = Mathf.Lerp(_agent.speed, _targetSpeed, _lerpSpeed * Time.deltaTime);
         _agent.speed = smoothedSpeed;
 
@@ -71,116 +80,49 @@ public partial class EnemyFSMController : FSMControllerBase
         {
             _agent.speed = _targetSpeed;
         }
-      /*  if (Mathf.Abs(_agent.speed - _targetSpeed) <= 0f)
-        {
-            _movementChanged = false;
-        }*/
-
-        // _animController.UpdateSpeed(smoothedSpeed);
-
-        /* if (Mathf.Abs(_agent.speed - _targetSpeed) <= 0.001f)
-         {
-
-             _agent.speed = _targetSpeed;
-             //_animController.UpdateSpeed(_targetSpeed);
-            // _movementChanged = false;
-         }*/
 
     }
 
-    [SerializeField] private float dampTime = 0.1f;    // How long it takes to reach the target
-    private float _speedVelocity;                      // Internal ref for SmoothDamp
-    private float _directionVelocity;                  // Internal ref for SmoothDamp
-    private float _currentSpeed;                       // Smoothed speed value
-    private float _currentDirection;
+    #endregion
 
-    private void UpdateAnimator()
+    #region Agent/ GameObject Toggles
+    private void DisableAgentAndObstacle()
     {
-        if (_animController == null || _agent == null)
-            return;
-
-        // Project velocity onto the XZ plane
-        Vector3 velocity = _agent.velocity;
-        velocity.y = 0f;
-
-        // Dead-zone: treat micro-movement as zero
-        if (velocity.sqrMagnitude < 0.01f)
-        {
-            // Smoothly return to idle/forward-facing
-            _currentSpeed = Mathf.SmoothDamp(_currentSpeed, 0f, ref _speedVelocity, dampTime);
-            _currentDirection = Mathf.SmoothDamp(_currentDirection, 0f, ref _directionVelocity, dampTime);
-            _animController.UpdateBlendTreeParams(_currentSpeed, _currentDirection);
-            return;
-        }
-
-        // Compute raw speed (magnitude) and raw direction (-1 to +1)
-        float rawSpeed = velocity.magnitude;
-        Vector3 forward = transform.forward;
-        Vector3 dirNorm = velocity.normalized;
-
-        // Invert speed if moving backwards
-        if (Vector3.Dot(forward, dirNorm) < 0f)
-            rawSpeed *= -1f;
-
-        // Signed angle between facing and movement direction, then normalize
-        float angle = Vector3.SignedAngle(forward, dirNorm, Vector3.up);
-        float rawDirection = Mathf.Clamp(angle / 90f, -1f, 1f);
-
-        // Smoothly interpolate toward the raw values
-        _currentSpeed = Mathf.SmoothDamp(_currentSpeed, rawSpeed, ref _speedVelocity, dampTime);
-        _currentDirection = Mathf.SmoothDamp(_currentDirection, rawDirection, ref _directionVelocity, dampTime);
-
-        // Send the smoothed values to your blend tree
-        _animController.UpdateBlendTreeParams(_currentSpeed, _currentDirection);
-
-        /*if(_animController == null) { return; }
-
-        Vector3 moveDir = _agent.velocity;
-        moveDir.y = 0f;
-        moveDir.Normalize();
-        Vector3 forward = transform.forward;
-        float directionAngle = Vector3.SignedAngle(forward, moveDir, Vector3.up);
-        float normalizedDirection = directionAngle / 90f; // Normalize to -1 to 1 range
-
-        float dot = Vector3.Dot(forward, moveDir);
-        float speed = _agent.speed;
-        if (dot < 0)
-        {
-            speed *= -1;
-        }
-
-        _animController.UpdateBlendTreeParams(speed, normalizedDirection);*/
+        ToggleAgent(false);
+        ToggleNMObstacle(false);
     }
 
-    // bool _movementChanged = false;
-
-
-    private void UpdateAnimatorDirection()
+    protected override void ToggleNMObstacle(bool status)
     {
-        // Get the normalized movement direction
-        Vector3 movementDirection = _agent.velocity.normalized;
+        if (_obstacle.enabled == status) { return; }
+        _obstacle.enabled = status;
+    }
 
-        // Calculate the angle between the agent's forward direction and the movement direction
-        float angle = Vector3.SignedAngle(transform.forward, movementDirection, Vector3.up);
+    protected override void CarveOnDestinationReached(bool reached)
+    {
+        //if(_currentState == _patrol) { return; }
+        if (!reached) { return; }
+        ToggleAgent(false);
+        ToggleNMObstacle(true);
+    }
 
-        // Normalize the angle to a value between -1 and 1
-        float normalizedDirection = angle / 90f;
+    private void ToggleAgent(bool agentEnabled)
+    {
+        if (_agent.enabled == agentEnabled) { return; }
 
-        // Only update the direction if it has changed significantly (for example, threshold of 0.1)
-        if (Mathf.Abs(normalizedDirection - _previousDirection) > 0.1f)
-        {
-            _animController.UpdateDirection(normalizedDirection); // Update the animator with the new direction
-            //animator.SetFloat("direction", normalizedDirection); // Update the direction parameter
-            _previousDirection = normalizedDirection; // Store the new direction
-        }
+        _agent.enabled = agentEnabled;
+    }
 
-       
-       
+    protected override void ToggleAgentControlledRotationToTarget(bool rotate)
+    {
+        if (_rotatingTowardsTarget == rotate) return;
+
+        _agent.updateRotation = !rotate;
+        _rotatingTowardsTarget = rotate;
     }
     #endregion
 
-
-    #region Death Region
+    #region Status Updates
     protected override void OwnerDeathStatusChanged(bool isDead)
     {
         base.OwnerDeathStatusChanged(isDead);
@@ -192,75 +134,357 @@ public partial class EnemyFSMController : FSMControllerBase
         // Implement Respawn here
         //if (AgentIsAlive) { AgentIsAlive = false; }
 
-        
-    }
 
-    private void DisableAgentAndObstacle()
-    {
-        ToggleAgent(false);
-        ToggleNMObstacle(false);
-    }
-
-    protected override void ToggleNMObstacle(bool status) 
-    {
-        if(_obstacle.enabled == status) { return; }
-        _obstacle.enabled = status;
-    }
-
-    protected override void CarveOnDestinationReached(bool reached)
-    {
-        //if(_currentState == _patrol) { return; }
-        if (!reached) { return; }
-        ToggleAgent(false);
-        ToggleNMObstacle(true);
-        //_obstacle.enabled = true;
-    }
-
-
-
-    private void ToggleAgent(bool agentEnabled)
-    {
-        if (_agent.enabled == agentEnabled) { return; }
-
-        _agent.enabled = agentEnabled;
-    }
-
-
-    #endregion
-
-
-
-    #region Global Events
-
-    protected override void OnSceneStarted()
-    {
-        //InitializeWeapon();
-        ChangeState(_patrol);
-       
-        OwnerIsDead = false;
-        //AgentIsAlive = true;
-        //_agent.ResetPath();
-    }
-
-    protected override void OnSceneComplete()
-    {
-        _animController = null;
-        base.OnSceneComplete(); 
     }
 
     protected override void OnPlayerDeathStatusUpdated(bool isDead)
     {
         base.OnPlayerDeathStatusUpdated(isDead);
-        
+
         //_playerIsDead = true;
         if (OwnerIsDead || !PlayerIsDead) { return; }
 
-        
+
         ResetFSM(_patrol);
-        
+
     }
 
+    private void HandleAgentRespawn()
+    {
+        ToggleGameObject(true);
+        ToggleAgent(true);
+        //_agent.enabled = true;
+        OwnerIsDead = false;
+        _agentEventManager.ChangeAnimatorLayerWeight(EnemyAnimController.AnimationLayer.Combat, 0, 1, 0.5f);
+        OwnerDeathStatusChanged(false);
+        _agentEventManager.AgentRespawn();
+        _alertStatus = AlertStatus.None;
+        //AgentIsAlive = true;
+    }
     #endregion
 
+    #region Component Updates
+    private void UpdateAnimator()
+    {
+        if (_animController == null || _agent == null)
+            return;
+
+        _animController.UpdateAnimator(_agent.velocity, transform.forward);
+
+    }
+    #endregion
+
+    #region FSM State Management
+    protected override void ChangeState(EnemyState state, AlertStatus status = AlertStatus.None)
+    {
+
+        if (_currentState == state) { return; }
+
+        if (_currentState != null)
+        {
+            _currentState.ExitState();
+        }
+        _currentState = state;
+
+        _destinationCheckAction = _currentState == _stationary ? StopImmediately : MeasurePathToDestination;
+
+        _currentState.EnterState(status);
+
+    }
+
+    protected override void StationaryStateRequested(AlertStatus alertStatus)
+    {
+        if (_currentState == _stationary)
+        {
+            return;
+        }
+        ChangeState(_stationary, alertStatus);
+    }
+
+    protected override void OnDestinationRequestComplete(bool success, Vector3 destination, AIDestinationType destType)
+    {
+        if (!success)
+        {
+            ChangeState(_stationary);
+            return;
+        }
+
+        int stoppingDistance = 0;
+
+        switch (destType)
+        {
+            case AIDestinationType.PatrolDestination:
+                break;
+            case AIDestinationType.ChaseDestination:
+                ChangeState(_chasing, AlertStatus.Chasing);
+                stoppingDistance = Random.Range(4, 11);
+                break;
+            case AIDestinationType.FlankDestination:
+                ChangeState(_chasing, AlertStatus.Flanking);
+                break;
+            default:
+                ChangeState(_stationary);
+                return;
+        }
+        _resourceRequest.carvingCallback = () =>
+        {
+            if (_obstacle.enabled)
+            {
+                _obstacle.enabled = false;
+            }
+        };
+
+        _resourceRequest.agentActiveCallback = () =>
+        {
+            if (!_agent.enabled)
+            {
+                ToggleAgent(true);
+
+            }
+
+            _agent.stoppingDistance = stoppingDistance;
+            _agent.SetDestination(destination);
+            _agentEventManager.DestinationApplied();
+        };
+        _destinationManager.StartCarvingRoutine(_resourceRequest);
+
+
+    }
+
+    public override void ResetFSM(EnemyState contextState = null)
+    {
+        if (TargetInView)
+        {
+            TargetInViewStatusUpdated(false);
+            //Debug.LogError("Target in view reset to false");
+            // UpdateFieldOfViewResults(false);
+
+        }
+
+        _agentEventManager.ChangeAnimatorLayerWeight(EnemyAnimController.AnimationLayer.Alert, 1, 0, 0.5f, true);
+
+        switch (contextState)
+        {
+            case PatrolState: // ResetFSM called when the player dies, or this agent is respawning
+
+                break;
+            case DeathState: // ResetFSM called when this agent dies
+                DisableAgentAndObstacle();
+                break;
+            default: // ResetFSM called when this agent is respawning
+                contextState = _patrol;
+                if (OwnerIsDead)
+                {
+                    HandleAgentRespawn();
+                }
+                break;
+        }
+
+        Debug.LogError("Resetting FSM to state: " + contextState.GetType().Name);
+
+        if (_currentState != contextState)
+        {
+            ChangeState(contextState);
+        }
+    }
+
    
+    #endregion
+
+    #region Path Validity & Remaining Distance Check
+    private void CheckCurrentPathValidity()
+    {
+        if (_agent.hasPath)
+        {
+            if (_agent.pathStatus != NavMeshPathStatus.PathComplete)
+            {
+                //_enemyEventManager.PathInvalid();
+                //Debug.LogError("Path is invalid, resetting path.");
+            }
+        }
+    }
+
+    private void MeasurePathToDestination()
+    {
+        if (!_agent.enabled) { return; }
+        //DebugExtension.DebugWireSphere(_agent.destination, Color.green);
+        if (_currentState != null && _agent.hasPath && !_agent.pathPending)
+        {
+            if (CheckIfDestinationIsReached())
+            {
+
+                _agent.ResetPath();
+                _agentEventManager.DestinationReached(true);
+
+
+            }
+
+        }
+    }
+
+    private bool CheckIfDestinationIsReached()
+    {
+        //Debug.LogError("Remainingdistance: "+_agent.remainingDistance);
+        return _agent.remainingDistance <= (_agent.stoppingDistance + 0.25f);
+    }
+
+    /// <summary>
+    /// Used when agent enters Stationary state
+    /// </summary>
+    private void StopImmediately()
+    {
+
+        if (_agent.hasPath)
+        {
+            _agent.ResetPath();
+        }
+
+        _destinationCheckAction = null;
+    }
+    #endregion
+
+    #region Field of view responses
+    protected override void TargetInViewStatusUpdated(bool inView)
+    {
+        if (TargetInView == inView) { return; }
+
+        TargetInView = inView;
+
+        if (_alertStatus != AlertStatus.None) { return; }
+
+        if (TargetInView)
+        {
+            EnterAlertPhase();
+            CallForBackup();
+        }
+    }
+
+    protected override void CallForBackup()
+    {
+        SceneEventAggregator.Instance.AlertZoneAgents(AgentZone, this);
+    }
+
+    public override void EnterAlertPhase()
+    {
+
+        if (_currentState != _chasing && _alertStatus == AlertStatus.None) /// Need to change Alert status param to something else
+        {
+            _alertStatus = AlertStatus.Alert;
+
+            _agentEventManager.ChangeAnimatorLayerWeight(EnemyAnimController.AnimationLayer.Alert, 0, 1, 0.5f, true);
+
+            //_alertStatus = AlertStatus.Alert;
+
+            _agentEventManager.DestinationRequested(AIDestinationType.ChaseDestination);
+
+        }
+
+    }
+
+    private void RotateTowardsPlayer()
+    {
+        Transform player = GameManager.Instance.GetPlayerPosition(PlayerPart.Position);
+        if (player == null)
+            return;
+
+        Vector3 toPlayer = player.position - transform.position;
+        toPlayer.y = 0f;
+
+        if (toPlayer.sqrMagnitude < 0.001f)
+            return;
+
+        Vector3 forward = transform.forward;
+        forward.y = 0f;
+
+        float dot = Vector3.Dot(forward.normalized, toPlayer.normalized);
+        float angle = Mathf.Acos(dot) * Mathf.Rad2Deg;
+
+        const float precisionThreshold = 1f; // degrees
+
+        Quaternion targetRotation = Quaternion.LookRotation(toPlayer);
+
+        if (angle < precisionThreshold)
+        {
+            // Close enough — complete the rotation smoothly
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation,
+                targetRotation,
+                1f); // forces it to land exactly, still smooth
+            //_enemyEventManager.FacingTarget(true);
+            return;
+        }
+        /*else
+        {
+            _enemyEventManager.FacingTarget(false);
+        }*/
+        // _agentEventManager.FacingTarget(false);
+
+        transform.rotation = Quaternion.Slerp(
+                transform.rotation,
+                targetRotation,
+                Time.deltaTime * 5f); // adjust speed as needed
+    }
+    #endregion
+
+
+    public bool testRespawn = false;
+
+    public bool _testDeath = false;
+
+
+    void Update()
+    {
+        if (_testDeath)
+        {
+            GameManager.Instance.CharacterDeathStatusChanged(CharacterType.Player);
+            //_animController.DeadAnimation();
+            //ChangeState(_chasing);
+            //CarveOnDestinationReached(true);
+            _testDeath = false;
+        }
+
+        if (testRespawn)
+        {
+            GameManager.Instance.PlayerDeathStatusChanged(false);
+            //_playerIsDead = false;
+            testRespawn = false;
+        }
+
+        /*if (_testWaypoint)
+        {
+            ChangeWaypoints();
+            _testWaypoint = false;
+        }*/
+
+        // UpdateAgentSpeed();
+    }
+
+    private void LateUpdate()
+    {
+        if (_currentState != null)
+        {
+            _currentState.LateUpdateState();
+        }
+
+        if (OwnerIsDead) { return; }
+
+        CheckCurrentPathValidity();
+
+
+        //MeasurePathToDestination();
+        _destinationCheckAction?.Invoke();
+
+        if (_rotatingTowardsTarget)
+        {
+
+            RotateTowardsPlayer();
+            // UpdateAnimatorDirection();
+        }
+        // UpdateAnimatorDirection();
+        UpdateAgentSpeed();
+        UpdateAnimator();
+        //if (!_movementChanged) { return; }
+
+        //UpdateAgentSpeed();
+    }
 }

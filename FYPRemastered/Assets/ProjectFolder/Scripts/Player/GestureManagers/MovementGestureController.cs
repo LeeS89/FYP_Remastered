@@ -12,7 +12,7 @@ public class MovementGestureController : BaseGesture
     public static bool _rightHandActive = false;
 
     private PlayerEventManager _playerEventManager;
-    [SerializeField] private bool _isGrabbing = false;
+    [SerializeField] public bool IsGrabbing { get; private set; } = false;
     [SerializeField] private Transform _grabTraceLocation;
 
    
@@ -36,8 +36,8 @@ public class MovementGestureController : BaseGesture
     public override void RegisterLocalEvents(EventManager eventManager)
     {
         if (eventManager == null) { return; }
+        _playerEventManager = eventManager as PlayerEventManager;
         ResetFields();
-        _playerEventManager = (PlayerEventManager)eventManager;
         _playerEventManager.OnGrab += ToggleHasGrabbedObject;
         _playerEventManager.OnReleaseGrabbable += ToggleHasGrabbedObject;
         
@@ -105,7 +105,7 @@ public class MovementGestureController : BaseGesture
 
     private bool CheckIfCanTriggerMovementPoseResponse()
     {
-        if (!InputEnabled || _isGrabbing) { return false; }
+        if (!InputEnabled || IsGrabbing) { return false; }
 
         if (_handInControl == HandSide.None)
         {
@@ -121,7 +121,7 @@ public class MovementGestureController : BaseGesture
     {
         if (_side == uniqueID)
         {
-            _isGrabbing = grabbing;
+            IsGrabbing = grabbing;
         }
     }
 

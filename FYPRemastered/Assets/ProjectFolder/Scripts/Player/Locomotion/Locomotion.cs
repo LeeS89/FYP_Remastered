@@ -14,22 +14,19 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
     [SerializeField] private float _moveSpeed = 4.0f;
     private bool _shouldMoveForward = false;
     private const float GRAVITY = -9.8f;
-    private Vector3 velocity = Vector3.zero;
+   // private Vector3 velocity = Vector3.zero;
     private Vector3 _moveDirection = Vector3.zero;
     private float _effectiveMoveSpeed = 0f;
     private float newVelocityY = 0f;
     private Vector3 _newControllerCenter = Vector3.zero;
 
     private PlayerEventManager _playerEventManager;
-    private bool _inputEnabled = false;
+    
 
-    public UniformZoneGridManager _gridManager;
+    //public UniformZoneGridManager _gridManager;
 
-    public bool InputEnabled
-    {
-        get => _inputEnabled;
-        private set => _inputEnabled = value;
-    }
+    public bool InputEnabled { get; private set; } = false;
+    
    
 
     public override void RegisterLocalEvents(EventManager eventManager)
@@ -152,6 +149,7 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
 
     private void LateUpdate()
     {
+#if !UNITY_EDITOR
         float movedDistance = Vector3.Distance(transform.position, _lastPosition);
 
         if (movedDistance > movementThreshold)
@@ -172,6 +170,7 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
         }
 
         _lastPosition = transform.position;
+#endif
     }
 
     private void HandleRotation(Quaternion targetRotation)

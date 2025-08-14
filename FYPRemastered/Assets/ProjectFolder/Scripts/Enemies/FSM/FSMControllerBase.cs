@@ -37,7 +37,7 @@ public abstract class FSMControllerBase : ComponentEvents
     
     public int AgentZone { get; protected set; } = 0;
 
-   
+    public bool TargetInView { get; protected set; } = false;
     protected GameObject OwningAgent => gameObject;
 
     public override void RegisterLocalEvents(EventManager eventManager)

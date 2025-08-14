@@ -2,7 +2,7 @@ using UnityEngine;
 
 public abstract class BaseGesture : ComponentEvents//, IPlayerEvents
 {
-    protected bool _inputEnabled = false;
+    public bool InputEnabled { get; protected set; } = false;
 
     public abstract void OnGestureRecognized();
 
@@ -17,12 +17,12 @@ public abstract class BaseGesture : ComponentEvents//, IPlayerEvents
     public abstract void UnRegisterLocalEvents(EventManager eventManager);
 */
 
-    public virtual bool InputEnabled
+    /*public virtual bool InputEnabled
     {
         set => _inputEnabled = value;
         protected get => _inputEnabled;
 
-    }
+    }*/
 
 
     protected override void OnSceneStarted() { }

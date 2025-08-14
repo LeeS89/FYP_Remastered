@@ -29,12 +29,33 @@ public class AITraceComponent : TraceComponent
 
     public bool IsWithinView(Transform from, Vector3 targetPosition, float horizontalThreshold, float verticalThreshold)
     {
+
+        Vector3 to = targetPosition - from.position;
+
+        
+        Vector3 up = from.up.normalized;
+        Vector3 fwdYaw = Vector3.ProjectOnPlane(from.forward, Vector3.up).normalized;
+        if (fwdYaw.sqrMagnitude < 1e-6f)
+            fwdYaw = Vector3.ProjectOnPlane(from.forward, up).normalized;
+
+        Quaternion basis = Quaternion.LookRotation(fwdYaw, up);
+        Vector3 local = Quaternion.Inverse(basis) * to; // no normalize
+
+        float h = Mathf.Abs(Mathf.Atan2(local.x, local.z) * Mathf.Rad2Deg); // yaw
+        float v = Mathf.Abs(Mathf.Atan2(local.y, local.z) * Mathf.Rad2Deg); // pitch
+
+        return h <= horizontalThreshold && v <= verticalThreshold;
+
+
+
+/*
         Vector3 localDir = from.InverseTransformDirection(targetPosition - from.position).normalized;
         
         float horizontalAngle = Mathf.Atan2(localDir.x, localDir.z) * Mathf.Rad2Deg;
         float verticalAngle = Mathf.Atan2(localDir.y, localDir.z) * Mathf.Rad2Deg;
 
         return Mathf.Abs(horizontalAngle) <= horizontalThreshold && Mathf.Abs(verticalAngle) <= verticalThreshold;
+*/
         /* Vector3 directionToTarget = (targetPosition - from.position).normalized;
 
          // Horizontal (XZ-plane)
@@ -124,7 +145,13 @@ public class AITraceComponent : TraceComponent
         return false;
     }*/
 
-
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="fallbackFrom">In cases where the Linecast hits the calling object first
+    /// we use a fallback point to fire the linecast from</param>
+    /// <param name="debug"></param>
+    /// <returns></returns>
     public bool HasLineOfSight(
        Transform from,
        Vector3 target,
@@ -145,7 +172,7 @@ public class AITraceComponent : TraceComponent
 
         if(fallbackFrom != null)
         {
-            if(hitInfo.transform.root == from)
+            if(hitInfo.transform.root == ownerTransform)
             {
                 targetWasHit = false;
                 CheckHit(fallbackFrom, target, out hitInfo, out targetWasHit, blockingMask);

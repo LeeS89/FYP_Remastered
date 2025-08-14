@@ -205,35 +205,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _agent: {fileID: 1804067267602914920}
   _obstacle: {fileID: 7963726222172396574}
-  _anim: {fileID: 8894583834217872234}
   _walkSpeed: 0.9
-  _stopAndWaitDelay: 6
-  _wayPoints: []
-  _wayPointForwards: []
-  _blockZone: 0
   _sprintSpeed: 3.6
   _maxFlankingSteps: 12
-  _losTargetMask:
-    serializedVersion: 2
-    m_Bits: 520
-  _losBlockingMask:
-    serializedVersion: 2
-    m_Bits: 537
-  _losBackupTargetMask:
-    serializedVersion: 2
-    m_Bits: 16
-  _bulletSpawnPoint: {fileID: 1520609376679817542}
-  _owningGameObject: {fileID: 0}
-  _testDeath: 0
-  _testFlankCubes: {fileID: 6064443228721452630, guid: 5f1d9bc0501d93140b8d583d719a72de, type: 3}
+  _debugFlankCubes: {fileID: 0}
+  _anim: {fileID: 8894583834217872234}
+  dampTime: 0.1
   testRespawn: 0
   _testWaypoint: 0
+  _testDeath: 0
   _updateEnaboled: 0
-  _testEnterPatrol: 0
-  testSeeView: 0
-  _testMelee: 0
   _testRotation: 0
-  _testLook: 0
 --- !u!208 &7963726222172396574
 NavMeshObstacle:
   m_ObjectHideFlags: 0
@@ -323,6 +305,7 @@ MonoBehaviour:
   _bulletSpawnPoint: {fileID: 1520609376679817542}
   _testMelee: 0
   _canUpdateWeapon: 0
+  _testSeen: 0
 --- !u!65 &3309944096030598539
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1193,7 +1176,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0.000010997054, y: -0.010664626, z: -0.00021446118, w: 0.9999432}
   m_LocalPosition: {x: 0, y: 0.08500008, z: 0.23799996}
-  m_LocalScale: {x: 0.08, y: 0.07999996, z: 0.07999999}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 4407192246320918620}

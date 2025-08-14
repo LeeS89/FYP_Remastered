@@ -238,8 +238,8 @@ public class CombatComponent : BaseAbilities
 
     public bool _canUpdateWeapon = false;
 
-    
 
+    public static bool _testFOV = true;
 
     private void BeginMeleeSweep()
     {
@@ -334,9 +334,9 @@ public class CombatComponent : BaseAbilities
 
     private void OnFieldOfViewComplete(bool seen, bool inShootingAngle)
     {
-        if (!seen && _testSeen)
+        if (!seen && _testFOV)
         {
-            Debug.LogError("Cannot see player");
+           // Debug.LogError("Cannot see player On FOV callback");
         }
         _enemyEventManager.TargetSeen(seen);
         _enemyEventManager.FacingTarget(inShootingAngle);
@@ -353,6 +353,76 @@ public class CombatComponent : BaseAbilities
     void OnDrawGizmosSelected()
     {
         if (_fovLocation == null) return;
+
+        Vector3 origin = _fovLocation.position;
+        float viewRadius = _proximityRadius;
+        float hAng = _fovViewangle * _horizontalAngleMultiplier;
+        float vAng = _fovViewangle * _verticalAngleMultiplier;
+
+#if UNITY_EDITOR
+        Handles.color = Color.white;
+#endif
+        // Draw detection sphere
+        Gizmos.color = Color.white;
+        Gizmos.DrawWireSphere(origin, viewRadius);
+
+        // Fetch basis vectors
+        Vector3 forward = _fovLocation.forward;  // full 3D forward
+        Vector3 up = _fovLocation.up;
+        Vector3 right = _fovLocation.right;
+
+        // Horizontal bounds: rotate forward around head.up
+        Vector3 rightBound = Quaternion.AngleAxis(hAng, up) * forward;
+        Vector3 leftBound = Quaternion.AngleAxis(-hAng, up) * forward;
+
+        Gizmos.color = Color.green;
+        Gizmos.DrawRay(origin, rightBound * viewRadius);
+        Gizmos.DrawRay(origin, leftBound * viewRadius);
+
+        // Vertical bounds: rotate forward around head.right
+        Vector3 upperBound = Quaternion.AngleAxis(vAng, right) * forward;
+        Vector3 lowerBound = Quaternion.AngleAxis(-vAng, right) * forward;
+
+        Gizmos.DrawRay(origin, upperBound * viewRadius);
+        Gizmos.DrawRay(origin, lowerBound * viewRadius);
+
+
+        /*if (_fovLocation == null) return;
+
+        Vector3 origin = _fovLocation.position;
+        float viewRadius = _proximityRadius;
+
+#if UNITY_EDITOR
+        Handles.color = Color.white;
+#endif
+        DebugExtension.DebugWireSphere(origin, Color.white, viewRadius);
+
+        // --- stable basis ---
+        Vector3 upAxis = _fovLocation.up.normalized;                                   // vertical follows
+        Vector3 fwdYaw = Vector3.ProjectOnPlane(_fovLocation.forward, Vector3.up).normalized; // yaw-only forward
+        if (fwdYaw.sqrMagnitude < 1e-6f)
+            fwdYaw = new Vector3(_fovLocation.forward.x, 0f, _fovLocation.forward.z).normalized;
+        Vector3 rightAxis = Vector3.Cross(upAxis, fwdYaw).normalized;
+        Vector3 fwd = Vector3.Cross(rightAxis, upAxis).normalized;                 // orthonormal forward
+
+        // Horizontal FOV (same style, just use yaw-only forward)
+        float hAng = _fovViewangle * _horizontalAngleMultiplier;
+        Vector3 right = Quaternion.Euler(0f, hAng, 0f) * fwdYaw;
+        Vector3 left = Quaternion.Euler(0f, -hAng, 0f) * fwdYaw;
+
+        Gizmos.color = Color.green;
+        Gizmos.DrawRay(origin, right * _proximityRadius);
+        Gizmos.DrawRay(origin, left * _proximityRadius);
+
+        // Vertical FOV (rotate around the agent's right axis, not world X)
+        float vAng = _fovViewangle * _verticalAngleMultiplier;
+        Vector3 up = Quaternion.AngleAxis(-vAng, rightAxis) * fwd;
+        Vector3 down = Quaternion.AngleAxis(vAng, rightAxis) * fwd;
+
+        Gizmos.DrawRay(origin, up * _proximityRadius);
+        Gizmos.DrawRay(origin, down * _proximityRadius);*/
+
+        /*if (_fovLocation == null) return;
 
       
 
@@ -381,12 +451,12 @@ public class CombatComponent : BaseAbilities
         Vector3 down = Quaternion.Euler(_fovViewangle * _verticalAngleMultiplier, 0, 0) * _fovLocation.forward;
 
         Gizmos.DrawRay(_fovLocation.position, up * _proximityRadius);
-        Gizmos.DrawRay(_fovLocation.position, down * _proximityRadius); 
+        Gizmos.DrawRay(_fovLocation.position, down * _proximityRadius); */
 
-      
+
     }
 
-   
+
 
 
     #region Redundant Code
