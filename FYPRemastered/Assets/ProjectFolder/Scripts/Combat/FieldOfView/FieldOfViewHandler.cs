@@ -208,11 +208,11 @@ public class FieldOfViewHandler
                 return;
                 //return true;
             }
-            else
+           /* else
             {
                 if(CombatComponent._testFOV)
                 //Debug.LogError("No hits in Targetting phase");
-            }
+            }*/
 
         }
         _eventManager.FieldOfViewCallback(seen, inShootAngle);
