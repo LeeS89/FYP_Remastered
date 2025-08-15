@@ -1,71 +1,68 @@
-using System.Collections;
 using UnityEngine;
 
-public class PlayerController : ComponentEvents
+[RequireComponent(typeof(CharacterController))]
+public sealed class PlayerController : ComponentEvents
 {
-    [Header("Character Controller Collider values")]
-    CharacterController _controller;
+    [Header("Locomotion Params")]
+    [SerializeField] private float _moveSpeed = 4.0f;
+    [SerializeField] private float _gravity = -9.8f;
+
+    [Header("Rotation Params")]
+    [SerializeField] private Transform _camera;
+    [SerializeField] private float _rotationSpeed = 5f;
+    [SerializeField] private float _rotationThreshold = 20f;
+    [SerializeField] private float _stopRotationThreshold = 18f;
+
+    [Header("Dynamic Body Height Params")]
     [SerializeField] private float _bodyHeightMin = 0.5f;
     [SerializeField] private float _bodyHeightMax = 2f;
 
-
-    [Header("Movement Speed")]
-    [SerializeField] private float _moveSpeed = 4.0f;
-    private bool _shouldMoveForward = false;
-    private const float GRAVITY = -9.8f;
-    // private Vector3 velocity = Vector3.zero;
-    private Vector3 _moveDirection = Vector3.zero;
-    private float _effectiveMoveSpeed = 0f;
-    private float newVelocityY = 0f;
-    private Vector3 _newControllerCenter = Vector3.zero;
-
+    [Header("Player Controller Components")]
+    private CharacterController _controller;
     private PlayerEventManager _playerEventManager;
-
-
-    //public UniformZoneGridManager _gridManager;
+    private LocomotionHandler _locomotion;
+    private RotationHandler _rotationHandler;
 
     public bool InputEnabled { get; private set; } = false;
 
 
-
     public override void RegisterLocalEvents(EventManager eventManager)
     {
-        base.RegisterLocalEvents(eventManager);
-        if (eventManager == null)
-        {
-            Debug.LogError("Player event manager is null");
-            return;
-        }
+        _playerEventManager = eventManager as PlayerEventManager;
+       
         if (TryGetComponent<CharacterController>(out CharacterController characterController))
         {
             _controller = characterController;
         }
         else
         {
+#if UNITY_EDITOR
             Debug.LogWarning("Character controller not found, please ensure component exists before use");
+#endif
         }
-        _playerEventManager = _eventManager as PlayerEventManager;
-        _playerEventManager.OnKnockbackTriggered += ApplyKnockback;
+  
         _playerEventManager.OnPlayerRotate += HandleRotation;
         _playerEventManager.OnPlayerHeightUpdated += AdjustPlayerHeight;
-        _playerEventManager.OnMovementGesturePerformedOrReleased += SetShouldMoveforward;
+        _playerEventManager.OnMovementUpdated += ApplyPlayerMovement;
+        _locomotion = new LocomotionHandler(_playerEventManager, transform, _moveSpeed, _gravity);
+
+        SetupRotationHandler();
 
         RegisterGlobalEvents();
     }
 
+    private void SetupRotationHandler()
+    {
+        var cfg = new RotationHandler.Config(_camera, transform, _rotationSpeed, _rotationThreshold, _stopRotationThreshold);
+        _rotationHandler = new RotationHandler(_playerEventManager, cfg);
+    }
+
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
-        if (_eventManager == null)
-        {
-            Debug.LogError("Player event manager is null");
-            return;
-        }
+        _playerEventManager.OnMovementUpdated -= ApplyPlayerMovement;
         _playerEventManager.OnPlayerRotate -= HandleRotation;
         _playerEventManager.OnPlayerHeightUpdated -= AdjustPlayerHeight;
-        _playerEventManager.OnMovementGesturePerformedOrReleased -= SetShouldMoveforward;
-        _playerEventManager.OnKnockbackTriggered -= ApplyKnockback;
         UnRegisterGlobalEvents();
-        base.UnRegisterLocalEvents(eventManager);
         _playerEventManager = null;
 
 
@@ -87,89 +84,21 @@ public class PlayerController : ComponentEvents
         BaseSceneManager._instance.OnSceneEnded -= OnSceneComplete;
     }
 
-    //public bool _testMove = false;
-    private Vector3 _lastPosition;
-    public float movementThreshold = 0.01f;
-
-    public bool _testKnockback = false;
 
     private void Update()
     {
         if (!InputEnabled) { return; }
 
-        ApplyPlayerMovement();
+        _locomotion?.Tick(_controller.isGrounded);
 
-        if (_testKnockback)
-        {
-            ApplyKnockback(-transform.forward, 7f, 0.3f);
-            _testKnockback = false;
-        }
-
-#if UNITY_EDITOR
-        float movedDistance = Vector3.Distance(transform.position, _lastPosition);
-
-        if (movedDistance > movementThreshold)
-        {
-            if (!GameManager.Instance.PlayerHasMoved)
-            {
-                GameManager.Instance.PlayerHasMoved = true;  // Replace with actual method
-            }
-        }
-        else
-        {
-            if (GameManager.Instance.PlayerHasMoved)
-            {
-                GameManager.Instance.PlayerHasMoved = false;
-                SceneEventAggregator.Instance.RunClosestPointToPlayerJob();
-                //MoonSceneManager._instance.TestRun();
-            }
-        }
-
-        _lastPosition = transform.position;
-#endif
-        //     SceneEventAggregator.Instance.RunClosestPointToPlayerJob();
-        /*if (_testMove)
-        {
-            GameManager.Instance.PlayerHasMoved = true;
-        }
-        else
-        {
-            GameManager.Instance.PlayerHasMoved = false;
-        }*/
-        /*if (_testMove)
-        {
-            SetShouldMoveforward(true);
-        }
-        else
-        {
-            SetShouldMoveforward(false);
-        }*/
     }
 
     private void LateUpdate()
     {
-#if !UNITY_EDITOR
-        float movedDistance = Vector3.Distance(transform.position, _lastPosition);
+        if (!InputEnabled) { return; }
 
-        if (movedDistance > movementThreshold)
-        {
-            if (!GameManager.Instance.PlayerHasMoved)
-            {
-                GameManager.Instance.PlayerHasMoved = true;  // Replace with actual method
-            }
-        }
-        else
-        {
-            if (GameManager.Instance.PlayerHasMoved)
-            {
-                GameManager.Instance.PlayerHasMoved = false;
-                SceneEventAggregator.Instance.RunClosestPointToPlayerJob();
-                //MoonSceneManager._instance.TestRun();
-            }
-        }
-
-        _lastPosition = transform.position;
-#endif
+        _locomotion?.LateTick();
+        _rotationHandler?.LateTick();
     }
 
     private void HandleRotation(Quaternion targetRotation)
@@ -180,124 +109,49 @@ public class PlayerController : ComponentEvents
     private void AdjustPlayerHeight(Vector3 _cameraLocalPos)
     {
         if (_controller == null) { return; }
+        Vector3 newControllerCenter;
 
         _controller.height = Mathf.Clamp(_cameraLocalPos.y, _bodyHeightMin, _bodyHeightMax);
-        _newControllerCenter.x = _cameraLocalPos.x;
-        _newControllerCenter.y = _controller.height / 2;
-        _newControllerCenter.z = _cameraLocalPos.z;
+        newControllerCenter.x = _cameraLocalPos.x;
+        newControllerCenter.y = _controller.height / 2;
+        newControllerCenter.z = _cameraLocalPos.z;
 
-
-
-        _controller.center = _newControllerCenter;
+        _controller.center = newControllerCenter;
 
     }
 
-    public bool _testMove = false;
-    private void SetShouldMoveforward(bool move)
+   
+
+
+    private void ApplyPlayerMovement(Vector3 velocity)
     {
-        //if (_shouldMoveForward != move)
-        // {
-        _shouldMoveForward = move;
-        GameManager.Instance.PlayerHasMoved = _shouldMoveForward;
+        if (_controller == null || PlayerIsDead) { return; }
 
-        if (!_shouldMoveForward)
-        {
-
-            //MoonSceneManager._instance.TestRun();
-        }
-        // }
-    }
-
-
-
-    private void ApplyPlayerMovement(Vector3? overrideVelocity = null)
-    {
-        if (_controller == null) { return; }
-
-        Vector3 finalVelocity;
-
-        if (overrideVelocity.HasValue)
-        {
-            finalVelocity = overrideVelocity.Value;
-        }
-        else
-        {
-            _effectiveMoveSpeed = _shouldMoveForward ? _moveSpeed : 0f;
-
-            _moveDirection = transform.forward;
-            finalVelocity = _moveDirection * _effectiveMoveSpeed;
-            finalVelocity.y = ApplyGravity();
-        }
-
-        _controller.Move(finalVelocity * Time.deltaTime);
+        _controller.Move(velocity * Time.deltaTime);
 
     }
 
-    private void ApplyKnockback(Vector3 direction, float force, float duration)
-    {
-        StartCoroutine(HandleKnockback(direction, force, duration));
-    }
 
-    private IEnumerator HandleKnockback(Vector3 direction, float force, float duration)
-    {
-        InputEnabled = false;
-
-        float timer = 0f;
-        Vector3 knockbackVelocity = direction * force;
-
-        while (timer < duration)
-        {
-            ApplyPlayerMovement(knockbackVelocity);
-            timer += Time.deltaTime;
-            yield return null;
-        }
-
-        InputEnabled = true;
-    }
-
-    private float ApplyGravity()
-    {
-        if (_controller.isGrounded)
-        {
-            newVelocityY = GRAVITY / 2f;
-        }
-        else
-        {
-            newVelocityY += GRAVITY * Time.deltaTime;
-        }
-
-        return newVelocityY;
-    }
 
     protected override void OnSceneStarted()
     {
-
         InputEnabled = true;
-        _lastPosition = transform.position;
     }
 
     protected override void OnSceneComplete()
     {
         InputEnabled = false;
-        if (_shouldMoveForward)
-        {
-            _shouldMoveForward = false;
-        }
+        _locomotion?.OnInstanceDestroyed();
+        _locomotion = null;
+        _rotationHandler?.OnInstanceDestroyed();
+        _rotationHandler = null;
     }
 
     protected override void OnPlayerDeathStatusUpdated(bool isDead)
     {
         base.OnPlayerDeathStatusUpdated(isDead);
 
-        InputEnabled = PlayerIsDead;
-        if (PlayerIsDead)
-        {
-            if (_shouldMoveForward)
-            {
-                _shouldMoveForward = false;
-            }
-        }
-
-
+        InputEnabled = !PlayerIsDead;
+       
     }
 }

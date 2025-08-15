@@ -6,24 +6,27 @@ public class LocomotionHandler
     //NEW
     private PlayerEventManager _eventManager;
     private Transform _playerTransform;
-    public float Gravity { get; private set; } = -9.8f;
+    public float Gravity { get; set; } = -9.8f;
     public bool CanMoveForward { get; private set; } = false;
     public float _moveSpeed { get; set; } = 4.0f;
-    // private float _effectiveMoveSpeed = 0f;
+
+    public bool Knockedback { get; private set; } = false;
 
 
-    public LocomotionHandler(PlayerEventManager eventManager, Transform playerTransform, float moveSpeed)
+
+    public LocomotionHandler(PlayerEventManager eventManager, Transform playerTransform, float moveSpeed, float gravity = -9.8f)
     {
         _eventManager = eventManager;
         _playerTransform = playerTransform;
         _moveSpeed = moveSpeed;
-        _playerEventManager.OnMovementGesturePerformedOrReleased += SetCanMoveforward;
-        _playerEventManager.OnKnockbackTriggered += ApplyKnockback;
+        Gravity = gravity;
+        _eventManager.OnMovementGesturePerformedOrReleased += SetCanMoveforward;
+        _eventManager.OnKnockbackTriggered += ApplyKnockback;
     }
 
-    private void CalculateMovementDirection(Vector3? overrideVelocity = null)
+    private void CalculateMovementDirection(bool isGrounded = true, Vector3? overrideVelocity = null)
     {
-        float _effectiveMoveSpeed;
+        float effectiveMoveSpeed;
         Vector3 finalVelocity;
 
         if (overrideVelocity.HasValue)
@@ -32,11 +35,11 @@ public class LocomotionHandler
         }
         else
         {
-            _effectiveMoveSpeed = CanMoveForward ? _moveSpeed : 0f;
+            effectiveMoveSpeed = CanMoveForward ? _moveSpeed : 0f;
 
-            _moveDirection = _playerTransform.forward;
-            finalVelocity = _moveDirection * _effectiveMoveSpeed;
-            finalVelocity.y = ApplyGravity();
+            Vector3 moveDirection = _playerTransform.forward;
+            finalVelocity = moveDirection * effectiveMoveSpeed;
+            finalVelocity.y = ApplyGravity(isGrounded);
         }
 
         _eventManager.MovementUpdated(finalVelocity);
@@ -54,24 +57,24 @@ public class LocomotionHandler
 
     private IEnumerator HandleKnockback(Vector3 direction, float force, float duration)
     {
-        //InputEnabled = false; => 
+        Knockedback = true; 
 
         float timer = 0f;
         Vector3 knockbackVelocity = direction * force;
 
         while (timer < duration)
         {
-            CalculateMovementDirection(knockbackVelocity);
+            CalculateMovementDirection(true, knockbackVelocity);
             timer += Time.deltaTime;
             yield return null;
         }
 
-        //InputEnabled = true;
+        Knockedback = false;
     }
 
-    private float ApplyGravity()
+    private float ApplyGravity(bool isGrounded)
     {
-        if (_controller.isGrounded)
+        if (isGrounded)
         {
             newVelocityY = Gravity / 2f;
         }
@@ -99,61 +102,32 @@ public class LocomotionHandler
 
     public void OnInstanceDestroyed()
     {
-        _playerEventManager.OnMovementGesturePerformedOrReleased -= SetCanMoveforward;
-        _playerEventManager.OnKnockbackTriggered -= ApplyKnockback;
+        _eventManager.OnMovementGesturePerformedOrReleased -= SetCanMoveforward;
+        _eventManager.OnKnockbackTriggered -= ApplyKnockback;
         _playerTransform = null;
         _eventManager = null;
     }
 
 
-
-
-    // END NEW
-
-
-    [Header("Character Controller Collider values")]
-    CharacterController _controller;
-    [SerializeField] private float _bodyHeightMin = 0.5f;
-    [SerializeField] private float _bodyHeightMax = 2f;
-
-
-   
-   
-    
-    // private Vector3 velocity = Vector3.zero;
-    private Vector3 _moveDirection = Vector3.zero;
    
     private float newVelocityY = 0f;
-    private Vector3 _newControllerCenter = Vector3.zero;
-
-    private PlayerEventManager _playerEventManager;
-
-
-    //public UniformZoneGridManager _gridManager;
-
-   // public bool InputEnabled { get; private set; } = false;
-
-
-
-
-
+   
 
     //public bool _testMove = false;
     private Vector3 _lastPosition;
     public float movementThreshold = 0.01f;
 
-    public bool _testKnockback = false;
-
-    public void Tick()
+    public void Tick(bool isGrounded, bool testKnockback = false)
     {
-       // if (!InputEnabled) { return; }
+        if (!Knockedback)
+        {
+            CalculateMovementDirection();
+        }
 
-        CalculateMovementDirection();
-
-        if (_testKnockback)
+        if (testKnockback)
         {
             ApplyKnockback(-_playerTransform.forward, 7f, 0.3f);
-            _testKnockback = false;
+            testKnockback = false;
         }
 
 #if UNITY_EDITOR
@@ -179,6 +153,32 @@ public class LocomotionHandler
         _lastPosition = _playerTransform.position;
 #endif
        
+    }
+
+    public void LateTick()
+    {
+#if !UNITY_EDITOR
+        float movedDistance = Vector3.Distance(_playerTransform.position, _lastPosition);
+
+        if (movedDistance > movementThreshold)
+        {
+            if (!GameManager.Instance.PlayerHasMoved)
+            {
+                GameManager.Instance.PlayerHasMoved = true;  // Replace with actual method
+            }
+        }
+        else
+        {
+            if (GameManager.Instance.PlayerHasMoved)
+            {
+                GameManager.Instance.PlayerHasMoved = false;
+                SceneEventAggregator.Instance.RunClosestPointToPlayerJob();
+                //MoonSceneManager._instance.TestRun();
+            }
+        }
+
+        _lastPosition = _playerTransform.position;
+#endif
     }
 
 

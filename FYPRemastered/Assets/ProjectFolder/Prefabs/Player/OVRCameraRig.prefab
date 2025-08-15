@@ -9982,9 +9982,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5625166215890319758}
-  - component: {fileID: 1259335678097365104}
   - component: {fileID: 5437152048673592274}
   - component: {fileID: 7185523588651463741}
+  - component: {fileID: 5884852673508482577}
   m_Layer: 0
   m_Name: OVRHandDataSource
   m_TagString: Untagged
@@ -10007,26 +10007,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 3045157531615462819}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1259335678097365104
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2060164211915216872}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4855895ba1c44959a306beb7ae318fc2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _updateMode: 0
-  _updateAfter: {fileID: 0}
-  _cameraRigRef: {fileID: 977659798350230422}
-  _processLateUpdates: 0
-  _handedness: 0
-  _ovrHand: {fileID: 0}
-  _trackingToWorldTransformer: {fileID: 7559762440991983132}
-  _handSkeletonProvider: {fileID: 305630395911599139}
 --- !u!114 &5437152048673592274
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10043,7 +10023,7 @@ MonoBehaviour:
   _includeChildrenAsDependents: 0
   _gameObjects: []
   _monoBehaviours:
-  - {fileID: 1259335678097365104}
+  - {fileID: 5884852673508482577}
 --- !u!114 &7185523588651463741
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10058,6 +10038,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _handType: 0
   _showState: 3
+--- !u!114 &5884852673508482577
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2060164211915216872}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c64e4c4fad6644489413b174d5d1f2a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _updateMode: 0
+  _updateAfter: {fileID: 0}
+  _cameraRigRef: {fileID: 977659798350230422}
+  _processLateUpdates: 0
+  _handedness: 0
+  _ovrHand: {fileID: 0}
+  _trackingToWorldTransformer: {fileID: 7559762440991983132}
+  _handSkeletonProvider: {fileID: 305630395911599139}
 --- !u!1 &2066698040359211201
 GameObject:
   m_ObjectHideFlags: 0
@@ -15814,8 +15814,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _updateMode: 8
-  _updateAfter: {fileID: 4297709723644607997}
-  _iModifyDataFromSourceMono: {fileID: 4297709723644607997}
+  _updateAfter: {fileID: 7005845373473120864}
+  _iModifyDataFromSourceMono: {fileID: 7005845373473120864}
   _applyModifier: 1
 --- !u!114 &2903542384325373571
 MonoBehaviour:
@@ -21692,10 +21692,10 @@ GameObject:
   - component: {fileID: 4420417596140531666}
   - component: {fileID: 4383587474410879416}
   - component: {fileID: 5895332772353476969}
-  - component: {fileID: 6324312337921889092}
   - component: {fileID: 2024878569438777599}
   - component: {fileID: 7416273003992140369}
   - component: {fileID: 1210552597580251229}
+  - component: {fileID: 6876751921516696965}
   m_Layer: 3
   m_Name: OVRCameraRig
   m_TagString: Player
@@ -21853,25 +21853,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ca6b8022500fe84c8c5739780e553e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &6324312337921889092
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4579910219311772944}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 81652228358d7c1499600f8129cfe4b1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _bodyHeightMin: 0.5
-  _bodyHeightMax: 2
-  _moveSpeed: 4
-  _gridManager: {fileID: 0}
-  movementThreshold: 0.01
-  _testKnockback: 0
-  _testMove: 0
 --- !u!143 &2024878569438777599
 CharacterController:
   m_ObjectHideFlags: 0
@@ -21932,11 +21913,31 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _stats:
   - statType: 1
-    value: 1500
+    value: 50
   - statType: 0
     value: 0
   _characterType: 0
   _testDamage: 0
+--- !u!114 &6876751921516696965
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4579910219311772944}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41f1879f34598a84eaa77aad11efb56f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _moveSpeed: 4
+  _gravity: -9.8
+  _camera: {fileID: 3158222064746425504}
+  _rotationSpeed: 2
+  _rotationThreshold: 20
+  _stopRotationThreshold: 18
+  _bodyHeightMin: 0.5
+  _bodyHeightMax: 2
 --- !u!1 &4581950023465667236
 GameObject:
   m_ObjectHideFlags: 0
@@ -23827,7 +23828,6 @@ GameObject:
   - component: {fileID: 6000957796368456688}
   - component: {fileID: 5578681182552913435}
   - component: {fileID: 1723747611668581063}
-  - component: {fileID: 5784869330764524350}
   - component: {fileID: 5157714096026078523}
   - component: {fileID: 7047503045057567263}
   - component: {fileID: 7508456238397915898}
@@ -23956,22 +23956,6 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
---- !u!114 &5784869330764524350
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5127051721775726867}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3bde6107d14d22247b0cf409e50e5ba1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _playerEventManager: {fileID: 0}
-  _rotationSpeed: 2
-  _rotateThreshold: 20
-  _stopRotatingThreshold: 18
 --- !u!114 &5157714096026078523
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -26817,8 +26801,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _updateMode: 8
-  _updateAfter: {fileID: 1259335678097365104}
-  _iModifyDataFromSourceMono: {fileID: 1259335678097365104}
+  _updateAfter: {fileID: 5884852673508482577}
+  _iModifyDataFromSourceMono: {fileID: 5884852673508482577}
   _applyModifier: 1
 --- !u!114 &8710909347101106329
 MonoBehaviour:
@@ -31129,9 +31113,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4087079385589380919}
-  - component: {fileID: 4297709723644607997}
   - component: {fileID: 5196330001066466657}
   - component: {fileID: 6250751299035633103}
+  - component: {fileID: 7005845373473120864}
   m_Layer: 0
   m_Name: OVRHandDataSource
   m_TagString: Untagged
@@ -31154,26 +31138,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2228223892966462283}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4297709723644607997
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7019707540061243448}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4855895ba1c44959a306beb7ae318fc2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _updateMode: 0
-  _updateAfter: {fileID: 0}
-  _cameraRigRef: {fileID: 977659798350230422}
-  _processLateUpdates: 0
-  _handedness: 1
-  _ovrHand: {fileID: 0}
-  _trackingToWorldTransformer: {fileID: 7559762440991983132}
-  _handSkeletonProvider: {fileID: 305630395911599139}
 --- !u!114 &5196330001066466657
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -31190,7 +31154,7 @@ MonoBehaviour:
   _includeChildrenAsDependents: 0
   _gameObjects: []
   _monoBehaviours:
-  - {fileID: 4297709723644607997}
+  - {fileID: 7005845373473120864}
 --- !u!114 &6250751299035633103
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -31205,6 +31169,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _handType: 1
   _showState: 3
+--- !u!114 &7005845373473120864
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7019707540061243448}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c64e4c4fad6644489413b174d5d1f2a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _updateMode: 0
+  _updateAfter: {fileID: 0}
+  _cameraRigRef: {fileID: 977659798350230422}
+  _processLateUpdates: 0
+  _handedness: 1
+  _ovrHand: {fileID: 0}
+  _trackingToWorldTransformer: {fileID: 7559762440991983132}
+  _handSkeletonProvider: {fileID: 305630395911599139}
 --- !u!1 &7019727559088065162
 GameObject:
   m_ObjectHideFlags: 0
@@ -40737,6 +40721,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 1647136311250998403, guid: 0e1b2ff3bedb5c0498180178216f13d0, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2588925041195329601, guid: 0e1b2ff3bedb5c0498180178216f13d0, type: 3}
       propertyPath: _transformFeatureStateProvider
       value: 
@@ -41147,7 +41135,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _side: 1
-  _isGrabbing: 0
   _grabTraceLocation: {fileID: 5015062384385060467}
 --- !u!4 &3219690551865101402 stripped
 Transform:
@@ -41172,7 +41159,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _side: 2
-  _isGrabbing: 0
   _grabTraceLocation: {fileID: 2644083803099172006}
 --- !u!4 &6907349076850187547 stripped
 Transform:
@@ -41201,6 +41187,10 @@ PrefabInstance:
     - target: {fileID: 1647136311250998403, guid: 0e1b2ff3bedb5c0498180178216f13d0, type: 3}
       propertyPath: m_Layer
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1647136311250998403, guid: 0e1b2ff3bedb5c0498180178216f13d0, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2588925041195329601, guid: 0e1b2ff3bedb5c0498180178216f13d0, type: 3}
       propertyPath: _transformFeatureStateProvider
@@ -41264,7 +41254,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2588925041195329607, guid: 0e1b2ff3bedb5c0498180178216f13d0, type: 3}
       propertyPath: _activeStates.Array.size
-      value: 4
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 2588925041195329607, guid: 0e1b2ff3bedb5c0498180178216f13d0, type: 3}
       propertyPath: '_activeStates.Array.data[3]'
