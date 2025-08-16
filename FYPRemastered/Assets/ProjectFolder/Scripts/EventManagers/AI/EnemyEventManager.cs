@@ -37,7 +37,7 @@ public class EnemyEventManager : EventManager
     public event Action<bool> OnMelee;
     public event Action OnMeleeAttackPerformed;
 
-    private List<ComponentEvents> _cachedListeners;
+  //  private List<ComponentEvents> _cachedListeners;
 
     // Chasing Events
     public event Action<AlertStatus> OnRequestStationaryState;
@@ -57,7 +57,7 @@ public class EnemyEventManager : EventManager
     /// <summary>
     /// Called From Scene Manager
     /// </summary>
-    public override void BindComponentsToEvents()
+    /*public override void BindComponentsToEvents()
     {
         _cachedListeners = new List<ComponentEvents>();
 
@@ -68,17 +68,17 @@ public class EnemyEventManager : EventManager
         {
             listener.RegisterLocalEvents(this);
         }
-    }
+    }*/
 
 
     /// <summary>
     /// Come back to later -> Will be called on Scene Completed
     /// </summary>
     /// <exception cref="System.NotImplementedException"></exception>
-    public override void UnbindComponentsToEvents()
+   /* public override void UnbindComponentsToEvents()
     {
         throw new System.NotImplementedException();
-    }
+    }*/
 
     public void FieldOfViewCallback(bool seen, bool inShootingangle)
     {

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class BulletEventManager : EventManager
 {
-    private List<ComponentEvents> _cachedListeners;
+    //private List<ComponentEvents> _cachedListeners;
     public event Action OnExpired;
     public event Action OnFired;
     public event Action<Collision> OnCollision;
@@ -37,7 +37,7 @@ public class BulletEventManager : EventManager
         BindComponentsToEvents();
     }
 
-    public override void BindComponentsToEvents()
+    /*public override void BindComponentsToEvents()
     {
        
         _cachedListeners = new List<ComponentEvents>();
@@ -51,7 +51,7 @@ public class BulletEventManager : EventManager
             listener.RegisterLocalEvents(this);
         }
        
-    }
+    }*/
 
     public override void UnbindComponentsToEvents()
     {

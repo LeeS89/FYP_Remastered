@@ -1,13 +1,37 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class EventManager : MonoBehaviour
 {
-    //protected PoolManager _poolManager;
+    protected List<ComponentEvents> _cachedListeners;
 
-    public abstract void BindComponentsToEvents();
+    /// <summary>
+    /// Finds all Interface components within the object hierarchy and 
+    /// ensures each component binds to their relevant events
+    /// </summary>
+    public virtual void BindComponentsToEvents()
+    {
+        _cachedListeners = new List<ComponentEvents>();
 
-    public abstract void UnbindComponentsToEvents();
+        var childListeners = GetComponentsInChildren<ComponentEvents>(true);
+        _cachedListeners.AddRange(childListeners);
+
+        foreach (var listener in _cachedListeners)
+        {
+            listener.RegisterLocalEvents(this);
+        }
+    }
+
+    public virtual void UnbindComponentsToEvents()
+    {
+        foreach (var listener in _cachedListeners)
+        {
+            listener.UnRegisterLocalEvents(this);
+        }
+        _cachedListeners?.Clear();
+        _cachedListeners = null;
+    }
 
     public event Action<bool> OnOwnerDeathStatusUpdated;
 

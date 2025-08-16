@@ -1,3 +1,5 @@
+using Oculus.Interaction;
+using Oculus.Interaction.HandGrab;
 using System.Collections;
 using UnityEngine;
 
@@ -13,17 +15,38 @@ public class Lightsaber : GrabbableObject
     [SerializeField] private AudioClip _deflect;
     [SerializeField] private AudioClip _swing;
 
-    
-    private void Awake()
+    public PointableUnityEventWrapper _eventWrapper;
+
+    public HandGrabPose _hgPose;
+
+    public override void RegisterLocalEvents(EventManager eventManager)
     {
-        if(TryGetComponent<Animator>(out Animator anim))
+        base.RegisterLocalEvents(eventManager);
+        if (TryGetComponent<Animator>(out Animator anim))
         {
             _anim = anim;
         }
 
+        var old = _hgPose?.HandPose.Handedness;
+        Debug.LogError("Handedness is: "+old);
     }
 
-   
+    protected override void OnPlayerDeathStatusUpdated(bool isDead)
+    {
+        base.OnPlayerDeathStatusUpdated(isDead);
+    }
+
+   /* public void Grab(HandGrabPose hgp)
+    {
+        if (IsGrabbed || _playerEventManager == null) { return; }
+
+        var hand = hgp.HandPose.Handedness;
+        IsGrabbed = true;
+        _playerEventManager.Grab(hand, IsGrabbed);
+
+        OnGrabbed();
+    }*/
+
     protected override void OnGrabbed()
     {
        

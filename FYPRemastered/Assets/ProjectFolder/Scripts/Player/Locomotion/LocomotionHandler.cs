@@ -12,7 +12,7 @@ public class LocomotionHandler
 
     public bool Knockedback { get; private set; } = false;
 
-
+    public bool IsGrounded { get; private set; } = true;
 
     public LocomotionHandler(PlayerEventManager eventManager, Transform playerTransform, float moveSpeed, float gravity = -9.8f)
     {
@@ -24,7 +24,7 @@ public class LocomotionHandler
         _eventManager.OnKnockbackTriggered += ApplyKnockback;
     }
 
-    private void CalculateMovementDirection(bool isGrounded = true, Vector3? overrideVelocity = null)
+    private void CalculateMovementDirection(Vector3? overrideVelocity = null)
     {
         float effectiveMoveSpeed;
         Vector3 finalVelocity;
@@ -39,7 +39,7 @@ public class LocomotionHandler
 
             Vector3 moveDirection = _playerTransform.forward;
             finalVelocity = moveDirection * effectiveMoveSpeed;
-            finalVelocity.y = ApplyGravity(isGrounded);
+            finalVelocity.y = ApplyGravity();
         }
 
         _eventManager.MovementUpdated(finalVelocity);
@@ -64,7 +64,7 @@ public class LocomotionHandler
 
         while (timer < duration)
         {
-            CalculateMovementDirection(true, knockbackVelocity);
+            CalculateMovementDirection(knockbackVelocity);
             timer += Time.deltaTime;
             yield return null;
         }
@@ -72,9 +72,9 @@ public class LocomotionHandler
         Knockedback = false;
     }
 
-    private float ApplyGravity(bool isGrounded)
+    private float ApplyGravity()
     {
-        if (isGrounded)
+        if (IsGrounded)
         {
             newVelocityY = Gravity / 2f;
         }
@@ -119,6 +119,8 @@ public class LocomotionHandler
 
     public void Tick(bool isGrounded, bool testKnockback = false)
     {
+        IsGrounded = isGrounded;
+
         if (!Knockedback)
         {
             CalculateMovementDirection();

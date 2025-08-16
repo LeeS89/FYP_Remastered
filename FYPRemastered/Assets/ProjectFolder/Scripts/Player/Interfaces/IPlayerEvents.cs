@@ -1,4 +1,7 @@
 
+using System;
+
+[Obsolete]
 public interface IPlayerEvents
 {
     public void OnSceneStarted();

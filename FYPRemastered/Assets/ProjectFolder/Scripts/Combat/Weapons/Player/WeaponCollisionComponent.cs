@@ -36,9 +36,9 @@ public class WeaponCollisionComponent : EventManager
         }*/
 
         
-        if (collision.gameObject.TryGetComponent<IDeflectable>(out IDeflectable deflectable))
+        if (collision.gameObject.TryGetComponent<IDeflectable>(out IDeflectable deflectable)) // Use Same registry as IDamageable for getting
         {
-            ContactPoint contact = collision.contacts[0];
+            ContactPoint contact = collision.GetContact(0);
             Vector3 impactPosition = contact.point;
             deflectable.Deflect();
 

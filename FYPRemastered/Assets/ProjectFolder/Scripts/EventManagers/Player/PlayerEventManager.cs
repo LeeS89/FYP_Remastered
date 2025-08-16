@@ -15,7 +15,7 @@ public class PlayerEventManager : EventManager
     
     //public event Action<HandGrabInteractor, bool> OnGrabbedObject; 
     //public static Dictionary<HandGrabInteractor, bool> _lastGrabbingStates = new Dictionary<HandGrabInteractor, bool>();
-    private List<ComponentEvents> _cachedListeners;
+   // private List<ComponentEvents> _cachedListeners;
 
     private void Awake()
     {
@@ -27,7 +27,7 @@ public class PlayerEventManager : EventManager
     /// Finds all Interface components within the player and 
     /// ensures each component binds to their relevant events
     /// </summary>
-    public override void BindComponentsToEvents()
+   /* public override void BindComponentsToEvents()
     {
         _cachedListeners = new List<ComponentEvents>();
         
@@ -38,9 +38,9 @@ public class PlayerEventManager : EventManager
         {
             listener.RegisterLocalEvents(this);
         }
-    }
+    }*/
 
-    public override void UnbindComponentsToEvents()
+    /*public override void UnbindComponentsToEvents()
     {
         foreach (var listener in _cachedListeners)
         {
@@ -48,7 +48,7 @@ public class PlayerEventManager : EventManager
         }
         _cachedListeners?.Clear();
         _cachedListeners = null;
-    }
+    }*/
 
     #region Locomotion events
     public void MovementGesturePerformedOrReleased(bool performed)

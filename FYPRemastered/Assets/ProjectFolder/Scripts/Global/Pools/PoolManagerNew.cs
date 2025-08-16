@@ -10,7 +10,7 @@ public sealed class PoolManagerNew<T> : IPoolManager where T : UnityEngine.Objec
     private Transform _poolContainer;
     private T _prefab;
     private Dictionary<T,Transform> _transformCache = new();
-    BulletResources _manager;
+    private BulletResources _manager;
 
     public Type ItemType => typeof(T);
 

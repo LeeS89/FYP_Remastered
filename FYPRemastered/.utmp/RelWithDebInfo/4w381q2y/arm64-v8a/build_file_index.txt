@@ -1,0 +1,2 @@
+C:\Users\leesl\Documents\GitHub\FYP_Remastered\FYPRemastered\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\src\main\cpp\CMakeLists.txt
+C:\Users\leesl\Documents\GitHub\FYP_Remastered\FYPRemastered\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\src\main\cpp\GameActivity\CMakeLists.txt

@@ -1,3 +1,4 @@
+using Oculus.Interaction;
 using System;
 using UnityEngine;
 
@@ -15,13 +16,16 @@ public class MovementGestureController : BaseGesture
     [SerializeField] public bool IsGrabbing { get; private set; } = false;
     [SerializeField] private Transform _grabTraceLocation;
 
+    public SelectorUnityEventWrapper _eventWrapper;
+
    
     private void ResetFields()
     {
         _handInControl = HandSide.None;
         _leftHandActive = false;
         _rightHandActive = false;
-        
+    
+
     }
 
     private void Start()
@@ -105,7 +109,7 @@ public class MovementGestureController : BaseGesture
 
     private bool CheckIfCanTriggerMovementPoseResponse()
     {
-        if (!InputEnabled || IsGrabbing) { return false; }
+        if (IsGrabbing) { return false; }
 
         if (_handInControl == HandSide.None)
         {
@@ -162,6 +166,7 @@ public class MovementGestureController : BaseGesture
 
     protected override void ResetStates()
     {
+        if (IsGrabbing) { _eventWrapper.WhenUnselected.Invoke(); }
         if(_handInControl != HandSide.None) { _handInControl = HandSide.None; }
         if (_leftHandActive) {  _leftHandActive = false; }
         if(_rightHandActive) { _rightHandActive = false; }
@@ -170,12 +175,12 @@ public class MovementGestureController : BaseGesture
 
     protected override void OnSceneStarted()
     {
-        InputEnabled = true;
+     
     }
 
     protected override void OnSceneComplete()
     {
-        InputEnabled = false;
+      
     }
 
 

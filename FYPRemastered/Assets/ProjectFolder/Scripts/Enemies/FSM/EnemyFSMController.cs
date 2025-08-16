@@ -279,9 +279,9 @@ public sealed class EnemyFSMController : FSMControllerBase
                 }
                 break;
         }
-
+#if UNITY_EDITOR
         Debug.LogError("Resetting FSM to state: " + contextState.GetType().Name);
-
+#endif
         if (_currentState != contextState)
         {
             ChangeState(contextState);

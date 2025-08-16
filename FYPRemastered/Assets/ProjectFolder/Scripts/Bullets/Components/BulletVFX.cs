@@ -83,7 +83,8 @@ public class BulletVFX : ComponentEvents
 
     private void PlayDeflectionAudio()
     {
-        _audioPoolManager.Get(transform.position, transform.rotation);
+        var sfx = _audioPoolManager.Get(transform.position, transform.rotation) as AudioSource;
+        sfx.Play();
         //PoolExtensions.GetAndPlay(_audioPoolManager, transform.position, transform.rotation);
     }
    

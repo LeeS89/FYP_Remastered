@@ -1,8 +1,7 @@
 using UnityEngine;
 
-public abstract class BaseGesture : ComponentEvents//, IPlayerEvents
+public abstract class BaseGesture : ComponentEvents
 {
-    public bool InputEnabled { get; protected set; } = false;
 
     public abstract void OnGestureRecognized();
 
@@ -10,20 +9,6 @@ public abstract class BaseGesture : ComponentEvents//, IPlayerEvents
 
    
     protected virtual void ResetStates() { }
-
-   /* public abstract override void RegisterLocalEvents(EventManager eventManager);
-
-
-    public abstract void UnRegisterLocalEvents(EventManager eventManager);
-*/
-
-    /*public virtual bool InputEnabled
-    {
-        set => _inputEnabled = value;
-        protected get => _inputEnabled;
-
-    }*/
-
 
     protected override void OnSceneStarted() { }
 
@@ -34,7 +19,6 @@ public abstract class BaseGesture : ComponentEvents//, IPlayerEvents
     protected override void OnPlayerDeathStatusUpdated(bool isDead)
     {
         base.OnPlayerDeathStatusUpdated(isDead);
-        InputEnabled = PlayerIsDead; 
     }
 
 
