@@ -1,10 +1,18 @@
 using Oculus.Interaction;
 using System;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class MovementGestureController : BaseGesture
 {
-    
+    [SerializeField] private float _grabbableCheckRadius = 0.2f;
+    [SerializeField] private LayerMask _grabbableMask = default;
+    [SerializeField] private Transform _grabbableCheckAnchor;
+    [SerializeField] private int _maxGrabbableCheckcolliders = 2;
+    [SerializeField] private Collider[] _grabbableCheckResults;
+
+    public GameObject _sphereTest;
+
     private static HandSide _handInControl = HandSide.None;
     public HandSide _side = HandSide.None;
     
@@ -17,8 +25,15 @@ public class MovementGestureController : BaseGesture
     [SerializeField] private Transform _grabTraceLocation;
 
     public SelectorUnityEventWrapper _eventWrapper;
+    public TraceComponent TraceComp { get; private set; }
 
-   
+    private void TraceComponentReceived(TraceComponent traceComp)
+    {
+        TraceComp = traceComp;
+        if (TraceComp == null) { return; }
+        _grabbableCheckResults = new Collider[_maxGrabbableCheckcolliders];
+    }
+
     private void ResetFields()
     {
         _handInControl = HandSide.None;
@@ -30,10 +45,12 @@ public class MovementGestureController : BaseGesture
 
     private void Start()
     {
+#if UNITY_EDITOR
         if(_side == HandSide.None)
         {
             Debug.LogWarning("_current hand must be set to left or right");
         }
+#endif
     }
 
 
@@ -44,7 +61,7 @@ public class MovementGestureController : BaseGesture
         ResetFields();
         _playerEventManager.OnGrab += ToggleHasGrabbedObject;
         _playerEventManager.OnReleaseGrabbable += ToggleHasGrabbedObject;
-        
+        _playerEventManager.OnTraceComponentReceived += TraceComponentReceived;
         RegisterGlobalEvents();
         
     }
@@ -55,6 +72,7 @@ public class MovementGestureController : BaseGesture
     {
         if (eventManager == null) { return; }
 
+        _playerEventManager.OnTraceComponentReceived -= TraceComponentReceived;
         _playerEventManager.OnGrab -= ToggleHasGrabbedObject;
         _playerEventManager.OnReleaseGrabbable -= ToggleHasGrabbedObject;
         UnRegisterGlobalEvents();
@@ -79,9 +97,45 @@ public class MovementGestureController : BaseGesture
     }
 
 
+    public bool _testtrace = false;
+
+    private void Update()
+    {
+        if (_testtrace)
+        {
+            GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            sphere.transform.position = _grabbableCheckAnchor.position;
+            sphere.transform.localScale = Vector3.one * (_grabbableCheckRadius * 2f);
+
+            GameObject.Destroy(sphere, 2f);
+            int grabbablesDetected = TraceComp.CheckTargetProximity(_grabbableCheckAnchor, _grabbableCheckResults, _grabbableCheckRadius, _grabbableMask);
+
+            for (int i = 0; i < grabbablesDetected; i++)
+            {
+                if (_grabbableCheckResults[i].TryGetComponent<Lightsaber>(out Lightsaber ls))
+                {
+                    ls.OnGrabbed();
+                }
+            }
+            _testtrace = false;
+        }
+    }
+
     public override void OnGestureRecognized()
     {
 
+        // bool isGrabbableInRange = TraceComp.IsTargetWithinRange(_grabbableCheckAnchor.position, _grabbableCheckRadius, _grabbableMask, true, 2f);
+        int grabbablesDetected = TraceComp.CheckTargetProximity(_grabbableCheckAnchor, _grabbableCheckResults, _grabbableCheckRadius, _grabbableMask);
+
+        for(int i = 0; i < grabbablesDetected; i++)
+        {
+            if (_grabbableCheckResults[i].TryGetComponent<Lightsaber>(out Lightsaber ls))
+            {
+                ls.OnGrabbed();
+            }
+        }
+
+        return;
         if (CheckIfCanTriggerMovementPoseResponse())
         {
             if (_playerEventManager != null)
@@ -180,10 +234,7 @@ public class MovementGestureController : BaseGesture
 
     protected override void OnSceneComplete()
     {
-      
+        _grabbableCheckResults = null;
     }
 
-
-
-  
 }

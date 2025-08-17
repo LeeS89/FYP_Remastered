@@ -22,6 +22,7 @@ public sealed class PlayerController : ComponentEvents
     private PlayerEventManager _playerEventManager;
     private LocomotionHandler _locomotion;
     private RotationHandler _rotationHandler;
+    public TraceComponent TraceComp { get; private set; }
 
     public bool InputEnabled { get; private set; } = false;
 
@@ -45,6 +46,7 @@ public sealed class PlayerController : ComponentEvents
         _playerEventManager.OnPlayerHeightUpdated += AdjustPlayerHeight;
         _playerEventManager.OnMovementUpdated += ApplyPlayerMovement;
         _locomotion = new LocomotionHandler(_playerEventManager, transform, _moveSpeed, _gravity);
+        TraceComp = new TraceComponent();
 
         SetupRotationHandler();
 
@@ -135,6 +137,10 @@ public sealed class PlayerController : ComponentEvents
 
     protected override void OnSceneStarted()
     {
+        if (TraceComp != null)
+        {
+            _playerEventManager?.TraceComponentSent(TraceComp);
+        }
         InputEnabled = true;
     }
 
@@ -145,6 +151,8 @@ public sealed class PlayerController : ComponentEvents
         _locomotion = null;
         _rotationHandler?.OnInstanceDestroyed();
         _rotationHandler = null;
+
+        TraceComp = null;
     }
 
     protected override void OnPlayerDeathStatusUpdated(bool isDead)

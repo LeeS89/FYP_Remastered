@@ -47,9 +47,9 @@ public class Lightsaber : GrabbableObject
         OnGrabbed();
     }*/
 
-    protected override void OnGrabbed()
+    public override void OnGrabbed()
     {
-       
+        Debug.LogError("Grab Called");
         _anim.SetTrigger("extend");
         PowerUp();
     }

@@ -65,6 +65,6 @@ public abstract class GrabbableObject : ComponentEvents
     }
 
    
-    protected abstract void OnGrabbed();
+    public abstract void OnGrabbed();
     protected abstract void OnReleased();
 }

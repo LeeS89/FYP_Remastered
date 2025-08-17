@@ -12,6 +12,8 @@ public class PlayerEventManager : EventManager
     public event Action<HandSide, bool> OnReleaseGrabbable;
 
     public event Action<Vector3> OnMovementUpdated;
+
+    public event Action<TraceComponent> OnTraceComponentReceived;
     
     //public event Action<HandGrabInteractor, bool> OnGrabbedObject; 
     //public static Dictionary<HandGrabInteractor, bool> _lastGrabbingStates = new Dictionary<HandGrabInteractor, bool>();
@@ -49,6 +51,11 @@ public class PlayerEventManager : EventManager
         _cachedListeners?.Clear();
         _cachedListeners = null;
     }*/
+
+    public void TraceComponentSent(TraceComponent traceComponent)
+    {
+        OnTraceComponentReceived?.Invoke(traceComponent);
+    }
 
     #region Locomotion events
     public void MovementGesturePerformedOrReleased(bool performed)

@@ -17,13 +17,13 @@ public class AbilitiesComponent : BaseAbilities
     [Header("Trace results max size")]
     [SerializeField] private int _maxTraceResults = 30;
     [SerializeField] private Collider[] _bulletTraceresults;
-    private TraceComponent traceComp;
+    private TraceComponent _traceComp;
     private bool _traceEnabled = false;
     private List<BulletBase> _bullets;
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
-        traceComp = new TraceComponent();
+        _traceComp = new TraceComponent();
         _bulletTraceresults = new Collider[_maxTraceResults];
         _bullets = new List<BulletBase>();
     }
@@ -32,7 +32,7 @@ public class AbilitiesComponent : BaseAbilities
     {
         Array.Clear(_bulletTraceresults, 0, _bulletTraceresults.Length);
         _bulletTraceresults = null;
-        traceComp = null;
+        _traceComp = null;
         _bullets.Clear();
         _bullets = null;
 
@@ -68,7 +68,7 @@ public class AbilitiesComponent : BaseAbilities
 
     private void SweepForBullets()
     {
-        int numBullets = traceComp.CheckTargetProximity(_traceLocation, _bulletTraceresults, _sphereRadius, _traceLayer);
+        int numBullets = _traceComp.CheckTargetProximity(_traceLocation, _bulletTraceresults, _sphereRadius, _traceLayer);
         
         if(numBullets <= 0) { return; }
         

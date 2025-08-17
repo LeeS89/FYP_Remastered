@@ -8,12 +8,12 @@ using UnityEngine.Experimental.XR.Interaction;
 public class TraceComponent
 {
   
-    public bool IsTargetWithinRange(Vector3 position, float radius, int layerMask, bool debug = false)
+    public bool IsTargetWithinRange(Vector3 position, float radius, int layerMask, bool debug = false, float debugDuration = 0f)
     {
         if (debug)
         {
 
-            DebugExtension.DebugWireSphere(position, Color.blue, radius);
+            DebugExtension.DebugWireSphere(position, Color.blue, radius, debugDuration);
 
         }
 
@@ -88,5 +88,7 @@ public class TraceComponent
 
 
 }
+
+
 
 
