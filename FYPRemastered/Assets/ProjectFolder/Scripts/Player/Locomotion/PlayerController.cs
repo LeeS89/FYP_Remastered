@@ -1,4 +1,7 @@
+using NUnit.Framework;
 using Oculus.Interaction.HandGrab;
+using Oculus.Interaction.Input;
+using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
@@ -25,11 +28,10 @@ public sealed class PlayerController : ComponentEvents
     private RotationHandler _rotationHandler;
     public TraceComponent TraceComp { get; private set; }
 
-    public HandGrabInteractor _leftInteractor;
-    public HandGrabInteractor _rightInteractor;
+    [SerializeField] private HandGrabInteractor _leftInteractor;
+    [SerializeField] private HandGrabInteractor _rightInteractor;
 
     public bool InputEnabled { get; private set; } = false;
-
 
 
 
@@ -37,14 +39,15 @@ public sealed class PlayerController : ComponentEvents
     {
         HandGrabInteractor interactor = side == HandSide.Left ? _leftInteractor : _rightInteractor;
 
-        return interactor != null && interactor.IsGrabbing;
+        // return interactor != null && interactor.IsGrabbing;
+        return interactor != null && interactor.HasSelectedInteractable;
 
     }
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
         _playerEventManager = eventManager as PlayerEventManager;
-       
+
         if (TryGetComponent<CharacterController>(out CharacterController characterController))
         {
             _controller = characterController;
@@ -55,7 +58,7 @@ public sealed class PlayerController : ComponentEvents
             Debug.LogWarning("Character controller not found, please ensure component exists before use");
 #endif
         }
-  
+
         _playerEventManager.OnPlayerRotate += HandleRotation;
         _playerEventManager.OnPlayerHeightUpdated += AdjustPlayerHeight;
         _playerEventManager.OnMovementUpdated += ApplyPlayerMovement;
@@ -63,9 +66,28 @@ public sealed class PlayerController : ComponentEvents
         _locomotion = new LocomotionHandler(_playerEventManager, transform, _moveSpeed, _gravity);
         TraceComp = new TraceComponent();
 
+        RetrieveGrabInteractors();
+
         SetupRotationHandler();
 
         RegisterGlobalEvents();
+    }
+
+  
+
+    private void RetrieveGrabInteractors()
+    {
+        foreach (var interactor in GetComponentsInChildren<HandGrabInteractor>(false))
+        {
+            if (interactor.Hand.Handedness == Handedness.Left)
+            {
+                _leftInteractor = interactor;
+            }
+            else if (interactor.Hand.Handedness == Handedness.Right)
+            {
+                _rightInteractor = interactor;
+            }
+        }
     }
 
     private void SetupRotationHandler()
@@ -172,8 +194,9 @@ public sealed class PlayerController : ComponentEvents
         _locomotion = null;
         _rotationHandler?.OnInstanceDestroyed();
         _rotationHandler = null;
-
         TraceComp = null;
+        _leftInteractor = null;
+        _rightInteractor = null;
     }
 
     protected override void OnPlayerDeathStatusUpdated(bool isDead)

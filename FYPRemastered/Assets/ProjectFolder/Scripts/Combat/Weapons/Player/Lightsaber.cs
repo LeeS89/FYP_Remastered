@@ -28,7 +28,7 @@ public class Lightsaber : GrabbableObject
         }
 
         var old = _hgPose?.HandPose.Handedness;
-        Debug.LogError("Handedness is: "+old);
+      //  Debug.LogError("Handedness is: "+old);
     }
 
     protected override void OnPlayerDeathStatusUpdated(bool isDead)
@@ -49,7 +49,6 @@ public class Lightsaber : GrabbableObject
 
     public override void OnGrabbed()
     {
-        Debug.LogError("Grab Called");
         _anim.SetTrigger("extend");
         PowerUp();
     }

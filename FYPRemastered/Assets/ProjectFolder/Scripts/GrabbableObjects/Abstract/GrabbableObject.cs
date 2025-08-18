@@ -1,5 +1,6 @@
 using Oculus.Interaction.HandGrab;
 using Oculus.Interaction.Input;
+using System;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -15,7 +16,7 @@ public abstract class GrabbableObject : ComponentEvents
     public bool IsGrabbed { get; protected set; } = false;
     
     [SerializeField] protected PlayerEventManager _playerEventManager;
-    protected HandSide _handSide = HandSide.None;
+    //protected HandSide _handSide = HandSide.None;
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
@@ -41,6 +42,7 @@ public abstract class GrabbableObject : ComponentEvents
 
     }
 
+    [Obsolete]
     public HandGrabInteractable Testgrab(HandSide side/*, HandGrabInteractor interactor*/)
     {
        
@@ -87,10 +89,10 @@ public abstract class GrabbableObject : ComponentEvents
         if(IsGrabbed || _playerEventManager == null) { return; }
 
         var sdkHand = hgp.HandPose?.Handedness;
-        _handSide = sdkHand == Handedness.Left ? HandSide.Left : HandSide.Right;
+       // _handSide = sdkHand == Handedness.Left ? HandSide.Left : HandSide.Right;
 
         IsGrabbed = true;
-        _playerEventManager.Grab(_handSide, IsGrabbed);
+       // _playerEventManager.Grab(_handSide, IsGrabbed);
         OnGrabbed();
 
         /*_handSide = (HandSide)handSideInt;
@@ -108,8 +110,8 @@ public abstract class GrabbableObject : ComponentEvents
         if(!IsGrabbed || _playerEventManager == null) return;
         IsGrabbed = false;
 
-        _playerEventManager.ReleaseGrabbable(_handSide, IsGrabbed);
-        _handSide = HandSide.None;
+       // _playerEventManager.ReleaseGrabbable(_handSide, IsGrabbed);
+       // _handSide = HandSide.None;
    
         OnReleased();
     }
