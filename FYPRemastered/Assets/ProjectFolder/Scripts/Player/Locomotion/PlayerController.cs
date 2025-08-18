@@ -1,3 +1,4 @@
+using Oculus.Interaction.HandGrab;
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
@@ -24,8 +25,21 @@ public sealed class PlayerController : ComponentEvents
     private RotationHandler _rotationHandler;
     public TraceComponent TraceComp { get; private set; }
 
+    public HandGrabInteractor _leftInteractor;
+    public HandGrabInteractor _rightInteractor;
+
     public bool InputEnabled { get; private set; } = false;
 
+
+
+
+    private bool IsGrabbing(HandSide side)
+    {
+        HandGrabInteractor interactor = side == HandSide.Left ? _leftInteractor : _rightInteractor;
+
+        return interactor != null && interactor.IsGrabbing;
+
+    }
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
@@ -45,6 +59,7 @@ public sealed class PlayerController : ComponentEvents
         _playerEventManager.OnPlayerRotate += HandleRotation;
         _playerEventManager.OnPlayerHeightUpdated += AdjustPlayerHeight;
         _playerEventManager.OnMovementUpdated += ApplyPlayerMovement;
+        _playerEventManager.OnCheckIfHandIsGrabbing += IsGrabbing;
         _locomotion = new LocomotionHandler(_playerEventManager, transform, _moveSpeed, _gravity);
         TraceComp = new TraceComponent();
 
@@ -61,6 +76,7 @@ public sealed class PlayerController : ComponentEvents
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
+        _playerEventManager.OnCheckIfHandIsGrabbing -= IsGrabbing;
         _playerEventManager.OnMovementUpdated -= ApplyPlayerMovement;
         _playerEventManager.OnPlayerRotate -= HandleRotation;
         _playerEventManager.OnPlayerHeightUpdated -= AdjustPlayerHeight;
@@ -89,6 +105,11 @@ public sealed class PlayerController : ComponentEvents
 
     private void Update()
     {
+        /*if (_leftInteractor.IsGrabbing)
+        {
+            Debug.LogError("Left Interactor is Grabbing");
+        }*/
+
         if (!InputEnabled) { return; }
 
         _locomotion?.Tick(_controller.isGrounded);

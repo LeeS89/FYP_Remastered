@@ -14,10 +14,18 @@ public class PlayerEventManager : EventManager
     public event Action<Vector3> OnMovementUpdated;
 
     public event Action<TraceComponent> OnTraceComponentReceived;
-    
+
+    public event Func<HandSide, bool> OnCheckIfHandIsGrabbing;
+
+    public bool CheckIfHandIsGrabbing(HandSide side)
+    {
+
+        return OnCheckIfHandIsGrabbing?.Invoke(side) ?? false;
+    }
+
     //public event Action<HandGrabInteractor, bool> OnGrabbedObject; 
     //public static Dictionary<HandGrabInteractor, bool> _lastGrabbingStates = new Dictionary<HandGrabInteractor, bool>();
-   // private List<ComponentEvents> _cachedListeners;
+    // private List<ComponentEvents> _cachedListeners;
 
     private void Awake()
     {

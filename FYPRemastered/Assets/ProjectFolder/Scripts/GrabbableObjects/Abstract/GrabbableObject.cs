@@ -6,6 +6,12 @@ using UnityEngine;
 public abstract class GrabbableObject : ComponentEvents
 {
     protected GrabbableEventManager _grabbableEventManager;
+    public HandGrabInteractable _leftInteractable;
+    public HandGrabInteractable _rightInteractable;
+
+    public GameObject _leftHand;
+
+
     public bool IsGrabbed { get; protected set; } = false;
     
     [SerializeField] protected PlayerEventManager _playerEventManager;
@@ -14,6 +20,50 @@ public abstract class GrabbableObject : ComponentEvents
     public override void RegisterLocalEvents(EventManager eventManager)
     {
        _grabbableEventManager = eventManager as GrabbableEventManager;
+
+        foreach (var interactable in GetComponentsInChildren<HandGrabInteractable>())
+        {
+            
+            var handedness = interactable.HandGrabPoses[0];
+           
+            if (handedness.HandPose.Handedness == Handedness.Left)
+            {
+                _leftInteractable = interactable;
+            }
+            else
+            {
+                _rightInteractable = interactable;
+            }
+        }
+
+        /*_leftInteractable.enabled = false;
+        _rightInteractable.enabled = false;*/
+
+    }
+
+    public HandGrabInteractable Testgrab(HandSide side/*, HandGrabInteractor interactor*/)
+    {
+       
+        
+        if (IsGrabbed) { return null; }
+        IsGrabbed = true;
+        HandGrabInteractable interactable;
+
+        interactable = side == HandSide.Left ? _leftInteractable : _rightInteractable;
+        interactable.enabled = true;
+
+        return interactable;
+
+        /*if (side == HandSide.Left)
+        {
+            interactable = _leftInteractable;
+            //_leftHand.SetActive(true);
+            _leftInteractable.enabled = true;
+            return _leftInteractable;
+           // interactor.ForceSelect(_leftInteractable);
+        }
+        _rightInteractable.enabled = true;
+        return _rightInteractable;*/
     }
 
     public override void UnRegisterLocalEvents(EventManager eventManager)

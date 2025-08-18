@@ -1,5 +1,7 @@
 using Oculus.Interaction;
+using Oculus.Interaction.HandGrab;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -12,6 +14,7 @@ public class MovementGestureController : BaseGesture
     [SerializeField] private Collider[] _grabbableCheckResults;
 
     public GameObject _sphereTest;
+    public HandGrabInteractor _interactor;
 
     private static HandSide _handInControl = HandSide.None;
     public HandSide _side = HandSide.None;
@@ -59,8 +62,8 @@ public class MovementGestureController : BaseGesture
         if (eventManager == null) { return; }
         _playerEventManager = eventManager as PlayerEventManager;
         ResetFields();
-        _playerEventManager.OnGrab += ToggleHasGrabbedObject;
-        _playerEventManager.OnReleaseGrabbable += ToggleHasGrabbedObject;
+       // _playerEventManager.OnGrab += ToggleHasGrabbedObject;
+       // _playerEventManager.OnReleaseGrabbable += ToggleHasGrabbedObject;
         _playerEventManager.OnTraceComponentReceived += TraceComponentReceived;
         RegisterGlobalEvents();
         
@@ -101,6 +104,10 @@ public class MovementGestureController : BaseGesture
 
     private void Update()
     {
+        /*if (_interactor != null && _interactor.HasSelectedInteractable)
+        {
+            Debug.LogError("Interactor has interactable: ");
+        }*/
         if (_testtrace)
         {
             GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -114,34 +121,54 @@ public class MovementGestureController : BaseGesture
             {
                 if (_grabbableCheckResults[i].TryGetComponent<Lightsaber>(out Lightsaber ls))
                 {
-                    ls.OnGrabbed();
+                    _currentInteractable = ls.Testgrab(_side/*, _interactor*/);
+                    _interactor.ForceSelect(_currentInteractable);
+                   // _interactable2 = _interactor.Interactable;
+                   // Debug.LogError("Interactable Name is: " + _interactable2.name);
+                    //ls.OnGrabbed();
                 }
             }
             _testtrace = false;
         }
     }
+    
 
+    public HandGrabInteractable _currentInteractable;
+    // public HandGrabInteractable _interactable2;
+    public Lightsaber LS;
     public override void OnGestureRecognized()
     {
 
         // bool isGrabbableInRange = TraceComp.IsTargetWithinRange(_grabbableCheckAnchor.position, _grabbableCheckRadius, _grabbableMask, true, 2f);
-        int grabbablesDetected = TraceComp.CheckTargetProximity(_grabbableCheckAnchor, _grabbableCheckResults, _grabbableCheckRadius, _grabbableMask);
+       // int grabbablesDetected = TraceComp.CheckTargetProximity(_grabbableCheckAnchor, _grabbableCheckResults, _grabbableCheckRadius, _grabbableMask);
 
-        for(int i = 0; i < grabbablesDetected; i++)
-        {
-            if (_grabbableCheckResults[i].TryGetComponent<Lightsaber>(out Lightsaber ls))
-            {
-                ls.OnGrabbed();
-            }
-        }
+        IsGrabbing = _playerEventManager.CheckIfHandIsGrabbing(_side);
+        /* for (int i = 0; i < grabbablesDetected; i++)
+         {
+            // if (_grabbableCheckResults[i].TryGetComponent<Lightsaber>(out Lightsaber ls))
+            // {
+                 _currentInteractable = LS.Testgrab(_side*//*, _interactor*//*);
 
-        return;
+                 if (_currentInteractable == null) { continue; }
+                 _interactor.ForceSelect(_currentInteractable);
+             if (_currentInteractable.HasInteractor(_interactor))
+             {
+                 Debug.LogError("Interactor has interactable: ");
+             }
+
+                 IsGrabbing = true;
+                 //  _interactable2 = _interactor.Interactable;
+                 //  Debug.LogError("Interactable Name is: " + _interactable2.name);
+                 //ls.OnGrabbed();
+            // }
+         }*/
+
+        // return;
         if (CheckIfCanTriggerMovementPoseResponse())
         {
-            if (_playerEventManager != null)
-            {
-                _playerEventManager.MovementGesturePerformedOrReleased(true);
-            }
+
+            _playerEventManager?.MovementGesturePerformedOrReleased(true);
+
         }
         SetHandActive(_side, true);
 
@@ -149,6 +176,13 @@ public class MovementGestureController : BaseGesture
 
     public override void OnGestureReleased()
     {
+        if(_currentInteractable != null)
+        {
+            
+            _interactor.ForceRelease();
+            _currentInteractable = null;
+        }
+
         if (CheckIfCanTriggerMovementPoseResponse())
         {
             if (_playerEventManager != null)
