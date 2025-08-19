@@ -29,18 +29,14 @@ public class BulletMovementComponent : ComponentEvents
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
-        base.RegisterLocalEvents(eventManager);
+        _bulletEventManager = eventManager as BulletEventManager;
         _rb = GetComponentInParent<Rigidbody>(true);
-       
-        if(_eventManager != null)
-        {
-            _speed = _editableSpeed;
-            _bulletEventManager = _eventManager as BulletEventManager;
-            _bulletEventManager.OnFired += Launch;
-            _bulletEventManager.OnReverseDirection += ReverseDirection;
-            //_bulletEventManager.OnDeflected += Deflected;
-            _bulletEventManager.OnFreeze += ResetRigidBody;
-        }
+        _speed = _editableSpeed;
+        _bulletEventManager.OnFired += Launch;
+        _bulletEventManager.OnReverseDirection += ReverseDirection;
+        //_bulletEventManager.OnDeflected += Deflected;
+        _bulletEventManager.OnFreeze += ResetRigidBody;
+
     }
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
@@ -49,9 +45,13 @@ public class BulletMovementComponent : ComponentEvents
         //_bulletEventManager.OnDeflected -= Deflected;
         _bulletEventManager.OnReverseDirection -= ReverseDirection;
         _bulletEventManager.OnFreeze -= ResetRigidBody;
-        _bulletEventManager = null;
-        _eventManager = null;
         ResetRigidBody();
+    }
+
+    protected override void OnSceneComplete()
+    {
+        base.OnSceneComplete();
+        _bulletEventManager = null;
         _rb = null;
     }
 

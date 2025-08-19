@@ -1,7 +1,9 @@
 using Oculus.Interaction;
+using System;
 using System.Collections;
 using UnityEngine;
 
+[Obsolete]
 public class Locomotion : ComponentEvents//, IPlayerEvents
 {
     [Header("Character Controller Collider values")]
@@ -45,7 +47,7 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
         {
             Debug.LogWarning("Character controller not found, please ensure component exists before use");
         }
-        _playerEventManager = _eventManager as PlayerEventManager;
+        _playerEventManager = eventManager as PlayerEventManager;
         _playerEventManager.OnKnockbackTriggered += ApplyKnockback;
         _playerEventManager.OnPlayerRotate += HandleRotation;
         _playerEventManager.OnPlayerHeightUpdated += AdjustPlayerHeight;
@@ -56,7 +58,7 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
-        if (_eventManager == null)
+        if (eventManager == null)
         {
             Debug.LogError("Player event manager is null");
             return;
@@ -75,7 +77,7 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
     protected override void RegisterGlobalEvents()
     {
         BaseSceneManager._instance.OnSceneStarted += OnSceneStarted;
-        BaseSceneManager._instance.OnSceneEnded += OnSceneComplete;
+        BaseSceneManager._instance.OnSceneComplete += OnSceneComplete;
         GameManager.OnPlayerDeathStatusChanged += OnPlayerDeathStatusUpdated;
         
     }
@@ -85,7 +87,7 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
         GameManager.OnPlayerDeathStatusChanged -= OnPlayerDeathStatusUpdated;
         
         BaseSceneManager._instance.OnSceneStarted -= OnSceneStarted;
-        BaseSceneManager._instance.OnSceneEnded -= OnSceneComplete;
+        BaseSceneManager._instance.OnSceneComplete -= OnSceneComplete;
     }
 
     //public bool _testMove = false;

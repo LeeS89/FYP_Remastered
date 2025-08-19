@@ -17,7 +17,7 @@ public class Lightsaber : GrabbableObject
 
     public PointableUnityEventWrapper _eventWrapper;
 
-    public HandGrabPose _hgPose;
+   
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
@@ -26,9 +26,6 @@ public class Lightsaber : GrabbableObject
         {
             _anim = anim;
         }
-
-        var old = _hgPose?.HandPose.Handedness;
-      //  Debug.LogError("Handedness is: "+old);
     }
 
     protected override void OnPlayerDeathStatusUpdated(bool isDead)
@@ -36,16 +33,7 @@ public class Lightsaber : GrabbableObject
         base.OnPlayerDeathStatusUpdated(isDead);
     }
 
-   /* public void Grab(HandGrabPose hgp)
-    {
-        if (IsGrabbed || _playerEventManager == null) { return; }
-
-        var hand = hgp.HandPose.Handedness;
-        IsGrabbed = true;
-        _playerEventManager.Grab(hand, IsGrabbed);
-
-        OnGrabbed();
-    }*/
+  
 
     public override void OnGrabbed()
     {

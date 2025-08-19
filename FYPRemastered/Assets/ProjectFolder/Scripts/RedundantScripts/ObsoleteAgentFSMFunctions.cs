@@ -490,4 +490,31 @@ public class ObsoleteAgentFSMFunctions : MonoBehaviour
         _agentEventManager.AlertStatusChanged(status);
     }*/
     #endregion
+
+    /*if (_interactor != null && _interactor.HasSelectedInteractable)
+       {
+           Debug.LogError("Interactor has interactable: ");
+       }*/
+    /* if (_testtrace)
+     {
+         GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+         sphere.transform.position = _grabbableCheckAnchor.position;
+         sphere.transform.localScale = Vector3.one * (_grabbableCheckRadius * 2f);
+
+         GameObject.Destroy(sphere, 2f);
+         int grabbablesDetected = TraceComp.CheckTargetProximity(_grabbableCheckAnchor, _grabbableCheckResults, _grabbableCheckRadius, _grabbableMask);
+
+         for (int i = 0; i < grabbablesDetected; i++)
+         {
+             if (_grabbableCheckResults[i].TryGetComponent<Lightsaber>(out Lightsaber ls))
+             {
+                 _currentInteractable = ls.Testgrab(_side*//*, _interactor*//*);
+                 _interactor.ForceSelect(_currentInteractable);
+                // _interactable2 = _interactor.Interactable;
+                // Debug.LogError("Interactable Name is: " + _interactable2.name);
+                 //ls.OnGrabbed();
+             }
+         }
+         _testtrace = false;
+     }*/
 }

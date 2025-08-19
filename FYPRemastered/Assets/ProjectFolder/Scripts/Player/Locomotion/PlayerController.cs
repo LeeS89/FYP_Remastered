@@ -1,7 +1,4 @@
-using NUnit.Framework;
 using Oculus.Interaction.HandGrab;
-using Oculus.Interaction.Input;
-using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
@@ -26,27 +23,19 @@ public sealed class PlayerController : ComponentEvents
     private PlayerEventManager _playerEventManager;
     private LocomotionHandler _locomotion;
     private RotationHandler _rotationHandler;
-    public TraceComponent TraceComp { get; private set; }
+    private GrabHandler _grabHandler;
 
-    [SerializeField] private HandGrabInteractor _leftInteractor;
-    [SerializeField] private HandGrabInteractor _rightInteractor;
+   
 
+  
     public bool InputEnabled { get; private set; } = false;
 
-
-
-    private bool IsGrabbing(HandSide side)
-    {
-        HandGrabInteractor interactor = side == HandSide.Left ? _leftInteractor : _rightInteractor;
-
-        // return interactor != null && interactor.IsGrabbing;
-        return interactor != null && interactor.HasSelectedInteractable;
-
-    }
-
+    
     public override void RegisterLocalEvents(EventManager eventManager)
     {
         _playerEventManager = eventManager as PlayerEventManager;
+
+        base.RegisterLocalEvents(_playerEventManager);
 
         if (TryGetComponent<CharacterController>(out CharacterController characterController))
         {
@@ -62,33 +51,16 @@ public sealed class PlayerController : ComponentEvents
         _playerEventManager.OnPlayerRotate += HandleRotation;
         _playerEventManager.OnPlayerHeightUpdated += AdjustPlayerHeight;
         _playerEventManager.OnMovementUpdated += ApplyPlayerMovement;
-        _playerEventManager.OnCheckIfHandIsGrabbing += IsGrabbing;
+       // _playerEventManager.OnDeathStatusUpdated += DeathStatusUpdated;
+
+        _grabHandler = new GrabHandler(_playerEventManager, GetComponentsInChildren<HandGrabInteractor>(false));
         _locomotion = new LocomotionHandler(_playerEventManager, transform, _moveSpeed, _gravity);
-        TraceComp = new TraceComponent();
-
-        RetrieveGrabInteractors();
-
+       
         SetupRotationHandler();
 
         RegisterGlobalEvents();
     }
 
-  
-
-    private void RetrieveGrabInteractors()
-    {
-        foreach (var interactor in GetComponentsInChildren<HandGrabInteractor>(false))
-        {
-            if (interactor.Hand.Handedness == Handedness.Left)
-            {
-                _leftInteractor = interactor;
-            }
-            else if (interactor.Hand.Handedness == Handedness.Right)
-            {
-                _rightInteractor = interactor;
-            }
-        }
-    }
 
     private void SetupRotationHandler()
     {
@@ -98,40 +70,19 @@ public sealed class PlayerController : ComponentEvents
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
-        _playerEventManager.OnCheckIfHandIsGrabbing -= IsGrabbing;
+        base.UnRegisterLocalEvents(_playerEventManager);
+        //_playerEventManager.OnDeathStatusUpdated -= DeathStatusUpdated;
         _playerEventManager.OnMovementUpdated -= ApplyPlayerMovement;
         _playerEventManager.OnPlayerRotate -= HandleRotation;
         _playerEventManager.OnPlayerHeightUpdated -= AdjustPlayerHeight;
-        UnRegisterGlobalEvents();
-        _playerEventManager = null;
-
-
+        base.UnRegisterGlobalEvents();
     }
 
-    protected override void RegisterGlobalEvents()
-    {
-        BaseSceneManager._instance.OnSceneStarted += OnSceneStarted;
-        BaseSceneManager._instance.OnSceneEnded += OnSceneComplete;
-        GameManager.OnPlayerDeathStatusChanged += OnPlayerDeathStatusUpdated;
-
-    }
-
-    protected override void UnRegisterGlobalEvents()
-    {
-        GameManager.OnPlayerDeathStatusChanged -= OnPlayerDeathStatusUpdated;
-
-        BaseSceneManager._instance.OnSceneStarted -= OnSceneStarted;
-        BaseSceneManager._instance.OnSceneEnded -= OnSceneComplete;
-    }
+  
 
 
     private void Update()
     {
-        /*if (_leftInteractor.IsGrabbing)
-        {
-            Debug.LogError("Left Interactor is Grabbing");
-        }*/
-
         if (!InputEnabled) { return; }
 
         _locomotion?.Tick(_controller.isGrounded);
@@ -170,7 +121,7 @@ public sealed class PlayerController : ComponentEvents
 
     private void ApplyPlayerMovement(Vector3 velocity)
     {
-        if (_controller == null || PlayerIsDead) { return; }
+        if (_controller == null || OwnerIsDead) { return; }
 
         _controller.Move(velocity * Time.deltaTime);
 
@@ -180,30 +131,31 @@ public sealed class PlayerController : ComponentEvents
 
     protected override void OnSceneStarted()
     {
-        if (TraceComp != null)
-        {
-            _playerEventManager?.TraceComponentSent(TraceComp);
-        }
+        base.OnSceneStarted();
         InputEnabled = true;
+    }
+
+    
+
+    protected override void DeathStatusUpdated(bool isDead)
+    {
+        base.DeathStatusUpdated(isDead);
+
+        InputEnabled = !OwnerIsDead;
+       
     }
 
     protected override void OnSceneComplete()
     {
+        base.OnSceneComplete();
         InputEnabled = false;
         _locomotion?.OnInstanceDestroyed();
         _locomotion = null;
         _rotationHandler?.OnInstanceDestroyed();
         _rotationHandler = null;
-        TraceComp = null;
-        _leftInteractor = null;
-        _rightInteractor = null;
-    }
-
-    protected override void OnPlayerDeathStatusUpdated(bool isDead)
-    {
-        base.OnPlayerDeathStatusUpdated(isDead);
-
-        InputEnabled = !PlayerIsDead;
        
+        _grabHandler.OnInstanceDestroyed();
+        _grabHandler = null;
+        _playerEventManager = null;
     }
 }

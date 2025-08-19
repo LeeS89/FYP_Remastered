@@ -11,10 +11,11 @@ public class StatsComponent : ComponentEvents
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
-        base.RegisterLocalEvents(eventManager);
+        //base.RegisterLocalEvents(eventManager);
+        _eventManager = eventManager;
         _statsComponent = new StatsHandler(_stats);
 
-        eventManager.OnNotifyDamage += NotifyDamage;
+        _eventManager.OnNotifyDamage += NotifyDamage;
         //float hlth = _statsComponent.Gethealth();
         //Debug.LogError("Health is: "+hlth);
     }
@@ -65,24 +66,25 @@ public class StatsComponent : ComponentEvents
         if(_statsComponent.ModifyStat(StatType.Health, -damage) == 0f)
         {
             GameManager.Instance.CharacterDeathStatusChanged(_characterType, null, true);
-            _eventManager.OwnerDeathStatusUpdated(true);
+            _eventManager.DeathStatusUpdated(true);
         }
     }
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
-        eventManager.OnNotifyDamage -= NotifyDamage;
+        _eventManager.OnNotifyDamage -= NotifyDamage;
+        
+        //base.UnRegisterLocalEvents(eventManager);
+    }
+
+   
+
+    protected override void OnSceneComplete()
+    {
+        base.OnSceneComplete();
         _statsComponent = null;
-        base.UnRegisterLocalEvents(eventManager);
-    }
-
-    protected override void RegisterGlobalEvents()
-    {
-        // Interface function - Not Implemented in class yet
-    }
-
-    protected override void UnRegisterGlobalEvents()
-    {
-        // Interface function - Not Implemented in class yet
+        _stats.Clear();
+        _stats = null;
+        _eventManager = null;
     }
 }

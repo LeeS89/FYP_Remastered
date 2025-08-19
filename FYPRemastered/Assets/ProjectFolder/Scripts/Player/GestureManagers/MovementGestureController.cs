@@ -1,22 +1,19 @@
-using Oculus.Interaction;
 using Oculus.Interaction.HandGrab;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
+
 
 public class MovementGestureController : BaseGesture
 {
     [SerializeField] private float _grabbableCheckRadius = 0.2f;
-    [SerializeField] private LayerMask _grabbableMask = default;
     [SerializeField] private Transform _grabbableCheckAnchor;
     [SerializeField] private int _maxGrabbableCheckcolliders = 2;
-    [SerializeField] private Collider[] _grabbableCheckResults;
+   
 
     public GameObject _sphereTest;
     public HandGrabInteractor _interactor;
 
+    // Hand in control is used to determine which hand is currently controlling the movement gesture.
     private static HandSide _handInControl = HandSide.None;
     public HandSide _side = HandSide.None;
     
@@ -26,18 +23,7 @@ public class MovementGestureController : BaseGesture
 
     private PlayerEventManager _playerEventManager;
     [SerializeField] public bool IsGrabbing { get; private set; } = false;
-    [SerializeField] private Transform _grabTraceLocation;
-
-    public SelectorUnityEventWrapper _eventWrapper;
-    public TraceComponent TraceComp { get; private set; }
-
-    [Obsolete]
-    private void TraceComponentReceived(TraceComponent traceComp)
-    {
-        TraceComp = traceComp;
-        if (TraceComp == null) { return; }
-        _grabbableCheckResults = new Collider[_maxGrabbableCheckcolliders];
-    }
+    
 
     private void ResetFields()
     {
@@ -63,10 +49,8 @@ public class MovementGestureController : BaseGesture
     {
         if (eventManager == null) { return; }
         _playerEventManager = eventManager as PlayerEventManager;
+        base.RegisterLocalEvents(_playerEventManager);
         ResetFields();
-       // _playerEventManager.OnGrab += ToggleHasGrabbedObject;
-       // _playerEventManager.OnReleaseGrabbable += ToggleHasGrabbedObject;
-        _playerEventManager.OnTraceComponentReceived += TraceComponentReceived;
         RegisterGlobalEvents();
         
     }
@@ -75,77 +59,27 @@ public class MovementGestureController : BaseGesture
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
-        if (eventManager == null) { return; }
-
-        _playerEventManager.OnTraceComponentReceived -= TraceComponentReceived;
-       // _playerEventManager.OnGrab -= ToggleHasGrabbedObject;
-       // _playerEventManager.OnReleaseGrabbable -= ToggleHasGrabbedObject;
-        UnRegisterGlobalEvents();
-        ResetFields();
-        _playerEventManager = null;
+        base.UnRegisterLocalEvents(_playerEventManager);
+        base.UnRegisterGlobalEvents();
+        ResetFields();   
     }
 
-    protected override void RegisterGlobalEvents()
-    {
-        BaseSceneManager._instance.OnSceneStarted += OnSceneStarted;
-        BaseSceneManager._instance.OnSceneEnded += OnSceneComplete;
-        
-        GameManager.OnPlayerDeathStatusChanged += OnPlayerDeathStatusUpdated;
-    }
+   
 
-    protected override void UnRegisterGlobalEvents()
-    {
-        
-        GameManager.OnPlayerDeathStatusChanged -= OnPlayerDeathStatusUpdated;
-        BaseSceneManager._instance.OnSceneStarted -= OnSceneStarted;
-        BaseSceneManager._instance.OnSceneEnded -= OnSceneComplete;
-    }
-
-
-  //  public bool _testtrace = false;
-
-    private void Update()
-    {
-        /*if (_interactor != null && _interactor.HasSelectedInteractable)
-        {
-            Debug.LogError("Interactor has interactable: ");
-        }*/
-       /* if (_testtrace)
-        {
-            GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            sphere.transform.position = _grabbableCheckAnchor.position;
-            sphere.transform.localScale = Vector3.one * (_grabbableCheckRadius * 2f);
-
-            GameObject.Destroy(sphere, 2f);
-            int grabbablesDetected = TraceComp.CheckTargetProximity(_grabbableCheckAnchor, _grabbableCheckResults, _grabbableCheckRadius, _grabbableMask);
-
-            for (int i = 0; i < grabbablesDetected; i++)
-            {
-                if (_grabbableCheckResults[i].TryGetComponent<Lightsaber>(out Lightsaber ls))
-                {
-                    _currentInteractable = ls.Testgrab(_side*//*, _interactor*//*);
-                    _interactor.ForceSelect(_currentInteractable);
-                   // _interactable2 = _interactor.Interactable;
-                   // Debug.LogError("Interactable Name is: " + _interactable2.name);
-                    //ls.OnGrabbed();
-                }
-            }
-            _testtrace = false;
-        }*/
-    }
-    
-
-    public HandGrabInteractable _currentInteractable;
- 
-  
     public override void OnGestureRecognized()
     {
         IsGrabbing = _playerEventManager.CheckIfHandIsGrabbing(_side);
        
         if (CheckIfCanTriggerMovementPoseResponse())
         {
-
-            _playerEventManager?.MovementGesturePerformedOrReleased(true);
+            if(_playerEventManager == null)
+            {
+#if UNITY_EDITOR
+                Debug.LogWarning("PlayerEventManager is null, ensure it is initialized before use.");
+#endif
+                return;
+            }
+            _playerEventManager.MovementGesturePerformedOrReleased(true);
 
         }
         SetHandActive(_side, true);
@@ -156,7 +90,6 @@ public class MovementGestureController : BaseGesture
     public override void OnGestureReleased()
     {
       
-
         if (CheckIfCanTriggerMovementPoseResponse())
         {
             if (_playerEventManager != null)
@@ -208,19 +141,23 @@ public class MovementGestureController : BaseGesture
         ResetHandInControlIfNeeded();
     }
 
+    /// <summary>
+    /// Neither hand is performing the movement gesture, so reset the hand in control.
+    /// The movement gesture is available to either hand again
+    /// </summary>
     private static void ResetHandInControlIfNeeded()
     {
-        if(!_leftHandActive &&  !_rightHandActive)
+        if (!_leftHandActive && !_rightHandActive)
         {
             _handInControl = HandSide.None;
         }
     }
 
-    protected override void OnPlayerDeathStatusUpdated(bool isDead)
+    protected override void DeathStatusUpdated(bool isDead)
     {
-        base.OnPlayerDeathStatusUpdated(isDead);
+        base.DeathStatusUpdated(isDead);
 
-        if (PlayerIsDead)
+        if (OwnerIsDead)
         {
             ResetStates();
         }  
@@ -229,21 +166,19 @@ public class MovementGestureController : BaseGesture
 
     protected override void ResetStates()
     {
-        if (IsGrabbing) { _eventWrapper.WhenUnselected.Invoke(); }
         if(_handInControl != HandSide.None) { _handInControl = HandSide.None; }
         if (_leftHandActive) {  _leftHandActive = false; }
         if(_rightHandActive) { _rightHandActive = false; }
         _playerEventManager.MovementGesturePerformedOrReleased(false);
     }
 
-    protected override void OnSceneStarted()
-    {
-     
-    }
+   
 
     protected override void OnSceneComplete()
     {
-        _grabbableCheckResults = null;
+        base.OnSceneComplete();
+        ResetStates();
+        _playerEventManager = null;
     }
 
 }

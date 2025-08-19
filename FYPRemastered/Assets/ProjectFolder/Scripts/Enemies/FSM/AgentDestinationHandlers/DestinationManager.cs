@@ -50,7 +50,7 @@ public class DestinationManager
     public DestinationManager(EnemyEventManager eventManager, int maxFlankingSteps, GameObject cube, Transform owner, Action<bool, Vector3, AIDestinationType> callback)
     {
         _eventManager = eventManager;
-        _eventManager.OnOwnerDeathStatusUpdated += OwnerDeathStatusUpdated;
+        _eventManager.OnDeathStatusUpdated += OwnerDeathStatusUpdated;
 
         testCube = cube;
         _path = new NavMeshPath();
@@ -224,7 +224,7 @@ public class DestinationManager
 
     public void OnInstanceDestroyed()
     {
-        _eventManager.OnOwnerDeathStatusUpdated -= OwnerDeathStatusUpdated;
+        _eventManager.OnDeathStatusUpdated -= OwnerDeathStatusUpdated;
         _candidatePointProvider.OnInstanceDestroyed();
         _candidatePointProvider = null;
         _owner = null;

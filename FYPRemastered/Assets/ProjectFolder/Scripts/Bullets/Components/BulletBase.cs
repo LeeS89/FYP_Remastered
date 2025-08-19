@@ -58,9 +58,9 @@ public abstract class BulletBase : ComponentEvents, IPoolable
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
-        base.RegisterLocalEvents(eventManager);
-        if (_eventManager == null) { return; }
-        _bulletEventManager = (BulletEventManager)_eventManager;
+        //base.RegisterLocalEvents(eventManager);
+       
+        _bulletEventManager = eventManager as BulletEventManager;
         RegisterDependancies();
         _bulletEventManager.OnReverseDirection += UnFreeze;
         _bulletEventManager.OnExpired += OnExpired;
@@ -79,10 +79,15 @@ public abstract class BulletBase : ComponentEvents, IPoolable
         _bulletEventManager.OnExpired -= OnExpired;
         _bulletEventManager.OnGetDirectionToTarget -= GetDirectionToTarget;
         _bulletEventManager.OnReverseDirection -= UnFreeze;
-        base.UnRegisterLocalEvents(eventManager);
-        _bulletEventManager = null;
+        //base.UnRegisterLocalEvents(eventManager);
         UnRegisterDependencies();
        
+    }
+
+    protected override void OnSceneComplete()
+    {
+        base.OnSceneComplete();
+        _bulletEventManager = null;
     }
 
     protected void RegisterDependancies()

@@ -27,10 +27,7 @@ public sealed class EnemyFSMController : FSMControllerBase
     public override void RegisterLocalEvents(EventManager eventManager)
     {
         base.RegisterLocalEvents(eventManager);
-    
-        RegisterGlobalEvents();
         SetupFSM();
-
     }
 
     protected override void SetupFSM()
@@ -42,10 +39,11 @@ public sealed class EnemyFSMController : FSMControllerBase
 
     protected override void OnSceneStarted()
     {
+        base.OnSceneStarted();
         //InitializeWeapon();
         ChangeState(_patrol);
 
-        OwnerIsDead = false;
+        //OwnerIsDead = false;
         //AgentIsAlive = true;
         //_agent.ResetPath();
     }
@@ -123,9 +121,9 @@ public sealed class EnemyFSMController : FSMControllerBase
     #endregion
 
     #region Status Updates
-    protected override void OwnerDeathStatusChanged(bool isDead)
+    protected override void DeathStatusUpdated(bool isDead)
     {
-        base.OwnerDeathStatusChanged(isDead);
+        base.DeathStatusUpdated(isDead);
 
         if (OwnerIsDead)
         {
@@ -156,7 +154,7 @@ public sealed class EnemyFSMController : FSMControllerBase
         //_agent.enabled = true;
         OwnerIsDead = false;
         _agentEventManager.ChangeAnimatorLayerWeight(EnemyAnimController.AnimationLayer.Combat, 0, 1, 0.5f);
-        OwnerDeathStatusChanged(false);
+        DeathStatusUpdated(false);
         _agentEventManager.AgentRespawn();
         _alertStatus = AlertStatus.None;
         //AgentIsAlive = true;

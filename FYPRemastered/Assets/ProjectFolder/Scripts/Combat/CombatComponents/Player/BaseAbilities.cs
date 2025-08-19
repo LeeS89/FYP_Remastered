@@ -39,13 +39,7 @@ public class BaseAbilities : ComponentEvents
         //_eventManager.OnSetupGun += GunSetup;
     }
 
-    public override void UnRegisterLocalEvents(EventManager eventManager)
-    {
-       /* _eventManager.OnReload -= ReloadingGun;
-        _eventManager.OnOutOfAmmo -= OutOfAmmo;*/
-     //   _eventManager.OnSetupGun -= GunSetup;
-        base.UnRegisterLocalEvents(eventManager);
-    }
+   
 
     public virtual void GunSetup(GameObject gunOwner, EventManager eventManager, Transform bulletSpawnLocaiton, int clipCapacity, Transform target = null)
     {

@@ -42,43 +42,42 @@ public abstract class FSMControllerBase : ComponentEvents
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
-        base.RegisterLocalEvents(eventManager);
         _agentEventManager = eventManager as EnemyEventManager;
-        _agentEventManager.OnOwnerDeathStatusUpdated += OwnerDeathStatusChanged;
+        base.RegisterLocalEvents(_agentEventManager);
         _agentEventManager.OnTargetSeen += TargetInViewStatusUpdated;
         _agentEventManager.OnRequestStationaryState += StationaryStateRequested;
         _agentEventManager.OnDestinationReached += CarveOnDestinationReached;
         _agentEventManager.OnAgentDeathComplete += ToggleGameObject;
         _agentEventManager.OnSpeedChanged += UpdateAgentSpeedValues;
         _agentEventManager.OnRotateTowardsTarget += ToggleAgentControlledRotationToTarget;
+        RegisterGlobalEvents();
     }
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
+        base.UnRegisterLocalEvents(_agentEventManager);
         _agentEventManager.OnRotateTowardsTarget -= ToggleAgentControlledRotationToTarget;
         _agentEventManager.OnSpeedChanged -= UpdateAgentSpeedValues;
         _agentEventManager.OnAgentDeathComplete -= ToggleGameObject;
         _agentEventManager.OnDestinationReached -= CarveOnDestinationReached;
         _agentEventManager.OnRequestStationaryState -= StationaryStateRequested;
         _agentEventManager.OnTargetSeen -= TargetInViewStatusUpdated;
-        _agentEventManager.OnOwnerDeathStatusUpdated -= OwnerDeathStatusChanged;
-        _agentEventManager = null;
-        base.UnRegisterLocalEvents(eventManager);
+       
+        UnRegisterGlobalEvents();
     }
 
     protected override void RegisterGlobalEvents()
     {
-        BaseSceneManager._instance.OnSceneStarted += OnSceneStarted;
-        BaseSceneManager._instance.OnSceneEnded += OnSceneComplete;
+        base.RegisterGlobalEvents();
         GameManager.OnPlayerDeathStatusChanged += OnPlayerDeathStatusUpdated;
         GameManager.OnPlayerMoved += EnemyState.SetPlayerMoved;
     }
 
     protected override void UnRegisterGlobalEvents()
     {
+        base.UnRegisterGlobalEvents();
         GameManager.OnPlayerMoved -= EnemyState.SetPlayerMoved;
         SceneEventAggregator.Instance.UnRegisterAgentAndZone(this, AgentZone);
-        BaseSceneManager._instance.OnSceneStarted -= OnSceneStarted;
         GameManager.OnPlayerDeathStatusChanged -= OnPlayerDeathStatusUpdated;
     }
 
@@ -97,9 +96,7 @@ public abstract class FSMControllerBase : ComponentEvents
     }
 
 
-    protected virtual void OwnerDeathStatusChanged(bool isDead) => OwnerIsDead = isDead;
-    public bool OwnerIsDead { get; protected set; }
-
+  
     protected abstract void ChangeState(EnemyState state, AlertStatus status = AlertStatus.None);
 
     protected virtual void StationaryStateRequested(AlertStatus alertStatus) { }
@@ -129,6 +126,7 @@ public abstract class FSMControllerBase : ComponentEvents
 
     protected override void OnSceneComplete()
     {
+        base.OnSceneComplete();
         if (_currentState != null)
         {
             _currentState.ExitState();
@@ -143,6 +141,6 @@ public abstract class FSMControllerBase : ComponentEvents
         _chasing = null;
         _stationary = null;
         _deathState = null;
-        BaseSceneManager._instance.OnSceneEnded -= OnSceneComplete;
+        _agentEventManager = null;
     }
 }

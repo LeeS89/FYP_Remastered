@@ -28,16 +28,41 @@ public class EnemyAnimationEvents : ComponentEvents
 
 
 
-
-
-
     public override void RegisterLocalEvents(EventManager eventManager)
     {
-        base.RegisterLocalEvents(eventManager);
-        _enemyEventManager = _eventManager as EnemyEventManager;
+        _enemyEventManager = eventManager as EnemyEventManager;
+        base.RegisterLocalEvents(_enemyEventManager);
         _enemyEventManager.OnTargetSeen += AimTowardsTarget;
         animator = GetComponent<Animator>();
-       
+
+        RegisterGlobalEvents();
+
+    }
+
+    public override void UnRegisterLocalEvents(EventManager eventManager)
+    {
+        base.UnRegisterLocalEvents(eventManager);
+        base.UnRegisterGlobalEvents();
+        _enemyEventManager.OnTargetSeen -= AimTowardsTarget;
+    }
+
+    protected override void RegisterGlobalEvents()
+    {
+        base.RegisterGlobalEvents();
+        GameManager.OnPlayerDeathStatusChanged += OnPlayerDeathStatusUpdated;
+    }
+
+    protected override void UnRegisterGlobalEvents()
+    {
+        base.UnRegisterGlobalEvents();
+        GameManager.OnPlayerDeathStatusChanged -= OnPlayerDeathStatusUpdated;
+    }
+
+    protected override void OnSceneComplete()
+    {
+        base.OnSceneComplete();
+        animator = null;
+        _enemyEventManager = null;
     }
 
     public bool ShouldAim = true;

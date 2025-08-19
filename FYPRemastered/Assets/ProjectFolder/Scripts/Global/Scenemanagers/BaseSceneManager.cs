@@ -20,7 +20,7 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
 
     #region Scene Events
     public event Action OnSceneStarted;
-    public event Action OnSceneEnded;
+    public event Action OnSceneComplete;
 
     public void SceneStarted()
     {
@@ -28,9 +28,9 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
         OnSceneStarted?.Invoke();
     }
 
-    public void SceneEnded()
+    public void SceneComplete()
     {
-        OnSceneEnded?.Invoke();
+        OnSceneComplete?.Invoke();
     }
 
     protected virtual void RegisterDamageables()

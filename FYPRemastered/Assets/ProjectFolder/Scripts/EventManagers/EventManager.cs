@@ -33,11 +33,11 @@ public abstract class EventManager : MonoBehaviour
         _cachedListeners = null;
     }
 
-    public event Action<bool> OnOwnerDeathStatusUpdated;
+    public event Action<bool> OnDeathStatusUpdated;
 
-    public void OwnerDeathStatusUpdated(bool isDead)
+    public void DeathStatusUpdated(bool isDead)
     {
-        OnOwnerDeathStatusUpdated?.Invoke(isDead);
+        OnDeathStatusUpdated?.Invoke(isDead);
     }
 
     public event Action<float, DamageType, float, float, float> OnNotifyDamage;

@@ -128,7 +128,7 @@ public sealed class PoolManagerNew<T> : IPoolManager where T : UnityEngine.Objec
             var item = _pool.Get();
             tempList.Add(item);
         }
-        Debug.LogError("Pool Count: "+tempList.Count);
+       // Debug.LogError("Pool Count: "+tempList.Count);
         foreach (var item in tempList)
         {
             _pool.Release(item);

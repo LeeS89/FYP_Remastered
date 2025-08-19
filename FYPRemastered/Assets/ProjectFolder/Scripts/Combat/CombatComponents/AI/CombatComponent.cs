@@ -59,14 +59,14 @@ public class CombatComponent : BaseAbilities
     private FieldOfViewParams _fovParams;
     
 
-    AgentWeaponHandler _weaponHandler;
+    private AgentWeaponHandler _weaponHandler;
     //[SerializeField] protected bool _targetSeen = false;
-
-    private void OwnerDeathStatusChanged(bool isDead)
+    
+    protected override void DeathStatusUpdated(bool isDead)
     {
-        IsOwnerDead = isDead;
-
-        if (isDead)
+        base.DeathStatusUpdated(isDead);
+       
+        if (IsOwnerDead)
         {
             OnFieldOfViewComplete(false, false);
             _weaponHandler?.UnEquipWeapon();
@@ -105,9 +105,7 @@ public class CombatComponent : BaseAbilities
 
         _enemyEventManager.OnFieldOfViewCallback += OnFieldOfViewComplete;
 
-        _enemyEventManager.OnOwnerDeathStatusUpdated += OwnerDeathStatusChanged;
-     
-
+       
         _enemyEventManager.OnMeleeAttackPerformed += EvaluateMeleeAttackResults;
    
         _enemyEventManager.OnMelee += SetMeleeTriggered;
@@ -130,17 +128,17 @@ public class CombatComponent : BaseAbilities
         _enemyEventManager.OnMeleeAttackPerformed -= EvaluateMeleeAttackResults;
     
         _enemyEventManager.OnMelee -= SetMeleeTriggered;
-        _enemyEventManager.OnOwnerDeathStatusUpdated -= OwnerDeathStatusChanged;
+       
         _enemyEventManager.OnFieldOfViewCallback -= OnFieldOfViewComplete;
 
         base.UnRegisterLocalEvents(_enemyEventManager);
-    
+        UnRegisterGlobalEvents();
+
     }
 
     protected override void RegisterGlobalEvents()
     {
         base.RegisterGlobalEvents();
-        BaseSceneManager._instance.OnSceneStarted += OnSceneStarted;
         GameManager.OnPlayerDeathStatusChanged += OnPlayerDeathStatusUpdated;
        
 
@@ -148,7 +146,6 @@ public class CombatComponent : BaseAbilities
     protected override void UnRegisterGlobalEvents()
     {
         base.UnRegisterGlobalEvents();
-        BaseSceneManager._instance.OnSceneStarted -= OnSceneStarted;
         GameManager.OnPlayerDeathStatusChanged -= OnPlayerDeathStatusUpdated;
         
     }
@@ -325,6 +322,7 @@ public class CombatComponent : BaseAbilities
 
     protected override void OnSceneStarted()
     {
+        base.OnSceneStarted();
         _canUpdateWeapon = true;
         _updateFOV = true;
     }

@@ -16,9 +16,7 @@ public class BulletVFX : ComponentEvents
     //public MoonSceneManager _manager;
     public override void RegisterLocalEvents(EventManager eventManager)
     {
-        base.RegisterLocalEvents(eventManager);
-        if (_eventManager == null) { return; }
-        _bulletEventManager = (BulletEventManager)_eventManager;
+        _bulletEventManager = eventManager as BulletEventManager;
         
         _particleManager = ParticleManager.instance;
         _bulletEventManager.OnDeflected += PlayDeflectionAudio;
@@ -52,19 +50,25 @@ public class BulletVFX : ComponentEvents
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
-        if (_eventManager == null) { return; }
-
         _bulletEventManager.Expired();
-        _particleManager = null;
+        
         _bulletEventManager.OnDeflected -= PlayDeflectionAudio;
         _bulletEventManager.OnBulletParticlePlay -= PlayBulletParticle;
         _bulletEventManager.OnBulletParticleStop -= StopBulletParticle;
         _bulletEventManager.OnCollision -= SpawnHitParticle;
         //_bulletEventManager.OnSpawnHitParticle -= SpawnHitParticle;
-        base.UnRegisterLocalEvents(eventManager);
-        _bulletEventManager = null;
+        
 
         
+    }
+
+    protected override void OnSceneComplete()
+    {
+        base.OnSceneComplete();
+        _request.OnInstanceDestroyed();
+        _request = null;
+        _particleManager = null;
+        _bulletEventManager = null;
     }
 
     private void OnPoolReceived(IPoolManager pool)

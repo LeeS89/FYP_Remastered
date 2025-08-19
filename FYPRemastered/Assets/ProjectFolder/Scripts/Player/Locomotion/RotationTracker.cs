@@ -41,7 +41,7 @@ public class RotationTracker : ComponentEvents//, IPlayerEvents
     protected override void RegisterGlobalEvents()
     {
         BaseSceneManager._instance.OnSceneStarted += OnSceneStarted;
-        BaseSceneManager._instance.OnSceneEnded += OnSceneComplete;
+        BaseSceneManager._instance.OnSceneComplete += OnSceneComplete;
         
         GameManager.OnPlayerDeathStatusChanged += OnPlayerDeathStatusUpdated;
 
@@ -50,7 +50,7 @@ public class RotationTracker : ComponentEvents//, IPlayerEvents
     protected override void UnRegisterGlobalEvents()
     {
         BaseSceneManager._instance.OnSceneStarted -= OnSceneStarted;
-        BaseSceneManager._instance.OnSceneEnded -= OnSceneComplete;
+        BaseSceneManager._instance.OnSceneComplete -= OnSceneComplete;
        
         GameManager.OnPlayerDeathStatusChanged -= OnPlayerDeathStatusUpdated;
     }

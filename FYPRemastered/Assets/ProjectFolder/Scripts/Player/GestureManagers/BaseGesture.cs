@@ -24,9 +24,9 @@ public abstract class BaseGesture : ComponentEvents
 
    // protected override void OnPlayerRespawned() {  InputEnabled = true; }
 
-    protected override void RegisterGlobalEvents() { }
+  //  protected override void RegisterGlobalEvents() { }
 
 
-    protected override void UnRegisterGlobalEvents() { }
+   // protected override void UnRegisterGlobalEvents() { }
     
 }

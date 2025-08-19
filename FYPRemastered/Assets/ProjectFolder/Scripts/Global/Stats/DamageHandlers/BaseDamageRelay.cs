@@ -2,6 +2,13 @@ using UnityEngine;
 
 public class BaseDamageRelay : ComponentEvents, IDamageable
 {
+    public override void RegisterLocalEvents(EventManager eventManager)
+    {
+        //base.RegisterLocalEvents(eventManager);
+        _eventManager = eventManager;
+    }
+
+
     public void Knockback(float damage, Vector3 direction, float force, float duration)
     {
         _eventManager.Knockbacktriggered(direction, force, duration);
@@ -33,5 +40,11 @@ public class BaseDamageRelay : ComponentEvents, IDamageable
             NotifyDamage(1000, DamageType.Normal); // Simulate a death by applying a large amount of damage
             _testDeath = false;
         }
+    }
+
+    protected override void OnSceneComplete()
+    {
+        base.OnSceneComplete();
+        _eventManager = null;
     }
 }

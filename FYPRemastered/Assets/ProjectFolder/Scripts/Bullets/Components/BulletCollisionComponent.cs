@@ -26,9 +26,8 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
-        base.RegisterLocalEvents(eventManager);
-        if (_eventManager == null) { return; }
-        _bulletEventManager = _eventManager as BulletEventManager;
+        if (eventManager == null) { return; }
+        _bulletEventManager = eventManager as BulletEventManager;
 
         //_bulletEventManager.OnReverseDirection += Deflect;
         InitializeDamageType();
@@ -43,10 +42,10 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
         _dOTDuration = _damageData.duration;
     }
 
-    public override void UnRegisterLocalEvents(EventManager eventManager)
+
+    protected override void OnSceneComplete()
     {
-        //_bulletEventManager.OnReverseDirection -= Deflect;
-        base.UnRegisterLocalEvents(eventManager);
+        base.OnSceneComplete();
         _bulletEventManager = null;
     }
 

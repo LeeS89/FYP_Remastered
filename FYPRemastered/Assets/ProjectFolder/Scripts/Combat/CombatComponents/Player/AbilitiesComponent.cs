@@ -21,21 +21,36 @@ public class AbilitiesComponent : BaseAbilities
     private bool _traceEnabled = false;
     private List<BulletBase> _bullets;
 
+    private PlayerEventManager _playerEventManager;
+
     public override void RegisterLocalEvents(EventManager eventManager)
     {
+        _playerEventManager = eventManager as PlayerEventManager;
+        base.RegisterLocalEvents(_playerEventManager);
         _traceComp = new TraceComponent();
         _bulletTraceresults = new Collider[_maxTraceResults];
         _bullets = new List<BulletBase>();
+
+        RegisterGlobalEvents();
     }
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
+        base.UnRegisterLocalEvents(_playerEventManager);
         Array.Clear(_bulletTraceresults, 0, _bulletTraceresults.Length);
+        
+        UnRegisterGlobalEvents();
+    }
+
+    protected override void OnSceneComplete()
+    {
+        base.OnSceneComplete();
         _bulletTraceresults = null;
         _traceComp = null;
         _bullets.Clear();
         _bullets = null;
-
+        _playerEventManager = null;
+        _traceLocation = null;
     }
 
     public bool TraceEnabled
