@@ -35,6 +35,16 @@ public abstract class EventManager : MonoBehaviour
 
     public event Action<bool> OnDeathStatusUpdated;
 
+    public bool _testRespawn = false;
+    private void Update()
+    {
+        if (_testRespawn)
+        {
+            _testRespawn = false;
+            DeathStatusUpdated(false);
+        }
+    }
+
     public void DeathStatusUpdated(bool isDead)
     {
         OnDeathStatusUpdated?.Invoke(isDead);

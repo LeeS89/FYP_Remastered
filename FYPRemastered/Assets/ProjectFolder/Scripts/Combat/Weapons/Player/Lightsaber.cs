@@ -37,14 +37,15 @@ public class Lightsaber : GrabbableObject
 
     public override void OnGrabbed()
     {
-        _anim.SetTrigger("extend");
+        //_anim.SetTrigger("extend");
+        _anim.SetBool("Extend", true);
         PowerUp();
     }
 
     protected override void OnReleased()
     {
-        
-        _anim.SetTrigger("retract");
+        _anim.SetBool("Extend", false);
+        //_anim.SetTrigger("retract");
         PowerDown();
     }
 
