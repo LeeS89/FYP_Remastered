@@ -48,7 +48,7 @@ public class MoonSceneManager : BaseSceneManager
 
         await _resources.LoadResourcesAsync();
         await _resources.LoadDependancies(); 
-        RegisterDamageables();
+        RegisterGettableComponents();
 
         LoadActiveSceneEventManagers();
 

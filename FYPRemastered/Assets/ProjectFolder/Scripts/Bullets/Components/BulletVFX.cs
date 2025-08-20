@@ -16,6 +16,7 @@ public class BulletVFX : ComponentEvents
     //public MoonSceneManager _manager;
     public override void RegisterLocalEvents(EventManager eventManager)
     {
+        Debug.LogError("Registering BulletVFX local events");
         _bulletEventManager = eventManager as BulletEventManager;
         
         _particleManager = ParticleManager.instance;
@@ -24,8 +25,9 @@ public class BulletVFX : ComponentEvents
         _bulletEventManager.OnBulletParticleStop += StopBulletParticle;
         _bulletEventManager.OnCollision += SpawnHitParticle;
         //_bulletEventManager.OnSpawnHitParticle += SpawnHitParticle;
-        _request = new ResourceRequest();
+        /*_request = new ResourceRequest();
        
+
         _request.ResourceType = PoolResourceType.BasicHitParticlePool;
         _request.poolRequestCallback = OnPoolReceived;
         //_request.poolRequestCallback = (pool) =>
@@ -38,14 +40,39 @@ public class BulletVFX : ComponentEvents
         SceneEventAggregator.Instance.RequestResource(_request);
 
         _request.ResourceType = PoolResourceType.DeflectAudioPool;
-      /*  _request.poolRequestCallback = (pool) =>
+      *//*  _request.poolRequestCallback = (pool) =>
         {
             _audioPoolManager = pool;
-        };*/
+        };*//*
 
-        SceneEventAggregator.Instance.RequestResource(_request);
+        SceneEventAggregator.Instance.RequestResource(_request);*/
         //BaseSceneManager._instance.GetImpactParticlePool(ref _poolManager);
 
+    }
+
+    public override void InitialzeLocalPools()
+    {
+        _request = new ResourceRequest();
+
+
+        _request.ResourceType = PoolResourceType.BasicHitParticlePool;
+        _request.poolRequestCallback = OnPoolReceived;
+        //_request.poolRequestCallback = (pool) =>
+        //{
+
+        //        _particlePoolManager = pool;
+
+        //};
+
+        SceneEventAggregator.Instance.RequestResource(_request);
+
+        _request.ResourceType = PoolResourceType.DeflectAudioPool;
+        /*  _request.poolRequestCallback = (pool) =>
+          {
+              _audioPoolManager = pool;
+          };*/
+
+        SceneEventAggregator.Instance.RequestResource(_request);
     }
 
     public override void UnRegisterLocalEvents(EventManager eventManager)

@@ -136,7 +136,7 @@ public class BulletResources : SceneResources, IUpdateableResource
             //_bulletPool = this.CreatePool<GameObject>(_normalBulletPrefab);
             _bulletPool = new PoolManagerNew<GameObject>(this, _normalBulletPrefab);
             //_bulletPool = new PoolManager(_normalBulletPrefab, 40, 80);
-            // _bulletPool.PrewarmPool(5);
+            _bulletPool.PreWarmPool(30);
         }
 
        

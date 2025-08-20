@@ -33,14 +33,16 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
         OnSceneComplete?.Invoke();
     }
 
-    protected virtual void RegisterDamageables()
+    protected virtual void RegisterGettableComponents()
     {
-       
-        var damageables = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None).OfType<IDamageable>();
-        foreach(var d in damageables)
-        {
-            DamageManager.Register(((MonoBehaviour)d).gameObject, d);
-        }
+        ComponentRegistry.SetCapacities<IDamageable>(20);
+        ComponentRegistry.SetCapacities<IDeflectable>(100);
+
+        /* var damageables = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None).OfType<IDamageable>();
+         foreach(var d in damageables)
+         {
+             ComponentRegistry.Register(((MonoBehaviour)d).gameObject, d);
+         }*/
 
     }
    

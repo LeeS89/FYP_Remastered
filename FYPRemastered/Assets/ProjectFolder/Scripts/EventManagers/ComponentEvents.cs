@@ -31,6 +31,9 @@ public abstract class ComponentEvents : MonoBehaviour
         PlayerIsDead = false;
     }
 
+    public virtual void InitialzeLocalPools() { }
+    
+
     protected virtual void OnSceneComplete() => BaseSceneManager._instance.OnSceneComplete -= OnSceneComplete;
 
     protected virtual void OnPlayerDeathStatusUpdated(bool isDead) => PlayerIsDead = isDead;

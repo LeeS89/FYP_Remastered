@@ -1,8 +1,7 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class BulletEventManager : EventManager
+public sealed class BulletEventManager : EventManager
 {
     //private List<ComponentEvents> _cachedListeners;
     public event Action OnExpired;
@@ -19,39 +18,18 @@ public class BulletEventManager : EventManager
    
 
 
-    /*private bool _isAlreadyInitialized = false;
-
-    public bool IsAlreadyInitialized
-    {
-        get => _isAlreadyInitialized;
-        private set
-        {
-            _isAlreadyInitialized = value;
-        }
-     
-    }*/
-
     private void Awake()
     {
-       
-        BindComponentsToEvents();
+        base.BindComponentsToEvents();
     }
 
-    /*public override void BindComponentsToEvents()
+    private void Start()
     {
-       
-        _cachedListeners = new List<ComponentEvents>();
-
-        var childListeners = GetComponentsInChildren<ComponentEvents>();
-        _cachedListeners.AddRange(childListeners);
-
-        foreach(var listener in _cachedListeners)
+        foreach (var listener in _cachedListeners)
         {
-          
-            listener.RegisterLocalEvents(this);
+            listener.InitialzeLocalPools();
         }
-       
-    }*/
+    }
 
     public override void UnbindComponentsToEvents()
     {

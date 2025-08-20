@@ -58,8 +58,7 @@ public abstract class BulletBase : ComponentEvents, IPoolable
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
-        //base.RegisterLocalEvents(eventManager);
-       
+    
         _bulletEventManager = eventManager as BulletEventManager;
         RegisterDependancies();
         _bulletEventManager.OnReverseDirection += UnFreeze;

@@ -87,6 +87,11 @@ public sealed class PoolManagerNew<T> : IPoolManager where T : UnityEngine.Objec
             var poolable = go.GetComponentInChildren<IPoolable>();
             if (poolable != null)
                 poolable.SetParentPool(this);
+           /* var eventManager = go.GetComponentInChildren<EventManager>();
+            if (eventManager != null)
+            {
+                eventManager.BindComponentsToEvents();
+            }*/
 
             _transformCache[inst] = go.transform;
         }

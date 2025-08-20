@@ -90,7 +90,7 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
 
     private void OnCollisionEnter(Collision collision)
     {
-
+        
         ContactPoint contact = collision.GetContact(0);
          //collision.GetContact(0, out contact);
         // ContactPoint contact = collision.contacts[0];
@@ -122,10 +122,10 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
     {
         Vector3 spawnPoint = hitPoint;
 
-        if(DamageManager.TryGetDamageable(collision.gameObject, out var damageable))
+       /* if(ComponentRegistry.TryGetDamageable(collision.gameObject, out var damageable))
         {
             damageable.NotifyDamage(_baseDamage, _damageType, _statusEffectChancePercentage, _damageOverTime, _dOTDuration);
-        }
+        }*/
 
         
       /*  if (collision.gameObject.TryGetComponent<IDamageable>(out IDamageable damageable))
