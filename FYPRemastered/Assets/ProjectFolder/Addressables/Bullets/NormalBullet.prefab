@@ -89,8 +89,9 @@ GameObject:
   - component: {fileID: 6050013699054771250}
   - component: {fileID: 3527047245441631592}
   - component: {fileID: 7026262071358711773}
-  - component: {fileID: 8894704608222102351}
   - component: {fileID: 853653332336143470}
+  - component: {fileID: 20446614359500689}
+  - component: {fileID: 7342436492212579740}
   m_Layer: 6
   m_Name: NormalBullet
   m_TagString: Untagged
@@ -155,26 +156,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e810dd11bd1be74c9acb6bfea45cb11, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &8894704608222102351
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6588732399459625391}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0b154e5e0416cec4a9af13606f77dca9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _deflectSpeed: 25
-  _collider: {fileID: 5111258017325434983}
-  _ignoreMask:
-    serializedVersion: 2
-    m_Bits: 256
-  _damageData: {fileID: 11400000, guid: b7f82553a2b81bd4194b10319677300f, type: 2}
-  _statusEffectChancePercentage: 0
-  _testDeflect: 0
+  _testRespawn: 0
 --- !u!95 &853653332336143470
 Animator:
   serializedVersion: 7
@@ -197,6 +179,46 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &20446614359500689
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6588732399459625391}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb3b506c9ea3e354296fead10ecf33f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _lifespan: 5
+  _distanceToPlayer: 0
+  _cullDistance: 0.5
+  _anim: {fileID: 853653332336143470}
+  _layerMask:
+    serializedVersion: 2
+    m_Bits: 64
+  testFreeze: 0
+  _testUnFreeze: 0
+--- !u!114 &7342436492212579740
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6588732399459625391}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b154e5e0416cec4a9af13606f77dca9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _collider: {fileID: 5111258017325434983}
+  _ignoreMask:
+    serializedVersion: 2
+    m_Bits: 256
+  _damageData: {fileID: 11400000, guid: b7f82553a2b81bd4194b10319677300f, type: 2}
+  _statusEffectChancePercentage: 0
+  _testDeflect: 0
 --- !u!1 &7876611720651942564
 GameObject:
   m_ObjectHideFlags: 0
@@ -209,7 +231,6 @@ GameObject:
   - component: {fileID: 4295967632962239504}
   - component: {fileID: 4589556624897067028}
   - component: {fileID: 5111258017325434983}
-  - component: {fileID: 5567784061969438531}
   m_Layer: 6
   m_Name: Capsule
   m_TagString: Untagged
@@ -309,21 +330,6 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &5567784061969438531
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7876611720651942564}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b1b92c1cdcf52c4084ed357eca4e1f4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _deflectSpeed: 25
-  _editableSpeed: 2
-  _scale: {x: 0, y: 0, z: 0}
 --- !u!1 &8862239039402137114
 GameObject:
   m_ObjectHideFlags: 0
@@ -333,7 +339,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6068185006446265523}
-  - component: {fileID: 4723923294814418968}
+  - component: {fileID: 6536178701867982758}
   m_Layer: 6
   m_Name: Controller
   m_TagString: Untagged
@@ -356,7 +362,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6050013699054771250}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4723923294814418968
+--- !u!114 &6536178701867982758
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -365,16 +371,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 8862239039402137114}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eb3b506c9ea3e354296fead10ecf33f2, type: 3}
+  m_Script: {fileID: 11500000, guid: 9b1b92c1cdcf52c4084ed357eca4e1f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _lifespan: 5
-  _distanceToPlayer: 0
-  _cullDistance: 0.5
-  _anim: {fileID: 853653332336143470}
-  _capsuleCollider: {fileID: 5111258017325434983}
-  _layerMask:
-    serializedVersion: 2
-    m_Bits: 64
-  testFreeze: 0
-  _testUnFreeze: 0
+  _deflectSpeed: 25
+  _rb: {fileID: 0}
+  _editableSpeed: 5
+  _scale: {x: 0, y: 0, z: 0}

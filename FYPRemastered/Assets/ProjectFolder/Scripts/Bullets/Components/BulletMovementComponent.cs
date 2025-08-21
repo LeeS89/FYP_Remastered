@@ -1,12 +1,11 @@
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class BulletMovementComponent : ComponentEvents
 {
     [Header("Deflection Speed")]
     [SerializeField] private float _deflectSpeed;
 
-    private Rigidbody _rb;
+    [SerializeField] private Rigidbody _rb;
     [SerializeField] private float _editableSpeed;
     private float _speed;
     

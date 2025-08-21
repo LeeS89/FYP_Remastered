@@ -67,9 +67,11 @@ public abstract class RangedWeaponBase : IRangedWeapon
             
             GameObject obj = _bulletPoolManager.Get(_bulletSpawnPoint.position, bulletRotation) as GameObject;
 
-            BulletBase bullet = obj.GetComponentInChildren<BulletBase>();
+            ComponentRegistry.TryGet<IPoolable>(obj, out var bullet);
 
-            bullet.InitializeBullet(_gunOwner);
+            //BulletBase bullet = obj.GetComponentInChildren<BulletBase>();
+
+            bullet?.InitializePoolable(_gunOwner);
         }
 
         if (_clipCount == 0)

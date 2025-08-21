@@ -30,10 +30,10 @@ public abstract class BulletBase : ComponentEvents, IPoolable
     protected GameObject Owner { get; private set; }
    
   
-    protected GameObject _cachedRoot;
+  //  protected GameObject _cachedRoot;
    
     //[SerializeField] protected BulletType _bulletType;
-    [SerializeField] protected CapsuleCollider _capsuleCollider;
+   // [SerializeField] protected CapsuleCollider _capsuleCollider;
     public LayerMask _layerMask;
 
    /* protected bool _isAlive = false;
@@ -58,8 +58,9 @@ public abstract class BulletBase : ComponentEvents, IPoolable
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
-    
         _bulletEventManager = eventManager as BulletEventManager;
+        
+
         RegisterDependancies();
         _bulletEventManager.OnReverseDirection += UnFreeze;
         _bulletEventManager.OnExpired += OnExpired;
@@ -91,19 +92,19 @@ public abstract class BulletBase : ComponentEvents, IPoolable
 
     protected void RegisterDependancies()
     {
-        _cachedRoot = transform.parent.gameObject;
+        //_cachedRoot = transform.parent.gameObject;
       
     }
 
     protected void UnRegisterDependencies()
     {
-        _cachedRoot = null;
+       // _cachedRoot = null;
         
     }
 
     protected virtual Vector3 GetDirectionToTarget()
     {
-        Vector3 directionTotarget = TargetingUtility.GetDirectionToTarget(Owner, _cachedRoot, true);
+        Vector3 directionTotarget = TargetingUtility.GetDirectionToTarget(Owner, gameObject, true);
         return directionTotarget;
     }
 
@@ -118,7 +119,7 @@ public abstract class BulletBase : ComponentEvents, IPoolable
         _bulletEventManager.ParticlePlay(this);
     }
 
-    public virtual void InitializeBullet(GameObject bulletOwner)
+    public virtual void InitializePoolable(GameObject bulletOwner)
     {
         Owner = bulletOwner;
 

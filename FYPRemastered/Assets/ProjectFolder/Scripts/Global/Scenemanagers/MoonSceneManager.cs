@@ -45,15 +45,16 @@ public class MoonSceneManager : BaseSceneManager
     {
         _resources = new SceneResourceManager(new BulletResources(), new WaypointResources());
 
-
+        
         await _resources.LoadResourcesAsync();
-        await _resources.LoadDependancies(); 
+        await _resources.LoadDependancies();
+
         RegisterGettableComponents();
 
         LoadActiveSceneEventManagers();
 
         SceneStarted();
-
+        
     }
 
 
@@ -75,7 +76,7 @@ public class MoonSceneManager : BaseSceneManager
 
 
     #region Obsolete Code
-
+    [Obsolete]
     private void AssignPools() // => Sort next time
     {
 
@@ -88,6 +89,7 @@ public class MoonSceneManager : BaseSceneManager
 
     }
 
+    [Obsolete]
     public override void GetImpactParticlePool(ref PoolManager manager)
     {
         //manager = _hitParticlePool;  
@@ -118,7 +120,7 @@ public class MoonSceneManager : BaseSceneManager
 
 
      }*/
-
+    [Obsolete]
     protected override async Task LoadSceneResources() // Create Resources Component Later
     {
         try

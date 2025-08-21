@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
-using Object = UnityEngine.Object;
+
 
 public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
 {
@@ -36,14 +36,16 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
     protected virtual void RegisterGettableComponents()
     {
         ComponentRegistry.SetCapacities<IDamageable>(20);
-        ComponentRegistry.SetCapacities<IDeflectable>(100);
+        //ComponentRegistry.SetCapacities<IDeflectable>(100);
 
-        /* var damageables = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None).OfType<IDamageable>();
-         foreach(var d in damageables)
-         {
-             ComponentRegistry.Register(((MonoBehaviour)d).gameObject, d);
-         }*/
-
+        var damageables = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None).OfType<IDamageable>();
+        foreach (var d in damageables)
+        {
+            ComponentRegistry.Register<IDamageable>(((MonoBehaviour)d).gameObject, d);
+        }
+       // ComponentRegistry.TrimAll();
+        //int count = damageables.Count();
+        //Debug.LogError($"Registered {count} IDamageable components in scene {gameObject.scene.name}");
     }
    
 
@@ -52,7 +54,8 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
 
     #region Abstract Functions
     public abstract Task SetupScene();
-    protected abstract Task LoadSceneResources();
+
+   
 
     protected abstract void UnloadSceneResources();
     #endregion
@@ -78,6 +81,8 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
 
 
     #region Obsolete Code
+    [Obsolete]
+    protected abstract Task LoadSceneResources();
     //protected virtual void LoadWaypoints() { }
     // public virtual void RegisterAgentAndZone(EnemyFSMController agent, int zone) { }
     public virtual void UnregisterAgentAndZone(EnemyFSMController agent, int zone) { }
@@ -107,6 +112,7 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
         OnClosestPointToPlayerJobComplete?.Invoke(pointIndex);
     }
 
+    [Obsolete]
     public virtual void GetImpactParticlePool(ref PoolManager manager) { }
 
     //public virtual void GetBulletPool(ref PoolManager manager) { }

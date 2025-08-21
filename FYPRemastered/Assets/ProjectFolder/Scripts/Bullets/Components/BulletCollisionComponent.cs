@@ -1,7 +1,8 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 
-[RequireComponent(typeof(Rigidbody))]
+
 public class BulletCollisionComponent : ComponentEvents, IDeflectable
 {
    /* [Header("Deflection Speed")]
@@ -31,6 +32,8 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
 
         //_bulletEventManager.OnReverseDirection += Deflect;
         InitializeDamageType();
+
+        ComponentRegistry.Register<IDeflectable>(gameObject, this);
     }
 
     private void InitializeDamageType()
@@ -90,7 +93,24 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
 
     private void OnCollisionEnter(Collision collision)
     {
-        
+        /*foreach (ContactPoint contacts in collision.contacts)
+        {
+            // This is the collider on the Rigidbody’s GameObject hierarchy that was hit
+            Collider hitCollider = contacts.thisCollider;
+
+            // Grab the GameObject (which could be a child)
+            GameObject hitObject = hitCollider.gameObject;
+
+            Debug.Log($"Collider on '{hitObject.name}' was hit at {contacts.point}");
+
+            // Optionally notify a script on the child
+            var handler = hitObject.GetComponent<IChildCollisionHandler>();
+            if (handler != null)
+                handler.OnChildCollision(collision, contacts);
+        }*/
+
+   
+       
         ContactPoint contact = collision.GetContact(0);
          //collision.GetContact(0, out contact);
         // ContactPoint contact = collision.contacts[0];
@@ -117,6 +137,8 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
         _bulletEventManager.Expired();
 
     }
+
+    
 
     private void CheckForDamageableInterface(Collision collision, ContactPoint cPoint, Vector3 hitPoint, Vector3 hitNormal)
     {

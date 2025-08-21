@@ -1,9 +1,20 @@
 
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class Bullet : BulletBase
 {
     public bool testFreeze = false;
+
+   
+
+    public override void RegisterLocalEvents(EventManager eventManager)
+    {
+        base.RegisterLocalEvents(eventManager);
+        ComponentRegistry.Register<IPoolable>(gameObject, this);
+    }
+
     protected override void OnExpired()
     {
         RemoveFromJob();
@@ -16,7 +27,7 @@ public class Bullet : BulletBase
             ClearState(IsFrozen);
             //_isFrozen = false;
         }
-        _objectPoolManager.Release(_cachedRoot);
+        _objectPoolManager.Release(gameObject);
 
         
     }
@@ -39,9 +50,9 @@ public class Bullet : BulletBase
 
     }
 
-    public override void InitializeBullet(GameObject bulletOwner)
+    public override void InitializePoolable(GameObject bulletOwner)
     {
-        base.InitializeBullet(bulletOwner);
+        base.InitializePoolable(bulletOwner);
        
     }
 

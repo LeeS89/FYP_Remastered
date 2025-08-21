@@ -16,7 +16,7 @@ public class BulletVFX : ComponentEvents
     //public MoonSceneManager _manager;
     public override void RegisterLocalEvents(EventManager eventManager)
     {
-        Debug.LogError("Registering BulletVFX local events");
+        //Debug.LogError("Registering BulletVFX local events");
         _bulletEventManager = eventManager as BulletEventManager;
         
         _particleManager = ParticleManager.instance;

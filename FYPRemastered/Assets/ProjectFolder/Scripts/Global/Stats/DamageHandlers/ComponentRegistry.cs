@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using UnityEngine;
 
 public static class ComponentRegistry
@@ -55,13 +57,44 @@ public static class ComponentRegistry
             && dict.TryGetValue(obj.GetInstanceID(), out var go)
             && (comp = go as T) != null;
     }
-
+    
     public static void TrimAll()
     {
-        foreach(var dict in _maps.Values)
-        {
-            dict.TrimExcess();
-        }
+        /*  _maps.TryGetValue(typeof(IDamageable), out var dict);
+          int count = dict?.GetValueOrDefault ?? 0;
+          Debug.LogError("IDamageable count: "+count);*/
+
+        // Suppose we add an inner dictionary for a type:
+      /*  _maps[typeof(IDamageable)] = new Dictionary<int, object>(100);
+        _maps[typeof(IDamageable)][1] = "test";
+        _maps[typeof(IDamageable)][2] = "test2";
+*/
+        // Get the inner dictionary
+        var innerDict = _maps[typeof(IDeflectable)];
+
+        // Check before trim
+        Debug.LogError($"Count: {innerDict.Count}, Capacity: {innerDict.GetCapacity()}");
+
+        // Trim
+        innerDict.TrimExcess();
+
+        // Check after trim
+        Debug.LogError($"After TrimExcess -> Count: {innerDict.Count}, Capacity: {innerDict.GetCapacity()}");
+
+
+        /* foreach (var dict in _maps.Values)
+         {
+             dict.TrimExcess();
+         }*/
+    }
+
+    public static int GetCapacity<TKey, TValue>(this Dictionary<TKey, TValue> dict)
+    {
+        var entriesField = typeof(Dictionary<TKey, TValue>).GetField("_entries",
+            BindingFlags.NonPublic | BindingFlags.Instance);
+
+        var entries = (Array?)entriesField?.GetValue(dict);
+        return entries?.Length ?? 0;
     }
 
     public static void clearAll()
@@ -83,12 +116,12 @@ public static class ComponentRegistry
 
 
 
-    public static void Register(GameObject obj, IDamageable damageable)
+   /* public static void Register(GameObject obj, IDamageable damageable)
     {
         _damageables[obj.GetInstanceID()] = damageable;
     }
-
-    public static void Unregister(GameObject obj)
+*/
+   /* public static void Unregister(GameObject obj)
     {
         _damageables.Remove(obj.GetInstanceID());
     }
@@ -101,5 +134,5 @@ public static class ComponentRegistry
     public static void Clear()
     {
         _damageables.Clear();
-    }
+    }*/
 }

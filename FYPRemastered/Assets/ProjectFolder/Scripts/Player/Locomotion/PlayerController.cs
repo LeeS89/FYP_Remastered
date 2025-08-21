@@ -78,11 +78,17 @@ public sealed class PlayerController : ComponentEvents
         base.UnRegisterGlobalEvents();
     }
 
-  
 
+    public bool _testTrim = false;
 
     private void Update()
     {
+        if (_testTrim)
+        {
+            ComponentRegistry.TrimAll();
+            _testTrim = false;
+        }
+
         if (!InputEnabled) { return; }
 
         _locomotion?.Tick(_controller.isGrounded);
