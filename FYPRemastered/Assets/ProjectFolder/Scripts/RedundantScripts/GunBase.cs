@@ -122,7 +122,7 @@ public class GunBase //: IRangedWeapon
 
             GameObject obj = _bulletPool.GetFromPool(_bulletSpawnPoint.position, bulletRotation);
 
-            BulletBase bullet = obj.GetComponentInChildren<BulletBase>();
+            Projectile bullet = obj.GetComponentInChildren<Projectile>();
             //bullet.Owner = _owner;
             //obj.SetActive(true);
             bullet.InitializePoolable(_owner);

@@ -12,7 +12,7 @@ public class BulletDistanceJob : MonoBehaviour
 
     private NativeArray<Vector3> _bulletPositions;
     private NativeArray<float> _distances;
-    private List<BulletBase> _frozenBullets = new List<BulletBase>();
+    private List<Projectile> _frozenBullets = new List<Projectile>();
     private CalculateDistanceJob _job;
     [SerializeField] private int _maxbullets = 100;
     private float _jobCooldown = 0.1f;
@@ -62,7 +62,7 @@ public class BulletDistanceJob : MonoBehaviour
         }
     }
 
-    public bool AddFrozenBullet(BulletBase bullet)
+    public bool AddFrozenBullet(Projectile bullet)
     {
         if (!_frozenBullets.Contains(bullet))
         {
@@ -72,7 +72,7 @@ public class BulletDistanceJob : MonoBehaviour
         return false;
     }
 
-    public bool RemoveFrozenBullet(BulletBase bullet)
+    public bool RemoveFrozenBullet(Projectile bullet)
     {
         if (_frozenBullets.Contains(bullet))
         {

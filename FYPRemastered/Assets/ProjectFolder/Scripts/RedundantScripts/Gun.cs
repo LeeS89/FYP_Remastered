@@ -264,7 +264,7 @@ public class Gun
 
         GameObject obj = _poolManager.GetFromPool(_bulletSpawnPoint.position, bulletRotation);
 
-        BulletBase bullet = obj.GetComponentInChildren<BulletBase>();
+        Projectile bullet = obj.GetComponentInChildren<Projectile>();
         //bullet.Owner = _owner;
         //obj.SetActive(true);
         bullet.InitializePoolable(_owner);

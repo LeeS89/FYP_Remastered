@@ -70,7 +70,7 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
 
         foreach (var eventManager in _eventManagers)
         {
-            if (eventManager is not BulletEventManager)
+            if (eventManager is not ProjectileEventManager)
             {
                 eventManager.BindComponentsToEvents();
             }

@@ -1,18 +1,18 @@
 using System;
 using UnityEngine;
 
-public sealed class BulletEventManager : EventManager
+public sealed class ProjectileEventManager : EventManager
 {
     //private List<ComponentEvents> _cachedListeners;
     public event Action OnExpired;
     public event Action OnFired;
     public event Action<Collision> OnCollision;
-    public event Action OnDeflected;
+    public event Action<ProjectileKickType> OnDeflected;
     public event Func<Vector3> OnGetDirectionToTarget;
     public event Action OnFreeze;
-    public event Action OnReverseDirection;
-    public event Action<BulletBase/*, BulletType*/> OnBulletParticlePlay;
-    public event Action<BulletBase/*, BulletType*/> OnBulletParticleStop;
+  //  public event Action OnReverseDirection;
+    public event Action<Projectile/*, BulletType*/> OnBulletParticlePlay;
+    public event Action<Projectile/*, BulletType*/> OnBulletParticleStop;
     
     public event Action<bool> OnCull;
    
@@ -44,12 +44,12 @@ public sealed class BulletEventManager : EventManager
 
     
 
-    public void ParticlePlay(BulletBase bullet/*, BulletType bulletType*/)
+    public void ParticlePlay(Projectile bullet/*, BulletType bulletType*/)
     {
         OnBulletParticlePlay?.Invoke(bullet/*, bulletType*/);
     }
 
-    public void ParticleStop(BulletBase bullet/*, BulletType bulletType*/)
+    public void ParticleStop(Projectile bullet/*, BulletType bulletType*/)
     {
         OnBulletParticleStop?.Invoke(bullet/*, bulletType*/);
     }
@@ -65,9 +65,9 @@ public sealed class BulletEventManager : EventManager
         OnFired?.Invoke();
     }
 
-    public void Deflected()
+    public void Deflected(ProjectileKickType type)
     {
-        OnDeflected?.Invoke();
+        OnDeflected?.Invoke(type);
     }
 
     public Vector3 GetDirectionToTarget()
@@ -80,10 +80,10 @@ public sealed class BulletEventManager : EventManager
         OnFreeze?.Invoke();
     }
 
-    public void ReverseDirection()
+    /*public void ReverseDirection()
     {
         OnReverseDirection?.Invoke();
-    }
+    }*/
 
     public void Collision(Collision collision)
     {

@@ -2,7 +2,7 @@ using UnityEngine;
 
 public interface IDeflectable
 {
-    void Deflect();
+    void Deflect(ProjectileKickType type);
 
     void FireBack();
 

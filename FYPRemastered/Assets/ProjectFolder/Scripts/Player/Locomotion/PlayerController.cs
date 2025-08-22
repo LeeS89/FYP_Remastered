@@ -2,6 +2,7 @@ using Oculus.Interaction.HandGrab;
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
+[RequireComponent(typeof(PlayerEventManager))]
 public sealed class PlayerController : ComponentEvents
 {
     [Header("Locomotion Params")]

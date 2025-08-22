@@ -38,7 +38,7 @@ public class EnemyAnimationEvents : ComponentEvents
         RegisterGlobalEvents();
 
     }
-
+   
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
         base.UnRegisterLocalEvents(eventManager);

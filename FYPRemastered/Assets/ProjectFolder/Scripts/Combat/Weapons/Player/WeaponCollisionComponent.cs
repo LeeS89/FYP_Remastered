@@ -1,5 +1,5 @@
 using UnityEngine;
-using static UnityEngine.ParticleSystem;
+
 
 public class WeaponCollisionComponent : EventManager
 {
@@ -40,7 +40,7 @@ public class WeaponCollisionComponent : EventManager
         {
             ContactPoint contact = collision.GetContact(0);
             Vector3 impactPosition = contact.point;
-            deflectable.Deflect();
+            deflectable.Deflect(ProjectileKickType.Deflect);
 
             /* deflectable = collision.gameObject.GetComponentInParent<IDeflectable>() ??
                            collision.gameObject.GetComponentInChildren<IDeflectable>();*/

@@ -22,13 +22,13 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
     private float _dOTDuration;
     [SerializeField] private float _statusEffectChancePercentage;
 
-    private BulletEventManager _bulletEventManager; 
+    private ProjectileEventManager _bulletEventManager; 
     
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
         if (eventManager == null) { return; }
-        _bulletEventManager = eventManager as BulletEventManager;
+        _bulletEventManager = eventManager as ProjectileEventManager;
 
         //_bulletEventManager.OnReverseDirection += Deflect;
         InitializeDamageType();
@@ -58,10 +58,10 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
         _collider.excludeLayers = 0;
     }
 
-    public void Deflect()
+    public void Deflect(ProjectileKickType type)
     {
-        _bulletEventManager.Deflected();
-        FireBack();
+        _bulletEventManager.Deflected(type);
+        //FireBack();
        
         /* Vector3 directionTotarget = _bulletEventManager.GetDirectionToTarget();
 
@@ -75,7 +75,7 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
         /*Vector3 directionTotarget = _bulletEventManager.GetDirectionToTarget();
 
         Quaternion newRotation = Quaternion.LookRotation(directionTotarget);*/
-        _bulletEventManager.ReverseDirection();
+       // _bulletEventManager.ReverseDirection();
         //_bulletEventManager.Deflected(directionTotarget, newRotation, _deflectSpeed);
     }
 
@@ -85,7 +85,7 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
     {
         if (_testDeflect)
         {
-            Deflect();
+           // Deflect();
             _testDeflect = false;
         }
     }

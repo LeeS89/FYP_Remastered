@@ -10,15 +10,15 @@ public class BulletMovementComponent : ComponentEvents
     private float _speed;
     
 
-    private bool _deflectionProcessed = false;
-    private BulletEventManager _bulletEventManager;
+    
+    private ProjectileEventManager _bulletEventManager;
     public Vector3 _scale;
 
-    public bool DeflectionProcessed
-    {
+    public bool DeflectionProcessed { get; private set; }
+   /* {
         get => _deflectionProcessed;
         private set => _deflectionProcessed = value;
-    }
+    }*/
 
     private void Awake()
     {
@@ -28,11 +28,11 @@ public class BulletMovementComponent : ComponentEvents
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
-        _bulletEventManager = eventManager as BulletEventManager;
+        _bulletEventManager = eventManager as ProjectileEventManager;
         _rb = GetComponentInParent<Rigidbody>(true);
         _speed = _editableSpeed;
         _bulletEventManager.OnFired += Launch;
-        _bulletEventManager.OnReverseDirection += ReverseDirection;
+        _bulletEventManager.OnDeflected += ReverseDirection;
         //_bulletEventManager.OnDeflected += Deflected;
         _bulletEventManager.OnFreeze += ResetRigidBody;
 
@@ -42,7 +42,7 @@ public class BulletMovementComponent : ComponentEvents
     {
         _bulletEventManager.OnFired -= Launch;
         //_bulletEventManager.OnDeflected -= Deflected;
-        _bulletEventManager.OnReverseDirection -= ReverseDirection;
+        _bulletEventManager.OnDeflected -= ReverseDirection;
         _bulletEventManager.OnFreeze -= ResetRigidBody;
         ResetRigidBody();
     }
@@ -80,7 +80,7 @@ public class BulletMovementComponent : ComponentEvents
     }
 
     //public bool _deflect = false;
-    public void ReverseDirection(/*Vector3 direction, Quaternion newRotation, float newSpeed*/)
+    public void ReverseDirection(ProjectileKickType type)
     {
         Vector3 directionTotarget = _bulletEventManager.GetDirectionToTarget();
 

@@ -19,7 +19,7 @@ public class AbilitiesComponent : BaseAbilities
     [SerializeField] private Collider[] _bulletTraceresults;
     private TraceComponent _traceComp;
     private bool _traceEnabled = false;
-    private List<BulletBase> _bullets;
+    private List<Projectile> _bullets;
 
     private PlayerEventManager _playerEventManager;
 
@@ -29,7 +29,7 @@ public class AbilitiesComponent : BaseAbilities
         base.RegisterLocalEvents(_playerEventManager);
         _traceComp = new TraceComponent();
         _bulletTraceresults = new Collider[_maxTraceResults];
-        _bullets = new List<BulletBase>();
+        _bullets = new List<Projectile>();
 
         RegisterGlobalEvents();
     }
@@ -94,13 +94,13 @@ public class AbilitiesComponent : BaseAbilities
         
     }
 
-    private void HandleTraceResults(int j) // => Search instead for IDeflectable interface and call FireeBack()
+    private void HandleTraceResults(int j) // => Search instead for IDeflectable interface and call FireBack()
     {
         GameObject obj = _bulletTraceresults[j].transform.parent.gameObject;
 
-        BulletBase bullet = obj.GetComponentInChildren<BulletBase>();
+        Projectile bullet = obj.GetComponentInChildren<Projectile>();
 
-        if (bullet == null || bullet.HasState(BulletBase.IsFrozen)) { return; }
+        if (bullet == null || bullet.HasState(Projectile.IsFrozen)) { return; }
         bullet.Freeze();
         _bullets.Add(bullet);
     }
@@ -117,7 +117,7 @@ public class AbilitiesComponent : BaseAbilities
 
         for (int i = _bullets.Count - 1; i >= 0; i--)
         {
-            if (!_bullets[i].HasState(BulletBase.IsFrozen)) { continue; }
+            if (!_bullets[i].HasState(Projectile.IsFrozen)) { continue; }
 
             _bullets[i].UnFreeze();
             _bullets.RemoveAt(i);

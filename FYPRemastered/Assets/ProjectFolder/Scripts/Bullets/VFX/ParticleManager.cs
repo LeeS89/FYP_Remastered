@@ -9,7 +9,7 @@ public class ParticleManager : MonoBehaviour
     public ParticleSystem _particleSystem;
 
     [Header("Tracked Bullets")]
-    public List<BulletBase> activeBullets;
+    public List<Projectile> activeBullets;
 
     private ParticleSystem.Particle[] particles;
     private bool _particlesExist = false;
@@ -19,7 +19,7 @@ public class ParticleManager : MonoBehaviour
         instance = this;
     }
 
-    public void AddBullet(BulletBase bullet)
+    public void AddBullet(Projectile bullet)
     {
         if (!activeBullets.Contains(bullet))
         {
@@ -31,7 +31,7 @@ public class ParticleManager : MonoBehaviour
         }
     }
 
-    public void RemoveBullet(BulletBase bullet)
+    public void RemoveBullet(Projectile bullet)
     {
         activeBullets.Remove(bullet);
         if (activeBullets.Count <= 0)

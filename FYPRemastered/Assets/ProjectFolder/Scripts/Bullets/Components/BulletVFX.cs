@@ -7,7 +7,7 @@ public class BulletVFX : ComponentEvents
     public ParticleSystem _particle;
     private IPoolManager _particlePoolManager;
     private IPoolManager _audioPoolManager;
-    private BulletEventManager _bulletEventManager;
+    private ProjectileEventManager _bulletEventManager;
 
     public ParticleSystem particleMove;
 
@@ -17,7 +17,7 @@ public class BulletVFX : ComponentEvents
     public override void RegisterLocalEvents(EventManager eventManager)
     {
         //Debug.LogError("Registering BulletVFX local events");
-        _bulletEventManager = eventManager as BulletEventManager;
+        _bulletEventManager = eventManager as ProjectileEventManager;
         
         _particleManager = ParticleManager.instance;
         _bulletEventManager.OnDeflected += PlayDeflectionAudio;
@@ -112,8 +112,10 @@ public class BulletVFX : ComponentEvents
         //_audioPoolManager = pool;
     }
 
-    private void PlayDeflectionAudio()
+    private void PlayDeflectionAudio(ProjectileKickType type)
     {
+        // Different SFX for different deflection types
+
         var sfx = _audioPoolManager.Get(transform.position, transform.rotation) as AudioSource;
         sfx.Play();
         //PoolExtensions.GetAndPlay(_audioPoolManager, transform.position, transform.rotation);
@@ -134,7 +136,7 @@ public class BulletVFX : ComponentEvents
         //_poolManager.GetParticle(pos, rot);  
     }
 
-    private void PlayBulletParticle(BulletBase bullet/*, BulletType bulletType*/)
+    private void PlayBulletParticle(Projectile bullet/*, BulletType bulletType*/)
     {
         //ParticleSystem particle = transform.root.GetComponentInChildren<ParticleSystem>();
         
@@ -149,7 +151,7 @@ public class BulletVFX : ComponentEvents
         _particleManager.AddBullet(bullet/*, bulletType*/);
     }
 
-    private void StopBulletParticle(BulletBase bullet/*, BulletType bulletType*/)
+    private void StopBulletParticle(Projectile bullet/*, BulletType bulletType*/)
     {
         //ParticleSystem particle = transform.root.GetComponentInChildren<ParticleSystem>();
         /*particleMove.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);*/
