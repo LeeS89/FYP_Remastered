@@ -1,18 +1,39 @@
 using UnityEngine;
 
 
-public class Bullet : Projectile
+public class Bullet : Projectile, IDeflectable
 {
     public bool testFreeze = false;
     [SerializeField] protected Animator _anim;
     [SerializeField] protected float _cullDistance = 0.5f;
+    private GameObject _componentRegistryTargetObj;
 
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
         base.RegisterLocalEvents(eventManager);
-        ComponentRegistry.Register<IPoolable>(gameObject, this);
+        _projectileEventManager.OnGetDirectionToTarget += GetDirectionToTarget;
+
     }
+
+    public override void UnRegisterLocalEvents(EventManager eventManager)
+    {
+        base.UnRegisterLocalEvents(eventManager);
+        ComponentRegistry.Unregister<IDeflectable>(_componentRegistryTargetObj);
+        _projectileEventManager.OnGetDirectionToTarget -= GetDirectionToTarget;
+    }
+
+    protected override void CreateDefaultColliderIfNoneExists(GameObject target, bool exists)
+    {
+        _componentRegistryTargetObj = target;
+        if (!exists)
+        {
+            _componentRegistryTargetObj.AddComponent<CapsuleCollider>();
+        }
+        ComponentRegistry.Register<IDeflectable>(_componentRegistryTargetObj, this);
+    }
+
+    
 
     protected override void OnExpired()
     {
@@ -47,7 +68,7 @@ public class Bullet : Projectile
 
         if (_testUnFreeze)
         {
-            UnFreeze();
+           // UnFreeze();
             _testUnFreeze= false;
         }
 #endif
@@ -99,8 +120,9 @@ public class Bullet : Projectile
 
     }
 
-    public override void Freeze()
+    public virtual void Freeze()
     {
+       
         if (HasState(IsFrozen)) { return; }
       
         if (BulletDistanceJob.Instance.AddFrozenBullet(this))
@@ -120,14 +142,15 @@ public class Bullet : Projectile
         _timeOut = _lifespan;
     }
 
-    public override void UnFreeze() // => Move to IDeflectable interface & Change to ReverseDirection() 
+   /* public override void UnFreeze() // => Move to IDeflectable interface & Change to ReverseDirection() 
     {
+        base.UnFreeze();
         if (!HasState(IsFrozen)) { return; }
 
         RemoveFromJob();
-        //_projectileEventManager.Deflected(ProjectileKickType.ReFire);
+        _projectileEventManager.Deflected(ProjectileKickType.ReFire);
         //_bulletEventManager.ReverseDirection();
-    }
+    }*/
 
     protected override void RemoveFromJob()
     {
@@ -152,4 +175,20 @@ public class Bullet : Projectile
 
 
     }
+
+    public void Deflect(ProjectileKickType type)
+    {
+        if(type == ProjectileKickType.ReFire)
+        {
+            if (!HasState(IsFrozen)) { return; }
+            RemoveFromJob();
+        }
+        _projectileEventManager.Deflected(type);
+    }
+
+
+    /*public void FireBack()
+    {
+        throw new System.NotImplementedException();
+    }*/
 }

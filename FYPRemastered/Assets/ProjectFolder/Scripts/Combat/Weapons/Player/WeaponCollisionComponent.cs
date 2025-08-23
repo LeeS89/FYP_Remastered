@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 
@@ -34,23 +35,30 @@ public class WeaponCollisionComponent : EventManager
                 isImpacting = true;  // Mark the lightsaber as in contact
             }
         }*/
-
+        if (CheckForDeflectable(collision.gameObject, out IDeflectable deflectable))
+        {
+            deflectable.Deflect(ProjectileKickType.Deflect);
+        }
         
-        if (collision.gameObject.TryGetComponent<IDeflectable>(out IDeflectable deflectable)) // Use Same registry as IDamageable for getting
+        /*if (collision.gameObject.TryGetComponent<IDeflectable>(out IDeflectable deflectable)) // Use Same registry as IDamageable for getting
         {
             ContactPoint contact = collision.GetContact(0);
             Vector3 impactPosition = contact.point;
             deflectable.Deflect(ProjectileKickType.Deflect);
 
-            /* deflectable = collision.gameObject.GetComponentInParent<IDeflectable>() ??
-                           collision.gameObject.GetComponentInChildren<IDeflectable>();*/
+            *//* deflectable = collision.gameObject.GetComponentInParent<IDeflectable>() ??
+                           collision.gameObject.GetComponentInChildren<IDeflectable>();*//*
         }
         else
         {
             Debug.LogError($"No IDeflectable component found on {collision.gameObject.name}");
-        }
+        }*/
        
     }
+
+    private bool CheckForDeflectable(GameObject gameObject, out IDeflectable deflectable) 
+        => ComponentRegistry.TryGet<IDeflectable>(gameObject, out deflectable);
+
 
     /*private void OnCollisionStay(Collision collision)
     {

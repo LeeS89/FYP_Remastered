@@ -4,6 +4,8 @@ using UnityEngine;
 
 [RequireComponent(typeof(ProjectileEventManager))]
 [RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(BulletCollisionComponent))]
+
 public abstract class Projectile : ComponentEvents, IPoolable
 {
     [Header("Owning Pool - Set by the pool itself")]
@@ -39,21 +41,50 @@ public abstract class Projectile : ComponentEvents, IPoolable
     public override void RegisterLocalEvents(EventManager eventManager)
     {
         _projectileEventManager = eventManager as ProjectileEventManager;
-        
+        EnsureCollider();
         //_projectileEventManager.OnReverseDirection += UnFreeze; => Changing to Deflect
         _projectileEventManager.OnExpired += OnExpired;
-        _projectileEventManager.OnGetDirectionToTarget += GetDirectionToTarget;
+       
 
         _timeOut = _lifespan;
        
     }
 
-   
+    private void EnsureCollider()
+    {
+
+        var existingCol = GetComponentInChildren<Collider>(true);
+
+        if (existingCol != null)
+        {
+            CreateDefaultColliderIfNoneExists(existingCol.gameObject, exists: true);
+            return;
+        }
+      
+        var mr = GetComponentInChildren<MeshRenderer>(true);
+        var mf = GetComponentInChildren<MeshFilter>(true);
+
+        var meshObj = mr != null ? mr.gameObject
+                    : mf != null ? mf.gameObject
+                    : gameObject;
+
+
+        CreateDefaultColliderIfNoneExists(meshObj, exists : false);
+    }
+
+    protected virtual void CreateDefaultColliderIfNoneExists(GameObject target, bool exists)
+    {
+        if (exists) return;
+        target.AddComponent<SphereCollider>();
+    }
+
+
+
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
         _projectileEventManager.OnExpired -= OnExpired;
-        _projectileEventManager.OnGetDirectionToTarget -= GetDirectionToTarget;
+        
        // _projectileEventManager.OnReverseDirection -= UnFreeze;
         
     }
@@ -104,8 +135,8 @@ public abstract class Projectile : ComponentEvents, IPoolable
 
     protected abstract void OnExpired();
 
-    public virtual void Freeze() { }
-    public virtual void UnFreeze() { }
+   // public virtual void Freeze() { }
+   // public virtual void UnFreeze() { }
 
     protected virtual void RemoveFromJob() { } 
 

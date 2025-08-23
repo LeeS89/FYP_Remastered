@@ -3,7 +3,7 @@ using UnityEngine;
 
 
 
-public class BulletCollisionComponent : ComponentEvents, IDeflectable
+public class BulletCollisionComponent : ComponentEvents/*, IDeflectable*/
 {
    /* [Header("Deflection Speed")]
     [SerializeField] private float _deflectSpeed;*/
@@ -33,7 +33,7 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
         //_bulletEventManager.OnReverseDirection += Deflect;
         InitializeDamageType();
 
-        ComponentRegistry.Register<IDeflectable>(gameObject, this);
+       // ComponentRegistry.Register<IDeflectable>(gameObject, this);
     }
 
     private void InitializeDamageType()
@@ -58,17 +58,17 @@ public class BulletCollisionComponent : ComponentEvents, IDeflectable
         _collider.excludeLayers = 0;
     }
 
-    public void Deflect(ProjectileKickType type)
+   /* public void Deflect(ProjectileKickType type)
     {
         _bulletEventManager.Deflected(type);
         //FireBack();
        
-        /* Vector3 directionTotarget = _bulletEventManager.GetDirectionToTarget();
+        *//* Vector3 directionTotarget = _bulletEventManager.GetDirectionToTarget();
 
          Quaternion newRotation = Quaternion.LookRotation(directionTotarget);
 
-         _bulletEventManager.Deflected(directionTotarget, newRotation, _deflectSpeed);*/
-    }
+         _bulletEventManager.Deflected(directionTotarget, newRotation, _deflectSpeed);*//*
+    }*/
 
     public void FireBack()
     {

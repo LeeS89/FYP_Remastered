@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.XR.CoreUtils;
 using UnityEngine;
 
 public class AbilitiesComponent : BaseAbilities
@@ -17,6 +18,7 @@ public class AbilitiesComponent : BaseAbilities
     [Header("Trace results max size")]
     [SerializeField] private int _maxTraceResults = 30;
     [SerializeField] private Collider[] _bulletTraceresults;
+    [SerializeField] private List<IDeflectable> _deflectables;
     private TraceComponent _traceComp;
     private bool _traceEnabled = false;
     private List<Projectile> _bullets;
@@ -29,6 +31,8 @@ public class AbilitiesComponent : BaseAbilities
         base.RegisterLocalEvents(_playerEventManager);
         _traceComp = new TraceComponent();
         _bulletTraceresults = new Collider[_maxTraceResults];
+        _deflectables = new List<IDeflectable>();
+        _deflectables.EnsureCapacity(_maxTraceResults);
         _bullets = new List<Projectile>();
 
         RegisterGlobalEvents();
@@ -89,21 +93,25 @@ public class AbilitiesComponent : BaseAbilities
         
         for (int i = 0; i < numBullets; i++)
         {
-            HandleTraceResults(i);
+            GameObject obj = _bulletTraceresults[i].gameObject;
+            if (!ComponentRegistry.TryGet<IDeflectable>(obj, out IDeflectable deflectable)) continue;
+            _deflectables.Add(deflectable);
+            deflectable.Freeze();
+            //HandleTraceResults(deflectable);
         }
         
     }
 
-    private void HandleTraceResults(int j) // => Search instead for IDeflectable interface and call FireBack()
+   /* private void HandleTraceResults(IDeflectable deflectable*//*int j*//*) // => Search instead for IDeflectable interface and call FireBack()
     {
         GameObject obj = _bulletTraceresults[j].transform.parent.gameObject;
 
         Projectile bullet = obj.GetComponentInChildren<Projectile>();
 
         if (bullet == null || bullet.HasState(Projectile.IsFrozen)) { return; }
-        bullet.Freeze();
+        //bullet.Freeze();
         _bullets.Add(bullet);
-    }
+    }*/
 
     private void FireBulletsBack()
     {
@@ -119,7 +127,7 @@ public class AbilitiesComponent : BaseAbilities
         {
             if (!_bullets[i].HasState(Projectile.IsFrozen)) { continue; }
 
-            _bullets[i].UnFreeze();
+            //_bullets[i].UnFreeze();
             _bullets.RemoveAt(i);
             yield return new WaitForSeconds(0.1f);
         }
