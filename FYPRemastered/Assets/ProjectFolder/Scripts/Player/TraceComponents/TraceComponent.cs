@@ -1,9 +1,5 @@
-using Meta.XR.ImmersiveDebugger;
-using System;
-using System.Diagnostics;
-using System.Linq;
 using UnityEngine;
-using UnityEngine.Experimental.XR.Interaction;
+
 
 public class TraceComponent
 {
@@ -64,28 +60,30 @@ public class TraceComponent
 
     }
 
-   /* public int CheckTargetWithinCombatRange(Transform traceLocation, Collider[] hitResults, float sphereRadius = 0.2f, LayerMask traceLayer = default)
-    {
+    public virtual void OnInstanceDestroyed() { }
+   
 
-        //Vector3 start = location.position - location.forward * (capsuleHeight / 2f);  // Bottom of capsule
-        //Vector3 end = location.position + location.forward * (capsuleHeight / 2f);    // Top of capsule
+    /* public int CheckTargetWithinCombatRange(Transform traceLocation, Collider[] hitResults, float sphereRadius = 0.2f, LayerMask traceLayer = default)
+     {
 
-
-        return Physics.OverlapSphereNonAlloc(traceLocation.position, sphereRadius, hitResults, traceLayer);
-        //hitResults = _overlapResults;
-        //return hits;
+         //Vector3 start = location.position - location.forward * (capsuleHeight / 2f);  // Bottom of capsule
+         //Vector3 end = location.position + location.forward * (capsuleHeight / 2f);    // Top of capsule
 
 
-        *//*for (int i = 0; i < hitResults.Length; i++)
-        {
-            hitResults[i] = null;
-        }
-        // Clear the results if no objects were found
-        return 0;
-*//*
-    }
-*/
+         return Physics.OverlapSphereNonAlloc(traceLocation.position, sphereRadius, hitResults, traceLayer);
+         //hitResults = _overlapResults;
+         //return hits;
 
+
+         *//*for (int i = 0; i < hitResults.Length; i++)
+         {
+             hitResults[i] = null;
+         }
+         // Clear the results if no objects were found
+         return 0;
+ *//*
+     }
+ */
 
 }
 

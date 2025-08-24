@@ -99,7 +99,7 @@ public class FieldOfViewHandler
             radius,
             targetMask
             );
-
+        
         return count;
     }
 

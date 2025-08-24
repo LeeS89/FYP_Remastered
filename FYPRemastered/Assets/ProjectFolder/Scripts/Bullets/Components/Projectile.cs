@@ -4,7 +4,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(ProjectileEventManager))]
 [RequireComponent(typeof(Rigidbody))]
-[RequireComponent(typeof(BulletCollisionComponent))]
+[RequireComponent(typeof(ProjectileCollisionComponent))]
 
 public abstract class Projectile : ComponentEvents, IPoolable
 {
@@ -41,6 +41,7 @@ public abstract class Projectile : ComponentEvents, IPoolable
     public override void RegisterLocalEvents(EventManager eventManager)
     {
         _projectileEventManager = eventManager as ProjectileEventManager;
+        ComponentRegistry.Register<IPoolable>(gameObject, this);
         EnsureCollider();
         //_projectileEventManager.OnReverseDirection += UnFreeze; => Changing to Deflect
         _projectileEventManager.OnExpired += OnExpired;
@@ -83,6 +84,7 @@ public abstract class Projectile : ComponentEvents, IPoolable
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
+        ComponentRegistry.Unregister<IPoolable>(gameObject);
         _projectileEventManager.OnExpired -= OnExpired;
         
        // _projectileEventManager.OnReverseDirection -= UnFreeze;

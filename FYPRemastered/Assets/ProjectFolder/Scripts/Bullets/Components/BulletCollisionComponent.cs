@@ -3,7 +3,7 @@ using UnityEngine;
 
 
 
-public class BulletCollisionComponent : ComponentEvents/*, IDeflectable*/
+public class BulletCollisionComponent : ProjectileCollisionComponent/*, IDeflectable*/
 {
    /* [Header("Deflection Speed")]
     [SerializeField] private float _deflectSpeed;*/
@@ -91,7 +91,7 @@ public class BulletCollisionComponent : ComponentEvents/*, IDeflectable*/
     }
 
 
-    private void OnCollisionEnter(Collision collision)
+    protected override void OnCollisionEnter(Collision collision)
     {
         /*foreach (ContactPoint contacts in collision.contacts)
         {
@@ -109,7 +109,7 @@ public class BulletCollisionComponent : ComponentEvents/*, IDeflectable*/
                 handler.OnChildCollision(collision, contacts);
         }*/
 
-   
+        base.OnCollisionEnter(collision);
        
         ContactPoint contact = collision.GetContact(0);
          //collision.GetContact(0, out contact);

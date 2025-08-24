@@ -17,22 +17,23 @@ public class AbilitiesComponent : BaseAbilities
 
     [Header("Trace results max size")]
     [SerializeField] private int _maxTraceResults = 30;
-    [SerializeField] private Collider[] _bulletTraceresults;
-    [SerializeField] private List<IDeflectable> _deflectables;
-    private TraceComponent _traceComp;
+    [SerializeField] private IDeflectable[] _bulletTraceresults;
+   // [SerializeField] private List<IDeflectable> _deflectables;
+    private PlayerTraceManager _traceComp;
     private bool _traceEnabled = false;
     private List<Projectile> _bullets;
 
     private PlayerEventManager _playerEventManager;
+    private int _deflectableCount = 0;
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
         _playerEventManager = eventManager as PlayerEventManager;
         base.RegisterLocalEvents(_playerEventManager);
-        _traceComp = new TraceComponent();
-        _bulletTraceresults = new Collider[_maxTraceResults];
-        _deflectables = new List<IDeflectable>();
-        _deflectables.EnsureCapacity(_maxTraceResults);
+        _traceComp = new PlayerTraceManager(_maxTraceResults);
+        _bulletTraceresults = new IDeflectable[_maxTraceResults];
+       // _deflectables = new List<IDeflectable>();
+       // _deflectables.EnsureCapacity(_maxTraceResults);
         _bullets = new List<Projectile>();
 
         RegisterGlobalEvents();
@@ -87,16 +88,18 @@ public class AbilitiesComponent : BaseAbilities
 
     private void SweepForBullets()
     {
-        int numBullets = _traceComp.CheckTargetProximity(_traceLocation, _bulletTraceresults, _sphereRadius, _traceLayer);
+        _traceComp.CheckTargetProximity<IDeflectable>(_traceLocation, _bulletTraceresults, ref _deflectableCount, _sphereRadius, _traceLayer);
         
-        if(numBullets <= 0) { return; }
+        if(_deflectableCount <= 0) { return; }
         
-        for (int i = 0; i < numBullets; i++)
+        for (int i = 0; i < _deflectableCount; i++)
         {
-            GameObject obj = _bulletTraceresults[i].gameObject;
-            if (!ComponentRegistry.TryGet<IDeflectable>(obj, out IDeflectable deflectable)) continue;
-            _deflectables.Add(deflectable);
-            deflectable.Freeze();
+            //GameObject obj = _bulletTraceresults[i].gameObject;
+           // if (!ComponentRegistry.TryGet<IDeflectable>(obj, out IDeflectable deflectable)) continue;
+           var deflectable = _bulletTraceresults[i];
+            deflectable?.Freeze();
+            /*_deflectables.Add(deflectable);
+            deflectable.Freeze();*/
             //HandleTraceResults(deflectable);
         }
         
@@ -122,15 +125,27 @@ public class AbilitiesComponent : BaseAbilities
 
     private IEnumerator FireBackDelay()
     {
+        for (int i = _deflectableCount - 1; i >= 0; i--)
+        {
+            var d = _bulletTraceresults[i];
+            if (d != null)
+            {
+                d.Deflect(ProjectileKickType.ReFire);
+                _bulletTraceresults[i] = null;
+            }
+            yield return new WaitForSeconds(0.1f);
 
-        for (int i = _bullets.Count - 1; i >= 0; i--)
+        }
+        _deflectableCount = 0;
+
+       /* for (int i = _bullets.Count - 1; i >= 0; i--)
         {
             if (!_bullets[i].HasState(Projectile.IsFrozen)) { continue; }
 
             //_bullets[i].UnFreeze();
             _bullets.RemoveAt(i);
             yield return new WaitForSeconds(0.1f);
-        }
+        }*/
        
     }
 

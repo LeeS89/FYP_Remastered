@@ -1,6 +1,6 @@
 using UnityEngine;
 
-
+[RequireComponent(typeof(BulletCollisionComponent))]
 public class Bullet : Projectile, IDeflectable
 {
     public bool testFreeze = false;
