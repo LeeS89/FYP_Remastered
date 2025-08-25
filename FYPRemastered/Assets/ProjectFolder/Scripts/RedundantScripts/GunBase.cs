@@ -125,7 +125,7 @@ public class GunBase //: IRangedWeapon
             Projectile bullet = obj.GetComponentInChildren<Projectile>();
             //bullet.Owner = _owner;
             //obj.SetActive(true);
-            bullet.InitializePoolable(_owner);
+            bullet.LaunchPoolable(_owner);
         }
 
         if(_clipCount == 0)

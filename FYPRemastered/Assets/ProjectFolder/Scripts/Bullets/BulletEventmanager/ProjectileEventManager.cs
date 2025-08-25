@@ -5,7 +5,7 @@ public sealed class ProjectileEventManager : EventManager
 {
     //private List<ComponentEvents> _cachedListeners;
     public event Action OnExpired;
-    public event Action OnFired;
+    public event Action OnLaunch;
     public event Action<Collision> OnCollision;
     public event Action<ProjectileKickType> OnDeflected;
     public event Func<Vector3> OnGetDirectionToTarget;
@@ -44,56 +44,37 @@ public sealed class ProjectileEventManager : EventManager
 
     
 
-    public void ParticlePlay(Projectile bullet/*, BulletType bulletType*/)
-    {
-        OnBulletParticlePlay?.Invoke(bullet/*, bulletType*/);
-    }
-
-    public void ParticleStop(Projectile bullet/*, BulletType bulletType*/)
-    {
-        OnBulletParticleStop?.Invoke(bullet/*, bulletType*/);
-    }
+    public void ParticlePlay(Projectile bullet/*, BulletType bulletType*/) => OnBulletParticlePlay?.Invoke(bullet/*, bulletType*/);
 
 
-    public void Cull(bool cull = false)
-    {
-        OnCull?.Invoke(cull);
-    }
+    public void ParticleStop(Projectile bullet/*, BulletType bulletType*/) => OnBulletParticleStop?.Invoke(bullet/*, bulletType*/);
 
-    public void Fired()
-    {
-        OnFired?.Invoke();
-    }
 
-    public void Deflected(ProjectileKickType type)
-    {
-        OnDeflected?.Invoke(type);
-    }
+    public void Cull(bool cull = false) => OnCull?.Invoke(cull);
 
-    public Vector3 GetDirectionToTarget()
-    {
-        return OnGetDirectionToTarget?.Invoke() ?? Vector3.zero;
-    }
 
-    public void Freeze()
-    {
-        OnFreeze?.Invoke();
-    }
+    public void Launched() => OnLaunch?.Invoke();
+
+
+    public void Deflected(ProjectileKickType type) => OnDeflected?.Invoke(type);
+
+
+    public Vector3 GetDirectionToTarget() => OnGetDirectionToTarget?.Invoke() ?? Vector3.zero;
+
+
+    public void Freeze() => OnFreeze?.Invoke();
+
 
     /*public void ReverseDirection()
     {
         OnReverseDirection?.Invoke();
     }*/
 
-    public void Collision(Collision collision)
-    {
-        OnCollision?.Invoke(collision);
-    }
+    public void Collision(Collision collision) => OnCollision?.Invoke(collision);
 
-    public void Expired()
-    {
-        OnExpired?.Invoke();
-    }
 
-    
+    public void Expired() => OnExpired?.Invoke();
+
+
+
 }

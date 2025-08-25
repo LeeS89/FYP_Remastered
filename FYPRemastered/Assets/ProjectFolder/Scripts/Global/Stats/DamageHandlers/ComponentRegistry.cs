@@ -1,9 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
+/// <summary>
+/// To reduce runtime hierarchy lookups with GetComponent<>(), frequently requested components on gameobjects
+/// register and store their instance ID and the component to be requested
+/// Instead of GetComponent/ TryGetComponent, querying objects
+/// call TryGet<T>() passing in the object to query along with the component type to lookup
+/// </summary>
 public static class ComponentRegistry
 {
     private static readonly Dictionary<int, IDamageable> _damageables = new();

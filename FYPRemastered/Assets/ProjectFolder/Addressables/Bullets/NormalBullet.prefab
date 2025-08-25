@@ -193,12 +193,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _lifespan: 5
   _distanceToPlayer: 0
-  _cullDistance: 0.5
-  _anim: {fileID: 853653332336143470}
-  _layerMask:
-    serializedVersion: 2
-    m_Bits: 64
+  _projectileSpeed: 5
+  _deflectSpeed: 25
   testFreeze: 0
+  _anim: {fileID: 853653332336143470}
+  _cullDistance: 0.5
   _testUnFreeze: 0
 --- !u!114 &7342436492212579740
 MonoBehaviour:
@@ -339,7 +338,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6068185006446265523}
-  - component: {fileID: 6536178701867982758}
   m_Layer: 6
   m_Name: Controller
   m_TagString: Untagged
@@ -362,19 +360,3 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6050013699054771250}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6536178701867982758
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8862239039402137114}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b1b92c1cdcf52c4084ed357eca4e1f4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _deflectSpeed: 25
-  _rb: {fileID: 0}
-  _editableSpeed: 5
-  _scale: {x: 0, y: 0, z: 0}

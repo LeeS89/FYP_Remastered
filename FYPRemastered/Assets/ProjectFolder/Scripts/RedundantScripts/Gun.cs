@@ -267,7 +267,7 @@ public class Gun
         Projectile bullet = obj.GetComponentInChildren<Projectile>();
         //bullet.Owner = _owner;
         //obj.SetActive(true);
-        bullet.InitializePoolable(_owner);
+        bullet.LaunchPoolable(_owner);
 
     }
 

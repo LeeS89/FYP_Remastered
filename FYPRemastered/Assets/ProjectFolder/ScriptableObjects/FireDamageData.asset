@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f41c33025d13283429894fd158b64260, type: 3}
   m_Name: FireDamageData
   m_EditorClassIdentifier: 
-  damageType: 1
+  damageType: 2
   baseDamage: 5
   damageOverTime: 2
   duration: 5

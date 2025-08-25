@@ -22,11 +22,12 @@ public abstract class Projectile : ComponentEvents, IPoolable
     
     [Header("Components")]
     protected ProjectileEventManager _projectileEventManager;
+    protected ProjectileMovementHandler _movementHandler;
 
     [Header("The GameObject which activates the projectile")]
     protected GameObject Owner { get; private set; }
-   
-  
+
+    [SerializeField] protected float _projectileSpeed;
 
     protected byte _state;
     protected const byte IsActive = 1 << 0;
@@ -43,6 +44,7 @@ public abstract class Projectile : ComponentEvents, IPoolable
         _projectileEventManager = eventManager as ProjectileEventManager;
         ComponentRegistry.Register<IPoolable>(gameObject, this);
         EnsureCollider();
+        AttachMovementHandler();
         //_projectileEventManager.OnReverseDirection += UnFreeze; => Changing to Deflect
         _projectileEventManager.OnExpired += OnExpired;
        
@@ -50,6 +52,9 @@ public abstract class Projectile : ComponentEvents, IPoolable
         _timeOut = _lifespan;
        
     }
+
+    protected virtual void AttachMovementHandler() => _movementHandler = new ProjectileMovementHandler(_projectileEventManager, GetComponent<Rigidbody>());
+    
 
     private void EnsureCollider()
     {
@@ -86,7 +91,8 @@ public abstract class Projectile : ComponentEvents, IPoolable
     {
         ComponentRegistry.Unregister<IPoolable>(gameObject);
         _projectileEventManager.OnExpired -= OnExpired;
-        
+        _movementHandler.OnInstanceDestroyed();
+        _movementHandler = null;
        // _projectileEventManager.OnReverseDirection -= UnFreeze;
         
     }
@@ -108,12 +114,12 @@ public abstract class Projectile : ComponentEvents, IPoolable
   
 
 
-    public virtual void InitializePoolable(GameObject projectileOwner)
+    public virtual void LaunchPoolable(GameObject projectileOwner)
     {
         Owner = projectileOwner;
 
         SetState(IsActive);
-        _projectileEventManager.Fired();
+        _projectileEventManager.Launched();
         _timeOut = _lifespan;
         
     }
@@ -131,8 +137,11 @@ public abstract class Projectile : ComponentEvents, IPoolable
             OnExpired();
         }
 
-        
+    }
 
+    private void FixedUpdate()
+    {
+        _movementHandler?.FixedTick();
     }
 
     protected abstract void OnExpired();
@@ -144,40 +153,10 @@ public abstract class Projectile : ComponentEvents, IPoolable
 
     public virtual void SetDistanceToPlayer(float distance) => _distanceToPlayer = distance;
 
-
-
-
-
-
     public void SetParentPool(IPoolManager manager) => _projectilePool = manager;
 
 
+    protected virtual void OnDisable() => _movementHandler?.OnDisable();
 
-
-
-    #region redundant
-    /*protected virtual void CheckForOverlap()
-    {
-
-        Vector3 center = _capsuleCollider.transform.TransformPoint(_capsuleCollider.center); // Convert to world position
-        float worldHeight = _capsuleCollider.height * _capsuleCollider.transform.lossyScale.y;
-        Vector3 start = center - _capsuleCollider.transform.up * (worldHeight * 0.8f);
-        Vector3 end = center + _capsuleCollider.transform.up * (worldHeight * 0.8f);
-        float capsuleRadius = _capsuleCollider.radius * Mathf.Max(_capsuleCollider.transform.lossyScale.x, _capsuleCollider.transform.lossyScale.y, _capsuleCollider.transform.lossyScale.z);
-        int hits = Physics.OverlapCapsuleNonAlloc(start, end, capsuleRadius * 1.65f, _overlapResults, _layerMask);
-        //DebugExtension.DebugCapsule(start, end, Color.blue, capsuleRadius * 1.4f);
-        for (int i = 0; i < hits; ++i)
-        {
-            if (_overlapResults[i].gameObject == _capsuleCollider.gameObject)
-            {
-                continue;
-            }
-            //Cull(true);
-            break;
-        }
-
-    }*/
-
-    #endregion
 
 }

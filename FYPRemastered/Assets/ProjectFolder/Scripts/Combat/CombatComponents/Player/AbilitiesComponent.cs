@@ -20,7 +20,7 @@ public class AbilitiesComponent : BaseAbilities
     [SerializeField] private IDeflectable[] _bulletTraceresults;
    // [SerializeField] private List<IDeflectable> _deflectables;
     private PlayerTraceManager _traceComp;
-    private bool _traceEnabled = false;
+    [SerializeField] private bool _traceEnabled = false;
     private List<Projectile> _bullets;
 
     private PlayerEventManager _playerEventManager;
@@ -64,6 +64,23 @@ public class AbilitiesComponent : BaseAbilities
         set => _traceEnabled = value;
     }
 
+    public bool _testStartTrace = false;
+    public bool _testStopTrace = false;
+
+    private void Update()
+    {
+        if (_testStartTrace)
+        {
+            ToggleTrace(true);
+            _testStartTrace = false;
+        }
+        if (_testStopTrace)
+        {
+            ToggleTrace(false);
+            _testStopTrace = false;
+        }
+    }
+
     public void ToggleTrace(bool traceEnabled)
     {
         if(_traceEnabled == traceEnabled) { return; }
@@ -71,7 +88,7 @@ public class AbilitiesComponent : BaseAbilities
         _traceEnabled = traceEnabled;
         if(!_traceEnabled)
         {
-            if(_bullets.Count > 0)
+            if(_bulletTraceresults != null && _bulletTraceresults.Length > 0)
             {
                 FireBulletsBack();
             }
@@ -118,13 +135,15 @@ public class AbilitiesComponent : BaseAbilities
 
     private void FireBulletsBack()
     {
-        if (_bullets.Count == 0) { return; }
+        if (_bulletTraceresults == null || _bulletTraceresults.Length == 0) return;
+        //if (_bullets.Count == 0) { return; }
 
         StartCoroutine(FireBackDelay());
     }
 
     private IEnumerator FireBackDelay()
     {
+        Debug.LogError("Deflectable count: "+ _deflectableCount);
         for (int i = _deflectableCount - 1; i >= 0; i--)
         {
             var d = _bulletTraceresults[i];

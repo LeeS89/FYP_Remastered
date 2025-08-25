@@ -71,7 +71,7 @@ public abstract class RangedWeaponBase : IRangedWeapon
 
             //BulletBase bullet = obj.GetComponentInChildren<BulletBase>();
 
-            bullet?.InitializePoolable(_gunOwner);
+            bullet?.LaunchPoolable(_gunOwner);
         }
 
         if (_clipCount == 0)

@@ -31,7 +31,7 @@ public class BulletMovementComponent : ComponentEvents
         _bulletEventManager = eventManager as ProjectileEventManager;
         _rb = GetComponentInParent<Rigidbody>(true);
         _speed = _editableSpeed;
-        _bulletEventManager.OnFired += Launch;
+        _bulletEventManager.OnLaunch += Launch;
         _bulletEventManager.OnDeflected += ReverseDirection;
         //_bulletEventManager.OnDeflected += Deflected;
         _bulletEventManager.OnFreeze += ResetRigidBody;
@@ -40,7 +40,7 @@ public class BulletMovementComponent : ComponentEvents
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
-        _bulletEventManager.OnFired -= Launch;
+        _bulletEventManager.OnLaunch -= Launch;
         //_bulletEventManager.OnDeflected -= Deflected;
         _bulletEventManager.OnDeflected -= ReverseDirection;
         _bulletEventManager.OnFreeze -= ResetRigidBody;

@@ -3,9 +3,14 @@ using UnityEngine;
 [RequireComponent(typeof(BulletCollisionComponent))]
 public class Bullet : Projectile, IDeflectable
 {
+    [Header("Deflection Speed")]
+    [SerializeField] protected float _deflectSpeed;
+
     public bool testFreeze = false;
     [SerializeField] protected Animator _anim;
     [SerializeField] protected float _cullDistance = 0.5f;
+
+ 
     private GameObject _componentRegistryTargetObj;
 
 
@@ -33,7 +38,9 @@ public class Bullet : Projectile, IDeflectable
         ComponentRegistry.Register<IDeflectable>(_componentRegistryTargetObj, this);
     }
 
-    
+    protected override void AttachMovementHandler()
+        => _movementHandler = new BulletMovementHandler(_projectileEventManager, GetComponent<Rigidbody>(), _projectileSpeed, _deflectSpeed);
+
 
     protected override void OnExpired()
     {
@@ -113,9 +120,9 @@ public class Bullet : Projectile, IDeflectable
         }
     }
 
-    public override void InitializePoolable(GameObject bulletOwner)
+    public override void LaunchPoolable(GameObject bulletOwner)
     {
-        base.InitializePoolable(bulletOwner);
+        base.LaunchPoolable(bulletOwner);
         _projectileEventManager.ParticlePlay(this);
 
     }
@@ -142,15 +149,7 @@ public class Bullet : Projectile, IDeflectable
         _timeOut = _lifespan;
     }
 
-   /* public override void UnFreeze() // => Move to IDeflectable interface & Change to ReverseDirection() 
-    {
-        base.UnFreeze();
-        if (!HasState(IsFrozen)) { return; }
-
-        RemoveFromJob();
-        _projectileEventManager.Deflected(ProjectileKickType.ReFire);
-        //_bulletEventManager.ReverseDirection();
-    }*/
+   
 
     protected override void RemoveFromJob()
     {
@@ -186,9 +185,4 @@ public class Bullet : Projectile, IDeflectable
         _projectileEventManager.Deflected(type);
     }
 
-
-    /*public void FireBack()
-    {
-        throw new System.NotImplementedException();
-    }*/
 }
