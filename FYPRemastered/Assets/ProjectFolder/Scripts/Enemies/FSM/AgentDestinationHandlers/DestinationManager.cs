@@ -200,12 +200,6 @@ public class DestinationManager
     
 
 
-  
-
-
-
-
-
 
     public void StartCarvingRoutine(AIDestinationRequestData destinationRequest)
     {

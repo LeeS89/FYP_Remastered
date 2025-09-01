@@ -50,6 +50,7 @@ public class BulletVFX : ComponentEvents
 
     }
 
+
     public override void InitialzeLocalPools()
     {
         _request = new ResourceRequest();
@@ -181,7 +182,7 @@ public class BulletVFX : ComponentEvents
         }
     }*/
 
-    private bool _justActivated = false;
+   
 
     void OnEnable()
     {
@@ -191,18 +192,5 @@ public class BulletVFX : ComponentEvents
         //_justActivated = true;
     }
 
-    void LateUpdate()
-    {
-        /*if (_justActivated)
-        {
-            //particleMove.Play(true);
-            particleMove.transform.localPosition = Vector3.zero;
-            _justActivated = false;
-        }*/
-    }
-    /* private void OnDestroy()
-     {
-         BulletBase bullet = GetComponentInParent<BulletBase>();
-         _particleManager.Removebullet(bullet);
-     }*/
+   
 }

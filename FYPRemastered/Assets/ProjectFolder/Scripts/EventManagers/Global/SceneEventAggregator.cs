@@ -31,6 +31,10 @@ public class SceneEventAggregator : MonoBehaviour
     public event Action<SceneResources> OnDependancyAdded;
     public event Func<Type, bool> OnCheckDependencyExists;
 
+    //NEW AI
+    //public event Action<T> OnAIResourceRequest;
+    // END NEW AI
+
     public void SceneStarted()
     {
         OnSceneStarted?.Invoke();
