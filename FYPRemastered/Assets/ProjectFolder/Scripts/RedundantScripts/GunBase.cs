@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
+[Obsolete]
 public class GunBase //: IRangedWeapon
 {
     /// <summary>
@@ -10,7 +11,7 @@ public class GunBase //: IRangedWeapon
     /// </summary>
     ///  [Header("Bullet Params")]
     private Transform _bulletSpawnPoint;
-    private PoolManager _bulletPool;
+  //  private PoolManager _bulletPool;
     private Transform _target;
     private int _clipCapacity;
     private int _clipCount;
@@ -36,13 +37,13 @@ public class GunBase //: IRangedWeapon
     #region Constructors
   
 
-    public GunBase(Transform bulletSpawnPoint, Transform target, EventManager eventManager, GameObject gunOwner, PoolManager bulletPool, int clipCapacity)
+    public GunBase(Transform bulletSpawnPoint, Transform target, EventManager eventManager, GameObject gunOwner, /*PoolManager bulletPool,*/ int clipCapacity)
     {
         _bulletSpawnPoint = bulletSpawnPoint;
         _target = target;
         _eventManager = eventManager;
         _owner = gunOwner;
-        _bulletPool = bulletPool;
+     //   _bulletPool = bulletPool;
         _clipCapacity = clipCapacity;
         _clipCount = clipCapacity;
     }
@@ -120,12 +121,12 @@ public class GunBase //: IRangedWeapon
             Vector3 _directionToTarget = TargetingUtility.GetDirectionToTarget(_target, _bulletSpawnPoint, true);
             Quaternion bulletRotation = Quaternion.LookRotation(_directionToTarget);
 
-            GameObject obj = _bulletPool.GetFromPool(_bulletSpawnPoint.position, bulletRotation);
+           // GameObject obj = _bulletPool.GetFromPool(_bulletSpawnPoint.position, bulletRotation);
 
-            Projectile bullet = obj.GetComponentInChildren<Projectile>();
+           // Projectile bullet = obj.GetComponentInChildren<Projectile>();
             //bullet.Owner = _owner;
-            //obj.SetActive(true);
-            bullet.LaunchPoolable(_owner);
+      //    //obj.SetActive(true);
+          //  bullet.LaunchPoolable(_owner);
         }
 
         if(_clipCount == 0)
@@ -143,7 +144,7 @@ public class GunBase //: IRangedWeapon
         _owner = null;
         _target = null;
         _bulletSpawnPoint = null;
-        _bulletPool = null;
+      //  _bulletPool = null;
         _eventManager = null;
         /* _hasAimAnimationCompleted = null;
          _waitUntilAimIsReady = null;*/

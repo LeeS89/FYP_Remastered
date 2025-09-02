@@ -1,156 +1,156 @@
-using UnityEngine.Pool;
-using UnityEngine;
+using System;
 using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Pool;
 
-
-
-public class PoolManager
+public sealed class PoolManager<T> : IPoolManager where T : UnityEngine.Object
 {
-    private int _defaultSize;
-    private int _maxPoolSize;
-  
-    private static GameObject _poolContainer;
-    private GameObject _prefab;
-    private ObjectPool<GameObject> _gameObjectPool;
+    private ObjectPool<T> _pool;
+    private int _maxSize;
+    private Transform _poolContainer;
+    private T _prefab;
+    private Dictionary<T,Transform> _transformCache = new();
+    private BulletResources _manager;
 
-    public PoolManager(GameObject prefab, int defaultSize = 20, int maxSize = 50)
+    public Type ItemType => typeof(T);
+
+ 
+    ///////  NEW CONSTRUCTOR
+    public PoolManager(BulletResources manager, T prefab, int defaultCapacity = 10, int maxSize = 50)
     {
-        this._defaultSize = defaultSize;
-        this._maxPoolSize = maxSize;
-        this._prefab = prefab;
+        _prefab = prefab ?? throw new ArgumentNullException(nameof(prefab));
+        _poolContainer = new GameObject($"PoolContainer_{prefab.name}").transform;
+        _manager = manager ?? throw new ArgumentNullException(nameof(manager));
+        _maxSize = maxSize;
 
-        if (_poolContainer == null)
-        {
-            _poolContainer = new GameObject("PoolContainer");
-        }
-
-        _gameObjectPool = new ObjectPool<GameObject>(
-            CreatePooledGameObject,
-            OnGetFromPool,
-            OnReturnToPool,
-            OnDestroyPooledObject,
+        _pool = new ObjectPool<T>(
+            CreatePooledObject,
+            OnGet,
+            item => 
+            {
+                if (item is GameObject go)
+                {
+                    go.SetActive(false);
+                }
+                else if (item is Component c)
+                {
+                    c.gameObject.SetActive(false);
+                }
+            }, 
+            null, 
             false,
-            _defaultSize,
-            _maxPoolSize
-        );
+            defaultCapacity,
+            maxSize);
     }
 
-    private GameObject CreatePooledGameObject()
+    private void OnGet(T item)
     {
-        GameObject newObject = GameObject.Instantiate(_prefab);
-
-        IPoolable poolable = newObject.GetComponentInChildren<IPoolable>();
-        if (poolable != null)
+        if (typeof(T) == typeof(AudioSource))
         {
-            //poolable.SetParentPool(this);
-        }
-        newObject.transform.root.parent = _poolContainer.transform;
-       
-        return newObject;
-    }
-
-    public void PrewarmPool(int count)
-    {
-        int prewarmCount = Mathf.Min(count, _maxPoolSize);
-        List<GameObject> tempList = new List<GameObject>();
-
-
-        for (int i = 0; i < prewarmCount; i++)
+            var audio = item as AudioSource;
+            audio.gameObject.SetActive(false);
+            _manager.SchedulePoolObjectRelease(this, audio, audio.clip.length);
+        }else if(typeof(T) == typeof(ParticleSystem))
         {
-            GameObject obj = _gameObjectPool.Get();
-            tempList.Add(obj);
-        }
-
-        foreach (GameObject obj in tempList)
+            var ps = item as ParticleSystem;
+            ps.gameObject.SetActive(false);
+            _manager.SchedulePoolObjectRelease(this, ps, ps.main.duration);
+        }else if(typeof(T) == typeof(GameObject))
         {
-            _gameObjectPool.Release(obj);
+            var go = item as GameObject;
+            go.SetActive(false);
+        }
+    }
+
+    private T CreatePooledObject()
+    {
+        var inst = UnityEngine.Object.Instantiate(_prefab, _poolContainer, false);
+
+        if (typeof(T) == typeof(AudioSource))
+        {
+            var a = inst as AudioSource;
+            a.playOnAwake = false;
+
+            _transformCache[inst] = a.transform;
+        }
+        else if (typeof(T) == typeof(ParticleSystem))
+        {
+            var p = inst as ParticleSystem;
+            var main = p.main;
+            main.playOnAwake = false;
+            _transformCache[inst] = p.transform;
+
+        }
+        else if (typeof(T) == typeof(GameObject))
+        {
+            var go = inst as GameObject;
+            var poolable = go.GetComponentInChildren<IPoolable>();
+            if (poolable != null)
+                poolable.SetParentPool(this);
+           /* var eventManager = go.GetComponentInChildren<EventManager>();
+            if (eventManager != null)
+            {
+                eventManager.BindComponentsToEvents();
+            }*/
+
+            _transformCache[inst] = go.transform;
         }
 
-        tempList.Clear();
-        tempList = null;
+        return inst;
     }
 
-    public GameObject GetFromPool(Vector3 position, Quaternion rotation)
+    ////// End of NEW CONSTRUCTOR
+
+
+
+    private T Get(Vector3 position, Quaternion rotation)
     {
-        GameObject obj = _gameObjectPool.Get();
-        obj.transform.position = position;
-        obj.transform.rotation = rotation;
-        obj.SetActive(true);
-        return obj;
+        var item = _pool.Get();
+
+        var tr = _transformCache[item];
+
+        GameObject go = item switch
+        {
+            Component c => c.gameObject,
+            GameObject g => g,
+            _ => throw new InvalidOperationException(
+                     $"{typeof(T)} is not a Component or GameObject")
+        };
+
+        tr.SetPositionAndRotation(position, rotation);
+        go.SetActive(true);
+
+        return item;
+    }
+  
+
+    public void PreWarmPool(int count)
+    {
+        int preWarmCount = Mathf.Min(count, _maxSize);
+        List<T> tempList = new List<T>();
+        for (int i = 0; i < preWarmCount; i++)
+        {
+            var item = _pool.Get();
+            tempList.Add(item);
+        }
+       // Debug.LogError("Pool Count: "+tempList.Count);
+        foreach (var item in tempList)
+        {
+            _pool.Release(item);
+        }
+
     }
 
-    private void OnGetFromPool(GameObject obj)
+    UnityEngine.Object IPoolManager.Get(Vector3 position, Quaternion rotation)
     {
-        obj.SetActive(false); ///// SET TO TRUE
+        return Get(position, rotation);
     }
 
-    // Common logic for prewarming the pool (retrieving and returning objects)
-    /* public void PrewarmPool(ObjectPool<GameObject> pool, int count)
-     {
-         int prewarmCount = Mathf.Min(count, _maxPoolSize);
-         List<GameObject> tempList = new List<GameObject>();
-
-         Debug.LogError("PreWarm count is: " + prewarmCount);
-         for (int i = 0; i < prewarmCount; i++)
-         {
-             GameObject obj = pool.Get();
-             tempList.Add(obj);
-         }
-
-         foreach (GameObject obj in tempList)
-         {
-             pool.Release(obj);
-         }
-
-         tempList.Clear();
-     }*/
-
-    // Common methods for getting and returning objects
-    /*public GameObject GetObjectFromPool(ObjectPool<GameObject> pool, Vector3 position, Quaternion rotation)
+    void IPoolManager.Release(UnityEngine.Object obj)
     {
-        GameObject obj = pool.Get();
-        obj.transform.position = position;
-        obj.transform.rotation = rotation;
-        return obj;
-    }*/
-
-    /* public void PrewarmPool(PoolContents pool, int count)
-     {
-         switch (pool)
-         {
-             case PoolContents.Object:
-                 PrewarmObjectPool(count);
-                 break;
-
-         }
-     }*/
-
-    public void ReleaseObjectToPool(GameObject obj)
-    {
-        _gameObjectPool.Release(obj);
+        if(obj is T t) _pool.Release(t);
+        else throw new InvalidOperationException(
+            $"Cannot release object of type {obj.GetType()} to pool of type {typeof(T)}");
+        
     }
-
-    private void OnReturnToPool(GameObject obj)
-    {
-        obj.SetActive(false); // Deactivate the GameObject
-    }
-
-   
-    private void OnDestroyPooledObject(GameObject obj)
-    {
-        GameObject.Destroy(obj); // Destroy the GameObject when it's no longer needed
-    }
-
-    /* public GameObject GetGameObject(Vector3 position, Quaternion rotation)
-     {
-         return GetObjectFromPool(position, rotation); // Get a GameObject from the pool
-     }*/
-
-   
-
-    /* public void ReleaseToPool(GameObject obj)
-     {
-         ReleaseObjectToPool(_gameObjectPool, obj); // Release a GameObject back to the pool
-     }*/
-
 }

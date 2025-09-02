@@ -15,13 +15,11 @@ public class BulletResources : SceneResources, IUpdateableResource
     private GameObject _normalHitPrefab;
     public GameObject DeflectAudioSourcePrefabGO { get; private set; }
 
-   /* private PoolManager _bulletPool;
-    private PoolManager _deflectAudioPool;
-    private PoolManager _hitParticlePool;*/
+  
 
-    private PoolManagerNew<GameObject> _bulletPool;
-    private PoolManagerNew<AudioSource> _deflectAudioPool;
-    private PoolManagerNew<ParticleSystem> _hitParticlePool;
+    private PoolManager<GameObject> _bulletPool;
+    private PoolManager<AudioSource> _deflectAudioPool;
+    private PoolManager<ParticleSystem> _hitParticlePool;
 
 
     public override async Task LoadResources()
@@ -50,7 +48,9 @@ public class BulletResources : SceneResources, IUpdateableResource
                 Debug.LogError("Failed to load the normal bullet prefab from Addressables.");
             }
 
-            SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;
+           // SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;
+            SceneEventAggregator.Instance.OnResourceRequested += ResourcesRequested;
+
             SceneEventAggregator.Instance.OnResourceReleased += ResourceReleased;
         }
         catch(Exception e)
@@ -116,7 +116,7 @@ public class BulletResources : SceneResources, IUpdateableResource
         if (_normalHitPrefab != null)
         {
             //_hitParticlePool = this.CreatePool<ParticleSystem>(_normalHitPrefab.GetComponent<ParticleSystem>());
-            _hitParticlePool = new PoolManagerNew<ParticleSystem>(this, _normalHitPrefab.GetComponent<ParticleSystem>());
+            _hitParticlePool = new PoolManager<ParticleSystem>(this, _normalHitPrefab.GetComponent<ParticleSystem>());
             _hitParticlePool.PreWarmPool(40);
             /*_hitParticlePool = new PoolManager(_normalHitPrefab, 40, 80);
             _hitParticlePool.PrewarmPool(5);*/
@@ -125,7 +125,7 @@ public class BulletResources : SceneResources, IUpdateableResource
         if (DeflectAudioSourcePrefabGO != null)
         {
             //_deflectAudioPool = this.CreatePool<AudioSource>(DeflectAudioSourcePrefabGO.GetComponent<AudioSource>());
-            _deflectAudioPool = new PoolManagerNew<AudioSource>(this, DeflectAudioSourcePrefabGO.GetComponent<AudioSource>());
+            _deflectAudioPool = new PoolManager<AudioSource>(this, DeflectAudioSourcePrefabGO.GetComponent<AudioSource>());
             _deflectAudioPool.PreWarmPool(20);
             /*_deflectAudioPool = new PoolManager(DeflectAudioSourcePrefabGO, 5, 10);
             _deflectAudioPool.PrewarmPool(5);*/
@@ -134,7 +134,7 @@ public class BulletResources : SceneResources, IUpdateableResource
         if (_normalBulletPrefab != null)
         {
             //_bulletPool = this.CreatePool<GameObject>(_normalBulletPrefab);
-            _bulletPool = new PoolManagerNew<GameObject>(this, _normalBulletPrefab);
+            _bulletPool = new PoolManager<GameObject>(this, _normalBulletPrefab);
             //_bulletPool = new PoolManager(_normalBulletPrefab, 40, 80);
             _bulletPool.PreWarmPool(30);
         }
@@ -142,6 +142,46 @@ public class BulletResources : SceneResources, IUpdateableResource
        
     }
 
+    protected override void ResourcesRequested(in ResourceRequests request)
+    {
+
+        if (request.PoolType == PoolResourceType.None) return;
+
+        IPoolManager pool = request.PoolType switch
+        {
+            PoolResourceType.NormalBulletPool => _bulletPool,
+            PoolResourceType.BasicHitParticlePool => _hitParticlePool,
+            PoolResourceType.DeflectAudioPool => _deflectAudioPool,
+#if UNITY_EDITOR
+            _ => throw new ArgumentOutOfRangeException(nameof(request.PoolType), request.PoolType, null)
+#else
+            _ => null
+#endif
+        };
+
+        request.PoolCallback?.Invoke(request.PoolType, pool);
+
+       /* switch (request.PoolType)
+        {
+            case PoolResourceType.NormalBulletPool:
+                pool = _bulletPool;
+                break;
+            case PoolResourceType.BasicHitParticlePool:
+                pool = _hitParticlePool;
+                break;
+            case PoolResourceType.DeflectAudioPool:
+                pool = _deflectAudioPool;
+                break;
+            default:
+#if UNITY_EDITOR
+                Debug.LogWarning("Invalid resource type requested.");
+#endif
+                break;
+        }*/
+        
+    }
+
+    [Obsolete]
     protected override void ResourceRequested(ResourceRequest request)
     {
         if(request.ResourceType == PoolResourceType.None) { return; }

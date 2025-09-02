@@ -16,6 +16,7 @@ public class AgentRangedWeapon : RangedWeaponBase
         _gunOwner = gunOwner;
         _clipCapacity = clipCapacity;
         _clipCount = _clipCapacity;
+        PoolRequestCallback = SetBulletPool;
     }
 
   
@@ -41,6 +42,7 @@ public class AgentRangedWeapon : RangedWeaponBase
     public override void OnInstanceDestroyed()
     {
         _eventManager = null;
+        PoolRequestCallback = null;
         _target = null;
         base.OnInstanceDestroyed();
     }

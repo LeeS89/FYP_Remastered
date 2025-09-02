@@ -7,7 +7,7 @@ public class BaseAbilities : ComponentEvents
     protected Transform _targetTransform;
     protected GameObject _owner;
     protected IPoolManager _bulletPoolManager;
-    protected ResourceRequest _request;
+  //  protected ResourceRequest _request;
     protected bool _ownerHasDied = false;
     protected bool _isReloading = false;
     [SerializeField] protected int _clipCapacity = 5;
@@ -33,7 +33,7 @@ public class BaseAbilities : ComponentEvents
     public override void RegisterLocalEvents(EventManager eventManager)
     {
         base.RegisterLocalEvents(eventManager);
-        _request = new ResourceRequest();
+       // _request = new ResourceRequest();
         /*_eventManager.OnOutOfAmmo += OutOfAmmo;
         _eventManager.OnReload += ReloadingGun;*/
         //_eventManager.OnSetupGun += GunSetup;
@@ -41,7 +41,7 @@ public class BaseAbilities : ComponentEvents
 
    
 
-    public virtual void GunSetup(GameObject gunOwner, EventManager eventManager, Transform bulletSpawnLocaiton, int clipCapacity, Transform target = null)
+   /* public virtual void GunSetup(GameObject gunOwner, EventManager eventManager, Transform bulletSpawnLocaiton, int clipCapacity, Transform target = null)
     {
         _owner = gunOwner;
         BulletSpawnLocation = bulletSpawnLocaiton;
@@ -58,7 +58,7 @@ public class BaseAbilities : ComponentEvents
         SceneEventAggregator.Instance.RequestResource(_request);
 
        
-    }
+    }*/
 
     protected virtual void ShootGun()
     {

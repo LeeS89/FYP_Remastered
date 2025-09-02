@@ -11,7 +11,7 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
 
     [SerializeField] protected List<EventManager> _eventManagers;
   
-    protected PoolManager _deflectAudioPool;
+  
   
     protected virtual void Awake()
     {
@@ -112,8 +112,6 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
         OnClosestPointToPlayerJobComplete?.Invoke(pointIndex);
     }
 
-    [Obsolete]
-    public virtual void GetImpactParticlePool(ref PoolManager manager) { }
 
     //public virtual void GetBulletPool(ref PoolManager manager) { }
     #endregion

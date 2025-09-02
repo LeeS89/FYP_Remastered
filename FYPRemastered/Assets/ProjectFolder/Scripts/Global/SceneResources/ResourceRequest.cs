@@ -1,7 +1,7 @@
 
 using System;
 
-
+[Obsolete]
 public class ResourceRequest
 {  
     public PoolResourceType ResourceType { get; set; }

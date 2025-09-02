@@ -1,7 +1,9 @@
+using Oculus.Platform.Models;
 using System;
+using System.Collections;
 using UnityEngine;
-using Random = UnityEngine.Random;
 using UnityEngine.AI;
+using Random = UnityEngine.Random;
 
 
 public sealed class EnemyFSMController : FSMControllerBase
@@ -224,7 +226,8 @@ public sealed class EnemyFSMController : FSMControllerBase
                 ChangeState(_stationary);
                 return;
         }
-        _resourceRequest.carvingCallback = () =>
+        StartCoroutine(UnCarveAndSetDestination(destination, stoppingDistance));
+      /*  _resourceRequest.carvingCallback = () =>
         {
             if (_obstacle.enabled)
             {
@@ -244,10 +247,34 @@ public sealed class EnemyFSMController : FSMControllerBase
             _agent.SetDestination(destination);
             _agentEventManager.DestinationApplied();
         };
-        _destinationManager.StartCarvingRoutine(_resourceRequest);
-
+        _destinationManager.StartCarvingRoutine(_resourceRequest);*/
 
     }
+
+
+    private IEnumerator UnCarveAndSetDestination(Vector3 dest, int stoppingDistance)
+    {
+        if (_obstacle.enabled)
+        {
+            _obstacle.enabled = false;
+        }
+        yield return null;
+
+        if (!_agent.enabled)
+        {
+            ToggleAgent(true);
+
+        }
+
+        _agent.stoppingDistance = stoppingDistance;
+        _agent.SetDestination(dest);
+        _agentEventManager.DestinationApplied();
+    }
+
+
+
+
+
 
     public override void ResetFSM(EnemyState contextState = null)
     {

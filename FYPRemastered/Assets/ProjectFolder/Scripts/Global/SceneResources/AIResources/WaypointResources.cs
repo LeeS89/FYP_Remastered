@@ -49,7 +49,9 @@ public class WaypointResources : SceneResources
 
             NotifyClassDependancies();
             // Subscribe to the resource requested event
-            SceneEventAggregator.Instance.OnAIResourceRequested += AIResourceRequested;
+            // ResourceRequestBus<WaypointBlockRequest>.On += WaypointsRequested; /// NEW WAY to test
+            SceneEventAggregator.Instance.OnResourceRequested += ResourcesRequested;
+           // SceneEventAggregator.Instance.OnAIResourceRequested += AIResourceRequested; /////// CURRENT WAY
             SceneEventAggregator.Instance.OnResourceReleased += ResourceReleased;
         }
         catch (Exception e)
@@ -93,6 +95,29 @@ public class WaypointResources : SceneResources
         SceneEventAggregator.Instance.AddDependancies(dependancies);*/
     }
 
+    protected override void ResourcesRequested(in ResourceRequests request)
+    {
+        if (request.AIResourceType != AIResourceType.WaypointBlock) return;
+
+        if(_waypointBlockData == null)
+        {
+            Debug.LogWarning("No Waypoint data exists in the scene, please load the correct SO");
+            request.WaypointCallback?.Invoke(null);
+        }
+
+        foreach (var blockData in _waypointBlockData.blockDataArray)
+        {
+            if (!blockData._inUse)
+            {
+                blockData._inUse = true;
+                request.WaypointCallback?.Invoke(blockData);
+                return;
+            }
+        }
+  
+    }
+
+    [Obsolete("Use ResourcesRequested instead")]
     protected override void AIResourceRequested(AIDestinationRequestData request)
     {
         if(request.resourceType != AIResourceType.WaypointBlock) { return; }

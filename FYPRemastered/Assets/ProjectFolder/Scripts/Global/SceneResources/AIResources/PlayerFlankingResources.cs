@@ -20,7 +20,7 @@ public class PlayerFlankingResources : SceneResources, IUpdateableResource
         try
         {
             playerCollider = GameManager.Instance.GetPlayerCollider(PlayerPart.DefenceCollider);
-            
+
             // NotifyDependancies(); // => Needs Closest Point Job
             // Load the asset from Addressables
             //var flankPointHandle = Addressables.LoadAssetAsync<ScriptableObject>("SamplePointDataSO");
@@ -38,7 +38,8 @@ public class PlayerFlankingResources : SceneResources, IUpdateableResource
                 if (_flankPointDataSO != null)
                 {
                     SceneEventAggregator.Instance.OnClosestFlankPointToPlayerJobComplete += SetNearestIndexToPlayer; // => Dont forget to unsubscribe
-                    SceneEventAggregator.Instance.OnAIResourceRequested += AIResourceRequested; // => Dont forget to unsubscribe
+                    SceneEventAggregator.Instance.OnResourceRequested += ResourcesRequested;
+                  //  SceneEventAggregator.Instance.OnAIResourceRequested += AIResourceRequested; // => Dont forget to unsubscribe
                     _savedPoints = new List<FlankPointData>(_flankPointDataSO.savedPoints);
                     //SceneEventAggregator.Instance.OnFlankPointsRequested += ResourceRequested; // => Dont forget to unsubscribe
                     //DeserializeSavedPoints(); // Disabled for new approach
@@ -59,11 +60,11 @@ public class PlayerFlankingResources : SceneResources, IUpdateableResource
             /*SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;*/
             //SceneEventAggregator.Instance.OnResourceReleased += ResourceReleased;
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Error loading player flanking resources: {e.Message}");
         }
-     
+
     }
 
     public override async Task UnLoadResources()
@@ -87,6 +88,7 @@ public class PlayerFlankingResources : SceneResources, IUpdateableResource
         await Task.CompletedTask;
     }
 
+    [Obsolete]
     private void DeserializeSavedPoints()
     {
         foreach (var point in _flankPointDataSO.savedPoints)
@@ -99,8 +101,8 @@ public class PlayerFlankingResources : SceneResources, IUpdateableResource
             }
         }
 
-        _savedPoints = new List<FlankPointData>(_flankPointDataSO.savedPoints); 
-       
+        _savedPoints = new List<FlankPointData>(_flankPointDataSO.savedPoints);
+
     }
 
     protected override void NotifyClassDependancies()
@@ -109,31 +111,47 @@ public class PlayerFlankingResources : SceneResources, IUpdateableResource
 
         if (exists) { return; } // Already exists, no need to add again
 
-        SceneEventAggregator.Instance.AddDependancy(new ClosestPointToPlayerJob(_flankPointDataSO)); 
+        SceneEventAggregator.Instance.AddDependancy(new ClosestPointToPlayerJob(_flankPointDataSO));
 
-       /* List<Type> dependancies = new()
-        {
-            typeof(ClosestPointToPlayerJob)
-        };
-        SceneEventAggregator.Instance.AddDependancies(dependancies);*/
     }
 
     private void SetNearestIndexToPlayer(int nearestPointIndex)
     {
-        
+
         _nearestPointToPlayer = nearestPointIndex;
     }
 
-    protected override void AIResourceRequested(AIDestinationRequestData request) 
+    protected override void ResourcesRequested(in ResourceRequests request)
     {
-        if(request.resourceType != AIResourceType.FlankPointCandidates 
+        AIResourceType type = request.AIResourceType;
+
+        switch (type)
+        {
+            case AIResourceType.FlankPointCandidates:
+                ProcessFlankPointCandidatesRequest(in request);
+                break;
+            case AIResourceType.FlankPointEvaluationMasks:
+                ProcessFlankPointEvaluationMaskRequest(in request);
+                break;
+            default:
+#if UNITY_EDITOR
+                Debug.Log("Different type of resource requested, return early");
+#endif
+                return;
+        }
+    }
+
+    [Obsolete]
+    protected override void AIResourceRequested(AIDestinationRequestData request)
+    {
+        if (request.resourceType != AIResourceType.FlankPointCandidates
             && request.resourceType != AIResourceType.FlankPointEvaluationMasks) { return; }
 
-        
-        if(request.resourceType == AIResourceType.FlankPointCandidates)
+
+        if (request.resourceType == AIResourceType.FlankPointCandidates)
         {
             ProcessFlankPointCandidateRequest(request);
-        }else if(request.resourceType == AIResourceType.FlankPointEvaluationMasks)
+        } else if (request.resourceType == AIResourceType.FlankPointEvaluationMasks)
         {
             ProcessFlankPointEvaluationMasksRequest(request);
         }
@@ -141,9 +159,60 @@ public class PlayerFlankingResources : SceneResources, IUpdateableResource
         {
             Debug.LogError("Incorrect resource type provided, please provide either AIResourceType.FlankPointCandidates or AIResourceType.FlankPointEvaluationMasks");
         }
-        
+
     }
 
+    private void ProcessFlankPointEvaluationMaskRequest(in ResourceRequests request)
+    {
+        LayerMask blockingMask = _flankPointDataSO.flankBlockingMask;
+        LayerMask targetMask = _flankPointDataSO.flankTargetMask;
+        LayerMask secondaryTargetMask = _flankPointDataSO.flankSecondaryTargetMask;
+        request.FlankPointTargetAndBlockingMasksCallback?.Invoke(blockingMask, targetMask, secondaryTargetMask);
+    }
+
+    private void ProcessFlankPointCandidatesRequest(in ResourceRequests request)
+    {
+        int step = request.FlankCandidateSteps;
+        var buffer = request.FlankCandidates;
+        if (_savedPoints == null || _savedPoints.Count == 0 ||
+            _nearestPointToPlayer < 0 || _nearestPointToPlayer >= _savedPoints.Count)
+        {
+            request.FlankCallback?.Invoke(false);
+            return;
+        }
+
+        FlankPointData playerPoint = _savedPoints[_nearestPointToPlayer];
+
+        StepEntry stepEntry = null;
+        for (int i = 0; i < playerPoint.stepLinks.Count; i++)
+        {
+            if (playerPoint.stepLinks[i].step == step)
+            {
+                stepEntry = playerPoint.stepLinks[i];
+                break;
+            }
+        }
+
+        if (stepEntry != null)
+        {
+            foreach (int index in stepEntry.reachableIndices)
+            {
+                if (index >= 0 && index < _savedPoints.Count)
+                {
+                    var point = _savedPoints[index];
+                    if (!point.inUse)
+                    {
+                        buffer.Add(point);
+                    }
+
+                }
+            }
+        }
+
+        request.FlankCallback?.Invoke(buffer.Count > 0);
+    }
+
+    [Obsolete]
     private void ProcessFlankPointEvaluationMasksRequest(AIDestinationRequestData request)
     {
         LayerMask blockingMask = _flankPointDataSO.flankBlockingMask;
@@ -153,6 +222,8 @@ public class PlayerFlankingResources : SceneResources, IUpdateableResource
         request.flankPointEvaluationMasksRetrievalCallback?.Invoke(blockingMask, targetMask, secondaryTargetMask);
     }
 
+
+    [Obsolete]
     private void ProcessFlankPointCandidateRequest(AIDestinationRequestData request)
     {
         int step = request.numSteps;

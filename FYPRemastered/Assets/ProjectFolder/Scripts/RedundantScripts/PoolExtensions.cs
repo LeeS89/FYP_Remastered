@@ -1,7 +1,8 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
-
+[Obsolete]
 public static class PoolExtensions
 {
     private static WaitForSeconds _delayAudio;
@@ -22,17 +23,17 @@ public static class PoolExtensions
 
     }*/
 
-    private static IEnumerator ReturnToPoolAfterDelay(PoolManager pool, GameObject obj, float delay, WaitForSeconds waitDelay)
+    private static IEnumerator ReturnToPoolAfterDelay(/*PoolManager pool, */GameObject obj, float delay, WaitForSeconds waitDelay)
     {
         yield return waitDelay;
        // yield return new WaitForSeconds(delay);
-        pool.ReleaseObjectToPool(obj);
+        //pool.ReleaseObjectToPool(obj);
     }
 
-    public static void GetAndPlay(this PoolManager pool, Vector3 position, Quaternion rotation)
+    public static void GetAndPlay(/*this PoolManager pool,*/ Vector3 position, Quaternion rotation)
     {
-        var go = pool.GetFromPool(position, rotation);
-        AudioSource audio = go.GetComponent<AudioSource>();
+       // var go = pool.GetFromPool(position, rotation);
+      /*  AudioSource audio = go.GetComponent<AudioSource>();
         ParticleSystem particleSystem = go.GetComponent<ParticleSystem>();
 
         if (audio != null)
@@ -45,7 +46,7 @@ public static class PoolExtensions
         {
             if (_delayParticle == null) { _delayParticle = new WaitForSeconds(particleSystem.main.duration); }
             CoroutineRunner.Instance.StartCoroutine(ReturnToPoolAfterDelay(pool, go, particleSystem.main.duration, _delayParticle));
-        }
+        }*/
 
     }
 

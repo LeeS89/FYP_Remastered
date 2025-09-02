@@ -8,7 +8,7 @@ public class Gun
 {
     [Header("Bullet Params")]
     private Transform _bulletSpawnPoint;
-    private PoolManager _poolManager;
+  //  private PoolManager _poolManager;
     private Transform _target;
     
     private EnemyEventManager _enemyEventManager;
@@ -83,7 +83,7 @@ public class Gun
             //_poolManager = pool;
             _request.ResourceType = PoolResourceType.None; // Reset resource type after assignment
         };
-        SceneEventAggregator.Instance.RequestResource(_request);
+      //  SceneEventAggregator.Instance.RequestResource(_request);
         //BaseSceneManager._instance.GetBulletPool(ref _poolManager);
     }
 
@@ -262,12 +262,12 @@ public class Gun
         Vector3 _directionToTarget = TargetingUtility.GetDirectionToTarget(_target, _bulletSpawnPoint, true);
         Quaternion bulletRotation = Quaternion.LookRotation(_directionToTarget);
 
-        GameObject obj = _poolManager.GetFromPool(_bulletSpawnPoint.position, bulletRotation);
-
-        Projectile bullet = obj.GetComponentInChildren<Projectile>();
+        //GameObject obj = _poolManager.GetFromPool(_bulletSpawnPoint.position, bulletRotation);
+//
+       // Projectile bullet = obj.GetComponentInChildren<Projectile>();
         //bullet.Owner = _owner;
         //obj.SetActive(true);
-        bullet.LaunchPoolable(_owner);
+       // bullet.LaunchPoolable(_owner);
 
     }
 
@@ -288,7 +288,7 @@ public class Gun
         _enemyEventManager.OnReload -= Reload;
        /* GameManager.OnPlayerDeathStatusChanged -= PlayerHasDied;
         GameManager.OnPlayerRespawn -= PlayerHasRespawned;*/
-        _poolManager = null;
+       // _poolManager = null;
         _enemyEventManager = null;
         _hasAimAnimationCompleted = null;
         _waitUntilAimIsReady = null;

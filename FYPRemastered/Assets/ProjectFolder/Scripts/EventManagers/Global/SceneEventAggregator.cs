@@ -24,27 +24,31 @@ public class SceneEventAggregator : MonoBehaviour
     #region Global Scene Events
     public event Action OnSceneStarted;
     public event Action OnSceneEnded;
-    public event Action<ResourceRequest> OnResourceRequested;
-    public event Action<AIDestinationRequestData> OnAIResourceRequested;
+   // public event Action<ResourceRequest> OnResourceRequested;
+   // public event Action<AIDestinationRequestData> OnAIResourceRequested;
     public event Action<ResourceRequest> OnResourceReleased;
     //public event Action<List<Type>> OnDependanciesAdded;
     public event Action<SceneResources> OnDependancyAdded;
     public event Func<Type, bool> OnCheckDependencyExists;
 
+    // new way
+    public delegate void ResourcesRequestedHandler(in ResourceRequests request);
+    public event ResourcesRequestedHandler OnResourceRequested;
+   // public event Action<ResourceRequests> OnResourcesRequested;
+
+    public void ResourceRequested(in ResourceRequests request) => OnResourceRequested?.Invoke(request);
+
     //NEW AI
     //public event Action<T> OnAIResourceRequest;
     // END NEW AI
 
-    public void SceneStarted()
-    {
-        OnSceneStarted?.Invoke();
-    }
+    public void SceneStarted() => OnSceneStarted?.Invoke();
 
-    public void SceneEnded()
-    {
-        OnSceneEnded?.Invoke();
-    }
 
+    public void SceneEnded() => OnSceneEnded?.Invoke();
+
+
+   /* [Obsolete("Use RequestingResource instead")]
     public void RequestResource(ResourceRequest request)
     {
         if (request is AIDestinationRequestData aiRequest)
@@ -56,13 +60,10 @@ public class SceneEventAggregator : MonoBehaviour
             OnResourceRequested?.Invoke(request);
         }
            
-    }
+    }*/
 
-    public void ReleaseResource(ResourceRequest request)
-    {
-        
-        OnResourceReleased?.Invoke(request);
-    }
+    public void ReleaseResource(ResourceRequest request) => OnResourceReleased?.Invoke(request);
+
 
     /*public void AddDependancies(List<Type> resourceDependancies)
     {
@@ -76,11 +77,8 @@ public class SceneEventAggregator : MonoBehaviour
         OnDependancyAdded?.Invoke(resource);
     }
 
-    public bool CheckDependancyExists(Type dependency)
-    {
-        
-        return OnCheckDependencyExists?.Invoke(dependency) ?? false;
-    }
+    public bool CheckDependancyExists(Type dependency) => OnCheckDependencyExists?.Invoke(dependency) ?? false;
+
     #endregion
 
 
@@ -140,12 +138,7 @@ public class SceneEventAggregator : MonoBehaviour
     }
     #endregion
 
-    public event Action<AIDestinationRequestData> OnPathRequested;
-
-    public void PathRequested(AIDestinationRequestData request)
-    {
-        OnPathRequested?.Invoke(request);
-    }
+  
 
     #endregion
 }

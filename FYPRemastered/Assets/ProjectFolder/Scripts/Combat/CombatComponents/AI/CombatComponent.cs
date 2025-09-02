@@ -310,13 +310,13 @@ public class CombatComponent : BaseAbilities
         Array.Clear(_meleeResults, 0, _meleeResults.Length);
     }
 
-    public override void GunSetup(GameObject owner, EventManager eventManager, Transform bulletSpawnLocaiton, int clipCapacity, Transform target)
+   /* public override void GunSetup(GameObject owner, EventManager eventManager, Transform bulletSpawnLocaiton, int clipCapacity, Transform target)
     {
         //_weapon = new WeaponHandlerBase();
 
         _weaponHandler.EquipWeapon(owner, _enemyEventManager , bulletSpawnLocaiton, clipCapacity, target);
         // base.GunSetup(owner, _enemyEventManager, bulletSpawnLocaiton, clipCapacity, target);
-    }
+    }*/
 
 
 

@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 /// <summary>
 /// An extenstion of the Destination manager class
@@ -22,7 +24,7 @@ public class DestinationManagerHelper
     // Flank point variables
     private int _maxFlankingSteps = 0;
     private FlankPointData _currentFlankPoint;
-    private List<FlankPointData> _candidateFlankPointPositions;
+    
     private List<int> _stepsToTry; // Flank point Candidates x steps from the nearest point to the player
     
     private Collider[] _flankCandidateLOSColliders;
@@ -46,6 +48,11 @@ public class DestinationManagerHelper
     // Debug Stuff
     private GameObject _debugCube;
 
+    //NEW STUFF
+    private List<FlankPointData> _candidateFlankPointPositions;
+    private Action<BlockData> _wayPointCallback;
+    private Action<bool> _flankCandidatesCallback;
+
 
     public DestinationManagerHelper(AIDestinationRequestData requestData, Transform owner, int maxflankSteps, GameObject debugCube = null)
     {
@@ -60,15 +67,16 @@ public class DestinationManagerHelper
         _candidatePositions = new List<Vector3>();
         _flankCandidateLOSColliders = GameManager.Instance.GetPlayerTargetPoints();
         _waitUntilResultReceived = new WaitUntil(() => _resultReceived);
-
+        _wayPointCallback = SetWayPoints;
+        _flankCandidatesCallback = OnReceivedFlankPointCandidates;
         GetFlankEvaluationMasks();  
     }
 
     private void GetFlankEvaluationMasks()
     {
-        _requestData.resourceType = AIResourceType.FlankPointEvaluationMasks;
-        _requestData.flankPointEvaluationMasksRetrievalCallback = OnRetrieveFlankPointEvaluationMasks;
-        SceneEventAggregator.Instance.RequestResource(_requestData);
+        var maskRequest = ResourceRequests.FlankPointTargetAndBlockingMasks(AIResourceType.FlankPointEvaluationMasks, OnRetrieveFlankPointEvaluationMasks);
+        SceneEventAggregator.Instance.ResourceRequested(maskRequest);
+   
     }
 
     private void OnRetrieveFlankPointEvaluationMasks(LayerMask blockingMask, LayerMask targetMask, LayerMask secondaryTargetMask)
@@ -149,16 +157,13 @@ public class DestinationManagerHelper
     {
         GetStepsToTry();
 
-        _requestData.resourceType = AIResourceType.FlankPointCandidates;
         foreach (int step in _stepsToTry)
         {
             _resultReceived = false;
-            _requestData.numSteps = step;
 
-            _requestData.FlankPointCandidatesCallback = OnReceivedFlankPointCandidates;
+            var request = ResourceRequests.RequestFlankPoints(AIResourceType.FlankPointCandidates, step, _candidateFlankPointPositions, _flankCandidatesCallback);
 
-
-            SceneEventAggregator.Instance.RequestResource(_requestData);
+            SceneEventAggregator.Instance.ResourceRequested(request);
 
             yield return _waitUntilResultReceived;
         }
@@ -192,9 +197,9 @@ public class DestinationManagerHelper
     {
         _requestData.flankCandidates = _candidateFlankPointPositions;
 
-        _requestData.resourceType = AIResourceType.WaypointBlock;
-        _requestData.waypointCallback = SetWayPoints;
-        SceneEventAggregator.Instance.RequestResource(_requestData);
+        var wpb = ResourceRequests.Waypoints(AIResourceType.WaypointBlock, _wayPointCallback);
+        SceneEventAggregator.Instance.ResourceRequested(in wpb);
+    
     }
 
     private void SetWayPoints(BlockData data)
@@ -340,5 +345,7 @@ public class DestinationManagerHelper
         currentWaypointPair = null;
         _waypointPairs.Clear();
         _waypointPairs = null;
+        _wayPointCallback = null;
+        _flankCandidatesCallback = null;
     }
 }

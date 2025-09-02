@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class BulletVFX : ComponentEvents
@@ -12,18 +13,22 @@ public class BulletVFX : ComponentEvents
     public ParticleSystem particleMove;
 
     private ResourceRequest _request;
+    private Action<PoolResourceType, IPoolManager> PoolRequestCallback;
 
     //public MoonSceneManager _manager;
     public override void RegisterLocalEvents(EventManager eventManager)
     {
         //Debug.LogError("Registering BulletVFX local events");
         _bulletEventManager = eventManager as ProjectileEventManager;
-        
+        PoolRequestCallback = OnPoolReceived;
+
         _particleManager = ParticleManager.instance;
         _bulletEventManager.OnDeflected += PlayDeflectionAudio;
         _bulletEventManager.OnBulletParticlePlay += PlayBulletParticle;
         _bulletEventManager.OnBulletParticleStop += StopBulletParticle;
         _bulletEventManager.OnCollision += SpawnHitParticle;
+
+        
         //_bulletEventManager.OnSpawnHitParticle += SpawnHitParticle;
         /*_request = new ResourceRequest();
        
@@ -53,11 +58,17 @@ public class BulletVFX : ComponentEvents
 
     public override void InitialzeLocalPools()
     {
-        _request = new ResourceRequest();
+
+        var hitParticlePool = ResourceRequests.RequestPool(PoolResourceType.BasicHitParticlePool, PoolRequestCallback);
+        SceneEventAggregator.Instance.ResourceRequested(hitParticlePool);
+
+        var deflectAudioPool = ResourceRequests.RequestPool(PoolResourceType.DeflectAudioPool, PoolRequestCallback);
+        SceneEventAggregator.Instance.ResourceRequested(deflectAudioPool);
+        ///_request = new ResourceRequest();
 
 
-        _request.ResourceType = PoolResourceType.BasicHitParticlePool;
-        _request.poolRequestCallback = OnPoolReceived;
+    //    _request.ResourceType = PoolResourceType.BasicHitParticlePool;
+     //   _request.poolRequestCallback = OnPoolReceived;
         //_request.poolRequestCallback = (pool) =>
         //{
 
@@ -65,15 +76,15 @@ public class BulletVFX : ComponentEvents
 
         //};
 
-        SceneEventAggregator.Instance.RequestResource(_request);
+     //   SceneEventAggregator.Instance.RequestResource(_request);
 
-        _request.ResourceType = PoolResourceType.DeflectAudioPool;
+     //   _request.ResourceType = PoolResourceType.DeflectAudioPool;
         /*  _request.poolRequestCallback = (pool) =>
           {
               _audioPoolManager = pool;
           };*/
 
-        SceneEventAggregator.Instance.RequestResource(_request);
+       // SceneEventAggregator.Instance.RequestResource(_request);
     }
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
@@ -97,11 +108,12 @@ public class BulletVFX : ComponentEvents
         _request = null;
         _particleManager = null;
         _bulletEventManager = null;
+        PoolRequestCallback = null;
     }
 
-    private void OnPoolReceived(IPoolManager pool)
+    private void OnPoolReceived(PoolResourceType type, IPoolManager pool)
     {
-        switch (_request.ResourceType)
+        switch (type)
         {
             case PoolResourceType.BasicHitParticlePool:
                 _particlePoolManager = pool;

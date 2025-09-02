@@ -7,6 +7,7 @@ using UnityEngine.AI;
 /// This class acts as a middle man betweeen AI requesting potential destinations, and Resource classes providing the necessary data via callbacks
 /// to functions from the sending class
 /// </summary>
+[Obsolete]
 public class AIDestinationRequestData : ProjectileResourceRequest
 {
     public AIResourceType resourceType { get; set; }
@@ -28,6 +29,7 @@ public class AIDestinationRequestData : ProjectileResourceRequest
     public NavMeshObstacle obstacle;
 
     public Action<bool> internalCallback; // Callback for internal use, e.g., within the same system or component
+    [Obsolete]
     public Action<bool, Vector3> externalCallback; // Callback for external use, e.g., to notify original caller
     public Action carvingCallback; // Callback for carving operations, if needed
     public Action agentActiveCallback;

@@ -10,6 +10,7 @@ public enum WeaponType
 
 public enum AmmoType
 {
+    None,
     Normal,
     Poison
 }

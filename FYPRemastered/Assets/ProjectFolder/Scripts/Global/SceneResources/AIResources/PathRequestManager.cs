@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -8,36 +9,33 @@ using UnityEngine.AI;
 /// </summary>
 public class PathRequestManager : SceneResources, IUpdateableResource
 {
-    private Queue<AIDestinationRequestData> _pathRequests = new Queue<AIDestinationRequestData>();
+ 
+    private Queue<ResourceRequests> _pathRequestQueue = new Queue<ResourceRequests>();
     private int _maxConcurrentRequests = 5;
 
     public override async Task LoadResources()
     {
-        SceneEventAggregator.Instance.OnPathRequested += AddRequest;
+
+        SceneEventAggregator.Instance.OnResourceRequested += ResourcesRequested;
 
         await Task.CompletedTask;
-        /* SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;
-         SceneEventAggregator.Instance.OnResourceReleased += ResourceReleased;*/
-        // return base.LoadResources();
+       
     }
 
     public void ExecutePathRequests()
     {
         int processed = 0;
 
-        
-
-        while (_pathRequests.Count > 0 && processed < _maxConcurrentRequests)
+        while (_pathRequestQueue.Count > 0 && processed < _maxConcurrentRequests)
         {
-            var request = _pathRequests.Dequeue();
+            var request = _pathRequestQueue.Dequeue();
           
-            bool success = HasClearPathToTarget(request.start, request.end, request.path);
+            bool success = HasClearPathToTarget(request.PathStart, request.PathEnd, request.Path);
 
            
             //Debug.LogError($"Path request from {request.start} to {request.end} success: {success}, please");
             //request.externalCallback?.Invoke(success);
-            request.internalCallback?.Invoke(success);
-
+            request.PathRequestCallback?.Invoke(success);
 
             processed++;
         }
@@ -51,19 +49,19 @@ public class PathRequestManager : SceneResources, IUpdateableResource
         return path.status == NavMeshPathStatus.PathComplete;
     }
 
-    private void AddRequest(AIDestinationRequestData request)
+    protected override void ResourcesRequested(in ResourceRequests request)
     {
-        _pathRequests.Enqueue(request);
+        if (request.AIResourceType != AIResourceType.Path) return;
+        _pathRequestQueue.Enqueue(request);
     }
 
-    public int GetPendingRequestCount()
-    {
-        return _pathRequests.Count;
-    }
+  
+    public int GetPendingRequestCount() => _pathRequestQueue.Count;
+    
 
     public void UpdateResource()
     {
-        if (_pathRequests.Count == 0) { return; }
+        if (_pathRequestQueue.Count == 0) { return; }
 
         ExecutePathRequests();
     }

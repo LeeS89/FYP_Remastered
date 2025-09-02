@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public abstract class RangedWeaponBase : IRangedWeapon
@@ -10,6 +11,7 @@ public abstract class RangedWeaponBase : IRangedWeapon
     protected IPoolManager _bulletPoolManager;
     protected GameObject _gunOwner;
     protected int _clipCount;
+    protected Action<PoolResourceType, IPoolManager> PoolRequestCallback;
 
 
 
@@ -21,29 +23,30 @@ public abstract class RangedWeaponBase : IRangedWeapon
         GetPoolManager(type);
     }
 
-    protected virtual void SetBulletPool(IPoolManager poolManager)
+    protected virtual void SetBulletPool(PoolResourceType type, IPoolManager poolManager)
     {
        _bulletPoolManager = poolManager;
     }
 
     protected virtual void GetPoolManager(AmmoType type)
     {
+        if (type == AmmoType.None) return;
 
-        if (_request != null)
+        PoolResourceType poolType;
+
+        switch (type)
         {
-            switch (type)
-            {
-                case AmmoType.Normal:
-                    _request.ResourceType = PoolResourceType.NormalBulletPool;
-                    break;
-                default:
-                    break;
-            }
-
-            _request.poolRequestCallback = SetBulletPool;
-
-            SceneEventAggregator.Instance.RequestResource(_request);
+            case AmmoType.Normal:
+                poolType = PoolResourceType.NormalBulletPool;
+                break;
+            default:
+                poolType = PoolResourceType.NormalBulletPool;
+                break;
         }
+        var bulletPool = ResourceRequests.RequestPool(poolType, PoolRequestCallback);
+
+        SceneEventAggregator.Instance.ResourceRequested(bulletPool);
+
     }
 
   //  protected virtual void OutOfAmmo() { }
