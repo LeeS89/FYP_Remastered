@@ -1,4 +1,4 @@
-using System;
+/*using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -17,7 +17,7 @@ public class AIDestinationRequestData : ProjectileResourceRequest
 
 
     public int numSteps { get; set; }
-    public Action</*List<Vector3>*/bool> FlankPointCandidatesCallback { get; set; }
+    public Action<*//*List<Vector3>*//*bool> FlankPointCandidatesCallback { get; set; }
     public LayerMask flankTargetMask { get; set; }
     public LayerMask flankBlockingMask { get; set; }
     public Collider[] flankTargetColliders;
@@ -58,3 +58,4 @@ public class AIDestinationRequestData : ProjectileResourceRequest
 
     }
 }
+*/

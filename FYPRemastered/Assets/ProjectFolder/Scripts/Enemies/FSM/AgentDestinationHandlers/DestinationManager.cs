@@ -37,7 +37,7 @@ public class DestinationManager
     // Path Calculation Request callback function and data provided to request
     private NavMeshPath _path;
     private readonly Action<bool, Vector3, AIDestinationType> _onDestinationRequestComplete;
-    private AIDestinationRequestData _destinationRequest;
+   // private AIDestinationRequestData _destinationRequest;
     /////////////////////////////////////////////
 
     /// Helper class which stores and provides Destination candidates
@@ -59,13 +59,13 @@ public class DestinationManager
         _onDestinationRequestComplete = callback;
        
         _waitUntilResultReceived = new WaitUntil(() => _resultReceived);
-        _destinationRequest = new AIDestinationRequestData();
+
         _eventManager.OnDestinationRequested += DestinationRequested;
 
         _destinationQueue = new Queue<AIDestinationType>();
         _pathRequestCallback = PathRequestInternalCallback;
-        _destinationRequest.path = _path;
-        _candidatePointProvider = new DestinationManagerHelper(_destinationRequest, _owner, maxFlankingSteps, testCube);
+    
+        _candidatePointProvider = new DestinationManagerHelper(_owner, maxFlankingSteps, testCube);
         _candidatePointProvider?.InitializeWaypoints();
     }
 
@@ -148,15 +148,10 @@ public class DestinationManager
             _resultReceived = false;
             _isValid = false;
 
-            var pathRequest = ResourceRequests.RequestPath(AIResourceType.Path, LineOfSightUtility.GetClosestPointOnNavMesh(_owner.position), LineOfSightUtility.GetClosestPointOnNavMesh(point), _path, _pathRequestCallback);
-            SceneEventAggregator.Instance.ResourceRequested(pathRequest);
-           /* _destinationRequest.start = LineOfSightUtility.GetClosestPointOnNavMesh(_owner.position);
-            _destinationRequest.end = LineOfSightUtility.GetClosestPointOnNavMesh(point);
-            _destinationRequest.internalCallback = PathRequestInternalCallback;*/
+            this.RequestValidPath(LineOfSightUtility.GetClosestPointOnNavMesh(_owner.position), LineOfSightUtility.GetClosestPointOnNavMesh(point), _path, _pathRequestCallback);
 
-           //SceneEventAggregator.Instance.PathRequested(_destinationRequest);
 
-           yield return _waitUntilResultReceived;
+            yield return _waitUntilResultReceived;
 
             if (destType != _globalDestinationType)
             {
@@ -169,7 +164,7 @@ public class DestinationManager
             {
                 Vector3 wpForward = _candidatePointProvider.GetWaypointForward(point);
                 _eventManager.RotateAtPatrolPoint(wpForward);
-                
+
             }
 
             if (candidate is FlankPointData fp)
@@ -184,10 +179,10 @@ public class DestinationManager
                 _candidatePointProvider.SetCurrentFlankPoint(flankPoint);
             }
 
-               
-             markInUseFunc?.Invoke(candidate);
 
-            _destinationRequest.resourceType = AIResourceType.None;
+            markInUseFunc?.Invoke(candidate);
+
+
             _onDestinationRequestComplete?.Invoke(true, point, destType);
             yield break;
         }
@@ -202,22 +197,6 @@ public class DestinationManager
 
 
 
-    
-    public void StartCarvingRoutine(AIDestinationRequestData destinationRequest)
-    {
-        CoroutineRunner.Instance.StartCoroutine(CarvingRoutine(destinationRequest));
-    }
-
-    private IEnumerator CarvingRoutine(AIDestinationRequestData destinationRequest)
-    {
-        destinationRequest.carvingCallback?.Invoke();
-
-        yield return null;
-       
-        destinationRequest.agentActiveCallback?.Invoke();
-        
-    }
-
     public void OnInstanceDestroyed()
     {
         _eventManager.OnDeathStatusUpdated -= OwnerDeathStatusUpdated;
@@ -229,7 +208,7 @@ public class DestinationManager
         _eventManager = null;
         _pathRequestCallback = null;
          _waitUntilResultReceived = null;
-        _destinationRequest = null;
+       
         _destinationQueue.Clear();
         _destinationQueue = null;
     }

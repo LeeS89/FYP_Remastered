@@ -19,14 +19,11 @@ public abstract class SceneResources
         return Task.CompletedTask;
     }
 
-    [Obsolete("Use Resourcesrequested instead")]
-    protected virtual void ResourceRequested(ResourceRequest request) { }
+   
 
-    protected virtual void ResourcesRequested(in ResourceRequests request) { }
+    protected virtual void ResourceRequested(in ResourceRequests request) { }
 
-    [Obsolete("Use ResourcesRequested instead")]
-    protected virtual void AIResourceRequested(AIDestinationRequestData request) { }
-
+   
 
     protected virtual void ResourceReleased(ResourceRequest request) { }
 

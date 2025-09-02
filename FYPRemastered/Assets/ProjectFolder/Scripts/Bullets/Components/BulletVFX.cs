@@ -12,13 +12,12 @@ public class BulletVFX : ComponentEvents
 
     public ParticleSystem particleMove;
 
-    private ResourceRequest _request;
+ 
     private Action<PoolResourceType, IPoolManager> PoolRequestCallback;
 
-    //public MoonSceneManager _manager;
     public override void RegisterLocalEvents(EventManager eventManager)
     {
-        //Debug.LogError("Registering BulletVFX local events");
+
         _bulletEventManager = eventManager as ProjectileEventManager;
         PoolRequestCallback = OnPoolReceived;
 
@@ -28,63 +27,15 @@ public class BulletVFX : ComponentEvents
         _bulletEventManager.OnBulletParticleStop += StopBulletParticle;
         _bulletEventManager.OnCollision += SpawnHitParticle;
 
-        
-        //_bulletEventManager.OnSpawnHitParticle += SpawnHitParticle;
-        /*_request = new ResourceRequest();
-       
-
-        _request.ResourceType = PoolResourceType.BasicHitParticlePool;
-        _request.poolRequestCallback = OnPoolReceived;
-        //_request.poolRequestCallback = (pool) =>
-        //{
-
-        //        _particlePoolManager = pool;
-
-        //};
-
-        SceneEventAggregator.Instance.RequestResource(_request);
-
-        _request.ResourceType = PoolResourceType.DeflectAudioPool;
-      *//*  _request.poolRequestCallback = (pool) =>
-        {
-            _audioPoolManager = pool;
-        };*//*
-
-        SceneEventAggregator.Instance.RequestResource(_request);*/
-        //BaseSceneManager._instance.GetImpactParticlePool(ref _poolManager);
 
     }
 
 
     public override void InitialzeLocalPools()
     {
-
-        var hitParticlePool = ResourceRequests.RequestPool(PoolResourceType.BasicHitParticlePool, PoolRequestCallback);
-        SceneEventAggregator.Instance.ResourceRequested(hitParticlePool);
-
-        var deflectAudioPool = ResourceRequests.RequestPool(PoolResourceType.DeflectAudioPool, PoolRequestCallback);
-        SceneEventAggregator.Instance.ResourceRequested(deflectAudioPool);
-        ///_request = new ResourceRequest();
-
-
-    //    _request.ResourceType = PoolResourceType.BasicHitParticlePool;
-     //   _request.poolRequestCallback = OnPoolReceived;
-        //_request.poolRequestCallback = (pool) =>
-        //{
-
-        //        _particlePoolManager = pool;
-
-        //};
-
-     //   SceneEventAggregator.Instance.RequestResource(_request);
-
-     //   _request.ResourceType = PoolResourceType.DeflectAudioPool;
-        /*  _request.poolRequestCallback = (pool) =>
-          {
-              _audioPoolManager = pool;
-          };*/
-
-       // SceneEventAggregator.Instance.RequestResource(_request);
+        this.RequestPool(PoolResourceType.BasicHitParticlePool, PoolRequestCallback);
+       
+        this.RequestPool(PoolResourceType.DeflectAudioPool, PoolRequestCallback);
     }
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
@@ -94,18 +45,12 @@ public class BulletVFX : ComponentEvents
         _bulletEventManager.OnDeflected -= PlayDeflectionAudio;
         _bulletEventManager.OnBulletParticlePlay -= PlayBulletParticle;
         _bulletEventManager.OnBulletParticleStop -= StopBulletParticle;
-        _bulletEventManager.OnCollision -= SpawnHitParticle;
-        //_bulletEventManager.OnSpawnHitParticle -= SpawnHitParticle;
-        
-
-        
+        _bulletEventManager.OnCollision -= SpawnHitParticle;    
     }
 
     protected override void OnSceneComplete()
     {
         base.OnSceneComplete();
-        _request.OnInstanceDestroyed();
-        _request = null;
         _particleManager = null;
         _bulletEventManager = null;
         PoolRequestCallback = null;
@@ -122,7 +67,7 @@ public class BulletVFX : ComponentEvents
                 _audioPoolManager = pool;
                 break;
         }
-        //_audioPoolManager = pool;
+        
     }
 
     private void PlayDeflectionAudio(ProjectileKickType type)
@@ -141,12 +86,10 @@ public class BulletVFX : ComponentEvents
        // ContactPoint contact = collision.contacts[0];
         Vector3 pos = contact.point;
         //Vector3 hitNormal = contact.normal;
-        //GameObject obj = _poolManager.GetFromPool(pos, rot);
+      
         var hit = _particlePoolManager.Get(pos, Quaternion.identity) as ParticleSystem;
         hit.Play();
-       // PoolExtensions.GetAndPlay(_particlePoolManager, pos, Quaternion.identity);
-        //obj.SetActive(true);
-        //_poolManager.GetParticle(pos, rot);  
+    
     }
 
     private void PlayBulletParticle(Projectile bullet/*, BulletType bulletType*/)

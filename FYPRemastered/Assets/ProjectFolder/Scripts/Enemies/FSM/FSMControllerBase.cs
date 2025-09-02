@@ -16,7 +16,7 @@ public abstract class FSMControllerBase : ComponentEvents
 
     [Header("Event Manager & Resource request handler")]
     protected EnemyEventManager _agentEventManager;
-    protected AIDestinationRequestData _resourceRequest;
+ 
 
     [Header("Agent Speed Params")]
     [SerializeField, Tooltip("Do Not Change - Synchronized with Walking animation")]
@@ -87,7 +87,6 @@ public abstract class FSMControllerBase : ComponentEvents
         _chasing = new ChasingState(_agentEventManager, OwningAgent, _walkSpeed, _sprintSpeed);
         _stationary = new StationaryState(_agentEventManager, OwningAgent);
         _deathState = new DeathState(_agentEventManager, OwningAgent);
-        _resourceRequest = new AIDestinationRequestData();
         _destinationManager = new DestinationManager(_agentEventManager, _maxFlankingSteps, _debugFlankCubes, transform, OnDestinationRequestComplete);
         AgentZone = _destinationManager.GetCurrentWPZone();
         SceneEventAggregator.Instance.RegisterAgentAndZone(this, AgentZone);

@@ -49,7 +49,7 @@ public class BulletResources : SceneResources, IUpdateableResource
             }
 
            // SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;
-            SceneEventAggregator.Instance.OnResourceRequested += ResourcesRequested;
+            SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;
 
             SceneEventAggregator.Instance.OnResourceReleased += ResourceReleased;
         }
@@ -142,7 +142,7 @@ public class BulletResources : SceneResources, IUpdateableResource
        
     }
 
-    protected override void ResourcesRequested(in ResourceRequests request)
+    protected override void ResourceRequested(in ResourceRequests request)
     {
 
         if (request.PoolType == PoolResourceType.None) return;
@@ -181,28 +181,7 @@ public class BulletResources : SceneResources, IUpdateableResource
         
     }
 
-    [Obsolete]
-    protected override void ResourceRequested(ResourceRequest request)
-    {
-        if(request.ResourceType == PoolResourceType.None) { return; }
-
-        switch (request.ResourceType)
-        {
-            case PoolResourceType.NormalBulletPool:
-                request.poolRequestCallback?.Invoke(_bulletPool);
-                break;
-            case PoolResourceType.BasicHitParticlePool:
-                request.poolRequestCallback?.Invoke(_hitParticlePool);
-                break;
-            case PoolResourceType.DeflectAudioPool:
-                request.poolRequestCallback?.Invoke(_deflectAudioPool);
-                break;
-            default:
-                Debug.LogWarning("Unknown resource type requested.");
-                break;
-        }
-    }
-
+   
     public bool SchedulePoolObjectRelease(IPoolManager pool, UnityEngine.Object item, float seconds)
     {
         if(_jobs.Count == _maxTrackedPoolObjects) { return false; }

@@ -70,15 +70,15 @@ public readonly struct ResourceRequests
     public static ResourceRequests RequestPool(PoolResourceType type, Action<PoolResourceType, IPoolManager> pool)
         => new(AIResourceType.None, type, default, default, null, null, -1, null, pool, null, null, null);
 
-    public static ResourceRequests FlankPointTargetAndBlockingMasks(AIResourceType type, Action<LayerMask, LayerMask, LayerMask> masks)
-        => new(type, PoolResourceType.None, default, default, null, null, -1, null, null, masks, null, null);
+    public static ResourceRequests FlankPointTargetAndBlockingMasks(Action<LayerMask, LayerMask, LayerMask> masks)
+        => new(AIResourceType.FlankPointEvaluationMasks, PoolResourceType.None, default, default, null, null, -1, null, null, masks, null, null);
 
-    public static ResourceRequests Waypoints(AIResourceType type, Action<BlockData> wp)
-        => new(type, PoolResourceType.None, default, default, null, null, -1, null, null, null, wp, null);
+    public static ResourceRequests RequestWaypoints(Action<BlockData> callback)
+        => new(AIResourceType.WaypointBlock, PoolResourceType.None, default, default, null, null, -1, null, null, null, callback, null);
 
-    public static ResourceRequests RequestPath(AIResourceType type, Vector3 start, Vector3 end, NavMeshPath path, Action<bool> cb)
-        => new(type, PoolResourceType.None, start, end, path, null, -1, null, null, null, null, cb);
+    public static ResourceRequests RequestPath(Vector3 start, Vector3 end, NavMeshPath path, Action<bool> cb)
+        => new(AIResourceType.Path, PoolResourceType.None, start, end, path, null, -1, null, null, null, null, cb);
 
-    public static ResourceRequests RequestFlankPoints(AIResourceType type, int steps, List<FlankPointData> data, Action<bool> flankCB)
-        => new(type, PoolResourceType.None, default, default, null, data, steps, flankCB, null, null, null, null);
+    public static ResourceRequests RequestFlankPoints(int steps, List<FlankPointData> data, Action<bool> flankCB)
+        => new(AIResourceType.FlankPointCandidates, PoolResourceType.None, default, default, null, data, steps, flankCB, null, null, null, null);
 }

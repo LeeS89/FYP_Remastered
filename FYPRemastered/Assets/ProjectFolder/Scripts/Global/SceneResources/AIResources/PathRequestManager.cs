@@ -16,7 +16,7 @@ public class PathRequestManager : SceneResources, IUpdateableResource
     public override async Task LoadResources()
     {
 
-        SceneEventAggregator.Instance.OnResourceRequested += ResourcesRequested;
+        SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;
 
         await Task.CompletedTask;
        
@@ -49,7 +49,7 @@ public class PathRequestManager : SceneResources, IUpdateableResource
         return path.status == NavMeshPathStatus.PathComplete;
     }
 
-    protected override void ResourcesRequested(in ResourceRequests request)
+    protected override void ResourceRequested(in ResourceRequests request)
     {
         if (request.AIResourceType != AIResourceType.Path) return;
         _pathRequestQueue.Enqueue(request);

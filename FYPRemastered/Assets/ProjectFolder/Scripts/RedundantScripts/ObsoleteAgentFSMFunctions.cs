@@ -1,4 +1,4 @@
-using System;
+/*using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +10,7 @@ using Random = UnityEngine.Random;
 [Obsolete]
 public class ObsoleteAgentFSMFunctions : MonoBehaviour
 {
-    public AIDestinationRequestData _resourceRequest;
+    //public AIDestinationRequestData _resourceRequest;
     [SerializeField] private NavMeshObstacle _obstacle;
     private NavMeshAgent _agent;
     private BlockData _blockData;
@@ -82,12 +82,12 @@ public class ObsoleteAgentFSMFunctions : MonoBehaviour
     private void InitializeWaypoints()
     {
         //_resourceRequest.flankBlockingMask = _lineOfSightMask;
-        _resourceRequest.flankTargetMask = _losTargetMask;
-        _resourceRequest.flankTargetColliders = GameManager.Instance.GetPlayerTargetPoints();
+       // _resourceRequest.flankTargetMask = _losTargetMask;
+       /// _resourceRequest.flankTargetColliders = GameManager.Instance.GetPlayerTargetPoints();
         //_blockData = BaseSceneManager._instance.RequestWaypointBlock();
-        _resourceRequest.resourceType = AIResourceType.WaypointBlock;
-        _resourceRequest.waypointCallback = (blockData) =>
-        {
+      //  _resourceRequest.resourceType = AIResourceType.WaypointBlock;
+       // _resourceRequest.waypointCallback = (blockData) =>
+        *//*{
             if (blockData != null)
             {
                 _blockData = blockData;
@@ -99,7 +99,7 @@ public class ObsoleteAgentFSMFunctions : MonoBehaviour
 
             }
         };
-
+*//*
        // SceneEventAggregator.Instance.RequestResource(_resourceRequest);
 
 
@@ -149,9 +149,9 @@ public class ObsoleteAgentFSMFunctions : MonoBehaviour
 
         _resourceRequest.destinationType = AIDestinationType.ChaseDestination;
         _resourceRequest.start = LineOfSightUtility.GetClosestPointOnNavMesh(_agent.transform.position);
-        /*Vector3 playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
+        *//*Vector3 playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position;
         _destinationData.end = LineOfSightUtility.GetClosestPointOnNavMesh(playerPos);*/
-        /* _resourceRequest.path = _path;*/
+        /* _resourceRequest.path = _path;*//*
 
         _resourceRequest.externalCallback = (success, point) =>
         {
@@ -175,7 +175,7 @@ public class ObsoleteAgentFSMFunctions : MonoBehaviour
         _resourceRequest.destinationType = AIDestinationType.FlankDestination;
         _resourceRequest.start = LineOfSightUtility.GetClosestPointOnNavMesh(_agent.transform.position);
 
-        /*_resourceRequest.path = _path;*/
+        *//*_resourceRequest.path = _path;*//*
 
         _resourceRequest.externalCallback = (success, point) =>
         {
@@ -221,11 +221,11 @@ public class ObsoleteAgentFSMFunctions : MonoBehaviour
                 _agent.SetDestination(destination);
                 _enemyEventManager.DestinationApplied();
             };
-            _destinationManager.StartCarvingRoutine(_resourceRequest); // Move to extension function
+           // _destinationManager.StartCarvingRoutine(_resourceRequest); // Move to extension function
 
-            /* yield return new WaitUntil(() => _agent.enabled);
+            *//* yield return new WaitUntil(() => _agent.enabled);
              _agent.SetDestination(destination);
-             _enemyEventManager.DestinationApplied();*/
+             _enemyEventManager.DestinationApplied();*//*
         }
     }
 
@@ -285,13 +285,13 @@ public class ObsoleteAgentFSMFunctions : MonoBehaviour
         // Normalize the angle to a value between -1 and 1
         float normalizedDirection = angle / 90f;
 
-      /*  // Only update the direction if it has changed significantly (for example, threshold of 0.1)
+      *//*  // Only update the direction if it has changed significantly (for example, threshold of 0.1)
         if (Mathf.Abs(normalizedDirection - _previousDirection) > 0.1f)
         {
             _animController.UpdateDirection(normalizedDirection); // Update the animator with the new direction
             //animator.SetFloat("direction", normalizedDirection); // Update the direction parameter
             _previousDirection = normalizedDirection; // Store the new direction
-        }*/
+        }*//*
 
 
 
@@ -299,14 +299,14 @@ public class ObsoleteAgentFSMFunctions : MonoBehaviour
     #endregion
 
     #region Old Flank Resources reques function
-    protected /*override*/ void AIResourceRequested(AIDestinationRequestData request)
+   *//* protected *//*override*//* void AIResourceRequested(AIDestinationRequestData request)
     {
         if (request.resourceType != AIResourceType.FlankPointCandidates) { return; }
 
         
         ///// END NEW
 
-        /* int step = request.numSteps; 
+        *//* int step = request.numSteps; 
 
          if (_savedPoints == null || _savedPoints.Count == 0 ||
              _nearestPointToPlayer < 0 || _nearestPointToPlayer >= _savedPoints.Count)
@@ -326,14 +326,14 @@ public class ObsoleteAgentFSMFunctions : MonoBehaviour
          }
 
          request.FlankPointCandidatesCallback?.Invoke(request.flankPointCandidates.Count > 0);
-        */
+        *//*
 
-    }
+    }*//*
     #endregion
 
     #region Redundant Code
 
-    /* private void UpdateFieldOfViewResults(bool playerSeen)
+    *//* private void UpdateFieldOfViewResults(bool playerSeen)
     {
         if (_canSeePlayer == playerSeen) { return; } // Already Updated, return early
 
@@ -435,14 +435,14 @@ public class ObsoleteAgentFSMFunctions : MonoBehaviour
 
          //_enemyEventManager.FacingTarget(canShootTarget);
      }
- */
+ *//*
     /// <summary>
     /// First checks if the target is within FOV cone, then performs a capsule cast from waist to eye level to check for target colliders
     /// If target collider(s) are hit, performs a line of sight check to see if the target is visible.
     /// </summary>
     /// <param name="target"></param>
     /// <returns></returns>
-    /* private bool EvaluateFieldOfView(Collider target)
+    *//* private bool EvaluateFieldOfView(Collider target)
      {
          if (target == null) { return false; }
 
@@ -479,7 +479,7 @@ public class ObsoleteAgentFSMFunctions : MonoBehaviour
          }
 
          return false;
-     }*/
+     }*//*
 
     //private void AddFallbackPoints(Collider target, Vector3[] hitPoints, ref int startIndex)
     //{
@@ -488,15 +488,15 @@ public class ObsoleteAgentFSMFunctions : MonoBehaviour
     //    hitPoints[startIndex++] = target.bounds.center + Vector3.right * target.bounds.extents.x;
     //}
 
-    /*
+    *//*
     private void AlertStatusUpdated(AlertStatus status)
     {
         _alertStatus = status;
         _agentEventManager.AlertStatusChanged(status);
-    }*/
+    }*//*
     #endregion
 
-    /*if (_interactor != null && _interactor.HasSelectedInteractable)
+    *//*if (_interactor != null && _interactor.HasSelectedInteractable)
        {
            Debug.LogError("Interactor has interactable: ");
        }*/
@@ -521,7 +521,7 @@ public class ObsoleteAgentFSMFunctions : MonoBehaviour
              }
          }
          _testtrace = false;
-     }*/
+     }*//*
 
 
 
@@ -541,7 +541,7 @@ public class ObsoleteAgentFSMFunctions : MonoBehaviour
 
 
     #region Obsolete 
-    /*private bool ValidateTargetVisibilityFromPoint(Vector3 point)
+    *//*private bool ValidateTargetVisibilityFromPoint(Vector3 point)
     {
         int mask = LayerMask.GetMask("Default", "Water", "PlayerDefence", "Player");
         Collider playerCollider = GameManager.Instance.GetPlayerCollider(PlayerPart.Position);
@@ -731,7 +731,7 @@ public class ObsoleteAgentFSMFunctions : MonoBehaviour
     private List<Vector3> GetFlankPoints()
     {
         return _candidatePoints;
-    }*/
+    }*//*
     #endregion
 
 
@@ -742,7 +742,7 @@ public class ObsoleteAgentFSMFunctions : MonoBehaviour
 
 
 
-/*    #region Backup imp[lementaiton but now Obsolete
+*//*    #region Backup imp[lementaiton but now Obsolete
     private LayerMask _flankBlockingMask; // OLD
     private LayerMask _flankTargetMask; // OLD
     private LayerMask _flankBackupTargetMask; //OLD
@@ -1050,5 +1050,6 @@ public class ObsoleteAgentFSMFunctions : MonoBehaviour
 
     #endregion
 
-    #endregion*/
+    #endregion*//*
 }
+*/

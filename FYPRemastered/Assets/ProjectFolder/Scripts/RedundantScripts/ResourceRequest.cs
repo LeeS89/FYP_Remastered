@@ -1,4 +1,4 @@
-
+/*
 using System;
 
 [Obsolete]
@@ -13,3 +13,4 @@ public class ResourceRequest
         poolRequestCallback = null;
     }
 }
+*/

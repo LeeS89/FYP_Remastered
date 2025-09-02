@@ -18,9 +18,7 @@ public class DestinationManagerHelper
 
     // Candidate destination container & Resource request instance
     private List<Vector3> _candidatePositions;
-    private AIDestinationRequestData _requestData;
-
-
+  
     // Flank point variables
     private int _maxFlankingSteps = 0;
     private FlankPointData _currentFlankPoint;
@@ -54,9 +52,8 @@ public class DestinationManagerHelper
     private Action<bool> _flankCandidatesCallback;
 
 
-    public DestinationManagerHelper(AIDestinationRequestData requestData, Transform owner, int maxflankSteps, GameObject debugCube = null)
+    public DestinationManagerHelper(Transform owner, int maxflankSteps, GameObject debugCube = null)
     {
-        _requestData = requestData;
         _ownerTransform = owner;
         _maxFlankingSteps = maxflankSteps;
       
@@ -72,20 +69,14 @@ public class DestinationManagerHelper
         GetFlankEvaluationMasks();  
     }
 
-    private void GetFlankEvaluationMasks()
-    {
-        var maskRequest = ResourceRequests.FlankPointTargetAndBlockingMasks(AIResourceType.FlankPointEvaluationMasks, OnRetrieveFlankPointEvaluationMasks);
-        SceneEventAggregator.Instance.ResourceRequested(maskRequest);
-   
-    }
+    private void GetFlankEvaluationMasks() => this.RequestFlankPointEvaluationMasks(OnRetrieveFlankPointEvaluationMasks);
+
 
     private void OnRetrieveFlankPointEvaluationMasks(LayerMask blockingMask, LayerMask targetMask, LayerMask secondaryTargetMask)
     {
-        _requestData.resourceType = AIResourceType.None;
         _flankBlockingMask = blockingMask;
         _flankTargetMask = targetMask;
         _flankBackupTargetMask = secondaryTargetMask;
-
     }
 
     
@@ -119,10 +110,8 @@ public class DestinationManagerHelper
         return _candidateFlankPointPositions;
     }
 
-    public void SetCurrentFlankPoint(FlankPointData currentFP)
-    {
-        _currentFlankPoint = currentFP;
-    }
+    public void SetCurrentFlankPoint(FlankPointData currentFP) => _currentFlankPoint = currentFP;
+
 
     private void GetStepsToTry()
     {
@@ -161,10 +150,8 @@ public class DestinationManagerHelper
         {
             _resultReceived = false;
 
-            var request = ResourceRequests.RequestFlankPoints(AIResourceType.FlankPointCandidates, step, _candidateFlankPointPositions, _flankCandidatesCallback);
-
-            SceneEventAggregator.Instance.ResourceRequested(request);
-
+            this.RequestFlankPointCandidates(step, _candidateFlankPointPositions, _flankCandidatesCallback);
+        
             yield return _waitUntilResultReceived;
         }
 //#if UNITY_EDITOR
@@ -193,19 +180,13 @@ public class DestinationManagerHelper
         }
     }
 
-    public void InitializeWaypoints()
-    {
-        _requestData.flankCandidates = _candidateFlankPointPositions;
+    public void InitializeWaypoints() => this.RequestWaypointBlock(callback: _wayPointCallback);
 
-        var wpb = ResourceRequests.Waypoints(AIResourceType.WaypointBlock, _wayPointCallback);
-        SceneEventAggregator.Instance.ResourceRequested(in wpb);
-    
-    }
 
     private void SetWayPoints(BlockData data)
     {
         _blockData = data;
-        _requestData.resourceType = AIResourceType.None;
+    
         if (_blockData == null)
         {
             Debug.LogError("Waypoint block data is null. Cannot set waypoints.");
@@ -244,19 +225,6 @@ public class DestinationManagerHelper
 
     }
     #endregion
-
-
-
-    /* private void ShuffleWaypointPairs()
-     {
-         for (int i = 0; i < _waypointPairs.Count; i++)
-         {
-             int randIndex = UnityEngine.Random.Range(i, _waypointPairs.Count);
-             (_waypointPairs[i], _waypointPairs[randIndex]) = (_waypointPairs[randIndex], _waypointPairs[i]);
-         }
-     }*/
-
-
 
     #region Candidate point retrieval region 
 
@@ -306,7 +274,7 @@ public class DestinationManagerHelper
         _candidatePositions.Add(playerPos);
     }
 
-    private void OnReceivedFlankPointCandidates(/*List<Vector3> points*/bool success)
+    private void OnReceivedFlankPointCandidates(bool success)
     {
 
         ///// Later implementation => Based on returned bool => decide what happens when it fails
@@ -335,7 +303,6 @@ public class DestinationManagerHelper
         _ownerTransform = null;
         _stepsToTry.Clear();
         _stepsToTry = null;
-        _requestData = null;
         _currentFlankPoint = null;
         _candidateFlankPointPositions.Clear();
         _candidateFlankPointPositions = null;

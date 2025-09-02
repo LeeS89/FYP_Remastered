@@ -77,12 +77,12 @@ public class Gun
     {
         _bulletSpawnPoint = bulletSpawnPoint;
 
-        _request.ResourceType = PoolResourceType.NormalBulletPool;
+       /* _request.ResourceType = PoolResourceType.NormalBulletPool;
         _request.poolRequestCallback = (pool) =>
         {
             //_poolManager = pool;
             _request.ResourceType = PoolResourceType.None; // Reset resource type after assignment
-        };
+        };*/
       //  SceneEventAggregator.Instance.RequestResource(_request);
         //BaseSceneManager._instance.GetBulletPool(ref _poolManager);
     }
