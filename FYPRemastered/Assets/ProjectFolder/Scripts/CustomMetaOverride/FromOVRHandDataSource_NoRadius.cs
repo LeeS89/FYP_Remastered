@@ -1,9 +1,5 @@
-﻿using Meta.XR.Util;
-using Oculus.Interaction;
-using Oculus.Interaction.Input;
-using System;
+﻿using System;
 using UnityEngine;
-using static OVRPlugin;
 using static OVRSkeleton;
 
 namespace Oculus.Interaction.Input
@@ -17,7 +13,7 @@ namespace Oculus.Interaction.Input
         private bool _radiiReady;
         private Handedness _cachedHandedness;
 
-        /*protected override void UpdateDataPoses(SkeletonPoseData poseData)
+        protected override void UpdateDataPoses(SkeletonPoseData poseData)
         {
             EnsureRadiiCached();
 
@@ -137,7 +133,7 @@ namespace Oculus.Interaction.Input
         if (boneIndex == (int)HandJointId.HandPinky0)  return (int)HandJointId.HandPinky1;
 #endif
             return boneIndex;
-        }*/
+        }
     }
     // Replace this line:
     // _cachedRadii[i] = HandSkeletonOVR.GetBoneRadius(_ovrSkeletonCached, i);
