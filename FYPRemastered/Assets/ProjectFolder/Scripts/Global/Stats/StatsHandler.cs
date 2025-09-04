@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -8,6 +10,7 @@ using UnityEditor;
 public class StatsHandler
 {
     private List<StatEntry> _stats;
+    private StatEntry[] _entriesToModify = new StatEntry[4];
 
     public StatsHandler(List<StatEntry> sharedStats)
     {
@@ -28,7 +31,20 @@ public class StatsHandler
             entry.value = 0;
             _stats.Add(entry);
         }
-        ModifyStat(StatType.Health, GetStat(StatType.MaxHealth));
+        SetStat(StatType.Health, GetStat(StatType.MaxHealth));
+    }
+
+    private void SetStat(StatType type, float maxAmount)
+    {
+        for (int i = 0; i < _stats.Count; i++)
+        {
+            var entry = _stats[i];
+            if (entry.statType == type)
+            {
+                entry.value = maxAmount;
+            }
+        }
+       
     }
 
     private bool HasStat(StatType statType)
@@ -36,29 +52,69 @@ public class StatsHandler
         return _stats.Exists(s => s.statType == statType);
     }
 
-    public float ModifyStat(StatType stat, float amount)
+    public float ModifyStat(StatType stat, float amount/*, out float remaining*/)
     {
-        for(int i = 0; i < _stats.Count; i++)
+        for (int i = 0; i < _stats.Count; i++)
         {
             var entry = _stats[i];
             if (entry.statType == stat)
             {
                 entry.value += amount;
-                entry.value = Mathf.Clamp(entry.value, 0, GetMaxStatValue(stat));
+
+                if (stat == StatType.Health) entry.value = Mathf.Clamp(entry.value, 0, GetMaxStatValue(stat));
+
                 return entry.value;
             }
         }
-        return -1;
 
-        /*StatEntry entry = _stats.Find(s => s.statType == stat);
-        if (entry != null)
+        return -1;
+    }
+
+    public float ModifyStat(StatEntry stat, float amount)
+    {
+        if (stat == null) return -1;
+
+        stat.value += amount;
+        return stat.value;
+    }
+
+    public bool HasEnoughResources(ResourceCost[] resources)
+    {
+        // No cost for ability, return true and allow to proceed
+        if (resources == null || resources.Length == 0) return true;
+
+        for (int i = 0; i < resources.Length; i++)
         {
-            entry.value += amount;
-            entry.value = Mathf.Clamp(entry.value, 0, GetMaxStatValue(stat));
-            return entry.value;
-            
+            var stat = resources[i].ResourceType;
+            var cost = resources[i].Amount;
+            StatEntry found = null;
+
+            for (int j = 0; j < _stats.Count; j++)
+            {
+                var entry = _stats[j];
+                if (entry.statType == stat)
+                {
+                    found = entry;
+                    break;
+                }
+            }
+            if (found == null) return false;
+
+            if (found.value - cost < 0) return false;
+
+            _entriesToModify[i] = found;
+
         }
-        return -1;*//// CURRENT IMPLEMENTATION
+        ////////////// Split here into seperate check and apply functions
+        for(int i = 0; i < resources.Length; i++)
+        {
+            var stat = _entriesToModify[i];
+            var amount = resources[i].Amount;
+            ModifyStat(stat, -amount);
+            _entriesToModify[i] = null;
+        }
+        
+        return true;
     }
 
     private float GetMaxStatValue(StatType stat)

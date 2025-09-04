@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public enum EffectKind { Damage, Knockback }
+public enum EffectKind { Damage, Knockback, FreezeAndTrack, ReturnTrackedOnEnd }
 
 [CreateAssetMenu(fileName = "EffectDef", menuName = "Abilities/EffectDef")]
 public class EffectDef : ScriptableObject

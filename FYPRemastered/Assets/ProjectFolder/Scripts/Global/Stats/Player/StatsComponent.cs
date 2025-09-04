@@ -4,7 +4,7 @@ using UnityEngine;
 public class StatsComponent : ComponentEvents
 {
     [SerializeField] private List<StatEntry> _stats = new List<StatEntry>();
-    private StatsHandler _statsComponent;
+    private StatsHandler _statsHandler;
     [SerializeField] private CharacterType _characterType;
 
 
@@ -13,9 +13,10 @@ public class StatsComponent : ComponentEvents
     {
         //base.RegisterLocalEvents(eventManager);
         _eventManager = eventManager;
-        _statsComponent = new StatsHandler(_stats);
+        _statsHandler = new StatsHandler(_stats);
 
         _eventManager.OnNotifyDamage += NotifyDamage;
+        _eventManager.OnTrySpendResources += TrySpendResources;
         //float hlth = _statsComponent.Gethealth();
         //Debug.LogError("Health is: "+hlth);
     }
@@ -53,7 +54,7 @@ public class StatsComponent : ComponentEvents
 
     protected bool HealthIsEmpty()
     {
-        return _statsComponent.GetStat(StatType.Health) == 0;
+        return _statsHandler.GetStat(StatType.Health) == 0;
     }
 
     protected void ApplyElementalDamage(DamageType dType = DamageType.None, float statusEffectChancePercentage = 0, float damageOverTime = 0, float duration = 0)
@@ -63,12 +64,15 @@ public class StatsComponent : ComponentEvents
 
     protected void ApplyInstantDamage(float damage)
     {
-        if(_statsComponent.ModifyStat(StatType.Health, -damage) == 0f)
+        if(_statsHandler.ModifyStat(StatType.Health, -damage) <= 0f)
         {
-            GameManager.Instance.CharacterDeathStatusChanged(_characterType, null, true);
+            GameManager.Instance.CharacterDeathStatusChanged(_characterType, null, isDead : true);
             _eventManager.DeathStatusUpdated(true);
         }
     }
+
+    protected bool TrySpendResources(ResourceCost[] resources) => _statsHandler.HasEnoughResources(resources);
+
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
@@ -82,7 +86,7 @@ public class StatsComponent : ComponentEvents
     protected override void OnSceneComplete()
     {
         base.OnSceneComplete();
-        _statsComponent = null;
+        _statsHandler = null;
         _stats.Clear();
         _stats = null;
         _eventManager = null;

@@ -3,5 +3,7 @@ public enum StatType
     Health,
     MaxHealth,
     Force,
-    MaxForce
+    MaxForce,
+    Stamina,
+    MaxStamina
 }

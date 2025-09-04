@@ -9,9 +9,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d00450d800eb7904ab15f8b3159962af, type: 3}
-  m_Name: Damage
+  m_Script: {fileID: 11500000, guid: cfe4c14d22c6ea94a90669c0aec1a605, type: 3}
+  m_Name: BulletFreezeTick
   m_EditorClassIdentifier: 
-  Kind: 0
-  Magnitude: 0
-  DamageType: 
+  Sound: {fileID: 0}
+  Volume: 1
+  VfxPrefab: {fileID: 0}
+  VfxOffset: {x: 0, y: 0, z: 0}
+  VfxLifetime: 2
+  AnimationTrigger: 
+  CameraShake: 0
+  ShakeIntensity: 0
+  ShakeDuration: 0

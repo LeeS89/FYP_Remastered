@@ -1,3 +1,4 @@
+using Mono.Cecil;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -49,6 +50,29 @@ public abstract class EventManager : MonoBehaviour
     {
         OnDeathStatusUpdated?.Invoke(isDead);
     }
+
+    public event Func<ResourceCost[], bool> OnTrySpendResources;
+
+    public bool TrySpendResources(ResourceCost[] resources) => OnTrySpendResources?.Invoke(resources) ?? false;
+
+    /*public delegate bool TrySpendResource(ResourceCost resource, out float remaining);
+    public event TrySpendResource OnTrySpendResource;
+
+    public bool SpendResource(ResourceCost resource, out float remaining)
+    {
+        var handler = OnTrySpendResource;
+        if (handler == null)
+        {
+            remaining = 0f;
+            return false;
+        }
+        return handler(resource, out remaining);
+    }*/
+//    public event Func<bool> OnSpendResource;
+
+  //  public bool SpendResource() => OnSpendResource?.Invoke() ?? false;
+
+
 
     public event Action<float, DamageType, float, float, float> OnNotifyDamage;
 

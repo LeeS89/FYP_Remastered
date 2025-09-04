@@ -12,20 +12,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71322f7bd3f4f8e44ade1728ed234243, type: 3}
   m_Name: BulletFreeze
   m_EditorClassIdentifier: 
-  Id: 
+  Id: {fileID: 11400000, guid: de9d98fd1784a954188029730deb9b35, type: 2}
   GrantTags: []
   BlockedByTags: []
   RequiredTags: []
   CooldownSeconds: 0
+  Costs: []
   Targeting:
-    Mode: 0
+    Mode: 3
     Range: 0
     AngleDeg: 0
     Radius: 0
     hitMask:
       serializedVersion: 2
-      m_Bits: 0
+      m_Bits: 64
     Maxhits: 32
-  Effects: []
-  IsChanneled: 0
-  ChannelTick: 0
+  Effects:
+  - {fileID: 11400000, guid: cd73d535947aac5489607519ee8557f0, type: 2}
+  - {fileID: 11400000, guid: f7cecf5fba4b9c841b06b475cd499b89, type: 2}
+  Start: {fileID: 11400000, guid: fde676bb0e48d9b41b9ddb45892c7058, type: 2}
+  Impact: {fileID: 11400000, guid: 2df8565e3d657ed44a32284cd290cb38, type: 2}
+  End: {fileID: 11400000, guid: eee7f327485945f43abfc0243f16498b, type: 2}
+  IsChanneled: 1
+  ChannelTick: 0.05
