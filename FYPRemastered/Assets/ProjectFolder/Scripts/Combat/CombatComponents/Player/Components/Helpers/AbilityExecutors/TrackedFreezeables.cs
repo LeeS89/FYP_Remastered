@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 public sealed class TrackedFreezeables
@@ -16,11 +17,34 @@ public sealed class TrackedFreezeables
 
     public void ClearFreezeables()
     {
-        for(int i = 0; i < _count; i++)
+        if (_arr == null || _arr.Length == 0) return;
+
+        CoroutineRunner.Instance.StartCoroutine(FireFreezablesDelay());
+        /* for(int i = 0; i < _count; i++)
+         {
+             if (_arr[i] != null) _arr[i].Deflect(ProjectileKickType.ReFire);
+         }
+         Array.Clear(_arr, 0, _count);
+         _count = 0;*/
+    }
+
+
+    private IEnumerator FireFreezablesDelay()
+    {
+        //if (_arr == null || _arr.Length == 0) yield break;
+
+        for (int i = 0; i < _arr.Length; i++)
         {
-            if (_arr[i] != null) _arr[i].Deflect(ProjectileKickType.ReFire);
+            var d = _arr[i];
+            if (d != null)
+            {
+                d.Deflect(ProjectileKickType.ReFire);
+                yield return new WaitForSeconds(0.1f);
+            }
+            
         }
         Array.Clear(_arr, 0, _count);
         _count = 0;
     }
+
 }

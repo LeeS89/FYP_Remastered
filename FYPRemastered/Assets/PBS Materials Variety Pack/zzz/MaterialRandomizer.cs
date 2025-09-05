@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using UnityEditor;
 
+#if UNITY_EDITOR
 [CustomEditor(typeof(MaterialRandomizerScript))]
 public class MaterialRandomizer : Editor 
 {
@@ -24,3 +25,4 @@ public class MaterialRandomizer : Editor
         }
     }
 }
+#endif

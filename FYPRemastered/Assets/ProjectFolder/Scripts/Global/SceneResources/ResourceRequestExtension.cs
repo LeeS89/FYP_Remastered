@@ -7,7 +7,7 @@ public static class ResourceRequestExtension
 {
     public static void RequestPool<T>(this T _, PoolResourceType poolType, Action<PoolResourceType, IPoolManager> callback)
     {
-        var pool = ResourceRequests.RequestPool(PoolResourceType.BasicHitParticlePool, callback);
+        var pool = ResourceRequests.RequestPool(poolType, callback);
         SceneEventAggregator.Instance.ResourceRequested(pool);
     }
 

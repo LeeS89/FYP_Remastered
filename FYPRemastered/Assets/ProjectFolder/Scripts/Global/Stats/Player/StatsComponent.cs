@@ -16,7 +16,8 @@ public class StatsComponent : ComponentEvents
         _statsHandler = new StatsHandler(_stats);
 
         _eventManager.OnNotifyDamage += NotifyDamage;
-        _eventManager.OnTrySpendResources += TrySpendResources;
+        _eventManager.OnCheckIfHasSufficientResources += ValidateResources;
+        _eventManager.OnSpendResources += SpendResources;
         //float hlth = _statsComponent.Gethealth();
         //Debug.LogError("Health is: "+hlth);
     }
@@ -71,13 +72,16 @@ public class StatsComponent : ComponentEvents
         }
     }
 
-    protected bool TrySpendResources(ResourceCost[] resources) => _statsHandler.HasEnoughResources(resources);
+    protected bool ValidateResources(ResourceCost[] resources, Dictionary<StatEntry, float> stash) => _statsHandler.HasEnoughResources(resources, stash);
 
+
+    protected void SpendResources(Dictionary<StatEntry, float> stash) => _statsHandler.ModifyStat(stash);
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
         _eventManager.OnNotifyDamage -= NotifyDamage;
-        
+        _eventManager.OnCheckIfHasSufficientResources -= ValidateResources;
+        _eventManager.OnSpendResources -= SpendResources;
         //base.UnRegisterLocalEvents(eventManager);
     }
 

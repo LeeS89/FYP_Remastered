@@ -70,15 +70,20 @@ public class StatsHandler
         return -1;
     }
 
-    public float ModifyStat(StatEntry stat, float amount)
+    public void ModifyStat(Dictionary<StatEntry, float> stash)
     {
-        if (stat == null) return -1;
+        if (stash == null || stash.Count == 0) return;
 
-        stat.value += amount;
-        return stat.value;
+        foreach (var entry in stash)
+        {
+            StatEntry stat = entry.Key;
+            float cost = entry.Value;
+
+            stat.value += cost;
+        }
     }
 
-    public bool HasEnoughResources(ResourceCost[] resources)
+   /* public bool HasEnoughResources(ResourceCost[] resources)
     {
         // No cost for ability, return true and allow to proceed
         if (resources == null || resources.Length == 0) return true;
@@ -114,6 +119,38 @@ public class StatsHandler
             _entriesToModify[i] = null;
         }
         
+        return true;
+    }*/
+
+    public bool HasEnoughResources(ResourceCost[] resources, Dictionary<StatEntry, float> stash)
+    {
+        stash.Clear();
+        // No cost for ability, return true and allow to proceed
+        if (resources == null || resources.Length == 0) return true; 
+
+        for (int i = 0; i < resources.Length; i++)
+        {
+            var stat = resources[i].ResourceType;
+            var cost = resources[i].Amount;
+            StatEntry found = null;
+
+            for (int j = 0; j < _stats.Count; j++)
+            {
+                var entry = _stats[j];
+                if (entry.statType == stat)
+                {
+                    found = entry;
+                    break;
+                }
+            }
+            if (found == null) return false;
+
+            if (found.value - cost < 0) return false;
+
+            stash[found] = cost;
+            
+        }
+      
         return true;
     }
 

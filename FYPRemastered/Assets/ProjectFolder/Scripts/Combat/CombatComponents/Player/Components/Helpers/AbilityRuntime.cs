@@ -13,7 +13,7 @@ public sealed class AbilityRuntime
 
     private TrackedFreezeables _freezeTracker;
     private PlayerTraceManager _traceComp; // Optional
-
+    private bool _inProgress = false;
     public AbilityTags Id => _def.Id;
 
     public AbilityRuntime(AbilityDef def, IAbilityOwner owner, PlayerTraceManager trace = null)
@@ -66,15 +66,18 @@ public sealed class AbilityRuntime
         return true;
     }
 
-    private void End(float now)
+    public void End(float now)
     {
         if(_channeling) _channeling = false;
+        if (!_inProgress) return;
+
         Dispatch(new AbilityContext(_owner, _owner.Origin, _hits, 0, now), CuePhase.End);
 
         if(_def.GrantTags != null)
         {
             for(int i = 0; i < _def.GrantTags.Length; i++) _owner.RemoveTag(_def.GrantTags[i]);
         }
+        _inProgress = false;
     }
 
     public void Tick(float now)
@@ -111,30 +114,33 @@ public sealed class AbilityRuntime
 
     private bool CanActivate(float now)
     {
-        if (now < _cooldownEnd) return false;
-        if(_def.RequiredTags != null)
+        if (now < _cooldownEnd || _inProgress) return false;
+
+        if (_def.BlockedByTags != null)
+        {
+            for (int i = 0; i < _def.BlockedByTags.Length; i++)
+            {
+                if (_owner.HasTag(_def.BlockedByTags[i])) return false;
+            }
+        }
+        if (_def.RequiredTags != null)
         {
             for (int i = 0; i < _def.RequiredTags.Length; i++)
             {
                 if(!_owner.HasTag(_def.RequiredTags[i])) return false;
             }
         }
-        if(_def.BlockedByTags != null)
-        {
-            for(int i = 0; i < _def.BlockedByTags.Length; i++)
-            {
-                if (_owner.HasTag(_def.BlockedByTags[i])) return false;
-            }
-        }
+        
         if (!_owner.HasSufficientResources(_def.Costs)) return false;
 
-        return true;
+        _inProgress = true;
+        return _inProgress;
     }
 
     private int GatherTargets()
     {
         var tar = _def.Targeting;
-        if (tar != null || tar.Mode != TargetingMode.Sphere) return 0;
+        if (tar == null || tar.Mode != TargetingMode.Sphere) return 0;
         return Physics.OverlapSphereNonAlloc(_owner.Origin.position, tar.Radius, _hits, tar.hitMask);
     }
 

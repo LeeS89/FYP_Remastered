@@ -13,8 +13,11 @@ MonoBehaviour:
   m_Name: BulletFreeze
   m_EditorClassIdentifier: 
   Id: {fileID: 11400000, guid: de9d98fd1784a954188029730deb9b35, type: 2}
-  GrantTags: []
-  BlockedByTags: []
+  GrantTags:
+  - {fileID: 11400000, guid: 4c5c68cf7975e5d4a865fdf381fcdda1, type: 2}
+  BlockedByTags:
+  - {fileID: 11400000, guid: e318b344c73e6e54ba42e96b34f9923a, type: 2}
+  - {fileID: 11400000, guid: 4c5c68cf7975e5d4a865fdf381fcdda1, type: 2}
   RequiredTags: []
   CooldownSeconds: 0
   Costs: []
@@ -22,7 +25,7 @@ MonoBehaviour:
     Mode: 3
     Range: 0
     AngleDeg: 0
-    Radius: 0
+    Radius: 1.5
     hitMask:
       serializedVersion: 2
       m_Bits: 64
