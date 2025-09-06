@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
+using static UnityEngine.Rendering.DebugUI.Table;
 
 public sealed class AbilityRuntime
 {
@@ -11,7 +13,6 @@ public sealed class AbilityRuntime
     private bool _channeling;
     private float _nextTick;
 
-    private TrackedFreezeables _freezeTracker;
     private PlayerTraceManager _traceComp; // Optional
     private bool _inProgress = false;
     public AbilityTags Id => _def.Id;
@@ -37,8 +38,7 @@ public sealed class AbilityRuntime
     {
         IEffectExecutor exec = eff.Kind switch
         {
-            EffectKind.FreezeAndTrack => new FreezeAndTrackExecutor(_freezeTracker ??= new TrackedFreezeables()),
-            EffectKind.ReturnTrackedOnEnd => new ReturnTrackedOnEndExecutor(_freezeTracker ??= new TrackedFreezeables()),
+            EffectKind.FreezeAndTrack => new FreezeAndTrackExecutor(),
             _ => null
         };
         return exec;
@@ -50,13 +50,12 @@ public sealed class AbilityRuntime
         if (!CanActivate(now)) return false;
 
         Commit(now);
-        int count = GatherTargets();
-        Dispatch(new AbilityContext(_owner, _owner.Origin, _hits, count, now), CuePhase.Start);
-
-        if (_def.IsChanneled && _def.ChannelTick > 0)
+        GatherAndDispatch(now, CuePhase.Start);
+       
+        if (_def.IsChanneled && (_def.UsesFixedUpdate || _def.ChannelTick > 0))
         {
             _channeling = true;
-            _nextTick = now + _def.ChannelTick;
+            if(!_def.UsesFixedUpdate) _nextTick = now + _def.ChannelTick;
         }
         else
         {
@@ -82,33 +81,40 @@ public sealed class AbilityRuntime
 
     public void Tick(float now)
     {
+        if (_def.UsesFixedUpdate) return;
         if (!_channeling || now < _nextTick) return;
-        int count = GatherTargets();
-        Dispatch(new AbilityContext(_owner, _owner.Origin, _hits, count, now), CuePhase.Impact);
+        GatherAndDispatch(now, CuePhase.Impact);
         _nextTick += _def.ChannelTick;
+    }
+
+    public void FixedTick(float now)
+    {
+        if (!_def.UsesFixedUpdate) return;
+        if (!_channeling) return;
+        GatherAndDispatch(now, CuePhase.Impact);
+    }
+
+    private void GatherAndDispatch(float now, CuePhase phase)
+    {
+        int count = GatherTargets();
+        Dispatch(new AbilityContext(_owner, _owner.Origin, _hits, count, now), phase);
     }
 
     private void Dispatch(in AbilityContext context, CuePhase phase)
     {
-        CueDef cueDef;
-        switch (phase)
+        CueDef cueDef = phase switch
         {
-            case CuePhase.Start:
-                cueDef = _def.Start;
-                break;
-            case CuePhase.Impact:
-                cueDef = _def.Impact;
-                break;
-            case CuePhase.End:
-                cueDef = _def.End;
-                break;
-            default:
-                cueDef = _def.Impact;
-                break;
-        }
-        _owner.PlayCue(cueDef);
+            CuePhase.Start => _def.Start,
+            CuePhase.Impact => _def.Impact,
+            CuePhase.End => _def.End,
+            _ => null
+        };
 
-        for(int i = 0; i < _execs.Count; i++) _execs[i].Execute(context, _def.Effects[i], phase);
+        
+        if(cueDef)_owner.PlayCue(cueDef);
+
+        int n = Mathf.Min(_execs.Count, _def.Effects?.Length ?? 0);
+        for(int i = 0; i < n; i++) _execs[i].Execute(context, _def.Effects[i], phase);
 
     }
 
@@ -149,7 +155,7 @@ public sealed class AbilityRuntime
         if(_def.Costs != null && _def.Costs.Length > 0) _owner.SpendAll(_def.Costs);
         if (_def.GrantTags != null) for (int i = 0; i < _def.GrantTags.Length; i++) _owner.AddTag(_def.GrantTags[i]);
         _cooldownEnd = now + _def.CooldownSeconds;
-        _owner.PlayCue(_def.Start);
+        //_owner.PlayCue(_def.Start);
     }
 
     

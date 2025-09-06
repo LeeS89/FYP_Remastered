@@ -18,6 +18,7 @@ MonoBehaviour:
   BlockedByTags:
   - {fileID: 11400000, guid: e318b344c73e6e54ba42e96b34f9923a, type: 2}
   - {fileID: 11400000, guid: 4c5c68cf7975e5d4a865fdf381fcdda1, type: 2}
+  - {fileID: 11400000, guid: cf5924cb6e4108047bc6eb89218a44e0, type: 2}
   RequiredTags: []
   CooldownSeconds: 0
   Costs: []
@@ -29,12 +30,12 @@ MonoBehaviour:
     hitMask:
       serializedVersion: 2
       m_Bits: 64
-    Maxhits: 32
+    Maxhits: 64
   Effects:
   - {fileID: 11400000, guid: cd73d535947aac5489607519ee8557f0, type: 2}
-  - {fileID: 11400000, guid: f7cecf5fba4b9c841b06b475cd499b89, type: 2}
   Start: {fileID: 11400000, guid: fde676bb0e48d9b41b9ddb45892c7058, type: 2}
   Impact: {fileID: 11400000, guid: 2df8565e3d657ed44a32284cd290cb38, type: 2}
   End: {fileID: 11400000, guid: eee7f327485945f43abfc0243f16498b, type: 2}
   IsChanneled: 1
+  UsesFixedUpdate: 1
   ChannelTick: 0.05

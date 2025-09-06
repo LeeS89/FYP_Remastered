@@ -53,7 +53,7 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
     }
 
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
         if (_tryActivateFreeze)
         {
@@ -68,6 +68,15 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
 
         float now = Time.time;
         for (int i = 0; i < _runtimes.Count; i++) _runtimes[i].Tick(now);
+    }
+
+    private void FixedUpdate()
+    {
+        float now = Time.fixedTime;
+        for(int i = 0; i < _runtimes.Count; i++)
+        {
+            _runtimes[i].FixedTick(now);
+        }
     }
 
     public void AddTag(AbilityTags tag) => _tags.Add(tag);

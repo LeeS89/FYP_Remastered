@@ -14,6 +14,7 @@ public class AbilityDef : ScriptableObject
     public EffectDef[] Effects;
     public CueDef Start, Impact, End;
     public bool IsChanneled;
+    public bool UsesFixedUpdate;
     public float ChannelTick;
 }
 
