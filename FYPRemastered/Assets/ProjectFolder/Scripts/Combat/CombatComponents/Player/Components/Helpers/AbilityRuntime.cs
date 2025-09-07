@@ -65,6 +65,11 @@ public sealed class AbilityRuntime
         return true;
     }
 
+    private void OnInterrupted()
+    {
+
+    }
+
     public void End(float now)
     {
         if(_channeling) _channeling = false;

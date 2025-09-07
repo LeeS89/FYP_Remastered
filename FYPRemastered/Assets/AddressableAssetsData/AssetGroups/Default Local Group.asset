@@ -30,6 +30,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8a01480a7337d1a4c9d702efa8c7e443
+    m_Address: AbilityProjectile
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d17b80f5e1882c04b99e676a1cafe481
     m_Address: DeflectAudio
     m_ReadOnly: 0

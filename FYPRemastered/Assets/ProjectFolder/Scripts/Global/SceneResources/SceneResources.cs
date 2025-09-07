@@ -19,7 +19,12 @@ public abstract class SceneResources
         return Task.CompletedTask;
     }
 
-   
+    protected virtual Task LoadResourceFireParticle()
+    {
+        return Task.CompletedTask;
+    }
+
+
 
     protected virtual void ResourceRequested(in ResourceRequests request) { }
 

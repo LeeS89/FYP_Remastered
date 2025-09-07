@@ -211,12 +211,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b154e5e0416cec4a9af13606f77dca9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _damageData: {fileID: 11400000, guid: b7f82553a2b81bd4194b10319677300f, type: 2}
+  _statusEffectChancePercentage: 0
   _collider: {fileID: 5111258017325434983}
   _ignoreMask:
     serializedVersion: 2
     m_Bits: 256
-  _damageData: {fileID: 11400000, guid: b7f82553a2b81bd4194b10319677300f, type: 2}
-  _statusEffectChancePercentage: 0
   _testDeflect: 0
 --- !u!1 &7876611720651942564
 GameObject:
@@ -284,7 +284,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 5d7ea3ff6a41e1b46a4fbe67af406517, type: 2}
+  - {fileID: 2100000, guid: 44529b61ab7e6e94988601924d7f3319, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

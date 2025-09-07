@@ -13,13 +13,15 @@ public class BulletResources : SceneResources, IUpdateableResource
 
     private GameObject _normalBulletPrefab;
     private GameObject _normalHitPrefab;
+    private GameObject _fireParticleGO;
     public GameObject DeflectAudioSourcePrefabGO { get; private set; }
-
+    
   
 
     private PoolManager<GameObject> _bulletPool;
     private PoolManager<AudioSource> _deflectAudioPool;
     private PoolManager<ParticleSystem> _hitParticlePool;
+    private PoolManager<ParticleSystem> _fireParticlePool;
 
 
     public override async Task LoadResources()
@@ -40,6 +42,7 @@ public class BulletResources : SceneResources, IUpdateableResource
 
                 await LoadResourceAudio();
                 await LoadResourceParticles();
+                await LoadResourceFireParticle();
 
                 InitializePools();
             }
@@ -48,7 +51,7 @@ public class BulletResources : SceneResources, IUpdateableResource
                 Debug.LogError("Failed to load the normal bullet prefab from Addressables.");
             }
 
-           // SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;
+          
             SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;
 
             SceneEventAggregator.Instance.OnResourceReleased += ResourceReleased;
@@ -79,6 +82,33 @@ public class BulletResources : SceneResources, IUpdateableResource
             Debug.LogError($"Error loading bullet audio resources: {e.Message}");
         }
 
+    }
+
+    protected override async Task LoadResourceFireParticle()
+    {
+        try
+        {
+            var particleHandle = Addressables.LoadAssetAsync<GameObject>("AbilityProjectile");
+
+            await particleHandle.Task;
+
+            if (particleHandle.Status == AsyncOperationStatus.Succeeded)
+            {
+                _fireParticleGO = particleHandle.Result;
+                if (_fireParticleGO == null)
+                {
+                    Debug.LogError("Loaded normal hit particle prefab is null.");
+                }
+            }
+            else
+            {
+                Debug.LogError("Failed to load the normal hit particle prefab from Addressables.");
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Error loading bullet particle resources: {e.Message}");
+        }
     }
 
     protected override async Task LoadResourceParticles()
@@ -129,6 +159,12 @@ public class BulletResources : SceneResources, IUpdateableResource
             _deflectAudioPool.PreWarmPool(20);
             /*_deflectAudioPool = new PoolManager(DeflectAudioSourcePrefabGO, 5, 10);
             _deflectAudioPool.PrewarmPool(5);*/
+        }
+
+        if(_fireParticleGO != null)
+        {
+            _fireParticlePool = new PoolManager<ParticleSystem>(this, _fireParticleGO.GetComponent<ParticleSystem>());
+            _fireParticlePool.PreWarmPool(10);
         }
 
         if (_normalBulletPrefab != null)

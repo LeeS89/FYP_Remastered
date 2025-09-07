@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
 
-public sealed class PoolManager<T> : IPoolManager where T : UnityEngine.Object
+public sealed class PoolManager<T> : PoolManagerBase, IPoolManager where T : UnityEngine.Object
 {
     private ObjectPool<T> _pool;
     private int _maxSize;
