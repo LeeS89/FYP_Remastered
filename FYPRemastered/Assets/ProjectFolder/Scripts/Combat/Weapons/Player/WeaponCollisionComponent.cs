@@ -35,7 +35,7 @@ public class WeaponCollisionComponent : EventManager
                 isImpacting = true;  // Mark the lightsaber as in contact
             }
         }*/
-        if (CheckForDeflectable(collision.gameObject, out IDeflectable deflectable))
+        if (CheckForDeflectable(collision.gameObject, out IFreezeAndDeflectable deflectable))
         {
             deflectable.Deflect(ProjectileKickType.Deflect);
         }
@@ -56,8 +56,8 @@ public class WeaponCollisionComponent : EventManager
        
     }
 
-    private bool CheckForDeflectable(GameObject gameObject, out IDeflectable deflectable) 
-        => ComponentRegistry.TryGet<IDeflectable>(gameObject, out deflectable);
+    private bool CheckForDeflectable(GameObject gameObject, out IFreezeAndDeflectable deflectable) 
+        => ComponentRegistry.TryGet<IFreezeAndDeflectable>(gameObject, out deflectable);
 
 
     /*private void OnCollisionStay(Collision collision)

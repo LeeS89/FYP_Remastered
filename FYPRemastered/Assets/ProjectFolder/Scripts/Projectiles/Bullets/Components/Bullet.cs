@@ -1,14 +1,14 @@
 using UnityEngine;
 
 [RequireComponent(typeof(BulletCollisionComponent))]
-public class Bullet : Projectile, IDeflectable
+public sealed class Bullet : Projectile, IFreezeAndDeflectable
 {
     [Header("Deflection Speed")]
-    [SerializeField] protected float _deflectSpeed;
+    [SerializeField] private float _deflectSpeed;
 
     public bool testFreeze = false;
-    [SerializeField] protected Animator _anim;
-    [SerializeField] protected float _cullDistance = 0.5f;
+    [SerializeField] private Animator _anim;
+    [SerializeField] private float _cullDistance = 0.5f;
 
  
     private GameObject _componentRegistryTargetObj;
@@ -17,15 +17,15 @@ public class Bullet : Projectile, IDeflectable
     public override void RegisterLocalEvents(EventManager eventManager)
     {
         base.RegisterLocalEvents(eventManager);
-        _projectileEventManager.OnGetDirectionToTarget += GetDirectionToTarget;
+        _projectileEventManager.OnGetDirectionToTarget += GetDirectionToOwnerOnDeflect;
 
     }
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
         base.UnRegisterLocalEvents(eventManager);
-        ComponentRegistry.Unregister<IDeflectable>(_componentRegistryTargetObj);
-        _projectileEventManager.OnGetDirectionToTarget -= GetDirectionToTarget;
+        ComponentRegistry.Unregister<IFreezeAndDeflectable>(_componentRegistryTargetObj);
+        _projectileEventManager.OnGetDirectionToTarget -= GetDirectionToOwnerOnDeflect;
     }
 
     protected override void CreateDefaultColliderIfNoneExists(GameObject target, bool exists)
@@ -35,7 +35,7 @@ public class Bullet : Projectile, IDeflectable
         {
             _componentRegistryTargetObj.AddComponent<CapsuleCollider>();
         }
-        ComponentRegistry.Register<IDeflectable>(_componentRegistryTargetObj, this);
+        ComponentRegistry.Register<IFreezeAndDeflectable>(_componentRegistryTargetObj, this);
     }
 
     protected override void AttachMovementHandler()
@@ -102,7 +102,7 @@ public class Bullet : Projectile, IDeflectable
         }
     }
 
-    protected virtual void Cull(bool cull = false)
+    private void Cull(bool cull = false)
     {
         if (cull)
         {
@@ -127,7 +127,7 @@ public class Bullet : Projectile, IDeflectable
 
     }
 
-    public virtual void Freeze()
+    public void Freeze()
     {
        
         if (HasState(IsFrozen)) { return; }

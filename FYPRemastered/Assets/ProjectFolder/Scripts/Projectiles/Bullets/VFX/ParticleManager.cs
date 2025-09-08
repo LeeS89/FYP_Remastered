@@ -11,12 +11,27 @@ public class ParticleManager : MonoBehaviour
     [Header("Tracked Bullets")]
     public List<Projectile> activeBullets;
 
+    [Header("Tracked Bullets")]
+    public List<ProjectileBase> activeProjectiles;
+
     private ParticleSystem.Particle[] particles;
     private bool _particlesExist = false;
 
     private void Awake()
     {
         instance = this;
+    }
+
+    public void AddProjectile(ProjectileBase projectile)
+    {
+        if (!activeProjectiles.Contains(projectile))
+        {
+            activeProjectiles.Add(projectile);
+            _particlesExist = true;
+
+            // Emit a particle immediately for this bullet
+            _particleSystem.Emit(1);
+        }
     }
 
     public void AddBullet(Projectile bullet)

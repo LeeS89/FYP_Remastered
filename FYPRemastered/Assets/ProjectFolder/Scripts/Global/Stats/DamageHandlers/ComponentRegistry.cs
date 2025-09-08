@@ -75,7 +75,7 @@ public static class ComponentRegistry
         _maps[typeof(IDamageable)][2] = "test2";
 */
         // Get the inner dictionary
-        var innerDict = _maps[typeof(IDeflectable)];
+        var innerDict = _maps[typeof(IFreezeAndDeflectable)];
 
         // Check before trim
         Debug.LogError($"Count: {innerDict.Count}, Capacity: {innerDict.GetCapacity()}");

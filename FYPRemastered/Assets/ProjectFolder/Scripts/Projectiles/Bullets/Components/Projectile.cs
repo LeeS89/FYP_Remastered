@@ -105,7 +105,7 @@ public abstract class Projectile : ComponentEvents, IPoolable
 
   
 
-    protected virtual Vector3 GetDirectionToTarget()
+    protected virtual Vector3 GetDirectionToOwnerOnDeflect()
     {
         Vector3 directionTotarget = TargetingUtility.GetDirectionToTarget(Owner, gameObject, true);
         return directionTotarget;

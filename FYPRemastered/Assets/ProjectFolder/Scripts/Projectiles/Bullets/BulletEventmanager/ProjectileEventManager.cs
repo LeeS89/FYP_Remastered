@@ -15,7 +15,15 @@ public sealed class ProjectileEventManager : EventManager
     public event Action<Projectile/*, BulletType*/> OnBulletParticleStop;
     
     public event Action<bool> OnCull;
-   
+
+
+    // NEW PARTICLE
+    public event Action<ProjectileBase/*, BulletType*/> OnProjectileParticlePlay;
+    public event Action<ProjectileBase/*, BulletType*/> OnProjectileParticleStop;
+
+    public void ParticleBegin(ProjectileBase proj) => OnProjectileParticlePlay?.Invoke(proj);
+    public void ParticleEnd(ProjectileBase proj) => OnProjectileParticleStop?.Invoke(proj);
+    // END NEW PARTICLE
 
 
     private void Awake()

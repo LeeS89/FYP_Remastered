@@ -4,10 +4,10 @@ using UnityEngine;
 [Obsolete]
 public sealed class TrackedFreezeables
 {
-    private IDeflectable[] _arr = new IDeflectable[64];
+    private IFreezeAndDeflectable[] _arr = new IFreezeAndDeflectable[64];
     private int _count;
 
-    public bool Add(IDeflectable deflectable)
+    public bool Add(IFreezeAndDeflectable deflectable)
     {
         for (int i = 0; i < _count; i++) if (ReferenceEquals(_arr[i], deflectable)) return false;
         if (_count == _arr.Length) Array.Resize(ref _arr, _arr.Length * 2);

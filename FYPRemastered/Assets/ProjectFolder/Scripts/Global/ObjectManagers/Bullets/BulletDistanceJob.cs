@@ -18,6 +18,10 @@ public class BulletDistanceJob : MonoBehaviour
     private float _jobCooldown = 0.1f;
     private float _nextJobTime = 0f;
 
+    // NEW
+    private List<DeflectableProjectile> _frozenProjectiles = new List<DeflectableProjectile>();
+    // END NEW
+
     private void Awake()
     {
         if(Instance != null && Instance != this)
@@ -61,6 +65,28 @@ public class BulletDistanceJob : MonoBehaviour
             }
         }
     }
+
+    // NEW
+    public bool AddFrozenProjectile(DeflectableProjectile projectile)
+    {
+        if (!_frozenProjectiles.Contains(projectile))
+        {
+            _frozenProjectiles.Add(projectile);
+            return true;
+        }
+        return false;
+    }
+    public bool RemoveFrozenProjectile(DeflectableProjectile projectile)
+    {
+        if (_frozenProjectiles.Contains(projectile))
+        {
+            _frozenProjectiles.Remove(projectile);
+            return true;
+        }
+        return false;
+    }
+
+    // END NEW
 
     public bool AddFrozenBullet(Projectile bullet)
     {

@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class FreezeAndTrackExecutor : IEffectExecutor
 {
-    private IDeflectable[] _arr = new IDeflectable[64];
+    private IFreezeAndDeflectable[] _arr = new IFreezeAndDeflectable[64];
     private int _count;
 
     public FreezeAndTrackExecutor() { }
@@ -24,14 +24,14 @@ public class FreezeAndTrackExecutor : IEffectExecutor
         for (int i = 0; i < context.TargetCount; i++)
         {
             var go = context.Targets[i].gameObject;
-            if (ComponentRegistry.TryGet(go, out IDeflectable freezeable))
+            if (ComponentRegistry.TryGet(go, out IFreezeAndDeflectable freezeable))
             {
                 if (CanFreeze(freezeable)) freezeable.Freeze();
             }
         }
     }
 
-    private bool CanFreeze(IDeflectable freezable)
+    private bool CanFreeze(IFreezeAndDeflectable freezable)
     {
         for (int i = 0; i < _count; i++) if (ReferenceEquals(_arr[i], freezable)) return false;
         if (_count == _arr.Length) Array.Resize(ref _arr, _arr.Length * 2);

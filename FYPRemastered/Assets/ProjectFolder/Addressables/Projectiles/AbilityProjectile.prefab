@@ -5189,9 +5189,6 @@ GameObject:
   - component: {fileID: 2870671883106461670}
   - component: {fileID: 7947843632341690397}
   - component: {fileID: 5639096503607066153}
-  - component: {fileID: 4980644276533596484}
-  - component: {fileID: 1830351450458079496}
-  - component: {fileID: 7056529992644967916}
   m_Layer: 11
   m_Name: AbilityProjectile
   m_TagString: Untagged
@@ -10258,53 +10255,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &4980644276533596484
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7471035792201910026}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0b154e5e0416cec4a9af13606f77dca9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _damageData: {fileID: 0}
-  _statusEffectChancePercentage: 0
-  _collider: {fileID: 0}
-  _ignoreMask:
-    serializedVersion: 2
-    m_Bits: 0
-  _testDeflect: 0
---- !u!114 &1830351450458079496
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7471035792201910026}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1f4a8f9539130414486f6d4010ad52f1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _testRespawn: 0
---- !u!114 &7056529992644967916
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7471035792201910026}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 355cc7064fd20b441b656f07ee06a501, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _lifespan: 5
-  _distanceToPlayer: 0
-  _projectileSpeed: 0
 --- !u!1 &8591349786433122917
 GameObject:
   m_ObjectHideFlags: 0

@@ -17,7 +17,7 @@ public class AbilitiesComponent : BaseAbilities
 
     [Header("Trace results max size")]
     [SerializeField] private int _maxTraceResults = 30;
-    [SerializeField] private IDeflectable[] _bulletTraceresults;
+    [SerializeField] private IFreezeAndDeflectable[] _bulletTraceresults;
    // [SerializeField] private List<IDeflectable> _deflectables;
     private PlayerTraceManager _traceComp;
     [SerializeField] private bool _traceEnabled = false;
@@ -31,7 +31,7 @@ public class AbilitiesComponent : BaseAbilities
         _playerEventManager = eventManager as PlayerEventManager;
         base.RegisterLocalEvents(_playerEventManager);
         _traceComp = new PlayerTraceManager(_maxTraceResults);
-        _bulletTraceresults = new IDeflectable[_maxTraceResults];
+        _bulletTraceresults = new IFreezeAndDeflectable[_maxTraceResults];
        // _deflectables = new List<IDeflectable>();
        // _deflectables.EnsureCapacity(_maxTraceResults);
         _bullets = new List<Projectile>();
@@ -105,7 +105,7 @@ public class AbilitiesComponent : BaseAbilities
 
     private void SweepForBullets()
     {
-        _traceComp.CheckTargetProximity<IDeflectable>(_traceLocation, _bulletTraceresults, ref _deflectableCount, _sphereRadius, _traceLayer);
+        _traceComp.CheckTargetProximity<IFreezeAndDeflectable>(_traceLocation, _bulletTraceresults, ref _deflectableCount, _sphereRadius, _traceLayer);
         
         if(_deflectableCount <= 0) { return; }
         
