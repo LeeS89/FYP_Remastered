@@ -7,6 +7,8 @@ public sealed class DeflectableProjectileMovementManager : ProjectileMovementMan
 
     public bool IsFrozen { get; private set; } = false;
 
+
+
     public DeflectableProjectileMovementManager(
         ProjectileEventManager eventManager, Rigidbody rb, 
         float initialSpeed, MovementType moveType, 
@@ -43,14 +45,14 @@ public sealed class DeflectableProjectileMovementManager : ProjectileMovementMan
 
     public override void FixedTick()
     {
-        if(!IsFrozen) base.FixedTick();
-
-        if (!DeflectionProcessed || _rb.isKinematic) { return; } // Take out when changing to trigger
+        /*if(!IsFrozen)*/ base.FixedTick();
+        
+        /*if (!DeflectionProcessed || _rb.isKinematic) { return; } // Take out when changing to trigger
 
         if (_rb.linearVelocity.magnitude < Speed * 0.95f)
         {
             _rb.linearVelocity = _rb.transform.forward * Speed;
-        }
+        }*/
     }
 
     protected override void ResetRigidBody()

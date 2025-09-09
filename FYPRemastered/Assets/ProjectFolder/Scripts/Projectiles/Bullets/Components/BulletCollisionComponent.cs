@@ -96,6 +96,11 @@ public class BulletCollisionComponent : ProjectileCollisionComponent
 
     }
 
+    protected override void OnTriggerEnter(Collider other)
+    {
+        base.OnTriggerEnter(other);
+    }
+
     
 
     private void CheckForDamageableInterface(Collision collision, ContactPoint cPoint, Vector3 hitPoint, Vector3 hitNormal)

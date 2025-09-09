@@ -13,7 +13,7 @@ namespace Oculus.Interaction.Input
         private bool _radiiReady;
         private Handedness _cachedHandedness;
 
-        protected override void UpdateDataPoses(SkeletonPoseData poseData)
+       /* protected override void UpdateDataPoses(SkeletonPoseData poseData)
         {
             EnsureRadiiCached();
 
@@ -120,7 +120,7 @@ namespace Oculus.Interaction.Input
             _radiiReady = true;
             _cachedHandedness = _handedness;
         }
-
+*/
         private static int RemapBoneIndexForSDK(int boneIndex)
         {
 #if ISDK_OPENXR_HAND

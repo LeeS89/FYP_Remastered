@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class ProjectileMovementManagerBase
 {
@@ -89,7 +89,7 @@ public class ProjectileMovementManagerBase
                 _rb.AddForce(_rb.transform.forward * Speed, ForceMode.Impulse);
                 break;
             default:
-                Move();
+               // Move();
                 break;
         }
     }

@@ -40,7 +40,7 @@ public sealed class DeflectableProjectile : ProjectileBase, IFreezeAndDeflectabl
     }
 
     protected override void AttachMovementHandler()
-        => _movementHandler = new DeflectableProjectileMovementManager(_projectileEventManager, GetComponent<Rigidbody>(), _projectileSpeed, _movementType, _deflectSpeed) as DeflectableProjectileMovementManager;
+        => _movementHandler = new DeflectableProjectileMovementManager(_projectileEventManager, GetComponent<Rigidbody>(), _projectileSpeed, _movementType, _deflectSpeed, _acceleration, _maxSpeed, _useGravity) as DeflectableProjectileMovementManager;
 
 
     private Vector3 GetDirectionToOwnerOnDeflect()

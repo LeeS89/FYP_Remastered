@@ -45,9 +45,9 @@ public abstract class ProjectileBase : ComponentEvents, IPoolable
 
     protected byte _state;
     protected const byte IsActive = 1 << 0;
-   
-    
 
+
+    public ProjectileCollisionComponent _colComp;
 
     protected void SetState(byte state) => _state |= state;
     protected void ClearState(byte state) => _state &= (byte)~state;
@@ -153,11 +153,16 @@ public abstract class ProjectileBase : ComponentEvents, IPoolable
 
     }
 
-    protected virtual void FixedUpdate() => _movementHandler?.FixedTick();
+    protected virtual void FixedUpdate()
+    {
+        _movementHandler?.FixedTick();
+        _colComp.FixedTick();
+    }
 
 
     protected virtual void OnExpired()
     {
+       // Destroy(gameObject);
         ClearState(IsActive);
         _projectilePool?.Release(gameObject);
     }
