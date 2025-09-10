@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[RequireComponent(typeof(DeflectableCollisionComponent))]
 public sealed class DeflectableProjectile : ProjectileBase, IFreezeAndDeflectable
 {
     [Header("Deflection Speed")]
@@ -82,10 +83,16 @@ public sealed class DeflectableProjectile : ProjectileBase, IFreezeAndDeflectabl
 
         if (_testUnFreeze)
         {
-            // UnFreeze();
+            Deflect(ProjectileKickType.ReFire);
             _testUnFreeze = false;
         }
 #endif
+    }
+
+    protected override void FixedUpdate()
+    {
+        if (HasState(IsFrozen)) return;
+        base.FixedUpdate();
     }
 
     public override void SetDistanceToPlayer(float distance)
@@ -156,10 +163,11 @@ public sealed class DeflectableProjectile : ProjectileBase, IFreezeAndDeflectabl
     {
         if (BulletDistanceJob.Instance.RemoveFrozenProjectile(this))
         {
-            SetState(IsFrozen);
+            //SetState(IsFrozen);
+            ClearState(IsFrozen);
 
         }
-        if (!HasState(IsFrozen)) { return; }
+        if (HasState(IsFrozen)) { return; }
         if (HasState(IsCulled))
         {
             Cull(false);

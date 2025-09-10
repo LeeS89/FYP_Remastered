@@ -17,9 +17,16 @@ public sealed class ProjectileEventManager : EventManager
     public event Action<bool> OnCull;
 
 
+    public event Func<Vector3, float, bool> OnSweep;
+
+    public bool Sweep(Vector3 direction, float distance) => OnSweep?.Invoke(direction, distance) ?? false;
+
     // NEW PARTICLE
     public event Action<ProjectileBase/*, BulletType*/> OnProjectileParticlePlay;
     public event Action<ProjectileBase/*, BulletType*/> OnProjectileParticleStop;
+
+
+    public event Action<Vector3, Vector3> OnCollide;
 
     public void ParticleBegin(ProjectileBase proj) => OnProjectileParticlePlay?.Invoke(proj);
     public void ParticleEnd(ProjectileBase proj) => OnProjectileParticleStop?.Invoke(proj);
@@ -80,6 +87,7 @@ public sealed class ProjectileEventManager : EventManager
 
     public void Collision(Collision collision) => OnCollision?.Invoke(collision);
 
+    public void Collide(Vector3 hitPoint, Vector3? hitNormal = null) => OnCollide?.Invoke(hitPoint, hitNormal.Value);
 
     public void Expired() => OnExpired?.Invoke();
 

@@ -24,6 +24,7 @@ public sealed class DeflectableProjectileMovementManager : ProjectileMovementMan
 
     private void Deflected(ProjectileKickType type)
     {
+        Debug.LogError("Deflect called");
         Vector3 directionTotarget = _eventManager.GetDirectionToTarget();
 
         Quaternion newRotation = Quaternion.LookRotation(directionTotarget);
@@ -43,8 +44,24 @@ public sealed class DeflectableProjectileMovementManager : ProjectileMovementMan
         base.Launch();
     }
 
+
+    protected override void Accelerate()
+    {
+        
+        /*var dir = _rb.transform.forward;
+        _rb.AddForce(dir * Acceleration, ForceMode.Acceleration);
+
+        if (MaxSped > 0)
+        {
+            float sq = _rb.linearVelocity.sqrMagnitude;
+            float maxSq = MaxSped * MaxSped;
+            if (sq > maxSq) _rb.linearVelocity = _rb.linearVelocity.normalized * MaxSped;
+        }*/
+    }
+
     public override void FixedTick()
     {
+        
         /*if(!IsFrozen)*/ base.FixedTick();
         
         /*if (!DeflectionProcessed || _rb.isKinematic) { return; } // Take out when changing to trigger

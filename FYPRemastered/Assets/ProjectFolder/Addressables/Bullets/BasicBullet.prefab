@@ -12,6 +12,18 @@ PrefabInstance:
       propertyPath: _deflectSpeed
       value: 25
       objectReference: {fileID: 0}
+    - target: {fileID: 1383861232839778088, guid: 0a079e03acf62314b99b18a709e823e3, type: 3}
+      propertyPath: _collider
+      value: 
+      objectReference: {fileID: 8265262318752204571}
+    - target: {fileID: 1383861232839778088, guid: 0a079e03acf62314b99b18a709e823e3, type: 3}
+      propertyPath: _damageData
+      value: 
+      objectReference: {fileID: 11400000, guid: b7f82553a2b81bd4194b10319677300f, type: 2}
+    - target: {fileID: 3527047245441631592, guid: 0a079e03acf62314b99b18a709e823e3, type: 3}
+      propertyPath: m_Interpolate
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3527047245441631592, guid: 0a079e03acf62314b99b18a709e823e3, type: 3}
       propertyPath: m_ExcludeLayers.m_Bits
       value: 64
@@ -19,6 +31,10 @@ PrefabInstance:
     - target: {fileID: 3831919138153410472, guid: 0a079e03acf62314b99b18a709e823e3, type: 3}
       propertyPath: _editableSpeed
       value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 5111258017325434983, guid: 0a079e03acf62314b99b18a709e823e3, type: 3}
+      propertyPath: m_IsTrigger
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5111258017325434983, guid: 0a079e03acf62314b99b18a709e823e3, type: 3}
       propertyPath: m_ExcludeLayers.m_Bits
@@ -76,8 +92,52 @@ PrefabInstance:
       propertyPath: m_Name
       value: BasicBullet
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 7342436492212579740, guid: 0a079e03acf62314b99b18a709e823e3, type: 3}
+      propertyPath: _deflectorMask.m_Bits
+      value: 256
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 20446614359500689, guid: 0a079e03acf62314b99b18a709e823e3, type: 3}
+    - {fileID: 7342436492212579740, guid: 0a079e03acf62314b99b18a709e823e3, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6588732399459625391, guid: 0a079e03acf62314b99b18a709e823e3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5535871878978817987}
   m_SourcePrefab: {fileID: 100100000, guid: 0a079e03acf62314b99b18a709e823e3, type: 3}
+--- !u!1 &8013358849585882835 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6588732399459625391, guid: 0a079e03acf62314b99b18a709e823e3, type: 3}
+  m_PrefabInstance: {fileID: 3772550150110138236}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5535871878978817987
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8013358849585882835}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98f61b6b36ef07542bd35ed97c165c12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _movementType: 1
+  _lifespan: 5
+  _distanceToPlayer: 0
+  _projectileSpeed: 5
+  _acceleration: 2
+  _maxSpeed: 30
+  _useGravity: 0
+  _testlaunch: 0
+  _deflectSpeed: 25
+  testFreeze: 0
+  _anim: {fileID: 0}
+  _cullDistance: 0.5
+  _testUnFreeze: 0
+--- !u!136 &8265262318752204571 stripped
+CapsuleCollider:
+  m_CorrespondingSourceObject: {fileID: 5111258017325434983, guid: 0a079e03acf62314b99b18a709e823e3, type: 3}
+  m_PrefabInstance: {fileID: 3772550150110138236}
+  m_PrefabAsset: {fileID: 0}

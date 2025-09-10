@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[RequireComponent(typeof(BulletCollisionComponent))]
+[RequireComponent(typeof(DeflectableCollisionComponent))]
 public sealed class Bullet : Projectile, IFreezeAndDeflectable
 {
     [Header("Deflection Speed")]

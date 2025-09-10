@@ -47,7 +47,7 @@ public abstract class ProjectileBase : ComponentEvents, IPoolable
     protected const byte IsActive = 1 << 0;
 
 
-    public ProjectileCollisionComponent _colComp;
+  
 
     protected void SetState(byte state) => _state |= state;
     protected void ClearState(byte state) => _state &= (byte)~state;
@@ -120,13 +120,6 @@ public abstract class ProjectileBase : ComponentEvents, IPoolable
 
 
 
-    /* protected virtual Vector3 GetDirectionToOwnerOnDeflect()
-     {
-         Vector3 directionTotarget = TargetingUtility.GetDirectionToTarget(Owner, gameObject, true);
-         return directionTotarget;
-     }*/
-
-
     public bool _testlaunch = false;
 
     public virtual void LaunchPoolable(GameObject projectileOwner)
@@ -153,11 +146,8 @@ public abstract class ProjectileBase : ComponentEvents, IPoolable
 
     }
 
-    protected virtual void FixedUpdate()
-    {
-        _movementHandler?.FixedTick();
-        _colComp.FixedTick();
-    }
+    protected virtual void FixedUpdate() => _movementHandler?.FixedTick();
+
 
 
     protected virtual void OnExpired()

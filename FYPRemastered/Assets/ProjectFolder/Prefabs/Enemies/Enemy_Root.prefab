@@ -104,9 +104,9 @@ GameObject:
   - component: {fileID: 960491701997048275}
   - component: {fileID: 7963726222172396574}
   - component: {fileID: 3074888559223914219}
-  - component: {fileID: 5165514309955864409}
   - component: {fileID: 726394843645409294}
   - component: {fileID: 3309944096030598539}
+  - component: {fileID: 5995802391695940015}
   m_Layer: 4
   m_Name: Enemy_Root
   m_TagString: Untagged
@@ -191,6 +191,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5d6e71e80e349548aca2fca6f29d3ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _testRespawn: 0
 --- !u!114 &960491701997048275
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -210,12 +211,8 @@ MonoBehaviour:
   _maxFlankingSteps: 12
   _debugFlankCubes: {fileID: 0}
   _anim: {fileID: 8894583834217872234}
-  dampTime: 0.1
   testRespawn: 0
-  _testWaypoint: 0
   _testDeath: 0
-  _updateEnaboled: 0
-  _testRotation: 0
 --- !u!208 &7963726222172396574
 NavMeshObstacle:
   m_ObjectHideFlags: 0
@@ -252,20 +249,6 @@ MonoBehaviour:
   _characterType: 1
   _testDamage: 0
   skinnedRenderer: {fileID: 0}
---- !u!114 &5165514309955864409
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 295630588504063347}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d9c3409325ab68f47ab7a782d5d93874, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _testDeath: 0
-  _visualMesh: {fileID: 0}
 --- !u!114 &726394843645409294
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -327,6 +310,19 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.035965, y: 1.7152128, z: 0.61201286}
   m_Center: {x: 0.0787549, y: 1.2108064, z: 0.014566898}
+--- !u!114 &5995802391695940015
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 295630588504063347}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bee573a46eb891940b1392ede30cf816, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _testDeath: 0
 --- !u!1 &613288840807163240
 GameObject:
   m_ObjectHideFlags: 0

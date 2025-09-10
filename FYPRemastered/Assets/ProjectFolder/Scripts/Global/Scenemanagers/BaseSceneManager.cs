@@ -39,6 +39,8 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
         //ComponentRegistry.SetCapacities<IDeflectable>(100);
 
         var damageables = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None).OfType<IDamageable>();
+        int count = damageables.Count();
+        Debug.LogError($"Found {count} IDamageable components in scene {gameObject.scene.name}");
         foreach (var d in damageables)
         {
             ComponentRegistry.Register<IDamageable>(((MonoBehaviour)d).gameObject, d);
