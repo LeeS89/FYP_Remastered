@@ -3,20 +3,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
 
-public sealed class PoolManager<T> : PoolManagerBase, IPoolManager where T : UnityEngine.Object
+public sealed class PoolManager<T> : PoolManagerBase /*IPoolManager*/ where T : UnityEngine.Object
 {
     private ObjectPool<T> _pool;
     private int _maxSize;
     private Transform _poolContainer;
     private T _prefab;
     private Dictionary<T,Transform> _transformCache = new();
-    private BulletResources _manager;
+    private NewBulletResources _manager;
 
-    public Type ItemType => typeof(T);
+    public override Type ItemType => typeof(T);
 
  
     ///////  NEW CONSTRUCTOR
-    public PoolManager(BulletResources manager, T prefab, int defaultCapacity = 10, int maxSize = 50)
+    public PoolManager(NewBulletResources manager, T prefab, int defaultCapacity = 10, int maxSize = 50)
     {
         _prefab = prefab ?? throw new ArgumentNullException(nameof(prefab));
         _poolContainer = new GameObject($"PoolContainer_{prefab.name}").transform;
@@ -124,7 +124,7 @@ public sealed class PoolManager<T> : PoolManagerBase, IPoolManager where T : Uni
     }
   
 
-    public void PreWarmPool(int count)
+    public override void PreWarmPool(int count)
     {
         int preWarmCount = Mathf.Min(count, _maxSize);
         List<T> tempList = new List<T>();
@@ -133,7 +133,7 @@ public sealed class PoolManager<T> : PoolManagerBase, IPoolManager where T : Uni
             var item = _pool.Get();
             tempList.Add(item);
         }
-       // Debug.LogError("Pool Count: "+tempList.Count);
+      
         foreach (var item in tempList)
         {
             _pool.Release(item);
@@ -141,12 +141,12 @@ public sealed class PoolManager<T> : PoolManagerBase, IPoolManager where T : Uni
 
     }
 
-    UnityEngine.Object IPoolManager.Get(Vector3 position, Quaternion rotation)
+    public override UnityEngine.Object GetFromPool(Vector3 position, Quaternion rotation)
     {
         return Get(position, rotation);
     }
 
-    void IPoolManager.Release(UnityEngine.Object obj)
+    public override void Release(UnityEngine.Object obj)
     {
         if(obj is T t) _pool.Release(t);
         else throw new InvalidOperationException(

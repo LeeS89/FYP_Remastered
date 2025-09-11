@@ -23,7 +23,7 @@ public class AgentWeaponHandler : WeaponHandlerBase
 
     protected Action _fireSequenceCallback;
 
-    public AgentWeaponHandler(EnemyEventManager eventManager, GameObject owner, Transform bulletSpawnPoint, Transform target, int clipCapacity) : base(owner)
+    public AgentWeaponHandler(EnemyEventManager eventManager, PoolIdSO poolId, GameObject owner, Transform bulletSpawnPoint, Transform target, int clipCapacity) : base(owner, poolId)
     {
         _eventManager = eventManager;
         _bulletSpawnPoint = bulletSpawnPoint;
@@ -32,7 +32,7 @@ public class AgentWeaponHandler : WeaponHandlerBase
 
         _fireSequenceCallback = TryFireRangedWeapon;
 
-        _rangedWeapon = new AgentRangedWeapon(_bulletSpawnPoint, _target, _eventManager, _owner, _clipCapacity);
+        _rangedWeapon = new AgentRangedWeapon(poolId, _bulletSpawnPoint, _target, _eventManager, _owner, _clipCapacity);
       //  _waitUntilShotReady = new WaitUntil(() => _shotIsReady);
         _shotInterval = new WaitForSeconds(0.25f);
 

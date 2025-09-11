@@ -58,7 +58,7 @@ public static class PoolExtensions
         if (pool.ItemType == typeof(AudioSource))
         {
 
-            var audio = pool.Get(position, rotation) as AudioSource;
+            var audio = pool.GetFromPool(position, rotation) as AudioSource;
             audio.Play();
             float playTime = (audio.clip != null)
                 ? audio.clip.length / Mathf.Max(audio.pitch, 0.0001f)
@@ -68,7 +68,7 @@ public static class PoolExtensions
         }
         else if (pool.ItemType == typeof(ParticleSystem))
         {
-            var particleSystem = pool.Get(position, rotation) as ParticleSystem;
+            var particleSystem = pool.GetFromPool(position, rotation) as ParticleSystem;
 
             particleSystem.Play();
             if (_delayParticle == null) { _delayParticle = new WaitForSeconds(particleSystem.main.duration); }

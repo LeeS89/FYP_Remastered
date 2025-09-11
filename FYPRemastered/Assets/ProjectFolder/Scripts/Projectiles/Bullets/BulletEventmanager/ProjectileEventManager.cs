@@ -11,9 +11,9 @@ public sealed class ProjectileEventManager : EventManager
     public event Func<Vector3> OnGetDirectionToTarget;
     public event Action OnFreeze;
   //  public event Action OnReverseDirection;
-    public event Action<Projectile/*, BulletType*/> OnBulletParticlePlay;
-    public event Action<Projectile/*, BulletType*/> OnBulletParticleStop;
-    
+   /* public event Action<Projectile*//*, BulletType*//*> OnBulletParticlePlay;
+    public event Action<Projectile*//*, BulletType*//*> OnBulletParticleStop;
+    */
     public event Action<bool> OnCull;
 
 
@@ -59,10 +59,10 @@ public sealed class ProjectileEventManager : EventManager
 
     
 
-    public void ParticlePlay(Projectile bullet/*, BulletType bulletType*/) => OnBulletParticlePlay?.Invoke(bullet/*, bulletType*/);
+  /*  public void ParticlePlay(Projectile bullet*//*, BulletType bulletType*//*) => OnBulletParticlePlay?.Invoke(bullet*//*, bulletType*//*);
 
 
-    public void ParticleStop(Projectile bullet/*, BulletType bulletType*/) => OnBulletParticleStop?.Invoke(bullet/*, bulletType*/);
+    public void ParticleStop(Projectile bullet*//*, BulletType bulletType*//*) => OnBulletParticleStop?.Invoke(bullet*//*, bulletType*//*);*/
 
 
     public void Cull(bool cull = false) => OnCull?.Invoke(cull);

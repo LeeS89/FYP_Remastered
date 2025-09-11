@@ -8,8 +8,8 @@ public class ParticleManager : MonoBehaviour
     [Header("Main Particle System")]
     public ParticleSystem _particleSystem;
 
-    [Header("Tracked Bullets")]
-    public List<Projectile> activeBullets;
+   /* [Header("Tracked Bullets")]
+    public List<Projectile> activeBullets;*/
 
     [Header("Tracked Bullets")]
     public List<ProjectileBase> activeProjectiles;
@@ -34,7 +34,16 @@ public class ParticleManager : MonoBehaviour
         }
     }
 
-    public void AddBullet(Projectile bullet)
+    public void RemoveProjectile(ProjectileBase projectile)
+    {
+        activeProjectiles.Remove(projectile);
+        if (activeProjectiles.Count <= 0)
+        {
+            _particlesExist = false;
+        }
+    }
+
+  /*  public void AddBullet(Projectile bullet)
     {
         if (!activeBullets.Contains(bullet))
         {
@@ -53,7 +62,7 @@ public class ParticleManager : MonoBehaviour
         {
             _particlesExist = false;
         }
-    }
+    }*/
 
     private void LateUpdate() // Changed to LateUpdate for better sync with rendered positions
     {
@@ -65,7 +74,7 @@ public class ParticleManager : MonoBehaviour
 
     private void UpdateMovingParticles()
     {
-        int bulletCount = activeBullets.Count;
+        int bulletCount = activeProjectiles.Count;
         if (bulletCount == 0) return;
 
         // Ensure particles array is large enough
@@ -89,7 +98,7 @@ public class ParticleManager : MonoBehaviour
 
         for (int i = 0; i < bulletCount; i++)
         {
-            particles[i].position = activeBullets[i].transform.position;
+            particles[i].position = activeProjectiles[i].transform.position;
         }
 
         _particleSystem.SetParticles(particles, particleCount);

@@ -30,25 +30,46 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 74fc63e386f6acc489ee84f6fe5e62f0
+    m_Address: NormalProjectileHit
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - MoonScene
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8a01480a7337d1a4c9d702efa8c7e443
     m_Address: AbilityProjectile
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cf1e034ab8af6ce4a85ba014ab85a72c
+    m_Address: DeflectAudioId
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - MoonScene
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d17b80f5e1882c04b99e676a1cafe481
     m_Address: DeflectAudio
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - MoonScene
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dc63e5723b826d945945fa22652c44b7
+    m_Address: NormalBulletID
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - MoonScene
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f25ee36fa90530643a56d63e9a3467ca
     m_Address: BasicBullet
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - MoonScene
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f33db7fc758f5944180365f8ef5eb197
     m_Address: BasicHit
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - MoonScene
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 6b63f10b5a4877b4c8b0b80a43f5a334, type: 2}

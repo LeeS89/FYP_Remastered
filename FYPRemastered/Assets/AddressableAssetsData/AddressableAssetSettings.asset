@@ -15,7 +15,7 @@ MonoBehaviour:
   m_DefaultGroup: ab9c3870c9792ed4cb281eb3d2b875d0
   m_currentHash:
     serializedVersion: 2
-    Hash: 3c6c7d017bf049458cfb58ec19b9a6d2
+    Hash: 00000000000000000000000000000000
   m_OptimizeCatalogSize: 0
   m_BuildRemoteCatalog: 0
   m_CatalogRequestsTimeout: 0
@@ -99,6 +99,7 @@ MonoBehaviour:
   m_LabelTable:
     m_LabelNames:
     - default
+    - MoonScene
   m_SchemaTemplates: []
   m_GroupTemplateObjects:
   - {fileID: 11400000, guid: 9777c0d6523abc44784bc8adb349a341, type: 2}

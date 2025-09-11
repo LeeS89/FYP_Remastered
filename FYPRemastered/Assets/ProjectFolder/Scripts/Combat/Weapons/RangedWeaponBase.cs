@@ -11,8 +11,9 @@ public abstract class RangedWeaponBase : IRangedWeapon
     protected IPoolManager _bulletPoolManager;
     protected GameObject _gunOwner;
     protected int _clipCount;
-    protected Action<PoolResourceType, IPoolManager> PoolRequestCallback;
+    protected Action<PoolIdSO, IPoolManager> PoolRequestCallback;
 
+    protected PoolIdSO _normalBulletPoolId;
 
 
     public abstract void Reload();
@@ -23,8 +24,9 @@ public abstract class RangedWeaponBase : IRangedWeapon
         GetPoolManager(type);
     }
 
-    protected virtual void SetBulletPool(PoolResourceType type, IPoolManager poolManager)
+    protected virtual void SetBulletPool(PoolIdSO type, IPoolManager poolManager)
     {
+        if (type == null || poolManager == null) return;
        _bulletPoolManager = poolManager;
     }
 
@@ -32,18 +34,19 @@ public abstract class RangedWeaponBase : IRangedWeapon
     {
         if (type == AmmoType.None) return;
 
-        PoolResourceType poolType;
+       // PoolResourceType poolType;
+       PoolIdSO poolType;
 
         switch (type)
         {
             case AmmoType.Normal:
-                poolType = PoolResourceType.NormalBulletPool;
+                poolType = _normalBulletPoolId;
                 break;
             default:
-                poolType = PoolResourceType.NormalBulletPool;
+                poolType = _normalBulletPoolId;
                 break;
         }
-        var bulletPool = ResourceRequests.RequestPool(poolType, PoolRequestCallback);
+        var bulletPool = ResourceRequests.RequestPool(_normalBulletPoolId, PoolRequestCallback);
 
         SceneEventAggregator.Instance.ResourceRequested(bulletPool);
 
@@ -68,7 +71,7 @@ public abstract class RangedWeaponBase : IRangedWeapon
             Vector3 direction = directionOverride ?? _bulletSpawnPoint.forward; // fallback direction
             Quaternion bulletRotation = Quaternion.LookRotation(direction);
             
-            GameObject obj = _bulletPoolManager.Get(_bulletSpawnPoint.position, bulletRotation) as GameObject;
+            GameObject obj = _bulletPoolManager.GetFromPool(_bulletSpawnPoint.position, bulletRotation) as GameObject;
 
             ComponentRegistry.TryGet<IPoolable>(obj, out var bullet);
 

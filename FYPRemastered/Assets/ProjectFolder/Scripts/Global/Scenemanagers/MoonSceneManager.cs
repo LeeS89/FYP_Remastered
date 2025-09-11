@@ -43,7 +43,7 @@ public class MoonSceneManager : BaseSceneManager
 
     public override async Task SetupScene()
     {
-        _resources = new SceneResourceManager(new BulletResources(), new WaypointResources());
+        _resources = new SceneResourceManager(new NewBulletResources(), new WaypointResources());
 
         
         await _resources.LoadResourcesAsync();

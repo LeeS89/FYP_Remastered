@@ -12,8 +12,11 @@ public class BulletVFX : ComponentEvents
 
     public ParticleSystem particleMove;
 
- 
-    private Action<PoolResourceType, IPoolManager> PoolRequestCallback;
+    [SerializeField] public PoolIdSO DeflectAudioPoolId;
+    public PoolIdSO HitParticlePoolId;
+
+
+    private Action<PoolIdSO, IPoolManager> PoolRequestCallback;
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
@@ -23,8 +26,8 @@ public class BulletVFX : ComponentEvents
 
         _particleManager = ParticleManager.instance;
         _bulletEventManager.OnDeflected += PlayDeflectionAudio;
-        _bulletEventManager.OnBulletParticlePlay += PlayBulletParticle;
-        _bulletEventManager.OnBulletParticleStop += StopBulletParticle;
+        _bulletEventManager.OnProjectileParticlePlay += PlayBulletParticle;
+        _bulletEventManager.OnProjectileParticleStop += StopBulletParticle;
         _bulletEventManager.OnCollision += SpawnHitParticle;
 
 
@@ -33,9 +36,9 @@ public class BulletVFX : ComponentEvents
 
     public override void InitialzeLocalPools()
     {
-        this.RequestPool(PoolResourceType.BasicHitParticlePool, PoolRequestCallback);
+        this.RequestPool(HitParticlePoolId, PoolRequestCallback);
        
-        this.RequestPool(PoolResourceType.DeflectAudioPool, PoolRequestCallback);
+        this.RequestPool(DeflectAudioPoolId, PoolRequestCallback);
     }
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
@@ -43,8 +46,8 @@ public class BulletVFX : ComponentEvents
         _bulletEventManager.Expired();
         
         _bulletEventManager.OnDeflected -= PlayDeflectionAudio;
-        _bulletEventManager.OnBulletParticlePlay -= PlayBulletParticle;
-        _bulletEventManager.OnBulletParticleStop -= StopBulletParticle;
+        _bulletEventManager.OnProjectileParticlePlay -= PlayBulletParticle;
+        _bulletEventManager.OnProjectileParticleStop -= StopBulletParticle;
         _bulletEventManager.OnCollision -= SpawnHitParticle;    
     }
 
@@ -56,9 +59,19 @@ public class BulletVFX : ComponentEvents
         PoolRequestCallback = null;
     }
 
-    private void OnPoolReceived(PoolResourceType type, IPoolManager pool)
+    private void OnPoolReceived(PoolIdSO poolId, IPoolManager pool)
     {
-        switch (type)
+        if (poolId == null) return;
+
+        if(poolId == DeflectAudioPoolId)
+        {
+            _audioPoolManager = pool;
+        }
+        else if(poolId == HitParticlePoolId)
+        {
+            _particlePoolManager = pool;
+        }
+        /*switch (poolId)
         {
             case PoolResourceType.BasicHitParticlePool:
                 _particlePoolManager = pool;
@@ -66,7 +79,7 @@ public class BulletVFX : ComponentEvents
                 case PoolResourceType.DeflectAudioPool:
                 _audioPoolManager = pool;
                 break;
-        }
+        }*/
         
     }
 
@@ -74,7 +87,7 @@ public class BulletVFX : ComponentEvents
     {
         // Different SFX for different deflection types
 
-        var sfx = _audioPoolManager.Get(transform.position, transform.rotation) as AudioSource;
+        var sfx = _audioPoolManager.GetFromPool(transform.position, transform.rotation) as AudioSource;
         sfx.Play();
         //PoolExtensions.GetAndPlay(_audioPoolManager, transform.position, transform.rotation);
     }
@@ -87,12 +100,12 @@ public class BulletVFX : ComponentEvents
         Vector3 pos = contact.point;
         //Vector3 hitNormal = contact.normal;
       
-        var hit = _particlePoolManager.Get(pos, Quaternion.identity) as ParticleSystem;
+        var hit = _particlePoolManager.GetFromPool(pos, Quaternion.identity) as ParticleSystem;
         hit.Play();
     
     }
 
-    private void PlayBulletParticle(Projectile bullet/*, BulletType bulletType*/)
+    private void PlayBulletParticle(ProjectileBase bullet/*, BulletType bulletType*/)
     {
         //ParticleSystem particle = transform.root.GetComponentInChildren<ParticleSystem>();
         
@@ -104,10 +117,10 @@ public class BulletVFX : ComponentEvents
 
         if (_particleManager == null) { return; }    
 
-        _particleManager.AddBullet(bullet/*, bulletType*/);
+        _particleManager.AddProjectile(bullet/*, bulletType*/);
     }
 
-    private void StopBulletParticle(Projectile bullet/*, BulletType bulletType*/)
+    private void StopBulletParticle(ProjectileBase bullet/*, BulletType bulletType*/)
     {
         //ParticleSystem particle = transform.root.GetComponentInChildren<ParticleSystem>();
         /*particleMove.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);*/
@@ -115,7 +128,7 @@ public class BulletVFX : ComponentEvents
         //particleMove.Pause();
 
         if (_particleManager == null) { return; }
-        _particleManager.RemoveBullet(bullet);
+        _particleManager.RemoveProjectile(bullet);
     }
 
     private void OnDisable()

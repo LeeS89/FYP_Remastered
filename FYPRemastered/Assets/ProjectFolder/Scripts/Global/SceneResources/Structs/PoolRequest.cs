@@ -22,7 +22,8 @@ public readonly struct ResourceRequests
 {
     // For AI and Pool requests
     public readonly AIResourceType AIResourceType;
-    public readonly PoolResourceType PoolType;
+  //  public readonly PoolResourceType PoolType;
+    public readonly PoolIdSO PoolId;
 
     // Path request params
     public readonly Vector3 PathStart;
@@ -34,27 +35,29 @@ public readonly struct ResourceRequests
     public readonly List<FlankPointData> FlankCandidates;
     public readonly Action<bool> FlankCallback;
 
-    public readonly Action<PoolResourceType, IPoolManager> PoolCallback;
+    public readonly Action<PoolIdSO, IPoolManager> PoolCallback;
     public readonly Action<LayerMask, LayerMask, LayerMask> FlankPointTargetAndBlockingMasksCallback;
     public readonly Action<BlockData> WaypointCallback;
     public readonly Action<bool> PathRequestCallback;
 
     private ResourceRequests(
         AIResourceType airt,
-        PoolResourceType prt,
+       // PoolResourceType prt,
+        PoolIdSO pid,
         Vector3 start,
         Vector3 end,
         NavMeshPath path,
         List<FlankPointData> flankCandidates,
         int flankCandidateSteps,
         Action<bool> flankCb,
-        Action<PoolResourceType, IPoolManager> poolCb,
+        Action<PoolIdSO, IPoolManager> poolCb,
         Action<LayerMask, LayerMask,LayerMask> fptabmCb,
         Action<BlockData> wpCb,
         Action<bool> prCb)
     {
         AIResourceType = airt;
-        PoolType = prt;
+       // PoolType = prt;
+        PoolId = pid;
         PathStart = start;
         PathEnd = end;
         Path = path;
@@ -67,18 +70,18 @@ public readonly struct ResourceRequests
         PathRequestCallback = prCb;
     }
 
-    public static ResourceRequests RequestPool(PoolResourceType type, Action<PoolResourceType, IPoolManager> pool)
+    public static ResourceRequests RequestPool(PoolIdSO type, Action<PoolIdSO, IPoolManager> pool)
         => new(AIResourceType.None, type, default, default, null, null, -1, null, pool, null, null, null);
 
     public static ResourceRequests FlankPointTargetAndBlockingMasks(Action<LayerMask, LayerMask, LayerMask> masks)
-        => new(AIResourceType.FlankPointEvaluationMasks, PoolResourceType.None, default, default, null, null, -1, null, null, masks, null, null);
+        => new(AIResourceType.FlankPointEvaluationMasks, null, default, default, null, null, -1, null, null, masks, null, null);
 
     public static ResourceRequests RequestWaypoints(Action<BlockData> callback)
-        => new(AIResourceType.WaypointBlock, PoolResourceType.None, default, default, null, null, -1, null, null, null, callback, null);
+        => new(AIResourceType.WaypointBlock, null, default, default, null, null, -1, null, null, null, callback, null);
 
     public static ResourceRequests RequestPath(Vector3 start, Vector3 end, NavMeshPath path, Action<bool> cb)
-        => new(AIResourceType.Path, PoolResourceType.None, start, end, path, null, -1, null, null, null, null, cb);
+        => new(AIResourceType.Path, null, start, end, path, null, -1, null, null, null, null, cb);
 
     public static ResourceRequests RequestFlankPoints(int steps, List<FlankPointData> data, Action<bool> flankCB)
-        => new(AIResourceType.FlankPointCandidates, PoolResourceType.None, default, default, null, data, steps, flankCB, null, null, null, null);
+        => new(AIResourceType.FlankPointCandidates, null, default, default, null, data, steps, flankCB, null, null, null, null);
 }

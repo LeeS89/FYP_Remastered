@@ -1,6 +1,9 @@
+using System;
 using UnityEngine;
 
+[Obsolete]
 [RequireComponent(typeof(DeflectableCollisionComponent))]
+
 public sealed class Bullet : Projectile, IFreezeAndDeflectable
 {
     [Header("Deflection Speed")]
@@ -48,7 +51,7 @@ public sealed class Bullet : Projectile, IFreezeAndDeflectable
         _distanceToPlayer = float.MaxValue;
         ClearState(IsActive);
       
-        _projectileEventManager.ParticleStop(this/*, _bulletType*/);
+       // _projectileEventManager.ParticleStop(this/*, _bulletType*/);
         if (HasState(IsFrozen))
         {
             ClearState(IsFrozen);
@@ -107,14 +110,14 @@ public sealed class Bullet : Projectile, IFreezeAndDeflectable
         if (cull)
         {
             _anim.SetTrigger("minimize");
-            _projectileEventManager.ParticleStop(this/*, _bulletType*/);
+           // _projectileEventManager.ParticleStop(this/*, _bulletType*/);
             SetState(IsCulled);
          
         }
         else
         {
             _anim.SetTrigger("maximize");
-            _projectileEventManager.ParticlePlay(this/*, _bulletType*/);
+           // _projectileEventManager.ParticlePlay(this/*, _bulletType*/);
             ClearState(IsCulled);
  
         }
@@ -123,7 +126,7 @@ public sealed class Bullet : Projectile, IFreezeAndDeflectable
     public override void LaunchPoolable(GameObject bulletOwner)
     {
         base.LaunchPoolable(bulletOwner);
-        _projectileEventManager.ParticlePlay(this);
+       // _projectileEventManager.ParticlePlay(this);
 
     }
 

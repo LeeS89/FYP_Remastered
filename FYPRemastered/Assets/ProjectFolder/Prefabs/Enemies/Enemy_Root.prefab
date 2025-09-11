@@ -285,6 +285,7 @@ MonoBehaviour:
   _meleeCheckRadius: 1.5
   _shootAngleThreshold: 30
   _meleeResults: []
+  _normalBulletPoolId: {fileID: 11400000, guid: 6141d1b986a45144bad8d38b32617380, type: 2}
   _bulletSpawnPoint: {fileID: 1520609376679817542}
   _testMelee: 0
   _canUpdateWeapon: 0

@@ -32,6 +32,14 @@ PrefabInstance:
       propertyPath: _editableSpeed
       value: 8
       objectReference: {fileID: 0}
+    - target: {fileID: 4985544592548197474, guid: 0a079e03acf62314b99b18a709e823e3, type: 3}
+      propertyPath: HitParticlePoolId
+      value: 
+      objectReference: {fileID: 11400000, guid: d60d5ef593884a24883e5d70cbfc8105, type: 2}
+    - target: {fileID: 4985544592548197474, guid: 0a079e03acf62314b99b18a709e823e3, type: 3}
+      propertyPath: DeflectAudioPoolId
+      value: 
+      objectReference: {fileID: 11400000, guid: ddaf70cf0cbc90343814eba091736f24, type: 2}
     - target: {fileID: 5111258017325434983, guid: 0a079e03acf62314b99b18a709e823e3, type: 3}
       propertyPath: m_IsTrigger
       value: 0

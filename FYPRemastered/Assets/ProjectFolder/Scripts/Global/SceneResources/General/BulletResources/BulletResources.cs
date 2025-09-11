@@ -29,7 +29,7 @@ public class BulletResources : SceneResources, IUpdateableResource
         try
         {
             var normalBulletHandle = Addressables.LoadAssetAsync<GameObject>("BasicBullet");
-
+         
             await normalBulletHandle.Task;
 
             if (normalBulletHandle.Status == AsyncOperationStatus.Succeeded)
@@ -146,7 +146,7 @@ public class BulletResources : SceneResources, IUpdateableResource
         if (_normalHitPrefab != null)
         {
             //_hitParticlePool = this.CreatePool<ParticleSystem>(_normalHitPrefab.GetComponent<ParticleSystem>());
-            _hitParticlePool = new PoolManager<ParticleSystem>(this, _normalHitPrefab.GetComponent<ParticleSystem>());
+            //_hitParticlePool = new PoolManager<ParticleSystem>(this, _normalHitPrefab.GetComponent<ParticleSystem>());
             _hitParticlePool.PreWarmPool(40);
             /*_hitParticlePool = new PoolManager(_normalHitPrefab, 40, 80);
             _hitParticlePool.PrewarmPool(5);*/
@@ -155,7 +155,7 @@ public class BulletResources : SceneResources, IUpdateableResource
         if (DeflectAudioSourcePrefabGO != null)
         {
             //_deflectAudioPool = this.CreatePool<AudioSource>(DeflectAudioSourcePrefabGO.GetComponent<AudioSource>());
-            _deflectAudioPool = new PoolManager<AudioSource>(this, DeflectAudioSourcePrefabGO.GetComponent<AudioSource>());
+          //  _deflectAudioPool = new PoolManager<AudioSource>(this, DeflectAudioSourcePrefabGO.GetComponent<AudioSource>());
             _deflectAudioPool.PreWarmPool(20);
             /*_deflectAudioPool = new PoolManager(DeflectAudioSourcePrefabGO, 5, 10);
             _deflectAudioPool.PrewarmPool(5);*/
@@ -163,14 +163,14 @@ public class BulletResources : SceneResources, IUpdateableResource
 
         if(_fireParticleGO != null)
         {
-            _fireParticlePool = new PoolManager<ParticleSystem>(this, _fireParticleGO.GetComponent<ParticleSystem>());
+           // _fireParticlePool = new PoolManager<ParticleSystem>(this, _fireParticleGO.GetComponent<ParticleSystem>());
             _fireParticlePool.PreWarmPool(10);
         }
 
         if (_normalBulletPrefab != null)
         {
             //_bulletPool = this.CreatePool<GameObject>(_normalBulletPrefab);
-            _bulletPool = new PoolManager<GameObject>(this, _normalBulletPrefab);
+           // _bulletPool = new PoolManager<GameObject>(this, _normalBulletPrefab);
             //_bulletPool = new PoolManager(_normalBulletPrefab, 40, 80);
             _bulletPool.PreWarmPool(30);
         }
@@ -181,7 +181,7 @@ public class BulletResources : SceneResources, IUpdateableResource
     protected override void ResourceRequested(in ResourceRequests request)
     {
 
-        if (request.PoolType == PoolResourceType.None) return;
+       /* if (request.PoolType == PoolResourceType.None) return;
 
         IPoolManager pool = request.PoolType switch
         {
@@ -196,24 +196,8 @@ public class BulletResources : SceneResources, IUpdateableResource
         };
 
         request.PoolCallback?.Invoke(request.PoolType, pool);
-
-       /* switch (request.PoolType)
-        {
-            case PoolResourceType.NormalBulletPool:
-                pool = _bulletPool;
-                break;
-            case PoolResourceType.BasicHitParticlePool:
-                pool = _hitParticlePool;
-                break;
-            case PoolResourceType.DeflectAudioPool:
-                pool = _deflectAudioPool;
-                break;
-            default:
-#if UNITY_EDITOR
-                Debug.LogWarning("Invalid resource type requested.");
-#endif
-                break;
-        }*/
+*/
+   
         
     }
 

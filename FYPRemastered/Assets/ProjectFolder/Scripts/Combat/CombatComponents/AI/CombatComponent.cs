@@ -61,7 +61,10 @@ public class CombatComponent : BaseAbilities
 
     private AgentWeaponHandler _weaponHandler;
     //[SerializeField] protected bool _targetSeen = false;
-    
+    public PoolIdSO _normalBulletPoolId;
+
+
+
     protected override void DeathStatusUpdated(bool isDead)
     {
         base.DeathStatusUpdated(isDead);
@@ -112,7 +115,7 @@ public class CombatComponent : BaseAbilities
 
         Transform player = GameManager.Instance.GetPlayerPosition(PlayerPart.DefenceCollider);
 
-        _weaponHandler = new AgentWeaponHandler(_enemyEventManager, gameObject, _bulletSpawnPoint, player, 20);
+        _weaponHandler = new AgentWeaponHandler(_enemyEventManager, _normalBulletPoolId, gameObject, _bulletSpawnPoint, player, 20);
 
         RegisterGlobalEvents();
        

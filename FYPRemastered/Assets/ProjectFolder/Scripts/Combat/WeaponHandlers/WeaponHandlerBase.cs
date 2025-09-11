@@ -8,10 +8,12 @@ public class WeaponHandlerBase
     protected Transform _bulletSpawnPoint;
     protected int _clipCapacity;
     protected FireRate _fireRate;
+    protected PoolIdSO _normalBulletPoolId;
 
-    public WeaponHandlerBase(GameObject owner)
+    public WeaponHandlerBase(GameObject owner, PoolIdSO normalBulletPoolId)
     {
         _owner = owner;
+        _normalBulletPoolId = normalBulletPoolId;
     }
 
     #region Firing conditions region

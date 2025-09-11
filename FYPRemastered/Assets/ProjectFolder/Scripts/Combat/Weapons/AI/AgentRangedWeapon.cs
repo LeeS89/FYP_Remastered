@@ -8,9 +8,10 @@ public class AgentRangedWeapon : RangedWeaponBase
     protected Transform _target;
     
 
-    public AgentRangedWeapon(Transform bulletSpawnPoint, Transform target, EnemyEventManager eventManager, GameObject gunOwner, int clipCapacity)
+    public AgentRangedWeapon(PoolIdSO poolId, Transform bulletSpawnPoint, Transform target, EnemyEventManager eventManager, GameObject gunOwner, int clipCapacity)
     {
         _eventManager = eventManager;
+        _normalBulletPoolId = poolId;
         _bulletSpawnPoint = bulletSpawnPoint;
         _target = target;
         _gunOwner = gunOwner;
