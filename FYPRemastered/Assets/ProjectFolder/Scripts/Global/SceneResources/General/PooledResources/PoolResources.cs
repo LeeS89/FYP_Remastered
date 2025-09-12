@@ -1,41 +1,35 @@
-using Oculus.Interaction.GrabAPI;
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+
 using System.Threading.Tasks;
+
 using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceLocations;
 
-public class NewBulletResources : SceneResources, IUpdateableResource
+public class PoolResources : SceneResources, IUpdateableResource
 {
+    [Header("Handles auto return to pools for Audio & SFX pools")]
     private int _maxTrackedPoolObjects = 256;
-    private List<PoolObjectTracker> _jobs;
+    private List<PoolObjectTracker> _jobs = new();
 
-    private GameObject _normalBulletPrefab;
-    private GameObject _normalHitPrefab;
-    private GameObject _fireParticleGO;
-    public GameObject DeflectAudioSourcePrefabGO { get; private set; }
-
-
-
-    private PoolManager<GameObject> _bulletPool;
-    private PoolManager<AudioSource> _deflectAudioPool;
-    private PoolManager<ParticleSystem> _hitParticlePool;
-    private PoolManager<ParticleSystem> _fireParticlePool;
-
-    //NEW
-    static bool _catalogReady = false;
-   // static readonly List<PoolAddressSO> _poolAddresses = new();
-    static readonly Dictionary<string, PoolAddressSO> _addrToSO = new();
+    private static bool _catalogReady = false;
+ 
+    private static readonly Dictionary<string, PoolAddressSO> _addrToSO = new();
     AsyncOperationHandle<IList<PoolAddressSO>> _poolAddressHandle = new();
-    readonly Dictionary<PoolIdSO, PoolManagerBase> _pools = new();
-    readonly Dictionary<PoolIdSO, AsyncOperationHandle<GameObject>> _handles = new();
-    //END NEW
+    private readonly Dictionary<PoolIdSO, PoolManagerBase> _pools = new();
+    private readonly Dictionary<PoolIdSO, AsyncOperationHandle<GameObject>> _handles = new();
 
+
+    /// <summary>
+    /// Loads the addreses of all PoolAddressSO in the project into a dictionary for quick lookup.
+    /// Finds the addresses via addressable label "Pools".
+    /// </summary>
+    /// <returns></returns>
     public async Task EnsureCatalogAsync()
     {
         if (_catalogReady) return;
@@ -55,6 +49,17 @@ public class NewBulletResources : SceneResources, IUpdateableResource
         _catalogReady = true;
     }
 
+    /// <summary>
+    /// Asynchronously loads and initializes resources required for the scene, including creating and pre-warming object
+    /// pools.
+    /// </summary>
+    /// <remarks>This method retrieves resource locations with a label matching the current scene and loads the corresponding
+    /// assets.  It filters the resources to include only those with a matching configuration in the internal
+    /// address-to-configuration mapping. For each loaded asset, an appropriate object pool is created based on the
+    /// resource type, and the pool is pre-warmed to the specified size.  Event handlers for resource requests and
+    /// releases are registered with the <see cref="SceneEventAggregator"/> to manage resource usage
+    /// dynamically.</remarks>
+    /// <returns></returns>
     public override async Task LoadResources(/*string sceneName*/)
     {
         try
@@ -112,13 +117,14 @@ public class NewBulletResources : SceneResources, IUpdateableResource
                 _pools[config.Id] = pool;
                 _handles[config.Id] = h;
                 
-               // pool.PreWarmPool(config.PrewarmSize);
+                pool.PreWarmPool(config.PrewarmSize);
             }
 
             SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;
 
             SceneEventAggregator.Instance.OnResourceReleased += ResourceReleased;
-            CoroutineRunner.Instance.StartCoroutine(PoolLoad());
+            _jobs.EnsureCapacity(_maxTrackedPoolObjects);
+           // CoroutineRunner.Instance.StartCoroutine(PoolLoad());
         }
         catch (NullReferenceException e)
         {
@@ -126,17 +132,7 @@ public class NewBulletResources : SceneResources, IUpdateableResource
         }
     }
 
-    private IEnumerator PoolLoad()
-    {
-        yield return new WaitForSeconds(3f);
-        foreach(var pool in _pools)
-        {
-            pool.Value.PreWarmPool(10);
-        }
-    }
-
-
-
+   
     protected override void ResourceRequested(in ResourceRequests request)
     {
         if (request.PoolId == null) return;
@@ -144,27 +140,11 @@ public class NewBulletResources : SceneResources, IUpdateableResource
 
         if (!_pools.TryGetValue(id, out var pool))
         {
-#if UNITY_EDITOR
-            throw new KeyNotFoundException($"Pool with ID {id?.name} not found.");
-#endif
+            request.PoolCallback?.Invoke(id, null);
+            return;
         }
         request.PoolCallback?.Invoke(id, pool);
-        /*IPoolManager pool = request.PoolType switch
-        {
-            PoolResourceType.NormalBulletPool => _bulletPool,
-            PoolResourceType.BasicHitParticlePool => _hitParticlePool,
-            PoolResourceType.DeflectAudioPool => _deflectAudioPool,
-#if UNITY_EDITOR
-            _ => throw new ArgumentOutOfRangeException(nameof(request.PoolType), request.PoolType, null)
-#else
-            _ => null
-#endif
-        };
-
-        request.PoolCallback?.Invoke(request.PoolType, pool);
-*/
-
-
+      
     }
 
 

@@ -1,5 +1,7 @@
+using System;
 using UnityEngine;
 
+[Obsolete]
 public class BulletMovementHandler : ProjectileMovementHandler
 {
     public bool DeflectionProcessed { get; private set; } = false;

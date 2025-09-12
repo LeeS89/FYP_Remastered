@@ -1,8 +1,8 @@
 using UnityEngine;
 
-public class ForceProjectileMovementHandler : ProjectileMovementHandler
+public class ForceProjectileMovementHandler : ProjectileMovementManagerBase
 {
-    public ForceProjectileMovementHandler(ProjectileEventManager eventManager, Rigidbody rb, float initialSpeed = 0, bool usesFixedSpeed = false) : base(eventManager, rb, initialSpeed, usesFixedSpeed)
+    public ForceProjectileMovementHandler(ProjectileEventManager eventManager, Rigidbody rb, float initialSpeed = 0, bool usesFixedSpeed = false) : base(eventManager, rb, initialSpeed/*, usesFixedSpeed*/)
     {
         Launch();
     }
@@ -14,6 +14,6 @@ public class ForceProjectileMovementHandler : ProjectileMovementHandler
 
     public override void FixedTick()
     {
-        if (UsesFixedSpeed) return;
+       // if (UsesFixedSpeed) return;
     }
 }

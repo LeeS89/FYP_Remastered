@@ -4,15 +4,9 @@ public abstract class ComponentEvents : MonoBehaviour
 {
     protected EventManager _eventManager;
 
-    public virtual void RegisterLocalEvents(EventManager eventManager)
-    {
-        eventManager.OnDeathStatusUpdated += DeathStatusUpdated;
-    }
+    public virtual void RegisterLocalEvents(EventManager eventManager) => eventManager.OnDeathStatusUpdated += DeathStatusUpdated;
 
-    public virtual void UnRegisterLocalEvents(EventManager eventManager)
-    {
-        eventManager.OnDeathStatusUpdated -= DeathStatusUpdated;
-    }
+    public virtual void UnRegisterLocalEvents(EventManager eventManager) => eventManager.OnDeathStatusUpdated -= DeathStatusUpdated;
 
     protected virtual void RegisterGlobalEvents()
     {
@@ -20,10 +14,7 @@ public abstract class ComponentEvents : MonoBehaviour
         BaseSceneManager._instance.OnSceneComplete += OnSceneComplete;
     }
 
-    protected virtual void UnRegisterGlobalEvents()
-    {
-        BaseSceneManager._instance.OnSceneStarted -= OnSceneStarted;
-    }
+    protected virtual void UnRegisterGlobalEvents() => BaseSceneManager._instance.OnSceneStarted -= OnSceneStarted;
 
     protected virtual void OnSceneStarted()
     {

@@ -15,6 +15,8 @@ public sealed class DeflectableProjectile : ProjectileBase, IFreezeAndDeflectabl
     public static readonly byte IsFrozen = 1 << 1;
     private const byte IsCulled = 1 << 2;
 
+    public bool DeflectionProcessed { get; private set; } = false;
+
     public override void RegisterLocalEvents(EventManager eventManager)
     {
         base.RegisterLocalEvents(eventManager);
@@ -54,7 +56,7 @@ public sealed class DeflectableProjectile : ProjectileBase, IFreezeAndDeflectabl
     {
         RemoveFromJob();
         _distanceToPlayer = float.MaxValue;
-        
+        if (DeflectionProcessed) DeflectionProcessed = false;
 
         _projectileEventManager.ParticleEnd(this/*, _bulletType*/);
         if (HasState(IsFrozen))
@@ -148,9 +150,7 @@ public sealed class DeflectableProjectile : ProjectileBase, IFreezeAndDeflectabl
 
         if (BulletDistanceJob.Instance.AddFrozenProjectile(this))
         {
-            SetState(IsFrozen);
-
-            
+            SetState(IsFrozen);      
         }
       
         _projectileEventManager.Freeze();
@@ -178,6 +178,9 @@ public sealed class DeflectableProjectile : ProjectileBase, IFreezeAndDeflectabl
 
     public void Deflect(ProjectileKickType type)
     {
+        if (DeflectionProcessed) return;
+
+        DeflectionProcessed = true;
         if (type == ProjectileKickType.ReFire)
         {
             if (!HasState(IsFrozen)) { return; }

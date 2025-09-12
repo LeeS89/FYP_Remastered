@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(DeflectableCollisionComponent))]
-public sealed class ForceProjectile : Projectile
+public sealed class ForceProjectile : ProjectileBase
 {
     private IPoolManager _onCollisionParticlePool;
 

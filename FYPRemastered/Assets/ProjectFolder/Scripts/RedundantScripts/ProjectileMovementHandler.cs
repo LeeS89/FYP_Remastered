@@ -1,5 +1,7 @@
+using System;
 using UnityEngine;
 
+[Obsolete]
 public class ProjectileMovementHandler
 {
     protected ProjectileEventManager _eventManager;

@@ -62,6 +62,7 @@ public class ProjectileMovementManagerBase
 
     protected virtual void Accelerate()
     {
+        if(_rb.isKinematic) _rb.isKinematic = false;
         var dir = _rb.transform.forward;
         _rb.AddForce(dir * Acceleration, ForceMode.Acceleration);
 
