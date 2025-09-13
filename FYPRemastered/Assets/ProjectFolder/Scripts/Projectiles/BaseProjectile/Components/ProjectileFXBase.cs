@@ -7,7 +7,7 @@ public class ProjectileFXBase : ComponentEvents
     [Header("ID's of the SFX & VFX Pools to be used on Collision")]
     [SerializeField] protected PoolIdSO HitParticlePoolId;
 
-    
+    public PoolKind Kind { get; protected set; }
 
     [Header("Pool References")]
     public IPoolManager CollisionParticlePoolManager { get; protected set; }
@@ -54,7 +54,11 @@ public class ProjectileFXBase : ComponentEvents
     {
         if (poolId == null) return;
 
-        if (poolId == HitParticlePoolId) CollisionParticlePoolManager = pool;
+        if (poolId == HitParticlePoolId)
+        {
+            CollisionParticlePoolManager = pool;
+            Kind = CollisionParticlePoolManager.GetPoolType();
+        }
     }
 
     protected virtual void SpawnHitParticle(Collision collision)
@@ -64,9 +68,19 @@ public class ProjectileFXBase : ComponentEvents
         ContactPoint contact = collision.GetContact(0);
        
         Vector3 pos = contact.point;
+        Vector3 normal = contact.normal;
+
+        if (Kind == PoolKind.ParticleSystem)
+        {
+            var hit = CollisionParticlePoolManager.GetFromPool(pos, Quaternion.identity) as ParticleSystem;
+            hit.Play();
+        }
+        else
+        {
+            CollisionParticlePoolManager.GetFromPool(pos, Quaternion.FromToRotation(Vector3.up, normal));
+        }
+
        
-        var hit = CollisionParticlePoolManager.GetFromPool(pos, Quaternion.identity) as ParticleSystem;
-        hit.Play();
 
     }
 

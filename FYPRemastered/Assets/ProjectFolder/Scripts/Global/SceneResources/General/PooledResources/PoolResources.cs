@@ -45,7 +45,7 @@ public class PoolResources : SceneResources, IUpdateableResource
             }
         );
         await _poolAddressHandle.Task;
-
+   
         _catalogReady = true;
     }
 

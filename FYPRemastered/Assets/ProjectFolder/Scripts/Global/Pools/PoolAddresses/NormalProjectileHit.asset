@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06397a21e19fded4bbff2f20c30eef47, type: 3}
   m_Name: NormalProjectileHit
   m_EditorClassIdentifier: 
-  _addressableKey: BasicHit
+  _addressableKey: BasicHitPrefab
   _id: {fileID: 11400000, guid: d60d5ef593884a24883e5d70cbfc8105, type: 2}
   _kind: 2
   _prewarmSize: 50

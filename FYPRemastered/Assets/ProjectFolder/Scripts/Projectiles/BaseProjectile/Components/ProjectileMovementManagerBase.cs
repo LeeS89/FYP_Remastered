@@ -76,12 +76,12 @@ public class ProjectileMovementManagerBase
 
     protected virtual void Launch()
     {
-        _rb.useGravity = UsingGravity;
-
+      
         switch (_moveType)
         {
             case MovementType.Velocity or MovementType.Acceleration:
                 if (_rb.isKinematic) _rb.isKinematic = false;
+                _rb.useGravity = UsingGravity;
                 _rb.AddForce(_rb.transform.forward * Speed, ForceMode.VelocityChange);
                 break;
             case MovementType.Impulse:
@@ -90,7 +90,7 @@ public class ProjectileMovementManagerBase
                 _rb.AddForce(_rb.transform.forward * Speed, ForceMode.Impulse);
                 break;
             default:
-               // Move();
+                Move();
                 break;
         }
     }

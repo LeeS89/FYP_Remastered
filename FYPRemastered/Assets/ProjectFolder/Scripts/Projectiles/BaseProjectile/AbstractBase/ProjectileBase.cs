@@ -12,7 +12,7 @@ public enum MovementType
 [RequireComponent(typeof(ProjectileEventManager))]
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(ProjectileCollisionComponent))]
-public abstract class ProjectileBase : ComponentEvents, IPoolable
+public class ProjectileBase : ComponentEvents, IPoolable
 {
     [Header("Owning Pool - Set by the pool itself")]
     protected IPoolManager _projectilePool;
@@ -22,9 +22,7 @@ public abstract class ProjectileBase : ComponentEvents, IPoolable
     [SerializeField] protected float _lifespan = 5f;
     protected float _timeOut;
 
-    [Header("Freezable Projectiles retrieve this value from a job that culls when too close, to prevent overdraw")]
-    [SerializeField] protected float _distanceToPlayer;
-
+    
 
     [Header("Components")]
     protected ProjectileEventManager _projectileEventManager;
@@ -148,23 +146,24 @@ public abstract class ProjectileBase : ComponentEvents, IPoolable
 
     protected virtual void FixedUpdate() => _movementHandler?.FixedTick();
 
-
+    private void OnEnable()
+    {
+        SetState(IsActive);
+    }
 
     protected virtual void OnExpired()
     {
-       // Destroy(gameObject);
+   
         ClearState(IsActive);
         _projectilePool?.Release(gameObject);
     }
 
-    // public virtual void Freeze() { }
-    // public virtual void UnFreeze() { }
 
-    protected virtual void RemoveFromJob() { }
-
-    public virtual void SetDistanceToPlayer(float distance) => _distanceToPlayer = distance;
-
-    public void SetParentPool(IPoolManager manager) => _projectilePool = manager;
+    public void SetParentPool(IPoolManager manager)
+    {
+        if (manager == null) return;
+        _projectilePool = manager;
+    }
 
 
     protected virtual void OnDisable() => _movementHandler?.OnDisable();

@@ -44,9 +44,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9ac5e10560f1bd4a89d85fec9ba6f41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  HitParticlePoolId: {fileID: 11400000, guid: d60d5ef593884a24883e5d70cbfc8105, type: 2}
   _particleManager: {fileID: 0}
-  _particle: {fileID: 2117498089286912745, guid: f33db7fc758f5944180365f8ef5eb197, type: 3}
-  particleMove: {fileID: 0}
+  DeflectAudioPoolId: {fileID: 11400000, guid: ddaf70cf0cbc90343814eba091736f24, type: 2}
 --- !u!1 &4136559357840876812
 GameObject:
   m_ObjectHideFlags: 0
@@ -88,10 +88,10 @@ GameObject:
   m_Component:
   - component: {fileID: 6050013699054771250}
   - component: {fileID: 3527047245441631592}
-  - component: {fileID: 7842073233559252648}
   - component: {fileID: 853653332336143470}
-  - component: {fileID: 20446614359500689}
-  - component: {fileID: 7342436492212579740}
+  - component: {fileID: 901594435671694386}
+  - component: {fileID: 3695555817252886602}
+  - component: {fileID: 157951660231748554}
   m_Layer: 6
   m_Name: NormalBullet
   m_TagString: Untagged
@@ -141,22 +141,9 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 0
   m_IsKinematic: 0
-  m_Interpolate: 1
+  m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 2
---- !u!114 &7842073233559252648
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6588732399459625391}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1f4a8f9539130414486f6d4010ad52f1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _testRespawn: 0
 --- !u!95 &853653332336143470
 Animator:
   serializedVersion: 7
@@ -179,7 +166,7 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &20446614359500689
+--- !u!114 &901594435671694386
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -188,27 +175,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6588732399459625391}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eb3b506c9ea3e354296fead10ecf33f2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _lifespan: 5
-  _distanceToPlayer: 0
-  _projectileSpeed: 5
-  _deflectSpeed: 25
-  testFreeze: 0
-  _anim: {fileID: 853653332336143470}
-  _cullDistance: 0.5
-  _testUnFreeze: 0
---- !u!114 &7342436492212579740
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6588732399459625391}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0b154e5e0416cec4a9af13606f77dca9, type: 3}
+  m_Script: {fileID: 11500000, guid: 185ed6b695b47b94880536baafce0405, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _damageData: {fileID: 11400000, guid: b7f82553a2b81bd4194b10319677300f, type: 2}
@@ -217,7 +184,47 @@ MonoBehaviour:
   _ignoreMask:
     serializedVersion: 2
     m_Bits: 256
+  _deflectorMask:
+    serializedVersion: 2
+    m_Bits: 0
   _testDeflect: 0
+--- !u!114 &3695555817252886602
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6588732399459625391}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f4a8f9539130414486f6d4010ad52f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _testRespawn: 0
+--- !u!114 &157951660231748554
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6588732399459625391}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98f61b6b36ef07542bd35ed97c165c12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _movementType: 1
+  _lifespan: 5
+  _projectileSpeed: 5
+  _acceleration: 2
+  _maxSpeed: 30
+  _useGravity: 0
+  _testlaunch: 0
+  _deflectSpeed: 25
+  testFreeze: 0
+  _anim: {fileID: 0}
+  _cullDistance: 0.5
+  _testUnFreeze: 0
 --- !u!1 &7876611720651942564
 GameObject:
   m_ObjectHideFlags: 0

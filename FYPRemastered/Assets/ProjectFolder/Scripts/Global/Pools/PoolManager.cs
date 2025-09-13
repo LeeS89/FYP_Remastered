@@ -72,6 +72,7 @@ public sealed class PoolManager<T> : PoolManagerBase /*IPoolManager*/ where T : 
             a.playOnAwake = false;
 
             _transformCache[inst] = a.transform;
+            Kind = PoolKind.Audio;
         }
         else if (typeof(T) == typeof(ParticleSystem))
         {
@@ -79,7 +80,7 @@ public sealed class PoolManager<T> : PoolManagerBase /*IPoolManager*/ where T : 
             var main = p.main;
             main.playOnAwake = false;
             _transformCache[inst] = p.transform;
-
+            Kind = PoolKind.ParticleSystem;
         }
         else if (typeof(T) == typeof(GameObject))
         {
@@ -87,11 +88,13 @@ public sealed class PoolManager<T> : PoolManagerBase /*IPoolManager*/ where T : 
             var poolable = go.GetComponentInChildren<IPoolable>();
             if (poolable != null)
                 poolable.SetParentPool(this);
-           /* var eventManager = go.GetComponentInChildren<EventManager>();
-            if (eventManager != null)
-            {
-                eventManager.BindComponentsToEvents();
-            }*/
+
+            Kind = PoolKind.GameObject;
+            /* var eventManager = go.GetComponentInChildren<EventManager>();
+             if (eventManager != null)
+             {
+                 eventManager.BindComponentsToEvents();
+             }*/
 
             _transformCache[inst] = go.transform;
         }

@@ -8,7 +8,10 @@ public sealed class DeflectableProjectile : ProjectileBase, IFreezeAndDeflectabl
 
     public bool testFreeze = false;
     [SerializeField] private Animator _anim;
+    
+    [Header("How close to the camera can freezeable projectile be before it gets culled")]
     [SerializeField] private float _cullDistance = 0.5f;
+    [SerializeField] public float DistanceToPlayer { get; private set; }
 
 
     private GameObject _componentRegistryTargetObj;
@@ -55,7 +58,7 @@ public sealed class DeflectableProjectile : ProjectileBase, IFreezeAndDeflectabl
     protected override void OnExpired()
     {
         RemoveFromJob();
-        _distanceToPlayer = float.MaxValue;
+        DistanceToPlayer = float.MaxValue;
         if (DeflectionProcessed) DeflectionProcessed = false;
 
         _projectileEventManager.ParticleEnd(this/*, _bulletType*/);
@@ -97,12 +100,12 @@ public sealed class DeflectableProjectile : ProjectileBase, IFreezeAndDeflectabl
         base.FixedUpdate();
     }
 
-    public override void SetDistanceToPlayer(float distance)
+    public void SetDistanceToPlayer(float distance)
     {
         if (!HasState(IsFrozen)) { return; }
-        base.SetDistanceToPlayer(distance);
+        DistanceToPlayer = distance;
 
-        if (_distanceToPlayer <= _cullDistance)
+        if (DistanceToPlayer <= _cullDistance)
         {
             if (!HasState(IsCulled))
             {
@@ -159,7 +162,7 @@ public sealed class DeflectableProjectile : ProjectileBase, IFreezeAndDeflectabl
 
 
 
-    protected override void RemoveFromJob()
+    private void RemoveFromJob()
     {
         if (BulletDistanceJob.Instance.RemoveFrozenProjectile(this))
         {

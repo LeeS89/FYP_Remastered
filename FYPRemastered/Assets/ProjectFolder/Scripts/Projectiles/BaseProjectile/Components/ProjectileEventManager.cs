@@ -33,10 +33,9 @@ public sealed class ProjectileEventManager : EventManager
     // END NEW PARTICLE
 
 
-    private void Awake()
-    {
-        base.BindComponentsToEvents();
-    }
+    private void Awake() => base.BindComponentsToEvents();
+
+   
 
     private void Start()
     {

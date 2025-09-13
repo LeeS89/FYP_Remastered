@@ -1,9 +1,8 @@
-using Unity.VisualScripting;
 using UnityEngine;
 
 
 
-public class DeflectableCollisionComponent : ProjectileCollisionComponent
+public sealed class DeflectableCollisionComponent : ProjectileCollisionComponent
 {
 
     [Header("Game Object Collider")]
@@ -14,16 +13,6 @@ public class DeflectableCollisionComponent : ProjectileCollisionComponent
 
     [SerializeField] private LayerMask _deflectorMask;
 
-
-
-    protected override void InitializeDamageType()
-    {
-        if(_damageData == null) { return; }
-        _damageType = _damageData.damageType;
-        _baseDamage = _damageData.baseDamage;
-        _damageOverTime = _damageData.damageOverTime;
-        _dOTDuration = _damageData.duration;
-    }
 
 
     protected override void OnSceneComplete()
@@ -86,7 +75,7 @@ public class DeflectableCollisionComponent : ProjectileCollisionComponent
             return;
         }
 
-        CheckForDamageableInterface(collision.gameObject/*, contact, impactPosition, hitNormal*/);
+        CheckForDamageable(collision/*, contact, impactPosition, hitNormal*/);
 
         _projectileEventManager.Collision(collision);
         //_bulletEventManager.SpawnHitParticle(impactPosition, Quaternion.identity);
@@ -102,16 +91,19 @@ public class DeflectableCollisionComponent : ProjectileCollisionComponent
 
 
 
-    private void CheckForDamageableInterface(GameObject other/*, ContactPoint cPoint, Vector3 hitPoint, Vector3 hitNormal*/)
+    protected override void CheckForDamageable(Collision other/*, ContactPoint cPoint, Vector3 hitPoint, Vector3 hitNormal*/)
     {
-       // Vector3 spawnPoint = hitPoint;
+        // Vector3 spawnPoint = hitPoint;
 
-        if (ComponentRegistry.TryGet<IDamageable>(other, out var damageable))
+        if (ComponentRegistry.TryGet<IDamageable>(other.gameObject, out var damageable))
         {
-            damageable.NotifyDamage(_baseDamage, _damageType, _statusEffectChancePercentage, _damageOverTime, _dOTDuration);
-        }else if(ComponentRegistry.TryGet<IDamageable>(other.transform.root.gameObject, out var dam))
+            damageable.NotifyDamage(BaseDamage, DType, _statusEffectChancePercentage, DamageOverTime, DOTDuration);
+        }
+        else
         {
-            dam.NotifyDamage(_baseDamage, _damageType, _statusEffectChancePercentage, _damageOverTime, _dOTDuration);
+            var rb = other.collider.attachedRigidbody;
+            if (rb && ComponentRegistry.TryGet<IDamageable>(rb.gameObject, out var dam))
+                dam.NotifyDamage(BaseDamage, DType, _statusEffectChancePercentage, DamageOverTime, DOTDuration);
         }
 
 

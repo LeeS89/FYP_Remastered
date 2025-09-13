@@ -11,5 +11,10 @@ public abstract class PoolManagerBase : IPoolManager
     public virtual void PreWarmPool(int count) { }
 
     public abstract void Release(UnityEngine.Object obj);
+
+    public PoolKind GetPoolType() => Kind;
     
-}
+
+    public PoolKind Kind { get; protected set; }
+
+    }
