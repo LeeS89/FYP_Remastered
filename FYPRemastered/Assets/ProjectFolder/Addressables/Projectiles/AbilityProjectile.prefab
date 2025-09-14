@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 825369869739997926}
   - component: {fileID: 5392464650615478253}
   - component: {fileID: 3089063586021951841}
-  m_Layer: 11
+  m_Layer: 0
   m_Name: Particles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4854,7 +4854,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 239956236635775038}
-  m_Layer: 11
+  m_Layer: 0
   m_Name: Trails
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4888,7 +4888,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8625374199800317017}
   - component: {fileID: 2593626124899690697}
-  m_Layer: 11
+  m_Layer: 0
   m_Name: VFX
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4933,7 +4933,7 @@ GameObject:
   m_Component:
   - component: {fileID: 430849590971292944}
   - component: {fileID: 6702054099279699108}
-  m_Layer: 11
+  m_Layer: 0
   m_Name: Trail
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5081,7 +5081,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5804083036823539638}
   - component: {fileID: 1613758683528141323}
-  m_Layer: 11
+  m_Layer: 0
   m_Name: Trail02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5237,7 +5237,7 @@ GameObject:
   - component: {fileID: 3213223018692783564}
   - component: {fileID: 4116059248968556494}
   - component: {fileID: 5752314180857999443}
-  m_Layer: 11
+  m_Layer: 0
   m_Name: AbilityProjectile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10360,7 +10360,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3559431917225035618}
   - component: {fileID: 4865941694486722347}
-  m_Layer: 11
+  m_Layer: 0
   m_Name: Trail01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

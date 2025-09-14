@@ -6,6 +6,7 @@ public enum EffectKind { Damage, Knockback, FreezeAndTrack, ReturnTrackedOnEnd, 
 public class EffectDef : ScriptableObject
 {
     public EffectKind Kind;
+    public PoolIdSO PoolId;
     public float Magnitude;
     public string DamageType;
 }

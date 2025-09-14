@@ -4,6 +4,6 @@ public interface IPoolable
 {
     void SetParentPool(IPoolManager manager);
 
-    void LaunchPoolable(GameObject owner);
+    void LaunchPoolable(GameObject owner = null);
 
 }

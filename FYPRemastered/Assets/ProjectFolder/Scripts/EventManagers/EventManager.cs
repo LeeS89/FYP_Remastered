@@ -33,6 +33,12 @@ public abstract class EventManager : MonoBehaviour
         _cachedListeners = null;
     }
 
+    public event Action<AbilityTags, Transform> OnTryUseAbility;
+    public event Action<AbilityTags> OnEndAbility;
+    public void TryUseAbility(AbilityTags id, Transform origin = null) => OnTryUseAbility?.Invoke(id, origin);
+
+    public void EndAbility(AbilityTags id) => OnEndAbility?.Invoke(id);
+
     public event Action<bool> OnDeathStatusUpdated;
 
     public bool _testRespawn = false;

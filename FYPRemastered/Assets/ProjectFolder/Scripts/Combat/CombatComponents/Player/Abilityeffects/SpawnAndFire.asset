@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d00450d800eb7904ab15f8b3159962af, type: 3}
   m_Name: SpawnAndFire
   m_EditorClassIdentifier: 
-  Kind: 0
+  Kind: 4
+  PoolId: {fileID: 11400000, guid: 7249f8d07474c484ab32588d56342c7b, type: 2}
   Magnitude: 0
   DamageType: 

@@ -3,15 +3,17 @@ using UnityEngine;
 public readonly struct AbilityContext
 {
     public readonly IAbilityOwner Owner;
-    public readonly Transform Origin;
+    public readonly Transform CurrentOrigin;
+    public readonly Transform GazeOrigin;
     public readonly Collider[] Targets;
     public readonly int TargetCount;
     public readonly float Now;
 
-    public AbilityContext(IAbilityOwner owner, Transform origin, Collider[] targets, int count, float now)
+    public AbilityContext(IAbilityOwner owner, Transform origin, Transform gazeOrigin, Collider[] targets, int count, float now)
     {
         Owner = owner;
-        Origin = origin;
+        CurrentOrigin = origin;
+        GazeOrigin = gazeOrigin;
         Targets = targets;
         TargetCount = count;
         Now = now;

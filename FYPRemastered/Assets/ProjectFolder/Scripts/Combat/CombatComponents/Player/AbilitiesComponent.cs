@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Unity.XR.CoreUtils;
 using UnityEngine;
 
+[Obsolete("", true)]
 public class AbilitiesComponent : BaseAbilities
 {
     [Header("Trace Center")]

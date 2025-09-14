@@ -11,8 +11,8 @@ public class PlayerEventManager : EventManager
 
     public event Action<Vector3> OnMovementUpdated;
 
-  
 
+   
     public event Func<HandSide, bool> OnCheckIfHandIsGrabbing;
 
     public bool CheckIfHandIsGrabbing(HandSide side)
@@ -20,7 +20,7 @@ public class PlayerEventManager : EventManager
         return OnCheckIfHandIsGrabbing?.Invoke(side) ?? false;
     }
 
-    
+  
 
 
     #region Locomotion events

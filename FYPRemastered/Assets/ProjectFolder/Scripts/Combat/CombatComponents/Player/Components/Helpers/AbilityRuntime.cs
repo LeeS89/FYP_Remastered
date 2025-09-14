@@ -39,6 +39,7 @@ public sealed class AbilityRuntime
         IEffectExecutor exec = eff.Kind switch
         {
             EffectKind.FreezeAndTrack => new FreezeAndTrackExecutor(),
+            EffectKind.SpawnAndFire => new ProjectileFireExecutor(eff),
             _ => null
         };
         return exec;
@@ -65,9 +66,10 @@ public sealed class AbilityRuntime
         return true;
     }
 
-    private void OnInterrupted()
+    public void OnInterrupted()
     {
-
+        if (!_inProgress) return;
+        End(0f);
     }
 
     public void End(float now)
@@ -75,7 +77,7 @@ public sealed class AbilityRuntime
         if(_channeling) _channeling = false;
         if (!_inProgress) return;
 
-        Dispatch(new AbilityContext(_owner, _owner.Origin, _hits, 0, now), CuePhase.End);
+        Dispatch(new AbilityContext(_owner, _owner.Origin, _owner.GazeOrigin, _hits, 0, now), CuePhase.End);
 
         if(_def.GrantTags != null)
         {
@@ -102,7 +104,7 @@ public sealed class AbilityRuntime
     private void GatherAndDispatch(float now, CuePhase phase)
     {
         int count = GatherTargets();
-        Dispatch(new AbilityContext(_owner, _owner.Origin, _hits, count, now), phase);
+        Dispatch(new AbilityContext(_owner, _owner.Origin, _owner.GazeOrigin, _hits, count, now), phase);
     }
 
     private void Dispatch(in AbilityContext context, CuePhase phase)

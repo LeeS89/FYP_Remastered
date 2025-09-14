@@ -4,12 +4,14 @@ using UnityEngine;
 public class AbilityComponent : ComponentEvents, IAbilityOwner
 {
     [SerializeField] private AbilityDef _bulletFreeze;
-    [SerializeField] private Transform _origin;
+    [SerializeField] private List<AbilityDef> _abilities;
+    [SerializeField] private Transform _defaultOrigin;
+    private Transform _currentOrigin;
     readonly List<AbilityRuntime> _runtimes = new(10);
     public readonly HashSet<AbilityTags> _tags = new(10);
 
    
-    public Transform Origin => _origin ? _origin : transform;
+   
     public AudioSource _audio;
 
     private Dictionary<StatEntry, float> _resourcesToSpend = new(4);
@@ -18,28 +20,64 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
 
     private void Awake()
     {
-        if (_bulletFreeze) _runtimes.Add(new AbilityRuntime(_bulletFreeze, this));
+       /* if (_abilities == null || _abilities.Count == 0) return;
+        foreach(var ab in _abilities)
+        {
+            _runtimes.Add(new AbilityRuntime(ab, this));
+        }*/
+        //if (_bulletFreeze) _runtimes.Add(new AbilityRuntime(_bulletFreeze, this));
     }
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
         _eventManager = eventManager;
         base.RegisterLocalEvents(eventManager);
+
+        _eventManager.OnTryUseAbility += TryActivate;
+        _eventManager.OnEndAbility += EndChannel;
+        ResetOrigin();
+        if (_abilities == null || _abilities.Count == 0) return;
+        foreach (var ab in _abilities)
+        {
+            _runtimes.Add(new AbilityRuntime(ab, this));
+        }
     }
+
+    public override void UnRegisterLocalEvents(EventManager eventManager)
+    {
+        _eventManager.OnTryUseAbility -= TryActivate;
+        _eventManager.OnEndAbility -= EndChannel;
+        base.UnRegisterLocalEvents(eventManager);
+       
+    }
+
+    public Transform Origin
+    {
+        get => _currentOrigin;
+        set => _currentOrigin = value;
+    }
+
+    public Transform GazeOrigin => _defaultOrigin;
 
     public bool _tryActivateFreeze = false;
     public bool _tryEndFreeze = false;
 
-    public void TryActivate(AbilityTags id)
+    public void TryActivate(AbilityTags id, Transform abilityOrigin = null)
     {
+        if (OwnerIsDead) return;
+
         for(int i = 0; i < _runtimes.Count; i++)
         {
             if (_runtimes[i].Id == id)
             {
-                _runtimes[i].TryActivate(Time.time);
+                if (abilityOrigin != null) Origin = abilityOrigin;
+                if(!_runtimes[i].TryActivate(Time.time)) ResetOrigin();
             }
         }
     }
+
+    private void ResetOrigin() => Origin = _defaultOrigin ? _defaultOrigin : transform;
+
 
     public void EndChannel(AbilityTags id)
     {
@@ -50,6 +88,16 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
                 _runtimes[i].End(Time.time);
             }
         }
+    }
+
+    protected override void DeathStatusUpdated(bool isDead)
+    {
+        base.DeathStatusUpdated(isDead);
+
+        if (!OwnerIsDead) return;
+        ResetOrigin();
+        for (int i = 0; i < _runtimes.Count; i++)
+            _runtimes[i].OnInterrupted();
     }
 
     // Update is called once per frame
