@@ -2,7 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-
+using System.Linq;
 using System.Threading.Tasks;
 
 using Unity.XR.CoreUtils;
@@ -17,11 +17,15 @@ public class PoolResources : SceneResources, IUpdateableResource
     private int _maxTrackedPoolObjects = 256;
     private List<PoolObjectTracker> _jobs = new();
 
+
+    private static bool _addressablesready;
+
     private static bool _catalogReady = false;
  
     private static readonly Dictionary<string, PoolAddressSO> _addrToSO = new();
+    private static readonly Dictionary<string, GameObject> _addrToSOTemp = new();
     AsyncOperationHandle<IList<PoolAddressSO>> _poolAddressHandle = new();
-    private readonly Dictionary<PoolIdSO, PoolManagerBase> _pools = new();
+    private readonly Dictionary<string, PoolManagerBase> _pools = new();
     private readonly Dictionary<PoolIdSO, AsyncOperationHandle<GameObject>> _handles = new();
 
 
@@ -49,6 +53,9 @@ public class PoolResources : SceneResources, IUpdateableResource
         _catalogReady = true;
     }
 
+
+   
+
     /// <summary>
     /// Asynchronously loads and initializes resources required for the scene, including creating and pre-warming object
     /// pools.
@@ -64,8 +71,14 @@ public class PoolResources : SceneResources, IUpdateableResource
     {
         try
         {
+            if (!_addressablesready)
+            {
+                await Addressables.InitializeAsync().Task;
+                _addressablesready = true;
+            }
 
             await EnsureCatalogAsync();
+           
 
             //string sceneLabel = $"scene:{sceneName}";
 
@@ -95,11 +108,13 @@ public class PoolResources : SceneResources, IUpdateableResource
             {
                 var h = Addressables.LoadAssetAsync<GameObject>(locationsToLoad[i]);
                 handles.Add(h);
-                await h.Task;
+               // await h.Task;
 
             }
-         //   await Task.WhenAll(handles.Select(h => h.Task));
-           
+            await Task.WhenAll(handles.Select(h => h.Task));
+
+            await Awaitable.NextFrameAsync();
+
             for (int i = 0; i < handles.Count; i++)
             {
                 var h = handles[i];
@@ -114,7 +129,7 @@ public class PoolResources : SceneResources, IUpdateableResource
                     _ => new PoolManager<GameObject>(this, h.Result)
                 };
               
-                _pools[config.Id] = pool;
+                _pools[config.Id.Id] = pool;
                 _handles[config.Id] = h;
                 
                 pool.PreWarmPool(config.PrewarmSize);
@@ -124,7 +139,7 @@ public class PoolResources : SceneResources, IUpdateableResource
 
             SceneEventAggregator.Instance.OnResourceReleased += ResourceReleased;
             _jobs.EnsureCapacity(_maxTrackedPoolObjects);
-           // CoroutineRunner.Instance.StartCoroutine(PoolLoad());
+           
         }
         catch (NullReferenceException e)
         {
@@ -132,10 +147,22 @@ public class PoolResources : SceneResources, IUpdateableResource
         }
     }
 
-   
+     protected override void InitializePools()
+     {
+         /*foreach(var pool in _pools)
+         {
+
+         }
+         foreach (var pool in _pools.Values)
+         {
+             pool.Initialize();
+         }*/
+     }
+
+
     protected override void ResourceRequested(in ResourceRequests request)
     {
-        if (request.PoolId == null) return;
+        if (string.IsNullOrEmpty(request.PoolId)) return;
         var id = request.PoolId;    
 
         if (!_pools.TryGetValue(id, out var pool))
@@ -186,4 +213,137 @@ public class PoolResources : SceneResources, IUpdateableResource
 
         }
     }
+
+
+
+    #region obsolete
+    /* List<AsyncOperationHandle> _cached = new();
+    /// <summary>
+    /// Asynchronously loads and initializes resources required for the scene, including creating and pre-warming object
+    /// pools.
+    /// </summary>
+    /// <remarks>This method retrieves resource locations with a label matching the current scene and loads the corresponding
+    /// assets.  It filters the resources to include only those with a matching configuration in the internal
+    /// address-to-configuration mapping. For each loaded asset, an appropriate object pool is created based on the
+    /// resource type, and the pool is pre-warmed to the specified size.  Event handlers for resource requests and
+    /// releases are registered with the <see cref="SceneEventAggregator"/> to manage resource usage
+    /// dynamically.</remarks>
+    /// <returns></returns>
+    public override async Task LoadResources(*//*string sceneName*//*)
+    {
+        try
+        {
+            if (!_addressablesready)
+            {
+                await Addressables.InitializeAsync().Task;
+                _addressablesready = true;
+            }
+
+            await EnsureCatalogAsync();
+
+            //var hn = new List<AsyncOperationHandle>();
+            var configsToLoads = new List<PoolAddressSO>();
+            var objectsToLoad = new List<GameObject>();
+            foreach (var locs in _addrToSO)
+            {
+                
+                var h = Addressables.LoadAssetAsync<GameObject>(locs.Key);
+                _cached.Add(h);
+                await h.Task;
+                if(h.Status == AsyncOperationStatus.Succeeded && h.Result != null)
+                {
+                    objectsToLoad.Add(h.Result);
+                    configsToLoads.Add(locs.Value);
+                    //_addrToSOTemp[locs.Key] = h.Result;
+                }
+            }
+            for(int i = 0; i < _cached.Count; i++)
+            {
+                var cnfg = configsToLoads[i];
+                GameObject go = objectsToLoad[i];
+
+                PoolManagerBase pool = cnfg.Kind switch
+                {
+                    PoolKind.ParticleSystem => new PoolManager<ParticleSystem>(this, go.GetComponent<ParticleSystem>()),
+                    PoolKind.Audio => new PoolManager<AudioSource>(this, go.GetComponent<AudioSource>()),
+                    _ => new PoolManager<GameObject>(this, go)
+                };
+                _pools[cnfg.Id.Id] = pool;
+                pool.PreWarmPool(cnfg.PrewarmSize);
+            }
+
+            SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;
+
+            SceneEventAggregator.Instance.OnResourceReleased += ResourceReleased;
+            _jobs.EnsureCapacity(_maxTrackedPoolObjects);
+
+            return;
+
+            //string sceneLabel = $"scene:{sceneName}";
+
+            // Get all resource locations with the specified label
+            var locationHandle = Addressables.LoadResourceLocationsAsync("MoonScene", typeof(GameObject));
+            var locations = await locationHandle.Task;
+
+            if (locations == null || locations.Count == 0) return;
+
+            // Filter locations to only those that have a corresponding PoolAddressSO
+            var locationsToLoad = new List<IResourceLocation>(locations.Count);
+            var configsToLoad = new List<PoolAddressSO>(locations.Count);
+
+            foreach (var loc in locations)
+            {
+                if (_addrToSO.TryGetValue(loc.PrimaryKey, out var config))
+                {
+                    locationsToLoad.Add(loc);
+                    configsToLoad.Add(config);
+                }
+            }
+
+            if (locationsToLoad.Count == 0) return;
+            // Load all assets in parallel
+            var handles = new List<AsyncOperationHandle<GameObject>>(locationsToLoad.Count);
+            for (int i = 0; i < locationsToLoad.Count; i++)
+            {
+                var h = Addressables.LoadAssetAsync<GameObject>(locationsToLoad[i]);
+                handles.Add(h);
+                // await h.Task;
+
+            }
+            await Task.WhenAll(handles.Select(h => h.Task));
+
+            await Awaitable.NextFrameAsync();
+
+            for (int i = 0; i < handles.Count; i++)
+            {
+                var h = handles[i];
+                var config = configsToLoad[i];
+
+                if (h.Status != AsyncOperationStatus.Succeeded || h.Result == null) continue;
+
+                PoolManagerBase pool = config.Kind switch
+                {
+                    PoolKind.ParticleSystem => new PoolManager<ParticleSystem>(this, h.Result.GetComponent<ParticleSystem>()),
+                    PoolKind.Audio => new PoolManager<AudioSource>(this, h.Result.GetComponent<AudioSource>()),
+                    _ => new PoolManager<GameObject>(this, h.Result)
+                };
+
+                _pools[config.Id.Id] = pool;
+                _handles[config.Id] = h;
+
+                pool.PreWarmPool(config.PrewarmSize);
+            }
+
+            SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;
+
+            SceneEventAggregator.Instance.OnResourceReleased += ResourceReleased;
+            _jobs.EnsureCapacity(_maxTrackedPoolObjects);
+
+        }
+        catch (NullReferenceException e)
+        {
+            Debug.LogError($"Error loading resources: {e.Message}");
+        }
+    }*/
+    #endregion
 }

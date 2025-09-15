@@ -11,7 +11,7 @@ public abstract class RangedWeaponBase : IRangedWeapon
     protected IPoolManager _bulletPoolManager;
     protected GameObject _gunOwner;
     protected int _clipCount;
-    protected Action<PoolIdSO, IPoolManager> PoolRequestCallback;
+    protected Action<string, IPoolManager> PoolRequestCallback;
 
     protected PoolIdSO _normalBulletPoolId;
 
@@ -24,9 +24,10 @@ public abstract class RangedWeaponBase : IRangedWeapon
         GetPoolManager(type);
     }
 
-    protected virtual void SetBulletPool(PoolIdSO type, IPoolManager poolManager)
+    protected virtual void SetBulletPool(string type, IPoolManager poolManager)
     {
-        if (type == null || poolManager == null) return;
+        if (string.IsNullOrEmpty(type) || type != _normalBulletPoolId.Id || poolManager == null) return;
+       // if (type == null || poolManager == null) return;
        _bulletPoolManager = poolManager;
     }
 
@@ -46,7 +47,7 @@ public abstract class RangedWeaponBase : IRangedWeapon
                 poolType = _normalBulletPoolId;
                 break;
         }
-        var bulletPool = ResourceRequests.RequestPool(_normalBulletPoolId, PoolRequestCallback);
+        var bulletPool = ResourceRequests.RequestPool(_normalBulletPoolId.Id, PoolRequestCallback);
 
         SceneEventAggregator.Instance.ResourceRequested(bulletPool);
 
@@ -71,8 +72,9 @@ public abstract class RangedWeaponBase : IRangedWeapon
             Vector3 direction = directionOverride ?? _bulletSpawnPoint.forward; // fallback direction
             Quaternion bulletRotation = Quaternion.LookRotation(direction);
             
-            GameObject obj = _bulletPoolManager.GetFromPool(_bulletSpawnPoint.position, bulletRotation) as GameObject;
+            GameObject obj = _bulletPoolManager?.GetFromPool(_bulletSpawnPoint.position, bulletRotation) as GameObject;
 
+            if (obj == null) return;
             ComponentRegistry.TryGet<IPoolable>(obj, out var bullet);
 
             //BulletBase bullet = obj.GetComponentInChildren<BulletBase>();

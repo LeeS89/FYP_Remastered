@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 653dc2465d849f64cbfcd63ccd510361, type: 3}
   m_Name: NormalProjectileHitId
   m_EditorClassIdentifier: 
-  description: 
+  _id: NormalBulletHitId

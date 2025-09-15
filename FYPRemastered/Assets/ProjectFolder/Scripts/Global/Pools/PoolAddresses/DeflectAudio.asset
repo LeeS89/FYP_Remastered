@@ -12,7 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06397a21e19fded4bbff2f20c30eef47, type: 3}
   m_Name: DeflectAudio
   m_EditorClassIdentifier: 
+  AddressableReference:
+    m_AssetGUID: 
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_SubObjectGUID: 
+    m_EditorAssetChanged: 0
   _addressableKey: DeflectAudioPrefab
   _id: {fileID: 11400000, guid: ddaf70cf0cbc90343814eba091736f24, type: 2}
   _kind: 1
-  _prewarmSize: 10
+  _prewarmCount: 5

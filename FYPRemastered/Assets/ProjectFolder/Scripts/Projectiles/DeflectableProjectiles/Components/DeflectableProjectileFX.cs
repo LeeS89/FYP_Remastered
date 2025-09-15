@@ -33,7 +33,7 @@ public sealed class DeflectableProjectileFX : ProjectileFXBase
         base.InitialzeLocalPools();
 
         if (DeflectAudioPoolId == null) return;
-        this.RequestPool(DeflectAudioPoolId, PoolRequestCallback);
+        this.RequestPool(DeflectAudioPoolId.Id, PoolRequestCallback);
     }
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
@@ -50,13 +50,13 @@ public sealed class DeflectableProjectileFX : ProjectileFXBase
         _particleManager = null;
     }
 
-    protected override void OnPoolReceived(PoolIdSO poolId, IPoolManager pool)
+    protected override void OnPoolReceived(string poolId, IPoolManager pool)
     {
         if (poolId == null) return;
 
         base.OnPoolReceived(poolId, pool);
 
-        if (poolId == DeflectAudioPoolId) DeflectAudioPoolManager = pool;
+        if (poolId == DeflectAudioPoolId.Id) DeflectAudioPoolManager = pool;
 
     }
 

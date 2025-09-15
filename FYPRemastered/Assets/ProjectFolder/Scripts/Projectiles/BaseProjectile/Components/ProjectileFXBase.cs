@@ -14,7 +14,7 @@ public class ProjectileFXBase : ComponentEvents
 
 
     [Header("Called when a request for a pool is completed")]
-    protected Action<PoolIdSO, IPoolManager> PoolRequestCallback;
+    protected Action<string, IPoolManager> PoolRequestCallback;
 
     protected ProjectileEventManager _projectileEventManager;
 
@@ -31,7 +31,7 @@ public class ProjectileFXBase : ComponentEvents
     public override void InitialzeLocalPools()
     {
         if (HitParticlePoolId == null) return;
-        this.RequestPool(HitParticlePoolId, PoolRequestCallback);
+        this.RequestPool(HitParticlePoolId.Id, PoolRequestCallback);
     }
 
 
@@ -50,11 +50,11 @@ public class ProjectileFXBase : ComponentEvents
         PoolRequestCallback = null;
     }
 
-    protected virtual void OnPoolReceived(PoolIdSO poolId, IPoolManager pool)
+    protected virtual void OnPoolReceived(string poolId, IPoolManager pool)
     {
         if (poolId == null) return;
 
-        if (poolId == HitParticlePoolId)
+        if (poolId == HitParticlePoolId.Id)
         {
             CollisionParticlePoolManager = pool;
             Kind = CollisionParticlePoolManager.GetPoolType();

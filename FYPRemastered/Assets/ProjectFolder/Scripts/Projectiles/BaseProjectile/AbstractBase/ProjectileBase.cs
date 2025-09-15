@@ -124,9 +124,10 @@ public class ProjectileBase : ComponentEvents, IPoolable
     {
         Owner = projectileOwner;
 
-        SetState(IsActive);
+        
         _projectileEventManager.Launched();
         _timeOut = _lifespan;
+        SetState(IsActive);
 
     }
 
@@ -148,7 +149,7 @@ public class ProjectileBase : ComponentEvents, IPoolable
 
     private void OnEnable()
     {
-        SetState(IsActive);
+       // SetState(IsActive);
     }
 
     protected virtual void OnExpired()
