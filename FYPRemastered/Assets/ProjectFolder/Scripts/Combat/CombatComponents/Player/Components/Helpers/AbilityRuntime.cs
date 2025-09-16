@@ -1,7 +1,7 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
-using static UnityEngine.Rendering.DebugUI.Table;
+
 
 public sealed class AbilityRuntime
 {
@@ -13,15 +13,21 @@ public sealed class AbilityRuntime
     private bool _channeling;
     private float _nextTick;
 
-    private PlayerTraceManager _traceComp; // Optional
+    public bool IsReady { get; set; } = true;
+  //  private PlayerTraceManager _traceComp; // Optional
     private bool _inProgress = false;
-    public AbilityTags Id => _def.Id;
+    public AbilityTags Id => _def.Tag;
+    public string Ids { get; private set; }
 
-    public AbilityRuntime(AbilityDef def, IAbilityOwner owner, PlayerTraceManager trace = null)
+
+    private Action<bool> _executorReadyCallback;
+
+    public AbilityRuntime(AbilityDef def, IAbilityOwner owner)
     {
+        Ids = def.Tag.Id;
         _def = def;
         _owner = owner;
-        _traceComp = trace;
+ 
         int cap = Mathf.Max(64, def.Targeting?.Maxhits ?? 64);
         _hits = new Collider[cap];
 
@@ -46,10 +52,18 @@ public sealed class AbilityRuntime
        
     }
 
+    public void UpdateExecutorPool(PoolIdSO poolId)
+    {
+        foreach (var exec in _execs)
+        {
+            exec.UpdatePool(poolId);
+        }
+    }
+
     public bool TryActivate(float now)
     {
         if (!CanActivate(now)) return false;
-
+        
         Commit(now);
         GatherAndDispatch(now, CuePhase.Start);
        
@@ -77,7 +91,7 @@ public sealed class AbilityRuntime
         if(_channeling) _channeling = false;
         if (!_inProgress) return;
 
-        Dispatch(new AbilityContext(_owner, _owner.Origin, _owner.GazeOrigin, _hits, 0, now), CuePhase.End);
+        Dispatch(new AbilityContext(_owner, _owner.FireOrigin, _hits, 0, now, directionOffset: _owner.DirectionOffset, directionOrigin: _owner.DirectionOrigin), CuePhase.End);
 
         if(_def.GrantTags != null)
         {
@@ -104,7 +118,7 @@ public sealed class AbilityRuntime
     private void GatherAndDispatch(float now, CuePhase phase)
     {
         int count = GatherTargets();
-        Dispatch(new AbilityContext(_owner, _owner.Origin, _owner.GazeOrigin, _hits, count, now), phase);
+        Dispatch(new AbilityContext(_owner, _owner.FireOrigin, _hits, count, now, directionOffset: _owner.DirectionOffset, directionOrigin: _owner.DirectionOrigin), phase);
     }
 
     private void Dispatch(in AbilityContext context, CuePhase phase)
@@ -154,7 +168,7 @@ public sealed class AbilityRuntime
     {
         var tar = _def.Targeting;
         if (tar == null || tar.Mode != TargetingMode.Sphere) return 0;
-        return Physics.OverlapSphereNonAlloc(_owner.Origin.position, tar.Radius, _hits, tar.hitMask);
+        return Physics.OverlapSphereNonAlloc(_owner.FireOrigin.position, tar.Radius, _hits, tar.hitMask);
     }
 
     private void Commit(float now)

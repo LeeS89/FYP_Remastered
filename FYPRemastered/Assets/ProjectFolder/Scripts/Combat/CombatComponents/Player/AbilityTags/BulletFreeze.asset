@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: BulletFreeze
   m_EditorClassIdentifier: 
   Description: Bullet Freeze ID
+  _id: BulletFreeze

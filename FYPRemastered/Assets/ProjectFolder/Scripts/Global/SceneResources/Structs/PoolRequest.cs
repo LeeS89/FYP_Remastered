@@ -35,7 +35,8 @@ public readonly struct ResourceRequests
     public readonly List<FlankPointData> FlankCandidates;
     public readonly Action<bool> FlankCallback;
 
-    public readonly Action<string, IPoolManager> PoolCallback;
+    public readonly Action<string, IPoolManager> PoolRequesterCallback;
+   
     public readonly Action<LayerMask, LayerMask, LayerMask> FlankPointTargetAndBlockingMasksCallback;
     public readonly Action<BlockData> WaypointCallback;
     public readonly Action<bool> PathRequestCallback;
@@ -50,7 +51,7 @@ public readonly struct ResourceRequests
         List<FlankPointData> flankCandidates,
         int flankCandidateSteps,
         Action<bool> flankCb,
-        Action<string, IPoolManager> poolCb,
+        Action<string, IPoolManager> poolRequesterCallback,
         Action<LayerMask, LayerMask,LayerMask> fptabmCb,
         Action<BlockData> wpCb,
         Action<bool> prCb)
@@ -64,7 +65,7 @@ public readonly struct ResourceRequests
         FlankCandidates = flankCandidates;
         FlankCallback = flankCb;
         FlankCandidateSteps = flankCandidateSteps;
-        PoolCallback = poolCb;
+        PoolRequesterCallback = poolRequesterCallback;
         FlankPointTargetAndBlockingMasksCallback = fptabmCb;
         WaypointCallback = wpCb;
         PathRequestCallback = prCb;
@@ -74,7 +75,7 @@ public readonly struct ResourceRequests
         => new(AIResourceType.None, type, default, default, null, null, -1, null, pool, null, null, null);
 
     public static ResourceRequests FlankPointTargetAndBlockingMasks(Action<LayerMask, LayerMask, LayerMask> masks)
-        => new(AIResourceType.FlankPointEvaluationMasks, null, default, default, null, null, -1, null, null, masks, null, null);
+        => new(AIResourceType.FlankPointEvaluationMasks, null, default, default, null, null, -1, null, null,masks, null, null);
 
     public static ResourceRequests RequestWaypoints(Action<BlockData> callback)
         => new(AIResourceType.WaypointBlock, null, default, default, null, null, -1, null, null, null, callback, null);

@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: ProjectileFire
   m_EditorClassIdentifier: 
   Description: 
+  _id: ProjectileFire

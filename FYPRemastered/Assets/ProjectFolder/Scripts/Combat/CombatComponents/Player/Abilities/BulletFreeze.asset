@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71322f7bd3f4f8e44ade1728ed234243, type: 3}
   m_Name: BulletFreeze
   m_EditorClassIdentifier: 
-  Id: {fileID: 11400000, guid: de9d98fd1784a954188029730deb9b35, type: 2}
+  Tag: {fileID: 11400000, guid: de9d98fd1784a954188029730deb9b35, type: 2}
   GrantTags:
   - {fileID: 11400000, guid: 4c5c68cf7975e5d4a865fdf381fcdda1, type: 2}
   BlockedByTags:

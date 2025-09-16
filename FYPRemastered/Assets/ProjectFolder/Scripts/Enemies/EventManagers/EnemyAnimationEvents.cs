@@ -26,7 +26,8 @@ public class EnemyAnimationEvents : ComponentEvents
     [Range(0f, 1f)] public float clampWeight = 0.5f;
 
 
-
+    public Vector3 _weaponPos;
+    public GameObject _weaponObject;
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
@@ -208,9 +209,25 @@ public class EnemyAnimationEvents : ComponentEvents
             case AnimationAction.Melee:
                 _enemyEventManager.MeleeTriggered(false);
                 break;
+            case AnimationAction.Switch:
+                animator.SetBool("Switch", false);
+                break;
             default:
                 Debug.Log("No action specified");
                 break;
+        }
+    }
+
+    public bool _testSwitch = false;
+    private void Update()
+    {
+        if (_testSwitch)
+        {
+            _weaponObject.transform.localPosition = _weaponPos;
+            _weaponObject.SetActive(!_weaponObject.activeSelf);
+            _testSwitch = false;
+           // animator.SetBool("Switch", true);
+           
         }
     }
 }

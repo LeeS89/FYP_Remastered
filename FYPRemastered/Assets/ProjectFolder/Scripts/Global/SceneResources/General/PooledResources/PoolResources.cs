@@ -167,10 +167,10 @@ public class PoolResources : SceneResources, IUpdateableResource
 
         if (!_pools.TryGetValue(id, out var pool))
         {
-            request.PoolCallback?.Invoke(id, null);
+            request.PoolRequesterCallback?.Invoke(id, null);
             return;
         }
-        request.PoolCallback?.Invoke(id, pool);
+        request.PoolRequesterCallback?.Invoke(id, pool);
       
     }
 

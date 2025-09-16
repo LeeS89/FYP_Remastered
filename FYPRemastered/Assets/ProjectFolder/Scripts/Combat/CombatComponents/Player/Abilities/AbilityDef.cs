@@ -4,7 +4,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "AbilityDef", menuName = "Abilities/Ability")]
 public class AbilityDef : ScriptableObject
 {
-    public AbilityTags Id;
+    public AbilityTags Tag;
     public AbilityTags[] GrantTags;
     public AbilityTags[] BlockedByTags;
     public AbilityTags[] RequiredTags;

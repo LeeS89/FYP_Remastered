@@ -1,16 +1,21 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class AbilityComponent : ComponentEvents, IAbilityOwner
 {
-    [SerializeField] private AbilityDef _bulletFreeze;
+   // [SerializeField] private AbilityDef _bulletFreeze;
     [SerializeField] private List<AbilityDef> _abilities;
-    [SerializeField] private Transform _defaultOrigin;
-    private Transform _currentOrigin;
-    readonly List<AbilityRuntime> _runtimes = new(10);
+    [SerializeField] private Transform _defaultAbilityDirectionOrigin;
+    private Transform _directionOrigin;
+
+    [SerializeField] private float _abilityFireDirectionOffset = 0f;
+    private Transform _abilityFireOrigin;
+    readonly List<AbilityRuntime> _runtimes = new(10); // Switch to Dictionary Lookups
+    private Dictionary<string, AbilityRuntime> _rt = new(10);
     public readonly HashSet<AbilityTags> _tags = new(10);
 
-   
+  
    
     public AudioSource _audio;
 
@@ -37,10 +42,18 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
         _eventManager.OnEndAbility += EndChannel;
         ResetOrigin();
         if (_abilities == null || _abilities.Count == 0) return;
-        foreach (var ab in _abilities)
+
+        foreach(var ab in _abilities)
+        {
+            string id = ab.Tag.Id;
+            _rt[id] = new AbilityRuntime(ab, this);
+        }
+
+       /* foreach (var ab in _abilities)
         {
             _runtimes.Add(new AbilityRuntime(ab, this));
-        }
+        }*/
+        _directionOrigin = _defaultAbilityDirectionOrigin ? _defaultAbilityDirectionOrigin : transform;
     }
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
@@ -51,43 +64,60 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
        
     }
 
-    public Transform Origin
+    public Transform FireOrigin
     {
-        get => _currentOrigin;
-        set => _currentOrigin = value;
+        get => _abilityFireOrigin;
+        private set => _abilityFireOrigin = value;
     }
 
-    public Transform GazeOrigin => _defaultOrigin;
+    public Transform DirectionOrigin => _defaultAbilityDirectionOrigin;
+
+    public float DirectionOffset => _abilityFireDirectionOffset;
 
     public bool _tryActivateFreeze = false;
     public bool _tryEndFreeze = false;
 
-    public void TryActivate(AbilityTags id, Transform abilityOrigin = null)
+    public void TryActivate(AbilityTags tag, Transform abilityFireOrigin = null)
     {
         if (OwnerIsDead) return;
-
-        for(int i = 0; i < _runtimes.Count; i++)
+    
+        if(_rt.TryGetValue(tag.Id, out var runtime))
         {
-            if (_runtimes[i].Id == id)
+            if (abilityFireOrigin != null) FireOrigin = abilityFireOrigin;
+            if (!runtime.TryActivate(Time.time)) ResetOrigin();
+        }
+       
+
+        /*for(int i = 0; i < _runtimes.Count; i++)
+        {
+            if (_runtimes[i].Id == tag)
             {
-                if (abilityOrigin != null) Origin = abilityOrigin;
+                if (abilityFireOrigin != null) FireOrigin = abilityFireOrigin;
                 if(!_runtimes[i].TryActivate(Time.time)) ResetOrigin();
             }
-        }
+        }*/
     }
 
-    private void ResetOrigin() => Origin = _defaultOrigin ? _defaultOrigin : transform;
+    private void ResetOrigin() => FireOrigin = _defaultAbilityDirectionOrigin ? _defaultAbilityDirectionOrigin : transform;
 
 
-    public void EndChannel(AbilityTags id)
+    public void EndChannel(AbilityTags tag)
     {
-        for(int i = 0; i < _runtimes.Count; i++)
+        string id = tag.Id;
+        if (_rt.TryGetValue(id, out var runtime))
         {
-            if (_runtimes[i].Id == id)
+            runtime.End(Time.time);
+            ResetOrigin();
+        }
+
+        /*for(int i = 0; i < _runtimes.Count; i++)
+        {
+            if (_runtimes[i].Id == tag)
             {
                 _runtimes[i].End(Time.time);
+                ResetOrigin();
             }
-        }
+        }*/
     }
 
     protected override void DeathStatusUpdated(bool isDead)
@@ -95,9 +125,15 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
         base.DeathStatusUpdated(isDead);
 
         if (!OwnerIsDead) return;
-        ResetOrigin();
-        for (int i = 0; i < _runtimes.Count; i++)
-            _runtimes[i].OnInterrupted();
+        ResetOrigin(); // Switch to stored Currently Active Ability
+
+        foreach (var rt in _rt.Values)
+        {
+            rt.OnInterrupted();
+        }
+
+        /*for (int i = 0; i < _runtimes.Count; i++)
+            _runtimes[i].OnInterrupted();*/
     }
 
     // Update is called once per frame
@@ -115,7 +151,9 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
         }
 
         float now = Time.time;
-        for (int i = 0; i < _runtimes.Count; i++) _runtimes[i].Tick(now);
+
+        foreach(var rt in _rt.Values) rt.Tick(now);
+        //for (int i = 0; i < _rt.Count; i++) _rt.Tick(now);
     }
 
     private void FixedUpdate()
@@ -136,11 +174,11 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
     public void PlayCue(CueDef cue)
     {
         if (!cue) return;
-        if (cue.Sound) AudioSource.PlayClipAtPoint(cue.Sound, Origin.position, cue.Volume);
+        if (cue.Sound) AudioSource.PlayClipAtPoint(cue.Sound, FireOrigin.position, cue.Volume);
         if (cue.VfxPrefab)
         {
-            var pos = Origin.TransformPoint(cue.VfxOffset);
-            var vfx = Instantiate(cue.VfxPrefab, pos, Origin.rotation);
+            var pos = FireOrigin.TransformPoint(cue.VfxOffset);
+            var vfx = Instantiate(cue.VfxPrefab, pos, FireOrigin.rotation);
             if (cue.VfxLifetime > 0) Destroy(vfx, cue.VfxLifetime);
         }
     }

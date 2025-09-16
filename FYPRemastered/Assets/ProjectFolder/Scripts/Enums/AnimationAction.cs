@@ -7,7 +7,8 @@ public enum AnimationAction
     Dead,
     Look,
     Reload,
-    Melee
+    Melee,
+    Switch
 }
 
 public enum AnimationActionComplete

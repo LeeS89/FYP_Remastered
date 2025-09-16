@@ -3,14 +3,13 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class FreezeAndTrackExecutor : IEffectExecutor
+public class FreezeAndTrackExecutor :ExecutorBase
 {
     private IFreezeAndDeflectable[] _arr = new IFreezeAndDeflectable[64];
     private int _count;
 
-    public FreezeAndTrackExecutor() { }
 
-    public void Execute(in AbilityContext context, EffectDef def, CuePhase phase)
+    public override void Execute(in AbilityContext context, EffectDef def, CuePhase phase)
     {
         if (def.Kind != EffectKind.FreezeAndTrack && def.Kind != EffectKind.ReturnTrackedOnEnd) return;
 
@@ -18,6 +17,8 @@ public class FreezeAndTrackExecutor : IEffectExecutor
         else ClearAndFireBack(); 
 
     }
+
+
 
     private void Add(in AbilityContext context)
     {
@@ -72,10 +73,16 @@ public sealed class ReturnTrackedOnEndExecutor : IEffectExecutor
 
     public ReturnTrackedOnEndExecutor(TrackedFreezeables tracker) => _tracker = tracker;
 
+    public bool IsReady => throw new NotImplementedException();
 
     public void Execute(in AbilityContext context, EffectDef def, CuePhase phase)
     {
         if (phase != CuePhase.End || def.Kind != EffectKind.ReturnTrackedOnEnd) return;
         _tracker?.ClearFreezeables();
+    }
+
+    public void UpdatePool(PoolIdSO poolId, Action<bool> actionCompleteCallback)
+    {
+        throw new NotImplementedException();
     }
 }
