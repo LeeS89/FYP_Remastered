@@ -33,9 +33,14 @@ public abstract class EventManager : MonoBehaviour
         _cachedListeners = null;
     }
 
-    public event Action<AbilityTags, Transform> OnTryUseAbility;
+  //  public event Action<AbilityResources, Transform> OnTryUseAbility;
     public event Action<AbilityTags> OnEndAbility;
-    public void TryUseAbility(AbilityTags id, Transform origin = null) => OnTryUseAbility?.Invoke(id, origin);
+
+    public delegate void TryUseAbility(in AbilityResources resources, Transform origin = null);
+    public event TryUseAbility OnTryUseAbility;
+
+    public void TryActivateAbility(in AbilityResources resources, Transform origin = null) => OnTryUseAbility?.Invoke(resources, origin);
+    // public void TryUseAbility(in AbilityResources resources, Transform origin = null) => OnTryUseAbility?.Invoke(resources, origin);
 
     public void EndAbility(AbilityTags id) => OnEndAbility?.Invoke(id);
 

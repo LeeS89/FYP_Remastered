@@ -77,14 +77,16 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
     public bool _tryActivateFreeze = false;
     public bool _tryEndFreeze = false;
 
-    public void TryActivate(AbilityTags tag, Transform abilityFireOrigin = null)
+    public void TryActivate(in AbilityResources resources, /*AbilityTags tag, */Transform abilityFireOrigin = null)
     {
         if (OwnerIsDead) return;
-    
-        if(_rt.TryGetValue(tag.Id, out var runtime))
+
+        
+        if(_rt.TryGetValue(resources.AbilityTag.Id, out var runtime))
         {
             if (abilityFireOrigin != null) FireOrigin = abilityFireOrigin;
-            if (!runtime.TryActivate(Time.time)) ResetOrigin();
+            if (!runtime.TryActivate(in resources)) ResetOrigin();
+            
         }
        
 
@@ -141,7 +143,7 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
     {
         if (_tryActivateFreeze)
         {
-            TryActivate(_tag);
+           // TryActivate(_tag);
             _tryActivateFreeze = false;
         }
         if (_tryEndFreeze)

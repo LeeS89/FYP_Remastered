@@ -7,18 +7,18 @@ public abstract class ExecutorBase : IEffectExecutor
 
     public bool IsReady { get; protected set; } = true;
 
+    protected Action spendResourcesNotification;
+
+    public ExecutorBase(Action spendCallback) => spendResourcesNotification = spendCallback;
 
 
-    /* public ExecutorBase(string id, Action<string, bool> callback = null)
-     {
-         Id = id;
+    public abstract void Execute(in AbilityContext context, EffectDef def, CuePhase phase, IPoolManager pool = null);
 
-     }*/
+ 
+    
 
-    public abstract void Execute(in AbilityContext context, EffectDef def, CuePhase phase);
+   // public virtual void UpdatePool(PoolIdSO poolId, Action<bool> actionCompleteCallback = null) { }
 
-    public virtual void UpdatePool(PoolIdSO poolId, Action<bool> actionCompleteCallback = null) { }
-
-    protected virtual void OnPoolReceived(string poolId, IPoolManager pool) { }
+   // protected virtual void OnPoolReceived(string poolId, IPoolManager pool) { }
     
 }
