@@ -27,7 +27,7 @@ public class PoolResources : SceneResources, IUpdateableResource
     AsyncOperationHandle<IList<PoolAddressSO>> _poolAddressHandle = new();
     private readonly Dictionary<string, PoolManagerBase> _pools = new();
     private readonly Dictionary<PoolIdSO, AsyncOperationHandle<GameObject>> _handles = new();
-
+    private bool _sceneLoaded = false;
 
     /// <summary>
     /// Loads the addreses of all PoolAddressSO in the project into a dictionary for quick lookup.
@@ -71,6 +71,7 @@ public class PoolResources : SceneResources, IUpdateableResource
     {
         try
         {
+            BaseSceneManager._instance.OnSceneStarted += SetLoaded;
             if (!_addressablesready)
             {
                 await Addressables.InitializeAsync().Task;
@@ -78,8 +79,8 @@ public class PoolResources : SceneResources, IUpdateableResource
             }
 
             await EnsureCatalogAsync();
-           
 
+            _jobs.EnsureCapacity(_maxTrackedPoolObjects);
             //string sceneLabel = $"scene:{sceneName}";
 
             // Get all resource locations with the specified label
@@ -131,19 +132,33 @@ public class PoolResources : SceneResources, IUpdateableResource
               
                 _pools[config.Id.Id] = pool;
                 _handles[config.Id] = h;
-                
+                //await LoadPool(pool, config.PrewarmSize);
                 pool.PreWarmPool(config.PrewarmSize);
             }
-
+           
             SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;
 
             SceneEventAggregator.Instance.OnResourceReleased += ResourceReleased;
-            _jobs.EnsureCapacity(_maxTrackedPoolObjects);
+
            
         }
-        catch (NullReferenceException e)
+        catch (Exception e)
         {
-            Debug.LogError($"Error loading resources: {e.Message}");
+            Debug.LogError($"[Pools] Exception in LoadResources:\n{e}");
+            //Debug.LogError($"Error loading resources: {e.Message}");
+        }
+    }
+
+    public async Task LoadPool(PoolManagerBase pool, int count)
+    {
+        try
+        {
+            pool.PreWarmPool(count);
+            await Task.CompletedTask;
+        }
+        catch(Exception e)
+        {
+            Debug.LogError(e);
         }
     }
 
@@ -177,19 +192,26 @@ public class PoolResources : SceneResources, IUpdateableResource
 
 
 
-   
+   public void SetLoaded() => _sceneLoaded = true;
 
 
     public bool SchedulePoolObjectRelease(IPoolManager pool, UnityEngine.Object item, float seconds)
     {
-        if (_jobs.Count == _maxTrackedPoolObjects) { return false; }
+        if (!_sceneLoaded || _jobs == null || _jobs.Count == _maxTrackedPoolObjects) { return false; }
         _jobs.Add(new PoolObjectTracker(pool, item, seconds));
         return true;
     }
 
     public void UpdateResource()
     {
-        if (_jobs == null || _jobs.Count == 0) { return; }
+        if (_pools == null || _pools.Count == 0) return;
+
+        foreach(var pool in _pools.Values)
+        {
+            pool?.Tick();
+        }
+
+        /*if (_jobs == null || _jobs.Count == 0) { return; }
 
         float dt = Time.deltaTime;
 
@@ -211,7 +233,7 @@ public class PoolResources : SceneResources, IUpdateableResource
                 _jobs.RemoveAt(last);
             }
 
-        }
+        }*/
     }
 
 

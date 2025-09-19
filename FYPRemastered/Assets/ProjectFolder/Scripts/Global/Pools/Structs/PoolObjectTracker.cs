@@ -13,3 +13,17 @@ public struct PoolObjectTracker
         TimeRemaining = timeRemaining;
     }
 }
+
+public struct PoolObjectTrackers
+{
+  
+    public readonly UnityEngine.Object Item;
+    public float TimeRemaining;
+
+    public PoolObjectTrackers(UnityEngine.Object item, float timeRemaining)
+    {
+        Item = item;
+        TimeRemaining = timeRemaining;
+    }
+}
+

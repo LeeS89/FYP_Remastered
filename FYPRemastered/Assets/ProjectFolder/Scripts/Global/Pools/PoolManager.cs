@@ -11,10 +11,14 @@ public sealed class PoolManager<T> : PoolManagerBase /*IPoolManager*/ where T : 
     private T _prefab;
     private Dictionary<T,Transform> _transformCache = new();
     private PoolResources _manager;
+    private List<IPoolManager> _autoReleases = new(50);
+    private List<PoolObjectTrackers> _jobs = new(50);
 
     public override Type ItemType => typeof(T);
+    private static readonly bool IsPlainGameObject = (typeof(T) == typeof(GameObject));
 
- 
+    private static bool IsPrewarming;
+
     ///////  NEW CONSTRUCTOR
     public PoolManager(PoolResources manager, T prefab, int defaultCapacity = 10, int maxSize = 50)
     {
@@ -49,13 +53,18 @@ public sealed class PoolManager<T> : PoolManagerBase /*IPoolManager*/ where T : 
         {
             var audio = item as AudioSource;
             audio.gameObject.SetActive(false);
-            _manager.SchedulePoolObjectRelease(this, audio, audio.clip.length);
+            if (IsPrewarming) return;
+            _jobs.Add(new PoolObjectTrackers(audio, audio.clip.length));
+           // _manager?.SchedulePoolObjectRelease(this, audio, audio.clip.length);
         }else if(typeof(T) == typeof(ParticleSystem))
         {
             var ps = item as ParticleSystem;
             ps.gameObject.SetActive(false);
-            _manager.SchedulePoolObjectRelease(this, ps, ps.main.duration);
-        }else if(typeof(T) == typeof(GameObject))
+            if (IsPrewarming) return;
+            _jobs.Add(new PoolObjectTrackers(ps, ps.main.duration));
+            // _manager?.SchedulePoolObjectRelease(this, ps, ps.main.duration);
+        }
+        else if(typeof(T) == typeof(GameObject))
         {
             var go = item as GameObject;
             go.SetActive(false);
@@ -103,7 +112,34 @@ public sealed class PoolManager<T> : PoolManagerBase /*IPoolManager*/ where T : 
     }
 
     ////// End of NEW CONSTRUCTOR
+    public override void Tick()
+    {
+        if(IsPlainGameObject) return;
 
+        if (_jobs == null || _jobs.Count == 0) { return; }
+
+        float dt = Time.deltaTime;
+
+        for (int i = _jobs.Count - 1; i >= 0; i--)
+        {
+            var job = _jobs[i];
+            job.TimeRemaining -= dt;
+            _jobs[i] = job;
+
+            if (job.TimeRemaining <= 0f)
+            {
+                Release(job.Item);
+
+                int last = _jobs.Count - 1;
+                if (i != last)
+                {
+                    _jobs[i] = _jobs[last];
+                }
+                _jobs.RemoveAt(last);
+            }
+
+        }
+    }
 
 
     private T Get(Vector3 position, Quaternion rotation)
@@ -129,6 +165,8 @@ public sealed class PoolManager<T> : PoolManagerBase /*IPoolManager*/ where T : 
 
     public override void PreWarmPool(int count)
     {
+        if (count <= 0) return;
+        IsPrewarming = true;
         int preWarmCount = Mathf.Min(count, _maxSize);
         List<T> tempList = new List<T>();
         for (int i = 0; i < preWarmCount; i++)
@@ -141,6 +179,7 @@ public sealed class PoolManager<T> : PoolManagerBase /*IPoolManager*/ where T : 
         {
             _pool.Release(item);
         }
+        IsPrewarming = false;
 
     }
 

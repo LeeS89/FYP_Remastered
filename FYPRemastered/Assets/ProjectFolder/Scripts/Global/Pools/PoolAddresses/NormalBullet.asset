@@ -21,4 +21,4 @@ MonoBehaviour:
   _addressableKey: BasicBulletPrefab
   _id: {fileID: 11400000, guid: 6141d1b986a45144bad8d38b32617380, type: 2}
   _kind: 0
-  _prewarmCount: 0
+  _prewarmCount: 50

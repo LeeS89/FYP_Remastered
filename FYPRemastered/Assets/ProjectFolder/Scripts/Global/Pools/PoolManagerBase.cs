@@ -13,8 +13,8 @@ public abstract class PoolManagerBase : IPoolManager
     public abstract void Release(UnityEngine.Object obj);
 
     public PoolKind GetPoolType() => Kind;
-    
 
+    public virtual void Tick() { }
     public PoolKind Kind { get; protected set; }
 
     }
