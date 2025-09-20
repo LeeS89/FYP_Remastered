@@ -33,13 +33,15 @@ public abstract class EventManager : MonoBehaviour
         _cachedListeners = null;
     }
 
-  //  public event Action<AbilityResources, Transform> OnTryUseAbility;
+    //  public event Action<AbilityResources, Transform> OnTryUseAbility;
     public event Action<AbilityTags> OnEndAbility;
 
-    public delegate void TryUseAbility(in AbilityResources resources, Transform origin = null);
-    public event TryUseAbility OnTryUseAbility;
+    public event Action<AbilityTags, Transform> OnTryUseAbility;
+    public void TryUseAbility(AbilityTags tag, Transform origin = null) => OnTryUseAbility?.Invoke(tag, origin);
+    /* public delegate void TryUseAbility(in AbilityResources resources, Transform origin = null);
+     public event TryUseAbility OnTryUseAbility;
 
-    public void TryActivateAbility(in AbilityResources resources, Transform origin = null) => OnTryUseAbility?.Invoke(resources, origin);
+     public void TryActivateAbility(in AbilityResources resources, Transform origin = null) => OnTryUseAbility?.Invoke(resources, origin);*/
     // public void TryUseAbility(in AbilityResources resources, Transform origin = null) => OnTryUseAbility?.Invoke(resources, origin);
 
     public void EndAbility(AbilityTags id) => OnEndAbility?.Invoke(id);
@@ -69,7 +71,7 @@ public abstract class EventManager : MonoBehaviour
     public event Action<Dictionary<StatEntry, float>> OnSpendResources;
 
     public void SpendResources(Dictionary<StatEntry, float> stash) => OnSpendResources?.Invoke(stash);
-   
+
     /*public delegate bool TrySpendResource(ResourceCost resource, out float remaining);
     public event TrySpendResource OnTrySpendResource;
 
@@ -83,9 +85,9 @@ public abstract class EventManager : MonoBehaviour
         }
         return handler(resource, out remaining);
     }*/
-//    public event Func<bool> OnSpendResource;
+    //    public event Func<bool> OnSpendResource;
 
-  //  public bool SpendResource() => OnSpendResource?.Invoke() ?? false;
+    //  public bool SpendResource() => OnSpendResource?.Invoke() ?? false;
 
 
 

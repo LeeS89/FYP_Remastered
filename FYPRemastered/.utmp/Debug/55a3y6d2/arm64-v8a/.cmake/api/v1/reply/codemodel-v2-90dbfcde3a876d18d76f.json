@@ -10,7 +10,7 @@
 					[
 						1
 					],
-					"jsonFile" : "directory-.-RelWithDebInfo-d0094a50bb2071803777.json",
+					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.6.0"
@@ -20,7 +20,7 @@
 				},
 				{
 					"build" : "GameActivity",
-					"jsonFile" : "directory-GameActivity-RelWithDebInfo-3edf2ef9e25ca0503118.json",
+					"jsonFile" : "directory-GameActivity-Debug-3edf2ef9e25ca0503118.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.4.1"
@@ -34,7 +34,7 @@
 					]
 				}
 			],
-			"name" : "RelWithDebInfo",
+			"name" : "Debug",
 			"projects" : 
 			[
 				{
@@ -66,7 +66,7 @@
 				{
 					"directoryIndex" : 1,
 					"id" : "game::@d02bb112ea9f9c2ed29f",
-					"jsonFile" : "target-game-RelWithDebInfo-71e8d68372e61175e57a.json",
+					"jsonFile" : "target-game-Debug-0445dba96c613d68b7dc.json",
 					"name" : "game",
 					"projectIndex" : 1
 				}
@@ -76,7 +76,7 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "C:/Users/leesl/Documents/GitHub/FYP_Remastered/FYPRemastered/.utmp/RelWithDebInfo/4w381q2y/arm64-v8a",
+		"build" : "C:/Users/leesl/Documents/GitHub/FYP_Remastered/FYPRemastered/.utmp/Debug/55a3y6d2/arm64-v8a",
 		"source" : "C:/Users/leesl/Documents/GitHub/FYP_Remastered/FYPRemastered/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/src/main/cpp"
 	},
 	"version" : 

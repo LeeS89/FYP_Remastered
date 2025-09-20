@@ -14,9 +14,9 @@ public sealed class AbilityRuntime : CSBase
     private float _nextTick;
 
     public bool IsReady { get; set; } = true;
-  //  private PlayerTraceManager _traceComp; // Optional
+    //  private PlayerTraceManager _traceComp; // Optional
     private bool _inProgress = false;
-  //  public AbilityTags Id => _def.Tag;
+    //  public AbilityTags Id => _def.Tag;
     public string Ids { get; private set; }
 
     private IPoolManager _startPhasePool;
@@ -25,20 +25,24 @@ public sealed class AbilityRuntime : CSBase
     private Action _spendResourcesCallback;
 
 
-    public AbilityRuntime(AbilityDef def, IAbilityOwner owner)
+    public AbilityRuntime(AbilityParams abParams,/*AbilityDef def,*/ IAbilityOwner owner)
     {
-        Ids = def.Tag.Id;
-        _def = def;
+        Ids = abParams.AbilityId();
+        //Ids = def.Tag.Id;
+        _def = abParams._def;
+        //_def = def;
         _owner = owner;
- 
+
+        SetExecutorPools(abParams);
+
         _spendResourcesCallback = SpendResources;
 
-        int cap = Mathf.Max(64, def.Targeting?.Maxhits ?? 64);
+        int cap = Mathf.Max(64, _def.Targeting?.Maxhits ?? 64);
         _hits = new Collider[cap];
 
-        if(_def.Effects != null)
+        if (_def.Effects != null)
         {
-            for(int i = 0; i < _def.Effects.Length; i++)
+            for (int i = 0; i < _def.Effects.Length; i++)
             {
                 _execs.Add(CreateExecutor(_def.Effects[i]));
             }
@@ -54,36 +58,36 @@ public sealed class AbilityRuntime : CSBase
             _ => null
         };
         return exec;
-       
+
     }
 
 
 
-   /* public void UpdateExecutorPool(PoolIdSO poolId)
-    {
-        foreach (var exec in _execs)
-        {
-            exec.UpdatePool(poolId);
-        }
-    }*/
+    /* public void UpdateExecutorPool(PoolIdSO poolId)
+     {
+         foreach (var exec in _execs)
+         {
+             exec.UpdatePool(poolId);
+         }
+     }*/
 
-    public bool TryActivate(/*float now, */in AbilityResources resources)
+    public bool TryActivate(float now /*in AbilityResources resources*/)
     {
-        
-        float now = resources.Now;
+
+        // float now = resources.Now;
         if (!CanActivate(now)) return false;
 
         /// Important: Set the pools before Commit, as Commit may fail if resources are insufficient
         /// If ability doesnt use pools, its ok to set null
-        SetExecutorPools(in resources);
+       // SetExecutorPools(in resources);
 
         Commit(now);
         GatherAndDispatch(now, CuePhase.Start);
-       
+
         if (_def.IsChanneled && (_def.UsesFixedUpdate || _def.ChannelTick > 0))
         {
             _channeling = true;
-            if(!_def.UsesFixedUpdate) _nextTick = now + _def.ChannelTick;
+            if (!_def.UsesFixedUpdate) _nextTick = now + _def.ChannelTick;
         }
         else
         {
@@ -93,28 +97,32 @@ public sealed class AbilityRuntime : CSBase
         return true;
     }
 
-    private void SetExecutorPools(in AbilityResources resources)
+    private void SetExecutorPools(AbilityParams abParams/*in AbilityResources resources*/)
     {
         /* _startPhasePool = resources._startPhasePool;
          _impactPhasePool = resources._impactPhasePool;
          _endPhasePool = resources._endPhasePool;*/
-        foreach (var kv in resources.AbilityPools)
-        {
-            switch (kv.Key)
-            {
-                case CuePhase.Start:
-                    _startPhasePool = kv.Value;
-                    break;
-                case CuePhase.Impact:
-                    _impactPhasePool = kv.Value;
+
+        _startPhasePool = abParams?.GetPoolRef(CuePhase.Start);
+        _impactPhasePool = abParams?.GetPoolRef(CuePhase.Impact);
+        _endPhasePool = abParams?.GetPoolRef(CuePhase.End);
+        /* foreach (var kv in resources.AbilityPools)
+         {
+             switch (kv.Key)
+             {
+                 case CuePhase.Start:
+                     _startPhasePool = kv.Value;
                      break;
-                case CuePhase.End:
-                    _endPhasePool = kv.Value;
-                    break;
-                default:
-                    return;
-            }
-        }
+                 case CuePhase.Impact:
+                     _impactPhasePool = kv.Value;
+                      break;
+                 case CuePhase.End:
+                     _endPhasePool = kv.Value;
+                     break;
+                 default:
+                     return;
+             }
+         }*/
 
     }
 
@@ -126,14 +134,14 @@ public sealed class AbilityRuntime : CSBase
 
     public void End(float now)
     {
-        if(_channeling) _channeling = false;
+        if (_channeling) _channeling = false;
         if (!_inProgress) return;
 
         Dispatch(new AbilityContext(_owner, _owner.FireOrigin, _hits, 0, now, directionOffset: _owner.DirectionOffset, directionOrigin: _owner.DirectionOrigin), CuePhase.End);
 
-        if(_def.GrantTags != null)
+        if (_def.GrantTags != null)
         {
-            for(int i = 0; i < _def.GrantTags.Length; i++) _owner.RemoveTag(_def.GrantTags[i]);
+            for (int i = 0; i < _def.GrantTags.Length; i++) _owner.RemoveTag(_def.GrantTags[i]);
         }
         _inProgress = false;
     }
@@ -194,11 +202,11 @@ public sealed class AbilityRuntime : CSBase
                 return;
         }
 
-        
-        if(cueDef)_owner.PlayCue(cueDef);
+
+        if (cueDef) _owner.PlayCue(cueDef);
 
         int n = Mathf.Min(_execs.Count, _def.Effects?.Length ?? 0);
-        for(int i = 0; i < n; i++) _execs[i].Execute(context, _def.Effects[i], phase, pm);
+        for (int i = 0; i < n; i++) _execs[i].Execute(context, _def.Effects[i], phase, pm);
 
     }
 
@@ -217,7 +225,7 @@ public sealed class AbilityRuntime : CSBase
         {
             for (int i = 0; i < _def.RequiredTags.Length; i++)
             {
-                if(!_owner.HasTag(_def.RequiredTags[i])) return false;
+                if (!_owner.HasTag(_def.RequiredTags[i])) return false;
             }
         }
 
@@ -254,7 +262,7 @@ public sealed class AbilityRuntime : CSBase
     }
 
     private bool HasSufficientResources() => _owner.HasSufficientResources(_def.Costs);
-    
+
 
     private void SpendResources()
     {

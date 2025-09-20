@@ -8,9 +8,11 @@ public class AbilityGesture : BaseGesture
     [SerializeField] private AbilityTags _abilityId;
     [SerializeField] private PoolIdSO _poolId;
     private Action<string, IPoolManager> poolCallback;
-    private IPoolManager _poolManager;  
+    private IPoolManager _poolManager;
     private PlayerEventManager _pEventManager;
     private Dictionary<CuePhase, IPoolManager> _abilityPools = new(2);
+
+
 
 
     public override void RegisterLocalEvents(EventManager eventManager)
@@ -29,8 +31,8 @@ public class AbilityGesture : BaseGesture
     {
         if (OwnerIsDead) return;
         if (_pEventManager == null || _poolManager == null || _abilityPools == null) return;
-        var ability = AbilityResources.SetAbilityPools(_abilityId, now: Time.time, _abilityPools);//AbilityResources.SetImpactPhasePool(_abilityId, now: Time.time, _poolManager);
-        _pEventManager.TryActivateAbility(ability, _handAnchor); 
+        // var ability = AbilityResources.SetAbilityPools(_abilityId, now: Time.time, _abilityPools);//AbilityResources.SetImpactPhasePool(_abilityId, now: Time.time, _poolManager);
+        _pEventManager.TryUseAbility(_abilityId, _handAnchor);
     }
 
     public override void OnGestureReleased()
@@ -41,7 +43,7 @@ public class AbilityGesture : BaseGesture
 
     private void OnPoolReceived(string poolId, IPoolManager pool)
     {
-        if(poolId == _poolId.Id) _poolManager = pool;
+        if (poolId == _poolId.Id) _poolManager = pool;
         _abilityPools[CuePhase.Start] = _poolManager;
         _abilityPools[CuePhase.Impact] = _poolManager;
     }
@@ -50,7 +52,7 @@ public class AbilityGesture : BaseGesture
     {
         base.DeathStatusUpdated(isDead);
 
-        if(isDead) OnGestureReleased();
+        if (isDead) OnGestureReleased();
     }
-   
+
 }

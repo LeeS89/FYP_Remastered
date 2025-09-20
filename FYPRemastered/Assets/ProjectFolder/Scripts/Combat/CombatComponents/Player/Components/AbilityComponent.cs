@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class AbilityComponent : ComponentEvents, IAbilityOwner
 {
-   // [SerializeField] private AbilityDef _bulletFreeze;
-    [SerializeField] private List<AbilityDef> _abilities;
+    // [SerializeField] private AbilityDef _bulletFreeze;
+    // [SerializeField] private List<AbilityDef> _abilities;
     [SerializeField] private Transform _defaultAbilityDirectionOrigin;
     private Transform _directionOrigin;
 
@@ -15,21 +15,21 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
     private Dictionary<string, AbilityRuntime> _rt = new(10);
     public readonly HashSet<AbilityTags> _tags = new(10);
 
-  
-   
+    [SerializeField] private List<AbilityParams> _abilityParams;
+
     public AudioSource _audio;
 
-    private Dictionary<StatEntry, float> _resourcesToSpend = new(4);
-    public AbilityTags _tag;
-
+    private Dictionary<StatEntry, float> _resourcesToSpend = new(4); 
+    public AbilityTags _tag; // Delete later
+     
 
     private void Awake()
     {
-       /* if (_abilities == null || _abilities.Count == 0) return;
-        foreach(var ab in _abilities)
-        {
-            _runtimes.Add(new AbilityRuntime(ab, this));
-        }*/
+        /* if (_abilities == null || _abilities.Count == 0) return;
+         foreach(var ab in _abilities)
+         {
+             _runtimes.Add(new AbilityRuntime(ab, this));
+         }*/
         //if (_bulletFreeze) _runtimes.Add(new AbilityRuntime(_bulletFreeze, this));
     }
 
@@ -41,18 +41,17 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
         _eventManager.OnTryUseAbility += TryActivate;
         _eventManager.OnEndAbility += EndChannel;
         ResetOrigin();
-        if (_abilities == null || _abilities.Count == 0) return;
+        if (_abilityParams == null || _abilityParams.Count == 0) return;
 
-        foreach(var ab in _abilities)
+        foreach (var ab in _abilityParams)
         {
-            string id = ab.Tag.Id;
-            _rt[id] = new AbilityRuntime(ab, this);
+            ab?.Initialize();
+            string id = ab.AbilityId();
+            if (string.IsNullOrEmpty(id)) continue;
+            AbilityRuntime rt = new AbilityRuntime(ab, this);
+            _rt[id] = rt;
         }
-
-       /* foreach (var ab in _abilities)
-        {
-            _runtimes.Add(new AbilityRuntime(ab, this));
-        }*/
+       
         _directionOrigin = _defaultAbilityDirectionOrigin ? _defaultAbilityDirectionOrigin : transform;
     }
 
@@ -61,7 +60,7 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
         _eventManager.OnTryUseAbility -= TryActivate;
         _eventManager.OnEndAbility -= EndChannel;
         base.UnRegisterLocalEvents(eventManager);
-       
+
     }
 
     public Transform FireOrigin
@@ -77,27 +76,18 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
     public bool _tryActivateFreeze = false;
     public bool _tryEndFreeze = false;
 
-    public void TryActivate(in AbilityResources resources, /*AbilityTags tag, */Transform abilityFireOrigin = null)
+    public void TryActivate(AbilityTags tag,Transform abilityFireOrigin = null)
     {
         if (OwnerIsDead) return;
 
-        
-        if(_rt.TryGetValue(resources.AbilityTag.Id, out var runtime))
+
+        if (_rt.TryGetValue(tag.Id, out var runtime))
         {
             if (abilityFireOrigin != null) FireOrigin = abilityFireOrigin;
-            if (!runtime.TryActivate(in resources)) ResetOrigin();
-            
-        }
-       
+            if (!runtime.TryActivate(Time.time)) ResetOrigin();
 
-        /*for(int i = 0; i < _runtimes.Count; i++)
-        {
-            if (_runtimes[i].Id == tag)
-            {
-                if (abilityFireOrigin != null) FireOrigin = abilityFireOrigin;
-                if(!_runtimes[i].TryActivate(Time.time)) ResetOrigin();
-            }
-        }*/
+        }
+
     }
 
     private void ResetOrigin() => FireOrigin = _defaultAbilityDirectionOrigin ? _defaultAbilityDirectionOrigin : transform;
@@ -112,14 +102,6 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
             ResetOrigin();
         }
 
-        /*for(int i = 0; i < _runtimes.Count; i++)
-        {
-            if (_runtimes[i].Id == tag)
-            {
-                _runtimes[i].End(Time.time);
-                ResetOrigin();
-            }
-        }*/
     }
 
     protected override void DeathStatusUpdated(bool isDead)
@@ -143,7 +125,7 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
     {
         if (_tryActivateFreeze)
         {
-           // TryActivate(_tag);
+            // TryActivate(_tag);
             _tryActivateFreeze = false;
         }
         if (_tryEndFreeze)
@@ -154,24 +136,24 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
 
         float now = Time.time;
 
-        foreach(var rt in _rt.Values) rt.Tick(now);
+        foreach (var rt in _rt.Values) rt.Tick(now);
         //for (int i = 0; i < _rt.Count; i++) _rt.Tick(now);
     }
 
     private void FixedUpdate()
     {
         float now = Time.fixedTime;
-        for(int i = 0; i < _runtimes.Count; i++)
+        for (int i = 0; i < _runtimes.Count; i++)
         {
             _runtimes[i].FixedTick(now);
         }
     }
 
     public void AddTag(AbilityTags tag) => _tags.Add(tag);
-    
+
 
     public bool HasTag(AbilityTags tag) => _tags.Contains(tag);
-   
+
 
     public void PlayCue(CueDef cue)
     {
@@ -186,9 +168,9 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
     }
 
     public void RemoveTag(AbilityTags tag) => _tags.Remove(tag);
-    
 
-   
+
+
 
     public bool HasSufficientResources(ResourceCost[] costs)
     {
