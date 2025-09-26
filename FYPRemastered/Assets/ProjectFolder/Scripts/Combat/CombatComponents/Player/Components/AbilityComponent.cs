@@ -4,34 +4,28 @@ using UnityEngine;
 
 public class AbilityComponent : ComponentEvents, IAbilityOwner
 {
-    // [SerializeField] private AbilityDef _bulletFreeze;
-    // [SerializeField] private List<AbilityDef> _abilities;
+    [SerializeField] private List<AbilityParam> _abilityPools;
+
+
+    [SerializeField] private List<AbilityDef> _abilities;
     [SerializeField] private Transform _defaultAbilityDirectionOrigin;
     private Transform _directionOrigin;
 
     [SerializeField] private float _abilityFireDirectionOffset = 0f;
     private Transform _abilityFireOrigin;
-    readonly List<AbilityRuntime> _runtimes = new(10); // Switch to Dictionary Lookups
-    private Dictionary<string, AbilityRuntime> _rt = new(10);
+    private List<AbilityRuntime> _runtimeUpdates = new(10); // Switch to Dictionary Lookups
+    private Dictionary<string, AbilityRuntime> _runtimeLookups = new(10);
     public readonly HashSet<AbilityTags> _tags = new(10);
 
-    [SerializeField] private List<AbilityParams> _abilityParams;
+   // [SerializeField] private List<AbilityParams> _abilityParams;
 
     public AudioSource _audio;
 
     private Dictionary<StatEntry, float> _resourcesToSpend = new(4); 
     public AbilityTags _tag; // Delete later
-     
+  
 
-    private void Awake()
-    {
-        /* if (_abilities == null || _abilities.Count == 0) return;
-         foreach(var ab in _abilities)
-         {
-             _runtimes.Add(new AbilityRuntime(ab, this));
-         }*/
-        //if (_bulletFreeze) _runtimes.Add(new AbilityRuntime(_bulletFreeze, this));
-    }
+   
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
@@ -41,18 +35,23 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
         _eventManager.OnTryUseAbility += TryActivate;
         _eventManager.OnEndAbility += EndChannel;
         ResetOrigin();
-        if (_abilityParams == null || _abilityParams.Count == 0) return;
+        InitializeRuntimes();
+        /* if (_abilityParams == null || _abilityParams.Count == 0) return;
 
-        foreach (var ab in _abilityParams)
+         foreach (var ab in _abilityParams)
+         {
+             ab?.Initialize();
+             string id = ab.AbilityId();
+             if (string.IsNullOrEmpty(id)) continue;
+             AbilityRuntime rt = new AbilityRuntime(ab, this);
+             _rt[id] = rt;
+         }*/
+
+        if (_defaultAbilityDirectionOrigin != null) 
         {
-            ab?.Initialize();
-            string id = ab.AbilityId();
-            if (string.IsNullOrEmpty(id)) continue;
-            AbilityRuntime rt = new AbilityRuntime(ab, this);
-            _rt[id] = rt;
+            _directionOrigin = _defaultAbilityDirectionOrigin;
         }
-       
-        _directionOrigin = _defaultAbilityDirectionOrigin ? _defaultAbilityDirectionOrigin : transform;
+       // _directionOrigin = _defaultAbilityDirectionOrigin ? _defaultAbilityDirectionOrigin : transform;
     }
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
@@ -61,6 +60,25 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
         _eventManager.OnEndAbility -= EndChannel;
         base.UnRegisterLocalEvents(eventManager);
 
+    }
+
+    private void InitializeRuntimes()
+    {
+        if (_abilities == null || _abilities.Count == 0) return;
+        foreach (var ab in _abilities)
+        {
+            string id = ab.Tag.Id;
+            if (id == null) continue;
+            id.Trim();
+            if (id.Length == 0) continue;
+
+            AbilityRuntime rt = new AbilityRuntime(ab, this);
+            if (_runtimeLookups.TryAdd(id, rt))
+            {
+                _runtimeUpdates.Add(rt);
+            }
+
+        }
     }
 
     public Transform FireOrigin
@@ -81,7 +99,7 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
         if (OwnerIsDead) return;
 
 
-        if (_rt.TryGetValue(tag.Id, out var runtime))
+        if (_runtimeLookups.TryGetValue(tag.Id, out var runtime))
         {
             if (abilityFireOrigin != null) FireOrigin = abilityFireOrigin;
             if (!runtime.TryActivate(Time.time)) ResetOrigin();
@@ -90,13 +108,25 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
 
     }
 
+    public void TryActivate(AbilityParam abParams, Transform activateOrigin = null, Vector3? direction = null)
+    {
+        if (OwnerIsDead) return;
+
+        string tag = abParams.AbilityIdTag.Id;
+
+        if(_runtimeLookups.TryGetValue(tag, out var rt))
+        {
+
+        }
+    }
+
     private void ResetOrigin() => FireOrigin = _defaultAbilityDirectionOrigin ? _defaultAbilityDirectionOrigin : transform;
 
 
     public void EndChannel(AbilityTags tag)
     {
         string id = tag.Id;
-        if (_rt.TryGetValue(id, out var runtime))
+        if (_runtimeLookups.TryGetValue(id, out var runtime))
         {
             runtime.End(Time.time);
             ResetOrigin();
@@ -111,7 +141,7 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
         if (!OwnerIsDead) return;
         ResetOrigin(); // Switch to stored Currently Active Ability
 
-        foreach (var rt in _rt.Values)
+        foreach (var rt in _runtimeLookups.Values)
         {
             rt.OnInterrupted();
         }
@@ -136,16 +166,21 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
 
         float now = Time.time;
 
-        foreach (var rt in _rt.Values) rt.Tick(now);
+        foreach (var rt in _runtimeLookups.Values) rt.Tick(now);
         //for (int i = 0; i < _rt.Count; i++) _rt.Tick(now);
     }
 
     private void FixedUpdate()
     {
         float now = Time.fixedTime;
-        for (int i = 0; i < _runtimes.Count; i++)
+        foreach(var rt in _runtimeLookups.Values)
         {
-            _runtimes[i].FixedTick(now);
+            rt.FixedTick(now);
+        }
+
+        for (int i = 0; i < _runtimeUpdates.Count; i++)
+        {
+            _runtimeUpdates[i].FixedTick(now);
         }
     }
 

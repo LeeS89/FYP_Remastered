@@ -10,10 +10,10 @@ public class ProjectileFireExecutor : ExecutorBase
     public override void Execute(in AbilityContext context, EffectDef def, CuePhase phase, IPoolManager pool = null)
     {
   
-        if (def.Kind != EffectKind.SpawnAndFire) return;
-        if (pool == null) return;
+        if (def.Kind != EffectKind.SpawnAndFire || pool == null) return;
+ 
 
-        if (phase == CuePhase.Start || phase == CuePhase.Impact)
+        if (phase != CuePhase.End/*phase == CuePhase.Start || phase == CuePhase.Impact*/)
         {
             // Vector3 direction = context.AbilitydirectionOrigin.forward;
             Quaternion rotation = context.AbilityDirectionOrigin.rotation;

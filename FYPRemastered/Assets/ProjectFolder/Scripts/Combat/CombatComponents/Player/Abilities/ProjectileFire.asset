@@ -33,6 +33,9 @@ MonoBehaviour:
     Maxhits: 32
   Effects:
   - {fileID: 11400000, guid: d757268d4872f06418b4221a6e13c354, type: 2}
+  StartPhasePool: {fileID: 11400000, guid: 7249f8d07474c484ab32588d56342c7b, type: 2}
+  ImpactPhasePool: {fileID: 11400000, guid: 7249f8d07474c484ab32588d56342c7b, type: 2}
+  EndPhasePool: {fileID: 0}
   Start: {fileID: 0}
   Impact: {fileID: 0}
   End: {fileID: 0}

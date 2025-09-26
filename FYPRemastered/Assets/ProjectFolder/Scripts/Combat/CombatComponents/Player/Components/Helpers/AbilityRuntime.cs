@@ -17,23 +17,33 @@ public sealed class AbilityRuntime : CSBase
     //  private PlayerTraceManager _traceComp; // Optional
     private bool _inProgress = false;
     //  public AbilityTags Id => _def.Tag;
-    public string Ids { get; private set; }
+ //   public string Ids { get; private set; }
 
-    private IPoolManager _startPhasePool;
-    private IPoolManager _impactPhasePool;
-    private IPoolManager _endPhasePool;
+    private IPoolManager _startPhasePool, _impactPhasePool, _endPhasePool;
+   
+    // private IPoolManager _impactPhasePool;
+    // private IPoolManager _endPhasePool;
     private Action _spendResourcesCallback;
+    private Action<string, IPoolManager> OnPoolReceived;
+    private string StartPoolId, ImpactPoolId, EndPoolId;
 
 
-    public AbilityRuntime(AbilityParams abParams,/*AbilityDef def,*/ IAbilityOwner owner)
+
+
+
+    public AbilityRuntime(/*AbilityParams abParams,*/AbilityDef def, IAbilityOwner owner)
     {
-        Ids = abParams.AbilityId();
-        //Ids = def.Tag.Id;
-        _def = abParams._def;
-        //_def = def;
+        _def = def;
+
+        OnPoolReceived = OnPoolRequestComplete;
+        RequestPoolsIfProvided(_def);
+
+        //  Ids = abParams.AbilityId();
+        //  Ids = def.Tag.Id;
+        //  _def = abParams._def;
+
         _owner = owner;
 
-        SetExecutorPools(abParams);
 
         _spendResourcesCallback = SpendResources;
 
@@ -61,8 +71,58 @@ public sealed class AbilityRuntime : CSBase
 
     }
 
+    private void RequestPoolsIfProvided(AbilityDef def)
+    {
+        if (def.StartPhasePool != null)
+        {
+            StartPoolId = def.StartPhasePool.Id;
+            this.RequestPool(StartPoolId, OnPoolReceived);
+        }
+        if(def.ImpactPhasePool != null)
+        {
+            ImpactPoolId = def.ImpactPhasePool.Id;
+            this.RequestPool(ImpactPoolId, OnPoolReceived);
+        }
+        if(def.EndPhasePool != null)
+        {
+            EndPoolId = def.EndPhasePool.Id;
+            this.RequestPool(EndPoolId, OnPoolReceived);
+        }
+    }
+
+    private void OnPoolRequestComplete(string id, IPoolManager pool)
+    {
+        if (string.IsNullOrEmpty(id) || pool == null) return;
+
+        if (StartPoolId != null && id == StartPoolId) _startPhasePool = pool;
+
+        if (ImpactPoolId != null && id == ImpactPoolId) _impactPhasePool = pool;
+
+        if (EndPoolId != null && id == EndPoolId) _endPhasePool = pool;
+
+    }
 
 
+    public void ChangePools(CuePhase phase, IPoolManager pool)
+    {
+        switch (phase)
+        {
+            case CuePhase.Start:
+                _startPhasePool = pool;
+                break;
+            case CuePhase.Impact:
+                _impactPhasePool = pool;
+                break;
+            case CuePhase.End:
+                _endPhasePool = pool;
+                break;
+            default:
+#if UNITY_EDITOR
+                Debug.LogError("A valid pool manager must be provided");
+#endif
+                return;
+        }
+    }
     /* public void UpdateExecutorPool(PoolIdSO poolId)
      {
          foreach (var exec in _execs)
@@ -97,34 +157,7 @@ public sealed class AbilityRuntime : CSBase
         return true;
     }
 
-    private void SetExecutorPools(AbilityParams abParams/*in AbilityResources resources*/)
-    {
-        /* _startPhasePool = resources._startPhasePool;
-         _impactPhasePool = resources._impactPhasePool;
-         _endPhasePool = resources._endPhasePool;*/
-
-        _startPhasePool = abParams?.GetPoolRef(CuePhase.Start);
-        _impactPhasePool = abParams?.GetPoolRef(CuePhase.Impact);
-        _endPhasePool = abParams?.GetPoolRef(CuePhase.End);
-        /* foreach (var kv in resources.AbilityPools)
-         {
-             switch (kv.Key)
-             {
-                 case CuePhase.Start:
-                     _startPhasePool = kv.Value;
-                     break;
-                 case CuePhase.Impact:
-                     _impactPhasePool = kv.Value;
-                      break;
-                 case CuePhase.End:
-                     _endPhasePool = kv.Value;
-                     break;
-                 default:
-                     return;
-             }
-         }*/
-
-    }
+   
 
     public void OnInterrupted()
     {

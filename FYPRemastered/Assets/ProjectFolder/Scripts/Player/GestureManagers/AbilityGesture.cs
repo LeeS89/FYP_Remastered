@@ -13,7 +13,7 @@ public class AbilityGesture : BaseGesture
     private Dictionary<CuePhase, IPoolManager> _abilityPools = new(2);
 
 
-
+    [SerializeField] private List<AbilityParams> _abilityParams;
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
@@ -25,6 +25,7 @@ public class AbilityGesture : BaseGesture
         if (_poolId == null) return;
         poolCallback = OnPoolReceived;
         this.RequestPool(_poolId.Id, poolCallback);
+       
     }
 
     public override void OnGestureRecognized()

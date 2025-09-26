@@ -12,6 +12,7 @@ public class AbilityDef : ScriptableObject
     public ResourceCost[] Costs;
     public TargetingDef Targeting;
     public EffectDef[] Effects;
+    public PoolIdSO StartPhasePool, ImpactPhasePool, EndPhasePool;
     public CueDef Start, Impact, End;
     public bool IsChanneled;
     public bool UsesFixedUpdate;
