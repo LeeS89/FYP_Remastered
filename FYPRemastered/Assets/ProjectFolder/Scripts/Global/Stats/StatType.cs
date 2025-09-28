@@ -1,5 +1,6 @@
 public enum StatType
 {
+    None,
     Health,
     MaxHealth,
     Force,

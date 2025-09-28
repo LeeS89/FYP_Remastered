@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class AbilityComponent : ComponentEvents, IAbilityOwner
 {
+    [SerializeField] private AbilityOrigins _origins;
+
     [SerializeField] private List<AbilityParam> _abilityPools;
 
 
