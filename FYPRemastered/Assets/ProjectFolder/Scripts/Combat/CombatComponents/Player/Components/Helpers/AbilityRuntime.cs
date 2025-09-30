@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-
+[Obsolete("Use Ability manager instead", false)]
 public sealed class AbilityRuntime : CSBase
 {
-    readonly AbilityDef _def;
+    readonly AbilityDefinition _def;
     readonly IAbilityOwner _owner;
     readonly Collider[] _hits;
     readonly List<IEffectExecutor> _execs = new();
@@ -31,7 +31,7 @@ public sealed class AbilityRuntime : CSBase
 
 
 
-    public AbilityRuntime(/*AbilityParams abParams,*/AbilityDef def, IAbilityOwner owner)
+    public AbilityRuntime(/*AbilityParams abParams,*/AbilityDefinition def, IAbilityOwner owner)
     {
         _def = def;
 
@@ -50,28 +50,28 @@ public sealed class AbilityRuntime : CSBase
         int cap = Mathf.Max(64, _def.Targeting?.Maxhits ?? 64);
         _hits = new Collider[cap];
 
-        if (_def.Effects != null)
+        /*if (_def.Effects != null)
         {
             for (int i = 0; i < _def.Effects.Length; i++)
             {
                 _execs.Add(CreateExecutor(_def.Effects[i]));
             }
-        }
+        }*/
     }
 
-    private IEffectExecutor CreateExecutor(EffectDef eff)
+    private IEffectExecutor CreateExecutor(EffectType eff)
     {
-        IEffectExecutor exec = eff.Kind switch
+        IEffectExecutor exec = eff switch
         {
-            EffectKind.FreezeAndTrack => new FreezeAndTrackExecutor(_spendResourcesCallback),
-            EffectKind.SpawnAndFire => new ProjectileFireExecutor(_spendResourcesCallback),
+            EffectType.FreezeAndTrack => new FreezeAndTrackExecutor(_spendResourcesCallback),
+            EffectType.SpawnAndFire => new ProjectileFireExecutor(_spendResourcesCallback),
             _ => null
         };
         return exec;
 
     }
 
-    private void RequestPoolsIfProvided(AbilityDef def)
+    private void RequestPoolsIfProvided(AbilityDefinition def)
     {
         if (def.StartPhasePool != null)
         {
@@ -170,7 +170,7 @@ public sealed class AbilityRuntime : CSBase
         if (_channeling) _channeling = false;
         if (!_inProgress) return;
 
-        Dispatch(new AbilityContext(_owner, _owner.FireOrigin, _hits, 0, now, directionOffset: _owner.DirectionOffset, directionOrigin: _owner.DirectionOrigin), CuePhase.End);
+     //   Dispatch(new AbilityContext(_owner, _owner.ExecuteOrigin, _hits, 0, now, directionOffset: _owner.DirectionOffset, directionOrigin: _owner.DirectionOrigin), CuePhase.End);
 
         if (_def.GrantTags != null)
         {
@@ -183,11 +183,11 @@ public sealed class AbilityRuntime : CSBase
     {
         if (_def.UsesFixedUpdate) return;
         if (!_channeling || now < _nextTick) return;
-        if (!HasSufficientResources())
+        /*if (!HasSufficientResources())
         {
             End(now);
             return;
-        }
+        }*/
         GatherAndDispatch(now, CuePhase.Impact);
         _nextTick += _def.ChannelTick;
     }
@@ -202,7 +202,7 @@ public sealed class AbilityRuntime : CSBase
     private void GatherAndDispatch(float now, CuePhase phase, IPoolManager pool = null)
     {
         int count = GatherTargets();
-        Dispatch(new AbilityContext(_owner, _owner.FireOrigin, _hits, count, now, directionOffset: _owner.DirectionOffset, directionOrigin: _owner.DirectionOrigin), phase);
+      //  Dispatch(new AbilityContext(_owner, _owner.ExecuteOrigin, _hits, count, now, directionOffset: _owner.DirectionOffset, directionOrigin: _owner.DirectionOrigin), phase);
     }
 
     private void Dispatch(in AbilityContext context, CuePhase phase, IPoolManager pool = null)
@@ -238,8 +238,8 @@ public sealed class AbilityRuntime : CSBase
 
         if (cueDef) _owner.PlayCue(cueDef);
 
-        int n = Mathf.Min(_execs.Count, _def.Effects?.Length ?? 0);
-        for (int i = 0; i < n; i++) _execs[i].Execute(context, _def.Effects[i], phase, pm);
+      //  int n = Mathf.Min(_execs.Count, _def.Effects?.Length ?? 0);
+      //  for (int i = 0; i < n; i++) _execs[i].Execute(context, _def.Effects[i], phase, pm);
 
     }
 
@@ -262,7 +262,7 @@ public sealed class AbilityRuntime : CSBase
             }
         }
 
-        if (!HasSufficientResources()) return false;
+     //   if (!HasSufficientResources()) return false;
         //if (!_owner.HasSufficientResources(_def.Costs)) return false;
 
         _inProgress = true;
@@ -273,7 +273,7 @@ public sealed class AbilityRuntime : CSBase
     {
         var tar = _def.Targeting;
         if (tar == null || tar.Mode != TargetingMode.Sphere) return 0;
-        return Physics.OverlapSphereNonAlloc(_owner.FireOrigin.position, tar.Radius, _hits, tar.hitMask);
+        return Physics.OverlapSphereNonAlloc(_owner.ExecuteOrigin.position, tar.Radius, _hits, tar.hitMask);
     }
 
     private void Commit(float now)
@@ -286,21 +286,22 @@ public sealed class AbilityRuntime : CSBase
 
     private bool CheckOrSpendResources(bool spend = false)
     {
-        bool hasEnoughResources = _owner.HasSufficientResources(_def.Costs);
+        return true;
+       /* bool hasEnoughResources = _owner.HasSufficientResources(_def.Costs);
         if (!spend) return hasEnoughResources;
 
         if (!hasEnoughResources) return false;
         _owner.SpendAll(_def.Costs);
-        return true;
+        return true;*/
     }
 
-    private bool HasSufficientResources() => _owner.HasSufficientResources(_def.Costs);
+   // private bool HasSufficientResources() => _owner.HasSufficientResources(_def.Cost);
 
 
     private void SpendResources()
     {
-        if (_def.Costs != null && _def.Costs.Length > 0)
-            _owner.SpendAll(_def.Costs);
+       // if (_def.Costs != null && _def.Costs.Length > 0)
+            //_owner.SpendAll(_def.Costs);
     }
 
 

@@ -6,24 +6,27 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
 {
     [SerializeField] private AbilityOrigins _origins;
 
-    [SerializeField] private List<AbilityParam> _abilityPools;
+   // [SerializeField] private List<AbilityParam> _abilityPools;
 
 
-    [SerializeField] private List<AbilityDef> _abilities;
-    [SerializeField] private Transform _defaultAbilityDirectionOrigin;
-    private Transform _directionOrigin;
+  //  [SerializeField] private List<AbilityDef> _abilities;
+    [SerializeField] private List<AbilityDefinition> _abilities;
+  //  [SerializeField] private Transform _defaultAbilityDirectionOrigin;
+    //private Transform _directionOrigin;
 
-    [SerializeField] private float _abilityFireDirectionOffset = 0f;
-    private Transform _abilityFireOrigin;
-    private List<AbilityRuntime> _runtimeUpdates = new(10); // Switch to Dictionary Lookups
-    private Dictionary<string, AbilityRuntime> _runtimeLookups = new(10);
+
+  
+    // private List<AbilityRuntime> _runtimeUpdates = new(10); // Switch to Dictionary Lookups
+    private List<AbilityManager> _runtimeUpdates = new(10); // Switch to Dictionary Lookups
+    private Dictionary<string, AbilityManager> _runtimeLookups = new(10);
+   // private Dictionary<string, AbilityRuntime> _runtimeLookups = new(10);
     public readonly HashSet<AbilityTags> _tags = new(10);
 
    // [SerializeField] private List<AbilityParams> _abilityParams;
 
     public AudioSource _audio;
 
-    private Dictionary<StatEntry, float> _resourcesToSpend = new(4); 
+   // private Dictionary<StatEntry, float> _resourcesToSpend = new(4); 
     public AbilityTags _tag; // Delete later
   
 
@@ -36,24 +39,26 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
 
         _eventManager.OnTryUseAbility += TryActivate;
         _eventManager.OnEndAbility += EndChannel;
-        ResetOrigin();
+    
         InitializeRuntimes();
-        /* if (_abilityParams == null || _abilityParams.Count == 0) return;
+        InitializeAbilityOrigins();
 
-         foreach (var ab in _abilityParams)
-         {
-             ab?.Initialize();
-             string id = ab.AbilityId();
-             if (string.IsNullOrEmpty(id)) continue;
-             AbilityRuntime rt = new AbilityRuntime(ab, this);
-             _rt[id] = rt;
-         }*/
+    }
 
-        if (_defaultAbilityDirectionOrigin != null) 
+    private void InitializeAbilityOrigins()
+    {
+        if (_origins.Position == null)
         {
-            _directionOrigin = _defaultAbilityDirectionOrigin;
+#if UNITY_EDITOR
+            throw new NullReferenceException("Must provide An ability Origin");
+#else
+            return;
+#endif
+
         }
-       // _directionOrigin = _defaultAbilityDirectionOrigin ? _defaultAbilityDirectionOrigin : transform;
+        ExecuteOrigin = _origins.Position;
+        DirectionOrigin = _origins.DirectionOrigin;
+        DirectionOffset = _origins.DirectionOffset;
     }
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
@@ -74,7 +79,8 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
             id.Trim();
             if (id.Length == 0) continue;
 
-            AbilityRuntime rt = new AbilityRuntime(ab, this);
+          //  AbilityRuntime rt = new AbilityRuntime(ab, this);
+            AbilityManager rt = new AbilityManager(ab, this);
             if (_runtimeLookups.TryAdd(id, rt))
             {
                 _runtimeUpdates.Add(rt);
@@ -83,18 +89,31 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
         }
     }
 
-    public Transform FireOrigin
-    {
-        get => _abilityFireOrigin;
-        private set => _abilityFireOrigin = value;
-    }
+    public Transform ExecuteOrigin { get; private set; }
 
-    public Transform DirectionOrigin => _defaultAbilityDirectionOrigin;
-
-    public float DirectionOffset => _abilityFireDirectionOffset;
+   
+    public Transform DirectionOrigin { get; private set; }
+  
+    public float DirectionOffset { get; private set; }
 
     public bool _tryActivateFreeze = false;
     public bool _tryEndFreeze = false;
+
+
+
+    public void TryActivate(AbilityTags tag) // NEWEST
+    {
+        if (OwnerIsDead) return;
+
+
+        if (_runtimeLookups.TryGetValue(tag.Id, out var runtime))
+        {
+            // if (abilityFireOrigin != null) ExecuteOrigin = abilityFireOrigin;
+            //if (!runtime.TryActivate(Time.time)) ResetOrigin();
+            runtime.TryActivate(Time.time);
+        }
+
+    }
 
     public void TryActivate(AbilityTags tag,Transform abilityFireOrigin = null)
     {
@@ -103,14 +122,14 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
 
         if (_runtimeLookups.TryGetValue(tag.Id, out var runtime))
         {
-            if (abilityFireOrigin != null) FireOrigin = abilityFireOrigin;
-            if (!runtime.TryActivate(Time.time)) ResetOrigin();
+            if (abilityFireOrigin != null) ExecuteOrigin = abilityFireOrigin;
+           // if (!runtime.TryActivate(Time.time)) ResetOrigin();
 
         }
 
     }
 
-    public void TryActivate(AbilityParam abParams, Transform activateOrigin = null, Vector3? direction = null)
+  /*  public void TryActivate(AbilityParam abParams, Transform activateOrigin = null, Vector3? direction = null)
     {
         if (OwnerIsDead) return;
 
@@ -120,9 +139,9 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
         {
 
         }
-    }
+    }*/
 
-    private void ResetOrigin() => FireOrigin = _defaultAbilityDirectionOrigin ? _defaultAbilityDirectionOrigin : transform;
+  
 
 
     public void EndChannel(AbilityTags tag)
@@ -131,7 +150,7 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
         if (_runtimeLookups.TryGetValue(id, out var runtime))
         {
             runtime.End(Time.time);
-            ResetOrigin();
+           // ResetOrigin();
         }
 
     }
@@ -141,7 +160,7 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
         base.DeathStatusUpdated(isDead);
 
         if (!OwnerIsDead) return;
-        ResetOrigin(); // Switch to stored Currently Active Ability
+     //   ResetOrigin(); // Switch to stored Currently Active Ability
 
         foreach (var rt in _runtimeLookups.Values)
         {
@@ -157,7 +176,7 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
     {
         if (_tryActivateFreeze)
         {
-            // TryActivate(_tag);
+             TryActivate(_tag);
             _tryActivateFreeze = false;
         }
         if (_tryEndFreeze)
@@ -195,11 +214,11 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
     public void PlayCue(CueDef cue)
     {
         if (!cue) return;
-        if (cue.Sound) AudioSource.PlayClipAtPoint(cue.Sound, FireOrigin.position, cue.Volume);
+        if (cue.Sound) AudioSource.PlayClipAtPoint(cue.Sound, ExecuteOrigin.position, cue.Volume);
         if (cue.VfxPrefab)
         {
-            var pos = FireOrigin.TransformPoint(cue.VfxOffset);
-            var vfx = Instantiate(cue.VfxPrefab, pos, FireOrigin.rotation);
+            var pos = ExecuteOrigin.TransformPoint(cue.VfxOffset);
+            var vfx = Instantiate(cue.VfxPrefab, pos, ExecuteOrigin.rotation);
             if (cue.VfxLifetime > 0) Destroy(vfx, cue.VfxLifetime);
         }
     }
@@ -209,20 +228,22 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
 
 
 
-    public bool HasSufficientResources(ResourceCost[] costs)
+    public bool HasSufficientResources(ResourceCost cost)
     {
-        if (costs == null || costs.Length == 0) return true;
+        if (cost.ResourceType == StatType.None || cost.Amount <= 0) return true;
+       // if (cost == null || costs.Length == 0) return true;
 
-        return _eventManager.CheckIfHasSufficientResources(costs, _resourcesToSpend);
+        return _eventManager.CheckIfHasSufficientResources(cost/*, _resourcesToSpend*/);
     }
 
-    public void SpendAll(ResourceCost[] costs) => _eventManager.SpendResources(_resourcesToSpend);
+    public void Spend(ResourceCost cost) => _eventManager.SpendResources(cost/*_resourcesToSpend*/);
 
     protected override void OnSceneComplete()
     {
         base.OnSceneComplete();
-        _resourcesToSpend = null;
+      //  _resourcesToSpend = null;
         _eventManager = null;
     }
 
+  
 }

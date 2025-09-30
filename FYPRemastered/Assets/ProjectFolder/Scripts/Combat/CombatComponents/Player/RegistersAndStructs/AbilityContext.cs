@@ -18,11 +18,13 @@ public readonly struct AbilityContext
     public readonly Collider[] Targets;
     public readonly int TargetCount;
     public readonly float Now;
+    public readonly CuePhase Phase; 
     
 
-    public AbilityContext(IAbilityOwner owner, Transform fireOrigin, Collider[] targets, int count, float now, float directionOffset = 0f, Transform directionOrigin = null)
+    public AbilityContext(IAbilityOwner owner, CuePhase phase, Transform fireOrigin, Collider[] targets, int count, float now, float directionOffset = 0f, Transform directionOrigin = null)
     {
         Owner = owner;
+        Phase = phase;
         AbilityFireOrigin = fireOrigin;
         AbilityDirectionOrigin = directionOrigin;
         Targets = targets;
@@ -64,8 +66,8 @@ public readonly struct AbilityResources
        public static AbilityResources SetAllPhasePools(AbilityTags tag, float now, IPoolManager startPool, IPoolManager impactPool, IPoolManager endPool)
            => new(tag, now, startPool, impactPool, endPool);*/
 
-    public static AbilityResources SetAbilityPools(AbilityTags tag, float now, Dictionary<CuePhase, IPoolManager> pools)
-        => new(tag, now, pools);
+   /* public static AbilityResources SetAbilityPools(AbilityTags tag, float now, Dictionary<CuePhase, IPoolManager> pools)
+        => new(tag, now, pools);*/
 }
 
 
@@ -74,7 +76,7 @@ public enum CuePhase { Start, Impact, End };
 
 public interface IEffectExecutor
 {
-    void Execute(in AbilityContext context, EffectDef def, CuePhase phase, IPoolManager pool = null);
+    void Execute(in AbilityContext context, EffectType def, IPoolManager pool = null);
 
   //  void UpdatePool(PoolIdSO poolId, Action<bool> actionCompleteCallback = null);
 

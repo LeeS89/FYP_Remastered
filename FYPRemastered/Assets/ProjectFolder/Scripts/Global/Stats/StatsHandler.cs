@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using static UnityEngine.EventSystems.EventTrigger;
+
 
 
 #if UNITY_EDITOR
@@ -9,19 +11,23 @@ using UnityEditor;
 
 public class StatsHandler
 {
-    private List<StatEntry> _stats;
+ //   private List<StatEntry> _stats;
     private StatEntry[] _entriesToModify = new StatEntry[4];
 
-    public StatsHandler(List<StatEntry> sharedStats)
+    private Dictionary<StatType, float> _statStore;
+
+    public StatsHandler(Dictionary<StatType, float> sharedstats/*List<StatEntry> sharedStats*/)
     {
-        _stats = sharedStats;
+        _statStore = sharedstats;
+       // _stats = sharedstats;
 
         if (!HasStat(StatType.MaxHealth))
         {
             StatEntry entry = new StatEntry();
             entry.statType = StatType.MaxHealth;
             entry.value = 100;
-            _stats.Add(entry);
+            _statStore.Add(entry.statType, entry.value);
+            //_stats.Add(entry);
         }
 
         if (!HasStat(StatType.Health))
@@ -29,32 +35,49 @@ public class StatsHandler
             StatEntry entry = new StatEntry();  
             entry.statType = StatType.Health;
             entry.value = 0;
-            _stats.Add(entry);
+            _statStore.Add(entry.statType, entry.value);
+            //_stats.Add(entry);
         }
         SetStat(StatType.Health, GetStat(StatType.MaxHealth));
     }
 
     private void SetStat(StatType type, float maxAmount)
     {
-        for (int i = 0; i < _stats.Count; i++)
+        if (_statStore.TryGetValue(type, out var amount))
+        {
+            amount = maxAmount;
+            _statStore[type] = amount;
+        }
+       /* for (int i = 0; i < _stats.Count; i++)
         {
             var entry = _stats[i];
             if (entry.statType == type)
             {
                 entry.value = maxAmount;
             }
-        }
+        }*/
        
     }
 
     private bool HasStat(StatType statType)
     {
-        return _stats.Exists(s => s.statType == statType);
+        return _statStore.ContainsKey(statType);
+      //  return _stats.Exists(s => s.statType == statType);
     }
 
     public float ModifyStat(StatType stat, float amount/*, out float remaining*/)
     {
-        for (int i = 0; i < _stats.Count; i++)
+
+        if(_statStore.TryGetValue(stat, out var value))
+        {
+            value += amount;
+
+            if (stat == StatType.Health) value = Mathf.Clamp(value, 0, GetMaxStatValue(stat));
+            _statStore[stat] = value;
+            return value;
+        }
+
+       /* for (int i = 0; i < _stats.Count; i++)
         {
             var entry = _stats[i];
             if (entry.statType == stat)
@@ -65,22 +88,32 @@ public class StatsHandler
 
                 return entry.value;
             }
-        }
+        }*/
 
         return -1;
     }
 
-    public void ModifyStat(Dictionary<StatEntry, float> stash)
+    public void ModifyStat(ResourceCost cost/*Dictionary<StatEntry, float> stash*/)
     {
-        if (stash == null || stash.Count == 0) return;
+        if (cost.ResourceType == StatType.None || cost.Amount <= 0) return;
+        //if (stash == null || stash.Count == 0) return;
+        var stat = cost.ResourceType;
+        var amount = cost.Amount;
 
-        foreach (var entry in stash)
+        if(_statStore.TryGetValue(stat, out var value))
+        {
+            value += amount;
+            _statStore[stat] = value;
+        }
+
+
+       /* foreach (var entry in stash)
         {
             StatEntry stat = entry.Key;
             float cost = entry.Value;
 
             stat.value += cost;
-        }
+        }*/
     }
 
    /* public bool HasEnoughResources(ResourceCost[] resources)
@@ -122,12 +155,48 @@ public class StatsHandler
         return true;
     }*/
 
-    public bool HasEnoughResources(ResourceCost[] resources, Dictionary<StatEntry, float> stash)
+    public bool HasEnoughResources(ResourceCost resources/*, Dictionary<StatType, float> stash*//*Dictionary<StatEntry, float> stash*/)
     {
-        stash.Clear();
-        // No cost for ability, return true and allow to proceed
-        if (resources == null || resources.Length == 0) return true; 
+       // stash.Clear();
 
+        if (resources.ResourceType == StatType.None || resources.Amount <= 0) return true;
+        // No cost for ability, return true and allow to proceed
+        //  if (resources == null || resources.Length == 0) return true; 
+
+        var stat = resources.ResourceType;
+        var cost = resources.Amount;
+       // StatEntry found = null;
+
+        if (_statStore.TryGetValue(stat, out var amount))
+        {
+            if (amount - cost < 0) return false;
+
+            //stash[stat] = cost;
+            return true;
+        }
+
+        return false;
+
+
+
+        /*for (int j = 0; j < _stats.Count; j++)
+        {
+            var entry = _stats[j];
+            if (entry.statType == stat)
+            {
+                found = entry;
+                break;
+            }
+        }
+        if (found == null) return false;
+
+        if (found.value - cost < 0) return false;
+
+        stash[found] = cost;*/
+
+
+
+/*
         for (int i = 0; i < resources.Length; i++)
         {
             var stat = resources[i].ResourceType;
@@ -149,9 +218,9 @@ public class StatsHandler
 
             stash[found] = cost;
             
-        }
+        }*/
       
-        return true;
+       // return true;
     }
 
     private float GetMaxStatValue(StatType stat)
@@ -169,14 +238,19 @@ public class StatsHandler
 
     public float GetStat(StatType stat)
     {
-        for (int i = 0; i < _stats.Count; i++)
+        if(_statStore.TryGetValue(stat, out var amount))
+        {
+            return amount;
+        }
+
+       /* for (int i = 0; i < _stats.Count; i++)
         {
             var entry = _stats[i];
             if (entry.statType == stat)
             {
                 return entry.value;
             }
-        }
+        }*/
 
         return 0;
         /* StatEntry entry = _stats.Find(s => s.statType == stat);

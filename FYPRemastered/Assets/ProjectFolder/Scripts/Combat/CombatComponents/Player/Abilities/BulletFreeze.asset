@@ -31,8 +31,10 @@ MonoBehaviour:
       serializedVersion: 2
       m_Bits: 64
     Maxhits: 64
-  Effects:
-  - {fileID: 11400000, guid: cd73d535947aac5489607519ee8557f0, type: 2}
+  Effects: 03000000
+  StartPhasePool: {fileID: 0}
+  ImpactPhasePool: {fileID: 0}
+  EndPhasePool: {fileID: 0}
   Start: {fileID: 11400000, guid: fde676bb0e48d9b41b9ddb45892c7058, type: 2}
   Impact: {fileID: 11400000, guid: 2df8565e3d657ed44a32284cd290cb38, type: 2}
   End: {fileID: 11400000, guid: eee7f327485945f43abfc0243f16498b, type: 2}

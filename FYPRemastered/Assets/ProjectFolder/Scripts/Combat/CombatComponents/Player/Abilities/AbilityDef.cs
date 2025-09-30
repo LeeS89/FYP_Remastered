@@ -9,9 +9,9 @@ public class AbilityDef : ScriptableObject
     public AbilityTags[] BlockedByTags;
     public AbilityTags[] RequiredTags;
     public float CooldownSeconds;
-    public ResourceCost[] Costs;
+    public ResourceCosts[] Costs;
     public TargetingDef Targeting;
-    public EffectDef[] Effects;
+    public EffectType[] Effects;
     public PoolIdSO StartPhasePool, ImpactPhasePool, EndPhasePool;
     public CueDef Start, Impact, End;
     public bool IsChanneled;
@@ -19,7 +19,7 @@ public class AbilityDef : ScriptableObject
     public float ChannelTick;
 }
 
-[System.Serializable] public struct ResourceCost
+[System.Serializable] public struct ResourceCosts
 {
     public StatType ResourceType;
     public float Amount;

@@ -7,13 +7,13 @@ public class ProjectileFireExecutor : ExecutorBase
     public ProjectileFireExecutor(Action spendCallback) : base(spendCallback) { }
      
 
-    public override void Execute(in AbilityContext context, EffectDef def, CuePhase phase, IPoolManager pool = null)
+    public override void Execute(in AbilityContext context, EffectType kind, IPoolManager pool = null)
     {
   
-        if (def.Kind != EffectKind.SpawnAndFire || pool == null) return;
+        if (kind != EffectType.SpawnAndFire || pool == null) return;
  
 
-        if (phase != CuePhase.End/*phase == CuePhase.Start || phase == CuePhase.Impact*/)
+        if (context.Phase != CuePhase.End/*phase == CuePhase.Start || phase == CuePhase.Impact*/)
         {
             // Vector3 direction = context.AbilitydirectionOrigin.forward;
             Quaternion rotation = context.AbilityDirectionOrigin.rotation;

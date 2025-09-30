@@ -1,3 +1,4 @@
+using Mono.Cecil;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -63,14 +64,14 @@ public abstract class EventManager : MonoBehaviour
         OnDeathStatusUpdated?.Invoke(isDead);
     }
 
-    public event Func<ResourceCost[], Dictionary<StatEntry, float>, bool> OnCheckIfHasSufficientResources;
+    public event Func<ResourceCost, /*Dictionary<StatEntry, float>,*/ bool> OnCheckIfHasSufficientResources;
 
-    public bool CheckIfHasSufficientResources(ResourceCost[] resources, Dictionary<StatEntry, float> stash) => OnCheckIfHasSufficientResources?.Invoke(resources, stash) ?? false;
+    public bool CheckIfHasSufficientResources(ResourceCost resource/*, Dictionary<StatEntry, float> stash*/) => OnCheckIfHasSufficientResources?.Invoke(resource/*, stash*/) ?? false;
 
 
-    public event Action<Dictionary<StatEntry, float>> OnSpendResources;
+    public event Action<ResourceCost/*Dictionary<StatEntry, float>*/> OnSpendResources;
 
-    public void SpendResources(Dictionary<StatEntry, float> stash) => OnSpendResources?.Invoke(stash);
+    public void SpendResources(ResourceCost resource/*Dictionary<StatEntry, float> stash*/) => OnSpendResources?.Invoke(resource/*stash*/);
 
     /*public delegate bool TrySpendResource(ResourceCost resource, out float remaining);
     public event TrySpendResource OnTrySpendResource;

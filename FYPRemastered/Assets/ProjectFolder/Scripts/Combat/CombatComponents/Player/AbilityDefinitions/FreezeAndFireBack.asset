@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c27f349b57728e439bdc78d25214c0e, type: 3}
+  m_Name: FreezeAndFireBack
+  m_EditorClassIdentifier: 
+  Tag: {fileID: 11400000, guid: de9d98fd1784a954188029730deb9b35, type: 2}
+  GrantTags:
+  - {fileID: 11400000, guid: 4c5c68cf7975e5d4a865fdf381fcdda1, type: 2}
+  BlockedByTags:
+  - {fileID: 11400000, guid: cf5924cb6e4108047bc6eb89218a44e0, type: 2}
+  - {fileID: 11400000, guid: 4c5c68cf7975e5d4a865fdf381fcdda1, type: 2}
+  - {fileID: 11400000, guid: e318b344c73e6e54ba42e96b34f9923a, type: 2}
+  RequiredTags: []
+  CooldownSeconds: 0
+  Cost:
+    ResourceType: 0
+    Amount: 0
+  Targeting:
+    Mode: 3
+    Range: 0
+    AngleDeg: 0
+    Radius: 1.5
+    hitMask:
+      serializedVersion: 2
+      m_Bits: 64
+    Maxhits: 64
+  EffectKind: 3
+  StartPhasePool: {fileID: 0}
+  ImpactPhasePool: {fileID: 0}
+  EndPhasePool: {fileID: 0}
+  Start: {fileID: 0}
+  Impact: {fileID: 0}
+  End: {fileID: 0}
+  IsChanneled: 1
+  UsesFixedUpdate: 1
+  ChannelTick: 0.05

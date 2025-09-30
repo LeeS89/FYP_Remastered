@@ -2,7 +2,7 @@ using UnityEngine;
 
 public interface IAbilityOwner
 {
-    Transform FireOrigin { get; }
+    Transform ExecuteOrigin { get; }
     Transform DirectionOrigin { get; }
     float DirectionOffset { get; }
     bool HasTag(AbilityTags tag);
@@ -10,9 +10,9 @@ public interface IAbilityOwner
     void RemoveTag(AbilityTags tag);
    
 
-    bool HasSufficientResources(ResourceCost[] costs);
+    bool HasSufficientResources(ResourceCost cost);
 
-    void SpendAll(ResourceCost[] costs);
+    void Spend(ResourceCost cost);
 
     void PlayCue(CueDef cue);
 }

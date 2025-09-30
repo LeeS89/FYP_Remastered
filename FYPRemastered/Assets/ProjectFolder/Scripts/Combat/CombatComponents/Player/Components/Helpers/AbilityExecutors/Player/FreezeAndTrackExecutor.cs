@@ -10,11 +10,11 @@ public class FreezeAndTrackExecutor: ExecutorBase
 
     public FreezeAndTrackExecutor(Action spendCallback) : base(spendCallback) { }
 
-    public override void Execute(in AbilityContext context, EffectDef def, CuePhase phase, IPoolManager pool = null)
+    public override void Execute(in AbilityContext context, EffectType kind, IPoolManager pool = null)
     {
-        if (def.Kind != EffectKind.FreezeAndTrack && def.Kind != EffectKind.ReturnTrackedOnEnd) return;
+        if (kind != EffectType.FreezeAndTrack && kind != EffectType.ReturnTrackedOnEnd) return;
 
-        if(phase == CuePhase.Start || phase == CuePhase.Impact) Add(in context);
+        if(context.Phase == CuePhase.Start || context.Phase == CuePhase.Impact) Add(in context);
         else ClearAndFireBack(); 
 
     }
@@ -77,17 +77,21 @@ public sealed class ReturnTrackedOnEndExecutor : IEffectExecutor
 
     public bool IsReady => throw new NotImplementedException();
 
-    public void Execute(in AbilityContext context, EffectDef def, CuePhase phase)
+    public void Execute(in AbilityContext context, EffectType kind, CuePhase phase)
     {
-        if (phase != CuePhase.End || def.Kind != EffectKind.ReturnTrackedOnEnd) return;
+        if (phase != CuePhase.End || kind != EffectType.ReturnTrackedOnEnd) return;
         _tracker?.ClearFreezeables();
     }
 
-    public void Execute(in AbilityContext context, EffectDef def, CuePhase phase, IPoolManager pool = null)
+    public void Execute(in AbilityContext context, EffectType def, CuePhase phase, IPoolManager pool = null)
     {
         throw new NotImplementedException();
     }
 
+    public void Execute(in AbilityContext context, EffectType def, IPoolManager pool = null)
+    {
+        throw new NotImplementedException();
+    }
 
     public void UpdatePool(PoolIdSO poolId, Action<bool> actionCompleteCallback)
     {

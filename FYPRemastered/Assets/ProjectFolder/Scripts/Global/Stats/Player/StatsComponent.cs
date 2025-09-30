@@ -7,19 +7,29 @@ public class StatsComponent : ComponentEvents
     private StatsHandler _statsHandler;
     [SerializeField] private CharacterType _characterType;
 
-
+    protected Dictionary<StatType, float> _statEntries = new(6);
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
+        foreach (var entry in _stats)
+        {
+            if (!_statEntries.ContainsKey(entry.statType))
+            {
+                _statEntries.Add(entry.statType, entry.value);
+            }
+        }
+
         //base.RegisterLocalEvents(eventManager);
         _eventManager = eventManager;
-        _statsHandler = new StatsHandler(_stats);
+        _statsHandler = new StatsHandler(_statEntries/*_stats*/);
 
         _eventManager.OnNotifyDamage += NotifyDamage;
         _eventManager.OnCheckIfHasSufficientResources += ValidateResources;
         _eventManager.OnSpendResources += SpendResources;
         //float hlth = _statsComponent.Gethealth();
         //Debug.LogError("Health is: "+hlth);
+
+       
     }
 
     
@@ -55,7 +65,7 @@ public class StatsComponent : ComponentEvents
 
     protected bool HealthIsEmpty()
     {
-        return _statsHandler.GetStat(StatType.Health) == 0;
+        return _statsHandler.GetStat(StatType.Health) <= 0;
     }
 
     protected void ApplyElementalDamage(DamageType dType = DamageType.None, float statusEffectChancePercentage = 0, float damageOverTime = 0, float duration = 0)
@@ -72,10 +82,10 @@ public class StatsComponent : ComponentEvents
         }
     }
 
-    protected bool ValidateResources(ResourceCost[] resources, Dictionary<StatEntry, float> stash) => _statsHandler.HasEnoughResources(resources, stash);
+    protected bool ValidateResources(ResourceCost resource/*, Dictionary<StatEntry, float> stash*/) => _statsHandler.HasEnoughResources(resource/*, stash*/);
 
 
-    protected void SpendResources(Dictionary<StatEntry, float> stash) => _statsHandler.ModifyStat(stash);
+    protected void SpendResources(ResourceCost resource/*Dictionary<StatEntry, float> stash*/) => _statsHandler.ModifyStat(resource/*stash*/);
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
@@ -91,8 +101,10 @@ public class StatsComponent : ComponentEvents
     {
         base.OnSceneComplete();
         _statsHandler = null;
-        _stats.Clear();
-        _stats = null;
+        _statEntries.Clear();
+        _statEntries = null;
+        //_stats.Clear();
+        //_stats = null;
         _eventManager = null;
     }
 }
