@@ -70,6 +70,7 @@ public class StatsHandler
 
         if(_statStore.TryGetValue(stat, out var value))
         {
+           
             value += amount;
 
             if (stat == StatType.Health) value = Mathf.Clamp(value, 0, GetMaxStatValue(stat));

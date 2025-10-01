@@ -18,7 +18,7 @@ public class ProjectileMovementHandler
         InitialSpeed = initialSpeed;
         Speed = InitialSpeed;
         _eventManager.OnLaunch += Launch;
-        _eventManager.OnFreeze += ResetRigidBody;
+     //  _eventManager.OnFreeze += ResetRigidBody;
         _eventManager.OnDeflected += Deflected;
         ResetRigidBody();
         UsesFixedSpeed = usesFixedSpeed;
@@ -48,7 +48,7 @@ public class ProjectileMovementHandler
     {
         _eventManager.OnDeflected -= Deflected;
         _eventManager.OnLaunch -= Launch;
-        _eventManager.OnFreeze -= ResetRigidBody;
+        //_eventManager.OnFreeze -= ResetRigidBody;
         _rb = null;
         _eventManager = null;
     }

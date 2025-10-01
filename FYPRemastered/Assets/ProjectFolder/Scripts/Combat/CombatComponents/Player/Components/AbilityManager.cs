@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class AbilityManager
 {
@@ -269,7 +270,11 @@ public class AbilityManager
     {
         var tar = _def.Targeting;
         if (tar == null || tar.Mode != TargetingMode.Sphere) return 0;
-        return Physics.OverlapSphereNonAlloc(_owner.ExecuteOrigin.position, tar.Radius, _hits, tar.hitMask);
+#if UNITY_EDITOR
+        if(ExecuteOrigin != null)
+        DebugExtension.DebugWireSphere(ExecuteOrigin.position, Color.blue, tar.Radius);
+#endif
+        return Physics.OverlapSphereNonAlloc(ExecuteOrigin.position, tar.Radius, _hits, tar.hitMask);
     }
 
     private void Commit(float now)

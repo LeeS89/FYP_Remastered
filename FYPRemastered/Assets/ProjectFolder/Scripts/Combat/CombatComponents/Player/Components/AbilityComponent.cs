@@ -39,10 +39,9 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
 
         _eventManager.OnTryUseAbility += TryActivate;
         _eventManager.OnEndAbility += EndChannel;
-    
-        InitializeRuntimes();
-        InitializeAbilityOrigins();
 
+        InitializeAbilityOrigins();
+        
     }
 
     private void InitializeAbilityOrigins()
@@ -59,6 +58,7 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
         ExecuteOrigin = _origins.Position;
         DirectionOrigin = _origins.DirectionOrigin;
         DirectionOffset = _origins.DirectionOffset;
+        InitializeRuntimes();
     }
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
@@ -194,10 +194,10 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
     private void FixedUpdate()
     {
         float now = Time.fixedTime;
-        foreach(var rt in _runtimeLookups.Values)
+        /*foreach(var rt in _runtimeLookups.Values)
         {
             rt.FixedTick(now);
-        }
+        }*/
 
         for (int i = 0; i < _runtimeUpdates.Count; i++)
         {

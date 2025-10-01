@@ -1,4 +1,3 @@
-using Oculus.Platform.Models;
 using System;
 using System.Collections;
 using UnityEngine;

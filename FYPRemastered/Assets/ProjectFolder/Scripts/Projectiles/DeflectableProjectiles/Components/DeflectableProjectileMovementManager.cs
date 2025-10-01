@@ -24,7 +24,7 @@ public sealed class DeflectableProjectileMovementManager : ProjectileMovementMan
 
     private void Deflected(ProjectileKickType type)
     {
-        Debug.LogError("Deflect called");
+       // Debug.LogError("Deflect called");
         Vector3 directionTotarget = _eventManager.GetDirectionToTarget();
 
         Quaternion newRotation = Quaternion.LookRotation(directionTotarget);
@@ -48,9 +48,9 @@ public sealed class DeflectableProjectileMovementManager : ProjectileMovementMan
 
     public override void FixedTick()
     {
-        
-       base.FixedTick();
-        
+        if (IsFrozen) return;
+        base.FixedTick();
+
         /*if (!DeflectionProcessed || _rb.isKinematic) { return; } // Take out when changing to trigger
 
         if (_rb.linearVelocity.magnitude < Speed * 0.95f)
@@ -61,7 +61,7 @@ public sealed class DeflectableProjectileMovementManager : ProjectileMovementMan
 
     protected override void ResetRigidBody()
     {
-        //IsFrozen = true;
+        IsFrozen = true;
         DeflectionProcessed = false;
         base.ResetRigidBody();
     }

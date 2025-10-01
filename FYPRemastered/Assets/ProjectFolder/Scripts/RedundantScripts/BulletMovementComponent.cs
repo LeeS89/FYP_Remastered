@@ -1,5 +1,7 @@
+using System;
 using UnityEngine;
 
+[Obsolete]
 public class BulletMovementComponent : ComponentEvents
 {
     [Header("Deflection Speed")]
@@ -34,7 +36,7 @@ public class BulletMovementComponent : ComponentEvents
         _bulletEventManager.OnLaunch += Launch;
         _bulletEventManager.OnDeflected += ReverseDirection;
         //_bulletEventManager.OnDeflected += Deflected;
-        _bulletEventManager.OnFreeze += ResetRigidBody;
+     //   _bulletEventManager.OnFreeze += ResetRigidBody;
 
     }
 
@@ -43,7 +45,7 @@ public class BulletMovementComponent : ComponentEvents
         _bulletEventManager.OnLaunch -= Launch;
         //_bulletEventManager.OnDeflected -= Deflected;
         _bulletEventManager.OnDeflected -= ReverseDirection;
-        _bulletEventManager.OnFreeze -= ResetRigidBody;
+       // _bulletEventManager.OnFreeze -= ResetRigidBody;
         ResetRigidBody();
     }
 
