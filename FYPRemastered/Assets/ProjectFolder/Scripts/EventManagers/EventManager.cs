@@ -37,8 +37,8 @@ public abstract class EventManager : MonoBehaviour
     //  public event Action<AbilityResources, Transform> OnTryUseAbility;
     public event Action<AbilityTags> OnEndAbility;
 
-    public event Action<AbilityTags, Transform> OnTryUseAbility;
-    public void TryUseAbility(AbilityTags tag, Transform origin = null) => OnTryUseAbility?.Invoke(tag, origin);
+    public event Action<AbilityTags, AbilityOrigins> OnTryUseAbility;
+    public void TryUseAbility(AbilityTags tag, AbilityOrigins origins) => OnTryUseAbility?.Invoke(tag, origins);
     /* public delegate void TryUseAbility(in AbilityResources resources, Transform origin = null);
      public event TryUseAbility OnTryUseAbility;
 

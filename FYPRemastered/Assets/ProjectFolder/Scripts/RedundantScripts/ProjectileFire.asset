@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 71322f7bd3f4f8e44ade1728ed234243, type: 3}
+  m_Name: ProjectileFire
+  m_EditorClassIdentifier: 
+  Tag: {fileID: 11400000, guid: 321bf07d25791d34f92137a4746a430c, type: 2}
+  GrantTags:
+  - {fileID: 11400000, guid: 4c5c68cf7975e5d4a865fdf381fcdda1, type: 2}
+  BlockedByTags:
+  - {fileID: 11400000, guid: 4c5c68cf7975e5d4a865fdf381fcdda1, type: 2}
+  - {fileID: 11400000, guid: cf5924cb6e4108047bc6eb89218a44e0, type: 2}
+  - {fileID: 11400000, guid: e318b344c73e6e54ba42e96b34f9923a, type: 2}
+  RequiredTags: []
+  CooldownSeconds: 0
+  Costs: []
+  Targeting:
+    Mode: 0
+    Range: 0
+    AngleDeg: 0
+    Radius: 0
+    hitMask:
+      serializedVersion: 2
+      m_Bits: 0
+    Maxhits: 32
+  Effects:
+  - {fileID: 11400000, guid: d757268d4872f06418b4221a6e13c354, type: 2}
+  StartPhasePool: {fileID: 11400000, guid: 7249f8d07474c484ab32588d56342c7b, type: 2}
+  ImpactPhasePool: {fileID: 11400000, guid: 7249f8d07474c484ab32588d56342c7b, type: 2}
+  EndPhasePool: {fileID: 0}
+  Start: {fileID: 0}
+  Impact: {fileID: 0}
+  End: {fileID: 0}
+  IsChanneled: 1
+  UsesFixedUpdate: 0
+  ChannelTick: 1

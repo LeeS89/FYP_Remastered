@@ -7,21 +7,27 @@ public class StatsComponent : ComponentEvents
     private StatsHandler _statsHandler;
     [SerializeField] private CharacterType _characterType;
 
-    protected Dictionary<StatType, float> _statEntries = new(6);
+  //  protected Dictionary<StatType, float> _statEntries = new(6);
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
-        foreach (var entry in _stats)
+      /*  foreach (var entry in _stats)
         {
             if (!_statEntries.ContainsKey(entry.statType))
             {
                 _statEntries.Add(entry.statType, entry.value);
             }
         }
-
+*/
         //base.RegisterLocalEvents(eventManager);
         _eventManager = eventManager;
-        _statsHandler = new StatsHandler(_statEntries/*_stats*/);
+
+
+        _statsHandler = new StatsHandler(_stats);
+
+        // _statsHandler = new StatsHandler(_statEntries/*_stats*/);
+
+
 
         _eventManager.OnNotifyDamage += NotifyDamage;
         _eventManager.OnCheckIfHasSufficientResources += ValidateResources;
@@ -29,7 +35,7 @@ public class StatsComponent : ComponentEvents
         //float hlth = _statsComponent.Gethealth();
         //Debug.LogError("Health is: "+hlth);
 
-       
+
     }
 
     
@@ -101,10 +107,10 @@ public class StatsComponent : ComponentEvents
     {
         base.OnSceneComplete();
         _statsHandler = null;
-        _statEntries.Clear();
-        _statEntries = null;
-        //_stats.Clear();
-        //_stats = null;
+      //  _statEntries.Clear();
+      //  _statEntries = null;
+        _stats.Clear();
+        _stats = null;
         _eventManager = null;
     }
 }

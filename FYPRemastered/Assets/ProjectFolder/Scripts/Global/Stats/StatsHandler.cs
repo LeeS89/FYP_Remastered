@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using static UnityEngine.EventSystems.EventTrigger;
+using System;
+
 
 
 
@@ -11,90 +13,102 @@ using UnityEditor;
 
 public class StatsHandler
 {
- //   private List<StatEntry> _stats;
-    private StatEntry[] _entriesToModify = new StatEntry[4];
+    private List<StatEntry> _editorVisibleStats;
+    //  private StatEntry[] _entriesToModify = new StatEntry[4];
 
     private Dictionary<StatType, float> _statStore;
 
-    public StatsHandler(Dictionary<StatType, float> sharedstats/*List<StatEntry> sharedStats*/)
+
+    public StatsHandler(List<StatEntry> stats)/* : this(sharedstats) */
     {
-        _statStore = sharedstats;
-       // _stats = sharedstats;
+        if(stats == null)
+        {
+#if UNITY_EDITOR
+            throw new NullReferenceException("Must provide a valid list of stats");
+#else
+            return;
+#endif
+        }
+        _statStore = new(stats.Count);
+       // _statStore.EnsureCapacity(stats.Count);
+        _editorVisibleStats = stats;
+        // _stats = sharedstats;
 
         if (!HasStat(StatType.MaxHealth))
         {
             StatEntry entry = new StatEntry();
             entry.statType = StatType.MaxHealth;
             entry.value = 100;
-            _statStore.Add(entry.statType, entry.value);
-            //_stats.Add(entry);
+            _editorVisibleStats.Add(entry);
+            //_statStore.Add(entry.statType, entry.value);
+       
         }
-
+        
         if (!HasStat(StatType.Health))
         {
-            StatEntry entry = new StatEntry();  
+            StatEntry entry = new StatEntry();
             entry.statType = StatType.Health;
             entry.value = 0;
-            _statStore.Add(entry.statType, entry.value);
-            //_stats.Add(entry);
+            _editorVisibleStats.Add(entry);
+            //_statStore.Add(entry.statType, entry.value);
+          
         }
         SetStat(StatType.Health, GetStat(StatType.MaxHealth));
+        InitializeStats(_editorVisibleStats);
+    }
+
+    private void InitializeStats(List<StatEntry> editorOnlyStats)
+    {
+        foreach(var entry in editorOnlyStats)
+        {
+            if (!_statStore.ContainsKey(entry.statType))
+            {
+                _statStore.Add(entry.statType, entry.value);
+            }
+        }
     }
 
     private void SetStat(StatType type, float maxAmount)
     {
-        if (_statStore.TryGetValue(type, out var amount))
+      
+        for (int i = 0; i < _editorVisibleStats.Count; i++)
         {
-            amount = maxAmount;
-            _statStore[type] = amount;
-        }
-       /* for (int i = 0; i < _stats.Count; i++)
-        {
-            var entry = _stats[i];
+            var entry = _editorVisibleStats[i];
             if (entry.statType == type)
             {
                 entry.value = maxAmount;
             }
-        }*/
-       
+        }
+
     }
 
     private bool HasStat(StatType statType)
     {
-        return _statStore.ContainsKey(statType);
-      //  return _stats.Exists(s => s.statType == statType);
+      //  return _statStore.ContainsKey(statType);
+        return _editorVisibleStats.Exists(s => s.statType == statType);
     }
 
     public float ModifyStat(StatType stat, float amount/*, out float remaining*/)
     {
-
-        if(_statStore.TryGetValue(stat, out var value))
+      
+        if (_statStore.TryGetValue(stat, out var value))
         {
-           
+
             value += amount;
 
             if (stat == StatType.Health) value = Mathf.Clamp(value, 0, GetMaxStatValue(stat));
             _statStore[stat] = value;
+#if UNITY_EDITOR
+            var statObj = _editorVisibleStats.Find(s => s.statType == stat);
+            if (statObj != null) statObj.value = value;
+#endif
             return value;
         }
-
-       /* for (int i = 0; i < _stats.Count; i++)
-        {
-            var entry = _stats[i];
-            if (entry.statType == stat)
-            {
-                entry.value += amount;
-
-                if (stat == StatType.Health) entry.value = Mathf.Clamp(entry.value, 0, GetMaxStatValue(stat));
-
-                return entry.value;
-            }
-        }*/
 
         return -1;
     }
 
-    public void ModifyStat(ResourceCost cost/*Dictionary<StatEntry, float> stash*/)
+    public void ModifyStat(in ResourceCost cost/*Dictionary<StatEntry, float> stash*/)
     {
         if (cost.ResourceType == StatType.None || cost.Amount <= 0) return;
         //if (stash == null || stash.Count == 0) return;
@@ -239,21 +253,39 @@ public class StatsHandler
 
     public float GetStat(StatType stat)
     {
-        if(_statStore.TryGetValue(stat, out var amount))
+        if (_statStore == null) return 0;
+
+        if (_statStore.TryGetValue(stat, out var amount))
         {
             return amount;
         }
-
-       /* for (int i = 0; i < _stats.Count; i++)
+#if UNITY_EDITOR
+        else
         {
-            var entry = _stats[i];
-            if (entry.statType == stat)
-            {
-                return entry.value;
-            }
-        }*/
 
-        return 0;
+            StatEntry entry = _editorVisibleStats.Find(s => s.statType == stat);
+            return entry != null ? entry.value : 0;
+
+        }
+#endif
+
+        /* else
+         {
+             StatEntry entry = _editorVisibleStats.Find(s => s.statType == stat);
+             return entry != null ? entry.value : 0; 
+         }
+ */
+        // return 0;
+        /* for (int i = 0; i < _stats.Count; i++)
+         {
+             var entry = _stats[i];
+             if (entry.statType == stat)
+             {
+                 return entry.value;
+             }
+         }*/
+
+        //  return 0;
         /* StatEntry entry = _stats.Find(s => s.statType == stat);
          return entry != null ? entry.value : 0;*/ // CURRENT IMPLEMENTATION
     }

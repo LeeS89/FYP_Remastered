@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class AbilityComponent : ComponentEvents, IAbilityOwner
 {
-    [SerializeField] private AbilityOrigins _origins;
+    [SerializeField] private AbilityOrigins _origins = new();
 
    // [SerializeField] private List<AbilityParam> _abilityPools;
 
@@ -55,9 +55,9 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
 #endif
 
         }
-        ExecuteOrigin = _origins.Position;
+       /* ExecuteOrigin = _origins.Position;
         DirectionOrigin = _origins.DirectionOrigin;
-        DirectionOffset = _origins.DirectionOffset;
+        DirectionOffset = _origins.DirectionOffset;*/
         InitializeRuntimes();
     }
 
@@ -101,7 +101,7 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
 
 
 
-    public void TryActivate(AbilityTags tag) // NEWEST
+    public void TryActivate(AbilityTags tag, AbilityOrigins origins = null) // NEWEST
     {
         if (OwnerIsDead) return;
 
@@ -110,7 +110,7 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
         {
             // if (abilityFireOrigin != null) ExecuteOrigin = abilityFireOrigin;
             //if (!runtime.TryActivate(Time.time)) ResetOrigin();
-            runtime.TryActivate(Time.time);
+            runtime.TryActivate(Time.time, origins);
         }
 
     }
@@ -176,7 +176,7 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
     {
         if (_tryActivateFreeze)
         {
-             TryActivate(_tag);
+             TryActivate(_tag, _origins);
             _tryActivateFreeze = false;
         }
         if (_tryEndFreeze)

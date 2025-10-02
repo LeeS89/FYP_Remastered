@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
+using static UnityEngine.UI.GridLayoutGroup;
 
 public class AbilityManager
 {
@@ -35,9 +36,9 @@ public class AbilityManager
     {
         _def = def;
 
-        ExecuteOrigin = owner.ExecuteOrigin;
-        DirectionOrigin = owner.DirectionOrigin != null ? owner.DirectionOrigin : owner.ExecuteOrigin;
-        DirectionOffset = owner.DirectionOffset;
+      //  ExecuteOrigin = owner.ExecuteOrigin;
+      //  DirectionOrigin = owner.DirectionOrigin != null ? owner.DirectionOrigin : owner.ExecuteOrigin;
+      //  DirectionOffset = owner.DirectionOffset;
 
         if (_def.UsesPools())
         {
@@ -59,6 +60,18 @@ public class AbilityManager
 
         if (_def.EffectKind != EffectType.None) _executor = CreateExecutor(_def.EffectKind);
 
+    }
+
+    private void SetOrigins(AbilityOrigins origins)
+    {
+        if (origins == null)
+        {
+            Debug.LogError("[AbilityRuntime] Origins was NULL. Did you forget to instantiate/assign it?");
+            return;
+        }
+        ExecuteOrigin = origins.Position;
+        DirectionOrigin = origins.DirectionOrigin;
+        DirectionOffset = origins.DirectionOffset;
     }
 
     private IEffectExecutor CreateExecutor(EffectType kind)
@@ -133,12 +146,13 @@ public class AbilityManager
          }
      }*/
 
-    public bool TryActivate(float now /*in AbilityResources resources*/)
+    public bool TryActivate(float now, AbilityOrigins origins = null)
     {
 
         // float now = resources.Now;
         if (!CanActivate(now)) return false;
 
+        SetOrigins(origins);
         /// Important: Set the pools before Commit, as Commit may fail if resources are insufficient
         /// If ability doesnt use pools, its ok to set null
        // SetExecutorPools(in resources);
@@ -204,7 +218,7 @@ public class AbilityManager
     private void GatherAndDispatch(float now, CuePhase phase, IPoolManager pool = null)
     {
         int count = GatherTargets();
-        Dispatch(new AbilityContext(_owner, phase, _owner.ExecuteOrigin, _hits, count, now, directionOffset: _owner.DirectionOffset, directionOrigin: _owner.DirectionOrigin));
+        Dispatch(new AbilityContext(_owner, phase, ExecuteOrigin, _hits, count, now, directionOffset: DirectionOffset, directionOrigin: DirectionOrigin));
     }
 
     private void Dispatch(in AbilityContext context, IPoolManager pool = null)

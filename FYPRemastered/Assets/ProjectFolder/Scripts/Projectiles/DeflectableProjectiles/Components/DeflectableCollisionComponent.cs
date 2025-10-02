@@ -75,9 +75,9 @@ public sealed class DeflectableCollisionComponent : ProjectileCollisionComponent
             return;
         }
 
-        CheckForDamageable(collision/*, contact, impactPosition, hitNormal*/);
+      //  CheckForDamageable(collision/*, contact, impactPosition, hitNormal*/);
 
-        _projectileEventManager.Collision(collision);
+       // _projectileEventManager.Collision(collision);
         //_bulletEventManager.SpawnHitParticle(impactPosition, Quaternion.identity);
 
 

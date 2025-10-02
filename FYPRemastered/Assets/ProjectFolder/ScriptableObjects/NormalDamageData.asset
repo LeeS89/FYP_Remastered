@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: NormalDamageData
   m_EditorClassIdentifier: 
   damageType: 1
-  baseDamage: 5
+  baseDamage: 10
   damageOverTime: 0
   duration: 0
