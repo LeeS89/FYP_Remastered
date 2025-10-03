@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public interface IRangedWeapon : IWeapon
+public interface IRangedWeapon : IWeaponObsolete
 {
   
     void Reload();

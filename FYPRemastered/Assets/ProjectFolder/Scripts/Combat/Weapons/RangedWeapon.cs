@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class RangedWeapon : WeaponBase
+public class RangedWeapon : WeaponBaseObsolete
 {
     public AbilityDef _def;
     public PoolIdSO _poolId;

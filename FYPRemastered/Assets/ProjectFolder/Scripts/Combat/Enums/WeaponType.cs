@@ -18,6 +18,7 @@ public enum AmmoType
 public enum FireRate
 {
     Single,
+    SingleAutomatic,
     Burst,
-    Automatic
+    FullAutomatic
 }

@@ -43,4 +43,18 @@ public class TestBulletfire : MonoBehaviour
         yield return new WaitForSeconds(4f);
         this.RequestPool(_bulletPoolId.Id, PoolRequestCallback);
     }
+
+    ///NEEDED
+    // Equip() => Pass event manager
+    // UnEquip => Remove event manager
+    // Base class => Used by player
+    // Derived class => Used by npc's
+    // Interface
+    // Fire()
+    // Reload()
+    // Fire rate switching
+    // Random time between firing i.e. With single fire a random time between 0.5 and 1.5 to fire next bullet
+    // With burst a random time between bursts
+    // Fully automatic, universal time
+
 }

@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class WeaponHandlerBase
 {
-    protected IWeapon _equippedWeapon;
+    protected IWeaponObsolete _equippedWeapon;
     protected RangedWeaponBase _rangedWeapon;
     protected GameObject _owner;
     protected Transform _bulletSpawnPoint;

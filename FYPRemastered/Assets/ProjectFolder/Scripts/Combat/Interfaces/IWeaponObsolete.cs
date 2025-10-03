@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public interface IWeapon
+public interface IWeaponObsolete
 {
     void Equip();
     void UnEquip();
