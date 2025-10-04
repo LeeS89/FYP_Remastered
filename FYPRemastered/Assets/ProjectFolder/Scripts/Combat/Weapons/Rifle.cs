@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Rifle : Weapon, IRanged
@@ -13,7 +14,10 @@ public class Rifle : Weapon, IRanged
     [SerializeField] protected int _clipCount;
     protected int _leftInClip;
     protected Transform _target; // Used by NPC's to fire in direction of player
-    
+
+    [SerializeField] protected List<FireRateParams> _params;
+    protected Dictionary<FireRate, FireRateParams> _fireStates = new(3);
+    protected FireRateParams _currentFireRate;
 
     private void Start()
     {
@@ -33,11 +37,29 @@ public class Rifle : Weapon, IRanged
         }
 
         _leftInClip = _clipCapacity;
+
+        foreach(var rate in _params)
+        {
+            FireRate fr = rate._fireRate;
+            if (!_fireStates.TryAdd(fr, rate))
+            {
+#if UNITY_EDITOR
+                Debug.LogError("Cannot add duplicate FireRate");
+                return;
+#endif
+            }
+            else
+            {
+                Debug.LogError("Successfully added FireRate");
+            }
+
+        }
     }
 
     protected void OnPoolReceived(string poolId, IPoolManager pool)
     {
         if (string.IsNullOrEmpty(poolId) || poolId != this.poolId.Id || pool == null) return;
+        Debug.LogError("Pool Request Completed");
         _pool = pool;
     }
 
@@ -99,7 +121,15 @@ public class Rifle : Weapon, IRanged
         // Reload Audio
     }
 
-    public void SetFireRate(FireRate rate) => _fireRate = rate;
+    public void SetFireRate(FireRate rate)
+    {
+        if (_currentFireRate != null && _currentFireRate._fireRate == rate) return;
+
+        if(_fireStates != null && _fireStates.TryGetValue(rate, out var frp))
+        {
+            _currentFireRate = frp;
+        }
+    }
 
 
     public override void UnEquip()
