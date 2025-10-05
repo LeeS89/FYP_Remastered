@@ -142,13 +142,4 @@ public abstract class EventManager : MonoBehaviour
     {
         OnFireRangedWeapon?.Invoke();
     }
-
-
-
-
-
-    //// NEW SETUP
-    public event Action OnOnShootReady;
-
-    public void ShootReady() => OnOnShootReady?.Invoke();
 }
