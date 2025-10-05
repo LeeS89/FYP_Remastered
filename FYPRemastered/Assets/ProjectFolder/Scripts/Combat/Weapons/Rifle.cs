@@ -2,22 +2,24 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Rifle : Weapon, IRanged
+public sealed class Rifle : Weapon, IRanged
 {
-    [SerializeField] protected PoolIdSO poolId;
-    protected IPoolManager _pool;
-    [SerializeField] protected Transform _spawnPoint;
-    [SerializeField] protected FireRate _fireRate = FireRate.Single;
-    protected Action<string, IPoolManager> PoolRequestCallback;
+    [SerializeField] private PoolIdSO poolId;
+    private IPoolManager _pool;
+    [SerializeField] private Transform _spawnPoint;
+   // [SerializeField] protected FireRate _fireRate = FireRate.Single;
+    private Action<string, IPoolManager> PoolRequestCallback;
 
-    [SerializeField] protected int _clipCapacity;
-    [SerializeField] protected int _clipCount;
-    protected int _leftInClip;
-    protected Transform _target; // Used by NPC's to fire in direction of player
+    [SerializeField] private int _clipCapacity;
+    [SerializeField] private int _clipCount;
+    private int _leftInClip;
+    private Transform _target; // Used by NPC's to fire in direction of player
 
-    [SerializeField] protected List<FireRateParams> _params;
-    protected Dictionary<FireRate, FireRateParams> _fireStates = new(3);
-    protected FireRateParams _currentFireRate;
+    [SerializeField] private List<FireRateParams> _params;
+    private Dictionary<FireRate, FireRateParams> _fireStates = new(3);
+    private FireRateParams _currentFireRate;
+    public float NextTick { get; private set; }
+    public bool AutoFiring { get; private set; } = false;
 
     private void Start()
     {
@@ -56,7 +58,13 @@ public class Rifle : Weapon, IRanged
         }
     }
 
-    protected void OnPoolReceived(string poolId, IPoolManager pool)
+    public void Equip(EventManager eventManager, GameObject owner, FireRate fRate)
+    {
+        base.Equip(eventManager, owner);
+        SetFireRate(fRate);
+    }
+
+    private void OnPoolReceived(string poolId, IPoolManager pool)
     {
         if (string.IsNullOrEmpty(poolId) || poolId != this.poolId.Id || pool == null) return;
         Debug.LogError("Pool Request Completed");
@@ -68,52 +76,58 @@ public class Rifle : Weapon, IRanged
         base.Equip(eventManager, owner);
     }
 
-    public virtual void Fire(Transform target = null)
+    public void TryFire(Transform target = null)
     {
-        if(_leftInClip > 0)
-        {
-            _leftInClip--;
-            Vector3 directionToTarget = target != null ? TargetingUtility.GetDirectionToTarget(_target, _spawnPoint, true) :
-                _spawnPoint.forward;
-            Quaternion rotation = Quaternion.LookRotation(directionToTarget);
-
-            GameObject obj = _pool?.GetFromPool(_spawnPoint.position, rotation) as GameObject;
-
-            if (obj == null)
-            {
-#if UNITY_EDITOR
-                Debug.LogError("Failed to retrieve bullet from pool");
-#endif
-                return;
-
-            }
-
-            if (ComponentRegistry.TryGet<IPoolable>(obj, out var bullet)) bullet.LaunchPoolable(_owner);
-            else
-            {
-#if UNITY_EDITOR
-                Debug.LogError("Failed to retrieve IPoolable component on bullet");
-#endif
-            }
-        }
-        else
-        {
-            NotifyReload();
-        }
+        if (_leftInClip > 0) Fire(target);
+        else NotifyReload();
     }
 
-    public virtual void NotifyReload()
+    public void Fire(Transform target = null)
+    {
+        //  if(_leftInClip > 0)
+        //  {
+        _leftInClip--;
+        Vector3 directionToTarget = target != null ? TargetingUtility.GetDirectionToTarget(_target, _spawnPoint, true) :
+            _spawnPoint.forward;
+        Quaternion rotation = Quaternion.LookRotation(directionToTarget);
+
+        GameObject obj = _pool?.GetFromPool(_spawnPoint.position, rotation) as GameObject;
+
+        if (obj == null)
+        {
+#if UNITY_EDITOR
+            Debug.LogError("Failed to retrieve bullet from pool");
+#endif
+            return;
+
+        }
+
+        if (ComponentRegistry.TryGet<IPoolable>(obj, out var bullet)) bullet.LaunchPoolable(_owner);
+        else
+        {
+#if UNITY_EDITOR
+            Debug.LogError("Failed to retrieve IPoolable component on bullet");
+#endif
+        }
+        // }
+        /* else
+         {
+             NotifyReload();
+         }*/
+    }
+
+    public  void NotifyReload()
     {
         // For Player => Maybe some text, SFX, voice over etc
         // For NPC => Trigger Reload animation in derived class
     }
 
-    public virtual void OnFireInterupted()
+    public void OnFireInterupted()
     {
         
     }
 
-    public virtual void Reload()
+    public void Reload()
     {
         if (_clipCount <= 0) return; // Notify Player via event
         _clipCount--;
@@ -134,23 +148,42 @@ public class Rifle : Weapon, IRanged
 
     public override void UnEquip()
     {
-       base.UnEquip();
+        EndAutoFire();
+        base.UnEquip();
     }
 
-    public virtual void StartAutoFire() { }
-    
+    public void StartAutoFire()
+    {
+        if (!CanAutoFire()) return;
+        NextTick = Time.time + _currentFireRate.GetNextInterval();
+        AutoFiring = true;
+    }
+
+    public void EndAutoFire()
+    {
+        if (!AutoFiring) return;
+        AutoFiring = false;
+    }
+
 
     private void Update()
     {
-        if (!Equipped || _fireRate == FireRate.Single) return;
+        if (!AutoFiring) return;
+
+       
+        if (Time.time < NextTick) return;
+
+
+        NextTick += _currentFireRate.GetNextInterval();
     }
 
-  
-    /*public enum FireRate
+    private bool CanAutoFire()
     {
-        Single,
-        SingleAutomatic,
-        Burst,
-        FullAutomatic
-    }*/
+        if (!Equipped || _currentFireRate == null 
+            || _currentFireRate._fireRate == FireRate.Single) return false;
+
+        return true;
+    }
+
+    
 }

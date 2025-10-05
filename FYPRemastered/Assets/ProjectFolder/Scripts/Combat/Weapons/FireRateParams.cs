@@ -1,4 +1,6 @@
+using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 
 [System.Serializable]
@@ -18,7 +20,10 @@ public class FireRateParams
     public float _minFireInterval;
     [Range(1.1f, 2.0f)]
     public float _maxFireInterval;
-  
+
+  //  private float _nextTick;
+
+   // public event Action OnReachedFiringThreshold;
 
     public float GetNextInterval()
     {
@@ -42,5 +47,16 @@ public class FireRateParams
        
     }
 
+  /*  public void Tick(float now)
+    {
+        if (_fireRate == FireRate.Single) return;
+        if (now < _nextTick) return;
+
+        OnReachedFiringThreshold?.Invoke();
+        _nextTick += GetNextInterval(); ;
+    }
+
+    
+*/
     
 }
