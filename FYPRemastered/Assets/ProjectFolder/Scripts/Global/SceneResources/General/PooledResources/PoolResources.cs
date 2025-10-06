@@ -108,10 +108,10 @@ public class PoolResources : SceneResources, IUpdateableResource
             {
                 var h = Addressables.LoadAssetAsync<GameObject>(locationsToLoad[i]);
                 handles.Add(h);
-               // await h.Task;
+                await h.Task;
 
             }
-            await Task.WhenAll(handles.Select(h => h.Task));
+            //await Task.WhenAll(handles.Select(h => h.Task));
 
             await Awaitable.NextFrameAsync();
 
