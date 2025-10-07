@@ -2,7 +2,7 @@
  
 # 🧠 VR Stealth Remaster – Developer Growth Showcase
 
-This is a remastered version of my final year Unity VR project. It is rebuilt from the ground up to demonstrate my growth in architecture, performance, and system design. The original project was functional but featured tightly coupled systems, 
+This is a remastered version of my final year Unity VR project. It is being rebuilt from the ground up to demonstrate my growth in architecture, performance, and system design. The original project was functional but featured tightly coupled systems, 
 redundant calculations, and limited flexibility. This remaster focuses on an event-driven, performance-aware architecture.
 
 ---
