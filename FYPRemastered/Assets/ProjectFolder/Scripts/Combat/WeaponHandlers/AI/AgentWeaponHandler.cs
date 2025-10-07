@@ -23,6 +23,9 @@ public class AgentWeaponHandler : WeaponHandlerBase
 
     protected Action _fireSequenceCallback;
 
+    protected Action PoolIsready;
+    public bool PoolReady { get; protected set; } = false;
+
     public AgentWeaponHandler(EnemyEventManager eventManager, PoolIdSO poolId, GameObject owner, Transform bulletSpawnPoint, Transform target, int clipCapacity) : base(owner, poolId)
     {
         _eventManager = eventManager;
@@ -31,8 +34,8 @@ public class AgentWeaponHandler : WeaponHandlerBase
         _clipCapacity = clipCapacity;
 
         _fireSequenceCallback = TryFireRangedWeapon;
-
-        _rangedWeapon = new AgentRangedWeapon(poolId, _bulletSpawnPoint, _target, _eventManager, _owner, _clipCapacity);
+        PoolIsready = SetPoolReady;
+        _rangedWeapon = new AgentRangedWeapon(poolId, _bulletSpawnPoint, _target, _eventManager, _owner, _clipCapacity, PoolIsready);
       //  _waitUntilShotReady = new WaitUntil(() => _shotIsReady);
         _shotInterval = new WaitForSeconds(0.25f);
 
@@ -46,9 +49,16 @@ public class AgentWeaponHandler : WeaponHandlerBase
 
         GameManager.OnPlayerDeathStatusChanged += TargetDead;
        
+        
 
         EquipWeapon(WeaponType.Ranged);
         //_equippedWeapon = _rangedWeapon;
+    }
+
+    protected void SetPoolReady()
+    {
+        Debug.LogError("Pool Is Ready");
+        PoolReady = true;
     }
 
     public override void EquipWeapon(WeaponType type)
@@ -137,6 +147,7 @@ public class AgentWeaponHandler : WeaponHandlerBase
 
     public override void TryFireRangedWeapon()
     {
+        if (!PoolReady) return;
         if (CanFire())
         {
             _eventManager.AnimationTriggered(AnimationAction.Shoot);

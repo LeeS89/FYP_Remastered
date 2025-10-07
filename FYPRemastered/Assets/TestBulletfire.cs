@@ -41,7 +41,7 @@ public class TestBulletfire : MonoBehaviour
     IEnumerator StartRequest()
     {
         yield return new WaitForSeconds(4f);
-        this.RequestPool(_bulletPoolId.Id, PoolRequestCallback);
+        this.RequestPool(_bulletPoolId, PoolRequestCallback);
     }
 
     ///NEEDED

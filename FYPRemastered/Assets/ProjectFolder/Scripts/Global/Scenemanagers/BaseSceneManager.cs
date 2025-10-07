@@ -10,9 +10,9 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
     public static BaseSceneManager _instance { get; private set; }
 
     [SerializeField] protected List<EventManager> _eventManagers;
-  
-  
-  
+
+    protected List<PoolIdSO> _scenePoolsToLoad;
+
     protected virtual void Awake()
     {
         _instance = this;
@@ -77,6 +77,24 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
                 eventManager.BindComponentsToEvents();
             }
         }
+    }
+
+    protected virtual void GatherScenePools()
+    {
+        _scenePoolsToLoad = new(10);
+        var behaviours = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        var results = new List<IPoolOwner>();
+
+        foreach(var b in behaviours)
+        {
+            if(b is IPoolOwner po)
+            {
+                _scenePoolsToLoad.AddRange(po.GetPoolIds());
+            }
+        }
+
+
+
     }
     #endregion
 

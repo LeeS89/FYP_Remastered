@@ -1,4 +1,3 @@
-using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -24,14 +23,14 @@ public class AbilityParams
     public void Initialize()
     {
         PoolRequestCallback = OnPoolReceived;
-        if (_startPhasePoolId != null) this.RequestPool(_startPhasePoolId.Id, PoolRequestCallback);
-        if (_impactPhasePoolId != null) this.RequestPool(_impactPhasePoolId.Id, PoolRequestCallback);
-        if (_endPhasePoolId != null) this.RequestPool(_endPhasePoolId.Id, PoolRequestCallback);
+        if (_startPhasePoolId != null) this.RequestPool(_startPhasePoolId, PoolRequestCallback);
+        if (_impactPhasePoolId != null) this.RequestPool(_impactPhasePoolId, PoolRequestCallback);
+        if (_endPhasePoolId != null) this.RequestPool(_endPhasePoolId, PoolRequestCallback);
 
         foreach(var pId in _availablePools)
         {
-            string id = pId.Id;
-            this.RequestPool(id, PoolRequestCallback);
+           // string id = pId.Id;
+            this.RequestPool(pId, PoolRequestCallback);
         }
     }
 

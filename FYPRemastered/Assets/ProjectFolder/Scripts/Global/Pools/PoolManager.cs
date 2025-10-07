@@ -10,13 +10,13 @@ public sealed class PoolManager<T> : PoolManagerBase /*IPoolManager*/ where T : 
     private Transform _poolContainer;
     private T _prefab;
     private Dictionary<T,Transform> _transformCache = new();
-    private PoolResources _manager;
+    private SceneResources _manager;
 
     public override Type ItemType => typeof(T);
 
  
     ///////  NEW CONSTRUCTOR
-    public PoolManager(PoolResources manager, T prefab, int defaultCapacity = 10, int maxSize = 50)
+    public PoolManager(SceneResources manager, T prefab, int defaultCapacity = 10, int maxSize = 50)
     {
         _prefab = prefab ?? throw new ArgumentNullException(nameof(prefab));
         _poolContainer = new GameObject($"PoolContainer_{prefab.name}").transform;

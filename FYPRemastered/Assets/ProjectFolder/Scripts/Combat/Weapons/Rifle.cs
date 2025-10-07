@@ -26,7 +26,7 @@ public sealed class Rifle : Weapon, IRanged
         if(poolId != null && !string.IsNullOrEmpty(poolId.Id))
         {
             PoolRequestCallback = OnPoolReceived;
-            this.RequestPool(poolId.Id, PoolRequestCallback);
+            this.RequestPool(poolId, PoolRequestCallback);
         }
         else
         {

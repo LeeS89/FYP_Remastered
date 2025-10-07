@@ -12,4 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 653dc2465d849f64cbfcd63ccd510361, type: 3}
   m_Name: DeflectAudioId
   m_EditorClassIdentifier: 
-  _id: DeflectAudioId
+  _id: DeflectAudioPrefab
+  _kind: 1
+  _prewarmCount: 10

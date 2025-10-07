@@ -1,3 +1,4 @@
+using Meta.XR.MRUtilityKit.SceneDecorator;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -15,6 +16,29 @@ public class PoolLoader : SceneResources, IUpdateableResource
     private readonly Dictionary<string, List<ResourceRequests>> _waiters = new();
     private readonly Queue<ResourceRequests> _queue = new();
     private bool _isProcessing;
+    private readonly Dictionary<string, AsyncOperationHandle<GameObject>> _assetHandles = new();
+    private readonly HashSet<string> _poolsToLoad = new(10);
+
+    /*public PoolLoader(List<PoolIdSO> poolIds)
+    {
+        if (poolIds == null || poolIds.Count == 0) return;
+
+        foreach(var tag in poolIds)
+        {
+            _poolsToLoad.Add(tag.Id);
+            if (tag._fxPools == null || tag._fxPools.Count == 0) continue;
+
+            foreach (var fxp in tag._fxPools)
+            {
+                if (!string.IsNullOrEmpty(fxp.Id)) _poolsToLoad.Add(fxp.Id);
+            }
+
+           *//* string ap = tag._audioPoolId.Id;
+            string pp = tag._particlePoolId.Id;
+            if (!string.IsNullOrEmpty(ap)) _poolsToLoad.Add(ap);
+            if(!string.IsNullOrEmpty(pp)) _poolsToLoad.Add(pp);*//*
+        }
+    }*/
     //ConcurrentDictionary
     //////// END NEW LOADER
 
@@ -24,59 +48,107 @@ public class PoolLoader : SceneResources, IUpdateableResource
     // NEW FUNCTIONS
     public void RequestPool(in ResourceRequests req)
     {
-        if(_cache.TryGetValue(req.PoolId, out var pool))
+        if(_cache.TryGetValue(req.PoolId.Id, out var pool))
         {
-            req.PoolRequesterCallback?.Invoke(req.PoolId, pool);
+            req.PoolRequesterCallback?.Invoke(req.PoolId.Id, pool);
             return;
         }
 
         _queue.Enqueue(req);
-        if(!_isProcessing) ProcessQueue();
+        if(!_isProcessing) _ = ProcessQueue();
     }
 
-    private void ProcessQueue()
+    private async Task ProcessQueue()
     {
         _isProcessing = true;
-
+       
         while(_queue.Count > 0)
         {
             var req = _queue.Dequeue();
 
-            // Another request earlier in the queue may have loaded it already
-            if (_cache.TryGetValue(req.PoolId, out var pool))
+            PoolIdSO pid = req.PoolId;
+
+            if(pid._fxPools != null)
             {
-                req.PoolRequesterCallback?.Invoke(req.PoolId, pool);
+                foreach(var poolId in pid._fxPools)
+                {
+                    if(!_cache.ContainsKey(poolId.Id))
+                        await LoadPoolAsync(poolId, notifyWaiters: false);
+                }
+            }
+
+
+            // Another request earlier in the queue may have loaded it already
+            if (_cache.TryGetValue(req.PoolId.Id, out var pool))
+            {
+                req.PoolRequesterCallback?.Invoke(req.PoolId.Id, pool);
                 continue;
             }
 
             // If it's already loading, just add this requester to the waiters
-            if (_loading.Contains(req.PoolId))
+            if (_loading.Contains(req.PoolId.Id))
             {
-                _waiters[req.PoolId].Add(req);
+                _waiters[req.PoolId.Id].Add(req);
                 continue;
             }
 
-            _loading.Add(req.PoolId);
-            _waiters[req.PoolId] = new List<ResourceRequests> { req };
+            _loading.Add(req.PoolId.Id);
+            _waiters[req.PoolId.Id] = new List<ResourceRequests> { req };
+
+            _= LoadPoolAsync(req.PoolId, notifyWaiters: true);
+
+           
         }
+        _isProcessing = false;
     }
 
-    private async Task LoadPoolAsync(string poolId)
+
+
+    private async Task LoadPoolAsync(PoolIdSO poolId, bool notifyWaiters)
     {
         try
         {
-            var handle = Addressables.LoadAssetAsync<GameObject>(poolId);
-            await handle.Task;
+            string address = poolId.Id;
+            if (string.IsNullOrEmpty(address)) throw new Exception("Invalid address passed for pool");
+            address = address.Trim();
 
-            if(handle.Status == AsyncOperationStatus.Succeeded)
+            var handle = Addressables.LoadAssetAsync<GameObject>(address);
+            var prefab = await handle.Task;
+
+            if (handle.Status != AsyncOperationStatus.Succeeded || prefab == null)
+                throw new Exception($"Addressables load failed for '{poolId}' ({handle.Status}).");
+
+
+
+            _assetHandles[address] = handle;
+            PoolKind kind = poolId.Kind;
+
+            PoolManagerBase pool = kind switch
             {
+                PoolKind.ParticleSystem => new PoolManager<ParticleSystem>(this, prefab.GetComponent<ParticleSystem>()),
+                PoolKind.Audio => new PoolManager<AudioSource>(this, prefab.GetComponent<AudioSource>()),
+                _ => new PoolManager<GameObject>(this, prefab)
+            };
 
+            _cache[address] = pool;
+
+            pool.PreWarmPool(poolId._prewarmCount);
+
+            if (!notifyWaiters) return;
+
+            if(_waiters.TryGetValue(poolId.Id, out var waiters))
+            {
+                _waiters.Remove(poolId.Id);
+                _loading.Remove(poolId.Id);
+
+                foreach (var waiter in waiters)
+                    waiter.PoolRequesterCallback?.Invoke(poolId.Id, pool);
             }
-
+           
         }
         catch (Exception e)
         {
-
+            Debug.LogError($"Error loading resources: {e.Message}");
         }
     }
     // END NEW FUNCTIONS
@@ -142,6 +214,11 @@ public class PoolLoader : SceneResources, IUpdateableResource
     /// <returns></returns>
     public override async Task LoadResources(/*string sceneName*/)
     {
+        SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;
+
+        SceneEventAggregator.Instance.OnResourceReleased += ResourceReleased;
+        _jobs.EnsureCapacity(_maxTrackedPoolObjects);
+        return;
         try
         {
             if (!_addressablesready)
@@ -233,17 +310,46 @@ public class PoolLoader : SceneResources, IUpdateableResource
     }
 
 
-    protected override void ResourceRequested(in ResourceRequests request)
+    protected override void ResourceRequested(in ResourceRequests req)
     {
-        if (string.IsNullOrEmpty(request.PoolId)) return;
-        var id = request.PoolId;
-
-        if (!_pools.TryGetValue(id, out var pool))
+        if (req.PoolId == null || string.IsNullOrEmpty(req.PoolId.Id)) return;
+        
+        if (_cache.TryGetValue(req.PoolId.Id, out var pool))
         {
-            request.PoolRequesterCallback?.Invoke(id, null);
+            req.PoolRequesterCallback?.Invoke(req.PoolId.Id, pool);
             return;
         }
-        request.PoolRequesterCallback?.Invoke(id, pool);
+
+        _queue.Enqueue(req);
+        if (!_isProcessing) ProcessQueue();
+
+
+
+
+/*
+        if (req.PoolId == null || string.IsNullOrEmpty(req.PoolId.Id)) return;
+
+        foreach (var tag in poolIds)
+        {
+            _poolsToLoad.Add(tag.Id);
+            if (tag._fxPools == null || tag._fxPools.Count == 0) continue;
+
+            foreach (var fxp in tag._fxPools)
+            {
+                if (!string.IsNullOrEmpty(fxp.Id)) _poolsToLoad.Add(fxp.Id);
+            }
+
+           
+        }*/
+        /* if (string.IsNullOrEmpty(request.PoolId.Id)) return;
+         var id = request.PoolId.Id;
+
+         if (!_pools.TryGetValue(id, out var pool))
+         {
+             request.PoolRequesterCallback?.Invoke(id, null);
+             return;
+         }
+         request.PoolRequesterCallback?.Invoke(id, pool);*/
 
     }
 
@@ -253,7 +359,7 @@ public class PoolLoader : SceneResources, IUpdateableResource
 
 
 
-    public bool SchedulePoolObjectRelease(IPoolManager pool, UnityEngine.Object item, float seconds)
+    public override bool SchedulePoolObjectRelease(IPoolManager pool, UnityEngine.Object item, float seconds)
     {
         if (_jobs.Count == _maxTrackedPoolObjects) { return false; }
         _jobs.Add(new PoolObjectTracker(pool, item, seconds));

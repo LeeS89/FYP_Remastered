@@ -1,4 +1,3 @@
-using Meta.XR.MRUtilityKit.SceneDecorator;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -23,7 +22,8 @@ public readonly struct ResourceRequests
     // For AI and Pool requests
     public readonly AIResourceType AIResourceType;
   //  public readonly PoolResourceType PoolType;
-    public readonly string PoolId;
+   // public readonly string PoolId;
+    public readonly PoolIdSO PoolId;
 
     // Path request params
     public readonly Vector3 PathStart;
@@ -44,7 +44,8 @@ public readonly struct ResourceRequests
     private ResourceRequests(
         AIResourceType airt,
        // PoolResourceType prt,
-        string pid,
+        //string pid,
+        PoolIdSO pid,
         Vector3 start,
         Vector3 end,
         NavMeshPath path,
@@ -71,7 +72,7 @@ public readonly struct ResourceRequests
         PathRequestCallback = prCb;
     }
 
-    public static ResourceRequests RequestPool(string type, Action<string, IPoolManager> pool)
+    public static ResourceRequests RequestPool(PoolIdSO type, Action<string, IPoolManager> pool)
         => new(AIResourceType.None, type, default, default, null, null, -1, null, pool, null, null, null);
 
     public static ResourceRequests FlankPointTargetAndBlockingMasks(Action<LayerMask, LayerMask, LayerMask> masks)

@@ -25,7 +25,7 @@ public class AbilityGesture : BaseGesture
 
         if (_poolId == null) return;
         poolCallback = OnPoolReceived;
-        this.RequestPool(_poolId.Id, poolCallback);
+        this.RequestPool(_poolId, poolCallback);
        
     }
 

@@ -18,9 +18,9 @@ public class AbilityParam
     public void Initialize()
     {
         PoolRequestCallback = OnPoolReceived;
-        if (_startPhasePoolId != null) this.RequestPool(_startPhasePoolId.Id, PoolRequestCallback);
-        if (_impactPhasePoolId != null) this.RequestPool(_impactPhasePoolId.Id, PoolRequestCallback);
-        if (_endPhasePoolId != null) this.RequestPool(_endPhasePoolId.Id, PoolRequestCallback);
+        if (_startPhasePoolId != null) this.RequestPool(_startPhasePoolId, PoolRequestCallback);
+        if (_impactPhasePoolId != null) this.RequestPool(_impactPhasePoolId, PoolRequestCallback);
+        if (_endPhasePoolId != null) this.RequestPool(_endPhasePoolId, PoolRequestCallback);
     }
 
     private void OnPoolReceived(string poolId, IPoolManager pool)

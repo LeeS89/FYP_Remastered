@@ -28,9 +28,9 @@ public class AbilityBase
     protected virtual void InitializePools()
     {
         PoolReceivedCallback = OnPoolReceived;
-        if (BeginPoolId != null) this.RequestPool(BeginPoolId.Id, PoolReceivedCallback);
-        if (InProgressPoolId != null) this.RequestPool(InProgressPoolId.Id, PoolReceivedCallback);
-        if (EndPoolId != null) this.RequestPool(EndPoolId.Id, PoolReceivedCallback);
+        if (BeginPoolId != null) this.RequestPool(BeginPoolId, PoolReceivedCallback);
+        if (InProgressPoolId != null) this.RequestPool(InProgressPoolId, PoolReceivedCallback);
+        if (EndPoolId != null) this.RequestPool(EndPoolId, PoolReceivedCallback);
     }
 
     public virtual void Tick(float now) { }

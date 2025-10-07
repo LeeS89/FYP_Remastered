@@ -12,4 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 653dc2465d849f64cbfcd63ccd510361, type: 3}
   m_Name: NormalBulletId
   m_EditorClassIdentifier: 
-  _id: NormalBulletId
+  _id: BasicBulletPrefab
+  _kind: 0
+  _prewarmCount: 50
+  _fxPools:
+  - {fileID: 11400000, guid: ddaf70cf0cbc90343814eba091736f24, type: 2}
+  - {fileID: 11400000, guid: d60d5ef593884a24883e5d70cbfc8105, type: 2}
+  _audioPoolId: {fileID: 11400000, guid: ddaf70cf0cbc90343814eba091736f24, type: 2}
+  _particlePoolId: {fileID: 11400000, guid: d60d5ef593884a24883e5d70cbfc8105, type: 2}

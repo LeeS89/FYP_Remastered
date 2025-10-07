@@ -25,7 +25,8 @@ public sealed class AbilityRuntime : CSBase
     // private IPoolManager _endPhasePool;
     private Action _spendResourcesCallback;
     private Action<string, IPoolManager> OnPoolReceived;
-    private string StartPoolId, ImpactPoolId, EndPoolId;
+   // private string StartPoolId, ImpactPoolId, EndPoolId;
+    private PoolIdSO StartPoolId, ImpactPoolId, EndPoolId;
 
 
 
@@ -75,17 +76,17 @@ public sealed class AbilityRuntime : CSBase
     {
         if (def.StartPhasePool != null)
         {
-            StartPoolId = def.StartPhasePool.Id;
+            StartPoolId = def.StartPhasePool;
             this.RequestPool(StartPoolId, OnPoolReceived);
         }
         if(def.ImpactPhasePool != null)
         {
-            ImpactPoolId = def.ImpactPhasePool.Id;
+            ImpactPoolId = def.ImpactPhasePool;
             this.RequestPool(ImpactPoolId, OnPoolReceived);
         }
         if(def.EndPhasePool != null)
         {
-            EndPoolId = def.EndPhasePool.Id;
+            EndPoolId = def.EndPhasePool;
             this.RequestPool(EndPoolId, OnPoolReceived);
         }
     }
@@ -94,11 +95,11 @@ public sealed class AbilityRuntime : CSBase
     {
         if (string.IsNullOrEmpty(id) || pool == null) return;
 
-        if (StartPoolId != null && id == StartPoolId) _startPhasePool = pool;
+        if (StartPoolId != null && id == StartPoolId.Id) _startPhasePool = pool;
 
-        if (ImpactPoolId != null && id == ImpactPoolId) _impactPhasePool = pool;
+        if (ImpactPoolId != null && id == ImpactPoolId.Id) _impactPhasePool = pool;
 
-        if (EndPoolId != null && id == EndPoolId) _endPhasePool = pool;
+        if (EndPoolId != null && id == EndPoolId.Id) _endPhasePool = pool;
 
     }
 

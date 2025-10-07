@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 
@@ -6,9 +7,9 @@ public class AgentRangedWeapon : RangedWeaponBase
     private EnemyEventManager _eventManager;
     
     protected Transform _target;
-    
+   
 
-    public AgentRangedWeapon(PoolIdSO poolId, Transform bulletSpawnPoint, Transform target, EnemyEventManager eventManager, GameObject gunOwner, int clipCapacity)
+    public AgentRangedWeapon(PoolIdSO poolId, Transform bulletSpawnPoint, Transform target, EnemyEventManager eventManager, GameObject gunOwner, int clipCapacity, Action _cb)
     {
         _eventManager = eventManager;
         _normalBulletPoolId = poolId;
@@ -17,6 +18,7 @@ public class AgentRangedWeapon : RangedWeaponBase
         _gunOwner = gunOwner;
         _clipCapacity = clipCapacity;
         _clipCount = _clipCapacity;
+        Callback = _cb;
         PoolRequestCallback = SetBulletPool;
     }
 

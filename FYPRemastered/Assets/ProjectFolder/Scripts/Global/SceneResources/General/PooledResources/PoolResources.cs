@@ -162,8 +162,8 @@ public class PoolResources : SceneResources, IUpdateableResource
 
     protected override void ResourceRequested(in ResourceRequests request)
     {
-        if (string.IsNullOrEmpty(request.PoolId)) return;
-        var id = request.PoolId;    
+        if (string.IsNullOrEmpty(request.PoolId.Id)) return;
+        var id = request.PoolId.Id;    
 
         if (!_pools.TryGetValue(id, out var pool))
         {
