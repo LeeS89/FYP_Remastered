@@ -115,7 +115,7 @@ Drop in comparison gifs, before/after screenshots or diagrams here.
 
 ## 🔗 Original Project
 
-- [View Original College Submission](<img width="736" height="186" alt="image" src="https://github.com/user-attachments/assets/13c2f394-9438-4fd9-973b-05ba89040d5b" />
+- [View Original College Submission](https://github.com/LeeS89/VR_Project
 ) 
 
 ---
