@@ -107,6 +107,8 @@ redundant calculations, and limited flexibility. This remaster focuses on an eve
 
 ## 📸 Media (Coming Soon)
 
+- [Quick Demo of agent losing sight of player and then moving to within view](https://drive.google.com/file/d/1nXlU8e6fQI-vGR5_MLiJcoOxxfPgEko-/view?usp=drive_link
+) 
 <!--
 Drop in comparison gifs, before/after screenshots or diagrams here.
 -->
