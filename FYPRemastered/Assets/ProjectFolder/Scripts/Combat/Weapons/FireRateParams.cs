@@ -9,17 +9,17 @@ public class FireRateParams
     public FireRate _fireRate;
 
     [Range(0.5f, 2.0f)]
-    public float _interval;
+    public float _interval = 1f;
 
     [Range(0.1f, 0.5f)]
-    public float _rapidInterval;
+    public float _rapidInterval = 0.25f;
 
-    public bool _useFixedInterval;
+    public bool _useFixedInterval = false;
 
     [Range(0.2f, 1f)]
-    public float _minFireInterval;
+    public float _minFireInterval = 0.5f;
     [Range(1.1f, 2.0f)]
-    public float _maxFireInterval;
+    public float _maxFireInterval = 2.0f;
 
   //  private float _nextTick;
 

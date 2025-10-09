@@ -14,4 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: ForceProjectilePrefab
   _kind: 0
-  _prewarmCount: 0
+  _prewarmCount: 5
+  _fxPools:
+  - {fileID: 11400000, guid: de3d5f12dddbc4b4386af47a5abf0a8a, type: 2}

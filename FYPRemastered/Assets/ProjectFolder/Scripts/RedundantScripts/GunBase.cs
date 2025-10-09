@@ -65,7 +65,7 @@ public class GunBase //: IRangedWeapon
 
     private void NotifyReload()
     {
-        _eventManager.OutOfAmmo();
+        _eventManager.NotifyReload();
         //_isReloading = isReloading;
     }
 

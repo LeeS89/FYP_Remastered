@@ -113,19 +113,16 @@ public abstract class EventManager : MonoBehaviour
         OnTryShoot?.Invoke(conditions);
     }
 
+    public event Action OnNotifyReload;
+
+    public void NotifyReload() => OnNotifyReload?.Invoke();
+
     public event Action OnOutOfAmmo;
 
-    public void OutOfAmmo()
-    {
-        OnOutOfAmmo?.Invoke();
-    }
+    public void OutOfAmmo() => OnOutOfAmmo?.Invoke();
 
-    public event Action<bool> OnReload;
+    
 
-    public void Reload(bool isReloading)
-    {
-        OnReload?.Invoke(isReloading);
-    }
 
     public event Action<Vector3, float, float> OnKnockbackTriggered;
 
@@ -137,17 +134,21 @@ public abstract class EventManager : MonoBehaviour
     // Gun Events
     public event Action OnFireRangedWeapon;
 
-    public void FireRangedWeapon()
-    {
-        OnFireRangedWeapon?.Invoke();
-    }
+    public void FireRangedWeapon() => OnFireRangedWeapon?.Invoke();
+
 
 
 
 
 
     //// NEW SETUP
-    public event Action OnOnShootReady;
+    public event Action<Weapon> OnReadyToFire;
 
-    public void ShootReady() => OnOnShootReady?.Invoke();
+    public void ReadyToFire(Weapon wp) => OnReadyToFire?.Invoke(wp);
+
+    public event Action OnShoot;
+
+    public void Shoot() => OnShoot?.Invoke();
+
+    //public event Action On
 }

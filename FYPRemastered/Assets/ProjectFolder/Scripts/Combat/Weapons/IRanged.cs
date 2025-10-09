@@ -2,21 +2,16 @@ using UnityEngine;
 
 public interface IRanged : IWeapon
 {
-    void NotifyReload();
+    void ClipEmpty();
     void Reload();
 
     void SetFireRate(FireRate rate);
 
-    void TryFire(Transform target = null);
+    void TryFire(FireRate rate, Transform target = null);
 
-    void Fire(Transform target = null);
+    void Fire();
 
-    void OnFireInterupted();
+    void OnInterupted();
 
-    void StartAutoFire();
-
-    void EndAutoFire();
-
-    void Equip(EventManager eventManager, GameObject owner, FireRate fRate);
-
+    bool LockedAndLoaded { get; }
 }

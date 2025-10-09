@@ -13,6 +13,5 @@ public class PoolIdSO : ScriptableObject
     public PoolKind Kind => _kind;
 
     public List<PoolIdSO> _fxPools;
-    public PoolIdSO _audioPoolId;
-    public PoolIdSO _particlePoolId;
+   
 }

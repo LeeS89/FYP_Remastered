@@ -44,8 +44,8 @@ public class AgentWeaponHandler : WeaponHandlerBase
         _eventManager.OnFacingTarget += FacingTargetStatusChanged;
         _eventManager.OnMelee += MeleeTriggered;
         _eventManager.OnTargetSeen += TargetInViewStatusChanged;
-        _eventManager.OnOutOfAmmo += OutOfAmmo;
-        _eventManager.OnReload += ReloadStateChanged;
+        _eventManager.OnNotifyReload += OutOfAmmo;
+        _eventManager.OnReloading += ReloadStateChanged;
 
         GameManager.OnPlayerDeathStatusChanged += TargetDead;
        
@@ -189,8 +189,8 @@ public class AgentWeaponHandler : WeaponHandlerBase
         _eventManager.OnFacingTarget -= FacingTargetStatusChanged;
         _eventManager.OnMelee -= MeleeTriggered;
         _eventManager.OnTargetSeen -= TargetInViewStatusChanged;
-        _eventManager.OnOutOfAmmo -= OutOfAmmo;
-        _eventManager.OnReload -= ReloadStateChanged;
+        _eventManager.OnNotifyReload -= OutOfAmmo;
+        _eventManager.OnReloading -= ReloadStateChanged;
 
         GameManager.OnPlayerDeathStatusChanged -= TargetDead;
         
@@ -210,8 +210,8 @@ public class AgentWeaponHandler : WeaponHandlerBase
         _eventManager.OnFacingTarget += FacingTargetStatusChanged;
         _eventManager.OnMelee += MeleeTriggered;
         _eventManager.OnTargetSeen += TargetInViewStatusChanged;
-        _eventManager.OnOutOfAmmo += OutOfAmmo;
-        _eventManager.OnReload += ReloadStateChanged;
+        _eventManager.OnNotifyReload += OutOfAmmo;
+        _eventManager.OnReloading += ReloadStateChanged;
 
         GameManager.OnPlayerDeathStatusChanged += TargetDead;
        

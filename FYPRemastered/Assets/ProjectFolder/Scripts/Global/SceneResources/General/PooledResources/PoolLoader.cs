@@ -53,7 +53,7 @@ public class PoolLoader : SceneResources, IUpdateableResource
             req.PoolRequesterCallback?.Invoke(req.PoolId.Id, pool);
             return;
         }
-
+        // If Requested pool has not already been loaded, queue request for loading
         _queue.Enqueue(req);
         if(!_isProcessing) _ = ProcessQueue();
     }
@@ -66,6 +66,7 @@ public class PoolLoader : SceneResources, IUpdateableResource
         {
             var req = _queue.Dequeue();
 
+            // Checking if the requested pool has any dependent pools that also need to be loaded
             PoolIdSO pid = req.PoolId;
 
             if(pid._fxPools != null)
@@ -85,7 +86,7 @@ public class PoolLoader : SceneResources, IUpdateableResource
                 continue;
             }
 
-            // If it's already loading, just add this requester to the waiters
+            // If it's already loading, add this requester to the waiters
             if (_loading.Contains(req.PoolId.Id))
             {
                 _waiters[req.PoolId.Id].Add(req);

@@ -183,7 +183,7 @@ public class EnemyAnimationEvents : ComponentEvents
         switch (action)
         {
             case AnimationAction.Reload:
-                _enemyEventManager.Reload(true);
+                _enemyEventManager.Reloading(true);
                 break;
             case AnimationAction.Melee:
                 _enemyEventManager.MeleeTriggered(true);
@@ -203,7 +203,7 @@ public class EnemyAnimationEvents : ComponentEvents
         switch (completedAction)
         {
             case AnimationAction.Reload:
-                _enemyEventManager.Reload(false);
+                _enemyEventManager.Reloading(false);
                 animator.SetBool("reloading", false);
                 break;
             case AnimationAction.Melee:
