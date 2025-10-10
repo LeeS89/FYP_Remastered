@@ -31,7 +31,7 @@ public class ProjectileFXBase : ComponentEvents
     public override void InitialzeLocalPools()
     {
         if (HitParticlePoolId == null) return;
-        this.RequestPool(HitParticlePoolId.Id, PoolRequestCallback);
+        this.RequestPool(HitParticlePoolId, PoolRequestCallback);
     }
 
 

@@ -259,15 +259,17 @@ public class StatsHandler
         {
             return amount;
         }
-#if UNITY_EDITOR
+
         else
         {
-
+#if UNITY_EDITOR
             StatEntry entry = _editorVisibleStats.Find(s => s.statType == stat);
             return entry != null ? entry.value : 0;
-
-        }
+#else
+            return 0f;
 #endif
+        }
+
 
         /* else
          {

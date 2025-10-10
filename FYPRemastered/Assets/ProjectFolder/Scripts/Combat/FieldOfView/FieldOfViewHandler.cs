@@ -192,7 +192,7 @@ public class FieldOfViewHandler
             
             RunEvaluationPhase(_proximityDetectionResults[i], out hitCount, _addFallbackPoints);
 
-            if (hitCount == 0 && CombatComponent._testFOV) { /*Debug.LogError("CapsuleCast hit nothing");*/ continue; }
+            if (hitCount == 0 && CombatComponentObsolete._testFOV) { /*Debug.LogError("CapsuleCast hit nothing");*/ continue; }
 
            // SetTargetingPhaseParams(ref _fovPhaseParams);
 

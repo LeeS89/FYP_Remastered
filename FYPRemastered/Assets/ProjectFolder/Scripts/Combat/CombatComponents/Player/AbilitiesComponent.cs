@@ -5,7 +5,7 @@ using Unity.XR.CoreUtils;
 using UnityEngine;
 
 [Obsolete("", true)]
-public class AbilitiesComponent : BaseAbilities
+public class AbilitiesComponent : BaseAbilitiesObsolete
 {
     [Header("Trace Center")]
     [SerializeField] private Transform _traceLocation;

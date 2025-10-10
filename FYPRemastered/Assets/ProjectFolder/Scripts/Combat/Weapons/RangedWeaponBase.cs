@@ -15,7 +15,7 @@ public abstract class RangedWeaponBase : IRangedWeapon
 
     protected PoolIdSO _normalBulletPoolId;
 
-
+    protected Action Callback;
     public abstract void Reload();
 
     #region Ammo Region
@@ -26,9 +26,12 @@ public abstract class RangedWeaponBase : IRangedWeapon
 
     protected virtual void SetBulletPool(string type, IPoolManager poolManager)
     {
+      
         if (string.IsNullOrEmpty(type) || type != _normalBulletPoolId.Id || poolManager == null) return;
+   
        // if (type == null || poolManager == null) return;
        _bulletPoolManager = poolManager;
+        Callback?.Invoke();
     }
 
     protected virtual void GetPoolManager(AmmoType type)
@@ -47,7 +50,8 @@ public abstract class RangedWeaponBase : IRangedWeapon
                 poolType = _normalBulletPoolId;
                 break;
         }
-        var bulletPool = ResourceRequests.RequestPool(_normalBulletPoolId.Id, PoolRequestCallback);
+      
+        var bulletPool = ResourceRequests.RequestPool(_normalBulletPoolId, PoolRequestCallback);
 
         SceneEventAggregator.Instance.ResourceRequested(bulletPool);
 

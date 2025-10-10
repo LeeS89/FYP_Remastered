@@ -5,7 +5,7 @@ using UnityEngine.AI;
 
 public static class ResourceRequestExtension
 {
-    public static void RequestPool<T>(this T _, string poolId, Action<string, IPoolManager> componentCallback, Action<bool> ownerCallback = null)
+    public static void RequestPool<T>(this T _, PoolIdSO poolId, Action<string, IPoolManager> componentCallback, Action<bool> ownerCallback = null)
     {
         var pool = ResourceRequests.RequestPool(poolId, componentCallback);
         SceneEventAggregator.Instance.ResourceRequested(pool);

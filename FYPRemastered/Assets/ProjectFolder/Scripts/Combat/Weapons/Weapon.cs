@@ -4,10 +4,14 @@ using UnityEngine;
 public abstract class Weapon : MonoBehaviour, IWeapon
 {
     protected EventManager _eventManager;
-    protected GameObject _owner;
+    protected IWeaponOwner _owner;
+    public Transform Target { get; protected set; } = null;
+
     public bool Equipped { get; protected set; } = false;
 
-    public virtual void Equip(EventManager eventManager, GameObject owner)
+   // public bool WeaponReady { get; protected set; } = false;
+
+    public virtual void Equip(EventManager eventManager, IWeaponOwner owner = null)
     {
         _eventManager = eventManager;
         _owner = owner;
@@ -19,6 +23,7 @@ public abstract class Weapon : MonoBehaviour, IWeapon
         Equipped = false;
         _eventManager = null;
         _owner = null;
+        Target = null;
     }
 
    

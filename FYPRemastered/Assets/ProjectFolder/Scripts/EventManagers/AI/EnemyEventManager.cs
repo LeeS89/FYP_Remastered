@@ -201,10 +201,10 @@ public class EnemyEventManager : EventManager
         OnRequestChasingState?.Invoke();
     }*/
 
-    public void PendingNewDestination(bool pending)
+   /* public void PendingNewDestination(bool pending)
     {
         OnPendingNewDestination?.Invoke(pending);
-    }
+    }*/
 
     public void DestinationApplied()
     {
@@ -235,4 +235,8 @@ public class EnemyEventManager : EventManager
     {
         OnRotateTowardsTarget?.Invoke(rotate);
     }
+
+    public event Action<bool> OnReloading;
+
+    public void Reloading(bool isReloading) => OnReloading?.Invoke(isReloading);
 }

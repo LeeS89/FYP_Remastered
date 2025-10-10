@@ -108,10 +108,10 @@ public class PoolResources : SceneResources, IUpdateableResource
             {
                 var h = Addressables.LoadAssetAsync<GameObject>(locationsToLoad[i]);
                 handles.Add(h);
-               // await h.Task;
+                await h.Task;
 
             }
-            await Task.WhenAll(handles.Select(h => h.Task));
+            //await Task.WhenAll(handles.Select(h => h.Task));
 
             await Awaitable.NextFrameAsync();
 
@@ -162,8 +162,8 @@ public class PoolResources : SceneResources, IUpdateableResource
 
     protected override void ResourceRequested(in ResourceRequests request)
     {
-        if (string.IsNullOrEmpty(request.PoolId)) return;
-        var id = request.PoolId;    
+        if (string.IsNullOrEmpty(request.PoolId.Id)) return;
+        var id = request.PoolId.Id;    
 
         if (!_pools.TryGetValue(id, out var pool))
         {

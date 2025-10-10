@@ -12,4 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 653dc2465d849f64cbfcd63ccd510361, type: 3}
   m_Name: ForceProjectileHitId
   m_EditorClassIdentifier: 
-  _id: ForceProjHitId
+  _id: ForceProjectileHitPrefab
+  _kind: 0
+  _prewarmCount: 5
+  _fxPools: []

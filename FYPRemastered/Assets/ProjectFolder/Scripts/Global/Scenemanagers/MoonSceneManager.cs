@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -10,6 +11,9 @@ public class MoonSceneManager : BaseSceneManager
     [SerializeField] private WaypointBlockData _waypointBlockData;
     [SerializeField] private WaypointManager _waypointManager;
     private SceneResourceManager _resources;
+
+   
+
 
     // public Dictionary<GameObject, float> stats = new Dictionary<GameObject, float>();
 
@@ -43,9 +47,9 @@ public class MoonSceneManager : BaseSceneManager
 
     public override async Task SetupScene()
     {
-        _resources = new SceneResourceManager(new PoolResources(), new WaypointResources());
+       
+        _resources = new SceneResourceManager(new WaypointResources(), new PoolLoader());
 
-        
         await _resources.LoadResourcesAsync();
         await _resources.LoadDependancies();
 

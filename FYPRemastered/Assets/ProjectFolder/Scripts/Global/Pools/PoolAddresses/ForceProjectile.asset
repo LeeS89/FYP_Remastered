@@ -12,7 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06397a21e19fded4bbff2f20c30eef47, type: 3}
   m_Name: ForceProjectile
   m_EditorClassIdentifier: 
+  AddressableReference:
+    m_AssetGUID: 
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_SubObjectGUID: 
+    m_EditorAssetChanged: 0
   _addressableKey: ForceProjectilePrefab
   _id: {fileID: 11400000, guid: 7249f8d07474c484ab32588d56342c7b, type: 2}
   _kind: 0
-  _prewarmSize: 5
+  _prewarmCount: 5

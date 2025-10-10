@@ -33,7 +33,7 @@ public sealed class DeflectableProjectileFX : ProjectileFXBase
         base.InitialzeLocalPools();
 
         if (DeflectAudioPoolId == null) return;
-        this.RequestPool(DeflectAudioPoolId.Id, PoolRequestCallback);
+        this.RequestPool(DeflectAudioPoolId, PoolRequestCallback);
     }
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
