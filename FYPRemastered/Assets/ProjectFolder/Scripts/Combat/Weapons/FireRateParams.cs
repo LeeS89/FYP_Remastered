@@ -21,10 +21,7 @@ public class FireRateParams
     [Range(1.1f, 2.0f)]
     public float _maxFireInterval = 2.0f;
 
-  //  private float _nextTick;
-
-   // public event Action OnReachedFiringThreshold;
-
+ 
     public float GetNextInterval()
     {
         float rate;
@@ -47,16 +44,5 @@ public class FireRateParams
        
     }
 
-  /*  public void Tick(float now)
-    {
-        if (_fireRate == FireRate.Single) return;
-        if (now < _nextTick) return;
-
-        OnReachedFiringThreshold?.Invoke();
-        _nextTick += GetNextInterval(); ;
-    }
-
-    
-*/
     
 }

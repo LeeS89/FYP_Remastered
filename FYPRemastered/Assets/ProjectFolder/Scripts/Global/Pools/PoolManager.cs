@@ -129,7 +129,6 @@ public sealed class PoolManager<T> : PoolManagerBase /*IPoolManager*/ where T : 
 
     public override void PreWarmPool(int count)
     {
-        Debug.LogError("Trying to prewarm "+typeof(T).ToString());
         int preWarmCount = Mathf.Min(count, _maxSize);
         List<T> tempList = new List<T>();
         for (int i = 0; i < preWarmCount; i++)

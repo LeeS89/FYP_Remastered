@@ -14,7 +14,7 @@ public abstract class ComponentEvents : MonoBehaviour
         BaseSceneManager._instance.OnSceneComplete += OnSceneComplete;
     }
 
-    protected virtual void UnRegisterGlobalEvents() => BaseSceneManager._instance.OnSceneStarted -= OnSceneStarted;
+    protected virtual void UnRegisterGlobalEvents() => BaseSceneManager._instance.OnSceneStarted -= OnSceneStarted; // Switch to Scene aggregator
 
     protected virtual void OnSceneStarted()
     {
@@ -25,9 +25,9 @@ public abstract class ComponentEvents : MonoBehaviour
     public virtual void InitialzeLocalPools() { }
     
 
-    protected virtual void OnSceneComplete() => BaseSceneManager._instance.OnSceneComplete -= OnSceneComplete;
+    protected virtual void OnSceneComplete() => BaseSceneManager._instance.OnSceneComplete -= OnSceneComplete; // Switch to Scene aggregator
 
-    protected virtual void OnPlayerDeathStatusUpdated(bool isDead) => PlayerIsDead = isDead;
+    protected virtual void OnPlayerDeathStatusUpdated(bool isDead) => PlayerIsDead = isDead; 
     public bool PlayerIsDead { get; protected set; }
 
     public bool OwnerIsDead { get; protected set; } = false;

@@ -13,5 +13,5 @@ public interface IRanged : IWeapon
 
     void OnInterupted();
 
-    bool LockedAndLoaded { get; }
+    bool WeaponReady { get; }
 }

@@ -4,24 +4,32 @@ using UnityEngine;
 
 public sealed class Rifle : Weapon, IRanged
 {
+    [Header("Pool Params")]
     [SerializeField] private PoolIdSO poolId;
     private IPoolManager _pool;
-    [SerializeField] private Transform _spawnPoint;
-   // [SerializeField] protected FireRate _fireRate = FireRate.Single;
     private Action<string, IPoolManager> PoolRequestCallback;
 
+    [Header("Bullet Spawn Point & ammo params")]
+    [SerializeField] private Transform _spawnPoint;
     [SerializeField] private int _clipCapacity;
     [SerializeField] private int _clipCount;
     private int _leftInClip;
-    private Transform _target; // Used by NPC's to fire in direction of player
 
+    [Header("Rates at which this weaon can fire, i.e. Single, Burst, Fully Automatic")]
     [SerializeField] private List<FireRateParams> _params;
     private Dictionary<FireRate, FireRateParams> _fireStates = new(3);
     private FireRateParams _currentFireRate;
-    public float NextTick { get; private set; }
-    public bool AutoFiring { get; private set; } = false;
 
-    public bool LockedAndLoaded { get; private set; } = true;
+    [Header("Firing sequence params")]
+   // public float NextTick { get; private set; }
+    private float _fireCooldown;
+    public bool AutoFiring { get; private set; } = false;
+    private bool _lockedAndLoaded = true;
+    public bool WeaponReady { get; private set; } = false;
+
+    private Transform _target; // Used by NPC's to fire in direction of player
+
+
 
     #region Initialization
 
@@ -34,7 +42,7 @@ public sealed class Rifle : Weapon, IRanged
         }
         else
         {
-#if UNITY_EDITOR
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             throw new NullReferenceException("Must provide a valid Pool Id");
 #else
             return;
@@ -49,7 +57,7 @@ public sealed class Rifle : Weapon, IRanged
             FireRate fr = rate._fireRate;
             if (!_fireStates.TryAdd(fr, rate))
             {
-#if UNITY_EDITOR
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                 Debug.LogError("Cannot add duplicate FireRate");
                 return;
 #endif
@@ -62,22 +70,49 @@ public sealed class Rifle : Weapon, IRanged
         }
     }
 
-  
+    public override void Equip(EventManager eventManager, IWeaponOwner owner = null)
+    {
+        base.Equip(eventManager, owner);
+        EnsureBulletPoolExists();
+    }
+
+    private void EnsureBulletPoolExists()
+    {
+        if (_pool != null) return;
+      
+        if (poolId != null && !string.IsNullOrEmpty(poolId.Id))
+        {
+            PoolRequestCallback = OnPoolReceived;
+            this.RequestPool(poolId, PoolRequestCallback);
+        }
+        else
+        {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            throw new NullReferenceException("Must provide a valid Pool Id");
+#else
+            return;
+#endif
+
+        }
+    }
+
     private void OnPoolReceived(string poolId, IPoolManager pool)
     {
         if (string.IsNullOrEmpty(poolId) || poolId != this.poolId.Id || pool == null) return;
         Debug.LogError("Pool Request Completed");
         _pool = pool;
-
-       // Equip(new EnemyEventManager());
-       // TryFire(FireRate.FullAutomatic);
+        _leftInClip = _clipCapacity;
+        WeaponReady = true;
+        //SetWeaponReady(true);
+         Equip(new EnemyEventManager());
+         TryFire(FireRate.FullAutomatic);
     }
 
     public void SetFireRate(FireRate rate)
     {
         if (_currentFireRate != null && _currentFireRate._fireRate == rate) return;
         if (_fireStates == null) return;
-
+       
         if (_fireStates.TryGetValue(rate, out var frp))
         {
             _currentFireRate = frp;
@@ -89,7 +124,7 @@ public sealed class Rifle : Weapon, IRanged
             fr._fireRate = rate;
             _fireStates.Add(rate, fr);
         }
-        SetWeaponReady(true);
+       
     }
     #endregion
 
@@ -148,7 +183,9 @@ public sealed class Rifle : Weapon, IRanged
     public void ClipEmpty()
     {
         if (_eventManager == null) return;
-        SetWeaponReady(false);
+
+        _lockedAndLoaded = false;
+      //  SetWeaponReady(false);
         // EndAutoFire();
         if (_clipCount > 0) _eventManager.NotifyReload();
         else
@@ -157,15 +194,16 @@ public sealed class Rifle : Weapon, IRanged
             _eventManager.OutOfAmmo();
         }
 
-        // For Player => Maybe some text, SFX, voice over etc
+        // For Player => Maybe some text, SFX, voice over etc, and weapon UI update in derived class
         // For NPC => Trigger Reload animation in derived class
     }
 
     public void Reload()
     {
-        _clipCount--;
+        // For now, NPC's have infinite ammo, so no need to check for clip count
+        if (!_owner.IsNPC) _clipCount--;
         _leftInClip = _clipCapacity;
-        SetWeaponReady(true);
+        _lockedAndLoaded = true;
         // Reload Audio
     }
     #endregion
@@ -177,8 +215,6 @@ public sealed class Rifle : Weapon, IRanged
 
     public override void UnEquip()
     {
-        // Reset weapon ready to true on UnEquip so it is ready when re-equipped
-        SetWeaponReady(true);
         EndAutoFire();
         _currentFireRate = null;
         base.UnEquip();
@@ -190,7 +226,8 @@ public sealed class Rifle : Weapon, IRanged
     private void StartAutoFire(FireRate rate)
     {
         EnsureAutorFireRateExists(rate);
-        NextTick = Time.time + _currentFireRate.GetNextInterval();
+        _fireCooldown = _currentFireRate.GetNextInterval();
+       // NextTick = Time.time + _currentFireRate.GetNextInterval();
         AutoFiring = true;
     }
 
@@ -205,7 +242,6 @@ public sealed class Rifle : Weapon, IRanged
         if (!Equipped) return;
         if (_currentFireRate == null || _currentFireRate._fireRate != rate)
         {
-            SetWeaponReady(false);
             SetFireRate(rate);
         }
     }
@@ -215,16 +251,11 @@ public sealed class Rifle : Weapon, IRanged
     private bool CanFire()
     {
         if (!Equipped || _currentFireRate == null) return false;
-        if (!LockedAndLoaded) return false;
+        if (!_lockedAndLoaded) return false;
 
         return true;
     }
 
-    private void SetWeaponReady(bool ready)
-    {
-        _owner?.NotifyWeaponReady(ready);
-        LockedAndLoaded = ready;
-    }
     #endregion
 
 
@@ -232,16 +263,17 @@ public sealed class Rifle : Weapon, IRanged
     {
         if (!AutoFiring || !CanFire()) return;
        
-        if (Time.time < NextTick) return;
+        if(_fireCooldown > 0)
+        {
+            _fireCooldown -= Time.deltaTime;
+            return;
+        }
+       // if (Time.time < NextTick) return;
         TryFire();
 
-        NextTick += _currentFireRate.GetNextInterval();
+        _fireCooldown = _currentFireRate.GetNextInterval();
+       // NextTick += _currentFireRate.GetNextInterval();
     }
-
-   
-
-
-    
 
    
 }
