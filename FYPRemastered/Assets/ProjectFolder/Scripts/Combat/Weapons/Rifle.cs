@@ -104,8 +104,8 @@ public sealed class Rifle : Weapon, IRanged
         _leftInClip = _clipCapacity;
         WeaponReady = true;
         //SetWeaponReady(true);
-         Equip(new EnemyEventManager());
-         TryFire(FireRate.FullAutomatic);
+        // Equip(new EnemyEventManager());
+        // TryFire(FireRate.FullAutomatic);
     }
 
     public void SetFireRate(FireRate rate)

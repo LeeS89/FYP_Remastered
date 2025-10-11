@@ -11,7 +11,7 @@ public abstract class Weapon : MonoBehaviour, IWeapon
 
    // public bool WeaponReady { get; protected set; } = false;
 
-    public virtual void Equip(EventManager eventManager, IWeaponOwner owner = null)
+    public virtual void Equip(EventManager eventManager, IWeaponOwner owner)
     {
         _eventManager = eventManager;
         _owner = owner;

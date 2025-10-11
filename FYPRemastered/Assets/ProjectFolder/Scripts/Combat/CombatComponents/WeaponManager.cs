@@ -2,7 +2,8 @@ using UnityEngine;
 
 public class WeaponManager : ComponentEvents, IWeaponOwner
 {
-    protected Weapon _equippedWeapon;
+  //  protected Weapon _equippedWeapon;
+    protected IEquippable _equippedItem;
 
     public GameObject GameObject => gameObject;
 
@@ -15,20 +16,41 @@ public class WeaponManager : ComponentEvents, IWeaponOwner
     {
         _eventManager = eventManager;
         base.RegisterLocalEvents(eventManager);
+        _eventManager.OnEquipped += EquipWeapon;
     }
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
         base.UnRegisterLocalEvents(eventManager);
+        _eventManager.OnUnEquipped -= EquipWeapon;
         _eventManager = null;
 
     }
 
-    protected virtual void TryUseWeapon()
-    {
-        if (_equippedWeapon == null) return;
 
-        if(_equippedWeapon is IRanged rw) rw.TryFire(FireRate.SingleAutomatic);
-        
+    protected void EquipWeapon(IEquippable equippable)
+    {
+        if (equippable == null) return;
+
+        if (_equippedItem != null) _equippedItem.UnEquip();
+
+        _equippedItem = equippable;
+        _equippedItem.Equip(_eventManager, this);
+     
+        // Update weapon UI here if applicable
+        // Optionally, parent the weapon to a specific transform (e.g., hand) on derived NPC class
+    }
+
+    public virtual void TryUseWeapon()
+    {
+        if (_equippedItem == null) return;
+
+        if(_equippedItem is IRanged rw) rw.TryFire(FireRate.SingleAutomatic);
+    }
+
+    public virtual void StopUsingWeapon()
+    {
+        if (_equippedItem == null) return;
+        if(_equippedItem is IRanged rw) rw.OnInterupted();
     }
 }

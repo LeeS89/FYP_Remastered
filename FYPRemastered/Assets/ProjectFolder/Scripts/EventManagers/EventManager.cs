@@ -151,4 +151,10 @@ public abstract class EventManager : MonoBehaviour
     public void Shoot() => OnShoot?.Invoke();
 
     //public event Action On
+    public event Action<IEquippable> OnEquipped;
+    public void InteractableSelected(IEquippable item) => OnEquipped?.Invoke(item);
+
+    public event Action<IEquippable> OnUnEquipped;
+    public void InteractableReleased(IEquippable item) => OnUnEquipped?.Invoke(item);
+
 }

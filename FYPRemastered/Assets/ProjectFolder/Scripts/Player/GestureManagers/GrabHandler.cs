@@ -50,6 +50,10 @@ public class GrabHandler
 
         _eventManager.OnCheckIfHandIsGrabbing += IsGrabbing;
         _eventManager.OnDeathStatusUpdated += DropGrabbable;
+        // LeftInteractor.WhenStateChanged += OnHandGrabInteractorStateChanged;
+        // RightInteractor.WhenStateChanged += OnHandGrabInteractorStateChanged;
+        LeftInteractor.WhenInteractableSelected.Action += OnInteractorSelected;
+        LeftInteractor.WhenInteractableUnselected.Action += OnInteractorReleased;
     }
 
     private bool IsGrabbing(HandSide side)
@@ -84,19 +88,70 @@ public class GrabHandler
             }
             if (RightInteractor != null && RightInteractor.HasSelectedInteractable)
             {
-               /* _it = RightInteractor.SelectedInteractable;
-                _eventWrapper = _it.GetComponent<PointableUnityEventWrapper>();
-                // _lightsaber = _it.GetComponentInParent<Lightsaber>();
-                if (_eventWrapper != null)
-                {
-                   // _lightsaber.Release(6);
-                }*/
+                // += (HandGrabInteractable obj) =>
+               // RightInteractor.WhenInteractableUnselected.Action += TestInt;
+                //RightInteractor.WhenInteractableSelected += (HandGrabInteractable obj) =>
+                /* _it = RightInteractor.SelectedInteractable;
+                 _eventWrapper = _it.GetComponent<PointableUnityEventWrapper>();
+                 // _lightsaber = _it.GetComponentInParent<Lightsaber>();
+                 if (_eventWrapper != null)
+                 {
+                    // _lightsaber.Release(6);
+                 }*/
                 RightInteractor.ForceRelease();
 
             }
         }
         LeftInteractor.enabled = !ownerDied;
         RightInteractor.enabled = !ownerDied;
+    }
+
+    private void OnInteractorSelected(IInteractable i)
+    {
+        if(i is HandGrabInteractable hgi)
+        {
+            IEquippable equippable = hgi.GetComponentInParent<IEquippable>();
+            if (equippable != null) _eventManager.InteractableSelected(equippable);
+            else Debug.LogError("No Equippable found");
+        }
+        
+    }
+
+    private void OnInteractorReleased(IInteractable i)
+    {
+        if (i is HandGrabInteractable hgi)
+        {
+            IEquippable equippable = hgi.GetComponentInParent<IEquippable>();
+            if (equippable != null) _eventManager.InteractableReleased(equippable);
+            else Debug.LogError("No Equippable found");
+        }
+
+    }
+
+    private void OnHandGrabInteractorStateChanged(InteractorStateChangeArgs args)
+    {
+        
+
+        if (args.NewState == InteractorState.Select)
+        {
+            Debug.LogError("HandGrabInteractor select state changed to select");
+        }
+        if (args.NewState == InteractorState.Normal)
+        {
+            Debug.LogError("HandGrabInteractor select state changed to NORMAL");
+        }
+        if (args.NewState == InteractorState.Hover)
+        {
+            Debug.LogError("HandGrabInteractor select state changed to HOVER");
+        }
+
+        /* RightInteractor.WhenStateChanged += (InteractorStateChangeArgs args) =>
+         {
+             if (args.NewState == InteractorState.Select)
+             {
+                 Debug.Log("Right interactor select state changed");
+             }
+         };*/
     }
 
     public void OnInstanceDestroyed()
