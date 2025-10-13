@@ -6,6 +6,7 @@ TagManager:
   tags:
   - waypointBlock
   - SampleNavMeshPoint
+  - Bullet
   layers:
   - Default
   - TransparentFX
@@ -17,7 +18,7 @@ TagManager:
   - Camera
   - LaserSword
   - PlayerDefence
-  - 
+  - TestLayer
   - 
   - 
   - 

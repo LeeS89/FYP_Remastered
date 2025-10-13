@@ -1,6 +1,7 @@
+using Oculus.Interaction.HandGrab;
 using UnityEngine;
 
-public class WeaponManager : ComponentEvents, IWeaponOwner
+public class WeaponManager : ComponentEvents, IWeaponOwner, IHandGrabUseDelegate
 {
   //  protected Weapon _equippedWeapon;
     protected IEquippable _equippedItem;
@@ -17,12 +18,14 @@ public class WeaponManager : ComponentEvents, IWeaponOwner
         _eventManager = eventManager;
         base.RegisterLocalEvents(eventManager);
         _eventManager.OnEquipped += EquipWeapon;
+        _eventManager.OnUnEquipped += UnEquipWeapon;
     }
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
         base.UnRegisterLocalEvents(eventManager);
         _eventManager.OnUnEquipped -= EquipWeapon;
+        _eventManager.OnUnEquipped -= UnEquipWeapon;
         _eventManager = null;
 
     }
@@ -41,6 +44,15 @@ public class WeaponManager : ComponentEvents, IWeaponOwner
         // Optionally, parent the weapon to a specific transform (e.g., hand) on derived NPC class
     }
 
+    protected void UnEquipWeapon(IEquippable equippable)
+    {
+        if (equippable == null || equippable != _equippedItem) return;
+        if (_equippedItem == null) return;
+        _equippedItem.UnEquip();
+        _equippedItem = null;
+        // Update weapon UI here if applicable
+    }
+
     public virtual void TryUseWeapon()
     {
         if (_equippedItem == null) return;
@@ -52,5 +64,20 @@ public class WeaponManager : ComponentEvents, IWeaponOwner
     {
         if (_equippedItem == null) return;
         if(_equippedItem is IRanged rw) rw.OnInterupted();
+    }
+
+    public void BeginUse()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void EndUse()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public float ComputeUseStrength(float strength)
+    {
+        throw new System.NotImplementedException();
     }
 }

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 040efcd89a410c14e8028ab44381dba8
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325468
+  packageName: Blaster Gun Retro Futuristic Sci-fi Wars
+  packageVersion: 1.0
+  assetPath: Assets/GreyratsLab/Blaster Gun Retro Futuristic Sci-fi Wars/Scripts/PooledRigidbodyObject.cs
+  uploadId: 770098

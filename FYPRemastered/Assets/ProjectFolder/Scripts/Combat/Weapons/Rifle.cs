@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using ProjectRemaster.Combat;
 
 public sealed class Rifle : Weapon, IRanged
 {
@@ -60,13 +61,13 @@ public sealed class Rifle : Weapon, IRanged
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 Debug.LogError("Cannot add duplicate FireRate");
                 return;
-#endif
+
             }
             else
             {
                 Debug.LogError("Successfully added FireRate");
             }
-
+#endif
         }
     }
 

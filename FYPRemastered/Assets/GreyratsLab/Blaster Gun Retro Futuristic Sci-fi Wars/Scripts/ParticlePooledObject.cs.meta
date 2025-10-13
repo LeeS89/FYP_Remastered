@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 070cac41f0c5f0a48b1edebb742411f3
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325468
+  packageName: Blaster Gun Retro Futuristic Sci-fi Wars
+  packageVersion: 1.0
+  assetPath: Assets/GreyratsLab/Blaster Gun Retro Futuristic Sci-fi Wars/Scripts/ParticlePooledObject.cs
+  uploadId: 770098

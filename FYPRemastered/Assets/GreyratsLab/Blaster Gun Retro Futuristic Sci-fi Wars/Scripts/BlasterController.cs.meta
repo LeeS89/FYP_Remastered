@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 61c8fefe0481fde4ba1707133395244b
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 325468
+  packageName: Blaster Gun Retro Futuristic Sci-fi Wars
+  packageVersion: 1.0
+  assetPath: Assets/GreyratsLab/Blaster Gun Retro Futuristic Sci-fi Wars/Scripts/BlasterController.cs
+  uploadId: 770098
