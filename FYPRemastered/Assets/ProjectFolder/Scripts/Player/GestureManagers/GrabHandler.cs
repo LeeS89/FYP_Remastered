@@ -13,6 +13,7 @@ public class GrabHandler
 
     public GrabHandler(PlayerEventManager eventManager, HandGrabInteractor[] interactors)
     {
+        Debug.LogWarning("Grab called");
         _eventManager = eventManager;
 
         if (interactors == null || interactors.Length < 2)

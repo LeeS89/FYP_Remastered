@@ -7,6 +7,8 @@ public abstract class EventManager : MonoBehaviour
 {
     protected List<ComponentEvents> _cachedListeners;
 
+    
+
     /// <summary>
     /// Finds all Interface components within the object hierarchy and 
     /// ensures each component binds to their relevant events
@@ -157,5 +159,11 @@ public abstract class EventManager : MonoBehaviour
 
     public event Action<IEquippable> OnUnEquipped;
     public void InteractableReleased(IEquippable item) => OnUnEquipped?.Invoke(item);
+
+    public event Action OnTriggerPressed;
+    public event Action OnTriggerReleased;
+
+    public void TriggerPressed() => OnTriggerPressed?.Invoke();
+    public void TriggerReleased() => OnTriggerReleased?.Invoke();
 
 }

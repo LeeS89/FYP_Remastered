@@ -20,6 +20,7 @@ public sealed class Rifle : Weapon, IRanged
     [SerializeField] private List<FireRateParams> _params;
     private Dictionary<FireRate, FireRateParams> _fireStates = new(3);
     private FireRateParams _currentFireRate;
+    [SerializeField] private FireRate _defaultFireRate = FireRate.SingleAutomatic;
 
     [Header("Firing sequence params")]
    // public float NextTick { get; private set; }
@@ -97,6 +98,9 @@ public sealed class Rifle : Weapon, IRanged
         }
     }
 
+    public void TriggerPressed() => _eventManager.TriggerPressed();
+    public void TriggerReleased() => _eventManager.TriggerReleased();
+
     private void OnPoolReceived(string poolId, IPoolManager pool)
     {
         if (string.IsNullOrEmpty(poolId) || poolId != this.poolId.Id || pool == null) return;
@@ -130,16 +134,18 @@ public sealed class Rifle : Weapon, IRanged
     #endregion
 
     #region Firing Region
-    public void TryFire(FireRate rate, Transform target = null)
+    public void TryFire() => TryFire(_defaultFireRate);
+
+    public void TryFire(FireRate rate = FireRate.SingleAutomatic, Transform target = null)
     {
         Target = target;
         SetFireRate(rate);
 
         if (rate == FireRate.SingleAutomatic || rate == FireRate.Burst || rate == FireRate.FullAutomatic) StartAutoFire(rate);
-        else TryFire();
+        else EnsureAmmoAndFire();
     }
 
-    private void TryFire()
+    private void EnsureAmmoAndFire()
     {
         if (_leftInClip > 0)
         {
@@ -147,7 +153,6 @@ public sealed class Rifle : Weapon, IRanged
             else Fire();
         }
         else ClipEmpty();
-
 
     }
 
@@ -270,7 +275,7 @@ public sealed class Rifle : Weapon, IRanged
             return;
         }
        // if (Time.time < NextTick) return;
-        TryFire();
+        EnsureAmmoAndFire();
 
         _fireCooldown = _currentFireRate.GetNextInterval();
        // NextTick += _currentFireRate.GetNextInterval();

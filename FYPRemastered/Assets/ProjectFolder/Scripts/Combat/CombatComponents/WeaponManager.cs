@@ -1,7 +1,7 @@
 using Oculus.Interaction.HandGrab;
 using UnityEngine;
 
-public class WeaponManager : ComponentEvents, IWeaponOwner, IHandGrabUseDelegate
+public class WeaponManager : ComponentEvents, IWeaponOwner
 {
   //  protected Weapon _equippedWeapon;
     protected IEquippable _equippedItem;
@@ -19,6 +19,9 @@ public class WeaponManager : ComponentEvents, IWeaponOwner, IHandGrabUseDelegate
         base.RegisterLocalEvents(eventManager);
         _eventManager.OnEquipped += EquipWeapon;
         _eventManager.OnUnEquipped += UnEquipWeapon;
+        _eventManager.OnTriggerPressed += TryUseWeapon;
+        _eventManager.OnTriggerReleased += StopUsingWeapon;
+
     }
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
@@ -26,6 +29,8 @@ public class WeaponManager : ComponentEvents, IWeaponOwner, IHandGrabUseDelegate
         base.UnRegisterLocalEvents(eventManager);
         _eventManager.OnUnEquipped -= EquipWeapon;
         _eventManager.OnUnEquipped -= UnEquipWeapon;
+        _eventManager.OnTriggerPressed -= TryUseWeapon;
+        _eventManager.OnTriggerReleased -= StopUsingWeapon;
         _eventManager = null;
 
     }
@@ -57,7 +62,7 @@ public class WeaponManager : ComponentEvents, IWeaponOwner, IHandGrabUseDelegate
     {
         if (_equippedItem == null) return;
 
-        if(_equippedItem is IRanged rw) rw.TryFire(FireRate.SingleAutomatic);
+        if(_equippedItem is IRanged rw) rw.TryFire(/*FireRate.Single*/);
     }
 
     public virtual void StopUsingWeapon()
@@ -66,18 +71,4 @@ public class WeaponManager : ComponentEvents, IWeaponOwner, IHandGrabUseDelegate
         if(_equippedItem is IRanged rw) rw.OnInterupted();
     }
 
-    public void BeginUse()
-    {
-        throw new System.NotImplementedException();
-    }
-
-    public void EndUse()
-    {
-        throw new System.NotImplementedException();
-    }
-
-    public float ComputeUseStrength(float strength)
-    {
-        throw new System.NotImplementedException();
-    }
 }

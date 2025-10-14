@@ -1,4 +1,7 @@
 using Oculus.Interaction.HandGrab;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
@@ -26,16 +29,16 @@ public sealed class PlayerController : ComponentEvents
     private RotationHandler _rotationHandler;
     private GrabHandler _grabHandler;
 
-   
 
-  
+
+   
     public bool InputEnabled { get; private set; } = false;
 
-    
+   
     public override void RegisterLocalEvents(EventManager eventManager)
     {
         _playerEventManager = eventManager as PlayerEventManager;
-
+    
         base.RegisterLocalEvents(_playerEventManager);
 
         if (TryGetComponent<CharacterController>(out CharacterController characterController))

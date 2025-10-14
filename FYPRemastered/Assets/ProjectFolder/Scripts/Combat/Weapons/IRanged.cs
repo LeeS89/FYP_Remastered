@@ -7,7 +7,9 @@ public interface IRanged : IWeapon
 
     void SetFireRate(FireRate rate);
 
-    void TryFire(FireRate rate, Transform target = null);
+    void TryFire();
+
+    void TryFire(FireRate rate = FireRate.SingleAutomatic, Transform target = null);
 
     void Fire();
 
