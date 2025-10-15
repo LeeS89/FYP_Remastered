@@ -45,6 +45,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - MoonScene
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b368b24a2ca23ff439d73a84775e3589
+    m_Address: MuzzleFlashPrefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - MoonScene
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cf1e034ab8af6ce4a85ba014ab85a72c
     m_Address: DeflectAudioSO
     m_ReadOnly: 0

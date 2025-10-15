@@ -5,8 +5,9 @@ namespace ProjectRemaster.Combat
 {
     public abstract class Weapon : MonoBehaviour, IWeapon
     {
-        protected EventManager _eventManager;
+        public EventManager EventManager { get; protected set; }
         protected IWeaponOwner _owner;
+      
         public Transform Target { get; protected set; } = null;
 
         public bool Equipped { get; protected set; } = false;
@@ -15,7 +16,7 @@ namespace ProjectRemaster.Combat
 
         public virtual void Equip(EventManager eventManager, IWeaponOwner owner)
         {
-            _eventManager = eventManager;
+            EventManager = eventManager;
             _owner = owner;
             Equipped = true;
         }
@@ -23,7 +24,7 @@ namespace ProjectRemaster.Combat
         public virtual void UnEquip()
         {
             Equipped = false;
-            _eventManager = null;
+            EventManager = null;
             _owner = null;
             Target = null;
         }

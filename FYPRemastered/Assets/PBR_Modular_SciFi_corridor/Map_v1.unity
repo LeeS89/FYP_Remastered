@@ -7729,7 +7729,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 328627094}
-  - {fileID: 319159869}
+  - {fileID: 645110513}
   m_Father: {fileID: 1425476014}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!23 &96386566
@@ -10751,8 +10751,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 162608214}
-  - component: {fileID: 162608217}
-  - component: {fileID: 162608216}
   - component: {fileID: 162608215}
   m_Layer: 0
   m_Name: ColliderGun
@@ -10797,59 +10795,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!23 &162608216
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 162608213}
-  m_Enabled: 0
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_AdditionalVertexStreams: {fileID: 0}
---- !u!33 &162608217
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 162608213}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1001 &164518126
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -20929,38 +20874,6 @@ MonoBehaviour:
   occlusionProbeRendererIndex: 0
   offscreenSize: 128
   forceGCCollectAtEnd: 1
---- !u!1 &319159868
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 319159869}
-  m_Layer: 0
-  m_Name: Poker
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &319159869
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 319159868}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0.5, y: -0.5, z: -0.5, w: 0.5}
-  m_LocalPosition: {x: 0.06127406, y: 0, z: 0.075655}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 645110513}
-  m_Father: {fileID: 96386565}
-  m_LocalEulerAnglesHint: {x: 0, y: -90, z: -90}
 --- !u!1001 &321860248
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -35444,8 +35357,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 565637379}
-  - component: {fileID: 565637382}
-  - component: {fileID: 565637381}
   - component: {fileID: 565637380}
   m_Layer: 0
   m_Name: ColliderGrip
@@ -35490,59 +35401,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!23 &565637381
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 565637378}
-  m_Enabled: 0
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_AdditionalVertexStreams: {fileID: 0}
---- !u!33 &565637382
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 565637378}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1001 &568457957
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -40317,12 +40175,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 645110512}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.5, y: 0.5, z: 0.5, w: 0.5}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.061273575, y: 0, z: 0.07565498}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 319159869}
+  m_Father: {fileID: 96386565}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!23 &645110514
 MeshRenderer:
@@ -44844,7 +44702,7 @@ Transform:
   m_GameObject: {fileID: 722793738}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0.3052, y: 0, z: 0.12779997}
+  m_LocalPosition: {x: 0.326, y: 0, z: 0.12779997}
   m_LocalScale: {x: 0.015357755, y: 0.009999998, z: 0.006511368}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -75185,6 +75043,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1209446005}
   - component: {fileID: 1209446006}
+  - component: {fileID: 1209446007}
   m_Layer: 0
   m_Name: HandGrabInteractable
   m_TagString: Untagged
@@ -75251,6 +75110,65 @@ MonoBehaviour:
   _handAligment: 1
   _handGrabPoses:
   - {fileID: 1941036834}
+--- !u!114 &1209446007
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1209446004}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2f8f6e9e6f3e114b9bf9a57c2160615, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _pointable: {fileID: 1209446006}
+  _whenRelease:
+    m_PersistentCalls:
+      m_Calls: []
+  _whenHover:
+    m_PersistentCalls:
+      m_Calls: []
+  _whenUnhover:
+    m_PersistentCalls:
+      m_Calls: []
+  _whenSelect:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1786564865}
+        m_TargetAssemblyTypeName: USETEST, Assembly-CSharp
+        m_MethodName: SetHandGrabUseInteractable
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 1786564864}
+          m_ObjectArgumentAssemblyTypeName: Oculus.Interaction.HandGrab.HandGrabUseInteractable,
+            Oculus.Interaction
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  _whenUnselect:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1786564865}
+        m_TargetAssemblyTypeName: USETEST, Assembly-CSharp
+        m_MethodName: ResetHandGrabUseInteractable
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  _whenMove:
+    m_PersistentCalls:
+      m_Calls: []
+  _whenCancel:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1001 &1215337229
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -86059,7 +85977,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47fd0747c0e73974f907433e8a842912, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  poolId: {fileID: 11400000, guid: 6141d1b986a45144bad8d38b32617380, type: 2}
+  bulletPoolId: {fileID: 11400000, guid: 6141d1b986a45144bad8d38b32617380, type: 2}
+  muzzleFlashPoolId: {fileID: 11400000, guid: e1aac957633022f438e7f902b76c3ec4, type: 2}
   _spawnPoint: {fileID: 722793739}
   _clipCapacity: 50
   _clipCount: 100
@@ -107843,7 +107762,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pressThreshold: 0.9
   releaseThreshold: 0.5
-  use: {fileID: 1786564864}
+  currentUse: {fileID: 0}
   visual: {fileID: 645110513}
   localAxis: {x: 0, y: 0, z: 1}
   travel: 0.012
@@ -107854,7 +107773,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1425476015}
         m_TargetAssemblyTypeName: Rifle, Assembly-CSharp
-        m_MethodName: TriggerPressed
+        m_MethodName: TryFire
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -107869,7 +107788,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1425476015}
         m_TargetAssemblyTypeName: Rifle, Assembly-CSharp
-        m_MethodName: TriggerReleased
+        m_MethodName: OnInterupted
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -107880,7 +107799,6 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
   damped: 0
-  _weapon: {fileID: 1425476015}
   showHud: 1
   hudFollow: {fileID: 3158222064580901752}
   hudLocalOffset: {x: 0, y: -0.08, z: 0.45}
@@ -148114,7 +148032,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47fd0747c0e73974f907433e8a842912, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  poolId: {fileID: 11400000, guid: 6141d1b986a45144bad8d38b32617380, type: 2}
+  bulletPoolId: {fileID: 0}
+  muzzleFlashPoolId: {fileID: 0}
   _spawnPoint: {fileID: 498179001}
   _clipCapacity: 50
   _clipCount: 100

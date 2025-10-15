@@ -12,9 +12,9 @@ public class USETEST : MonoBehaviour//, IHandGrabUseDelegate
     [Range(0f, 1f)]
     public float releaseThreshold = 0.7f;
 
-   // private bool _wasFired = false;
+    // private bool _wasFired = false;
 
-    public HandGrabUseInteractable use;
+    public HandGrabUseInteractable currentUse;
     public Transform visual;
     public Vector3 localAxis = Vector3.right;
     public float travel = 0.012f;
@@ -29,9 +29,9 @@ public class USETEST : MonoBehaviour//, IHandGrabUseDelegate
     bool wasPressed;
 
     public float damped;
-    public Weapon _weapon;
 
-
+    // Prevents accidental firing on initial Grab
+    public bool IsInitialUse { get; private set; }
 
     //
     // HUD internals
@@ -46,26 +46,39 @@ public class USETEST : MonoBehaviour//, IHandGrabUseDelegate
 
     private void Awake()
     {
-        if(!visual) visual = this.transform;
+        if (!visual) visual = this.transform;
         startLocal = visual.localPosition;
-        if(localAxis.sqrMagnitude < 1e-6f) localAxis = Vector3.right;
+        if (localAxis.sqrMagnitude < 1e-6f) localAxis = Vector3.right;
         localAxis.Normalize();
     }
+
+    public void SetHandGrabUseInteractable(HandGrabUseInteractable hgu = null)
+    {
+        IsInitialUse = true;
+        currentUse = hgu;
+    }
+
+    public void ResetHandGrabUseInteractable() => currentUse = null;
 
 
     private void Update()
     {
-        if (!_weapon || _weapon is not IRanged rw) return;
-        if (!rw.Equipped) return;
+        /*if (!_weapon || _weapon is not IRanged rw) return;
+        if (!rw.Equipped) return;*/
+        if (currentUse == null) return;
 
-        float target01 = use ? Mathf.Clamp01(use.UseProgress) : 0f;
+        float target01 = currentUse ? Mathf.Clamp01(currentUse.UseProgress) : 0f;
         float rate = (target01 > current01) ? pressLerp : releaseLerp;
         current01 = Mathf.MoveTowards(current01, target01, rate * Time.deltaTime);
         visual.localPosition = startLocal + localAxis * (current01 * travel);
 
         bool nextPressed = wasPressed ? (current01 > releaseThreshold) : (current01 >= pressThreshold);
         // bool pressed = current01 >= pressThreshold;
-        if (nextPressed && !wasPressed) onPressed?.Invoke();
+        if (nextPressed && !wasPressed)
+        {  
+            if(IsInitialUse) IsInitialUse = false;
+            else onPressed?.Invoke(); 
+        }
         if (!nextPressed && wasPressed && (current01 <= releaseThreshold)) onReleased?.Invoke();
         wasPressed = nextPressed;
 
@@ -73,7 +86,6 @@ public class USETEST : MonoBehaviour//, IHandGrabUseDelegate
         _dbgTarget01 = target01;
         _dbgPressed = nextPressed;
         UpdateHud(target01);
-
 
 
     }

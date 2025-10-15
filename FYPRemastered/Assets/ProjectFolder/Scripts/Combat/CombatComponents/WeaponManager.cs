@@ -19,9 +19,6 @@ public class WeaponManager : ComponentEvents, IWeaponOwner
         base.RegisterLocalEvents(eventManager);
         _eventManager.OnEquipped += EquipWeapon;
         _eventManager.OnUnEquipped += UnEquipWeapon;
-        _eventManager.OnTriggerPressed += TryUseWeapon;
-        _eventManager.OnTriggerReleased += StopUsingWeapon;
-
     }
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
@@ -29,8 +26,6 @@ public class WeaponManager : ComponentEvents, IWeaponOwner
         base.UnRegisterLocalEvents(eventManager);
         _eventManager.OnUnEquipped -= EquipWeapon;
         _eventManager.OnUnEquipped -= UnEquipWeapon;
-        _eventManager.OnTriggerPressed -= TryUseWeapon;
-        _eventManager.OnTriggerReleased -= StopUsingWeapon;
         _eventManager = null;
 
     }
@@ -58,17 +53,8 @@ public class WeaponManager : ComponentEvents, IWeaponOwner
         // Update weapon UI here if applicable
     }
 
-    public virtual void TryUseWeapon()
-    {
-        if (_equippedItem == null) return;
+    protected virtual void TryUseWeapon() { }
 
-        if(_equippedItem is IRanged rw) rw.TryFire(/*FireRate.Single*/);
-    }
-
-    public virtual void StopUsingWeapon()
-    {
-        if (_equippedItem == null) return;
-        if(_equippedItem is IRanged rw) rw.OnInterupted();
-    }
-
+    protected virtual void StopUsingWeapon() { }
+    
 }

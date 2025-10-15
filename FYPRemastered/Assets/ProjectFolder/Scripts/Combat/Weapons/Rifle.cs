@@ -6,8 +6,10 @@ using ProjectRemaster.Combat;
 public sealed class Rifle : Weapon, IRanged
 {
     [Header("Pool Params")]
-    [SerializeField] private PoolIdSO poolId;
-    private IPoolManager _pool;
+    [SerializeField] private PoolIdSO bulletPoolId;
+    [SerializeField] private PoolIdSO muzzleFlashPoolId;
+    private IPoolManager _muzzleFlashPool;
+    private IPoolManager _bulletPool;
     private Action<string, IPoolManager> PoolRequestCallback;
 
     [Header("Bullet Spawn Point & ammo params")]
@@ -37,10 +39,11 @@ public sealed class Rifle : Weapon, IRanged
 
     private void Start()
     {
-        if(poolId != null && !string.IsNullOrEmpty(poolId.Id))
+        if(bulletPoolId != null && !string.IsNullOrEmpty(bulletPoolId.Id))
         {
             PoolRequestCallback = OnPoolReceived;
-            this.RequestPool(poolId, PoolRequestCallback);
+            this.RequestPool(bulletPoolId, PoolRequestCallback);
+            if(muzzleFlashPoolId != null) this.RequestPool(muzzleFlashPoolId, PoolRequestCallback);
         }
         else
         {
@@ -61,31 +64,34 @@ public sealed class Rifle : Weapon, IRanged
             {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 Debug.LogError("Cannot add duplicate FireRate");
+#endif
                 return;
 
             }
             else
             {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                 Debug.LogError("Successfully added FireRate");
-            }
 #endif
+            }
+
         }
     }
 
     public override void Equip(EventManager eventManager, IWeaponOwner owner = null)
     {
-        base.Equip(eventManager, owner);
         EnsureBulletPoolExists();
+        base.Equip(eventManager, owner); 
     }
 
     private void EnsureBulletPoolExists()
     {
-        if (_pool != null) return;
+        if (_bulletPool != null) return;
       
-        if (poolId != null && !string.IsNullOrEmpty(poolId.Id))
+        if (bulletPoolId != null && !string.IsNullOrEmpty(bulletPoolId.Id))
         {
             PoolRequestCallback = OnPoolReceived;
-            this.RequestPool(poolId, PoolRequestCallback);
+            this.RequestPool(bulletPoolId, PoolRequestCallback);
         }
         else
         {
@@ -98,19 +104,20 @@ public sealed class Rifle : Weapon, IRanged
         }
     }
 
-    public void TriggerPressed() => _eventManager.TriggerPressed();
-    public void TriggerReleased() => _eventManager.TriggerReleased();
+    public void TriggerPressed() => EventManager.TriggerPressed();
+    public void TriggerReleased() => EventManager.TriggerReleased();
 
     private void OnPoolReceived(string poolId, IPoolManager pool)
     {
-        if (string.IsNullOrEmpty(poolId) || poolId != this.poolId.Id || pool == null) return;
-        Debug.LogError("Pool Request Completed");
-        _pool = pool;
-        _leftInClip = _clipCapacity;
-        WeaponReady = true;
-        //SetWeaponReady(true);
-        // Equip(new EnemyEventManager());
-        // TryFire(FireRate.FullAutomatic);
+        if (string.IsNullOrEmpty(poolId) || pool == null) return;
+        if(poolId == bulletPoolId.Id)
+        {
+            _bulletPool = pool;
+            _leftInClip = _clipCapacity;
+            WeaponReady = true;
+        }
+        else if(poolId == muzzleFlashPoolId.Id) _muzzleFlashPool = pool;
+
     }
 
     public void SetFireRate(FireRate rate)
@@ -138,6 +145,7 @@ public sealed class Rifle : Weapon, IRanged
 
     public void TryFire(FireRate rate = FireRate.SingleAutomatic, Transform target = null)
     {
+        if (!Equipped) return;
         Target = target;
         SetFireRate(rate);
 
@@ -149,7 +157,7 @@ public sealed class Rifle : Weapon, IRanged
     {
         if (_leftInClip > 0)
         {
-            if (_owner != null &&_owner.IsNPC) _eventManager.ReadyToFire(this);
+            if (_owner != null &&_owner.IsNPC) EventManager.ReadyToFire(this);
             else Fire();
         }
         else ClipEmpty();
@@ -163,7 +171,8 @@ public sealed class Rifle : Weapon, IRanged
             _spawnPoint.forward;
         Quaternion rotation = Quaternion.LookRotation(directionToTarget);
 
-        GameObject obj = _pool?.GetFromPool(_spawnPoint.position, rotation) as GameObject;
+        GameObject obj = _bulletPool?.GetFromPool(_spawnPoint.position, rotation) as GameObject;
+        ParticleSystem ps = _muzzleFlashPool?.GetFromPool(_spawnPoint.position, rotation) as ParticleSystem;
 
         if (obj == null)
         {
@@ -174,7 +183,11 @@ public sealed class Rifle : Weapon, IRanged
 
         }
 
-        if (ComponentRegistry.TryGet<IPoolable>(obj, out var bullet)) bullet.LaunchPoolable(gameObject/*_owner.GameObject*/);
+        if (ComponentRegistry.TryGet<IPoolable>(obj, out var bullet))
+        {
+            if (ps != null) ps.Play();
+            bullet.LaunchPoolable(/*gameObject*/_owner.GameObject);
+        }
         else
         {
 #if UNITY_EDITOR
@@ -188,16 +201,16 @@ public sealed class Rifle : Weapon, IRanged
     #region Reload/ Out of ammo notifications
     public void ClipEmpty()
     {
-        if (_eventManager == null) return;
+        if (EventManager == null) return;
 
         _lockedAndLoaded = false;
       //  SetWeaponReady(false);
         // EndAutoFire();
-        if (_clipCount > 0) _eventManager.NotifyReload();
+        if (_clipCount > 0) EventManager.NotifyReload();
         else
         {
             EndAutoFire();
-            _eventManager.OutOfAmmo();
+            EventManager.OutOfAmmo();
         }
 
         // For Player => Maybe some text, SFX, voice over etc, and weapon UI update in derived class
@@ -231,6 +244,7 @@ public sealed class Rifle : Weapon, IRanged
     #region Auto Fire Start/End
     private void StartAutoFire(FireRate rate)
     {
+        EnsureAmmoAndFire(); // Initial fire on trigger press
         EnsureAutorFireRateExists(rate);
         _fireCooldown = _currentFireRate.GetNextInterval();
        // NextTick = Time.time + _currentFireRate.GetNextInterval();
