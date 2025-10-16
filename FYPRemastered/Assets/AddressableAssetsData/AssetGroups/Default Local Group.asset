@@ -21,24 +21,6 @@ MonoBehaviour:
     m_SerializedLabels:
     - MoonScene
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 4ca45755d3093c941add5b4899ed9fb2
-    m_Address: ForceProjectileSO
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - MoonScene
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 74fc63e386f6acc489ee84f6fe5e62f0
-    m_Address: BasicHitSO
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - MoonScene
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 827f064ef7ef47047870e08676ba7efd
-    m_Address: ForceProjectileHitSO
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - MoonScene
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8a01480a7337d1a4c9d702efa8c7e443
     m_Address: ForceProjectilePrefab
     m_ReadOnly: 0
@@ -51,20 +33,8 @@ MonoBehaviour:
     m_SerializedLabels:
     - MoonScene
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: cf1e034ab8af6ce4a85ba014ab85a72c
-    m_Address: DeflectAudioSO
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - MoonScene
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d17b80f5e1882c04b99e676a1cafe481
     m_Address: DeflectAudioPrefab
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - MoonScene
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: dc63e5723b826d945945fa22652c44b7
-    m_Address: BasicBulletSO
     m_ReadOnly: 0
     m_SerializedLabels:
     - MoonScene

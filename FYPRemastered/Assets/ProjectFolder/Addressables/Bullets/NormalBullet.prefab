@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5442378553331236647}
-  - component: {fileID: 4985544592548197474}
+  - component: {fileID: 2822241732132061960}
   m_Layer: 6
   m_Name: VFX
   m_TagString: Untagged
@@ -32,7 +32,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6050013699054771250}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4985544592548197474
+--- !u!114 &2822241732132061960
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -41,12 +41,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 913009348907442633}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a9ac5e10560f1bd4a89d85fec9ba6f41, type: 3}
+  m_Script: {fileID: 11500000, guid: 2126fb3d1e2d2c84fb21500af8c7d171, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  HitParticlePoolId: {fileID: 11400000, guid: d60d5ef593884a24883e5d70cbfc8105, type: 2}
-  _particleManager: {fileID: 0}
+  CollisionParticlePoolId: {fileID: 11400000, guid: d60d5ef593884a24883e5d70cbfc8105, type: 2}
+  SpawnParticlePoolId: {fileID: 0}
+  SpawnParticleLocaton: {fileID: 0}
   DeflectAudioPoolId: {fileID: 11400000, guid: ddaf70cf0cbc90343814eba091736f24, type: 2}
+  _particleManager: {fileID: 0}
 --- !u!1 &4136559357840876812
 GameObject:
   m_ObjectHideFlags: 0

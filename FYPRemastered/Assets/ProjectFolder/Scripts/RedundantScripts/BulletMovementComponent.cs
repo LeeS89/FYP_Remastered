@@ -13,7 +13,7 @@ public class BulletMovementComponent : ComponentEvents
     
 
     
-    private ProjectileEventManager _bulletEventManager;
+    private CombatEventManager _bulletEventManager;
     public Vector3 _scale;
 
     public bool DeflectionProcessed { get; private set; }
@@ -30,7 +30,7 @@ public class BulletMovementComponent : ComponentEvents
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
-        _bulletEventManager = eventManager as ProjectileEventManager;
+        _bulletEventManager = eventManager as CombatEventManager;
         _rb = GetComponentInParent<Rigidbody>(true);
         _speed = _editableSpeed;
         _bulletEventManager.OnLaunch += Launch;

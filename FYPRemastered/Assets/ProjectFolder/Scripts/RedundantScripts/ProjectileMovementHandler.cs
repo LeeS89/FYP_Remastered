@@ -4,14 +4,14 @@ using UnityEngine;
 [Obsolete]
 public class ProjectileMovementHandler
 {
-    protected ProjectileEventManager _eventManager;
+    protected CombatEventManager _eventManager;
     protected Rigidbody _rb;
     public float Speed { get; protected set; }
     public float InitialSpeed { get; set; }
 
     public bool UsesFixedSpeed { get; protected set; }
 
-    public ProjectileMovementHandler(ProjectileEventManager eventManager, Rigidbody rb, float initialSpeed = 0f, bool usesFixedSpeed = false)
+    public ProjectileMovementHandler(CombatEventManager eventManager, Rigidbody rb, float initialSpeed = 0f, bool usesFixedSpeed = false)
     {
         _eventManager = eventManager;
         _rb = rb;

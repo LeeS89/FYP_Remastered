@@ -7,7 +7,7 @@ public class BulletMovementHandler : ProjectileMovementHandler
     public bool DeflectionProcessed { get; private set; } = false;
     public float DeflectSpeed { get; set; }
 
-    public BulletMovementHandler(ProjectileEventManager eventManager, Rigidbody rb, float speed, float deflectSpeed) : base(eventManager, rb, speed) { DeflectSpeed = deflectSpeed; }
+    public BulletMovementHandler(CombatEventManager eventManager, Rigidbody rb, float speed, float deflectSpeed) : base(eventManager, rb, speed) { DeflectSpeed = deflectSpeed; }
 
     //protected override void Launch() { }
 

@@ -2,7 +2,7 @@ using UnityEngine;
 
 
 
-[RequireComponent(typeof(ProjectileEventManager))]
+[RequireComponent(typeof(CombatEventManager))]
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(ProjectileCollisionComponent))]
 
@@ -21,7 +21,7 @@ public abstract class Projectile : ComponentEvents, IPoolable
    
     
     [Header("Components")]
-    protected ProjectileEventManager _projectileEventManager;
+    protected CombatEventManager _projectileEventManager;
     protected ProjectileMovementHandler _movementHandler;
 
     [Header("The GameObject which activates the projectile")]
@@ -41,7 +41,7 @@ public abstract class Projectile : ComponentEvents, IPoolable
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
-        _projectileEventManager = eventManager as ProjectileEventManager;
+        _projectileEventManager = eventManager as CombatEventManager;
         ComponentRegistry.Register<IPoolable>(gameObject, this);
         EnsureCollider();
         AttachMovementHandler();

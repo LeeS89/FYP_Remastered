@@ -58,7 +58,7 @@ public class USETEST : MonoBehaviour//, IHandGrabUseDelegate
         currentUse = hgu;
     }
 
-    public void ResetHandGrabUseInteractable() => currentUse = null;
+    public void ResetHandGrabUseInteractable() { }//=> currentUse = null;
 
 
     private void Update()
