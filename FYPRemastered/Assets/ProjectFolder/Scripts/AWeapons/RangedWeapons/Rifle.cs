@@ -30,10 +30,10 @@ public sealed class Rifle : Weapon, IRanged
     private float _fireCooldown;
     public bool AutoFiring { get; private set; } = false;
     private bool _lockedAndLoaded = true;
-    public bool WeaponReady { get; private set; } = false;
+    public bool WeaponReady { get; private set; } = false; // Obsolete
 
     private Transform _target; // Used by NPC's to fire in direction of player
-
+   
 
 
     #region Initialization
@@ -106,6 +106,18 @@ public sealed class Rifle : Weapon, IRanged
         }
     }
 
+    protected override void PlayAnimations()
+    {
+        if (_anim != null && !_anim.GetBool("Fire2")) _anim.SetBool("Fire2", true);
+        // if (_anim != null) _anim.SetTrigger("Fire");//&& !_anim.GetBool("Fire2")) _anim.SetBool("Fire2", true);
+    }
+
+    public override void ResetAnimator()
+    {
+        if (_anim == null) return;
+        _anim.SetBool("Fire2", false);
+    }
+
     public void TriggerPressed() => EventManager.TriggerPressed();
     public void TriggerReleased() => EventManager.TriggerReleased();
 
@@ -169,6 +181,8 @@ public sealed class Rifle : Weapon, IRanged
 
     public void Fire()
     {
+        PlayAnimations();
+
         _leftInClip--;
         Vector3 directionToTarget = Target != null ? TargetingUtility.GetDirectionToTarget(_target, _spawnPoint, true) :
             _spawnPoint.forward;

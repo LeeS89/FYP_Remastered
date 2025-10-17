@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Pool;
 
-public sealed class PoolManager<T> : PoolManagerBase /*IPoolManager*/ where T : UnityEngine.Object
+public sealed class PoolManager<T> : PoolManagerBase where T : UnityEngine.Object
 {
     private ObjectPool<T> _pool;
     private int _maxSize;
@@ -11,6 +12,7 @@ public sealed class PoolManager<T> : PoolManagerBase /*IPoolManager*/ where T : 
     private T _prefab;
     private Dictionary<T,Transform> _transformCache = new();
     private SceneResources _manager;
+    private List<T> _active = new(30);
 
     public override Type ItemType => typeof(T);
 
@@ -82,6 +84,7 @@ public sealed class PoolManager<T> : PoolManagerBase /*IPoolManager*/ where T : 
         }
         else if (typeof(T) == typeof(ParticleSystem))
         {
+ 
             var p = inst as ParticleSystem;
             var main = p.main;
             main.playOnAwake = false;
@@ -128,7 +131,7 @@ public sealed class PoolManager<T> : PoolManagerBase /*IPoolManager*/ where T : 
 
         tr.SetPositionAndRotation(position, rotation);
         go.SetActive(true);
-
+        
         return item;
     }
   
@@ -160,6 +163,7 @@ public sealed class PoolManager<T> : PoolManagerBase /*IPoolManager*/ where T : 
         if(obj is T t) _pool.Release(t);
         else throw new InvalidOperationException(
             $"Cannot release object of type {obj.GetType()} to pool of type {typeof(T)}");
-        
+
     }
+
 }

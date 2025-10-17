@@ -5,6 +5,7 @@ namespace ProjectRemaster.Combat
 {
     public abstract class Weapon : MonoBehaviour, IWeapon
     {
+        [SerializeField] protected Animator _anim;
         public EventManager EventManager { get; protected set; }
         protected IWeaponOwner _owner;
       
@@ -29,6 +30,8 @@ namespace ProjectRemaster.Combat
             Target = null;
         }
 
+        public virtual void ResetAnimator() { }
 
+        protected virtual void PlayAnimations() { }
     }
 }

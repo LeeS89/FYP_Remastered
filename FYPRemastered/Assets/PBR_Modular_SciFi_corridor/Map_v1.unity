@@ -69995,7 +69995,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 295630588504063347, guid: 8b63e884631feb14da8f59c2b7e506ef, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1598136579007358660, guid: 8b63e884631feb14da8f59c2b7e506ef, type: 3}
       propertyPath: lookTarget
@@ -75168,7 +75168,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1786564865}
-        m_TargetAssemblyTypeName: USETEST, Assembly-CSharp
+        m_TargetAssemblyTypeName: WeaponHandGrabUse, Assembly-CSharp
         m_MethodName: SetHandGrabUseInteractable
         m_Mode: 2
         m_Arguments:
@@ -75184,7 +75184,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1786564865}
-        m_TargetAssemblyTypeName: USETEST, Assembly-CSharp
+        m_TargetAssemblyTypeName: WeaponHandGrabUse, Assembly-CSharp
         m_MethodName: ResetHandGrabUseInteractable
         m_Mode: 1
         m_Arguments:
@@ -86009,6 +86009,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47fd0747c0e73974f907433e8a842912, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _anim: {fileID: 1425476012}
   bulletPoolId: {fileID: 11400000, guid: 6141d1b986a45144bad8d38b32617380, type: 2}
   muzzleFlashPoolId: {fileID: 11400000, guid: e1aac957633022f438e7f902b76c3ec4, type: 2}
   _spawnPoint: {fileID: 722793739}
@@ -107790,12 +107791,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1786564861}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d0795805d15f83f44856d190cb7a48f6, type: 3}
+  m_Script: {fileID: 11500000, guid: 455c83a64542c6b44bacec92d90e9c82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   pressThreshold: 0.9
   releaseThreshold: 0.5
-  currentUse: {fileID: 1786564864}
+  currentUse: {fileID: 0}
   visual: {fileID: 645110513}
   localAxis: {x: -1, y: 0, z: 0}
   travel: 0.012
@@ -107832,9 +107833,6 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
   damped: 0
-  showHud: 1
-  hudFollow: {fileID: 3158222064580901752}
-  hudLocalOffset: {x: 0, y: -0.08, z: 0.45}
 --- !u!1001 &1787773049
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -146651,6 +146649,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47fd0747c0e73974f907433e8a842912, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _anim: {fileID: 0}
   bulletPoolId: {fileID: 0}
   muzzleFlashPoolId: {fileID: 0}
   _spawnPoint: {fileID: 498179001}

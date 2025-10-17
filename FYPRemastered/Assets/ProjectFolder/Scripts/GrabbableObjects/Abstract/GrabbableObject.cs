@@ -1,8 +1,7 @@
+using Oculus.Interaction;
 using Oculus.Interaction.HandGrab;
-using Oculus.Interaction.Input;
-using System;
-using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
 
 public abstract class GrabbableObject : ComponentEvents
 {
@@ -18,8 +17,6 @@ public abstract class GrabbableObject : ComponentEvents
        _grabbableEventManager = eventManager as GrabbableEventManager;
 
     }
-
-   
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {

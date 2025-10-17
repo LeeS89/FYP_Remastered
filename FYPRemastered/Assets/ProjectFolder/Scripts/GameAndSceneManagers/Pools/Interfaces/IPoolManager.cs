@@ -8,4 +8,5 @@ public interface IPoolManager
     void Release(UnityEngine.Object obj);
 
     PoolKind GetPoolType();
+
 }

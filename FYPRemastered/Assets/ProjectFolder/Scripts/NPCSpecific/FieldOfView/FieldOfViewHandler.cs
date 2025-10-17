@@ -83,7 +83,7 @@ public class FieldOfViewHandler
         if (Time.time >= _nextCheckTime)
         {
             _nextCheckTime = Time.time + _fovCheckFrequency;
-            RunFieldOfViewSweep();
+            RunFieldOsfViewSweep();
         }
        // RunFieldOfViewCheck();
     }
