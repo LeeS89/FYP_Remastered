@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class FieldOfViewHandler
+public class FieldOfViewHandlerObsolete
 {
     private Collider[] _proximityDetectionResults;
     private Vector3[] _evaluationHitPoints;
@@ -28,11 +28,11 @@ public class FieldOfViewHandler
     private float _nextCheckTime = 0f;
     private EnemyEventManager _eventManager;
 
-    public FieldOfViewHandler(
+    public FieldOfViewHandlerObsolete(
         AITraceComponent traceComponent,
         EnemyEventManager eventManager,
         /*Action<bool, bool> onFOVResultCallback,*/
-        in FieldOfViewParams fovParams,
+        in FieldOfViewParamsObsolete fovParams,
         bool addFallbackPoints = false
        )
     {
@@ -83,7 +83,7 @@ public class FieldOfViewHandler
         if (Time.time >= _nextCheckTime)
         {
             _nextCheckTime = Time.time + _fovCheckFrequency;
-            RunFieldOsfViewSweep();
+            RunFieldOfViewSweep();
         }
        // RunFieldOfViewCheck();
     }

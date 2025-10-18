@@ -55,8 +55,8 @@ public class CombatComponentMigration : BaseAbilitiesMigration
 
 
 
-    private FieldOfViewHandler _fovhandler;
-    private FieldOfViewParams _fovParams;
+    private FieldOfViewHandlerObsolete _fovhandler;
+    private FieldOfViewParamsObsolete _fovParams;
 
 
     // Possible updates to shooting condition of within aiming angle
@@ -123,7 +123,7 @@ public class CombatComponentMigration : BaseAbilitiesMigration
         _fovCallback = OnFieldOfViewComplete;
 
         InitializeFOVParams();
-        _fovhandler = new FieldOfViewHandler(_aiTraceComponent, _enemyEventManager, _fovParams, true);
+        _fovhandler = new FieldOfViewHandlerObsolete(_aiTraceComponent, _enemyEventManager, _fovParams, true);
 
         _enemyEventManager.OnFieldOfViewCallback += OnFieldOfViewComplete;
 
@@ -176,7 +176,7 @@ public class CombatComponentMigration : BaseAbilitiesMigration
     public Transform _bulletSpawnPoint;
     private void InitializeFOVParams()
     {
-        _fovParams = new FieldOfViewParams
+        _fovParams = new FieldOfViewParamsObsolete
         (
             _fovLocation,
             transform,
@@ -210,7 +210,7 @@ public class CombatComponentMigration : BaseAbilitiesMigration
         }
 
         FieldOfViewEvaluation();
-        UpdateWeaponHandler();
+       // UpdateWeaponHandler();
 
     }
 

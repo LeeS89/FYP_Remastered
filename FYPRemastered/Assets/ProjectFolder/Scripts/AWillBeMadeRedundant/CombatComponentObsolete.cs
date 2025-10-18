@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class CombatComponentObsolete : BaseAbilitiesObsolete
 {
+    public FieldOfViewParams prms;
     protected EnemyEventManager _enemyEventManager;
 
     [Header ("Field of view Origin")]
@@ -55,8 +56,8 @@ public class CombatComponentObsolete : BaseAbilitiesObsolete
 
 
 
-    private FieldOfViewHandler _fovhandler;
-    private FieldOfViewParams _fovParams;
+    private FieldOfViewHandlerObsolete _fovhandler;
+    private FieldOfViewParamsObsolete _fovParams;
     
 
     private AgentWeaponHandlerObsolete _weaponHandler;
@@ -104,7 +105,7 @@ public class CombatComponentObsolete : BaseAbilitiesObsolete
         _fovCallback = OnFieldOfViewComplete;
 
         InitializeFOVParams();
-        _fovhandler = new FieldOfViewHandler(_aiTraceComponent, _enemyEventManager, _fovParams, true);
+        _fovhandler = new FieldOfViewHandlerObsolete(_aiTraceComponent, _enemyEventManager, _fovParams, true);
 
         _enemyEventManager.OnFieldOfViewCallback += OnFieldOfViewComplete;
 
@@ -157,7 +158,7 @@ public class CombatComponentObsolete : BaseAbilitiesObsolete
     public Transform _bulletSpawnPoint;
     private void InitializeFOVParams()
     {
-        _fovParams = new FieldOfViewParams
+        _fovParams = new FieldOfViewParamsObsolete
         (
             _fovLocation,
             transform,
@@ -351,7 +352,7 @@ public class CombatComponentObsolete : BaseAbilitiesObsolete
     }
 
 
-    void OnDrawGizmosSelected()
+    void OnDrawGizmos()
     {
         if (_fovLocation == null) return;
 

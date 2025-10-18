@@ -1,54 +1,42 @@
 using UnityEngine;
 
-public readonly struct FieldOfViewParams
+[System.Serializable]
+public class FieldOfViewParams
 {
-    public readonly Transform fovOrigin;
-    public readonly Transform ownerOrigin;
-    public readonly Transform shootOrigin;
-    public readonly float proximityRadius;
-    public readonly float evaluationCapsuleStartHeight;
-    public readonly float evaluationCapsuleEndHeight;
-    public readonly float evaluationCapsuleRadius;
-    public readonly float horizontalViewAngle;
-    public readonly float verticalViewAngle;
-    public readonly float horizontalShootAngle;
-    public readonly float verticalShootAngle;
+    [Header("Targeting phase origin - Final phase of FOV check, Linecast from eyes.\n" +
+        "Also the origin for initial Detection phase, uses OverlapSphere from this origin")]
+    public Transform fovOrigin;
+    public float fovAngle = 50.0f;
+    public int maxFovTargets = 5;
+    public LayerMask blockingMask;
+    public LayerMask targetMask;
+    [Header("Radius for detection phase - also the max distance in evaluation phase")]
+    public float fovRadius = 25.0f;
 
-    public readonly LayerMask obstructionMask;
-    public readonly LayerMask targetMask;
-    public readonly int maxTraceTargets;
+    [Header("Evaluation Phase params - Uses capsule cast from owner origin + waist and eye height offsets\n" +
+        "Gathers targets for the final targeting phase")]
+    public Transform ownerOrigin;
+    public float waistHeightOffset = 1.0f;
+    public float eyeHeightOffset = 1.8f;
+    public float evaluationCapsuleRadius = 0.4f;
 
-    public FieldOfViewParams(
-        Transform fovOrigin,
-        Transform ownerOrigin,
-        Transform shootOrigin,
-        float proximityRadius,
-        float evaluationCapsuleStartHeight,
-        float evaluationCapsuleEndHeight,
-        float evaluationCapsuleRadius,
-        float horizontalViewAngle,
-        float verticalViewAngle,
-        float horizontalShootAngle,
-        float verticalShootAngle,
-        LayerMask obstructionMask,
-        LayerMask targetMask,
-        int maxTraceTargets
-    )
-    {
-        this.fovOrigin = fovOrigin;
-        this.ownerOrigin = ownerOrigin;
-        this.shootOrigin = shootOrigin;
-        this.proximityRadius = proximityRadius;
-        this.evaluationCapsuleStartHeight = evaluationCapsuleStartHeight;
-        this.evaluationCapsuleEndHeight = evaluationCapsuleEndHeight;
-        this.evaluationCapsuleRadius = evaluationCapsuleRadius;
-        this.horizontalViewAngle = horizontalViewAngle;
-        this.verticalViewAngle = verticalViewAngle;
-        this.horizontalShootAngle = horizontalShootAngle;
-        this.verticalShootAngle = verticalShootAngle;
-        this.obstructionMask = obstructionMask;
-        this.targetMask = targetMask;
-        this.maxTraceTargets = maxTraceTargets;
-    }
+    [Header("When true, adds extra points on detected target colliders\n" +
+        "from the evaluation phase to use in the targeting phase\n" +
+        "increasing robustness of FOV check - may impact performance")]
+    public bool addTargetFallbackPoints = true;
 
+    [Header("Optional - Ensures ranged weapons can only be used once fully aiming in the targets direction\n" +
+        "within halfHorizontalShootAngle threshold")]
+    public bool useShootingAngleRestriction = true;
+    public float halfHorizontalShootAngle = 15.0f;
+
+    [Header("Frequency of FOV checks when target is outide of fovRadius")]
+    public float idleFOVCheckFrequency = 1f;
+
+    [Header("Frequency of FOV checks upon either losing LOS to target after some time\n" +
+        "or some other cue such as hearing a noise")]
+    public float suspiciousFOVCheckFrequency = 0.5f;
+
+    [Header("Frequency of FOV checks when alerted to target")]
+    public float alertedFOVCheckFrequency = 0.1f;
 }

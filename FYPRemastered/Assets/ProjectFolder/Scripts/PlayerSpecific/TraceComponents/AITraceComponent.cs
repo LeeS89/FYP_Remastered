@@ -46,7 +46,7 @@ public class AITraceComponent : TraceComponent
 
         return h <= horizontalThreshold && v <= verticalThreshold;
 
-
+      
 
 /*
         Vector3 localDir = from.InverseTransformDirection(targetPosition - from.position).normalized;
@@ -71,6 +71,16 @@ public class AITraceComponent : TraceComponent
          float verticalAngle = Mathf.Atan2(yOffset, Mathf.Sqrt(dx * dx + dz * dz)) * Mathf.Rad2Deg;
 
          return horizontalAngle <= horizontalThreshold && Mathf.Abs(verticalAngle) <= verticalThreshold;*/
+    }
+
+    public bool IsWithinAngle(Transform from, Vector3 to, float halfangle, bool ignoreHorizontal = false, bool ignoreVertical = false)
+    {
+        Vector3 pos = from.position;
+        Vector3 dir = (to - pos).normalized;
+        float cosHalf = Mathf.Cos(halfangle * Mathf.Deg2Rad);
+
+        return Vector3.Dot(from.forward, dir) >= cosHalf;
+     
     }
 
 
