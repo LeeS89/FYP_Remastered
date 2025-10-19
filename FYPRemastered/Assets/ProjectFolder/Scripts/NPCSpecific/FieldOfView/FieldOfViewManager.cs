@@ -6,155 +6,140 @@ public class FieldOfViewManager
     // NEW
     private FieldOfViewParams _params;
     private EnemyEventManager _eventManager;
+    private AlertPhase _currentAlertPhase = AlertPhase.Idle;
+    private float _fovSweepFrequency;
+    private float _nextCheckTime = 0f;
+    private Vector3[] _evaluationHitPoints;
+    private Collider[] _proximityDetectionResults;
+    private AITraceComponent _traceComponent;
 
     public FieldOfViewManager(EnemyEventManager eventManager, FieldOfViewParams fovParams, AITraceComponent traceComponent = null)
     {
         _eventManager = eventManager;
+
+        if(fovParams == null)
+        {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            Debug.LogError("FieldOfViewManager: FOV Params is null, cannot proceed.");
+#else
+            return;
+#endif
+        }
         _params = fovParams;
-        _aiTraceComponent = traceComponent != null ? traceComponent : new AITraceComponent();
+        _evaluationHitPoints = new Vector3[_params.maxFovTargets];
+        _proximityDetectionResults = new Collider[_params.maxFovTargets];
+        _traceComponent = traceComponent != null ? traceComponent : new AITraceComponent();
+        _nextCheckTime = Time.time + GetCheckFrequency(AlertPhase.Idle);
     }
     // END NEW
 
     #region Old Code
     // Start Old
-    private Collider[] _proximityDetectionResults;
-    private Vector3[] _evaluationHitPoints;
-    private Transform _fovOrigin;
-    private Transform _ownerOrigin;
+ 
+ 
     private Transform _fallbackFOVOrigin;
-    private float _horizontalViewAngle;
-    private float _verticalViewAngle;
-    private float _horizontalShootAngle;
-    private float _verticalShootAngle;
-    private float _proximityRadius;
-    private float _evaluationCapsuleStartHeight;
-    private float _evaluationCapsuleEndHeight;
-    private float _evaluationCapsuleRadius;
-    private LayerMask _obstructionMask;
-    private LayerMask _targetMask;
-    private AITraceComponent _aiTraceComponent;
-    private float _fovCheckFrequency;
-    private FieldOfViewFrequencyStatus _fieldOfViewStatus = FieldOfViewFrequencyStatus.Normal;
-    [SerializeField] private float _normalFOVCheckFrequency = 1f;
-    [SerializeField] private float _heightenedFOVCheckFrequency = 0.1f;
-    // private Action<bool, bool> _onFOVResultCallback;
-    private bool _addFallbackPoints = false;
-    private float _nextCheckTime = 0f;
+  
+    
     // END OLD
 
     public FieldOfViewManager(
        AITraceComponent traceComponent,
        EnemyEventManager eventManager,
        Action<bool, bool> onFOVResultCallback,
-       in FieldOfViewParamsObsolete fovParams,
+      // in FieldOfViewParamsObsolete fovParams,
        bool addFallbackPoints = false
       )
     {
         _eventManager = eventManager;
-        _aiTraceComponent = traceComponent;
+        _traceComponent = traceComponent;
         //_onFOVResultCallback = onFOVResultCallback;
-        _addFallbackPoints = addFallbackPoints;
-
-        _proximityDetectionResults = new Collider[fovParams.maxTraceTargets];
-        _evaluationHitPoints = new Vector3[fovParams.maxTraceTargets];
-        _fovOrigin = fovParams.fovOrigin;
-        _ownerOrigin = fovParams.ownerOrigin;
-        _fallbackFOVOrigin = fovParams.shootOrigin;
-        _horizontalViewAngle = fovParams.horizontalViewAngle;
-        _verticalViewAngle = fovParams.verticalViewAngle;
-        _horizontalShootAngle = fovParams.horizontalShootAngle;
-        _verticalShootAngle = fovParams.verticalShootAngle;
-        _proximityRadius = fovParams.proximityRadius;
-        _evaluationCapsuleStartHeight = fovParams.evaluationCapsuleStartHeight;
-        _evaluationCapsuleEndHeight = fovParams.evaluationCapsuleEndHeight;
-        _evaluationCapsuleRadius = fovParams.evaluationCapsuleRadius;
-        _obstructionMask = fovParams.obstructionMask;
-        _targetMask = fovParams.targetMask;
+      
+       // _fallbackFOVOrigin = fovParams.shootOrigin;
+      
     }
 
-   
+
     #endregion
 
 
-    public void UpdateFieldOfView()
+    public void Tick()
     {
-
-        switch (_fieldOfViewStatus)
-        {
-            case FieldOfViewFrequencyStatus.Normal:
-                if (_fovCheckFrequency != _normalFOVCheckFrequency)
-                {
-                    _fovCheckFrequency = _normalFOVCheckFrequency;
-                }
-                break;
-            case FieldOfViewFrequencyStatus.Heightened:
-                if (_fovCheckFrequency != _heightenedFOVCheckFrequency)
-                {
-                    _fovCheckFrequency = _heightenedFOVCheckFrequency;
-                }
-                break;
-            default:
-                _fovCheckFrequency = _normalFOVCheckFrequency;
-                break;
-        }
+        _fovSweepFrequency = GetCheckFrequency(_currentAlertPhase);
+       
         if (Time.time >= _nextCheckTime)
         {
-            _nextCheckTime = Time.time + _fovCheckFrequency;
+            _nextCheckTime = Time.time + _fovSweepFrequency;
             RunFieldOfViewSweep();
         }
-        // RunFieldOfViewCheck();
+   
     }
 
-    public void RunFieldOfViewSweep(/*Action<bool, bool> onFOVResult, bool addFallbackPoints = false*/)
+    private float GetCheckFrequency(AlertPhase phase)
+    {
+        return phase switch
+        {
+            AlertPhase.Idle => _params.idleFOVCheckFrequency,
+            AlertPhase.Heightened => _params.heightenedFOVCheckFrequency,
+            AlertPhase.Suspicious => _params.suspiciousFOVCheckFrequency,
+            AlertPhase.Alerted => _params.alertedFOVCheckFrequency,
+            _ => _params.idleFOVCheckFrequency,
+        };
+    }
+
+    private void SetCurrentPhaseAndSweepFrequency(AlertPhase phase)
+    {
+        if (_currentAlertPhase == phase) return;
+        _currentAlertPhase = phase;
+        _fovSweepFrequency = GetCheckFrequency(phase);
+    }
+
+    public void RunFieldOfViewSweep()
     {
 
         bool seen = false;
         bool inShootAngle = false;
 
-        int detectedCount = RunDetectionPhase(_aiTraceComponent, _fovOrigin, _proximityDetectionResults, _proximityRadius, _targetMask);
+        int detectedCount = RunDetectionPhase(_traceComponent, _params.fovOrigin, _proximityDetectionResults, _params.fovRadius, _params.targetMask);
 
 
 
         if (detectedCount == 0)
         {
             _eventManager.FieldOfViewCallback(seen, inShootAngle);
-            //_onFOVResultCallback?.Invoke(seen, inShootAngle);
-            if (_fieldOfViewStatus != FieldOfViewFrequencyStatus.Normal)
-                _fieldOfViewStatus = FieldOfViewFrequencyStatus.Normal;
+            SetCurrentPhaseAndSweepFrequency(AlertPhase.Idle);
+            return;
         }
 
-        if (_fieldOfViewStatus != FieldOfViewFrequencyStatus.Heightened)
-            _fieldOfViewStatus = FieldOfViewFrequencyStatus.Heightened;
+        SetCurrentPhaseAndSweepFrequency(AlertPhase.Heightened);
 
         for (int i = 0; i < detectedCount; i++)
         {
             int hitCount;
 
-            RunEvaluationPhase(_proximityDetectionResults[i], out hitCount, _addFallbackPoints);
+            RunEvaluationPhase(_proximityDetectionResults[i], out hitCount, _params.addTargetFallbackPoints);
 
             if (hitCount == 0 && CombatComponentObsolete._testFOV) { /*Debug.LogError("CapsuleCast hit nothing");*/ continue; }
 
-            // SetTargetingPhaseParams(ref _fovPhaseParams);
-
             if (RunTargetingPhase(hitCount))
             {
+                SetCurrentPhaseAndSweepFrequency(AlertPhase.Alerted);
                 // UpdateFOVResults(true);
                 // bool facingTarget = this.TargetWithinShootingRange(_aiTraceComponent, _fovLocation, _detectionPhaseResults[i].ClosestPointOnBounds(_fovLocation.position), _shootAngleThreshold * 0.5f, _shootAngleThreshold * 1.25f);
                 // SetFacingtarget(facingTarget);
                 seen = true;
-                inShootAngle = TargetWithinShootingRange(_aiTraceComponent, _fovOrigin, _proximityDetectionResults[i].ClosestPointOnBounds(_fovOrigin.position), _horizontalShootAngle, _verticalShootAngle);
+                inShootAngle = _params.useShootingAngleRestriction == false ? true :
+                 TargetWithinAimThreshold(_traceComponent, _params.fovOrigin, _proximityDetectionResults[i].ClosestPointOnBounds(_params.fovOrigin.position), _params.halfHorizontalShootAngle);
+               // inShootAngle = TargetWithinShootingRange(_traceComponent, _params.fovOrigin, _proximityDetectionResults[i].ClosestPointOnBounds(_params.fovOrigin.position), _horizontalShootAngle, _verticalShootAngle);
                 _eventManager.FieldOfViewCallback(seen, inShootAngle);
                 //_onFOVResultCallback?.Invoke(seen, inShootAngle);
                 return;
-                //return true;
+
             }
-           
+
 
         }
         _eventManager.FieldOfViewCallback(seen, inShootAngle);
-        //_onFOVResultCallback?.Invoke(seen, inShootAngle);
-        //return false;
-
+       
     }
 
 
@@ -175,24 +160,33 @@ public class FieldOfViewManager
 
     private void RunEvaluationPhase(Collider targetCollider, out int hitCount, bool addFallbackPoints)
     {
-        if (!_aiTraceComponent.IsWithinView(_fovOrigin, targetCollider.bounds.center, _horizontalViewAngle, _verticalViewAngle))
+        if (!_traceComponent.IsWithinAngle(_params.fovOrigin, targetCollider.bounds.center, _params.fovHalfAngle, _params.useSeparateVerticleAngle, _params.verticalFovHalfAngle))
         {
             hitCount = 0;
             return;
         }
-
+        /* if (!_traceComponent.IsWithinView(_fovOrigin, targetCollider.bounds.center, _horizontalViewAngle, _verticalViewAngle))
+         {
+             hitCount = 0;
+             return;
+         }*/
+        Vector3 waistPos = _params.ownerOrigin.TransformPoint(0f, _params.waistHeightOffset, 0f);
+        Vector3 eyePos = _params.ownerOrigin.TransformPoint(0f, _params.eyeHeightOffset, 0f);
+        Vector3 center = (waistPos + eyePos) * 0.5f;
+        Vector3 direction = TargetingUtility.GetDirectionToTarget(targetCollider.bounds.center, center);
+/*
         Vector3 waistPos = _ownerOrigin.position + Vector3.up * _evaluationCapsuleStartHeight;
         Vector3 eyePos = _ownerOrigin.position + Vector3.up * _evaluationCapsuleEndHeight;
         Vector3 sweepCenter = (waistPos + eyePos) * 0.5f;
         Vector3 directionTotarget = TargetingUtility.GetDirectionToTarget(targetCollider.bounds.center, sweepCenter);
-
-        hitCount = _aiTraceComponent.EvaluateViewCone(
+*/
+        hitCount = _traceComponent.EvaluateViewCone(
         waistPos,
         eyePos,
-        _evaluationCapsuleRadius,
-        directionTotarget,
-        _proximityRadius,
-        _targetMask,
+        _params.evaluationCapsuleRadius,
+        direction,
+        _params.fovRadius,
+        _params.targetMask,
         _evaluationHitPoints
         );
 
@@ -213,13 +207,13 @@ public class FieldOfViewManager
     {
         for (int i = 0; i < targetCount; i++)
         {
-            if (!_aiTraceComponent.HasLineOfSight(
-                _fovOrigin,
+            if (!_traceComponent.HasLineOfSight(
+                _params.fovOrigin,
                 _evaluationHitPoints[i],
-                _obstructionMask,
-                _targetMask,
-                _ownerOrigin,
-                _fallbackFOVOrigin
+                _params.blockingMask,
+                _params.targetMask,
+                _params.ownerOrigin,
+                _fallbackFOVOrigin // Remove this later
                 ))
             {
                 continue;
@@ -231,8 +225,17 @@ public class FieldOfViewManager
         return false;
     }
 
+    public bool TargetWithinAimThreshold(AITraceComponent traceComp, Transform origin, Vector3 targetPosition, float halfAngle, bool useLocalUp = true)
+    {
+        return traceComp.IsWithinYaw(
+            origin,
+            targetPosition,
+            halfAngle,
+            useLocalUp
+            );
+    }
 
-
+    [Obsolete("Use TargetWithinAimThreshold instead")]
     public bool TargetWithinShootingRange(AITraceComponent traceComp, Transform origin, Vector3 targetPosition, float horizontalangle, float verticalAngle)
     {
         return traceComp.IsWithinView(
@@ -241,7 +244,7 @@ public class FieldOfViewManager
             horizontalangle,
             verticalAngle
             );
-        //return false;
+       
     }
 
     private void AddFallbackPoints(Collider target, Vector3[] hitPoints, ref int startIndex)

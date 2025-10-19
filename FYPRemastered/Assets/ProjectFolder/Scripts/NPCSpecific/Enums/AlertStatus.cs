@@ -13,3 +13,11 @@ public enum FieldOfViewFrequencyStatus
     Normal,
     Heightened
 }
+
+public enum AlertPhase
+{
+    Idle,
+    Heightened,
+    Suspicious,
+    Alerted
+}

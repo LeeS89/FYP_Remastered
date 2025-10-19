@@ -73,14 +73,58 @@ public class AITraceComponent : TraceComponent
          return horizontalAngle <= horizontalThreshold && Mathf.Abs(verticalAngle) <= verticalThreshold;*/
     }
 
-    public bool IsWithinAngle(Transform from, Vector3 to, float halfangle, bool ignoreHorizontal = false, bool ignoreVertical = false)
+    public bool IsWithinAngle(Transform from, Vector3 to, float halfangle, bool separateVertical = false, float halfVertical = 0f)
     {
-        Vector3 pos = from.position;
-        Vector3 dir = (to - pos).normalized;
-        float cosHalf = Mathf.Cos(halfangle * Mathf.Deg2Rad);
+        Vector3 toVec = to - from.position;
+        if (toVec.sqrMagnitude < 1e-8f) return true;
 
-        return Vector3.Dot(from.forward, dir) >= cosHalf;
-     
+        if (!separateVertical)
+        {
+            float cosHalf = Mathf.Cos(halfangle * Mathf.Deg2Rad);
+            return Vector3.Dot(from.forward, toVec.normalized) >= cosHalf;
+        }
+
+        if (Vector3.Dot(from.forward, toVec) <= 0f) return false;
+
+        Vector3 up = from.up;
+
+        Vector3 fwdYaw = Vector3.ProjectOnPlane(from.forward, up);
+        Vector3 dirYaw = Vector3.ProjectOnPlane(toVec, up);
+
+        bool horizontalOk;
+        if (fwdYaw.sqrMagnitude < 1e-8f || dirYaw.sqrMagnitude < 1e-8f) horizontalOk = true;
+        else horizontalOk = Vector3.Angle(fwdYaw, dirYaw) <= halfangle;
+
+        Vector3 dirN = toVec.normalized;
+        Vector3 dirHoriz = Vector3.ProjectOnPlane(dirN, up);
+        float vAngle = (dirHoriz.sqrMagnitude < 1e-8f) ? 90f : Vector3.Angle(dirN, dirHoriz);
+        bool verticalOk = vAngle <= halfVertical;
+
+        return horizontalOk && verticalOk;
+
+        /*
+                Vector3 pos = from.position;
+                Vector3 dir = (to - pos).normalized;
+                float cosHalf = Mathf.Cos(halfangle * Mathf.Deg2Rad);
+
+                return Vector3.Dot(from.forward, dir) >= cosHalf;*/
+
+    }
+
+    public bool IsWithinYaw(Transform from, Vector3 target, float halfYawDeg, bool useLocalUp = true)
+    {
+        Vector3 up = useLocalUp ? from.up : Vector3.up;
+
+        Vector3 to = target - from.position;
+        if (to.sqrMagnitude < 1e-8f) return true;
+
+        Vector3 fwdXZ = Vector3.ProjectOnPlane(from.forward, up).normalized;
+        Vector3 toXZ = Vector3.ProjectOnPlane(to, up).normalized;
+
+        if (fwdXZ.sqrMagnitude < 1e-8f || toXZ.sqrMagnitude < 1e-8f) return true;
+
+        float cosHalf = Mathf.Cos(halfYawDeg * Mathf.Deg2Rad);
+        return Vector3.Dot(fwdXZ, toXZ) >= cosHalf;
     }
 
 

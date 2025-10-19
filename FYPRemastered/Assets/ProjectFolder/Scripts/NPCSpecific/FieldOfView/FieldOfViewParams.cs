@@ -6,7 +6,6 @@ public class FieldOfViewParams
     [Header("Targeting phase origin - Final phase of FOV check, Linecast from eyes.\n" +
         "Also the origin for initial Detection phase, uses OverlapSphere from this origin")]
     public Transform fovOrigin;
-    public float fovAngle = 50.0f;
     public int maxFovTargets = 5;
     public LayerMask blockingMask;
     public LayerMask targetMask;
@@ -25,6 +24,15 @@ public class FieldOfViewParams
         "increasing robustness of FOV check - may impact performance")]
     public bool addTargetFallbackPoints = true;
 
+    [Header("The angle from fovOrigin.forward which target mucst be within\n" +
+        "for a successful LOS hit")]
+    public float fovHalfAngle = 50.0f;
+
+    [Header("If false, uses fovHalfAngle for both H and V angle\n" +
+        "If true, uses fovHalfAngle for Horizontal check")]
+    public bool useSeparateVerticleAngle = false;
+    public float verticalFovHalfAngle = 25f;
+
     [Header("Optional - Ensures ranged weapons can only be used once fully aiming in the targets direction\n" +
         "within halfHorizontalShootAngle threshold")]
     public bool useShootingAngleRestriction = true;
@@ -33,9 +41,13 @@ public class FieldOfViewParams
     [Header("Frequency of FOV checks when target is outide of fovRadius")]
     public float idleFOVCheckFrequency = 1f;
 
+    [Header("Frequency of FOV checks when target is inside of fovRadius\n" +
+        "but without any alerted or suspicious cues")]
+    public float heightenedFOVCheckFrequency = 0.5f;
+
     [Header("Frequency of FOV checks upon either losing LOS to target after some time\n" +
         "or some other cue such as hearing a noise")]
-    public float suspiciousFOVCheckFrequency = 0.5f;
+    public float suspiciousFOVCheckFrequency = 0.25f;
 
     [Header("Frequency of FOV checks when alerted to target")]
     public float alertedFOVCheckFrequency = 0.1f;
