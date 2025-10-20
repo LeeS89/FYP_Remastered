@@ -22,7 +22,7 @@ public class FieldOfViewParams
     [Header("When true, adds extra points on detected target colliders\n" +
         "from the evaluation phase to use in the targeting phase\n" +
         "increasing robustness of FOV check - may impact performance")]
-    public bool addTargetFallbackPoints = true;
+    public bool addTargetFallbackPoints = false;
 
     [Header("The angle from fovOrigin.forward which target mucst be within\n" +
         "for a successful LOS hit")]
@@ -51,4 +51,8 @@ public class FieldOfViewParams
 
     [Header("Frequency of FOV checks when alerted to target")]
     public float alertedFOVCheckFrequency = 0.1f;
+
+    [Header("How long to wait after LOS has been lost to downgrade alert status")]
+    public float alertToSuspiciousDelaySeconds = 3f;
+    public float suspiciousToIdleDelaySeconds = 5f;
 }

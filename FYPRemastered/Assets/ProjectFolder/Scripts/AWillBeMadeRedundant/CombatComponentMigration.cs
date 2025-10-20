@@ -9,16 +9,16 @@ public class CombatComponentMigration : BaseAbilitiesMigration
 
     [Header("Field of view Origin")]
     [SerializeField] public Transform _fovLocation;
-    [Header("Max Field of view targets")]
-    [SerializeField] private int _maxFovTraceResults = 5;
+   /* [Header("Max Field of view targets")]
+    [SerializeField] private int _maxFovTraceResults = 5;*/
     [Header("Field of view proximity phase radius")]
     [SerializeField] public float _proximityRadius = 5f; // Make Protected later
 
-    [Header("Field of view evaluation phase")]
+   /* [Header("Field of view evaluation phase")]
     [Header("start and end points + radius of capsule cast in FOV evaluation phase")]
     [SerializeField] private float _waistHeight = 1.0f;
     [SerializeField] private float _eyeHeight = 1.8f;
-    [SerializeField] private float _fovEvaluationRadius = 0.4f;
+    [SerializeField] private float _fovEvaluationRadius = 0.4f;*/
 
     [Header("Field of view angle with horizontal & vertical multipliers")]
     [Range(0, 360)] public float _fovViewangle;
@@ -26,22 +26,22 @@ public class CombatComponentMigration : BaseAbilitiesMigration
     [Range(0, 2)] public float _verticalAngleMultiplier;
 
 
-    [Header("Field of view region - Melee target, FOV obstruction, and FOV target masks")]
+   /* [Header("Field of view region - Melee target, FOV obstruction, and FOV target masks")]
     [SerializeField] private LayerMask _meleeCheckMask;
     [SerializeField] private LayerMask _fovTargetMask;
-    [SerializeField] private LayerMask _fovBlockingMask;
+    [SerializeField] private LayerMask _fovBlockingMask;*/
 
     [Header("Melee attack check interval")]
     [SerializeField] private float _meleeCheckInterval = 0.2f;
 
     [Header("Melee trigger radius")]
-    [SerializeField] private float _meleeCheckRadius = 1.5f;
+   // [SerializeField] private float _meleeCheckRadius = 1.5f;
     protected bool _meleeTriggered = false;
     private Coroutine _meleeCheckCoroutine;
     private WaitForSeconds _meleeCheckWait;
     private bool _evaluatingMeleeCheck = false;
 
-
+    public FieldOfViewParams _fovParams;
 
     [Range(0, 360)] public float _shootAngleThreshold;
 
@@ -54,9 +54,9 @@ public class CombatComponentMigration : BaseAbilitiesMigration
     private Action<bool, bool> _fovCallback;
 
 
-
-    private FieldOfViewHandlerObsolete _fovhandler;
-    private FieldOfViewParamsObsolete _fovParams;
+    public NPCWeaponManager _weaponManager;
+    private FieldOfViewManager _fovhandler;
+   // private FieldOfViewParamsObsolete _fovParams;
 
 
     // Possible updates to shooting condition of within aiming angle
@@ -114,7 +114,7 @@ public class CombatComponentMigration : BaseAbilitiesMigration
     {
         _enemyEventManager = eventManager as EnemyEventManager;
         base.RegisterLocalEvents(_enemyEventManager);
-
+        
         _aiTraceComponent = new AITraceComponent();
 
         _meleeResults = new Collider[2];
@@ -123,13 +123,13 @@ public class CombatComponentMigration : BaseAbilitiesMigration
         _fovCallback = OnFieldOfViewComplete;
 
         InitializeFOVParams();
-        _fovhandler = new FieldOfViewHandlerObsolete(_aiTraceComponent, _enemyEventManager, _fovParams, true);
+        _fovhandler = new FieldOfViewManager(_enemyEventManager, _fovParams, _aiTraceComponent);
 
         _enemyEventManager.OnFieldOfViewCallback += OnFieldOfViewComplete;
 
 
-        _enemyEventManager.OnMeleeAttackPerformed += EvaluateMeleeAttackResults;
-
+        // _enemyEventManager.OnMeleeAttackPerformed += EvaluateMeleeAttackResults;
+        
         _enemyEventManager.OnMelee += SetMeleeTriggered;
 
         Transform player = GameManager.Instance.GetPlayerPosition(PlayerPart.DefenceCollider);
@@ -147,7 +147,7 @@ public class CombatComponentMigration : BaseAbilitiesMigration
         _meleeCheckWait = null;
 
         _meleeResults = null;
-        _enemyEventManager.OnMeleeAttackPerformed -= EvaluateMeleeAttackResults;
+       // _enemyEventManager.OnMeleeAttackPerformed -= EvaluateMeleeAttackResults;
 
         _enemyEventManager.OnMelee -= SetMeleeTriggered;
 
@@ -176,7 +176,7 @@ public class CombatComponentMigration : BaseAbilitiesMigration
     public Transform _bulletSpawnPoint;
     private void InitializeFOVParams()
     {
-        _fovParams = new FieldOfViewParamsObsolete
+       /* _fovParams = new FieldOfViewParamsObsolete
         (
             _fovLocation,
             transform,
@@ -193,7 +193,7 @@ public class CombatComponentMigration : BaseAbilitiesMigration
             _fovTargetMask,
             _maxFovTraceResults
 
-        );
+        );*/
     }
 
     public bool _testMelee = false;
@@ -227,7 +227,7 @@ public class CombatComponentMigration : BaseAbilitiesMigration
     {
         if (!_updateFOV || _fovhandler == null) { return; }
 
-        _fovhandler.UpdateFieldOfView();
+        _fovhandler.Tick();
 
 
     }
@@ -266,7 +266,7 @@ public class CombatComponentMigration : BaseAbilitiesMigration
         {
             if (_meleeCheckCoroutine == null)
             {
-                _meleeCheckCoroutine = StartCoroutine(MeleeCheckRoutine());
+               // _meleeCheckCoroutine = StartCoroutine(MeleeCheckRoutine());
             }
         }
         else
@@ -279,7 +279,7 @@ public class CombatComponentMigration : BaseAbilitiesMigration
         }
     }
 
-    private IEnumerator MeleeCheckRoutine()
+   /* private IEnumerator MeleeCheckRoutine()
     {
         while (_evaluatingMeleeCheck)
         {
@@ -293,7 +293,7 @@ public class CombatComponentMigration : BaseAbilitiesMigration
             _enemyEventManager.PursuitConditionChanged(true);
             yield return _meleeCheckWait;
         }
-    }
+    }*/
 
     private void PerformMeleeAttack()
     {
@@ -301,7 +301,7 @@ public class CombatComponentMigration : BaseAbilitiesMigration
         _enemyEventManager.AnimationTriggered(AnimationAction.Melee);
     }
 
-    private void EvaluateMeleeAttackResults()
+  /*  private void EvaluateMeleeAttackResults()
     {
         int targets = _aiTraceComponent.CheckTargetWithinCombatRange(_fovLocation.position, _meleeResults, _meleeCheckRadius, _meleeCheckMask);
 
@@ -320,7 +320,7 @@ public class CombatComponentMigration : BaseAbilitiesMigration
         }
 
         Array.Clear(_meleeResults, 0, _meleeResults.Length);
-    }
+    }*/
 
 
 
@@ -330,6 +330,7 @@ public class CombatComponentMigration : BaseAbilitiesMigration
         base.OnSceneStarted();
         _canUpdateWeapon = true;
         _updateFOV = true;
+        _weaponManager.Equip();
     }
 
 
@@ -343,6 +344,9 @@ public class CombatComponentMigration : BaseAbilitiesMigration
         }
         _enemyEventManager.TargetSeen(seen);
         _enemyEventManager.FacingTarget(inShootingAngle);
+
+        if(seen) _weaponManager.TryUseWeapon();
+         else _weaponManager.StopUsingWeapon();
         //SetFacingtarget(inShootingAngle);
     }
 
@@ -404,7 +408,7 @@ public class CombatComponentMigration : BaseAbilitiesMigration
 
     protected void SetTargetingPhaseParams(ref FOVPhaseParams fovParams)
     {
-        fovParams.targetingBlockingMask = _fovBlockingMask;
+      //  fovParams.targetingBlockingMask = _fovBlockingMask;
         fovParams.ownerOrigin = transform;
         fovParams.shootOrigin = _bulletSpawnLocation;
     }

@@ -16,8 +16,8 @@ public enum FieldOfViewFrequencyStatus
 
 public enum AlertPhase
 {
-    Idle,
-    Heightened,
-    Suspicious,
-    Alerted
+    Idle = 1,
+    Heightened = 2,
+    Suspicious = 3,
+    Alerted = 4
 }

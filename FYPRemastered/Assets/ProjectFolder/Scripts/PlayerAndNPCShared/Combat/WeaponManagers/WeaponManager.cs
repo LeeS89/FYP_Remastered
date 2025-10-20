@@ -53,8 +53,8 @@ public class WeaponManager : ComponentEvents, IWeaponOwner
         // Update weapon UI here if applicable
     }
 
-    protected virtual void TryUseWeapon() { }
+    public virtual void TryUseWeapon() { } // Should be protected, but needs to be public for testing
 
-    protected virtual void StopUsingWeapon() { }
-    
+    public virtual void StopUsingWeapon() { } // Should be protected, but needs to be public for testing
+
 }

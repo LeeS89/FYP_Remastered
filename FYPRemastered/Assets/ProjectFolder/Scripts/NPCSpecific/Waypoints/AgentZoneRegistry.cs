@@ -52,7 +52,7 @@ public class AgentZoneRegistry : SceneResources
         {
             if (agent != source)
             {
-                agent.EnterAlertPhase(); // Use GameManager.Instance.PlayerPosition internally if needed
+                agent.EnterAlertPhase(); // Use GameManager.Instance.PlayerPosition internally instead maybe
             }
         }
     }

@@ -3,6 +3,12 @@ using UnityEngine;
 
 public class FieldOfViewManager
 {
+    /// <summary>
+    /// New setup of Alerting zones and FOV management
+    /// 
+    /// </summary>
+
+
     // NEW
     private FieldOfViewParams _params;
     private EnemyEventManager _eventManager;
@@ -12,6 +18,7 @@ public class FieldOfViewManager
     private Vector3[] _evaluationHitPoints;
     private Collider[] _proximityDetectionResults;
     private AITraceComponent _traceComponent;
+    private float _deescalationTimer;
 
     public FieldOfViewManager(EnemyEventManager eventManager, FieldOfViewParams fovParams, AITraceComponent traceComponent = null)
     {
@@ -29,7 +36,8 @@ public class FieldOfViewManager
         _evaluationHitPoints = new Vector3[_params.maxFovTargets];
         _proximityDetectionResults = new Collider[_params.maxFovTargets];
         _traceComponent = traceComponent != null ? traceComponent : new AITraceComponent();
-        _nextCheckTime = Time.time + GetCheckFrequency(AlertPhase.Idle);
+        _nextCheckTime = Time.time + GetCheckFrequency(_currentAlertPhase);
+        _fovSweepFrequency = GetCheckFrequency(_currentAlertPhase);
     }
     // END NEW
 
@@ -51,7 +59,7 @@ public class FieldOfViewManager
       )
     {
         _eventManager = eventManager;
-        _traceComponent = traceComponent;
+      //  _traceComponent = traceComponent;
         //_onFOVResultCallback = onFOVResultCallback;
       
        // _fallbackFOVOrigin = fovParams.shootOrigin;
@@ -64,7 +72,7 @@ public class FieldOfViewManager
 
     public void Tick()
     {
-        _fovSweepFrequency = GetCheckFrequency(_currentAlertPhase);
+       // _fovSweepFrequency = GetCheckFrequency(_currentAlertPhase);
        
         if (Time.time >= _nextCheckTime)
         {
@@ -86,8 +94,17 @@ public class FieldOfViewManager
         };
     }
 
+  
     private void SetCurrentPhaseAndSweepFrequency(AlertPhase phase)
     {
+      //  if (phase.CompareTo(_currentAlertPhase) == 0) return;
+
+        /* if (phase.CompareTo(_currentAlertPhase) > 0) _currentAlertPhase = phase;
+         else
+         {
+
+         }*/
+
         if (_currentAlertPhase == phase) return;
         _currentAlertPhase = phase;
         _fovSweepFrequency = GetCheckFrequency(phase);
@@ -100,9 +117,7 @@ public class FieldOfViewManager
         bool inShootAngle = false;
 
         int detectedCount = RunDetectionPhase(_traceComponent, _params.fovOrigin, _proximityDetectionResults, _params.fovRadius, _params.targetMask);
-
-
-
+        
         if (detectedCount == 0)
         {
             _eventManager.FieldOfViewCallback(seen, inShootAngle);
@@ -120,7 +135,9 @@ public class FieldOfViewManager
 
             if (hitCount == 0 && CombatComponentObsolete._testFOV) { /*Debug.LogError("CapsuleCast hit nothing");*/ continue; }
 
-            if (RunTargetingPhase(hitCount))
+            seen = RunTargetingPhase(hitCount);
+
+            if (seen)
             {
                 SetCurrentPhaseAndSweepFrequency(AlertPhase.Alerted);
                 // UpdateFOVResults(true);
@@ -129,7 +146,7 @@ public class FieldOfViewManager
                 seen = true;
                 inShootAngle = _params.useShootingAngleRestriction == false ? true :
                  TargetWithinAimThreshold(_traceComponent, _params.fovOrigin, _proximityDetectionResults[i].ClosestPointOnBounds(_params.fovOrigin.position), _params.halfHorizontalShootAngle);
-               // inShootAngle = TargetWithinShootingRange(_traceComponent, _params.fovOrigin, _proximityDetectionResults[i].ClosestPointOnBounds(_params.fovOrigin.position), _horizontalShootAngle, _verticalShootAngle);
+                // inShootAngle = TargetWithinShootingRange(_traceComponent, _params.fovOrigin, _proximityDetectionResults[i].ClosestPointOnBounds(_params.fovOrigin.position), _horizontalShootAngle, _verticalShootAngle);
                 _eventManager.FieldOfViewCallback(seen, inShootAngle);
                 //_onFOVResultCallback?.Invoke(seen, inShootAngle);
                 return;
@@ -212,8 +229,8 @@ public class FieldOfViewManager
                 _evaluationHitPoints[i],
                 _params.blockingMask,
                 _params.targetMask,
-                _params.ownerOrigin,
-                _fallbackFOVOrigin // Remove this later
+                _params.ownerOrigin
+               // _fallbackFOVOrigin // Remove this later
                 ))
             {
                 continue;
