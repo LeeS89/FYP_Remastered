@@ -1,24 +1,28 @@
+using Oculus.Interaction.Input;
 using ProjectRemaster.Combat;
 using System.Collections.Generic;
 using UnityEngine;
 
-public sealed class NPCWeaponManager : WeaponManager
+public sealed class NPCWeaponManager : WeaponManagerBase
 {
     [SerializeField] private List<Weapon> _availableWeapons;
+    private EnemyEventManager _eEventManager;
+    private IEquippable _equippedItem;
+
     // private Dictionary<AmmoType, IEquippable> _weaponsByTypeStore = new(5);
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
-        base.RegisterLocalEvents(eventManager);
-        _isNPC = true;
-        _eventManager.OnTriggerPressed += TryUseWeapon;
-        _eventManager.OnTriggerReleased += StopUsingWeapon;
-        
-        if(_eventManager is EnemyEventManager em)
+        _eEventManager = eventManager as EnemyEventManager;
+        base.RegisterLocalEvents(_eEventManager);
+     
+        HasUnlimitedAmmo = true;
+
+       /* if(_eventManager is EnemyEventManager em)
         {
             em.OnReadyToFire += Ready;
             em.OnFireRangedWeapon += Fre;
-        }
+        }*/
 
     }
 
@@ -29,12 +33,11 @@ public sealed class NPCWeaponManager : WeaponManager
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
-        _eventManager.OnTriggerPressed -= TryUseWeapon;
-        _eventManager.OnTriggerReleased -= StopUsingWeapon;
-        base.UnRegisterLocalEvents(eventManager);  
+        base.UnRegisterLocalEvents(eventManager);
+        _eEventManager = null;
     }
     private bool _isUsing = false;
-    public override void TryUseWeapon()
+    protected override void TryUseWeapon()
     {
         if (_equippedItem == null) return;
         if (_isUsing) return;
@@ -42,7 +45,7 @@ public sealed class NPCWeaponManager : WeaponManager
         if (_equippedItem is IRanged rw) rw.TryFire(FireRate.FullAutomatic);
     }
 
-    public override void StopUsingWeapon()
+    protected override void CancelWeaponUse()
     {
         if (_equippedItem == null) return;
         if (!_isUsing) return;
@@ -58,7 +61,7 @@ public sealed class NPCWeaponManager : WeaponManager
         _equippedItem = _availableWeapons[0] as IRanged;
         if (_equippedItem == null) Debug.LogError("Weapon is null");
        // _equippedItem = equippable;
-        _equippedItem.Equip(_eventManager, this);
+        _equippedItem.Equip(this);
 
         // Update weapon UI here if applicable
         // Optionally, parent the weapon to a specific transform (e.g., hand) on derived NPC class
@@ -66,9 +69,30 @@ public sealed class NPCWeaponManager : WeaponManager
 
     public void Ready(Weapon wp)
     {
-        if(_eventManager is EnemyEventManager em)
+       /* if(_eventManager is EnemyEventManager em)
         {
             em.AnimationTriggered(AnimationAction.Shoot);
+        }*/
+    }
+
+    protected override EquipResult EquipWeapon(IEquippable equippable, Handedness hand = Handedness.Left)
+    {
+        return base.EquipWeapon(equippable);
+    }
+
+    public override void OnEquippableSignal(EquippableSignal signal, IEquippable equippable = null)
+    {
+        switch (signal)
+        {
+            case EquippableSignal.Ready:
+                if (equippable is IRanged rw) rw.Fire();
+                break;
+            case EquippableSignal.ClipEmpty:
+                break;
+            case EquippableSignal.Empty:
+                break;
+            default:
+                break;
         }
     }
 }

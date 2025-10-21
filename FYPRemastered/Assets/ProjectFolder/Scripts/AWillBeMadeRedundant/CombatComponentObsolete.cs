@@ -77,7 +77,7 @@ public class CombatComponentObsolete : BaseAbilitiesObsolete
         }
         else
         {
-            _weaponHandler?.EquipWeapon(WeaponType.Ranged);
+            _weaponHandler?.EquipWeapon(WeaponTypeObsolete.Ranged);
         }
     }
  

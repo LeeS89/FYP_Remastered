@@ -345,8 +345,8 @@ public class CombatComponentMigration : BaseAbilitiesMigration
         _enemyEventManager.TargetSeen(seen);
         _enemyEventManager.FacingTarget(inShootingAngle);
 
-        if(seen) _weaponManager.TryUseWeapon();
-         else _weaponManager.StopUsingWeapon();
+       // if(seen) _weaponManager.TryUseWeapon();
+         //else _weaponManager.StopUsingWeapon();
         //SetFacingtarget(inShootingAngle);
     }
 

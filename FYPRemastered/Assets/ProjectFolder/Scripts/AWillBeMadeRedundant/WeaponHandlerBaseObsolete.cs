@@ -64,14 +64,14 @@ public class WeaponHandlerBaseObsolete
 
     #region Weapon Equip region
 
-    public virtual void EquipWeapon(WeaponType type)
+    public virtual void EquipWeapon(WeaponTypeObsolete type)
     {
         _equippedWeapon?.UnEquip();
         //if (_equippedWeapon != null) { _equippedWeapon.UnEquip(); }
 
         switch (type)
         {
-            case WeaponType.Ranged:
+            case WeaponTypeObsolete.Ranged:
                 _equippedWeapon = _rangedWeapon;
                 break;
             default:

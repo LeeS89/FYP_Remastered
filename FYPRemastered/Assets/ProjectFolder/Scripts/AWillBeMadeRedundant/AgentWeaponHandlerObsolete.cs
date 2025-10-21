@@ -51,7 +51,7 @@ public class AgentWeaponHandlerObsolete : WeaponHandlerBaseObsolete
        
         
 
-        EquipWeapon(WeaponType.Ranged);
+        EquipWeapon(WeaponTypeObsolete.Ranged);
         //_equippedWeapon = _rangedWeapon;
     }
 
@@ -61,7 +61,7 @@ public class AgentWeaponHandlerObsolete : WeaponHandlerBaseObsolete
         PoolReady = true;
     }
 
-    public override void EquipWeapon(WeaponType type)
+    public override void EquipWeapon(WeaponTypeObsolete type)
     {
         base.EquipWeapon(type);
        // Debug.LogError("Weapon Equipped");

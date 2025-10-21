@@ -79,10 +79,10 @@ public sealed class Rifle : Weapon, IRanged
         }
     }
 
-    public override void Equip(EventManager eventManager, IWeaponOwner owner = null)
+    public override void Equip(IWeaponOwner owner = null)
     {
         EnsureBulletPoolExists();
-        base.Equip(eventManager, owner); 
+        base.Equip(owner); 
     }
 
     private void EnsureBulletPoolExists()
@@ -118,8 +118,8 @@ public sealed class Rifle : Weapon, IRanged
         _anim.SetBool("Fire2", false);
     }
 
-    public void TriggerPressed() => EventManager.TriggerPressed();
-    public void TriggerReleased() => EventManager.TriggerReleased();
+ ///   public void TriggerPressed() => EventManager.TriggerPressed();
+  //  public void TriggerReleased() => EventManager.TriggerReleased();
 
     private void OnPoolReceived(string poolId, IPoolManager pool)
     {
@@ -172,8 +172,9 @@ public sealed class Rifle : Weapon, IRanged
     {
         if (_leftInClip > 0)
         {
-            if (_owner != null &&_owner.IsNPC) EventManager.ReadyToFire(this);
-            else Fire();
+            if (_owner != null) _owner.OnEquippableSignal(EquippableSignal.Ready, equippable: this);
+           // if (_owner != null &&_owner.IsNPC) EventManager.ReadyToFire(this);
+           // else Fire();
         }
         else ClipEmpty();
 
@@ -222,16 +223,18 @@ public sealed class Rifle : Weapon, IRanged
     #region Reload/ Out of ammo notifications
     public void ClipEmpty()
     {
-        if (EventManager == null) return;
+        if (_owner == null) return;
+        //if (EventManager == null) return;
 
         _lockedAndLoaded = false;
-      //  SetWeaponReady(false);
+        //  SetWeaponReady(false);
         // EndAutoFire();
-        if (_clipCount > 0) EventManager.NotifyReload();
+        if (_clipCount > 0) _owner.OnEquippableSignal(EquippableSignal.ClipEmpty, equippable: this);//EventManager.NotifyReload();
         else
         {
             EndAutoFire();
-            EventManager.OutOfAmmo();
+            _owner.OnEquippableSignal(EquippableSignal.Empty, equippable: this);
+            //EventManager.OutOfAmmo();
         }
 
         // For Player => Maybe some text, SFX, voice over etc, and weapon UI update in derived class
@@ -241,7 +244,7 @@ public sealed class Rifle : Weapon, IRanged
     public void Reload()
     {
         // For now, NPC's have infinite ammo, so no need to check for clip count
-        if (!_owner.IsNPC) _clipCount--;
+        if (!_owner.HasUnlimitedAmmo) _clipCount--;
         _leftInClip = _clipCapacity;
         _lockedAndLoaded = true;
         // Reload Audio

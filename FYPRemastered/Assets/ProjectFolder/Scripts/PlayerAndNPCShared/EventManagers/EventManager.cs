@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using ProjectRemaster.Combat;
+using Oculus.Interaction.Input;
 
 public abstract class EventManager : MonoBehaviour
 {
@@ -154,11 +155,11 @@ public abstract class EventManager : MonoBehaviour
     public void Shoot() => OnShoot?.Invoke();
 
     //public event Action On
-    public event Action<IEquippable> OnEquipped;
-    public void InteractableSelected(IEquippable item) => OnEquipped?.Invoke(item);
+    public Func<IEquippable, Handedness, EquipResult> OnEquipped;
+    public EquipResult InteractableSelected(IEquippable item, Handedness hand = Handedness.Left) => OnEquipped?.Invoke(item, hand) ?? EquipResult.Failed;
 
-    public event Action<IEquippable> OnUnEquipped;
-    public void InteractableReleased(IEquippable item) => OnUnEquipped?.Invoke(item);
+    public event Action<IEquippable, Handedness> OnUnEquipped;
+    public void InteractableReleased(IEquippable item, Handedness hand = Handedness.Left) => OnUnEquipped?.Invoke(item, hand);
 
     public event Action OnTriggerPressed;
     public event Action OnTriggerReleased;

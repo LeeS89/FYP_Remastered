@@ -1,60 +1,97 @@
-using Oculus.Interaction.HandGrab;
+using Oculus.Interaction.Input;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class WeaponManager : ComponentEvents, IWeaponOwner
+public class WeaponManager : WeaponManagerBase
 {
-  //  protected Weapon _equippedWeapon;
-    protected IEquippable _equippedItem;
+    //  protected Weapon _equippedWeapon;
 
-    public GameObject GameObject => gameObject;
+    private PlayerEventManager _pEventManager;
+   
 
-    protected bool _isNPC = false;
-    public bool IsNPC => _isNPC;
-
+    private Dictionary<Handedness, IEquippable> _equippableSlots = new(2);
+    
     public Transform Target { get; protected set; } = null;
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
-        _eventManager = eventManager;
-        base.RegisterLocalEvents(eventManager);
-        _eventManager.OnEquipped += EquipWeapon;
-        _eventManager.OnUnEquipped += UnEquipWeapon;
+        _pEventManager = eventManager as PlayerEventManager;
+        base.RegisterLocalEvents(_pEventManager);
     }
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
         base.UnRegisterLocalEvents(eventManager);
-        _eventManager.OnUnEquipped -= EquipWeapon;
-        _eventManager.OnUnEquipped -= UnEquipWeapon;
-        _eventManager = null;
-
+        _pEventManager = null;
     }
 
-
-    protected void EquipWeapon(IEquippable equippable)
+    
+    protected override EquipResult EquipWeapon(IEquippable equippable, Handedness hand)
     {
-        if (equippable == null) return;
+        if (equippable == null) return EquipResult.EquipIsNull;
 
-        if (_equippedItem != null) _equippedItem.UnEquip();
+        foreach (var kv in _equippableSlots) 
+            if (kv.Value == equippable) return EquipResult.AlreadyEquipped;
 
-        _equippedItem = equippable;
-        _equippedItem.Equip(_eventManager, this);
-     
+        if (_equippableSlots[hand] != null) return EquipResult.SlotOccupied;
+
+        _equippableSlots[hand] = equippable;
+      
+        return base.EquipWeapon(equippable);
         // Update weapon UI here if applicable
         // Optionally, parent the weapon to a specific transform (e.g., hand) on derived NPC class
     }
 
-    protected void UnEquipWeapon(IEquippable equippable)
+    protected override void UnEquipWeapon(IEquippable equippable, Handedness hand)
     {
-        if (equippable == null || equippable != _equippedItem) return;
-        if (_equippedItem == null) return;
-        _equippedItem.UnEquip();
-        _equippedItem = null;
+        if (equippable == null) return;
+
+        if (_equippableSlots[hand] == null || _equippableSlots[hand] != equippable) return;
+
+        _equippableSlots[hand] = null;
+        base.UnEquipWeapon(equippable);
+
         // Update weapon UI here if applicable
     }
 
-    public virtual void TryUseWeapon() { } // Should be protected, but needs to be public for testing
+   // public virtual void TryUseWeapon() { } // Should be protected, but needs to be public for testing
 
-    public virtual void StopUsingWeapon() { } // Should be protected, but needs to be public for testing
+   // public virtual void StopUsingWeapon() { } // Should be protected, but needs to be public for testing
 
+    public override void OnEquippableSignal(EquippableSignal signal, IEquippable equippable)
+    {
+        switch (signal)
+        {
+            case EquippableSignal.Ready:
+                if (equippable is IRanged rw) rw.Fire();
+                break;
+            case EquippableSignal.ClipEmpty:
+                break;
+            case EquippableSignal.Empty:
+                break;
+            default:
+                break;
+        }
+
+
+    }
+
+    #region Kept for optional changes
+    private int FindFreeSlot(IEquippable[] slots)
+    {
+        for(int i = 0; i < slots.Length; i++)
+            if (slots[i] == null) return i;
+        return -1;
+    }
+
+    private bool IndexOf(IEquippable[] slots, IEquippable w)
+    {
+        for (int i = 0;i < slots.Length;i++)
+            if (slots[i] == w) return true;
+
+        return false;
+    }
+
+   // private IEquippable[] _slots = new IEquippable[2];
+    #endregion
 }
