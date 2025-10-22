@@ -7,7 +7,7 @@ public sealed class NPCWeaponManager : WeaponManagerBase
 {
     [SerializeField] private List<Weapon> _availableWeapons;
     private EnemyEventManager _eEventManager;
-    private IEquippable _equippedItem;
+    private IEquippable _equippedWeapon;
 
     // private Dictionary<AmmoType, IEquippable> _weaponsByTypeStore = new(5);
 
@@ -15,7 +15,8 @@ public sealed class NPCWeaponManager : WeaponManagerBase
     {
         _eEventManager = eventManager as EnemyEventManager;
         base.RegisterLocalEvents(_eEventManager);
-     
+    
+        _eEventManager.OnProcessAnimCue += OnAnimationEventCallback;
         HasUnlimitedAmmo = true;
 
        /* if(_eventManager is EnemyEventManager em)
@@ -25,31 +26,67 @@ public sealed class NPCWeaponManager : WeaponManagerBase
         }*/
 
     }
-
+/*
     public void Fre()
     {
-        if (_equippedItem is IRanged rw) rw.Fire();
-    }
+        if (_equippedWeapon is IRanged rw) rw.Fire();
+    }*/
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
         base.UnRegisterLocalEvents(eventManager);
+      
+        _eEventManager.OnProcessAnimCue -= OnAnimationEventCallback;
         _eEventManager = null;
     }
+
+
     private bool _isUsing = false;
-    protected override void TryUseWeapon()
+    public override void TryUseWeapon()
     {
-        if (_equippedItem == null) return;
+        if (_equippedWeapon == null) return;
         if (_isUsing) return;
         _isUsing = true;
-        if (_equippedItem is IRanged rw) rw.TryFire(FireRate.FullAutomatic);
+        if (_equippedWeapon != null && _equippedWeapon is IRanged rw) rw.TryUse(FireRate.FullAutomatic); // Add player as target
     }
 
-    protected override void CancelWeaponUse()
+    /*private void Fire()
     {
-        if (_equippedItem == null) return;
+        if (_equippedWeapon != null && _equippedWeapon is IRanged rw) rw.Fire();
+    }*/
+
+
+
+    #region Animation callback events
+    private void OnAnimationEventCallback(AnimationCue cue)
+    {
+        if (_equippedWeapon == null) return;
+        if (_equippedWeapon is IRanged rw) RangedWeaponAnimCallbacks(rw, cue);
+    }
+
+    private void RangedWeaponAnimCallbacks(IRanged ranged, AnimationCue cue)
+    {
+        if (ranged == null) return;
+        switch (cue)
+        {
+            case AnimationCue.Shoot:
+                ranged.Fire();
+                break;
+            case AnimationCue.ReloadComplete:
+                ranged.Reload();
+                break;
+            default:
+                return;
+        }
+    }
+    #endregion
+
+
+    public override void CancelWeaponUse()
+    {
+        if (_equippedWeapon == null) return;
         if (!_isUsing) return;
-        if (_equippedItem is IRanged rw) rw.OnInterupted();
+        if (_equippedWeapon is IRanged rw) rw.OnInterupted();
         _isUsing = false;
     }
 
@@ -57,42 +94,48 @@ public sealed class NPCWeaponManager : WeaponManagerBase
     {
         //if (equippable == null) return;
         
-        if (_equippedItem != null) _equippedItem.UnEquip();
-        _equippedItem = _availableWeapons[0] as IRanged;
-        if (_equippedItem == null) Debug.LogError("Weapon is null");
+        if (_equippedWeapon != null) _equippedWeapon.UnEquip();
+        _equippedWeapon = _availableWeapons[0] as IRanged;
+        if (_equippedWeapon == null) Debug.LogError("Weapon is null");
        // _equippedItem = equippable;
-        _equippedItem.Equip(this);
+        _equippedWeapon.Equip(this);
 
         // Update weapon UI here if applicable
         // Optionally, parent the weapon to a specific transform (e.g., hand) on derived NPC class
     }
 
-    public void Ready(Weapon wp)
+    
+
+    public override EquipResult EquipWeapon(IEquippable equippable, Handedness hand = Handedness.Left)
     {
-       /* if(_eventManager is EnemyEventManager em)
-        {
-            em.AnimationTriggered(AnimationAction.Shoot);
-        }*/
+        if (equippable == null) return EquipResult.EquipIsNull;
+        if (_equippedWeapon != null && _equippedWeapon == equippable) return EquipResult.AlreadyEquipped;
+
+        if(_equippedWeapon != null) UnEquipWeapon(_equippedWeapon);
+        _equippedWeapon = equippable;
+
+        return base.EquipWeapon(_equippedWeapon);
     }
 
-    protected override EquipResult EquipWeapon(IEquippable equippable, Handedness hand = Handedness.Left)
+    #region Equiped Weapon callback cues
+    public override void OnEquippableCue(EquippableCue signal, IEquippable equippable = null)
     {
-        return base.EquipWeapon(equippable);
-    }
-
-    public override void OnEquippableSignal(EquippableSignal signal, IEquippable equippable = null)
-    {
+        AnimationCue cueToBroadcast = AnimationCue.None;
         switch (signal)
         {
-            case EquippableSignal.Ready:
-                if (equippable is IRanged rw) rw.Fire();
+            case EquippableCue.Ready: // Is ready to fire
+                if (equippable is IRanged) cueToBroadcast = AnimationCue.Shoot;
                 break;
-            case EquippableSignal.ClipEmpty:
-                break;
-            case EquippableSignal.Empty:
-                break;
+            case EquippableCue.ClipEmpty:
+                if (equippable is IRanged) cueToBroadcast = AnimationCue.Reload;
+                    break;
             default:
+               // cueToBroadcast = AnimationCue.None;
                 break;
         }
+        _eEventManager.TriggerAnimation(cueToBroadcast);
     }
+    #endregion
+
+
 }

@@ -162,23 +162,23 @@ public class EnemyAnimController
 
 
 
-    private void PlayAnimationType(AnimationAction action)
+    private void PlayAnimationType(AnimationCue action)
     {
         switch (action)
         {
-            case AnimationAction.Look:
+            case AnimationCue.Look:
                 LookAround();
                 break;
-            case AnimationAction.Shoot:
+            case AnimationCue.Shoot:
                 Shoot();
                 break;
-            case AnimationAction.Dead:
+            case AnimationCue.Dead:
                 DeadAnimation();
                 break;
-            case AnimationAction.Reload:
+            case AnimationCue.Reload:
                 Reload();
                 break;
-            case AnimationAction.Melee:
+            case AnimationCue.Melee:
                 MeleeAttack();
                 break;
             default:

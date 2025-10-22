@@ -58,7 +58,7 @@ public class Gun
             //_reloadComplete = IsReloading;
             //_waitUntilFinishedReloading = new WaitUntil(_reloadComplete);
 
-            _enemyEventManager.OnFireRangedWeapon += Shoot;
+            _enemyEventManager.OnFireWeapon += Shoot;
             _enemyEventManager.OnTargetSeen += UpdateTargetVisibility;
             _enemyEventManager.OnAimingLayerReady += SetAimReady;
             //_enemyEventManager.OnFacingTarget += SetIsFacingTarget;
@@ -66,7 +66,7 @@ public class Gun
 
 
             _request = new ResourceRequest();
-            _enemyEventManager.OnReloading += Reload;
+          //  _enemyEventManager.OnReloading += Reload;
           /*  GameManager.OnPlayerDeathStatusChanged += PlayerHasDied;
             GameManager.OnPlayerRespawn += PlayerHasRespawned;*/
            
@@ -242,14 +242,14 @@ public class Gun
 
         if (_ammo-- > 0)
         {
-            _enemyEventManager.AnimationTriggered(AnimationAction.Shoot);
+            _enemyEventManager.TriggerAnimation(AnimationCue.Shoot);
         }
         else
         {
 
             _ammo = 5;
 
-            _enemyEventManager.AnimationTriggered(AnimationAction.Reload);
+            _enemyEventManager.TriggerAnimation(AnimationCue.Reload);
         }
     }
 
@@ -278,14 +278,14 @@ public class Gun
         _isAimReady = false;
         _isShooting = false;
         CoroutineRunner.Instance.StopCoroutine(FiringSequence());
-        _enemyEventManager.OnFireRangedWeapon -= Shoot;
+        _enemyEventManager.OnFireWeapon -= Shoot;
         _enemyEventManager.OnTargetSeen -= UpdateTargetVisibility;
         _enemyEventManager.OnAimingLayerReady -= SetAimReady;
       //  _enemyEventManager.OnFacingTarget -= SetIsFacingTarget;
 
 
         _enemyEventManager.OnMelee -= SetMeleeTriggered;
-        _enemyEventManager.OnReloading -= Reload;
+      //  _enemyEventManager.OnReloading -= Reload;
        /* GameManager.OnPlayerDeathStatusChanged -= PlayerHasDied;
         GameManager.OnPlayerRespawn -= PlayerHasRespawned;*/
        // _poolManager = null;

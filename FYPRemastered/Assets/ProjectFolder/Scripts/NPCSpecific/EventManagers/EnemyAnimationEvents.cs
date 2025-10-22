@@ -136,7 +136,7 @@ public class EnemyAnimationEvents : ComponentEvents
 
     public void OnShoot()
     {
-        _enemyEventManager.FireRangedWeapon();
+        _enemyEventManager.FireWeapon();
     }
 
     public void MeleeTriggered(int meleeState)
@@ -168,54 +168,63 @@ public class EnemyAnimationEvents : ComponentEvents
         _enemyEventManager.ChangeAnimatorLayerWeight(EnemyAnimController.AnimationLayer.LookAround, 1, 0, 0.5f);
     }*/
 
-    public AnimationAction currentAction = AnimationAction.None;
+    public AnimationCue currentAction = AnimationCue.None;
 
 
-    private void OnAnimationEventReceived(AnimationAction action)
+    private void OnAnimationEventReceived(AnimationCue action)
     {
-        if (currentAction != AnimationAction.None)
+        if (currentAction != AnimationCue.None)
         {
             OnAnimationEventCompleteOrInterupted(currentAction);
         }
 
         currentAction = action;
 
-        switch (action)
+       /* switch (currentAction)
         {
-            case AnimationAction.Reload:
-                _enemyEventManager.Reloading(true);
+            case AnimationCue.Reload:
+                _enemyEventManager.Reload(action);
+               // _enemyEventManager.Reloading(true);
                 break;
-            case AnimationAction.Melee:
+            case AnimationCue.Melee:
                 _enemyEventManager.MeleeTriggered(true);
                 break;
             default:
                 Debug.Log("No action specified");
                 break;
-        }
+        }*/
 
-
+        _enemyEventManager.SendAnimCue(currentAction);
     }
 
-    private void OnAnimationEventCompleteOrInterupted(AnimationAction completedAction)
+    private void OnAnimationEventCompleteOrInterupted(AnimationCue completedAction)
     {
-        currentAction = AnimationAction.None;
+        currentAction = AnimationCue.None;
 
+        
+        AnimationCue cueToBroadcast;
         switch (completedAction)
         {
-            case AnimationAction.Reload:
-                _enemyEventManager.Reloading(false);
+            case AnimationCue.Reload:
+                cueToBroadcast = AnimationCue.ReloadComplete;
+               // _enemyEventManager.Reload(completedAction);
+               // _enemyEventManager.Reloading(false);
                 animator.SetBool("reloading", false);
                 break;
-            case AnimationAction.Melee:
+            case AnimationCue.Melee:
+                cueToBroadcast = AnimationCue.Melee;
                 _enemyEventManager.MeleeTriggered(false);
                 break;
-            case AnimationAction.Switch:
+            case AnimationCue.Switch:
+                cueToBroadcast = AnimationCue.Switch;
                 animator.SetBool("Switch", false);
                 break;
             default:
+                cueToBroadcast = AnimationCue.None;
                 Debug.Log("No action specified");
                 break;
         }
+        _enemyEventManager.SendAnimCue(cueToBroadcast);
     }
 
     public bool _testSwitch = false;

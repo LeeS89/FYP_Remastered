@@ -136,9 +136,9 @@ public abstract class EventManager : MonoBehaviour
     }
 
     // Gun Events
-    public event Action OnFireRangedWeapon;
+    public event Action OnFireWeapon;
 
-    public void FireRangedWeapon() => OnFireRangedWeapon?.Invoke();
+    public void FireWeapon() => OnFireWeapon?.Invoke();
 
 
 

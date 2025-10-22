@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ProjectRemaster.Combat
 {
-    public abstract class Weapon : MonoBehaviour, IWeapon
+    public abstract class Weapon : EquippableBase, IWeapon
     {
         [SerializeField] protected Animator _anim;
        // public EventManager EventManager { get; protected set; }
@@ -11,18 +11,17 @@ namespace ProjectRemaster.Combat
       
         public Transform Target { get; protected set; } = null;
 
-        public bool Equipped { get; protected set; } = false;
 
         // public bool WeaponReady { get; protected set; } = false;
 
-        public virtual void Equip(IWeaponOwner owner)
+        public override void Equip(IWeaponOwner owner)
         {
            // EventManager = eventManager;
             _owner = owner;
             Equipped = true;
         }
 
-        public virtual void UnEquip()
+        public override void UnEquip()
         {
             Equipped = false;
          //   EventManager = null;
@@ -33,5 +32,8 @@ namespace ProjectRemaster.Combat
         public virtual void ResetAnimator() { }
 
         protected virtual void PlayAnimations() { }
+
+       // public virtual void HandleOwnerCue(EquippableCue cue) { }
+       
     }
 }

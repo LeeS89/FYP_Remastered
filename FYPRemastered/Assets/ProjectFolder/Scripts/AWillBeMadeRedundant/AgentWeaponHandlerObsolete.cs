@@ -39,7 +39,7 @@ public class AgentWeaponHandlerObsolete : WeaponHandlerBaseObsolete
       //  _waitUntilShotReady = new WaitUntil(() => _shotIsReady);
         _shotInterval = new WaitForSeconds(0.25f);
 
-        _eventManager.OnFireRangedWeapon += FireRangedweapon;
+        _eventManager.OnFireWeapon += FireRangedweapon;
         _eventManager.OnAimingLayerReady += AimStateChanged;
         _eventManager.OnFacingTarget += FacingTargetStatusChanged;
         _eventManager.OnMelee += MeleeTriggered;
@@ -150,7 +150,7 @@ public class AgentWeaponHandlerObsolete : WeaponHandlerBaseObsolete
         if (!PoolReady) return;
         if (CanFire())
         {
-            _eventManager.AnimationTriggered(AnimationAction.Shoot);
+            _eventManager.TriggerAnimation(AnimationCue.Shoot);
         }
         _shotIsReady = false;
     }
@@ -159,7 +159,7 @@ public class AgentWeaponHandlerObsolete : WeaponHandlerBaseObsolete
 
     protected override void OutOfAmmo()
     {
-        _eventManager.AnimationTriggered(AnimationAction.Reload);
+        _eventManager.TriggerAnimation(AnimationCue.Reload);
     }
 
     protected override void ReloadStateChanged(bool isReloading)
@@ -184,7 +184,7 @@ public class AgentWeaponHandlerObsolete : WeaponHandlerBaseObsolete
 
     public override void OnInstanceDestroyed()
     {
-        _eventManager.OnFireRangedWeapon -= FireRangedweapon;
+        _eventManager.OnFireWeapon -= FireRangedweapon;
         _eventManager.OnAimingLayerReady -= AimStateChanged;
         _eventManager.OnFacingTarget -= FacingTargetStatusChanged;
         _eventManager.OnMelee -= MeleeTriggered;
@@ -205,7 +205,7 @@ public class AgentWeaponHandlerObsolete : WeaponHandlerBaseObsolete
         _eventManager = eventManager;
 
         //_eventManager.OnTryShoot += TryShootgun;
-        _eventManager.OnFireRangedWeapon += FireRangedweapon;
+        _eventManager.OnFireWeapon += FireRangedweapon;
         _eventManager.OnAimingLayerReady += AimStateChanged;
         _eventManager.OnFacingTarget += FacingTargetStatusChanged;
         _eventManager.OnMelee += MeleeTriggered;

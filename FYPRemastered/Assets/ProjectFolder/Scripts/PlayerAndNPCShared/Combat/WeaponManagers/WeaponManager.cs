@@ -7,9 +7,13 @@ public class WeaponManager : WeaponManagerBase
     //  protected Weapon _equippedWeapon;
 
     private PlayerEventManager _pEventManager;
-   
 
-    private Dictionary<Handedness, IEquippable> _equippableSlots = new(2);
+
+    private Dictionary<Handedness, IEquippable> _equippableSlots = new(2)
+    {
+        { Handedness.Left,  null },
+        { Handedness.Right, null },
+    };
     
     public Transform Target { get; protected set; } = null;
 
@@ -17,6 +21,8 @@ public class WeaponManager : WeaponManagerBase
     {
         _pEventManager = eventManager as PlayerEventManager;
         base.RegisterLocalEvents(_pEventManager);
+
+
     }
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
@@ -26,7 +32,7 @@ public class WeaponManager : WeaponManagerBase
     }
 
     
-    protected override EquipResult EquipWeapon(IEquippable equippable, Handedness hand)
+    public override EquipResult EquipWeapon(IEquippable equippable, Handedness hand)
     {
         if (equippable == null) return EquipResult.EquipIsNull;
 
@@ -58,16 +64,16 @@ public class WeaponManager : WeaponManagerBase
 
    // public virtual void StopUsingWeapon() { } // Should be protected, but needs to be public for testing
 
-    public override void OnEquippableSignal(EquippableSignal signal, IEquippable equippable)
+    public override void OnEquippableCue(EquippableCue signal, IEquippable equippable)
     {
         switch (signal)
         {
-            case EquippableSignal.Ready:
+            case EquippableCue.Ready:
                 if (equippable is IRanged rw) rw.Fire();
                 break;
-            case EquippableSignal.ClipEmpty:
+            case EquippableCue.ClipEmpty:
                 break;
-            case EquippableSignal.Empty:
+            case EquippableCue.Empty:
                 break;
             default:
                 break;

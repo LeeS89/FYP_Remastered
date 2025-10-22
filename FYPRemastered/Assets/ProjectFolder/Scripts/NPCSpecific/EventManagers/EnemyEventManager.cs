@@ -15,7 +15,7 @@ public class EnemyEventManager : EventManager
     //public event Action<AIDestinationRequestData> OnPathRequested;
 
     // Animation events
-    public event Action<AnimationAction> OnAnimationTriggered;
+    public event Action<AnimationCue> OnAnimationTriggered;
     public event Action<float, float> OnSpeedChanged;
     public event Action<AnimationLayer, float, float, float, bool> OnChangeAnimatorLayerWeight;
     public event Action<bool> OnAimingLayerReady;
@@ -99,7 +99,7 @@ public class EnemyEventManager : EventManager
     /// Animation actions other than Locomotion i.e. Melee, Look around etc
     /// </summary>
     /// <param name="action"></param>
-    public void AnimationTriggered(AnimationAction action)
+    public void TriggerAnimation(AnimationCue action)
     {
         OnAnimationTriggered?.Invoke(action);
     }
@@ -239,4 +239,11 @@ public class EnemyEventManager : EventManager
     public event Action<bool> OnReloading;
 
     public void Reloading(bool isReloading) => OnReloading?.Invoke(isReloading);
+
+    public event Action<AnimationCue> OnReload;
+
+    public void Reload(AnimationCue cue) => OnReload?.Invoke(cue);
+
+    public event Action<AnimationCue> OnProcessAnimCue;
+    public void SendAnimCue(AnimationCue cue) => OnProcessAnimCue?.Invoke(cue);
 }

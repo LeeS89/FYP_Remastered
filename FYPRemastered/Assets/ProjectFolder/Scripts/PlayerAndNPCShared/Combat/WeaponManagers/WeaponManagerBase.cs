@@ -10,7 +10,7 @@ public abstract class WeaponManagerBase : ComponentEvents, IWeaponOwner
    
 
     // Called from the currently equipped equippable via the IWeaponOwner interface
-    public abstract void OnEquippableSignal(EquippableSignal signal, IEquippable equippable);
+    public abstract void OnEquippableCue(EquippableCue signal, IEquippable equippable);
    
 
     public override void RegisterLocalEvents(EventManager eventManager)
@@ -28,7 +28,7 @@ public abstract class WeaponManagerBase : ComponentEvents, IWeaponOwner
     }
 
 
-    protected virtual EquipResult EquipWeapon(IEquippable equippable, Handedness hand = Handedness.Left)
+    public virtual EquipResult EquipWeapon(IEquippable equippable, Handedness hand = Handedness.Left)
     {
         equippable.Equip(owner: this);
         return EquipResult.Success;
@@ -36,9 +36,9 @@ public abstract class WeaponManagerBase : ComponentEvents, IWeaponOwner
 
     protected virtual void UnEquipWeapon(IEquippable equippable, Handedness hand = Handedness.Left) => equippable.UnEquip();
 
-    protected virtual void TryUseWeapon() { }
+    public virtual void TryUseWeapon() { }
 
-    protected virtual void CancelWeaponUse() { }
+    public virtual void CancelWeaponUse() { }
 
     protected virtual void ChangeFireRate(FireRate rate) { }
 

@@ -156,9 +156,15 @@ public sealed class Rifle : Weapon, IRanged
     #endregion
 
     #region Firing Region
-    public void TryFire() => TryFire(_defaultFireRate);
+    public override void HandleOwnerCue(EquippableCue cue)
+    {
+        if(cue == EquippableCue.Fire) Fire();
+    }
 
-    public void TryFire(FireRate rate = FireRate.SingleAutomatic, Transform target = null)
+
+    public void TryFire() => TryUse(_defaultFireRate);
+
+    public void TryUse(FireRate rate = FireRate.SingleAutomatic, Transform target = null)
     {
         if (!Equipped) return;
         Target = target;
@@ -172,7 +178,7 @@ public sealed class Rifle : Weapon, IRanged
     {
         if (_leftInClip > 0)
         {
-            if (_owner != null) _owner.OnEquippableSignal(EquippableSignal.Ready, equippable: this);
+            if (_owner != null) _owner.OnEquippableCue(EquippableCue.Ready, equippable: this);
            // if (_owner != null &&_owner.IsNPC) EventManager.ReadyToFire(this);
            // else Fire();
         }
@@ -229,11 +235,11 @@ public sealed class Rifle : Weapon, IRanged
         _lockedAndLoaded = false;
         //  SetWeaponReady(false);
         // EndAutoFire();
-        if (_clipCount > 0) _owner.OnEquippableSignal(EquippableSignal.ClipEmpty, equippable: this);//EventManager.NotifyReload();
+        if (_clipCount > 0) _owner.OnEquippableCue(EquippableCue.ClipEmpty, equippable: this);//EventManager.NotifyReload();
         else
         {
             EndAutoFire();
-            _owner.OnEquippableSignal(EquippableSignal.Empty, equippable: this);
+            _owner.OnEquippableCue(EquippableCue.Empty, equippable: this);
             //EventManager.OutOfAmmo();
         }
 

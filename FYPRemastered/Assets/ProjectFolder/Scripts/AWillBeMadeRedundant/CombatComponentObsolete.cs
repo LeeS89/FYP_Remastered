@@ -290,7 +290,7 @@ public class CombatComponentObsolete : BaseAbilitiesObsolete
     private void PerformMeleeAttack()
     {
         _enemyEventManager.PursuitConditionChanged(false);
-        _enemyEventManager.AnimationTriggered(AnimationAction.Melee);
+        _enemyEventManager.TriggerAnimation(AnimationCue.Melee);
     }
 
     private void EvaluateMeleeAttackResults()
@@ -501,7 +501,7 @@ public class CombatComponentObsolete : BaseAbilitiesObsolete
 
     protected override void OutOfAmmo()
     {
-        _enemyEventManager.AnimationTriggered(AnimationAction.Reload);
+        _enemyEventManager.TriggerAnimation(AnimationCue.Reload);
     }
    /* protected void UpdateFOVResults(bool targetSeen)
     {

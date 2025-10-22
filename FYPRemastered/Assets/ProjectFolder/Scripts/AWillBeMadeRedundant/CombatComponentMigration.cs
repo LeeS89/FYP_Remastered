@@ -1,7 +1,10 @@
+
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+//using RangeAttribute = UnityEngine.RangeAttribute;
 
 public class CombatComponentMigration : BaseAbilitiesMigration
 {
@@ -56,6 +59,9 @@ public class CombatComponentMigration : BaseAbilitiesMigration
 
     public NPCWeaponManager _weaponManager;
     private FieldOfViewManager _fovhandler;
+
+    [SerializeField] private List<EquippableBase> _availableWeapons;
+    private Dictionary<EquippableType, IEquippable> _weaponStore = new(5);
    // private FieldOfViewParamsObsolete _fovParams;
 
 
@@ -137,6 +143,15 @@ public class CombatComponentMigration : BaseAbilitiesMigration
        
 
         RegisterGlobalEvents();
+
+        foreach(var eq in _availableWeapons)
+        {
+            EquippableType type = eq.EquippableType;
+            if(!_weaponStore.TryAdd(type, eq))
+            {
+                Debug.LogError("Cannot Add duplicate weapons");
+            }
+        }
 
     }
 
@@ -298,7 +313,7 @@ public class CombatComponentMigration : BaseAbilitiesMigration
     private void PerformMeleeAttack()
     {
         _enemyEventManager.PursuitConditionChanged(false);
-        _enemyEventManager.AnimationTriggered(AnimationAction.Melee);
+        _enemyEventManager.TriggerAnimation(AnimationCue.Melee);
     }
 
   /*  private void EvaluateMeleeAttackResults()
@@ -330,7 +345,8 @@ public class CombatComponentMigration : BaseAbilitiesMigration
         base.OnSceneStarted();
         _canUpdateWeapon = true;
         _updateFOV = true;
-        _weaponManager.Equip();
+        EquipResult result = _weaponManager.EquipWeapon(_weaponStore[EquippableType.Poison]);
+        Debug.LogError("Weapon equip result: "+result.ToString());
     }
 
 
@@ -345,8 +361,8 @@ public class CombatComponentMigration : BaseAbilitiesMigration
         _enemyEventManager.TargetSeen(seen);
         _enemyEventManager.FacingTarget(inShootingAngle);
 
-       // if(seen) _weaponManager.TryUseWeapon();
-         //else _weaponManager.StopUsingWeapon();
+        if(seen) _weaponManager.TryUseWeapon();
+         else _weaponManager.CancelWeaponUse();
         //SetFacingtarget(inShootingAngle);
     }
 
@@ -416,7 +432,7 @@ public class CombatComponentMigration : BaseAbilitiesMigration
 
     protected override void OutOfAmmo()
     {
-        _enemyEventManager.AnimationTriggered(AnimationAction.Reload);
+        _enemyEventManager.TriggerAnimation(AnimationCue.Reload);
     }
    
 

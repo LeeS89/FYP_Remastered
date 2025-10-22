@@ -1,12 +1,13 @@
 
 
-public enum AnimationAction
+public enum AnimationCue
 {
     None,
     Shoot,
     Dead,
     Look,
     Reload,
+    ReloadComplete,
     Melee,
     Switch
 }

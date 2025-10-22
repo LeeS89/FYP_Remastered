@@ -23,14 +23,17 @@ public enum FireRate
     FullAutomatic
 }
 
-public enum EquippableSignal
+public enum EquippableCue
 {
     Ready,
     Empty,
-    ClipEmpty
+    ClipEmpty,
+    Fire
 }
 
-public enum WeaponType
+//public enum 
+
+public enum EquippableType
 {
     Basic,
     Poison,

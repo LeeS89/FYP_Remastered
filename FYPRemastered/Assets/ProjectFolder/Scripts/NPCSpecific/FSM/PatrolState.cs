@@ -87,7 +87,7 @@ public class PatrolState : EnemyState
                 yield return null;
             }
 
-            _eventManager.AnimationTriggered(AnimationAction.Look);
+            _eventManager.TriggerAnimation(AnimationCue.Look);
 
             float _delayTime = Random.Range(0, _randomWaitTime);
             float elapsedTime = 0.0f;

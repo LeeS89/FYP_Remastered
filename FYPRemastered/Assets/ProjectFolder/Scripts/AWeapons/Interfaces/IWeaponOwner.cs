@@ -6,7 +6,7 @@ public interface IWeaponOwner
   //  bool IsNPC { get; }
 
    // void NotifyWeaponReady(bool ready);
-    void OnEquippableSignal(EquippableSignal signal, IEquippable equippable);
+    void OnEquippableCue(EquippableCue signal, IEquippable equippable);
 
     bool HasUnlimitedAmmo { get; }
 

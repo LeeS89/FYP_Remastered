@@ -15,7 +15,7 @@ public class DeathState : EnemyState
         _eventManager.ChangeAnimatorLayerWeight(EnemyAnimController.AnimationLayer.Alert, 1, 0, 0.5f);
         _eventManager.ChangeAnimatorLayerWeight(EnemyAnimController.AnimationLayer.Combat, 1, 0, 0.5f);
         _eventManager.OnDeathAnimationComplete += DeathAnimationComplete;
-        _eventManager.AnimationTriggered(AnimationAction.Dead);
+        _eventManager.TriggerAnimation(AnimationCue.Dead);
         _deathAnimationComplete = false;
         _countdown = _timeToDisable;
     }
