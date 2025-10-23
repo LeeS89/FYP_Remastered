@@ -10,6 +10,6 @@ public interface IEquippable
 
     bool Equipped { get; }
 
-    EquippableType EquippableType { get; }
+    WeaponType EquippableType { get; }
 
 }

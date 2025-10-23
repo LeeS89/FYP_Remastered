@@ -20,6 +20,26 @@ public class FieldOfViewManager
     private AITraceComponent _traceComponent;
     private float _deescalationTimer;
 
+
+    // More NEW
+    private Action<bool> OnVisibility;
+    private Action<bool> OnAimCheck;
+    private Action<bool> OnMeleeRangeCheck;
+    //
+
+    public FieldOfViewManager(
+        FieldOfViewParams fovParams, 
+        Action<bool> visibilityCB, 
+        Action<bool> aimCB = null, 
+        Action<bool> meleeCB = null, 
+        AITraceComponent traceComp = null)
+    {
+        _params = fovParams;
+        OnVisibility = visibilityCB;
+        OnAimCheck = aimCB;
+        OnMeleeRangeCheck = meleeCB;
+    }
+
     public FieldOfViewManager(EnemyEventManager eventManager, FieldOfViewParams fovParams, AITraceComponent traceComponent = null)
     {
         _eventManager = eventManager;

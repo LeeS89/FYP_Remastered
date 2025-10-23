@@ -61,7 +61,7 @@ public class CombatComponentMigration : BaseAbilitiesMigration
     private FieldOfViewManager _fovhandler;
 
     [SerializeField] private List<EquippableBase> _availableWeapons;
-    private Dictionary<EquippableType, IEquippable> _weaponStore = new(5);
+    private Dictionary<WeaponType, IEquippable> _weaponStore = new(5);
    // private FieldOfViewParamsObsolete _fovParams;
 
 
@@ -146,7 +146,7 @@ public class CombatComponentMigration : BaseAbilitiesMigration
 
         foreach(var eq in _availableWeapons)
         {
-            EquippableType type = eq.EquippableType;
+            WeaponType type = eq.EquippableType;
             if(!_weaponStore.TryAdd(type, eq))
             {
                 Debug.LogError("Cannot Add duplicate weapons");
@@ -242,7 +242,7 @@ public class CombatComponentMigration : BaseAbilitiesMigration
     {
         if (!_updateFOV || _fovhandler == null) { return; }
 
-        _fovhandler.Tick();
+        _fovhandler?.Tick();
 
 
     }
@@ -345,7 +345,7 @@ public class CombatComponentMigration : BaseAbilitiesMigration
         base.OnSceneStarted();
         _canUpdateWeapon = true;
         _updateFOV = true;
-        EquipResult result = _weaponManager.EquipWeapon(_weaponStore[EquippableType.Poison]);
+        EquipResult result = _weaponManager.EquipWeapon(_weaponStore[WeaponType.Poison]);
         Debug.LogError("Weapon equip result: "+result.ToString());
     }
 

@@ -4,9 +4,9 @@ public abstract class EquippableBase : MonoBehaviour, IEquippable
 {
     public bool Equipped { get; protected set; } = false;
 
-    public EquippableType EquippableType => type;
+    public WeaponType EquippableType => type;
 
-    [SerializeField] protected EquippableType type;
+    [SerializeField] protected WeaponType type;
 
     public abstract void Equip(IWeaponOwner owner = null);
 

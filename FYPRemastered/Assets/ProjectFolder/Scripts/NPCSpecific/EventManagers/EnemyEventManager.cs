@@ -246,4 +246,8 @@ public class EnemyEventManager : EventManager
 
     public event Action<AnimationCue> OnProcessAnimCue;
     public void SendAnimCue(AnimationCue cue) => OnProcessAnimCue?.Invoke(cue);
+
+    public Func<State, StateChangeResult> OnChangeState;
+
+    public StateChangeResult ChangeState(State newState) => OnChangeState?.Invoke(newState) ?? StateChangeResult.Success;
 }

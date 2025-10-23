@@ -33,7 +33,7 @@ public enum EquippableCue
 
 //public enum 
 
-public enum EquippableType
+public enum WeaponType
 {
     Basic,
     Poison,
@@ -48,5 +48,22 @@ public enum EquipResult
     AlreadyEquipped,
     Failed,
     EquipIsNull
+}
+
+public enum State
+{
+    Patrol,
+    Chase,
+    Stationary,
+    Flank,
+    Cover,
+    Death
+}
+
+public enum StateChangeResult
+{
+    Success,
+    AlreadyInState,
+    Failed
 }
 
