@@ -37,7 +37,9 @@ public abstract class NPCControllerBase : ComponentEvents
 
     protected abstract void OnMeleeRangeEnter(bool targetInRange);
 
-    protected abstract void ChangeState(State state);
+    protected abstract void ChangeState(State state, Transform targetPos = null);
+
+    protected abstract void SetAndChaseTarget(Transform targetPosition);
 
     protected abstract void Engage();
 

@@ -247,7 +247,14 @@ public class EnemyEventManager : EventManager
     public event Action<AnimationCue> OnProcessAnimCue;
     public void SendAnimCue(AnimationCue cue) => OnProcessAnimCue?.Invoke(cue);
 
-    public Func<State, StateChangeResult> OnChangeState;
 
-    public StateChangeResult ChangeState(State newState) => OnChangeState?.Invoke(newState) ?? StateChangeResult.Success;
+    /// NEW FSM SETUP with NPC controller
+
+    public Func<State, Transform, AlertStatus, StateChangeResult> OnChangeState;
+
+    public StateChangeResult ChangeState(State newState, Transform targetPos = null, AlertStatus status = AlertStatus.None) => OnChangeState?.Invoke(newState, targetPos, status) ?? StateChangeResult.Success;
+
+    public Action<Transform> OnUpdateChaseTarget;
+
+    public void UpdateChaseTarget(Transform target) => OnUpdateChaseTarget?.Invoke(target);
 }

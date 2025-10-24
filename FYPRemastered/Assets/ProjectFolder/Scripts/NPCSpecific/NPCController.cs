@@ -2,10 +2,17 @@ using UnityEngine;
 
 public class NPCController : NPCControllerBase
 {
-    protected override void ChangeState(State state)
+    protected override void ChangeState(State state, Transform target = null)
     {
-        StateChangeResult result = _eEventManager.ChangeState(state);
+        StateChangeResult result = _eEventManager.ChangeState(state, target);
         if(result == StateChangeResult.Success) CurrentState = state;
+    }
+
+    protected override void SetAndChaseTarget(Transform targetPosition)
+    {
+        if (CurrentState == State.Death) return;
+        else if(CurrentState == State.Chase) _eEventManager.UpdateChaseTarget(targetPosition);
+        else ChangeState(State.Chase, targetPosition);
     }
 
     protected override void Engage()
@@ -32,4 +39,6 @@ public class NPCController : NPCControllerBase
     {
         throw new System.NotImplementedException();
     }
+
+   
 }
