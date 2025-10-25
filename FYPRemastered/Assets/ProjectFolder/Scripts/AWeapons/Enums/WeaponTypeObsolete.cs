@@ -67,3 +67,18 @@ public enum StateChangeResult
     Failed
 }
 
+public enum MovementIntent
+{
+    Patrol,
+    FollowTarget,
+    TakeCover,
+    Flee,
+    SearchArea
+}
+
+public enum ReloadPolicy
+{
+    InPlace,
+    TakecoverThenReload
+}
+
