@@ -41,6 +41,8 @@ public abstract class NPCControllerBase : ComponentEvents
 
     protected abstract void SetAndChaseTarget(Transform targetPosition);
 
+    protected abstract void OnPathValidationResult(bool status, MovementIntent currentIntent);
+
     protected abstract void Engage();
 
     protected abstract void OnDamageTaken(float remainingHealth);

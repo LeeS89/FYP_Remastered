@@ -71,6 +71,7 @@ public enum MovementIntent
 {
     Patrol,
     FollowTarget,
+    FollowGroup,
     TakeCover,
     Flee,
     SearchArea

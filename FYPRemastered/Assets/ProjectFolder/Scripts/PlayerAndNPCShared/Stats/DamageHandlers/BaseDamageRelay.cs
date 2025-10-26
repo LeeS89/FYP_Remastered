@@ -1,11 +1,17 @@
 using UnityEngine;
 
+[RequireComponent(typeof(Collider))]
 public class BaseDamageRelay : ComponentEvents, IDamageable
 {
+    [SerializeField] private Transform _parentTransform;
+    private Collider _targetableCollider;
+   
+
     public override void RegisterLocalEvents(EventManager eventManager)
     {
         //base.RegisterLocalEvents(eventManager);
         _eventManager = eventManager;
+        _targetableCollider = GetComponent<Collider>();
     }
 
 
@@ -33,6 +39,9 @@ public class BaseDamageRelay : ComponentEvents, IDamageable
     }
 
     public bool _testDeath = false;
+
+    
+
     private void Update()
     {
         if (_testDeath)
@@ -47,4 +56,12 @@ public class BaseDamageRelay : ComponentEvents, IDamageable
         base.OnSceneComplete();
         _eventManager = null;
     }
+
+    public bool IsMoving { get; private set; } = false;
+
+    public Vector3 GetTargetablePosition()
+        => _parentTransform == null ? transform.position : _parentTransform.position;
+
+    public Collider GetTargetableCollider() => _targetableCollider;
+    
 }

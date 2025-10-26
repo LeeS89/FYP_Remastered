@@ -40,5 +40,17 @@ public class NPCController : NPCControllerBase
         throw new System.NotImplementedException();
     }
 
-   
+    protected override void OnPathValidationResult(bool status, MovementIntent currentIntent)
+    {
+        // if status == false
+        // and currentIntent == FollowTarget
+        // Send new policy to follow group
+        // if currentIntent == FollowGroup
+        // new policy to Hold position
+
+        // if status == true
+        // and currentIntent == FollowGroup
+
+        
+    }
 }

@@ -145,7 +145,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void SetPlayer(GameObject player)
+    public void SetPlayer(GameObject player) // Obsolete
     {
         if (player != null)
         {
@@ -199,6 +199,13 @@ public class GameManager : MonoBehaviour
         };
         
         return playerPart;
+    }
+
+    public bool TryGetPlayer(out ITargetable player)
+    {
+        if (Player == null) { player = null; return false; }
+        player = Player.GetComponentInChildren<ITargetable>();
+        return player != null;
     }
 
     public Collider GetPlayerCollider(PlayerPart part)

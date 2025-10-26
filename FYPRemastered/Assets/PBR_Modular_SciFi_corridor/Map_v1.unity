@@ -148088,6 +148088,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bee573a46eb891940b1392ede30cf816, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _parentTransform: {fileID: 0}
   _testDeath: 0
 --- !u!64 &2162724135698998944
 MeshCollider:
