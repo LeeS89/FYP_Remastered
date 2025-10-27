@@ -3,6 +3,9 @@ using UnityEngine;
 
 public class TargetHandle
 {
+    private ITargetable _primaryTarget;
+    private ITargetable _secondaryTarget;
+
     private ITargetable _followTarget;
     public ITargetable _attackTarget;
 
@@ -11,13 +14,33 @@ public class TargetHandle
     public Transform FollowTarget { get; private set; } = null;
     public Vector3 LastKnownTargetPos { get; private set; }
 
-    public Collider GetAttackTarget() => _attackTarget?.GetTargetableCollider();
-    public Vector3? GetFollowTarget() => _followTarget?.GetTargetablePosition();
-
-
-    public void SetAttackTarget()
+    public Collider GetAttackTarget(AttackTarget target)
     {
-        if(!GameManager.Instance.TryGetPlayer(out _attackTarget))
+        if (target == AttackTarget.Primary) return _primaryTarget?.GetTargetableCollider();
+        else return _secondaryTarget?.GetTargetableCollider();
+    }
+    public Vector3? GetFollowTarget(MovementIntent intent)
+    {
+        Vector3? target;
+        switch (intent)
+        {
+            case MovementIntent.FollowPrimary:
+                target = _primaryTarget?.GetTargetablePosition();
+                break;
+            case MovementIntent.FollowSecondary:
+                target = _secondaryTarget?.GetTargetablePosition();
+                break;
+            default:
+                target = null;
+                break;
+        }
+        return target;
+    }
+
+
+    public void GetPrimaryTarget()
+    {
+        if(!GameManager.Instance.TryGetPlayer(out _primaryTarget))
         {
 #if UNITY_EDITOR
             Debug.LogError("Player ITargetable not found");

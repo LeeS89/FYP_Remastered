@@ -70,11 +70,23 @@ public enum StateChangeResult
 public enum MovementIntent
 {
     Patrol,
-    FollowTarget,
-    FollowGroup,
+    FollowPrimary,
+    FollowSecondary,
     TakeCover,
     Flee,
     SearchArea
+}
+
+public enum AttackTarget
+{
+    Primary,
+    Secondary
+}
+
+public enum SanityStatus
+{
+    Normal,
+    Confused
 }
 
 public enum ReloadPolicy

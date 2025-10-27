@@ -9,6 +9,10 @@ public abstract class NPCControllerBase : ComponentEvents
     protected Action<bool> OnVisibilityCallback;
     protected Action<bool> OnAimCheckCallback;
     protected Action<bool> OnMeleeRangeCheckCallback;
+    protected FSMPolicy? _currentPolicy;
+    protected uint _currentPolicyVersion;
+
+
     public State CurrentState { get; protected set; }
 
     public override void RegisterLocalEvents(EventManager eventManager)
@@ -41,11 +45,13 @@ public abstract class NPCControllerBase : ComponentEvents
 
     protected abstract void SetAndChaseTarget(Transform targetPosition);
 
-    protected abstract void OnPathValidationResult(bool status, MovementIntent currentIntent);
+    protected abstract void OnPathValidationResult(bool pathBlocked, FSMPolicy policy);
 
     protected abstract void Engage();
 
     protected abstract void OnDamageTaken(float remainingHealth);
 
     protected virtual void Update() => _fovhandler?.Tick();
+
+    protected abstract void PolicyResult(in FSMPolicyResult result);
 }
