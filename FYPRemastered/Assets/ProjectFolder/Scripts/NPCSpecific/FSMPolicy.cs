@@ -15,6 +15,7 @@ public readonly struct FSMPolicy
         UseRandomStoppingdistance = useRandomStoppingdistance;
         MinStoppingdistance = minStopdist;
         MaxStoppingdistance = maxStopdist;
+        if (!useRandomStoppingdistance) MinStoppingdistance = 0f;
     }
 }
 

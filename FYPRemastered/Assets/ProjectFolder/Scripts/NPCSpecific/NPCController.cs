@@ -74,18 +74,39 @@ public class NPCController : NPCControllerBase
             case MovementIntent.FollowSecondary:
                 HandleFollowGroupIntentHalted(result);
                 break;
+            case MovementIntent.FollowPrimary:
+                HandleFollowPrimaryIntentHalted(result);
+                break;
         }
     }
 
     protected void HandleFollowGroupIntentHalted(in FSMPolicyResult result)
     {
-        if (result.DestinationReached)
-        {
-            if(!result.PathToPrimaryBlocked)
-                _currentPolicy = new FSMPolicy(_currentPolicyVersion++, MovementIntent.FollowPrimary, true);
+        PolicyHaltReason reason = result.Reason;
 
-            
-        }
+        if(reason == PolicyHaltReason.PathUnAvailable) 
+            _currentPolicy = new FSMPolicy(_currentPolicyVersion++, MovementIntent.FollowPrimary, true);
+
+        else if(reason == PolicyHaltReason.NoAvailableGroupToFollow) 
+            _currentPolicy = new FSMPolicy(_currentPolicyVersion++, MovementIntent.FindAvailableCover, false);
+
+        else 
+            _currentPolicy = new FSMPolicy(_currentPolicyVersion++, MovementIntent.Flee);
+
+
+        /* if (!result.PathToPrimaryBlocked)
+         {
+             _currentPolicy = new FSMPolicy(_currentPolicyVersion++, MovementIntent.FollowPrimary, true);
+             return;
+         }
+
+         if (result.PathBlocked)
+         {
+             _currentPolicy = new FSMPolicy(_currentPolicyVersion++, MovementIntent.TakeCover, false);
+             return;
+         }
+ */
+
         // if DestinationReached && PathToPrimaryBlocked == false
         // New Policy to Follow Target
 
@@ -95,6 +116,144 @@ public class NPCController : NPCControllerBase
         // if Not DestinationReached && PathToPrimaryBlocked == false
         // New Policy to follow target
 
-       // All other cases => Remain in place
+        // All other cases => Remain in place
+    }
+
+    protected void HandleFollowPrimaryIntentHalted(in FSMPolicyResult result)
+    {
+        // => Eventually check brain for next decision
+        PolicyHaltReason reason = result.Reason;
+        if (reason == PolicyHaltReason.PathBlocked)
+        {
+            if(!result.DestinationReached)
+                _currentPolicy = new FSMPolicy(_currentPolicyVersion++, MovementIntent.FollowSecondary, true);
+            // else => No need for further action at this point
+        }
+        else if(reason == PolicyHaltReason.TargetLOSLost)
+        {
+            if (result.DestinationReached)
+                _currentPolicy = new FSMPolicy(_currentPolicyVersion++, MovementIntent.FindAvailableFlank, false);
+          
+        }
+        else if(reason == PolicyHaltReason.TargetMoved)
+        {
+            //if(result.DestinationReached)
+                // Re-send current policy
+        }
+
+
+
+  /*      if (!result.DestinationReached)
+        {
+            if (reason == PolicyHaltReason.PathBlocked)
+                _currentPolicy = new FSMPolicy(_currentPolicyVersion++, MovementIntent.FollowSecondary, true);
+        }
+        else
+        {
+            if (reason == PolicyHaltReason.TargetLOSLost)
+                _currentPolicy = new FSMPolicy(_currentPolicyVersion++, MovementIntent.FollowPrimary, true);//=> Inform ZoneClass of lost LOS
+            //if(reason == )
+        }*/
+
+        /*if (result.PathToPrimaryBlocked)
+            _currentPolicy = new FSMPolicy(_currentPolicyVersion++, MovementIntent.FollowSecondary, true);*/
+
+
+    }
+
+
+
+    protected /*override*/ void ValidateNewPolicy(MovementIntent intent)
+    {
+
+    }
+
+    protected void OnPolicyValidationResult(in FSMPolicyValidation result)
+    {
+        if (!_currentPolicy.HasValue || result.Version != _currentPolicy.Value.Version) return;
+        MovementIntent currentIntent = _currentPolicy.Value.MoveIntent;
+        PolicyIntentResult pathResult = result.PathResult;
+        bool destinationReached = result.DestinationReached;
+
+        switch (currentIntent)
+        {
+            case MovementIntent.FollowPrimary:
+                HandlePrimaryResult(pathResult, destinationReached);
+                break;
+            case MovementIntent.FollowSecondary:
+                HandleSecondaryResult(pathResult, destinationReached);
+                break;
+            default:
+                return;
+        }
+
+        /*else*/ if(currentIntent == MovementIntent.FollowSecondary)
+        {
+            //if(pathResult == PathCheckResult.PathAvailable) CommitPolicy
+            if (pathResult == PolicyIntentResult.PathToPrimaryAvailable)
+            {
+                _currentPolicy = new FSMPolicy(_currentPolicyVersion++, MovementIntent.FollowPrimary, true);
+                // CommitPolicy(_currentPolicy.Value);
+            }
+            else if(pathResult == PolicyIntentResult.NoAvailableSecondaryToFollow)
+            {
+
+            }
+               
+
+        }
+    }
+
+
+
+    protected void HandlePrimaryResult(PolicyIntentResult result, bool destinationReached)
+    {
+        // if (currentIntent == MovementIntent.FollowPrimary)
+        // {
+        if (result == PolicyIntentResult.TargetMoved) { ValidateNewPolicy(MovementIntent.FollowPrimary); return; }
+
+        if (destinationReached)
+        {
+            if (result == PolicyIntentResult.TargetLOSLost)
+                ValidateNewPolicy(MovementIntent.FindAvailableFlank);
+        }
+        else
+        {
+            if (result == PolicyIntentResult.PathToPrimaryBlocked) ValidateNewPolicy(MovementIntent.FollowSecondary);
+        }
+        //if(pathResult == PathCheckResult.PathToPrimaryAvailable) CommitPolicy
+        /*else */
+        
+        
+        // }
+    }
+
+    protected void HandleSecondaryResult(PolicyIntentResult result, bool destinationReached)
+    {
+
+        if (result == PolicyIntentResult.PathAvailable) return; // => CommitPolicy(_currentPolicy.Value);
+        else if (result == PolicyIntentResult.PathToPrimaryAvailable)
+        {
+            _currentPolicy = new FSMPolicy(_currentPolicyVersion++, MovementIntent.FollowPrimary, true);
+            // CommitPolicy(_currentPolicy.Value);
+        }
+        else if (result == PolicyIntentResult.PathBlocked)
+        {
+            // Re-Validate current Policy
+        }
+        else if (result == PolicyIntentResult.NoAvailableSecondaryToFollow)
+        {
+            _currentPolicy = new FSMPolicy(_currentPolicyVersion++, MovementIntent.FindAvailableCover, false);
+            // CommitPolicy(_currentPolicy.Value);
+        }
+        else
+        {
+            // Flank maybe, or flee, Hold etc...
+        }
+    }
+
+    public override void LogUnhandled(IntentStateBase state, PolicyNotification notification)
+    {
+        
     }
 }

@@ -54,4 +54,6 @@ public abstract class NPCControllerBase : ComponentEvents
     protected virtual void Update() => _fovhandler?.Tick();
 
     protected abstract void PolicyResult(in FSMPolicyResult result);
+
+    public abstract void LogUnhandled(IntentStateBase state, PolicyNotification notification);
 }

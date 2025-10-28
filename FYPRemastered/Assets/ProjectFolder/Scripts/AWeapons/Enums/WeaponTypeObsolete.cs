@@ -72,9 +72,59 @@ public enum MovementIntent
     Patrol,
     FollowPrimary,
     FollowSecondary,
-    TakeCover,
+    FindAvailableFlank,
+    FindAvailableCover,
     Flee,
     SearchArea
+}
+
+public enum PathTarget
+{
+    Primary,
+    Group,
+    Cover,
+    Flank,
+    Search,
+    Patrol,
+    Flee
+}
+
+public enum PolicyIntentResult
+{
+    PathBlocked,
+    PathAvailable,
+    TargetLOSLost,
+    TargetMoved,
+    PathToPrimaryBlocked,
+    PathToPrimaryAvailable,
+    NoAvailableSecondaryToFollow,
+  //  PathToGroupAvailable,
+    NoCoverAvailable,
+   // CoverAvailable
+}
+
+public enum PolicyNotification
+{
+    PathBlocked,
+    TargetLOSLost,
+    CoverExposed,
+    NoCoverAvailable,
+    NoAvailableGroupToFollow,
+    NoFlankAvailable,
+    PathToPrimaryBlocked,
+    PathToPrimaryAvailable
+}
+
+public enum PolicyHaltReason
+{
+    TargetMoved,
+    TargetLOSLost,
+    NoAvailableGroupToFollow,
+    NoFlankAvailable,
+    NoCoverAvailable,
+    CoverExposed,
+    PathBlocked,
+    PathUnAvailable
 }
 
 public enum AttackTarget

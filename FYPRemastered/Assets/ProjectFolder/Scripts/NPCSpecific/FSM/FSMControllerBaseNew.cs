@@ -3,26 +3,190 @@ using UnityEngine.AI;
 
 public abstract class FSMControllerBaseNew : ComponentEvents
 {
+    // NEW stuff for Combining with NPCController
     [Header("AI Components")]
     [SerializeField] protected NavMeshAgent _agent;
     [SerializeField] protected NavMeshObstacle _obstacle;
 
-    [Header("FSM States")]
-    protected PatrolState _patrol;
-    protected StationaryState _stationary;
-    protected DeathState _deathState;
-    protected ChasingState _chasing;
-    protected EnemyState _currentState;
-
     [Header("Event Manager & Resource request handler")]
     protected EnemyEventManager _agentEventManager;
 
+    protected TargetHandle _targetResolver;
+    public FSMPolicy? _currentPolicy;
+    protected uint _currentPolicyVersion;
 
     [Header("Agent Speed Params")]
     [SerializeField, Tooltip("Do Not Change - Synchronized with Walking animation")]
     protected float _walkSpeed;
     [SerializeField, Tooltip("Do Not Change - Synchronized with sprinting animation")]
     protected float _sprintSpeed;
+
+    protected virtual void PolicyUpdated(in FSMPolicy newPolicy) { }
+
+    protected virtual void OnPathEvaluationCompleted2(in FSMPolicy policyUsed, PolicyIntentResult result, Vector3 destination)
+    {
+        if (!_currentPolicy.HasValue || _currentPolicy.Value.Version != policyUsed.Version) return;
+        MovementIntent currentMoveIntent = _currentPolicy.Value.MoveIntent;
+
+        //  if(currentMoveIntent == policyUsed.MoveIntent)
+        //  {
+        if (currentMoveIntent == MovementIntent.FollowPrimary)
+        {
+            //if(result == PathCheckResult.PathToPrimaryAvailable) Setdestination
+            if(result == PolicyIntentResult.PathToPrimaryBlocked)
+            {
+                FSMPolicyResult haltResult = new FSMPolicyResult(_currentPolicy.Value, PolicyHaltReason.PathBlocked, true);
+                // Notfy NPCController
+            }
+        }
+        else if(currentMoveIntent == MovementIntent.FollowSecondary)
+        {
+            if(result == PolicyIntentResult.NoAvailableSecondaryToFollow)
+            {
+                FSMPolicyResult haltResult = new FSMPolicyResult(_currentPolicy.Value, PolicyHaltReason.NoAvailableGroupToFollow, true);
+                // Notfy NPCController
+            }
+            else if(result == PolicyIntentResult.PathAvailable)
+            {
+                // SetDestination
+            }
+            else if(result == PolicyIntentResult.PathToPrimaryAvailable)
+            {
+                FSMPolicyResult haltResult = new FSMPolicyResult(_currentPolicy.Value, PolicyHaltReason.PathUnAvailable, true);
+                // Notfy NPCController
+            }
+        }
+        //}
+
+
+
+
+
+
+
+
+
+        /*if (pathCheckIntent == currentMoveIntent) // And Version, and not null
+        {
+            // if(!pathBlocked)
+            // => SetDestination;
+            // else
+            // if (currentMoveIntent == FollowSecondary) Halt, no available group
+            // if (currentMoveIntent == FindFlank) Halt, no available Flank
+            // if (currentMoveIntent == FindCover) Halt, no available cover
+            // Halted
+        }
+
+        switch (pathTarget)
+        {
+            case PathTarget.Primary:
+
+                break;
+        }*/
+    }
+
+
+    protected virtual void OnPathEvaluationCompleted(in FSMPolicy policyUsed, MovementIntent pathCheckIntent, bool pathBlocked, Vector3 destination)
+    {
+        if (!_currentPolicy.HasValue || _currentPolicy.Value.Version != policyUsed.Version) return;
+        MovementIntent currentMoveIntent = _currentPolicy.Value.MoveIntent;
+
+        if (pathCheckIntent == currentMoveIntent) // And Version, and not null
+        {
+            // if(!pathBlocked)
+            // => SetDestination;
+            // else
+            // if (currentMoveIntent == FollowSecondary) Halt, no available group
+            // if (currentMoveIntent == FindFlank) Halt, no available Flank
+            // if (currentMoveIntent == FindCover) Halt, no available cover
+            // Halted
+        }
+
+        /*switch (pathTarget)
+        {
+            case PathTarget.Primary:
+
+                break;
+        }*/
+    }
+
+
+
+
+    protected virtual void OnPathEvaluationComplete(in FSMPolicy policyUsed, MovementIntent pathCheckIntent, bool pathBlocked, Vector3 destination)
+    {
+        if (!_currentPolicy.HasValue || _currentPolicy.Value.Version != policyUsed.Version) return;
+        MovementIntent currentMoveIntent = _currentPolicy.Value.MoveIntent;
+
+        if (pathCheckIntent == currentMoveIntent) // And Version, and not null
+        {
+            // if(!pathBlocked)
+            // => SetDestination;
+            // else
+            // if (currentMoveIntent == FollowSecondary) Halt, no available group
+            // if (currentMoveIntent == FindFlank) Halt, no available Flank
+            // if (currentMoveIntent == FindCover) Halt, no available cover
+            // Halted
+        }
+
+       /* switch (pathTarget)
+        {
+            case PathTarget.Primary:
+
+                break;
+        }*/
+    }
+
+    /// <summary>
+    /// A separate PathCheck to the primary target (Player)
+    /// Runs separately to the Main PathChecks when the inital path check to the player is blocked
+    /// 
+    /// </summary>
+    /// <param name="policyUsed"></param>
+    /// <param name="pathBlocked"></param>
+    /// <param name="targetPosition"></param>
+    protected virtual void OnPathToPrimaryTargetEvaluationComplete(in FSMPolicy policyUsed, bool pathBlocked, Vector3 targetPosition)
+    {
+        if (!_currentPolicy.HasValue || policyUsed.Version != _currentPolicy.Value.Version) return;
+        MovementIntent intent = _currentPolicy.Value.MoveIntent;
+
+        if(intent == MovementIntent.FollowPrimary)
+        {
+            //if(!pathBlocked) => ChasePrimary
+            if(pathBlocked)
+            {
+                FSMPolicyResult result = new FSMPolicyResult(_currentPolicy.Value, PolicyHaltReason.PathBlocked, false);
+            }
+        }
+        else if (intent == MovementIntent.FollowSecondary)
+        {
+            if (!pathBlocked)
+            {
+                FSMPolicyResult result = new FSMPolicyResult(_currentPolicy.Value, PolicyHaltReason.PathUnAvailable, true);
+            }
+                
+        }
+    }
+
+    // End New stuff for NPCController
+
+
+    // To be made Redundant
+    [Header("FSM States")]
+    protected PatrolState _patrol;
+    protected StationaryState _stationary;
+    protected DeathState _deathState;
+    protected ChasingState _chasing;
+    protected EnemyState _currentState;
+    // End redundant
+
+
+
+
+
+
+
+  
 
     [Header("")]
 
