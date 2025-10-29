@@ -19,3 +19,14 @@ public readonly struct FSMPolicy
     }
 }
 
+public readonly struct StateNotification
+{
+    public readonly NotificationKind Kind { get; }
+    public readonly bool DestinationReached { get; }
+
+    public StateNotification(NotificationKind kind, bool destinationreached)
+        => (Kind, DestinationReached) = (kind, destinationreached);
+}
+
+public delegate void StateNotificationProvider(in StateNotification n);
+

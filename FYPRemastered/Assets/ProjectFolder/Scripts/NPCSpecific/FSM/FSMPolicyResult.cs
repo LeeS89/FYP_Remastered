@@ -116,3 +116,9 @@ public readonly struct PathRequest
     public static PathRequest RequestFlankPoints(int steps, List<FlankPointData> data, Action<bool> flankCB)
         => new(AIResourceType.FlankPointCandidates, null, default, default, null, data, steps, flankCB, null, null, null, null);
 }
+
+
+public readonly struct StateInfo
+{
+
+}

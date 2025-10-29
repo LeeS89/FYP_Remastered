@@ -9,7 +9,23 @@ public class TargetHandle
     private ITargetable _followTarget;
     public ITargetable _attackTarget;
 
-   
+
+    private BlockData _wayPointSet;
+
+    // Plan for Destination providers
+    //
+
+
+
+
+
+
+
+
+
+
+
+
 
     public Transform FollowTarget { get; private set; } = null;
     public Vector3 LastKnownTargetPos { get; private set; }

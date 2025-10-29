@@ -12,6 +12,8 @@ public abstract class NPCControllerBase : ComponentEvents
     protected FSMPolicy? _currentPolicy;
     protected uint _currentPolicyVersion;
 
+    protected IFSMEvents _fsmController; 
+    protected IIntentState _state = Patrol.Instance;
 
     public State CurrentState { get; protected set; }
 
@@ -22,6 +24,10 @@ public abstract class NPCControllerBase : ComponentEvents
         OnAimCheckCallback = OnAimEnter;
         OnMeleeRangeCheckCallback = OnMeleeRangeEnter;
         _fovhandler = new FieldOfViewManager(_fovParams, OnVisibilityCallback, OnAimCheckCallback, OnMeleeRangeCheckCallback, new AITraceComponent());
+
+       // _fsmController = new FSMManager();
+        _fsmController.Notification = OnNotification;
+
         base.RegisterLocalEvents(_eEventManager);
         RegisterGlobalEvents();
     }
@@ -55,5 +61,20 @@ public abstract class NPCControllerBase : ComponentEvents
 
     protected abstract void PolicyResult(in FSMPolicyResult result);
 
-    public abstract void LogUnhandled(IntentStateBase state, PolicyNotification notification);
+    public abstract void LogUnhandled(IntentStateBase state, StateNotification notification);
+
+    public abstract void OnNotification(in StateNotification n);
+
+    public abstract void SwitchTo(IIntentState next);
+
+
+   /* public void SetIntent(MovementIntent intent) =>
+       SwitchTo(intent switch
+       {
+           MovementIntent.Patrol => PatrolState.Instance,
+           MovementIntent.Chase => ChaseState.Instance,
+           MovementIntent.Flee => HoldState.Instance,   // plug your FleeState here
+           MovementIntent.Hold => HoldState.Instance,
+           _ => PatrolState.Instance
+       });*/
 }

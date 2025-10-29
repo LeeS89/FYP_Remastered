@@ -103,10 +103,14 @@ public enum PolicyIntentResult
    // CoverAvailable
 }
 
-public enum PolicyNotification
+public enum NotificationKind
 {
+    TargetMoved,
+    TargetLeftArea,
     PathBlocked,
     TargetLOSLost,
+    TargetLOSConfirmed,
+    NoPatrolPointAvailable,
     CoverExposed,
     NoCoverAvailable,
     NoAvailableGroupToFollow,

@@ -1,8 +1,18 @@
+using System;
 using UnityEngine;
 using UnityEngine.AI;
 
 public abstract class FSMControllerBaseNew : ComponentEvents
 {
+
+    // New Functions Needed
+    public Action<float> Tick;
+    private Action<float> OnPatrol;
+
+    // End New functions
+
+
+
     // NEW stuff for Combining with NPCController
     [Header("AI Components")]
     [SerializeField] protected NavMeshAgent _agent;

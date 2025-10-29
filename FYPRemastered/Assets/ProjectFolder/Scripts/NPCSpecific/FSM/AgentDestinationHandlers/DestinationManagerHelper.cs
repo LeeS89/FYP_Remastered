@@ -50,7 +50,7 @@ public class DestinationManagerHelper
     private List<FlankPointData> _candidateFlankPointPositions;
     private Action<BlockData> _wayPointCallback;
     private Action<bool> _flankCandidatesCallback;
-
+   
 
     public DestinationManagerHelper(Transform owner, int maxflankSteps, GameObject debugCube = null)
     {

@@ -252,8 +252,19 @@ public class NPCController : NPCControllerBase
         }
     }
 
-    public override void LogUnhandled(IntentStateBase state, PolicyNotification notification)
+    public override void LogUnhandled(IntentStateBase state, StateNotification notification)
     {
         
     }
+
+    public override void SwitchTo(IIntentState next)
+    {
+        if (_state == next) return;
+        _state.Exit(this);
+        _state = next;
+        _state.Enter(this);
+    }
+
+    public override void OnNotification(in StateNotification n) => _state.Handle(this, n);
+    
 }
