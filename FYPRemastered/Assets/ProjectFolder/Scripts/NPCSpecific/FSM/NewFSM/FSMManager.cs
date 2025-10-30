@@ -1,32 +1,100 @@
+using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
 public class FSMManager : IFSMEvents
 {
     public Action<float> Tick { get; private set; }
-    public StateNotificationProvider Notification { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    public StateNotificationProvider Notification { get; set; }
+
+    public Transform Transform { get; set; }
+
+    private DestinationProvider _destinationProvider;
+    private PathFinder _pathFinder;
 
     private Action<float> OnPatrol;
 
     private NavMeshAgent _agent;
     private NavMeshObstacle _obstacle;
+    private NavMeshPath _path;
+    private uint _stateTransitionId;
     private EnemyEventManager _eventManager;
+    //private bool _isInStateTransition = false;
    
-    public FSMManager(EnemyEventManager em, NavMeshAgent agt, NavMeshObstacle ob)
+    public FSMManager(EnemyEventManager em, Transform owner, NavMeshAgent agt, NavMeshObstacle ob)
     {
+        _pathFinder = new(this);
+        Transform = owner;
+        _path = new();
+        _destinationProvider = new();
         _eventManager = em;
         _agent = agt;
         _obstacle = ob;
     }
 
+    public void OnPathRequestComplete(in PathResult result)
+    {
+        // Blocks Destination Setting while transitioning to new state
+        if (result.Id != _stateTransitionId) return;
+        bool pathFound = result.PathFound;
 
+        if (!result.PathFound) { SendNotification(NotificationKind.NoAvailablePath, false); return; }
+        else
+        {
+            if (result.Kind == DestinationKind.ProbeToTarget) { SendNotification(NotificationKind.PathToPrimaryAvailable, false); return; }
+
+            _agent.SetDestination(result.Position);
+        }
+
+            switch (result.Kind)
+            {
+                case DestinationKind.Patrol:
+                    if (!pathFound) SendNotification(NotificationKind.NoAvailablePath, false);
+                    return;
+                case DestinationKind.ProbeToTarget:
+                    if (pathFound) SendNotification(NotificationKind.PathToPrimaryAvailable, false);
+                    return;
+                case DestinationKind.ChaseTarget:
+                    if (!pathFound) SendNotification(NotificationKind.NoAvailablePath, false);
+                    return;
+                case DestinationKind.Flank:
+                    if (!pathFound) SendNotification(NotificationKind.NoAvailablePath, false);
+                    return;
+            }
+
+        /*switch (target)
+        {
+            *//*case PathPurpose.CheckPrimary:
+                break;*//*
+        }
+
+        if (!pathFound)
+        {
+            StateNotification n = new StateNotification(NotificationKind.NoAvailablePath, false);
+            Notification?.Invoke(n);
+            return;
+        }*/
+    }
+
+    private void SendNotification(NotificationKind kind, bool destinationReached)
+    {
+        StateNotification n = new StateNotification(kind, destinationReached);
+        Notification?.Invoke(n);
+    }
+
+    private Vector3 GetOwnerPos() => LineOfSightUtility.GetClosestPointOnNavMesh(Transform.position);
 
     private bool IsDestinationReached() => false;
 
     public void BeginPatrol()
     {
-        throw new NotImplementedException();
+        DestinationKind kind = DestinationKind.Patrol;
+        List<(Vector3,Vector3?)> points = _destinationProvider?.RetrieveDestinations(kind);
+        PathRequestInfo info = new PathRequestInfo(points, GetOwnerPos(), kind, _path, _stateTransitionId);
+        _pathFinder.TryGetPath(info);
+        Tick = OnPatrol;
     }
 
     public void BeginChase()
@@ -49,10 +117,7 @@ public class FSMManager : IFSMEvents
         throw new NotImplementedException();
     }
 
-    public void ClearState()
-    {
-        throw new NotImplementedException();
-    }
+    public void ClearState() => _stateTransitionId++;
+    
 
-    //  public required NavMeshAgent agent { get; init; }
 }

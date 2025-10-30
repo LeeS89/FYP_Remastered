@@ -78,15 +78,26 @@ public enum MovementIntent
     SearchArea
 }
 
-public enum PathTarget
+public enum DestinationKind
 {
-    Primary,
+    ChaseTarget,
+    ProbeToTarget,
+    FollowGroup,
+    TakeCover,
+    Flank,
+    SearchLastKnown,
+    Patrol,
+    Flee
+
+
+    /*ChasePrimary,
+    CheckPrimary,
     Group,
     Cover,
     Flank,
     Search,
     Patrol,
-    Flee
+    Flee*/
 }
 
 public enum PolicyIntentResult
@@ -103,6 +114,8 @@ public enum PolicyIntentResult
    // CoverAvailable
 }
 
+
+
 public enum NotificationKind
 {
     TargetMoved,
@@ -110,12 +123,13 @@ public enum NotificationKind
     PathBlocked,
     TargetLOSLost,
     TargetLOSConfirmed,
-    NoPatrolPointAvailable,
+    NoAvailablePath,
+ //   NoPatrolPointAvailable,
     CoverExposed,
-    NoCoverAvailable,
-    NoAvailableGroupToFollow,
-    NoFlankAvailable,
-    PathToPrimaryBlocked,
+   // NoCoverAvailable,
+    //NoAvailableGroupToFollow,
+    //NoFlankAvailable,
+  //  PathToPrimaryBlocked,
     PathToPrimaryAvailable
 }
 

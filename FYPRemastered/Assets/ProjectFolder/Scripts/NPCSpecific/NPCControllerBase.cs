@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.AI;
 
 public abstract class NPCControllerBase : ComponentEvents
 {
@@ -12,7 +13,7 @@ public abstract class NPCControllerBase : ComponentEvents
     protected FSMPolicy? _currentPolicy;
     protected uint _currentPolicyVersion;
 
-    protected IFSMEvents _fsmController; 
+    public IFSMEvents FSM { get; protected set; } 
     protected IIntentState _state = Patrol.Instance;
 
     public State CurrentState { get; protected set; }
@@ -25,8 +26,9 @@ public abstract class NPCControllerBase : ComponentEvents
         OnMeleeRangeCheckCallback = OnMeleeRangeEnter;
         _fovhandler = new FieldOfViewManager(_fovParams, OnVisibilityCallback, OnAimCheckCallback, OnMeleeRangeCheckCallback, new AITraceComponent());
 
+        FSM = new FSMManager(_eEventManager, transform, GetComponent<NavMeshAgent>(), GetComponent<NavMeshObstacle>());
        // _fsmController = new FSMManager();
-        _fsmController.Notification = OnNotification;
+        FSM.Notification = OnNotification;
 
         base.RegisterLocalEvents(_eEventManager);
         RegisterGlobalEvents();

@@ -26,7 +26,7 @@ public sealed class FollowGroup : IntentStateBase
             case NotificationKind.PathToPrimaryAvailable:
                 self.SwitchTo(ChaseState.Instance);
                 break;
-            case NotificationKind.NoAvailableGroupToFollow:
+            case NotificationKind.NoAvailablePath://.NoAvailableGroupToFollow:
                 // Take Cover, Flee, Try re-Chase, Flank
                 break;
             default:

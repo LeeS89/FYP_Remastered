@@ -21,7 +21,7 @@ public abstract class FSMControllerBaseNew : ComponentEvents
     [Header("Event Manager & Resource request handler")]
     protected EnemyEventManager _agentEventManager;
 
-    protected TargetHandle _targetResolver;
+    protected PathFinder _targetResolver;
     public FSMPolicy? _currentPolicy;
     protected uint _currentPolicyVersion;
 

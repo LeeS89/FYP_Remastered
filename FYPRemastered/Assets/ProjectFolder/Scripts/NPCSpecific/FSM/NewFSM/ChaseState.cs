@@ -28,7 +28,7 @@ public sealed class ChaseState : IntentStateBase
                 if (n.DestinationReached) self.SwitchTo(Flank.Instance);
                 // Plus Notify Zone handler of lost LOS => If all lost LOS switch to Search last known
                 break;
-            case NotificationKind.PathBlocked:
+            case NotificationKind.PathBlocked or NotificationKind.NoAvailablePath:
                 self.SwitchTo(FollowGroup.Instance);
                 break;
             case NotificationKind.TargetMoved:

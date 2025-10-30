@@ -25,7 +25,7 @@ public sealed class Flank : IntentStateBase
             case NotificationKind.TargetMoved or NotificationKind.TargetLeftArea:
                 self.SwitchTo(ChaseState.Instance);
                 break;
-            case NotificationKind.NoFlankAvailable:
+            case NotificationKind.NoAvailablePath://.NoFlankAvailable:
                 self.SwitchTo(TakeCover.Instance);
                 break;
             case NotificationKind.TargetLOSLost:

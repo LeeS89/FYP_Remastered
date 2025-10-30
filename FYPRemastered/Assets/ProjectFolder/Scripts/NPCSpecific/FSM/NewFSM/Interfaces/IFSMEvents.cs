@@ -12,5 +12,10 @@ public interface IFSMEvents : ITickable
     //void BeginSearch();
     void ClearState();
 
+    void OnPathRequestComplete(in PathResult result);
+
+
+    Transform Transform { get; }
+
     StateNotificationProvider Notification { get; set; }
 }

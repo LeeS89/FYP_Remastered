@@ -7,6 +7,7 @@ public sealed class Patrol : IntentStateBase
 
     public override void Enter(NPCController self)
     {
+        self.FSM.BeginPatrol();
         // public void BeginPatrol();
         // Pass a struct containing the following information:
         // Destination Provider, Possible Func<List<Vector3>>
@@ -22,7 +23,7 @@ public sealed class Patrol : IntentStateBase
             case NotificationKind.PathBlocked:
                 // Try- Repath
                 break;
-            case NotificationKind.NoPatrolPointAvailable:
+            case NotificationKind.NoAvailablePath://.NoPatrolPointAvailable:
                 // Error - Hold
                 break;
             case NotificationKind.TargetLOSConfirmed:
