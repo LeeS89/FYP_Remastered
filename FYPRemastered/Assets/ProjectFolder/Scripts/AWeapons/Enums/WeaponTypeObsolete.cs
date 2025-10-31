@@ -78,14 +78,20 @@ public enum MovementIntent
     SearchArea
 }
 
+public enum DynamicDestinationKind
+{
+    Player,
+    AgentInSameZone
+}
+
 public enum DestinationKind
 {
-    ChaseTarget,
-    ProbeToTarget,
+    Target,
+ //   ProbeToTarget,
     FollowGroup,
     TakeCover,
     Flank,
-    SearchLastKnown,
+  //  SearchLastKnown,
     Patrol,
     Flee
 
@@ -98,6 +104,12 @@ public enum DestinationKind
     Search,
     Patrol,
     Flee*/
+}
+
+public enum PathCheckReason
+{
+    ProbePathToPrimaryTarget,
+    ValidatePathForDestination
 }
 
 public enum PolicyIntentResult

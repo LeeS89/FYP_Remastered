@@ -17,54 +17,87 @@ public class PathFinder
 
     IFSMEvents Owner;
 
-    private BlockData _wayPointSet;
     private NavMeshPath _path;
     private WaitUntil _waitUntilPathCheckComplete;
     private bool _pathChecked;
-    private BlockData _wayPointBlock;
-    private Action<BlockData> _wayPointCallback;
+
     private Action<bool> PathCheckCallback;
-    private List<WaypointPairs> _waypointPairs = new();
-    private WaypointPairs? _currentWaypointPair = null;
+   
     public int CurrentWaypointZone { get; private set; } = 0;
   //  private Transform OwnerTransform { get; set; }
     private Coroutine _runningRoutine;
     List<(Vector3 position, Vector3? forward)> samples = new(50);
     private bool _isValid = false;
-   // public Action<bool, Vector3, Vector3?> OnSendDestinationResult { get; set; }
-    // Plan for Destination providers
-    //
+    private DestinationService _destService;
 
+    private Queue<(List<(Vector3, Vector3?)>, ValidateDestination)> _pathQueue = new(10);
+   
     public PathFinder(IFSMEvents owner)
     {
         Owner = owner;
-       // OwnerTransform = Owner.Transform;
         PathCheckCallback = OnPathRequestcallback;
         _waitUntilPathCheckComplete = new WaitUntil(() => _pathChecked);
-        //_wayPointCallback = OnWaypointBlockReceived;
-       // RetrieveWaypoints();
+        _destService = new DestinationService();
     }
 
     public void TryChaseTarget(ITargetable target) { }
 
-    private void RetrieveWaypoints() => this.RequestWaypointBlock(callback: _wayPointCallback);
 
-   // private void QueuePathRequest(Vector3 start, Vector3 end) => return;
-
-    private void OnWaypointBlockReceived(BlockData wpb)
+    public void TryGetDestination(in ValidateDestination req)
     {
-        _wayPointBlock = wpb;
-        if (_wayPointBlock == null)
+        List<(Vector3 position, Vector3? forward)> destinations;
+        destinations = _destService.TryGet(req);
+        if (destinations == null || destinations.Count == 0)
         {
-            Debug.LogError("Waypoint block data is null. Cannot set waypoints.");
+            PathResult failResult = new PathResult(req.Reason, false, Vector3.zero, req.RequestId, null);
+            Owner.OnPathRequestComplete(failResult);
             return;
         }
-        CurrentWaypointZone = _wayPointBlock._blockZone;
-
-        _waypointPairs.Clear();
-        for (int i = 0; i < wpb._waypointPositions.Length; i++)
-            _waypointPairs.Add(new WaypointPairs(_wayPointBlock._waypointPositions[i], _wayPointBlock._waypointForwards[i]));
+        _pathQueue.Enqueue((destinations, req));
+        if (_runningRoutine == null)
+            _runningRoutine = CoroutineRunner.Instance.StartCoroutine(PathFindRoutineNew(_pathQueue));
     }
+    
+    private IEnumerator PathFindRoutineNew(Queue<(List<(Vector3, Vector3?)>, ValidateDestination)> q)
+    {
+       
+        while (q.Count > 0)
+        {
+            bool found = false;
+            var (points, reqInfo) = q.Dequeue();
+           
+            foreach (var (pos, fwd) in points)
+            {
+                _pathChecked = false;
+                _isValid = false;
+
+                this.RequestValidPath(LineOfSightUtility.GetClosestPointOnNavMesh(reqInfo.Caller.GetPosition()),
+                     LineOfSightUtility.GetClosestPointOnNavMesh(pos), reqInfo.Path, PathCheckCallback);
+
+                yield return _waitUntilPathCheckComplete;
+
+                if (!_isValid) continue;
+
+                PathResult success = new PathResult(reqInfo.Reason, true, pos, reqInfo.RequestId, fwd);
+                Owner.OnPathRequestComplete(success);
+                found = true;
+                break;
+            }
+
+            if (!found)
+            {
+                PathResult failed = new PathResult(reqInfo.Reason, false, Vector3.zero, reqInfo.RequestId, null);
+                Owner.OnPathRequestComplete(failed);
+            }
+        }
+        
+        _runningRoutine = null;
+       
+    }
+
+
+    // private void QueuePathRequest(Vector3 start, Vector3 end) => return;
+
 
     public void TryGetPath(in PathRequestInfo info)
     {
@@ -87,13 +120,14 @@ public class PathFinder
 
             if (!_isValid) continue;
 
-            PathResult result = new PathResult(info.Kind, true, pos, info.Id, fwd);
+            PathResult result = new PathResult(info.Reason, true, pos, info.Id, fwd);
             Owner.OnPathRequestComplete(result);
+            _runningRoutine = null;
             yield break;
         }
-        PathResult failResult = new PathResult(info.Kind, false, Vector3.zero, info.Id, null);
+        PathResult failResult = new PathResult(info.Reason, false, Vector3.zero, info.Id, null);
         Owner.OnPathRequestComplete(failResult);
-
+        _runningRoutine = null;
     }
 
     
@@ -106,31 +140,7 @@ public class PathFinder
         _pathChecked = true;
     }
 
-    private void ShuffleCandidateList<T>(List<T> candidates)
-    {
-
-        for (int i = 0; i < candidates.Count; i++)
-        {
-            int randIndex = UnityEngine.Random.Range(i, candidates.Count);
-            (candidates[i], candidates[randIndex]) = (candidates[randIndex], candidates[i]);
-        }
-    }
-
-
-    private struct WaypointPairs
-    {
-        public Vector3 position;
-        public Vector3 forward;
-
-        public WaypointPairs(Vector3 pos, Vector3 fwd)
-        {
-            position = pos;
-            forward = fwd;
-        }
-    }
-
-
-
+   
 
     #region Redundant
 
@@ -182,23 +192,23 @@ public class PathFinder
         if (target == AttackTarget.Primary) return _primaryTarget?.GetTargetableCollider();
         else return _secondaryTarget?.GetTargetableCollider();
     }
-    public Vector3? GetFollowTarget(MovementIntent intent)
+   /* public Vector3? GetFollowTarget(MovementIntent intent)
     {
         Vector3? target;
         switch (intent)
         {
             case MovementIntent.FollowPrimary:
-                target = _primaryTarget?.GetTargetablePosition();
+                target = _primaryTarget?.GetTargetablePositionAndForward();
                 break;
             case MovementIntent.FollowSecondary:
-                target = _secondaryTarget?.GetTargetablePosition();
+                target = _secondaryTarget?.GetTargetablePositionAndForward();
                 break;
             default:
                 target = null;
                 break;
         }
         return target;
-    }
+    }*/
 
 
     public void GetPrimaryTarget()
@@ -222,15 +232,16 @@ public readonly struct PathRequestInfo
 {
     public readonly List<(Vector3, Vector3?)> Points;
     public readonly Vector3 StartPos;
-    public readonly DestinationKind Kind;
+    public readonly PathCheckReason Reason;
     public readonly NavMeshPath Path;
     public readonly uint Id;
 
-    public PathRequestInfo(List<(Vector3, Vector3?)> pts, Vector3 startPos, DestinationKind kind, NavMeshPath path, uint id)
+    public PathRequestInfo(List<(Vector3, Vector3?)> pts, Vector3 startPos, PathCheckReason reason, NavMeshPath path, uint id)
     {
         Points = pts;
         StartPos = startPos;
-        Kind = kind;
+        Reason = reason;
+       // Kind = kind;
         Path = path;
         Id = id;
     }
@@ -239,15 +250,17 @@ public readonly struct PathRequestInfo
 
 public readonly struct PathResult
 {
-    public readonly DestinationKind Kind;
+
+    public readonly PathCheckReason Reason;
     public readonly bool PathFound;
     public readonly Vector3 Position;
     public readonly Vector3? Forward;
     public readonly uint Id;
 
-    public PathResult(DestinationKind kind, bool found, Vector3 pos, uint id, Vector3? fwd = null)
+    public PathResult(PathCheckReason reason, bool found, Vector3 pos, uint id, Vector3? fwd = null)
     {
-        Kind = kind;
+   
+        Reason = reason;
         Id = id;
         PathFound = found;
         Position = pos;

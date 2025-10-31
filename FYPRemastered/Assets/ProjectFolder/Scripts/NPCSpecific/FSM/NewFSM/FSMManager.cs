@@ -1,4 +1,3 @@
-using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,30 +7,50 @@ public class FSMManager : IFSMEvents
 {
     public Action<float> Tick { get; private set; }
     public StateNotificationProvider Notification { get; set; }
+    public ITargetable PrimaryTarget { get; set; }
 
-    public Transform Transform { get; set; }
+    public bool HasLOS { get; set; }
 
-    private DestinationProvider _destinationProvider;
+    // public Transform Transform { get; set; }
+
+    private DestinationProviderOld _destinationProvider;
     private PathFinder _pathFinder;
 
     private Action<float> OnPatrol;
 
-    private NavMeshAgent _agent;
-    private NavMeshObstacle _obstacle;
-    private NavMeshPath _path;
+   // private NavMeshAgent _agent;
+   // private NavMeshObstacle _obstacle;
+  //  private NavMeshPath _path;
     private uint _stateTransitionId;
-    private EnemyEventManager _eventManager;
+   // private EnemyEventManager _eventManager;
+    private FSMOwner Owner; 
     //private bool _isInStateTransition = false;
    
+    public FSMManager(FSMOwner owner)
+    {
+        if (Owner == null)
+        {
+#if UNITY_EDITOR
+            Debug.LogError("Must Pass a valid FSMOwner");
+#endif
+            return;
+
+        }
+
+        Owner = owner;
+        _pathFinder = new(this);
+        _destinationProvider = new();
+    }
+
     public FSMManager(EnemyEventManager em, Transform owner, NavMeshAgent agt, NavMeshObstacle ob)
     {
         _pathFinder = new(this);
-        Transform = owner;
-        _path = new();
+       // Transform = owner;
+       // _path = new();
         _destinationProvider = new();
-        _eventManager = em;
-        _agent = agt;
-        _obstacle = ob;
+       // _eventManager = em;
+       // _agent = agt;
+      //  _obstacle = ob;
     }
 
     public void OnPathRequestComplete(in PathResult result)
@@ -40,15 +59,18 @@ public class FSMManager : IFSMEvents
         if (result.Id != _stateTransitionId) return;
         bool pathFound = result.PathFound;
 
+        if (result.Reason == PathCheckReason.ProbePathToPrimaryTarget && pathFound) 
+        { SendNotification(NotificationKind.PathToPrimaryAvailable, false); return; }
+
         if (!result.PathFound) { SendNotification(NotificationKind.NoAvailablePath, false); return; }
         else
         {
-            if (result.Kind == DestinationKind.ProbeToTarget) { SendNotification(NotificationKind.PathToPrimaryAvailable, false); return; }
+           
 
-            _agent.SetDestination(result.Position);
+            Owner.Agent.SetDestination(result.Position);
         }
 
-            switch (result.Kind)
+           /* switch (result.Kind)
             {
                 case DestinationKind.Patrol:
                     if (!pathFound) SendNotification(NotificationKind.NoAvailablePath, false);
@@ -62,7 +84,7 @@ public class FSMManager : IFSMEvents
                 case DestinationKind.Flank:
                     if (!pathFound) SendNotification(NotificationKind.NoAvailablePath, false);
                     return;
-            }
+            }*/
 
         /*switch (target)
         {
@@ -84,22 +106,27 @@ public class FSMManager : IFSMEvents
         Notification?.Invoke(n);
     }
 
-    private Vector3 GetOwnerPos() => LineOfSightUtility.GetClosestPointOnNavMesh(Transform.position);
+    private Vector3 GetOwnerPos() => LineOfSightUtility.GetClosestPointOnNavMesh(Owner.Transform.position);
 
     private bool IsDestinationReached() => false;
 
     public void BeginPatrol()
     {
-        DestinationKind kind = DestinationKind.Patrol;
-        List<(Vector3,Vector3?)> points = _destinationProvider?.RetrieveDestinations(kind);
-        PathRequestInfo info = new PathRequestInfo(points, GetOwnerPos(), kind, _path, _stateTransitionId);
+        PathCheckReason reason = PathCheckReason.ValidatePathForDestination;
+        List<(Vector3,Vector3?)> points = _destinationProvider?.TryGetDestinations(DestinationKind.Patrol);
+        PathRequestInfo info = new PathRequestInfo(points, GetOwnerPos(), reason, Owner.Path, _stateTransitionId);
         _pathFinder.TryGetPath(info);
         Tick = OnPatrol;
     }
 
+    private void TryGetDestinations(PathCheckReason reason)
+    {
+
+    }
+
     public void BeginChase()
     {
-        throw new NotImplementedException();
+        PathCheckReason reason = PathCheckReason.ValidatePathForDestination;
     }
 
     public void BeginFlank()

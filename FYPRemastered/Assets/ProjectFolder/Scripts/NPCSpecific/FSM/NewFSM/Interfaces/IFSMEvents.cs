@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.AI;
 
 public interface IFSMEvents : ITickable
 {
@@ -14,8 +15,23 @@ public interface IFSMEvents : ITickable
 
     void OnPathRequestComplete(in PathResult result);
 
-
-    Transform Transform { get; }
+    bool HasLOS { get; }
+   // Transform Transform { get; }
 
     StateNotificationProvider Notification { get; set; }
+}
+
+public interface FSMOwner : ITargetable
+{
+    Transform Transform { get; }
+
+    ITargetable PrimaryTarget { get; }
+
+    EnemyEventManager OwnerEM { get; }
+
+    NavMeshAgent Agent { get; }
+
+    NavMeshObstacle Obstacle { get; }
+
+    NavMeshPath Path { get; }
 }
