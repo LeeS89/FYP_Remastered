@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.AI;
 
-public interface IFSMEvents : ITickable
+public interface IFSMEvents : ITickable, IZoneSink
 {
     void BeginPatrol();
     void BeginChase();
@@ -13,19 +13,25 @@ public interface IFSMEvents : ITickable
     //void BeginSearch();
     void ClearState();
 
+    bool DestinationReached { get; }
+
     void OnPathRequestComplete(in PathResult result);
 
     bool HasLOS { get; }
    // Transform Transform { get; }
 
     StateNotificationProvider Notification { get; set; }
+
+   // bool CurrentZone(out uint zone);
 }
 
-public interface FSMOwner : ITargetable
+public interface IFSMOwner : ITargetable
 {
-    Transform Transform { get; }
+  //  Transform Transform { get; }
 
     ITargetable PrimaryTarget { get; }
+
+   // ITargetable GameObject { get; }
 
     EnemyEventManager OwnerEM { get; }
 
@@ -34,4 +40,7 @@ public interface FSMOwner : ITargetable
     NavMeshObstacle Obstacle { get; }
 
     NavMeshPath Path { get; }
+
+    float WalkSpeed { get; }
+    float SprintSpeed { get; } 
 }

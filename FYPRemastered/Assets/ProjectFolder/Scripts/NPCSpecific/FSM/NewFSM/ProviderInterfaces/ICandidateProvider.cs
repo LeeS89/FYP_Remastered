@@ -7,8 +7,25 @@ using UnityEngine.AI;
 public interface ICandidateProvider
 {
     List<(Vector3 position, Vector3? forward)> TryGet(in ValidateDestination req);
-     List<(Vector3, Vector3?)> Candidates { get; }
+  //  List<(Vector3, Vector3?)> Candidates { get; }
 
+}
+
+public interface IDestinationResolver : IZoneSink
+{
+    /*bool TryGetWaypointZone(out uint zone);
+
+    bool TrySwitchWaypoints();*/
+
+    void TryGetDestination(in ValidateDestination req);
+   // List<(Vector3 position, Vector3? forward)> TryGet(in ValidateDestination request);
+}
+
+public interface IZoneSink
+{
+    bool TryGetCurrentZone(out int zone);
+
+    bool TrySwitchZone();
 }
 
 public interface IWaypointRepository
@@ -53,7 +70,8 @@ public sealed class WaypointProvider : DestinationProvider
         _repo = WaypointRepo.Instance;
         Candidates.EnsureCapacity(15);
         _wpRequestCB = OnWaypointBlockReceived;
-        this.RequestWaypointBlock(callback: _wpRequestCB);
+        // this.RequestWaypointBlock(callback: _wpRequestCB);
+        _repo.GetWaypointBlock(requestCallback: _wpRequestCB);
     }
 
     public override List<(Vector3 position, Vector3? forward)> TryGet(in ValidateDestination req)

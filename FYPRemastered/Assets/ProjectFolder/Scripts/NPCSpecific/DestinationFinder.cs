@@ -5,51 +5,81 @@ using UnityEngine;
 using UnityEngine.AI;
 
 
-public class PathFinder
+public class DestinationFinder : IDestinationResolver
 {
-    private ITargetable _primaryTarget;
+   /* private ITargetable _primaryTarget;
     private ITargetable _secondaryTarget;
 
     private ITargetable _followTarget;
-    public ITargetable _attackTarget;
+    public ITargetable _attackTarget;*/
 
+    private readonly Dictionary<DestinationKind, ICandidateProvider> _map;
 
+    private readonly IFSMEvents Owner;
 
-    IFSMEvents Owner;
-
-    private NavMeshPath _path;
     private WaitUntil _waitUntilPathCheckComplete;
     private bool _pathChecked;
 
     private Action<bool> PathCheckCallback;
-   
+    
     public int CurrentWaypointZone { get; private set; } = 0;
-  //  private Transform OwnerTransform { get; set; }
+
     private Coroutine _runningRoutine;
     List<(Vector3 position, Vector3? forward)> samples = new(50);
     private bool _isValid = false;
-    private DestinationService _destService;
+  
 
     private Queue<(List<(Vector3, Vector3?)>, ValidateDestination)> _pathQueue = new(10);
    
-    public PathFinder(IFSMEvents owner)
+    public DestinationFinder(IFSMEvents owner)
     {
         Owner = owner;
         PathCheckCallback = OnPathRequestcallback;
         _waitUntilPathCheckComplete = new WaitUntil(() => _pathChecked);
-        _destService = new DestinationService();
+        _map = new()
+        {
+            [DestinationKind.Patrol] = new WaypointProvider()
+        };
     }
 
+    public List<(Vector3 position, Vector3? forward)> TryGet(in ValidateDestination request)
+    {
+        if (_map.TryGetValue(request.Kind, out var p)) return p.TryGet(request);
+
+        return null;
+    }
+
+    
+
+    public bool TryGetCurrentZone(out int zone)
+    {
+        if (_map.TryGetValue(DestinationKind.Patrol, out var p))
+        {
+            if (p is WaypointProvider pr)
+            {
+                zone = pr.CurrentWaypointZone;
+                return true;
+            }
+        }
+
+        zone = 0;
+        return false;
+    }
+    
+
+    public bool TrySwitchZone() => false;
+   
+   
     public void TryChaseTarget(ITargetable target) { }
 
 
     public void TryGetDestination(in ValidateDestination req)
     {
         List<(Vector3 position, Vector3? forward)> destinations;
-        destinations = _destService.TryGet(req);
+        destinations = TryGet(req);
         if (destinations == null || destinations.Count == 0)
         {
-            PathResult failResult = new PathResult(req.Reason, false, Vector3.zero, req.RequestId, null);
+            PathResult failResult = new PathResult(req.Reason, req.Kind, false, Vector3.zero, req.RequestId, null);
             Owner.OnPathRequestComplete(failResult);
             return;
         }
@@ -78,7 +108,7 @@ public class PathFinder
 
                 if (!_isValid) continue;
 
-                PathResult success = new PathResult(reqInfo.Reason, true, pos, reqInfo.RequestId, fwd);
+                PathResult success = new PathResult(reqInfo.Reason, reqInfo.Kind, true, pos, reqInfo.RequestId, fwd);
                 Owner.OnPathRequestComplete(success);
                 found = true;
                 break;
@@ -86,7 +116,7 @@ public class PathFinder
 
             if (!found)
             {
-                PathResult failed = new PathResult(reqInfo.Reason, false, Vector3.zero, reqInfo.RequestId, null);
+                PathResult failed = new PathResult(reqInfo.Reason, reqInfo.Kind, false, Vector3.zero, reqInfo.RequestId, null);
                 Owner.OnPathRequestComplete(failed);
             }
         }
@@ -96,19 +126,27 @@ public class PathFinder
     }
 
 
-    // private void QueuePathRequest(Vector3 start, Vector3 end) => return;
-
-
-    public void TryGetPath(in PathRequestInfo info)
+    
+    private void OnPathRequestcallback(bool pathFound/*in PathResult result*/)
     {
-        if (_runningRoutine == null)
-            _runningRoutine = CoroutineRunner.Instance.StartCoroutine(PathFindRoutine(info));
+        _isValid = pathFound;
+        _pathChecked = true;
     }
 
 
-    private IEnumerator PathFindRoutine(PathRequestInfo info)
+
+    #region Redundant
+/*
+    public void TryGetPath(in PathRequestInfo info)
     {
-        foreach(var (pos, fwd) in info.Points)
+        if (_runningRoutine == null)
+            _runningRoutine = CoroutineRunner.Instance.StartCoroutine(PathFindRoutineOld(info));
+    }
+
+
+    private IEnumerator PathFindRoutineOld(PathRequestInfo info)
+    {
+        foreach (var (pos, fwd) in info.Points)
         {
             _pathChecked = false;
             _isValid = false;
@@ -128,22 +166,7 @@ public class PathFinder
         PathResult failResult = new PathResult(info.Reason, false, Vector3.zero, info.Id, null);
         Owner.OnPathRequestComplete(failResult);
         _runningRoutine = null;
-    }
-
-    
-
-   
-
-    private void OnPathRequestcallback(bool pathFound/*in PathResult result*/)
-    {
-        _isValid = pathFound;
-        _pathChecked = true;
-    }
-
-   
-
-    #region Redundant
-
+    }*/
     /*public void TryGetWaypoint(DestinationKind target)
     {
         if (_currentWaypointPair.HasValue)
@@ -189,8 +212,9 @@ public class PathFinder
 
     public Collider GetAttackTarget(AttackTarget target)
     {
-        if (target == AttackTarget.Primary) return _primaryTarget?.GetTargetableCollider();
-        else return _secondaryTarget?.GetTargetableCollider();
+        /* if (target == AttackTarget.Primary) return _primaryTarget?.GetTargetableCollider();
+         else return _secondaryTarget?.GetTargetableCollider();*/
+        return null;
     }
    /* public Vector3? GetFollowTarget(MovementIntent intent)
     {
@@ -211,7 +235,7 @@ public class PathFinder
     }*/
 
 
-    public void GetPrimaryTarget()
+  /*  public void GetPrimaryTarget()
     {
         if(!GameManager.Instance.TryGetPlayer(out _primaryTarget))
         {
@@ -225,7 +249,11 @@ public class PathFinder
             Debug.LogError("Player ITargetable found");
 #endif
         }
-    }
+    }*/
+
+   
+
+
     #endregion
 }
 public readonly struct PathRequestInfo
@@ -252,15 +280,17 @@ public readonly struct PathResult
 {
 
     public readonly PathCheckReason Reason;
+    public readonly DestinationKind Kind;
     public readonly bool PathFound;
     public readonly Vector3 Position;
     public readonly Vector3? Forward;
     public readonly uint Id;
 
-    public PathResult(PathCheckReason reason, bool found, Vector3 pos, uint id, Vector3? fwd = null)
+    public PathResult(PathCheckReason reason, DestinationKind kind, bool found, Vector3 pos, uint id, Vector3? fwd = null)
     {
    
         Reason = reason;
+        Kind = kind;
         Id = id;
         PathFound = found;
         Position = pos;

@@ -132,7 +132,7 @@ public class EnemyAnimController
 
     public void LookAround()
     {
-       // _eventManager.ChangeAnimatorLayerWeight(EnemyAnimController.AnimationLayer.LookAround, 0, 1, 1f);
+   
         _anim.SetTrigger("look");
 
     }
@@ -243,12 +243,7 @@ public class EnemyAnimController
     }
 
 
-    public enum AnimationLayer
-    {
-        Alert = 1,
-        Combat = 2,
-        LookAround = 3
-    }
+    
 
 
 

@@ -6,7 +6,7 @@ public interface ITargetable
 
     Vector3 GetPosition();
 
-    Collider GetTargetableCollider();
+    Collider TargetableCollider { get; }
 
     bool IsMoving { get; }
 }

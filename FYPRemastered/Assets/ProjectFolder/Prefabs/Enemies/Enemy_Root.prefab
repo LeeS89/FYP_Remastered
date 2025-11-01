@@ -113,7 +113,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2438767272640573427
 Transform:
   m_ObjectHideFlags: 0
@@ -263,6 +263,32 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _clipCapacity: 5
   _testShootStatus: 0
+  prms:
+    fovOrigin: {fileID: 0}
+    maxFovTargets: 5
+    blockingMask:
+      serializedVersion: 2
+      m_Bits: 0
+    targetMask:
+      serializedVersion: 2
+      m_Bits: 0
+    fovRadius: 25
+    ownerOrigin: {fileID: 0}
+    waistHeightOffset: 1
+    eyeHeightOffset: 1.8
+    evaluationCapsuleRadius: 0.4
+    addTargetFallbackPoints: 0
+    fovHalfAngle: 50
+    useSeparateVerticleAngle: 0
+    verticalFovHalfAngle: 25
+    useShootingAngleRestriction: 1
+    halfHorizontalShootAngle: 15
+    idleFOVCheckFrequency: 1
+    heightenedFOVCheckFrequency: 0.5
+    suspiciousFOVCheckFrequency: 0.25
+    alertedFOVCheckFrequency: 0.1
+    alertToSuspiciousDelaySeconds: 3
+    suspiciousToIdleDelaySeconds: 5
   _fovLocation: {fileID: 3514716611913536367}
   _maxFovTraceResults: 5
   _proximityRadius: 25
@@ -323,6 +349,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bee573a46eb891940b1392ede30cf816, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _parentTransform: {fileID: 0}
   _testDeath: 0
 --- !u!1 &613288840807163240
 GameObject:

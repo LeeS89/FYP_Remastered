@@ -7,8 +7,8 @@ public class EnemyAnimationEvents : ComponentEvents
     private EnemyEventManager _enemyEventManager;
 
     [SerializeField] private Transform lookTarget; // Pull from event later
-    [SerializeField] private float maxPitchAngle = 30f;
-    [SerializeField] private float aimSpeed = 5f;
+   // [SerializeField] private float maxPitchAngle = 30f;
+    //[SerializeField] private float aimSpeed = 5f;
 
     private Animator animator;
    

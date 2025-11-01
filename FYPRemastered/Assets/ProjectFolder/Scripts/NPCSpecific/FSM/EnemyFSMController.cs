@@ -154,7 +154,7 @@ public sealed class EnemyFSMController : FSMControllerBase
         ToggleAgent(true);
         //_agent.enabled = true;
         OwnerIsDead = false;
-        _agentEventManager.ChangeAnimatorLayerWeight(EnemyAnimController.AnimationLayer.Combat, 0, 1, 0.5f);
+        _agentEventManager.ChangeAnimatorLayerWeight(AnimationLayer.Combat, 0, 1, 0.5f);
         DeathStatusUpdated(false);
         _agentEventManager.AgentRespawn();
         _alertStatus = AlertStatus.None;
@@ -285,7 +285,7 @@ public sealed class EnemyFSMController : FSMControllerBase
 
         }
 
-        _agentEventManager.ChangeAnimatorLayerWeight(EnemyAnimController.AnimationLayer.Alert, 1, 0, 0.5f, true);
+        _agentEventManager.ChangeAnimatorLayerWeight(AnimationLayer.Alert, 1, 0, 0.5f, true);
 
         switch (contextState)
         {
@@ -395,7 +395,7 @@ public sealed class EnemyFSMController : FSMControllerBase
         {
             _alertStatus = AlertStatus.Alert;
 
-            _agentEventManager.ChangeAnimatorLayerWeight(EnemyAnimController.AnimationLayer.Alert, 0, 1, 0.5f, true);
+            _agentEventManager.ChangeAnimatorLayerWeight(AnimationLayer.Alert, 0, 1, 0.5f, true);
 
             //_alertStatus = AlertStatus.Alert;
 

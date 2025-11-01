@@ -11,10 +11,15 @@ public class FSMManager : IFSMEvents
 
     public bool HasLOS { get; set; }
 
+    public bool DestinationReached { get; private set; } = true;
+
+    //public uint CurrentZone { get; set; }
+
     // public Transform Transform { get; set; }
 
-    private DestinationProviderOld _destinationProvider;
-    private PathFinder _pathFinder;
+    // private DestinationProviderOld _destinationProvider;
+    //  private DestinationService _destService;
+    private IDestinationResolver _pathFinder;
 
     private Action<float> OnPatrol;
 
@@ -23,12 +28,12 @@ public class FSMManager : IFSMEvents
   //  private NavMeshPath _path;
     private uint _stateTransitionId;
    // private EnemyEventManager _eventManager;
-    private FSMOwner Owner; 
+    private IFSMOwner Owner; 
     //private bool _isInStateTransition = false;
    
-    public FSMManager(FSMOwner owner)
+    public FSMManager(IFSMOwner owner)
     {
-        if (Owner == null)
+        if (owner == null)
         {
 #if UNITY_EDITOR
             Debug.LogError("Must Pass a valid FSMOwner");
@@ -38,67 +43,61 @@ public class FSMManager : IFSMEvents
         }
 
         Owner = owner;
-        _pathFinder = new(this);
-        _destinationProvider = new();
+        _pathFinder = new DestinationFinder(this);
+        Tick = OnTick;
     }
 
-    public FSMManager(EnemyEventManager em, Transform owner, NavMeshAgent agt, NavMeshObstacle ob)
-    {
-        _pathFinder = new(this);
-       // Transform = owner;
-       // _path = new();
-        _destinationProvider = new();
-       // _eventManager = em;
-       // _agent = agt;
-      //  _obstacle = ob;
-    }
+    private void OnTick(float dt) => CheckRemainingDistance();
+    
 
     public void OnPathRequestComplete(in PathResult result)
     {
+        
         // Blocks Destination Setting while transitioning to new state
         if (result.Id != _stateTransitionId) return;
         bool pathFound = result.PathFound;
+        DestinationKind kind = result.Kind;
 
         if (result.Reason == PathCheckReason.ProbePathToPrimaryTarget && pathFound) 
         { SendNotification(NotificationKind.PathToPrimaryAvailable, false); return; }
 
-        if (!result.PathFound) { SendNotification(NotificationKind.NoAvailablePath, false); return; }
+        if (!result.PathFound) { SendNotification(NotificationKind.NoAvailablePath, false); Debug.LogError("NO Path Found!!"); return; }
         else
         {
-           
+            if (kind == DestinationKind.Patrol) Owner.OwnerEM.SpeedChanged(Owner.WalkSpeed, 2f);
 
             Owner.Agent.SetDestination(result.Position);
         }
 
-           /* switch (result.Kind)
-            {
-                case DestinationKind.Patrol:
-                    if (!pathFound) SendNotification(NotificationKind.NoAvailablePath, false);
-                    return;
-                case DestinationKind.ProbeToTarget:
-                    if (pathFound) SendNotification(NotificationKind.PathToPrimaryAvailable, false);
-                    return;
-                case DestinationKind.ChaseTarget:
-                    if (!pathFound) SendNotification(NotificationKind.NoAvailablePath, false);
-                    return;
-                case DestinationKind.Flank:
-                    if (!pathFound) SendNotification(NotificationKind.NoAvailablePath, false);
-                    return;
-            }*/
-
-        /*switch (target)
-        {
-            *//*case PathPurpose.CheckPrimary:
-                break;*//*
-        }
-
-        if (!pathFound)
-        {
-            StateNotification n = new StateNotification(NotificationKind.NoAvailablePath, false);
-            Notification?.Invoke(n);
-            return;
-        }*/
     }
+
+    private void CheckRemainingDistance()
+    {
+        if (!Owner.Agent.enabled) return;
+        if(Owner.Agent.hasPath && !Owner.Agent.pathPending)
+        {
+            bool reached = HasReachedDestination();
+            if (DestinationReached == reached) return;
+            DestinationReached = reached;
+            if (DestinationReached)
+            {
+                Owner.OwnerEM.SpeedChanged(0f, 10f);
+                Owner.Agent.ResetPath();
+                Owner.Agent.enabled = false;
+                Owner.Obstacle.enabled = true;
+            }
+                
+        }
+    }
+
+    private bool HasReachedDestination() => Owner.Agent.remainingDistance <= (Owner.Agent.stoppingDistance + 0.25f);
+
+ 
+    public bool TryGetCurrentZone(out int zone)
+        => _pathFinder.TryGetCurrentZone(out zone);
+
+    public bool TrySwitchZone() => _pathFinder.TrySwitchZone();
+   
 
     private void SendNotification(NotificationKind kind, bool destinationReached)
     {
@@ -106,23 +105,22 @@ public class FSMManager : IFSMEvents
         Notification?.Invoke(n);
     }
 
-    private Vector3 GetOwnerPos() => LineOfSightUtility.GetClosestPointOnNavMesh(Owner.Transform.position);
+    private Vector3 GetOwnerPos() => LineOfSightUtility.GetClosestPointOnNavMesh(Owner.GetPosition());
 
     private bool IsDestinationReached() => false;
 
     public void BeginPatrol()
     {
-        PathCheckReason reason = PathCheckReason.ValidatePathForDestination;
-        List<(Vector3,Vector3?)> points = _destinationProvider?.TryGetDestinations(DestinationKind.Patrol);
-        PathRequestInfo info = new PathRequestInfo(points, GetOwnerPos(), reason, Owner.Path, _stateTransitionId);
-        _pathFinder.TryGetPath(info);
-        Tick = OnPatrol;
+        Debug.LogError("Trying To Patrol");
+   /*     PathCheckReason reason = PathCheckReason.ValidatePathForDestination;*/
+        var request = ValidateDestination.GetPatrolPoint(_stateTransitionId, Owner, Owner.Path);
+        /*List<(Vector3,Vector3?)> points = */_pathFinder?.TryGetDestination(request);
+     //   PathRequestInfo info = new PathRequestInfo(points, GetOwnerPos(), reason, Owner.Path, _stateTransitionId);
+       // _pathFinder.TryGetPath(info);
+       // Tick = OnPatrol;
     }
 
-    private void TryGetDestinations(PathCheckReason reason)
-    {
-
-    }
+  
 
     public void BeginChase()
     {
@@ -145,6 +143,6 @@ public class FSMManager : IFSMEvents
     }
 
     public void ClearState() => _stateTransitionId++;
-    
 
+   
 }

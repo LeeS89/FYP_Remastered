@@ -11,7 +11,7 @@ namespace ProjectRemaster.Combat
       
         public Transform Target { get; protected set; } = null;
 
-
+        //protected ITargetable _target;
         // public bool WeaponReady { get; protected set; } = false;
 
         public override void Equip(IWeaponOwner owner)

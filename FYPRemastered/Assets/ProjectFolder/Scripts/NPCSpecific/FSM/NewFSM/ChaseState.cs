@@ -25,7 +25,7 @@ public sealed class ChaseState : IntentStateBase
         switch (n.Kind)
         {
             case NotificationKind.TargetLOSLost:
-                if (n.DestinationReached) self.SwitchTo(Flank.Instance);
+                if (n.DestinationReached) self.SwitchTo(Flank.Instance); // Ensure to wait a few seconds after losing LOS, then check again before sending Notification
                 // Plus Notify Zone handler of lost LOS => If all lost LOS switch to Search last known
                 break;
             case NotificationKind.PathBlocked or NotificationKind.NoAvailablePath:

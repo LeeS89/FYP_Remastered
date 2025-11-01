@@ -9,15 +9,15 @@ public class EnemyEventManager : EventManager
     // Nav mesh agent events
     public event Action<bool> OnDestinationReached;
     //public event Action<Vector3, int> OnDestinationUpdated;  
-    public event Action<bool> OnTargetSeen;
+    public Action<bool> OnTargetSeen;
     public event Action<bool> OnRotateTowardsTarget;
     public event Action OnPathInvalid;
     //public event Action<AIDestinationRequestData> OnPathRequested;
 
     // Animation events
-    public event Action<AnimationCue> OnAnimationTriggered;
+    public Action<AnimationCue> OnAnimationTriggered;
     public event Action<float, float> OnSpeedChanged;
-    public event Action<AnimationLayer, float, float, float, bool> OnChangeAnimatorLayerWeight;
+    public Action<AnimationLayer, float, float, float, bool> OnChangeAnimatorLayerWeight;
     public event Action<bool> OnAimingLayerReady;
     public event Action OnDeathAnimationComplete;
 
@@ -99,20 +99,16 @@ public class EnemyEventManager : EventManager
     /// Animation actions other than Locomotion i.e. Melee, Look around etc
     /// </summary>
     /// <param name="action"></param>
-    public void TriggerAnimation(AnimationCue action)
-    {
-        OnAnimationTriggered?.Invoke(action);
-    }
+    public void TriggerAnimation(AnimationCue action) => OnAnimationTriggered?.Invoke(action);
+
 
     /// <summary>
     /// Updates agent move speed and animation
     /// </summary>
     /// <param name="moveSpeed"></param>
     /// <param name="lerpSpeed"></param>
-    public void SpeedChanged(float moveSpeed, float lerpSpeed)
-    {
-        OnSpeedChanged?.Invoke(moveSpeed, lerpSpeed);
-    }
+    public void SpeedChanged(float moveSpeed, float lerpSpeed) => OnSpeedChanged?.Invoke(moveSpeed, lerpSpeed);
+
 
     public void PathInvalid()
     {
@@ -127,10 +123,8 @@ public class EnemyEventManager : EventManager
 
    
 
-    public void TargetSeen(bool seen)
-    {
-        OnTargetSeen?.Invoke(seen);
-    }
+    public void TargetSeen(bool seen) => OnTargetSeen?.Invoke(seen);
+
 
     public void FacingTarget(bool facingTarget)
     {
@@ -147,9 +141,7 @@ public class EnemyEventManager : EventManager
     /// <param name="duration"></param>
     /// <param name="layerReady"></param>
     public void ChangeAnimatorLayerWeight(AnimationLayer layer, float from, float to, float duration, bool layerReady = false)
-    {
-        OnChangeAnimatorLayerWeight?.Invoke(layer, from, to, duration, layerReady);
-    }
+        => OnChangeAnimatorLayerWeight?.Invoke(layer, from, to, duration, layerReady);
 
     /// <summary>
     /// Used to alert the agents weapon to be ready to fire
@@ -257,4 +249,9 @@ public class EnemyEventManager : EventManager
     public Action<Transform> OnUpdateChaseTarget;
 
     public void UpdateChaseTarget(Transform target) => OnUpdateChaseTarget?.Invoke(target);
+
+
+    public Action<Vector3, Vector3> OnTickAnimator;
+
+    public void TickAnimator(Vector3 velocity, Vector3 forward) => OnTickAnimator?.Invoke(velocity, forward);
 }

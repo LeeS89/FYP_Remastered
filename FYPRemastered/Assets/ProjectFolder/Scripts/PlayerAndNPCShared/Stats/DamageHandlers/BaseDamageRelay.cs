@@ -4,14 +4,15 @@ using UnityEngine;
 public class BaseDamageRelay : ComponentEvents, IDamageable
 {
     [SerializeField] private Transform _parentTransform;
-    private Collider _targetableCollider;
-   
+    public Collider TargetableCollider { get; private set; }
 
+   
     public override void RegisterLocalEvents(EventManager eventManager)
     {
         //base.RegisterLocalEvents(eventManager);
         _eventManager = eventManager;
-        _targetableCollider = GetComponent<Collider>();
+        TargetableCollider = GetComponent<Collider>();
+        //_targetableCollider = GetComponent<Collider>();
     }
 
 
@@ -59,10 +60,14 @@ public class BaseDamageRelay : ComponentEvents, IDamageable
 
     public bool IsMoving { get; private set; } = false;
 
-   /* public Vector3 GetTargetablePosition()
-        => _parentTransform == null ? transform.position : _parentTransform.position;*/
+   
 
-    public Collider GetTargetableCollider() => _targetableCollider;
+
+
+    /* public Vector3 GetTargetablePosition()
+         => _parentTransform == null ? transform.position : _parentTransform.position;*/
+
+
 
     public (Vector3, Vector3?) GetTargetablePositionAndForward()
         => _parentTransform == null ? (transform.position, transform.forward) : (_parentTransform.position, _parentTransform.forward);

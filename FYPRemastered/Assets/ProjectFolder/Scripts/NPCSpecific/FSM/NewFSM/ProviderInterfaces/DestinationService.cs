@@ -20,18 +20,18 @@ public sealed class DestinationService
         return null;
     }
 
-    public bool GetCurrentZone(out int zone)
+    /*public bool GetCurrentZone(out int zone)
     {
         if(_map.TryGetValue(DestinationKind.Patrol, out var p))
         {
             if (p is WaypointProvider pr) 
             {
-                zone = pr.CurrentWaypointZone;
+            //    zone = pr.CurrentWaypointZone;
                 return true; 
             }
         }
 
         zone = -1;
         return false;
-    }
+    }*/
 }

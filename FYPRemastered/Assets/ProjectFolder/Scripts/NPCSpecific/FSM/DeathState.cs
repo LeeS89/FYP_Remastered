@@ -12,8 +12,8 @@ public class DeathState : EnemyState
 
     public override void EnterState(AlertStatus alertStatus = AlertStatus.None)
     {
-        _eventManager.ChangeAnimatorLayerWeight(EnemyAnimController.AnimationLayer.Alert, 1, 0, 0.5f);
-        _eventManager.ChangeAnimatorLayerWeight(EnemyAnimController.AnimationLayer.Combat, 1, 0, 0.5f);
+        _eventManager.ChangeAnimatorLayerWeight(AnimationLayer.Alert, 1, 0, 0.5f);
+        _eventManager.ChangeAnimatorLayerWeight(AnimationLayer.Combat, 1, 0, 0.5f);
         _eventManager.OnDeathAnimationComplete += DeathAnimationComplete;
         _eventManager.TriggerAnimation(AnimationCue.Dead);
         _deathAnimationComplete = false;

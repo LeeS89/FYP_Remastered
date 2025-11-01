@@ -5,14 +5,14 @@ public class NPCController : NPCControllerBase
 {
     protected override void ChangeState(State state, Transform target = null)
     {
-        StateChangeResult result = _eEventManager.ChangeState(state, target);
+        StateChangeResult result = OwnerEM.ChangeState(state, target);
         if(result == StateChangeResult.Success) CurrentState = state;
     }
 
     protected override void SetAndChaseTarget(Transform targetPosition)
     {
         if (CurrentState == State.Death) return;
-        else if(CurrentState == State.Chase) _eEventManager.UpdateChaseTarget(targetPosition);
+        else if(CurrentState == State.Chase) OwnerEM.UpdateChaseTarget(targetPosition);
         else ChangeState(State.Chase, targetPosition);
     }
 
@@ -41,7 +41,7 @@ public class NPCController : NPCControllerBase
         throw new System.NotImplementedException();
     }
 
-    protected override void OnPathValidationResult(bool pathBlocked, FSMPolicy policy)
+    /*protected override void OnPathValidationResult(bool pathBlocked, FSMPolicy policy)
     {
         if (!_currentPolicy.HasValue) return;
         if (policy.Version != _currentPolicy.Value.Version) return; // Stale
@@ -55,7 +55,7 @@ public class NPCController : NPCControllerBase
         // and currentIntent == FollowGroup
 
         
-    }
+    }*/
 
     public Action<FSMPolicy> OnPolicyUpdated;
     public void PolicyUpdated(FSMPolicy policy) => OnPolicyUpdated?.Invoke(policy);
@@ -65,7 +65,7 @@ public class NPCController : NPCControllerBase
 
     protected override void PolicyResult(in FSMPolicyResult result)
     {
-        if(!_currentPolicy.HasValue) return;
+       /* if(!_currentPolicy.HasValue) return;
         if (result.Version != _currentPolicy.Value.Version) return;
         MovementIntent currentIntent = _currentPolicy.Value.MoveIntent;
 
@@ -77,12 +77,12 @@ public class NPCController : NPCControllerBase
             case MovementIntent.FollowPrimary:
                 HandleFollowPrimaryIntentHalted(result);
                 break;
-        }
+        }*/
     }
 
     protected void HandleFollowGroupIntentHalted(in FSMPolicyResult result)
     {
-        PolicyHaltReason reason = result.Reason;
+      /*  PolicyHaltReason reason = result.Reason;
 
         if(reason == PolicyHaltReason.PathUnAvailable) 
             _currentPolicy = new FSMPolicy(_currentPolicyVersion++, MovementIntent.FollowPrimary, true);
@@ -92,7 +92,7 @@ public class NPCController : NPCControllerBase
 
         else 
             _currentPolicy = new FSMPolicy(_currentPolicyVersion++, MovementIntent.Flee);
-
+*/
 
         /* if (!result.PathToPrimaryBlocked)
          {
@@ -122,7 +122,7 @@ public class NPCController : NPCControllerBase
     protected void HandleFollowPrimaryIntentHalted(in FSMPolicyResult result)
     {
         // => Eventually check brain for next decision
-        PolicyHaltReason reason = result.Reason;
+      /*  PolicyHaltReason reason = result.Reason;
         if (reason == PolicyHaltReason.PathBlocked)
         {
             if(!result.DestinationReached)
@@ -139,7 +139,7 @@ public class NPCController : NPCControllerBase
         {
             //if(result.DestinationReached)
                 // Re-send current policy
-        }
+        }*/
 
 
 
@@ -160,7 +160,20 @@ public class NPCController : NPCControllerBase
 
 
     }
+    public bool TestZone = false;
 
+    protected override void Update()
+    {
+        base.Update();
+
+        if (TestZone)
+        {
+            int zone;
+            if (!FSM.TryGetCurrentZone(out zone)) Debug.LogError("No Valid Zone found");
+            else Debug.LogError("CurrentZone is: "+zone);
+            TestZone = false;
+        }
+    }
 
 
     protected /*override*/ void ValidateNewPolicy(MovementIntent intent)
@@ -170,7 +183,7 @@ public class NPCController : NPCControllerBase
 
     protected void OnPolicyValidationResult(in FSMPolicyValidation result)
     {
-        if (!_currentPolicy.HasValue || result.Version != _currentPolicy.Value.Version) return;
+      /*  if (!_currentPolicy.HasValue || result.Version != _currentPolicy.Value.Version) return;
         MovementIntent currentIntent = _currentPolicy.Value.MoveIntent;
         PolicyIntentResult pathResult = result.PathResult;
         bool destinationReached = result.DestinationReached;
@@ -187,7 +200,7 @@ public class NPCController : NPCControllerBase
                 return;
         }
 
-        /*else*/ if(currentIntent == MovementIntent.FollowSecondary)
+        *//*else*//* if(currentIntent == MovementIntent.FollowSecondary)
         {
             //if(pathResult == PathCheckResult.PathAvailable) CommitPolicy
             if (pathResult == PolicyIntentResult.PathToPrimaryAvailable)
@@ -201,7 +214,7 @@ public class NPCController : NPCControllerBase
             }
                
 
-        }
+        }*/
     }
 
 
@@ -234,7 +247,7 @@ public class NPCController : NPCControllerBase
         if (result == PolicyIntentResult.PathAvailable) return; // => CommitPolicy(_currentPolicy.Value);
         else if (result == PolicyIntentResult.PathToPrimaryAvailable)
         {
-            _currentPolicy = new FSMPolicy(_currentPolicyVersion++, MovementIntent.FollowPrimary, true);
+          //  _currentPolicy = new FSMPolicy(_currentPolicyVersion++, MovementIntent.FollowPrimary, true);
             // CommitPolicy(_currentPolicy.Value);
         }
         else if (result == PolicyIntentResult.PathBlocked)
@@ -243,7 +256,7 @@ public class NPCController : NPCControllerBase
         }
         else if (result == PolicyIntentResult.NoAvailableSecondaryToFollow)
         {
-            _currentPolicy = new FSMPolicy(_currentPolicyVersion++, MovementIntent.FindAvailableCover, false);
+          //  _currentPolicy = new FSMPolicy(_currentPolicyVersion++, MovementIntent.FindAvailableCover, false);
             // CommitPolicy(_currentPolicy.Value);
         }
         else
@@ -259,10 +272,10 @@ public class NPCController : NPCControllerBase
 
     public override void SwitchTo(IIntentState next)
     {
-        if (_state == next) return;
-        _state.Exit(this);
+        if (next == null || _state == next) return;
+        _state?.Exit(this);
         _state = next;
-        _state.Enter(this);
+        _state?.Enter(this);
     }
 
     public override void OnNotification(in StateNotification n) => _state.Handle(this, n);

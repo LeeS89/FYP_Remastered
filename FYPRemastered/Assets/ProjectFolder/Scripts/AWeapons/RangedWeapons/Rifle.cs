@@ -167,7 +167,7 @@ public sealed class Rifle : Weapon, IRanged
     public void TryUse(FireRate rate = FireRate.SingleAutomatic, Transform target = null)
     {
         if (!Equipped) return;
-        Target = target;
+       // Target = target;
         SetFireRate(rate);
 
         if (rate == FireRate.SingleAutomatic || rate == FireRate.Burst || rate == FireRate.FullAutomatic) StartAutoFire(rate);
@@ -191,7 +191,8 @@ public sealed class Rifle : Weapon, IRanged
         PlayAnimations();
 
         _leftInClip--;
-        Vector3 directionToTarget = Target != null ? TargetingUtility.GetDirectionToTarget(_target, _spawnPoint, true) :
+        // Need to add support for Collider passed into utility
+        Vector3 directionToTarget = _target != null ? TargetingUtility.GetDirectionToTarget(_target, _spawnPoint, true) :
             _spawnPoint.forward;
         Quaternion rotation = Quaternion.LookRotation(directionToTarget);
 
