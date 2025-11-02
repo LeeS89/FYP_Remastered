@@ -3,9 +3,9 @@ using UnityEngine;
 
 public interface IIntentState
 {
-    void Enter(NPCController self);
-    void Exit(NPCController self);
-    void Handle(NPCController self, StateNotification notification);
+    void Enter(IFSMOwner self);
+    void Exit(IFSMOwner self);
+    void Handle(IFSMOwner self, StateNotification notification);
    
 
     //void Tick(NPCController self, float dt); => Optional for Later

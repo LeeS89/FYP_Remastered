@@ -10,6 +10,9 @@ public interface IFSMEvents : ITickable, IZoneSink
     void TakeCover();
     void FollowGroup();
 
+    
+    Action TryRepath { get; }
+
     //void BeginSearch();
     void ClearState();
 
@@ -42,5 +45,17 @@ public interface IFSMOwner : ITargetable
     NavMeshPath Path { get; }
 
     float WalkSpeed { get; }
-    float SprintSpeed { get; } 
+    float SprintSpeed { get; }
+
+    void LogUnhandled(IntentStateBase state, StateNotification notification) { }
+
+  //  void SetAgentTargetSpeed(float speed = 0, float lerpSpeed = 10);
+
+    void OnDestinationReached(DestinationKind kind, Vector3? forward = null);
+
+    void OnDestinationFound(DestinationKind Kind, Vector3 destination, Vector3? forward = null);
+
+    void SwitchTo(IIntentState next) { }
+    IFSMEvents FSM { get; }
+
 }

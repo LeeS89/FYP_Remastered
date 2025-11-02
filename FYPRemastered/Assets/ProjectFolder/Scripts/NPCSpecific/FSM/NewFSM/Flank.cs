@@ -5,7 +5,7 @@ public sealed class Flank : IntentStateBase
     public static readonly Flank Instance = new();
     private Flank() { }
 
-    public override void Enter(NPCController self)
+    public override void Enter(IFSMOwner self)
     {
         // public void BeginFlank();
         // Pass a struct containing the following information:
@@ -15,7 +15,7 @@ public sealed class Flank : IntentStateBase
         // MaxStopDistance
     }
 
-    public override void Handle(NPCController self, StateNotification n)
+    public override void Handle(IFSMOwner self, StateNotification n)
     {
         switch (n.Kind)
         {

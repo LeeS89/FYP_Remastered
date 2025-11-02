@@ -86,14 +86,14 @@ public enum DynamicDestinationKind
 
 public enum DestinationKind
 {
-    Target,
- //   ProbeToTarget,
-    FollowGroup,
-    TakeCover,
-    Flank,
-  //  SearchLastKnown,
-    Patrol,
-    Flee
+    None,
+    Target,//
+    FollowGroup, //
+    TakeCover, //
+    Flank, //
+    Search,
+    Patrol, //
+    Flee //
 
 
     /*ChasePrimary,
@@ -136,13 +136,10 @@ public enum NotificationKind
     TargetLOSLost,
     TargetLOSConfirmed,
     NoAvailablePath,
- //   NoPatrolPointAvailable,
     CoverExposed,
-   // NoCoverAvailable,
-    //NoAvailableGroupToFollow,
-    //NoFlankAvailable,
-  //  PathToPrimaryBlocked,
-    PathToPrimaryAvailable
+    PathToPrimaryAvailable,
+    DestinationFound,
+    DestinationReached
 }
 
 public enum PolicyHaltReason

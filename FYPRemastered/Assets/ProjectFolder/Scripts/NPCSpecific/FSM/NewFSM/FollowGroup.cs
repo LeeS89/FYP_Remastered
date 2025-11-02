@@ -5,7 +5,7 @@ public sealed class FollowGroup : IntentStateBase
     public static readonly FollowGroup Instance = new();
     private FollowGroup() { }
 
-    public override void Enter(NPCController self)
+    public override void Enter(IFSMOwner self)
     {
         // public void FollowGroup();
         // Pass a struct containing the following information:
@@ -16,7 +16,7 @@ public sealed class FollowGroup : IntentStateBase
 
     }
 
-    public override void Handle(NPCController self, StateNotification n)
+    public override void Handle(IFSMOwner self, StateNotification n)
     {
         switch (n.Kind)
         {

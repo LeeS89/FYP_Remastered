@@ -1,7 +1,6 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AI;
+
 
 public class FSMManager : IFSMEvents
 {
@@ -12,6 +11,8 @@ public class FSMManager : IFSMEvents
     public bool HasLOS { get; set; }
 
     public bool DestinationReached { get; private set; } = true;
+
+    public Action TryRepath { get; private set; }
 
     //public uint CurrentZone { get; set; }
 
@@ -58,15 +59,18 @@ public class FSMManager : IFSMEvents
         bool pathFound = result.PathFound;
         DestinationKind kind = result.Kind;
 
-        if (result.Reason == PathCheckReason.ProbePathToPrimaryTarget && pathFound) 
-        { SendNotification(NotificationKind.PathToPrimaryAvailable, false); return; }
+        if (result.Reason == PathCheckReason.ProbePathToPrimaryTarget && pathFound)
+        { SendNot(StateNotification.PathToPrimaryAvailable(DestinationReached)); return; }
+        //{ SendNotification(NotificationKind.PathToPrimaryAvailable, false); return; }
 
-        if (!result.PathFound) { SendNotification(NotificationKind.NoAvailablePath, false); Debug.LogError("NO Path Found!!"); return; }
+       // if (!result.PathFound) { SendNotification(NotificationKind.NoAvailablePath, false); Debug.LogError("NO Path Found!!"); return; }
+        if (!result.PathFound) { SendNot(StateNotification.NoAvailablePath(DestinationReached)); Debug.LogError("NO Path Found!!"); return; }
         else
         {
-            if (kind == DestinationKind.Patrol) Owner.OwnerEM.SpeedChanged(Owner.WalkSpeed, 2f);
+            SendNot(StateNotification.DestinationFound(DestinationReached, kind, result.Position, result.Forward));
+           // if (kind == DestinationKind.Patrol) Owner.OwnerEM.SpeedChanged(Owner.WalkSpeed, 2f);
 
-            Owner.Agent.SetDestination(result.Position);
+           // Owner.Agent.SetDestination(result.Position);
         }
 
     }
@@ -81,10 +85,11 @@ public class FSMManager : IFSMEvents
             DestinationReached = reached;
             if (DestinationReached)
             {
-                Owner.OwnerEM.SpeedChanged(0f, 10f);
-                Owner.Agent.ResetPath();
-                Owner.Agent.enabled = false;
-                Owner.Obstacle.enabled = true;
+                SendNot(StateNotification.DestinationReached(DestinationKind.Patrol));
+                //Owner.OwnerEM.SpeedChanged(0f, 10f);
+                //Owner.Agent.ResetPath();
+                //Owner.Agent.enabled = false;
+                //Owner.Obstacle.enabled = true;
             }
                 
         }
@@ -99,11 +104,13 @@ public class FSMManager : IFSMEvents
     public bool TrySwitchZone() => _pathFinder.TrySwitchZone();
    
 
-    private void SendNotification(NotificationKind kind, bool destinationReached)
+    private void SendNot(in StateNotification n) => Notification?.Invoke(n);
+
+    /*private void SendNotification(NotificationKind kind, bool destinationReached)
     {
         StateNotification n = new StateNotification(kind, destinationReached);
         Notification?.Invoke(n);
-    }
+    }*/
 
     private Vector3 GetOwnerPos() => LineOfSightUtility.GetClosestPointOnNavMesh(Owner.GetPosition());
 
@@ -111,6 +118,7 @@ public class FSMManager : IFSMEvents
 
     public void BeginPatrol()
     {
+        TryRepath = BeginPatrol;
         Debug.LogError("Trying To Patrol");
    /*     PathCheckReason reason = PathCheckReason.ValidatePathForDestination;*/
         var request = ValidateDestination.GetPatrolPoint(_stateTransitionId, Owner, Owner.Path);

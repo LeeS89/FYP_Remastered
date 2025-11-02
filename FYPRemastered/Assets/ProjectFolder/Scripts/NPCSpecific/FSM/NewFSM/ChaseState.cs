@@ -5,7 +5,7 @@ public sealed class ChaseState : IntentStateBase
     public static readonly ChaseState Instance = new();
     private ChaseState() { }
 
-    public override void Enter(NPCController self)
+    public override void Enter(IFSMOwner self)
     {
         // public void Chase();
         // Pass a struct containing the following information:
@@ -15,17 +15,17 @@ public sealed class ChaseState : IntentStateBase
         // MaxStopDistance
     }
 
-    public override void Exit(NPCController self)
+    public override void Exit(IFSMOwner self)
     {
         // Public void CancelCurrent(token);
     }
 
-    public override void Handle(NPCController self, StateNotification n)
+    public override void Handle(IFSMOwner self, StateNotification n)
     {
         switch (n.Kind)
         {
             case NotificationKind.TargetLOSLost:
-                if (n.DestinationReached) self.SwitchTo(Flank.Instance); // Ensure to wait a few seconds after losing LOS, then check again before sending Notification
+                if (n.IsCurrentlyMoving) self.SwitchTo(Flank.Instance); // Ensure to wait a few seconds after losing LOS, then check again before sending Notification
                 // Plus Notify Zone handler of lost LOS => If all lost LOS switch to Search last known
                 break;
             case NotificationKind.PathBlocked or NotificationKind.NoAvailablePath:

@@ -5,7 +5,7 @@ public sealed class Patrol : IntentStateBase
     public static readonly Patrol Instance = new();
     private Patrol() { }
 
-    public override void Enter(NPCController self)
+    public override void Enter(IFSMOwner self)
     {
         self.FSM.BeginPatrol();
         // public void BeginPatrol();
@@ -16,7 +16,7 @@ public sealed class Patrol : IntentStateBase
         // MaxStopDistance
     }
 
-    public override void Handle(NPCController self, StateNotification n)
+    public override void Handle(IFSMOwner self, StateNotification n)
     {
         switch (n.Kind)
         {

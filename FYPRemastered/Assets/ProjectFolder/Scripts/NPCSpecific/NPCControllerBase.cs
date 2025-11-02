@@ -1,21 +1,23 @@
+using NUnit.Framework;
 using System;
-using System.Linq;
-using Unity.VisualScripting;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(NavMeshObstacle))]
 public abstract class NPCControllerBase : ComponentEvents, IFSMOwner
 {
-  //  protected EnemyEventManager _eEventManager;
+    //  protected EnemyEventManager _eEventManager;
     protected FieldOfViewManager _fovhandler;
     [SerializeField] protected FieldOfViewParams _fovParams;
     protected Action<bool> OnVisibilityCallback;
     protected Action<bool> OnAimCheckCallback;
     protected Action<bool> OnMeleeRangeCheckCallback;
     //protected FSMPolicy? _currentPolicy;
-   // protected uint _currentPolicyVersion;
+    // protected uint _currentPolicyVersion;
     [SerializeField] protected Transform _parentTransform;
     protected Collider _targetableCollider;
 
@@ -28,8 +30,9 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner
     [Header("Agent and animation speed values")]
     private float _targetSpeed = 0f;
     private float _lerpSpeed = 0f;
+    [SerializeField] protected Collider _targetCollider;
 
-    public IFSMEvents FSM { get; protected set; } 
+    public IFSMEvents FSM { get; protected set; }
     protected IIntentState _state;
 
     public State CurrentState { get; protected set; }
@@ -45,7 +48,7 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner
 
     public NavMeshPath Path { get; protected set; }
 
-    public bool IsMoving { get; private set; }
+    public bool IsMoving { get; private set; } = false;
 
     public Collider TargetableCollider { get; protected set; }
 
@@ -53,12 +56,156 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner
 
     public float SprintSpeed => _sprintSpeed;
 
-    [SerializeField] protected Collider _targetCollider;
+    protected uint _destinationId = 0;
 
-    protected void UpdateAgentTargetSpeed(float speed, float lerpSpeed)
+
+    #region Timer Region
+    protected readonly List<TimerTask> _tasks = new(5);
+
+    protected struct TimerTask
     {
-        _lerpSpeed = lerpSpeed;
-        _targetSpeed = speed;
+        public float Remaining;
+        public Vector3? Destintion;
+        public Vector3? Forward;
+        public Func<Vector3?, Vector3?, bool> Action;
+        public Action<Vector3?> OnTickAction;
+        public Action<Vector3?, Vector3?> OnDone;
+        
+    }
+
+    protected void AddTimer(float seconds, Action<Vector3?, Vector3?> onDone, Vector3? destination = null, Vector3? forward = null)
+    {
+        _tasks.Add(new TimerTask
+        {
+            Remaining = seconds,
+            OnDone = onDone,
+            Destintion = destination,
+            Forward = forward
+        });
+    }
+
+    protected void NextFrame(Vector3 destination, Action<Vector3?, Vector3?> onDone)
+        => AddTimer(Time.deltaTime + Mathf.Epsilon, onDone, destination, null);
+
+
+    protected void UpdateTicks()
+    {
+        float dt = Time.deltaTime;
+        for (int i = 0; i < _tasks.Count; i++)
+        {
+            var t = _tasks[i];
+            t.Remaining -= dt;
+
+            if(t.Remaining <= 0f)
+            {
+                t.OnDone?.Invoke(t.Destintion, t.Forward);
+
+                int last = _tasks.Count - 1;
+                _tasks[i] = _tasks[last];
+                _tasks.RemoveAt(last);
+
+                i--;
+                continue;
+            }
+
+            _tasks[i] = t;
+        }
+    }
+
+    #endregion
+
+    
+
+    // Plan for Patrol =>
+    // Let the FSM call Coroutine on Owner and pass forward and continue Action
+
+
+
+
+    protected void SetAgentTargetSpeed(float speed, float lerpSpeed)
+      => (_lerpSpeed, _targetSpeed) = (lerpSpeed, speed);
+
+    public void OnDestinationReached(DestinationKind kind, Vector3? forward = null)
+    {
+        SetAgentTargetSpeed(0f, 10f);
+        Agent.ResetPath();
+        Agent.enabled = false;
+        Obstacle.enabled = true;
+        if (kind == DestinationKind.Patrol)
+            StartCoroutine(PatrolWaitRoutine(forward));
+    }
+
+    IEnumerator PatrolWaitRoutine(Vector3? forward = null)
+    {
+        if(forward != null)
+        {
+            Quaternion targetRot = Quaternion.LookRotation(forward.Value);
+            while(Quaternion.Angle(transform.rotation, targetRot) > 2.0f + Mathf.Epsilon)
+            {
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * 2f);
+                yield return null;
+            }
+           
+        }
+        OwnerEM.TriggerAnimation(AnimationCue.Look);
+
+        float _delayTime = Random.Range(0, 5f);
+        float elapsedTime = 0.0f;
+
+        while (elapsedTime < _delayTime)
+        {
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+        FSM.TryRepath?.Invoke();
+    }
+
+    IEnumerator DelayEnableRoutine(uint id, Vector3 destination)
+    {
+        Obstacle.enabled = false;
+        yield return null;
+        SetAgentTargetSpeed(WalkSpeed, 10f);
+        TrySetDestination(id, destination);
+    }
+
+    public void OnDestinationFound(DestinationKind kind, Vector3 destination, Vector3? forward = null)
+    {
+        float speed;
+        float lerp;
+        _destinationId++;
+        switch (kind)
+        {
+            case DestinationKind.Patrol or DestinationKind.Flank or DestinationKind.Target or DestinationKind.Search:
+                speed = WalkSpeed;
+                lerp = 2f;
+                break;
+            case DestinationKind.Flee or DestinationKind.FollowGroup or DestinationKind.TakeCover:
+                speed = SprintSpeed;
+                lerp = 2f;
+                break;
+            default:
+                SetAgentTargetSpeed(0f, 10f);
+                return;
+        }
+
+        if (!IsMoving)
+            StartCoroutine(DelayEnableRoutine(_destinationId, destination));
+        else
+            TrySetDestination(_destinationId, destination);
+    }
+
+    protected void TrySetDestination(uint id, Vector3 destination)
+    {
+        if (id != _destinationId) return;
+
+        ToggleAgent(setActive: true);
+        Agent.SetDestination(destination);
+    }
+
+    protected void ToggleAgent(bool setActive)
+    {
+        if (Agent.enabled == setActive) return;
+        Agent.enabled = setActive;
     }
 
     protected void UpdateAgentSpeed()
@@ -102,7 +249,7 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner
         OnVisibilityCallback = OnVisibilityGained;
         OnAimCheckCallback = OnAimEnter;
         OnMeleeRangeCheckCallback = OnMeleeRangeEnter;
-        OwnerEM.OnSpeedChanged += UpdateAgentTargetSpeed;
+        
         _fovhandler = new FieldOfViewManager(_fovParams, OnVisibilityCallback, OnAimCheckCallback, OnMeleeRangeCheckCallback, new AITraceComponent());
 
         FSM = new FSMManager(this);
@@ -127,7 +274,7 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
-        OwnerEM.OnSpeedChanged -= UpdateAgentTargetSpeed;
+        
         OnVisibilityCallback = null;
         OnAimCheckCallback = null;
         OnMeleeRangeCheckCallback = null;
@@ -181,6 +328,12 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner
     public abstract void SwitchTo(IIntentState next);
 
    
+
+
+
+
+
+
 
 
     /* public void SetIntent(MovementIntent intent) =>
