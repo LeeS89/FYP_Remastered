@@ -74,4 +74,9 @@ public class BaseDamageRelay : ComponentEvents, IDamageable
 
     public Vector3 GetPosition()
         => _parentTransform == null ? transform.position : _parentTransform.position;
+
+    public Quaternion GetRotation()
+    {
+        throw new System.NotImplementedException();
+    }
 }

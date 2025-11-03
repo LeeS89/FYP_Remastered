@@ -79,7 +79,7 @@ public class DestinationFinder : IDestinationResolver
         destinations = TryGet(req);
         if (destinations == null || destinations.Count == 0)
         {
-            PathResult failResult = new PathResult(req.Reason, req.Kind, false, Vector3.zero, req.RequestId, null);
+            PathResult failResult = new PathResult(req.Reason, req.Kind, false, Vector3.zero, req.StateId, null);
             Owner.OnPathRequestComplete(failResult);
             return;
         }
@@ -107,8 +107,8 @@ public class DestinationFinder : IDestinationResolver
                 yield return _waitUntilPathCheckComplete;
 
                 if (!_isValid) continue;
-
-                PathResult success = new PathResult(reqInfo.Reason, reqInfo.Kind, true, pos, reqInfo.RequestId, fwd);
+                Debug.LogError("Mid Path routine StateId: "+reqInfo.StateId.ToString());
+                PathResult success = new PathResult(reqInfo.Reason, reqInfo.Kind, true, pos, reqInfo.StateId, fwd);
                 Owner.OnPathRequestComplete(success);
                 found = true;
                 break;
@@ -116,7 +116,7 @@ public class DestinationFinder : IDestinationResolver
 
             if (!found)
             {
-                PathResult failed = new PathResult(reqInfo.Reason, reqInfo.Kind, false, Vector3.zero, reqInfo.RequestId, null);
+                PathResult failed = new PathResult(reqInfo.Reason, reqInfo.Kind, false, Vector3.zero, reqInfo.StateId, null);
                 Owner.OnPathRequestComplete(failed);
             }
         }
@@ -282,18 +282,18 @@ public readonly struct PathResult
     public readonly PathCheckReason Reason;
     public readonly DestinationKind Kind;
     public readonly bool PathFound;
-    public readonly Vector3 Position;
+    public readonly Vector3 Destination;
     public readonly Vector3? Forward;
-    public readonly uint Id;
+    public readonly StateId Id;
 
-    public PathResult(PathCheckReason reason, DestinationKind kind, bool found, Vector3 pos, uint id, Vector3? fwd = null)
+    public PathResult(PathCheckReason reason, DestinationKind kind, bool found, Vector3 pos, StateId id, Vector3? fwd = null)
     {
    
         Reason = reason;
         Kind = kind;
         Id = id;
         PathFound = found;
-        Position = pos;
+        Destination = pos;
         Forward = fwd;
     }
 

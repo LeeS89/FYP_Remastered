@@ -20,12 +20,12 @@ public sealed class ChaseState : IntentStateBase
         // Public void CancelCurrent(token);
     }
 
-    public override void Handle(IFSMOwner self, StateNotification n)
+    public override void Handle(IFSMOwner self, NotifyOwnerNPC n)
     {
         switch (n.Kind)
         {
             case NotificationKind.TargetLOSLost:
-                if (n.IsCurrentlyMoving) self.SwitchTo(Flank.Instance); // Ensure to wait a few seconds after losing LOS, then check again before sending Notification
+                /*if (n.IsCurrentlyMoving)*/  /*Come back to this, need to know if moving */ self.SwitchTo(Flank.Instance); // Ensure to wait a few seconds after losing LOS, then check again before sending Notification
                 // Plus Notify Zone handler of lost LOS => If all lost LOS switch to Search last known
                 break;
             case NotificationKind.PathBlocked or NotificationKind.NoAvailablePath:

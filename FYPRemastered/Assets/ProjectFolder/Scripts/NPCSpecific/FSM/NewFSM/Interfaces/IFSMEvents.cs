@@ -4,17 +4,19 @@ using UnityEngine.AI;
 
 public interface IFSMEvents : ITickable, IZoneSink
 {
-    void BeginPatrol();
-    void BeginChase();
-    void BeginFlank();
-    void TakeCover();
-    void FollowGroup();
+    void BeginPatrol(StateId id);
+    void BeginChase(StateId id);
+    void BeginFlank(StateId id);
+    void TakeCover(StateId id);
+    void FollowGroup(StateId id);
 
-    
+    void TryGetNextDestination(StateId currentStateId);
+
+    void DestinationApproved(Vector3 newDestination, StateId ApprovalState);
     Action TryRepath { get; }
 
     //void BeginSearch();
-    void ClearState();
+    void ExitState();
 
     bool DestinationReached { get; }
 
@@ -36,6 +38,8 @@ public interface IFSMOwner : ITargetable
 
    // ITargetable GameObject { get; }
 
+    uint CurrentStateId { get; set; }
+
     EnemyEventManager OwnerEM { get; }
 
     NavMeshAgent Agent { get; }
@@ -47,13 +51,15 @@ public interface IFSMOwner : ITargetable
     float WalkSpeed { get; }
     float SprintSpeed { get; }
 
-    void LogUnhandled(IntentStateBase state, StateNotification notification) { }
+    void LogUnhandled(IntentStateBase state, NotifyOwnerNPC notification) { }
 
   //  void SetAgentTargetSpeed(float speed = 0, float lerpSpeed = 10);
 
-    void OnDestinationReached(DestinationKind kind, Vector3? forward = null);
+    void OnDestinationReached(StateId id, Vector3? forward = null);
 
-    void OnDestinationFound(DestinationKind Kind, Vector3 destination, Vector3? forward = null);
+    void DestinationReached(StateId reachedInState, bool isStale);
+
+    void OnDestinationFound(StateId id, Vector3 destination/*, float moveSpeed, float lerpSpeed*/);
 
     void SwitchTo(IIntentState next) { }
     IFSMEvents FSM { get; }

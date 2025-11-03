@@ -6,6 +6,8 @@ public interface ITargetable
 
     Vector3 GetPosition();
 
+    Quaternion GetRotation();
+
     Collider TargetableCollider { get; }
 
     bool IsMoving { get; }

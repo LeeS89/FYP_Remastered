@@ -3,11 +3,13 @@ using UnityEngine;
 public sealed class Patrol : IntentStateBase
 {
     public static readonly Patrol Instance = new();
-    private Patrol() { }
+    private Patrol() { Id = StateId.Patrol; }
+
+ 
 
     public override void Enter(IFSMOwner self)
     {
-        self.FSM.BeginPatrol();
+        self.FSM.BeginPatrol(Id);
         // public void BeginPatrol();
         // Pass a struct containing the following information:
         // Destination Provider, Possible Func<List<Vector3>>
@@ -16,7 +18,7 @@ public sealed class Patrol : IntentStateBase
         // MaxStopDistance
     }
 
-    public override void Handle(IFSMOwner self, StateNotification n)
+    public override void Handle(IFSMOwner self, NotifyOwnerNPC n)
     {
         switch (n.Kind)
         {
