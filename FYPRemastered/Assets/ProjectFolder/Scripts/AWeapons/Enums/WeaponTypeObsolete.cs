@@ -109,7 +109,8 @@ public enum DestinationKind
 public enum PathCheckReason
 {
     ProbePathToPrimaryTarget,
-    ValidatePathForDestination
+    ValidatePathForDestination,
+    Cancelled
 }
 
 public enum PolicyIntentResult

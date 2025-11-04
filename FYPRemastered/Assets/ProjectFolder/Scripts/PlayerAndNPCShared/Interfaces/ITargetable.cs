@@ -8,6 +8,8 @@ public interface ITargetable
 
     Quaternion GetRotation();
 
+    Transform Transform { get; }
+
     Collider TargetableCollider { get; }
 
     bool IsMoving { get; }

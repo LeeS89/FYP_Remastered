@@ -13,12 +13,12 @@ public sealed class DestinationService
         };
     }
 
-    public List<(Vector3 position, Vector3? forward)> TryGet(in ValidateDestination request)
+   /* public List<(Vector3 position, Vector3? forward)> TryGet(in ValidateDestination request)
     {
         if(_map.TryGetValue(request.Kind, out var p)) return p.TryGet(request);
 
         return null;
-    }
+    }*/
 
     /*public bool GetCurrentZone(out int zone)
     {

@@ -16,6 +16,7 @@ public interface IDestinationResolver : IZoneSink
     /*bool TryGetWaypointZone(out uint zone);
 
     bool TrySwitchWaypoints();*/
+    void CancelAll();
 
     void TryGetDestination(in ValidateDestination req);
    // List<(Vector3 position, Vector3? forward)> TryGet(in ValidateDestination request);
@@ -112,7 +113,7 @@ public sealed class WaypointProvider : DestinationProvider
 public readonly struct ValidateDestination
 {
     public readonly StateId StateId;
-    public readonly DestinationKind Kind;
+  //  public readonly DestinationKind Kind;
     public readonly ITargetable Caller;
     public readonly ITargetable Target;
     public readonly NavMeshPath Path;
@@ -124,7 +125,7 @@ public readonly struct ValidateDestination
     private ValidateDestination(
         StateId stateId,
         PathCheckReason reason,
-        DestinationKind kind,
+     //   DestinationKind kind,
         ITargetable caller,
         ITargetable target,
         NavMeshPath path,
@@ -135,7 +136,7 @@ public readonly struct ValidateDestination
     {
         StateId = stateId;
         Reason = reason;
-        Kind = kind; 
+      //  Kind = kind; 
         Caller = caller; 
         Target = target; 
         Path = path;
@@ -145,11 +146,11 @@ public readonly struct ValidateDestination
     }
 
     public static ValidateDestination GetPatrolPoint(StateId id, ITargetable caller, NavMeshPath path)
-        => new ValidateDestination(id, PathCheckReason.ValidatePathForDestination, DestinationKind.Patrol, caller, null, path, 0, 0, 0);
+        => new ValidateDestination(id, PathCheckReason.ValidatePathForDestination, /*DestinationKind.Patrol,*/ caller, null, path, 0, 0, 0);
 
     public static ValidateDestination GetFlankPoint(StateId id, NavMeshPath path, ITargetable caller, ITargetable flankTarget, uint maxFlankSteps = 15, uint minFlankSteps = 4)
-        => new ValidateDestination(id, PathCheckReason.ValidatePathForDestination, DestinationKind.Flank, caller, flankTarget, path, 0, maxFlankSteps, minFlankSteps);
+        => new ValidateDestination(id, PathCheckReason.ValidatePathForDestination, /*DestinationKind.Flank,*/ caller, flankTarget, path, 0, maxFlankSteps, minFlankSteps);
 
     public static ValidateDestination GetTargetPosition(StateId id, NavMeshPath path, PathCheckReason reason, ITargetable caller, ITargetable target)
-        => new ValidateDestination(id, reason, DestinationKind.Target, caller, target, path, 0, 0, 0);
+        => new ValidateDestination(id, reason, /*DestinationKind.Target,*/ caller, target, path, 0, 0, 0);
 }

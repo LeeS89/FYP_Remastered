@@ -1,11 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
-using static UnityEngine.UI.GridLayoutGroup;
-using Random = UnityEngine.Random;
+
+
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(NavMeshObstacle))]
@@ -60,9 +59,20 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner
     protected Vector3 _currentDestination;
     protected Vector3? _currentDestinationForward = null;
 
-    protected uint _destinationId = 0;
+   // protected uint _destinationId = 0;
 
     public uint CurrentStateId { get; set; }
+
+    [Range(0.5f, 15f)]
+    [SerializeField] protected float _maxWaitAtSeconds;
+    [Min(0.5f)]
+    [SerializeField] protected float _minWaitAtSeconds;
+
+    public float MaxWaitTime => _maxWaitAtSeconds;
+
+    public float MinWaitTime => _minWaitAtSeconds;
+
+    public Transform Transform => _parentTransform == null ? transform : _parentTransform;
 
 
     #region Timer Region
@@ -149,38 +159,13 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner
 
     #endregion
 
-    protected bool _destinationReached = false; 
-
-    // Plan for Patrol =>
-    // Let the FSM call Coroutine on Owner and pass forward and continue Action
-    private void CheckRemainingDistance()
-    {
-        if (Agent == null || !Agent.enabled) return;
-        if (Agent.hasPath && !Agent.pathPending)
-        {
-            bool reached = HasReachedDestination();
-            if (_destinationReached == reached) return;
-            _destinationReached = reached;
-            IsMoving = !_destinationReached;
-            if (_destinationReached)
-            {
-                // SendNot(StateNotification.DestinationReached(DestinationKind.Patrol, _id));
-
-
-                HandleDestinationReached(_state.Id, _currentDestinationForward);
-                // if(_state == Patrol.Instance)
-                //     StartCoroutine(PatrolWaitRoutine(StateId.None, _currentDestinationForward));
-            }
-
-        }
-    }
-
-    public void OnDestinationFound(StateId id, Vector3 destination/*, float moveSpeed, float lerpSpeed*/)
+   
+    public void OnDestinationFound(StateId id, Vector3 destination, NavMeshPath p)
     {
         if (id != _state.Id || destination == Vector3.zero) return;
 
         float newSpeed;
-        
+
         switch (id)
         {
             case StateId.Patrol or StateId.Flank or StateId.Chase or StateId.Search:
@@ -193,120 +178,50 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner
                 SetAgentTargetSpeed(0f, 10f);
                 return;
         }
-        SetAgentTargetSpeed(newSpeed, 2f);
-        FSM.DestinationApproved(destination, id);
+        //SetAgentTargetSpeed(newSpeed, 2f);
+        FSM.DestinationApproved(p, destination, id, newSpeed, 2f);
     }
 
     public void DestinationReached(StateId reachedInState, bool isStale)
     {
-        SetAgentTargetSpeed(0f, 10f);
-        Agent.ResetPath();
+       // SetAgentTargetSpeed(0f, 10f);
+        //Agent.ResetPath();
        // Agent.enabled = false; /// ReEnable later
        // Obstacle.enabled = true;
 
         if (isStale) return;
+        if (reachedInState == StateId.Patrol)
+            FSM?.LookAroundAndContinue();
         // Future logic here for Flee/ Search states
     }
 
-    protected void HandleDestinationReached(StateId id, Vector3? DestinationForward = null)
+
+    /*public (float, float) GetSpeedAndLerp(StateId id)
     {
-        SetAgentTargetSpeed(0f, 10f);
-        Agent.ResetPath();
-        Agent.enabled = false;
-        Obstacle.enabled = true;
-
-        if (id != _state.Id) return;
-        if (id == StateId.Patrol)
-            StartCoroutine(PatrolWaitRoutine(id, DestinationForward));
-    }
-    private bool HasReachedDestination() => Agent.remainingDistance <= (Agent.stoppingDistance + 0.25f);
-
-    public void OnDestinationReached(StateId id, Vector3? forward = null) // OLD
-    {
-        SetAgentTargetSpeed(0f, 10f);
-        Agent.ResetPath();
-        Agent.enabled = false;
-        Obstacle.enabled = true;
-
-        if (id != _state.Id) return;
-        if (id == StateId.Patrol)
-            StartCoroutine(PatrolWaitRoutine(id, forward));
-    }
-
-    public void OnDestinationFound(StateId id, Vector3 destination, Vector3? forward = null)
-    {
-        Debug.LogError("Passed in Id is: "+id.ToString() + ", and statId is: "+_state.Id);
-        if (id != _state.Id) return;
-        float speed;
-        float lerp;
-        
-        _currentDestination = destination;
-        _currentDestinationForward = forward;
-
-        switch (id)
+        if (_state == null || id != _state.Id) return (0f, 0f);
+        return id switch 
         {
-            case StateId.Patrol or StateId.Flank or StateId.Chase or StateId.Search:
-                speed = WalkSpeed;
-                lerp = 2f;
-                break;
-            case StateId.Flee or StateId.Follow or StateId.Cover:
-                speed = SprintSpeed;
-                lerp = 2f;
-                break;
-            default:
-                SetAgentTargetSpeed(0f, 10f);
-                return;
-        }
+            StateId.Patrol or StateId.Flank or StateId.Chase or StateId.Search => (WalkSpeed, 2f),
+            StateId.Flee or StateId.Follow or StateId.Cover => (SprintSpeed, 2f),
+            _=> (0f,0f)
+            };
 
-        if (!IsMoving)
-            StartCoroutine(DelayEnableRoutine(_destinationId, _currentDestination, speed, lerp));
-        else
-            TrySetDestination(_destinationId, _currentDestination, speed, lerp);
-    }
-    //
+    }*/
+
 
     protected void SetAgentTargetSpeed(float speed, float lerpSpeed)
       => (_lerpSpeed, _targetSpeed) = (lerpSpeed, speed);
     
 
 
-    IEnumerator PatrolWaitRoutine(StateId id = StateId.None, Vector3? forward = null)
-    {
-        if(forward != null)
-        {
-            Quaternion targetRot = Quaternion.LookRotation(forward.Value);
-            while(Quaternion.Angle(transform.rotation, targetRot) > 2.0f + Mathf.Epsilon)
-            {
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * 2f);
-                yield return null;
-            }
-           
-        }
-        OwnerEM.TriggerAnimation(AnimationCue.Look);
-
-        if (_state != Patrol.Instance) yield break;
-
-        float _delayTime = Random.Range(0, 5f);
-        float elapsedTime = 0.0f;
-
-        while (elapsedTime < _delayTime)
-        {
-            elapsedTime += Time.deltaTime;
-            yield return null;
-        }
-        if (_state != Patrol.Instance) yield break;
-        FSM.TryGetNextDestination(_state.Id);
-        //StartCoroutine(DelayEnableRoutine(0, _currentDestination, WalkSpeed, 2f));
-        //TrySetDestination(0, _currentDestination, WalkSpeed, 2f);
-        //FSM.TryRepath?.Invoke();
-    }
+  
 
     IEnumerator DelayEnableRoutine(uint id, Vector3 destination, float newSpeed, float lerp)
     {
         Obstacle.enabled = false;
         yield return null;
       //  SetAgentTargetSpeed(WalkSpeed, 10f);
-        TrySetDestination(id, destination, newSpeed, lerp);
+      //  TrySetDestination(id, destination, newSpeed, lerp);
     }
 
    
@@ -422,35 +337,32 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner
 
     protected virtual void Update()
     {
-       // CheckRemainingDistance();
-        if (FSM == null) return;
+      //   if (FSM == null) return;
 
-        FSM.Tick?.Invoke(Time.deltaTime);
-        IsMoving = !FSM.DestinationReached;
+        FSM?.Tick?.Invoke(Time.deltaTime);
+        IsMoving = !FSM?.DestinationReached ?? false;
+
        // _fovhandler?.Tick();
     }
 
     protected virtual void LateUpdate()
     {
-        UpdateAgentSpeed();
+        //UpdateAgentSpeed();
         if (OwnerEM == null) return;
         OwnerEM.TickAnimator(Agent.velocity, Agent.transform.forward);
     }
 
-    protected abstract void PolicyResult(in FSMPolicyResult result);
-
+   
     public abstract void LogUnhandled(IntentStateBase state, StateNotification notification);
 
     public abstract void OnNotification(in NotifyOwnerNPC n);
 
     public abstract void SwitchTo(IIntentState next);
 
-   
+
 
     public Quaternion GetRotation()
-    {
-        throw new NotImplementedException();
-    }
+         => _parentTransform == null ? transform.rotation : _parentTransform.rotation;
 
-    
+   
 }

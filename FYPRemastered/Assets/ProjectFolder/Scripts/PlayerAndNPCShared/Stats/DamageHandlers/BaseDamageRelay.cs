@@ -60,7 +60,9 @@ public class BaseDamageRelay : ComponentEvents, IDamageable
 
     public bool IsMoving { get; private set; } = false;
 
-   
+    public Transform Transform => throw new System.NotImplementedException();
+
+
 
 
 

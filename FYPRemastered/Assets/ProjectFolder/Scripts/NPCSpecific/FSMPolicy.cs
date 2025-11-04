@@ -1,5 +1,6 @@
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.AI;
 
 public readonly struct FSMPolicy
 {
@@ -113,43 +114,46 @@ public readonly struct NotifyOwnerNPC
 
     public readonly StateId Id;
 
+    
+
     public readonly bool HasReachedStaleDestination;
     public readonly Vector3 Destination { get; }
+    public readonly NavMeshPath Path;
 
-   // public readonly float NewSpeed;
-  //  public readonly float Lerp;
-    
-    private NotifyOwnerNPC(NotificationKind kind, StateId stateId, bool reachedStaleDestination, Vector3 dest/*, float speed = 0f, float lerp= 0f*/)
-        => (Kind, Id, HasReachedStaleDestination, Destination/*, NewSpeed, Lerp*/) = (kind, stateId, reachedStaleDestination, dest/*, speed, lerp*/);
+    // public readonly float NewSpeed;
+    //  public readonly float Lerp;
+
+    private NotifyOwnerNPC(NotificationKind kind, StateId stateId, bool reachedStaleDestination, Vector3 dest, NavMeshPath path)
+        => (Kind, Id, HasReachedStaleDestination, Destination, Path) = (kind, stateId, reachedStaleDestination, dest, path);
 
 
-    public static NotifyOwnerNPC DestinationFound(StateId stateId, Vector3 dest/*, float newMoveSpeed, float lerp*/)
-        => new(NotificationKind.DestinationFound, stateId, false, dest/*, newMoveSpeed, lerp*/);
+    public static NotifyOwnerNPC DestinationFound(StateId stateId, Vector3 dest, NavMeshPath path)
+        => new(NotificationKind.DestinationFound, stateId, false, dest, path);
 
     public static NotifyOwnerNPC TargetMoved(StateId id)
-        => new(NotificationKind.TargetMoved, id, false, Vector3.zero);
+        => new(NotificationKind.TargetMoved, id, false, Vector3.zero, null);
 
     public static NotifyOwnerNPC TargetLeftArea(StateId id, Vector3 dest)
-        => new(NotificationKind.TargetLeftArea, id, false, dest);
+        => new(NotificationKind.TargetLeftArea, id, false, dest, null);
 
     public static NotifyOwnerNPC PathBlocked(StateId id)
-        => new(NotificationKind.PathBlocked, id, false, Vector3.zero);
+        => new(NotificationKind.PathBlocked, id, false, Vector3.zero, null);
 
     public static NotifyOwnerNPC TargetLOSLost(StateId id)
-        => new(NotificationKind.TargetLOSLost, id, false, Vector3.zero);
+        => new(NotificationKind.TargetLOSLost, id, false, Vector3.zero, null);
 
     public static NotifyOwnerNPC TargetLOSConfirmed(StateId id)
-        => new(NotificationKind.TargetLOSConfirmed, id, false, Vector3.zero);
+        => new(NotificationKind.TargetLOSConfirmed, id, false, Vector3.zero, null);
 
     public static NotifyOwnerNPC NoAvailablePath(StateId id)
-        => new(NotificationKind.NoAvailablePath, id, false, Vector3.zero);
+        => new(NotificationKind.NoAvailablePath, id, false, Vector3.zero, null);
 
     public static NotifyOwnerNPC CoverExposed(StateId id)
-        => new(NotificationKind.CoverExposed, id, false, Vector3.zero);
+        => new(NotificationKind.CoverExposed, id, false, Vector3.zero, null);
 
     public static NotifyOwnerNPC PathToPrimaryAvailable(StateId id)
-        => new(NotificationKind.PathToPrimaryAvailable, id, false, Vector3.zero);
+        => new(NotificationKind.PathToPrimaryAvailable, id, false, Vector3.zero, null);
 
     public static NotifyOwnerNPC DestinationReached(StateId id, bool StaleDestination)
-        => new(NotificationKind.DestinationReached, id, StaleDestination, Vector3.zero);
+        => new(NotificationKind.DestinationReached, id, StaleDestination, Vector3.zero, null);
 }

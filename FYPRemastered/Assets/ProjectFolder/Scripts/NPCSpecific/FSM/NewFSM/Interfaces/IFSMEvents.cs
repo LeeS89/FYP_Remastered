@@ -10,9 +10,8 @@ public interface IFSMEvents : ITickable, IZoneSink
     void TakeCover(StateId id);
     void FollowGroup(StateId id);
 
-    void TryGetNextDestination(StateId currentStateId);
 
-    void DestinationApproved(Vector3 newDestination, StateId ApprovalState);
+    void DestinationApproved(NavMeshPath path, Vector3 newDestination, StateId ApprovalState, float newAgentpeed, float lerp);
     Action TryRepath { get; }
 
     //void BeginSearch();
@@ -23,6 +22,10 @@ public interface IFSMEvents : ITickable, IZoneSink
     void OnPathRequestComplete(in PathResult result);
 
     bool HasLOS { get; }
+
+  //  Action GetNext { get; }
+
+    void LookAroundAndContinue();
    // Transform Transform { get; }
 
     StateNotificationProvider Notification { get; set; }
@@ -46,6 +49,10 @@ public interface IFSMOwner : ITargetable
 
     NavMeshObstacle Obstacle { get; }
 
+    float MaxWaitTime { get; }
+
+    float MinWaitTime { get; }
+
     NavMeshPath Path { get; }
 
     float WalkSpeed { get; }
@@ -53,13 +60,13 @@ public interface IFSMOwner : ITargetable
 
     void LogUnhandled(IntentStateBase state, NotifyOwnerNPC notification) { }
 
-  //  void SetAgentTargetSpeed(float speed = 0, float lerpSpeed = 10);
+    //  void SetAgentTargetSpeed(float speed = 0, float lerpSpeed = 10);
 
-    void OnDestinationReached(StateId id, Vector3? forward = null);
+   // (float, float) GetSpeedAndLerp(StateId id);
 
     void DestinationReached(StateId reachedInState, bool isStale);
 
-    void OnDestinationFound(StateId id, Vector3 destination/*, float moveSpeed, float lerpSpeed*/);
+    void OnDestinationFound(StateId id, Vector3 destination, NavMeshPath path);
 
     void SwitchTo(IIntentState next) { }
     IFSMEvents FSM { get; }

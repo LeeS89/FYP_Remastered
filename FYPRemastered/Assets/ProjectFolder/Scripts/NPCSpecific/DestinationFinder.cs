@@ -13,13 +13,16 @@ public class DestinationFinder : IDestinationResolver
     private ITargetable _followTarget;
     public ITargetable _attackTarget;*/
 
-    private readonly Dictionary<DestinationKind, ICandidateProvider> _map;
+    private readonly Dictionary<StateId, ICandidateProvider> _map;
 
     private readonly IFSMEvents Owner;
 
     private WaitUntil _waitUntilPathCheckComplete;
     private bool _pathChecked;
 
+
+    public uint Gen { get; private set; }
+    private uint _activeGen;
     private Action<bool> PathCheckCallback;
     
     public int CurrentWaypointZone { get; private set; } = 0;
@@ -38,13 +41,13 @@ public class DestinationFinder : IDestinationResolver
         _waitUntilPathCheckComplete = new WaitUntil(() => _pathChecked);
         _map = new()
         {
-            [DestinationKind.Patrol] = new WaypointProvider()
+            [StateId.Patrol] = new WaypointProvider()
         };
     }
 
     public List<(Vector3 position, Vector3? forward)> TryGet(in ValidateDestination request)
     {
-        if (_map.TryGetValue(request.Kind, out var p)) return p.TryGet(request);
+        if (_map.TryGetValue(request.StateId, out var p)) return p.TryGet(request);
 
         return null;
     }
@@ -53,7 +56,7 @@ public class DestinationFinder : IDestinationResolver
 
     public bool TryGetCurrentZone(out int zone)
     {
-        if (_map.TryGetValue(DestinationKind.Patrol, out var p))
+        if (_map.TryGetValue(StateId.Patrol, out var p))
         {
             if (p is WaypointProvider pr)
             {
@@ -73,13 +76,26 @@ public class DestinationFinder : IDestinationResolver
     public void TryChaseTarget(ITargetable target) { }
 
 
+    public void CancelAll()
+    {
+        Gen++;
+        if (_runningRoutine != null) { CoroutineRunner.Instance.StopCoroutine(_runningRoutine); 
+            _runningRoutine = null; }
+        while(_pathQueue.Count > 0)
+        {
+            var (_, req) = _pathQueue.Dequeue();
+            PathResult cancelled = new PathResult(PathCheckReason.Cancelled, req.Path, false, Vector3.zero, req.StateId);
+        }
+    }
+
+
     public void TryGetDestination(in ValidateDestination req)
     {
         List<(Vector3 position, Vector3? forward)> destinations;
         destinations = TryGet(req);
         if (destinations == null || destinations.Count == 0)
         {
-            PathResult failResult = new PathResult(req.Reason, req.Kind, false, Vector3.zero, req.StateId, null);
+            PathResult failResult = new PathResult(req.Reason, req.Path, false, Vector3.zero, req.StateId, null);
             Owner.OnPathRequestComplete(failResult);
             return;
         }
@@ -95,9 +111,13 @@ public class DestinationFinder : IDestinationResolver
         {
             bool found = false;
             var (points, reqInfo) = q.Dequeue();
-           
+
+            _activeGen = Gen;
+
             foreach (var (pos, fwd) in points)
             {
+                if (_activeGen != Gen) break;
+
                 _pathChecked = false;
                 _isValid = false;
 
@@ -106,17 +126,19 @@ public class DestinationFinder : IDestinationResolver
 
                 yield return _waitUntilPathCheckComplete;
 
+                if (_activeGen != Gen) break;
                 if (!_isValid) continue;
-                Debug.LogError("Mid Path routine StateId: "+reqInfo.StateId.ToString());
-                PathResult success = new PathResult(reqInfo.Reason, reqInfo.Kind, true, pos, reqInfo.StateId, fwd);
+                
+                PathResult success = new PathResult(reqInfo.Reason, reqInfo.Path, true, pos, reqInfo.StateId, fwd);
                 Owner.OnPathRequestComplete(success);
                 found = true;
                 break;
             }
-
+            
+            if (_activeGen != Gen) break;
             if (!found)
             {
-                PathResult failed = new PathResult(reqInfo.Reason, reqInfo.Kind, false, Vector3.zero, reqInfo.StateId, null);
+                PathResult failed = new PathResult(reqInfo.Reason, reqInfo.Path, false, Vector3.zero, reqInfo.StateId, null);
                 Owner.OnPathRequestComplete(failed);
             }
         }
@@ -216,42 +238,44 @@ public class DestinationFinder : IDestinationResolver
          else return _secondaryTarget?.GetTargetableCollider();*/
         return null;
     }
-   /* public Vector3? GetFollowTarget(MovementIntent intent)
+
+    
+    /* public Vector3? GetFollowTarget(MovementIntent intent)
+{
+    Vector3? target;
+    switch (intent)
     {
-        Vector3? target;
-        switch (intent)
-        {
-            case MovementIntent.FollowPrimary:
-                target = _primaryTarget?.GetTargetablePositionAndForward();
-                break;
-            case MovementIntent.FollowSecondary:
-                target = _secondaryTarget?.GetTargetablePositionAndForward();
-                break;
-            default:
-                target = null;
-                break;
-        }
-        return target;
-    }*/
+        case MovementIntent.FollowPrimary:
+            target = _primaryTarget?.GetTargetablePositionAndForward();
+            break;
+        case MovementIntent.FollowSecondary:
+            target = _secondaryTarget?.GetTargetablePositionAndForward();
+            break;
+        default:
+            target = null;
+            break;
+    }
+    return target;
+}*/
 
 
-  /*  public void GetPrimaryTarget()
-    {
-        if(!GameManager.Instance.TryGetPlayer(out _primaryTarget))
-        {
-#if UNITY_EDITOR
-            Debug.LogError("Player ITargetable not found");
-#endif
-        }
-        else
-        {
-#if UNITY_EDITOR
-            Debug.LogError("Player ITargetable found");
-#endif
-        }
-    }*/
+    /*  public void GetPrimaryTarget()
+      {
+          if(!GameManager.Instance.TryGetPlayer(out _primaryTarget))
+          {
+  #if UNITY_EDITOR
+              Debug.LogError("Player ITargetable not found");
+  #endif
+          }
+          else
+          {
+  #if UNITY_EDITOR
+              Debug.LogError("Player ITargetable found");
+  #endif
+          }
+      }*/
 
-   
+
 
 
     #endregion
@@ -280,17 +304,17 @@ public readonly struct PathResult
 {
 
     public readonly PathCheckReason Reason;
-    public readonly DestinationKind Kind;
+    public readonly NavMeshPath Path;
     public readonly bool PathFound;
     public readonly Vector3 Destination;
     public readonly Vector3? Forward;
     public readonly StateId Id;
 
-    public PathResult(PathCheckReason reason, DestinationKind kind, bool found, Vector3 pos, StateId id, Vector3? fwd = null)
+    public PathResult(PathCheckReason reason, NavMeshPath path, bool found, Vector3 pos, StateId id, Vector3? fwd = null)
     {
    
         Reason = reason;
-        Kind = kind;
+        Path = path;
         Id = id;
         PathFound = found;
         Destination = pos;

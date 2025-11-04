@@ -63,23 +63,7 @@ public class NPCController : NPCControllerBase
     public Action<bool, FSMPolicy> OnPathValidation;
     public void PathValidation(bool isBlocked, FSMPolicy policy) => OnPathValidation?.Invoke(isBlocked, policy);
 
-    protected override void PolicyResult(in FSMPolicyResult result)
-    {
-       /* if(!_currentPolicy.HasValue) return;
-        if (result.Version != _currentPolicy.Value.Version) return;
-        MovementIntent currentIntent = _currentPolicy.Value.MoveIntent;
-
-        switch (currentIntent)
-        {
-            case MovementIntent.FollowSecondary:
-                HandleFollowGroupIntentHalted(result);
-                break;
-            case MovementIntent.FollowPrimary:
-                HandleFollowPrimaryIntentHalted(result);
-                break;
-        }*/
-    }
-
+   
     protected void HandleFollowGroupIntentHalted(in FSMPolicyResult result)
     {
       /*  PolicyHaltReason reason = result.Reason;

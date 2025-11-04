@@ -1,7 +1,10 @@
 using Oculus.Interaction.Editor;
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.AI;
 using Random = UnityEngine.Random;
 
 
@@ -17,26 +20,19 @@ public class FSMManager : IFSMEvents
 
     public Action TryRepath { get; private set; }
 
+
     private StateId _currentStateId = StateId.None;
  
-    //public uint CurrentZone { get; set; }
-
-    // public Transform Transform { get; set; }
-
-    // private DestinationProviderOld _destinationProvider;
-    //  private DestinationService _destService;
     private IDestinationResolver _pathFinder;
 
-    private Action<float> OnPatrol;
+    private Coroutine _runningRoutine;
 
-   // private NavMeshAgent _agent;
-   // private NavMeshObstacle _obstacle;
-  //  private NavMeshPath _path;
-  //  private uint _stateId;
-   // private EnemyEventManager _eventManager;
-    private IFSMOwner Owner; 
-    //private bool _isInStateTransition = false;
-   
+    private IFSMOwner Owner;
+    Vector3 _currentDestination;
+    private Vector3? _currentPatrolPoinfForward = null;
+    private float _targetSpeed = 0f;
+    private float _lerpSpeed = 0f;
+
     public FSMManager(IFSMOwner owner)
     {
         if (owner == null)
@@ -53,54 +49,33 @@ public class FSMManager : IFSMEvents
         Tick = OnTick;
     }
 
-    private void OnTick(float dt) => CheckRemainingDistance();
+    private void OnTick(float dt)
+    {
+        CheckRemainingDistance();
+        UpdateAgentSpeed();
+
+        for(int i = 0; i < _timer.Count; i++)
+        {
+            var t = _timer[i];
+            t.RemainingTime -= dt;
+
+            if(t.RemainingTime <= 0)
+            {
+                t.OnDone?.Invoke(t.Path, t.Destination, t.AgentSpeed, t.Lerp);
+                _timer.RemoveAt(i);
+                i--;
+                continue;
+            }
+            _timer[i] = t;
+        }
+    }
     
 
-    public void OnPathRequestComplete(in PathResult result)
-    {
-        
-        // Blocks Destination Setting while transitioning to new state
-        if (result.Id != _currentStateId) return;
-        bool pathFound = result.PathFound;
-        DestinationKind kind = result.Kind;
-
-        if (result.Reason == PathCheckReason.ProbePathToPrimaryTarget && pathFound)
-        { SendNotification(NotifyOwnerNPC.PathToPrimaryAvailable(result.Id)); return; }
-        //{ SendNotification(NotificationKind.PathToPrimaryAvailable, false); return; }
-
-       // if (!result.PathFound) { SendNotification(NotificationKind.NoAvailablePath, false); Debug.LogError("NO Path Found!!"); return; }
-        if (!result.PathFound) { SendNotification(NotifyOwnerNPC.NoAvailablePath(_currentStateId)); Debug.LogError("NO Path Found!!"); return; }
-        else
-        {
-
-            /*float newSpeed;
-            Vector3 destination = result.Destination;
-            switch (result.Id)
-            {
-                case StateId.Patrol or StateId.Flank or StateId.Chase or StateId.Search:
-                    newSpeed = Owner.WalkSpeed;
-                    break;
-                case StateId.Flee or StateId.Follow or StateId.Cover:
-                    newSpeed = Owner.SprintSpeed;
-                    break;
-                default:
-                    newSpeed = 0f;
-                    destination = Vector3.zero;
-                    break;
-            }*/
-            SendNotification(NotifyOwnerNPC.DestinationFound(result.Id, result.Destination/*, newSpeed, 2f*/));
-           // if (kind == DestinationKind.Patrol) Owner.OwnerEM.SpeedChanged(Owner.WalkSpeed, 2f);
-
-           // Owner.Agent.SetDestination(result.Position);
-        }
-
-    }
+    
 
     private StateId ApprovedDestinationStateId;
 
     private void SendNotification(in NotifyOwnerNPC n) => Notification?.Invoke(n);
-
-    #region Patrol Region
     private void CheckRemainingDistance()
     {
         if (!Owner.Agent.enabled) return;
@@ -111,33 +86,150 @@ public class FSMManager : IFSMEvents
             DestinationReached = reached;
             if (DestinationReached)
             {
-                // SendNot(StateNotification.DestinationReached(DestinationKind.Patrol, _id));
+                ResetAgent();
                 bool isStaleDestination = ApprovedDestinationStateId != _currentStateId;
                 SendNotification(NotifyOwnerNPC.DestinationReached(_currentStateId, isStaleDestination));
-               /* Owner.OwnerEM.SpeedChanged(0f, 10f);
-                Owner.Agent.ResetPath();
-                Owner.Agent.enabled = false;
-                Owner.Obstacle.enabled = true;*/
+
             }
 
         }
     }
 
-    public void DestinationApproved(Vector3 newDestination, StateId ApprovalState)
+    private void ResetAgent()
+    {
+        SetAgentTargetSpeed(0f, 10f);
+        Owner.Agent.ResetPath();
+       // if (_currentStateId == StateId.Patrol) return;
+        Owner.Agent.enabled = false;
+        Owner.Obstacle.enabled = true;
+    }
+
+    public void DestinationApproved(NavMeshPath path, Vector3 newDestination, StateId ApprovalState, float speed, float lerp)
     {
         ApprovedDestinationStateId = ApprovalState;
-        Owner.Agent.SetDestination(newDestination);
+        //var (speed, lerp) = Owner.GetSpeedAndLerp(ApprovedDestinationStateId);
+        NavMeshObstacle o = Owner.Obstacle;
+        if (o.enabled && o.carving)
+        {
+            Owner.Obstacle.enabled = false;
+            _timer.Add(new UnCarveDelay(Time.deltaTime + Mathf.Epsilon, newDestination, path, speed, lerp, SetDestination));
+          //  CoroutineRunner.Instance.StartCoroutine(DelayEnableroutine(path, newDestination, speed, lerp));
+            return;
+        }
+        SetDestination(path, newDestination, speed, lerp);
+    }
+
+    Action<NavMeshPath, Vector3, float, float> UnCarveCB;
+
+    IEnumerator DelayEnableroutine(NavMeshPath path, Vector3 destination, float speed, float lerp)
+    {
+        Owner.Obstacle.enabled = false;
+        yield return null;
+
+        SetDestination(path, destination, speed, lerp);
+    }
+
+    private List<UnCarveDelay> _timer = new(2);
+    private struct UnCarveDelay
+    {
+        public float RemainingTime;
+        public readonly Vector3 Destination;
+        public readonly NavMeshPath Path;
+        public readonly float AgentSpeed;
+        public readonly float Lerp;
+        
+        public readonly Action<NavMeshPath, Vector3, float, float> OnDone;
+
+        public UnCarveDelay(float time, Vector3 dest, NavMeshPath p, float speed, float lerp, Action<NavMeshPath, Vector3, float, float> cb)
+        {
+            RemainingTime = time;
+            Destination = dest;
+            Path = p;
+            AgentSpeed = speed;
+            Lerp = lerp;
+            OnDone = cb;
+        }
+    }
+
+
+
+    protected void SetDestination(NavMeshPath path, Vector3 destination, float newSpeed, float lerp)
+    {
+        SetAgentTargetSpeed(newSpeed, lerp);
+        ToggleAgent(setActive: true);
+        if (!Owner.Agent.SetPath(path))
+            if (!Owner.Agent.SetDestination(destination)) Debug.LogError("Failed to Set Destination");
+    }
+
+    public void ToggleAgent(bool setActive)
+    {
+        if (Owner.Agent.enabled == setActive) return;
+        Owner.Agent.enabled = setActive;
+    }
+
+    #region Path Received & Validation
+    public void OnPathRequestComplete(in PathResult result)
+    {
+
+        if (result.Id != _currentStateId || result.Reason == PathCheckReason.Cancelled) return;
+        bool pathFound = result.PathFound;
+        StateId id = result.Id;
+
+        if (result.Reason == PathCheckReason.ProbePathToPrimaryTarget && pathFound)
+        { SendNotification(NotifyOwnerNPC.PathToPrimaryAvailable(result.Id)); return; }
+    
+        if (!result.PathFound) { SendNotification(NotifyOwnerNPC.NoAvailablePath(_currentStateId)); Debug.LogError("NO Path Found!!"); return; }
+        else
+        {
+
+            _currentDestination = result.Destination;
+            _currentPatrolPoinfForward = result.Forward;
+
+            SendNotification(NotifyOwnerNPC.DestinationFound(result.Id, _currentDestination, result.Path));
+
+        }
+
+    }
+    #endregion
+
+
+    #region Tick Region
+    private void SetAgentTargetSpeed(float speed, float lerpSpeed)
+    => (_lerpSpeed, _targetSpeed) = (lerpSpeed, speed);
+
+    private void UpdateAgentSpeed()
+    {
+        if (Owner.Agent == null) return;
+        float smoothedSpeed = Mathf.Lerp(Owner.Agent.speed, _targetSpeed, _lerpSpeed * Time.deltaTime);
+        Owner.Agent.speed = smoothedSpeed;
+
+        float _currentSpeed = Owner.Agent.speed;
+
+        if (Mathf.Approximately(Owner.Agent.speed, _targetSpeed)) Owner.Agent.speed = _targetSpeed;
+    }
+    #endregion
+
+
+    #region Patrol Region
+
+ 
+
+
+    public void LookAroundAndContinue()
+    {
+        if(_runningRoutine == null)
+            _runningRoutine = CoroutineRunner.Instance.StartCoroutine(PatrolWaitRoutine(_currentPatrolPoinfForward));
     }
 
     private IEnumerator PatrolWaitRoutine(Vector3? forward = null)
     {
         if (forward != null)
         {
-            Quaternion ownerRot = Owner.GetRotation();
+            Transform t = Owner.Transform;
             Quaternion targetRot = Quaternion.LookRotation(forward.Value);
-            while (Quaternion.Angle(ownerRot, targetRot) > 2.0f + Mathf.Epsilon)
+            while (Quaternion.Angle(t.rotation, targetRot) > 2.0f + Mathf.Epsilon)
             {
-                ownerRot = Quaternion.Slerp(ownerRot, targetRot, Time.deltaTime * 2f);
+                t.rotation = Quaternion.Slerp(t.rotation, targetRot, Time.deltaTime * 2f);
                 yield return null;
             }
 
@@ -146,7 +238,7 @@ public class FSMManager : IFSMEvents
 
         if (_currentStateId != StateId.Patrol) yield break;
 
-        float _delayTime = Random.Range(0, 5f);
+        float _delayTime = Random.Range(Owner.MinWaitTime, Owner.MaxWaitTime);
         float elapsedTime = 0.0f;
 
         while (elapsedTime < _delayTime)
@@ -155,82 +247,36 @@ public class FSMManager : IFSMEvents
             yield return null;
         }
         if (_currentStateId != StateId.Patrol) yield break;
-        //FSM.TryGetNextDestination(_state.Id);
-        //StartCoroutine(DelayEnableRoutine(0, _currentDestination, WalkSpeed, 2f));
-        //TrySetDestination(0, _currentDestination, WalkSpeed, 2f);
-        //FSM.TryRepath?.Invoke();
+        BeginPatrol(_currentStateId);
+   
+        _runningRoutine = null;
     }
 
-
+    private void CancelRunningCoroutine()
+    {
+        if(_runningRoutine != null)
+        {
+            CoroutineRunner.Instance.StopCoroutine(_runningRoutine);
+            _runningRoutine = null;
+        }
+    }
 
     public void BeginPatrol(StateId id)
     {
         //  TryRepath = BeginPatrol;
-
+        if (id != StateId.Patrol) return;
         if (_currentStateId != id) _currentStateId = id;
-        Debug.LogError("BeginPatrol Passed id: " + id.ToString() + ", and after setting: " + _currentStateId.ToString());
-        // _stateId = stateId;
-        /*     PathCheckReason reason = PathCheckReason.ValidatePathForDestination;*/
-        var request = ValidateDestination.GetPatrolPoint(_currentStateId, Owner, Owner.Path);
-        /*List<(Vector3,Vector3?)> points = */
+
+        var request = ValidateDestination.GetPatrolPoint(id, Owner, Owner.Path);
+  
         _pathFinder?.TryGetDestination(request);
-        //   PathRequestInfo info = new PathRequestInfo(points, GetOwnerPos(), reason, Owner.Path, _stateTransitionId);
-        // _pathFinder.TryGetPath(info);
-        // Tick = OnPatrol;
+       
     }
 
-    public void OnPathRequestCompleted(in PathResult result)
-    {
-
-        // Blocks Destination Setting while transitioning to new state
-        if (result.Id != _currentStateId) return;
-        bool pathFound = result.PathFound;
-       // DestinationKind kind = result.Kind;
-        
-        if (result.Reason == PathCheckReason.ProbePathToPrimaryTarget && pathFound)
-        { SendNotification(NotifyOwnerNPC.PathToPrimaryAvailable(_currentStateId)); return; }
-        //{ SendNotification(NotificationKind.PathToPrimaryAvailable, false); return; }
-
-        // if (!result.PathFound) { SendNotification(NotificationKind.NoAvailablePath, false); Debug.LogError("NO Path Found!!"); return; }
-        if (!result.PathFound) { SendNotification(NotifyOwnerNPC.NoAvailablePath(_currentStateId)); Debug.LogError("NO Path Found!!"); return; }
-        else
-        {
-          //  SendNotification(NotifyOwnerNPC.DestinationFound(_currentStateId, result.Destination, 0, 0));
-            // if (kind == DestinationKind.Patrol) Owner.OwnerEM.SpeedChanged(Owner.WalkSpeed, 2f);
-            
-            // Owner.Agent.SetDestination(result.Position);
-        }
-
-    }
+  
 
     #endregion
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    public void TryGetNextDestination(StateId currentStateId)
-    {
-        if (_currentStateId != currentStateId) return;
-
-        switch (currentStateId)
-        {
-            case StateId.Patrol:
-                BeginPatrol(currentStateId);
-                break;
-        }
-    }
 
 
     private bool HasReachedDestination() => Owner.Agent.remainingDistance <= (Owner.Agent.stoppingDistance + 0.25f);
@@ -242,20 +288,6 @@ public class FSMManager : IFSMEvents
     public bool TrySwitchZone() => _pathFinder.TrySwitchZone();
    
 
-   // private void SendNot(in StateNotification n) => Notification?.Invoke(n);
-
-    /*private void SendNotification(NotificationKind kind, bool destinationReached)
-    {
-        StateNotification n = new StateNotification(kind, destinationReached);
-        Notification?.Invoke(n);
-    }*/
-
-    private Vector3 GetOwnerPos() => LineOfSightUtility.GetClosestPointOnNavMesh(Owner.GetPosition());
-
-    private bool IsDestinationReached() => false;
-
-    
-  
 
     public void BeginChase(StateId id)
     {
@@ -279,8 +311,10 @@ public class FSMManager : IFSMEvents
 
     public void ExitState()
     {
-       
+        CancelRunningCoroutine();
+        _pathFinder?.CancelAll();
     }
+    
 
    
 }
