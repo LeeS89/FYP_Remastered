@@ -18,7 +18,7 @@ public class FieldOfViewManager
     private Vector3[] _evaluationHitPoints;
     private Collider[] _proximityDetectionResults;
     private AITraceComponent _traceComponent;
-    private float _deescalationTimer;
+    private float _deEscalationTimer;
 
 
     // More NEW

@@ -10,7 +10,11 @@ public interface ITargetable
 
     Transform Transform { get; }
 
+   // Transform RootTransform { get; }
+
     Collider TargetableCollider { get; }
 
     bool IsMoving { get; }
+
+    LayerMask LayerMask { get; }
 }

@@ -60,12 +60,13 @@ public class BaseDamageRelay : ComponentEvents, IDamageable
 
     public bool IsMoving { get; private set; } = false;
 
-    public Transform Transform => throw new System.NotImplementedException();
+    public Transform Transform => _parentTransform != null ? _parentTransform : transform;
 
+    [SerializeField] protected LayerMask _selfTargetMask;
 
+    public LayerMask LayerMask => _selfTargetMask;
 
-
-
+   
     /* public Vector3 GetTargetablePosition()
          => _parentTransform == null ? transform.position : _parentTransform.position;*/
 

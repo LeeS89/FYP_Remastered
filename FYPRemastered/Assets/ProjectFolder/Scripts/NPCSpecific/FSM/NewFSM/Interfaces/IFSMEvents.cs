@@ -11,7 +11,7 @@ public interface IFSMEvents : ITickable, IZoneSink
     void FollowGroup(StateId id);
 
 
-    void DestinationApproved(NavMeshPath path, Vector3 newDestination, StateId ApprovalState, float newAgentpeed, float lerp);
+    void DestinationApproval(bool approved, NavMeshPath path, Vector3 newDestination, StateId ApprovalState, float newAgentpeed, float lerp);
     Action TryRepath { get; }
 
     //void BeginSearch();
@@ -71,4 +71,9 @@ public interface IFSMOwner : ITargetable
     void SwitchTo(IIntentState next) { }
     IFSMEvents FSM { get; }
 
+}
+
+public interface IFieldOfViewOwner
+{
+    void FieldOfViewSweepResult(FOVResult result, bool withinAttackAngles);
 }
