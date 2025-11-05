@@ -1,5 +1,8 @@
-using UnityEngine;
+using Meta.XR.Simulator.Editor;
+using NUnit.Framework;
 using System;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class NPCFieldOfViewHandler
 {
@@ -142,17 +145,47 @@ public class NPCFieldOfViewHandler
 
         return FOVResult.TargetNotSeen;
     }
-
+    private List<Vector3> _samplePoints = new(15);
     private void RunEvaluationPhase(Collider targetCollider, out int hitCount, bool addFallbackPoints, LayerMask targetMask)
     {
         Vector3 closest = targetCollider.ClosestPointOnBounds(_params.fovOrigin.position);
-        if (!_traceComponent.IsWithinAngle(_params.fovOrigin, closest, _params.fovHalfAngle, _params.useSeparateVerticleAngle, _params.verticalFovHalfAngle))
+        _samplePoints.Add(closest);
+        _samplePoints.Add(targetCollider.bounds.center + Vector3.up * targetCollider.bounds.extents.y);
+        _samplePoints.Add(targetCollider.bounds.center - Vector3.right * targetCollider.bounds.extents.x);
+        _samplePoints.Add(targetCollider.bounds.center + Vector3.right * targetCollider.bounds.extents.x);
+        int angleCount = 0;
+        foreach(var p in _samplePoints)
+        {
+            if (_traceComponent.IsWithinAngle(_params.fovOrigin, p, _params.fovHalfAngle, _params.useSeparateVerticleAngle, _params.verticalFovHalfAngle))
+            {
+                //Debug.LogError("Player INSIDE of angle");
+                angleCount++;
+                break;
+            }
+           
+        }
+        _samplePoints.Clear();
+       
+        if(angleCount == 0)
         {
             hitCount = 0;
             return;
         }
-       
-        Vector3 waistPos = _params.ownerOrigin.TransformPoint(0f, _params.waistHeightOffset, 0f);
+       // Debug.LogError("Name of collider: "+ targetCollider.gameObject.name);
+       /* if (!_traceComponent.IsWithinAngle(_params.fovOrigin, closest, _params.fovHalfAngle, _params.useSeparateVerticleAngle, _params.verticalFovHalfAngle))
+        {
+            Debug.LogError("Player outside of angle");
+            hitCount = 0;
+            return;
+        }
+        else
+        {
+            Debug.LogError("Player INSIDE of angle");
+            hitCount = 0;
+            return;
+        }*/
+
+            Vector3 waistPos = _params.ownerOrigin.TransformPoint(0f, _params.waistHeightOffset, 0f);
         Vector3 eyePos = _params.ownerOrigin.TransformPoint(0f, _params.eyeHeightOffset, 0f);
         Vector3 center = (waistPos + eyePos) * 0.5f;
         Vector3 direction = TargetingUtility.GetDirectionToTarget(closest, center);
@@ -363,6 +396,12 @@ public class AITraceComponentNew
 
     public bool IsWithinAngle(Transform from, Vector3 to, float halfangle, bool separateVertical = false, float halfVertical = 0f)
     {
+        var toTarget = (to - from.position).normalized;
+        if (Vector3.Angle(from.forward, toTarget) <= (halfangle))
+        {
+            return true;
+        }
+        return false;
         Vector3 toVec = to - from.position;
         if (toVec.sqrMagnitude < 1e-8f) return true;
 

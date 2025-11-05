@@ -87366,7 +87366,7 @@ MonoBehaviour:
     ownerOrigin: {fileID: 1435932819}
     waistHeightOffset: 1
     eyeHeightOffset: 1.8
-    evaluationCapsuleRadius: 0.4
+    evaluationCapsuleRadius: 0.5
     addTargetFallbackPoints: 0
     fovHalfAngle: 50
     useSeparateVerticleAngle: 0
@@ -148725,13 +148725,25 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 818588734654090478, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4886263204720703655, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6460290968195593162, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7300394724241211646, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
       propertyPath: m_Name
       value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 7300394724241211646, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8025562586149453778, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
       propertyPath: m_LocalPosition.x
