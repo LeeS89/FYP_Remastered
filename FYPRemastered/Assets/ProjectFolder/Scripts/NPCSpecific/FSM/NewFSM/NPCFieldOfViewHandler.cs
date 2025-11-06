@@ -1,6 +1,3 @@
-using Meta.XR.Simulator.Editor;
-using NUnit.Framework;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,10 +10,11 @@ public class NPCFieldOfViewHandler
     private float _nextCheckTime = 0f;
     private Vector3[] _evaluationHitPoints;
     private Collider[] _proximityDetectionResults;
-    private AITraceComponentNew _traceComponent;
+    private RaycastHit[] _hitBuffer = new RaycastHit[10];
+   
 
 
-    public NPCFieldOfViewHandler(IFieldOfViewOwner owner, FOVParameters fovParams, AITraceComponentNew traceComp)
+    public NPCFieldOfViewHandler(IFieldOfViewOwner owner, FOVParameters fovParams)
     {
         if(fovParams == null)
         {
@@ -26,10 +24,7 @@ public class NPCFieldOfViewHandler
             fovParams = new FOVParameters();
         }
 
-        if(traceComp == null) traceComp = new AITraceComponentNew();
-
         _owner = owner;
-        _traceComponent = traceComp;
         _params = fovParams;
         _evaluationHitPoints = new Vector3[_params.maxFovTargets];
         _proximityDetectionResults = new Collider[_params.maxFovTargets];
@@ -81,7 +76,7 @@ public class NPCFieldOfViewHandler
         bool inShootAngle = false;
         LayerMask targetMask = _params?.TargetMask() ?? default;
 
-        int detectedCount = RunDetectionPhase(_traceComponent, _params.fovOrigin, _proximityDetectionResults, _params.fovRadius, targetMask);
+        int detectedCount = RunDetectionPhase(_params.fovOrigin, _proximityDetectionResults, _params.fovRadius, targetMask);
 
         if (detectedCount == 0)
         {
@@ -102,8 +97,8 @@ public class NPCFieldOfViewHandler
 
             if(result == FOVResult.TargetSeen)
             {
-                inShootAngle = _params.useSeparateVerticleAngle == false ? true :
-                    TargetWithinAimThreshold(_traceComponent, _params.fovOrigin, _proximityDetectionResults[i].ClosestPointOnBounds(_params.fovOrigin.position), _params.halfHorizontalShootAngle);
+                inShootAngle = _params.useShootingAngleRestriction == false ? true :
+                    TargetWithinAimThreshold(_params.fovOrigin, _proximityDetectionResults[i].ClosestPointOnBounds(_params.fovOrigin.position), _params.halfHorizontalShootAngle);
 
                 _owner?.FieldOfViewSweepResult(result, inShootAngle);
                 return;
@@ -113,9 +108,9 @@ public class NPCFieldOfViewHandler
         _owner?.FieldOfViewSweepResult(FOVResult.TargetNotSeen, false);
     }
 
-    public bool TargetWithinAimThreshold(AITraceComponentNew traceComp, Transform origin, Vector3 targetPosition, float halfAngle, bool useLocalUp = true)
+    public bool TargetWithinAimThreshold(Transform origin, Vector3 targetPosition, float halfAngle, bool useLocalUp = true)
     {
-        return traceComp.IsWithinYaw(
+        return this.IsWithinYaw(
             origin,
             targetPosition,
             halfAngle,
@@ -127,7 +122,7 @@ public class NPCFieldOfViewHandler
     {
         for (int i = 0; i < targetCount; i++)
         {
-            if (!_traceComponent.HasLineOfSight(
+            if (!this.HasLineOfSight(
                 _params.fovOrigin,
                 _evaluationHitPoints[i],
                 blockingMask,
@@ -145,7 +140,7 @@ public class NPCFieldOfViewHandler
 
         return FOVResult.TargetNotSeen;
     }
-    private List<Vector3> _samplePoints = new(15);
+    private List<Vector3> _samplePoints = new(5);
     private void RunEvaluationPhase(Collider targetCollider, out int hitCount, bool addFallbackPoints, LayerMask targetMask)
     {
         Vector3 closest = targetCollider.ClosestPointOnBounds(_params.fovOrigin.position);
@@ -156,66 +151,41 @@ public class NPCFieldOfViewHandler
         int angleCount = 0;
         foreach(var p in _samplePoints)
         {
-            if (_traceComponent.IsWithinAngle(_params.fovOrigin, p, _params.fovHalfAngle, _params.useSeparateVerticleAngle, _params.verticalFovHalfAngle))
+            if (this.IsWithinAngle(_params.fovOrigin, p, _params.fovHalfAngle/*, _params.useSeparateVerticleAngle, _params.verticalFovHalfAngle*/))
             {
-                //Debug.LogError("Player INSIDE of angle");
                 angleCount++;
                 break;
             }
-           
         }
         _samplePoints.Clear();
-       
-        if(angleCount == 0)
-        {
-            hitCount = 0;
-            return;
-        }
-       // Debug.LogError("Name of collider: "+ targetCollider.gameObject.name);
-       /* if (!_traceComponent.IsWithinAngle(_params.fovOrigin, closest, _params.fovHalfAngle, _params.useSeparateVerticleAngle, _params.verticalFovHalfAngle))
-        {
-            Debug.LogError("Player outside of angle");
-            hitCount = 0;
-            return;
-        }
-        else
-        {
-            Debug.LogError("Player INSIDE of angle");
-            hitCount = 0;
-            return;
-        }*/
 
-            Vector3 waistPos = _params.ownerOrigin.TransformPoint(0f, _params.waistHeightOffset, 0f);
+        if (angleCount == 0)
+        {
+            hitCount = 0;
+            return;
+        }
+        
+       
+
+        Vector3 waistPos = _params.ownerOrigin.TransformPoint(0f, _params.waistHeightOffset, 0f);
         Vector3 eyePos = _params.ownerOrigin.TransformPoint(0f, _params.eyeHeightOffset, 0f);
         Vector3 center = (waistPos + eyePos) * 0.5f;
         Vector3 direction = TargetingUtility.GetDirectionToTarget(closest, center);
-        /*
-                Vector3 waistPos = _ownerOrigin.position + Vector3.up * _evaluationCapsuleStartHeight;
-                Vector3 eyePos = _ownerOrigin.position + Vector3.up * _evaluationCapsuleEndHeight;
-                Vector3 sweepCenter = (waistPos + eyePos) * 0.5f;
-                Vector3 directionTotarget = TargetingUtility.GetDirectionToTarget(targetCollider.bounds.center, sweepCenter);
-        */
-        hitCount = _traceComponent.EvaluateViewCone(
+       
+        hitCount = this.EvaluateViewCone(
         waistPos,
         eyePos,
         _params.evaluationCapsuleRadius,
         direction,
         _params.fovRadius,
         targetMask,
-        _evaluationHitPoints
+        _evaluationHitPoints,
+        _hitBuffer
         );
 
-        if (hitCount == 0)
-        {
-            return;
-        }
-
-        if (addFallbackPoints)
-        {
+        
+        if (hitCount > 0 && addFallbackPoints)
             AddFallbackPoints(targetCollider, _evaluationHitPoints, ref hitCount);
-        }
-
-
     }
 
     private void AddFallbackPoints(Collider target, Vector3[] hitPoints, ref int startIndex)
@@ -227,11 +197,11 @@ public class NPCFieldOfViewHandler
         hitPoints[startIndex++] = target.bounds.center + Vector3.right * target.bounds.extents.x;
     }
 
-    public int RunDetectionPhase(AITraceComponentNew traceComp = null, Transform origin = null, Collider[] results = null, float radius = 0.5f, LayerMask targetMask = default)
+    public int RunDetectionPhase(Transform origin = null, Collider[] results = null, float radius = 0.5f, LayerMask targetMask = default)
     {
-        if (traceComp == null || origin == null || results == null) { return 0; }
+        if (origin == null || results == null) { return 0; }
 
-        int count = traceComp.CheckTargetProximity(
+        int count = this.CheckTargetProximity(
             origin,
             results,
             radius,
@@ -265,12 +235,13 @@ public enum FOVResult
 
 
 
-public class AITraceComponentNew
+internal static class FOVHandlerExtension
 {
-    private RaycastHit[] _hitBuffer = new RaycastHit[10];
+    //private RaycastHit[] _hitBuffer = new RaycastHit[10];
+    //public static FOVHandlerExtension Instance = new();
+    //private FOVHandlerExtension() { }
 
-
-    public int CheckTargetWithinCombatRange(Vector3 traceLocation, Collider[] hitResults, float sphereRadius = 0.2f, LayerMask traceLayer = default)
+    public static int CheckTargetWithinCombatRange(this NPCFieldOfViewHandler handler, Vector3 traceLocation, Collider[] hitResults, float sphereRadius = 0.2f, LayerMask traceLayer = default)
     {
 
         //Vector3 start = location.position - location.forward * (capsuleHeight / 2f);  // Bottom of capsule
@@ -291,64 +262,38 @@ public class AITraceComponentNew
 
     }
 
-    public bool IsTargetWithinRange(Vector3 position, float radius, int layerMask, bool debug = false, float debugDuration = 0f)
+    public static bool IsTargetWithinRange(this NPCFieldOfViewHandler handler, Vector3 position, float radius, int layerMask, bool debug = false, float debugDuration = 0f)
     {
         if (debug)
-        {
-
             DebugExtension.DebugWireSphere(position, Color.blue, radius, debugDuration);
 
-        }
-
-        /* if (foundObject)
-         {
-
-             return Physics.OverlapSphereNonAlloc(traceLocation.position, sphereRadius, hitResults, traceLayer);
-             //hitResults = _overlapResults;
-             //return hits;
-
-         }*/
         return Physics.CheckSphere(position, radius, layerMask);
     }
 
-    public int CheckTargetProximity(Transform traceLocation, Collider[] hitResults, float sphereRadius = 0.2f, LayerMask traceLayer = default, bool debug = false)
+    public static int CheckTargetProximity(this NPCFieldOfViewHandler handler, Transform traceLocation, Collider[] hitResults, float sphereRadius = 0.2f, LayerMask traceLayer = default, bool debug = false)
     {
 
-        //Vector3 start = location.position - location.forward * (capsuleHeight / 2f);  // Bottom of capsule
-        //Vector3 end = location.position + location.forward * (capsuleHeight / 2f);    // Top of capsule
-
-
-        bool foundObject = IsTargetWithinRange(traceLocation.position, sphereRadius, traceLayer);//Physics.CheckSphere(traceLocation.position, sphereRadius, traceLayer);
+        //bool foundObject = IsTargetWithinRange(traceLocation.position, sphereRadius, traceLayer);
+        bool foundObject = Physics.CheckSphere(traceLocation.position, sphereRadius, traceLayer);
 
         Color debugColor = foundObject ? Color.green : Color.red; // Green if detected, red if not
 
         if (debug)
-        {
-
             DebugExtension.DebugWireSphere(traceLocation.position, debugColor, sphereRadius);
 
-        }
-
         if (foundObject)
-        {
-
             return Physics.OverlapSphereNonAlloc(traceLocation.position, sphereRadius, hitResults, traceLayer);
-            //hitResults = _overlapResults;
-            //return hits;
 
-        }
 
         for (int i = 0; i < hitResults.Length; i++)
-        {
             hitResults[i] = null;
-        }
-        // Clear the results if no objects were found
+
         return 0;
 
     }
 
 
-    public bool IsWithinView(Transform from, Vector3 targetPosition, float horizontalThreshold, float verticalThreshold)
+    public static bool IsWithinView(this NPCFieldOfViewHandler handler, Transform from, Vector3 targetPosition, float horizontalThreshold, float verticalThreshold)
     {
 
         Vector3 to = targetPosition - from.position;
@@ -367,34 +312,18 @@ public class AITraceComponentNew
 
         return h <= horizontalThreshold && v <= verticalThreshold;
 
-
-
-        /*
-                Vector3 localDir = from.InverseTransformDirection(targetPosition - from.position).normalized;
-
-                float horizontalAngle = Mathf.Atan2(localDir.x, localDir.z) * Mathf.Rad2Deg;
-                float verticalAngle = Mathf.Atan2(localDir.y, localDir.z) * Mathf.Rad2Deg;
-
-                return Mathf.Abs(horizontalAngle) <= horizontalThreshold && Mathf.Abs(verticalAngle) <= verticalThreshold;
-        */
-        /* Vector3 directionToTarget = (targetPosition - from.position).normalized;
-
-         // Horizontal (XZ-plane)
-         Vector3 flatForward = new Vector3(from.forward.x, 0f, from.forward.z).normalized;
-         Vector3 flatDirection = new Vector3(directionToTarget.x, 0f, directionToTarget.z).normalized;
-         float horizontalAngle = Vector3.Angle(flatForward, flatDirection);
-
-         // Vertical (Y-axis offset relative to flat distance)
-         float dx = targetPosition.x - from.position.x;
-         float dz = targetPosition.z - from.position.z;
-         float yOffset = targetPosition.y - from.position.y;
-
-         float verticalAngle = Mathf.Atan2(yOffset, Mathf.Sqrt(dx * dx + dz * dz)) * Mathf.Rad2Deg;
-
-         return horizontalAngle <= horizontalThreshold && Mathf.Abs(verticalAngle) <= verticalThreshold;*/
     }
 
-    public bool IsWithinAngle(Transform from, Vector3 to, float halfangle, bool separateVertical = false, float halfVertical = 0f)
+    public static bool IsWithinAngle(this NPCFieldOfViewHandler handler, Transform from, Vector3 to, float halfAngle)
+    {
+        Vector3 toVec = to - from.position;
+        if (toVec.sqrMagnitude < 1e-8f) return true;
+
+        float cosHalf = Mathf.Cos(halfAngle * Mathf.Deg2Rad);
+        return Vector3.Dot(from.forward, toVec.normalized) >= cosHalf;
+    }
+
+    public static bool IsWithinAngle(this NPCFieldOfViewHandler handler, Transform from, Vector3 to, float halfangle, bool separateVertical = false, float halfVertical = 0f)
     {
         var toTarget = (to - from.position).normalized;
         if (Vector3.Angle(from.forward, toTarget) <= (halfangle))
@@ -438,7 +367,7 @@ public class AITraceComponentNew
 
     }
 
-    public bool IsWithinYaw(Transform from, Vector3 target, float halfYawDeg, bool useLocalUp = true)
+    public static bool IsWithinYaw(this NPCFieldOfViewHandler handler, Transform from, Vector3 target, float halfYawDeg, bool useLocalUp = true)
     {
         Vector3 up = useLocalUp ? from.up : Vector3.up;
 
@@ -458,7 +387,7 @@ public class AITraceComponentNew
 
 
 
-    public int EvaluateViewCone(Vector3 start, Vector3 end, float radius, Vector3 direction, float maxDistance, LayerMask targetMask, Vector3[] hitPoints)
+    public static int EvaluateViewCone(this NPCFieldOfViewHandler handler, Vector3 start, Vector3 end, float radius, Vector3 direction, float maxDistance, LayerMask targetMask, Vector3[] hitPoints, RaycastHit[] _hitBuffer)
     {
 
         int hitCount = Physics.CapsuleCastNonAlloc(start, end, radius, direction, _hitBuffer, maxDistance, targetMask);
@@ -472,59 +401,9 @@ public class AITraceComponentNew
 
         return processedCount;
 
-        /*
-                RaycastHit[] hits = Physics.CapsuleCastAll(start, end, radius, direction.normalized, maxDistance, targetMask);
-
-
-                 int hitCount = 0;
-
-
-                foreach (var hit in hits)
-                {
-
-                    if (hitCount < hitPoints.Length)
-                    {
-                        hitPoints[hitCount++] = hit.point;
-                    }
-
-                }
-
-                return hitCount;*/
     }
 
-    /*  public bool HasLineOfSight(
-         Transform from,
-         Vector3 target,
-         LayerMask blockingMask,
-         LayerMask targetMask,
-         bool debug = false
-         )
-      {
 
-
-          if (Physics.Linecast(from.position, target, out RaycastHit hit, blockingMask | targetMask))
-          {
-              if (((1 << hit.collider.gameObject.layer) & targetMask) != 0)
-              {
-                  Debug.DrawLine(from.position, target, Color.green);
-                  Debug.LogError($"Hit target: {hit.collider.gameObject.name}");
-
-                  return true;
-              }
-              else if(((1 << hit.collider.gameObject.layer) & blockingMask) != 0)
-              {
-                  if (debug)
-                  {
-                      Debug.DrawLine(from.position, target, Color.red, 25f);
-                      Debug.LogError($"Hit target blocking mask: {hit.collider.gameObject.name}");
-                      return false;
-                  }
-              }
-          }
-
-
-          return false;
-      }*/
 
     /// <summary>
     /// 
@@ -533,7 +412,8 @@ public class AITraceComponentNew
     /// we use a fallback point to fire the linecast from</param>
     /// <param name="debug"></param>
     /// <returns></returns>
-    public bool HasLineOfSight(
+    public static bool HasLineOfSight(
+       this NPCFieldOfViewHandler handler,
        Transform from,
        Vector3 target,
        LayerMask blockingMask,
@@ -545,7 +425,7 @@ public class AITraceComponentNew
        )
     {
         if (from == null || targetTransform == null || ownerTransform == null) return false;
-        
+
         RaycastHit hitInfo;
         bool targetWasHit;
 
@@ -553,7 +433,7 @@ public class AITraceComponentNew
 
         if (!targetWasHit) { return false; }
 
-        
+
 
         if (fallbackFrom != null)
         {
@@ -578,7 +458,7 @@ public class AITraceComponentNew
         return false;
     }
 
-    private void CheckHit(
+    private static void CheckHit(
        Transform from,
        Vector3 target,
        out RaycastHit hit,

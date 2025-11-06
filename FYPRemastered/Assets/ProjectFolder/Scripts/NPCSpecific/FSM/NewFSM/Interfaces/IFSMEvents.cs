@@ -71,6 +71,8 @@ public interface IFSMOwner : ITargetable
     void SwitchTo(IIntentState next) { }
     IFSMEvents FSM { get; }
 
+    float SprintDistance { get; }
+
 }
 
 public interface IFieldOfViewOwner

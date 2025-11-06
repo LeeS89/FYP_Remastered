@@ -13,8 +13,8 @@ public class TestFov : MonoBehaviour, IFieldOfViewOwner
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        _fovHandler = new NPCFieldOfViewHandler(this, _params, new AITraceComponentNew());
-        _currentColor = _notSeenColor;
+        _fovHandler = new NPCFieldOfViewHandler(this, _params);
+       
         StartCoroutine(GetPlayerDelay());
     }
 
@@ -43,17 +43,16 @@ public class TestFov : MonoBehaviour, IFieldOfViewOwner
 
     public void FieldOfViewSweepResult(FOVResult result, bool withinAttackAngles)
     {
-        Debug.LogError("Recieved FOV result of: "+result.ToString());
-        if (result == FOVResult.TargetSeen) _currentColor = _seenColor;
-        else _currentColor = _notSeenColor;
+        Debug.LogError("In ShootingAngle: "+withinAttackAngles);
+        //Debug.LogError("Recieved FOV result of: "+result.ToString());
+        
+       
     }
 
     public float _horizontalAngleMultiplier;
     public float _verticalAngleMultiplier;
 
-    public Color _seenColor = Color.green;
-    public Color _notSeenColor = Color.red;
-    public Color _currentColor = Color.blue;
+   
 
     void OnDrawGizmos()
     {

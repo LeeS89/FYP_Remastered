@@ -42,7 +42,8 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner
     public Collider TargetableCollider { get; protected set; }
     public bool IsMoving { get; private set; } = false;
 
-    
+    public bool TestSprint;
+    public bool TestWalk;
 
     public float WalkSpeed => _walkSpeed;
 
@@ -68,6 +69,8 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner
     public LayerMask LayerMask => throw new NotImplementedException();
 
     public Transform RootTransform => throw new NotImplementedException();
+
+    public float SprintDistance => throw new NotImplementedException();
 
     public void OnDestinationFound(StateId id, Vector3 destination, NavMeshPath p)
     {

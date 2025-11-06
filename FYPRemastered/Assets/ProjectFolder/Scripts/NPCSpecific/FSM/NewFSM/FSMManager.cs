@@ -9,6 +9,15 @@ public class FSMManager : FSMBase
 {
     private StateId ApprovedDestinationStateId;
     private List<SetDestinationDelay> _timer = new(2);
+    private float _currentSpeed;
+
+    private enum SpeedTier
+    {
+        Idle,
+        Walk,
+        Sprint
+    }
+    private SpeedTier _speedTier = SpeedTier.Idle;
 
     public FSMManager(IFSMOwner owner)
     {
@@ -22,12 +31,29 @@ public class FSMManager : FSMBase
         }
 
         Owner = owner;
+        _currentSpeed = Owner?.WalkSpeed ?? 0f;
         _pathFinder = new DestinationFinder(this);
         OnLookAroundComplete = BeginPatrol;
         CancelOrContinueRoutine = CheckState;
         LookAroundAction = LookAround;
         Tick = OnTick;
         LateTick = OnLateTick;
+    }
+
+    private void SetSpeedTier(SpeedTier tier)
+    {
+        if (tier == _speedTier) return;
+        _speedTier = tier;
+        var (speed, lerp) = tier switch
+        {
+            SpeedTier.Idle => (0f, 10f),
+            SpeedTier.Walk => (Owner.WalkSpeed, 2f),
+            SpeedTier.Sprint => (Owner.SprintSpeed, 2f),
+            _=> (0f, 10f)
+        };
+
+        SetAgentTargetSpeed(speed, lerp);
+
     }
 
     public void ToggleAgent(bool setActive)
@@ -38,7 +64,8 @@ public class FSMManager : FSMBase
 
     private void ResetAgent()
     {
-        SetAgentTargetSpeed(0f, 10f);
+        SetSpeedTier(SpeedTier.Idle);
+        //SetAgentTargetSpeed(0f, 10f);
         Owner.Agent.ResetPath();
        // if (_currentStateId == StateId.Patrol) return;
         Owner.Agent.enabled = false;
@@ -65,13 +92,50 @@ public class FSMManager : FSMBase
         }
         SetDestination(path, newDestination, speed, lerp);
     }
+    public void DestinationApprovalNew(NavMeshPath path, Vector3 newDestination, StateId ApprovalState)
+    {
+        if (ApprovalState != _currentStateId) { SetSpeedTier(SpeedTier.Idle); return; }
 
+        NavMeshObstacle o = Owner.Obstacle;
+        if (o.enabled && o.carving)
+        {
+            Owner.Obstacle.enabled = false;
+           // _timer.Add(new SetDestinationDelay(Time.deltaTime + Mathf.Epsilon, newDestination, path, speed, lerp, SetDestination));
+            //  CoroutineRunner.Instance.StartCoroutine(DelayEnableroutine(path, newDestination, speed, lerp));
+            return;
+        }
+        //SetDestination(path, newDestination, speed, lerp);
+    }
+
+    private SpeedTier ResolveNewSpeed(StateId id)
+    {
+        SpeedTier newtier;
+        switch (id)
+        {
+            case StateId.Patrol or StateId.Flank:
+                newtier = SpeedTier.Walk;
+                break;
+            case StateId.Cover or StateId.Flee:
+                newtier = SpeedTier.Sprint;
+                break;
+            case StateId.Chase or StateId.Follow:
+                newtier = SpeedTier.Sprint;
+                break;
+            default:
+                newtier = SpeedTier.Idle;
+                break;
+        }
+        return newtier;
+    }
+
+    
     protected override void SetDestination(NavMeshPath path, Vector3 destination, float newSpeed, float lerp)
     {
         SetAgentTargetSpeed(newSpeed, lerp);
         ToggleAgent(setActive: true);
         if (!Owner.Agent.SetPath(path))
-            if (!Owner.Agent.SetDestination(destination)) Debug.LogError("Failed to Set Destination");
+            if (!Owner.Agent.SetDestination(destination)) Debug.LogError("Failed to set path");
+                //SetSpeedTier(SpeedTier.Idle); // Later => Send Notification i.e. Stuck
     }
     #endregion
 
@@ -108,6 +172,11 @@ public class FSMManager : FSMBase
 
     private void UpdateAgentSpeed()
     {
+        /*var a = Owner.Agent; if (!a) return;
+        float delta = Mathf.Abs(_targetSpeed - a.speed);
+        float rate = (0.5f > 0f) ? Mathf.Max(0.01f, delta / 0.5f) : float.PositiveInfinity;
+        a.speed = Mathf.MoveTowards(a.speed, _targetSpeed, rate * Time.deltaTime);*/
+
         if (Owner.Agent == null) return;
         float smoothedSpeed = Mathf.Lerp(Owner.Agent.speed, _targetSpeed, _lerpSpeed * Time.deltaTime);
         Owner.Agent.speed = smoothedSpeed;
@@ -128,6 +197,8 @@ public class FSMManager : FSMBase
             if (DestinationReached)
             {
                 ResetAgent();
+                
+                
                 bool isStaleDestination = ApprovedDestinationStateId != _currentStateId;
                 SendNotification(NotifyOwnerNPC.DestinationReached(_currentStateId, isStaleDestination));
 
@@ -136,10 +207,32 @@ public class FSMManager : FSMBase
         }
     }
 
+    private bool RemainingDistance(out float remaining)
+    {
+        if (Owner.Agent == null || !Owner.Agent.enabled) { remaining = float.MaxValue; return false; }
+        if (Owner.Agent.hasPath && !Owner.Agent.pathPending)
+        {
+            remaining = Owner.Agent.remainingDistance;
+            return true;
+        }
+            remaining = float.MaxValue;
+            return false;
+    }
+
     private bool HasReachedDestination() => Owner.Agent.remainingDistance <= (Owner.Agent.stoppingDistance + 0.25f);
 
     private void OnTick(float dt)
     {
+        if(Owner is NPCController c)
+        {
+            if (c.TestSprint)
+            {
+                SetAgentTargetSpeed(Owner.SprintSpeed, 2f);
+            }else if (c.TestWalk)
+            {
+                SetAgentTargetSpeed(Owner.WalkSpeed, 2f);
+            }
+        }
         CheckRemainingDistance();
      
         for (int i = 0; i < _timer.Count; i++)
@@ -192,6 +285,12 @@ public class FSMManager : FSMBase
     private Action<StateId> OnLookAroundComplete;
 
     public override void LookAroundAndContinue()
+    {
+        if (_runningRoutine == null)
+            _runningRoutine = this.BeginPatrolRoutine(_currentStateId, Owner.Transform, Owner.MinWaitTime, Owner.MaxWaitTime, _currentDestinaationForward, LookAroundAction, CancelOrContinueRoutine, OnLookAroundComplete);
+            //_runningRoutine = CoroutineRunner.Instance.StartCoroutine(PatrolWaitRoutine(_currentPatrolPoinfForward));
+    }
+    private void LookAroundAndContinuePatrol()
     {
         if (_runningRoutine == null)
             _runningRoutine = this.BeginPatrolRoutine(_currentStateId, Owner.Transform, Owner.MinWaitTime, Owner.MaxWaitTime, _currentDestinaationForward, LookAroundAction, CancelOrContinueRoutine, OnLookAroundComplete);

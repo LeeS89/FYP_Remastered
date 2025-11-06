@@ -87253,7 +87253,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!65 &1435932816
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -87371,7 +87371,7 @@ MonoBehaviour:
     fovHalfAngle: 50
     useSeparateVerticleAngle: 0
     verticalFovHalfAngle: 25
-    useShootingAngleRestriction: 1
+    useShootingAngleRestriction: 0
     halfHorizontalShootAngle: 15
     idleFOVCheckFrequency: 1
     heightenedFOVCheckFrequency: 0.5
@@ -87382,9 +87382,6 @@ MonoBehaviour:
   _result: 3
   _horizontalAngleMultiplier: 1
   _verticalAngleMultiplier: 1
-  _seenColor: {r: 0, g: 1, b: 0.003575325, a: 0}
-  _notSeenColor: {r: 1, g: 0, b: 0, a: 0}
-  _currentColor: {r: 0, g: 0.12585497, b: 1, a: 0}
 --- !u!1001 &1437567730
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -149766,7 +149763,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &6207833307496481232
 Transform:
   m_ObjectHideFlags: 0
@@ -151391,6 +151388,8 @@ MonoBehaviour:
   _walkSpeed: 0.9
   _sprintSpeed: 3.6
   _targetCollider: {fileID: 8950683044442760028}
+  TestSprint: 0
+  TestWalk: 0
   _maxWaitAtSeconds: 7
   _minWaitAtSeconds: 0.5
   TestZone: 0
