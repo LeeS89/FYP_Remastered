@@ -71,7 +71,8 @@ public interface IFSMOwner : ITargetable
     void SwitchTo(IIntentState next) { }
     IFSMEvents FSM { get; }
 
-    float SprintDistance { get; }
+    float SprintEnterDist { get; }
+    float SprintExitDist { get; }
 
 }
 

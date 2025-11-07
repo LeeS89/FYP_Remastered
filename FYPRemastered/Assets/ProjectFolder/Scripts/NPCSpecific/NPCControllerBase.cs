@@ -70,7 +70,9 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner
 
     public Transform RootTransform => throw new NotImplementedException();
 
-    public float SprintDistance => throw new NotImplementedException();
+    public float SprintEnterDist => throw new NotImplementedException();
+
+    public float SprintExitDist => throw new NotImplementedException();
 
     public void OnDestinationFound(StateId id, Vector3 destination, NavMeshPath p)
     {
@@ -206,7 +208,7 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner
     {
       //   if (FSM == null) return;
 
-        FSM?.Tick?.Invoke(Time.deltaTime);
+        FSM?.Tick(Time.deltaTime);
         IsMoving = !FSM?.DestinationReached ?? false;
 
        // _fovhandler?.Tick();

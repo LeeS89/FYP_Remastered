@@ -4,7 +4,8 @@ using System;
 
 public interface ITickable
 {
-    Action<float> Tick { get; }
+    //event Action<float> OnTick;
+    void Tick(float dt);
 
     Action<float> LateTick { get; }
 }

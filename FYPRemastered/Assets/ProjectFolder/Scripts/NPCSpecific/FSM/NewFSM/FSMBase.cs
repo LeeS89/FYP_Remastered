@@ -8,8 +8,15 @@ public abstract class FSMBase : IFSMEvents
     public bool DestinationReached { get; protected set; } = true;
     public bool HasLOS { get; set; }
     public StateNotificationProvider Notification { get; set; }
-    public Action<float> Tick { get; protected set; }
+    protected event Action<float> OnTick;
+
+    public void Tick(float dt) => OnTick?.Invoke(dt);
+    
     public Action<float> LateTick { get; protected set; }
+
+    protected Action<float> OnChaseTick;
+
+    protected virtual void ChaseTick(float dt) { }
 
     public ITargetable PrimaryTarget { get; set; }
 
@@ -34,7 +41,7 @@ public abstract class FSMBase : IFSMEvents
     public abstract void ExitState();
     public abstract void FollowGroup(StateId id);
     public abstract void TakeCover(StateId id);
-    protected abstract void SetDestination(NavMeshPath path, Vector3 destination, float newSpeed, float lerp);
+    protected abstract void SetDestination(NavMeshPath path, Vector3 destination, SpeedTier tier);
     public abstract void OnPathRequestComplete(in PathResult result);
     
 
@@ -49,4 +56,14 @@ public abstract class FSMBase : IFSMEvents
         if (_pathFinder == null) { zone = 0; return false; }
         return _pathFinder.TryGetCurrentZone(out zone);
     }
+
+    
+
+    protected enum SpeedTier
+    {
+        Idle,
+        Walk,
+        Sprint
+    }
+    protected SpeedTier _speedTier = SpeedTier.Idle;
 }

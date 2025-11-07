@@ -11,13 +11,7 @@ public class FSMManager : FSMBase
     private List<SetDestinationDelay> _timer = new(2);
     private float _currentSpeed;
 
-    private enum SpeedTier
-    {
-        Idle,
-        Walk,
-        Sprint
-    }
-    private SpeedTier _speedTier = SpeedTier.Idle;
+   
 
     public FSMManager(IFSMOwner owner)
     {
@@ -36,9 +30,13 @@ public class FSMManager : FSMBase
         OnLookAroundComplete = BeginPatrol;
         CancelOrContinueRoutine = CheckState;
         LookAroundAction = LookAround;
-        Tick = OnTick;
+        OnChaseTick = ChaseTick;
+        OnTick += FSMTick;
+     //   OnTick += OnChaseTick;
         LateTick = OnLateTick;
     }
+
+   
 
     private void SetSpeedTier(SpeedTier tier)
     {
@@ -62,7 +60,7 @@ public class FSMManager : FSMBase
         Owner.Agent.enabled = setActive;
     }
 
-    private void ResetAgent()
+    private void TryResetAgent()
     {
         SetSpeedTier(SpeedTier.Idle);
         //SetAgentTargetSpeed(0f, 10f);
@@ -73,41 +71,9 @@ public class FSMManager : FSMBase
     }
 
     #region Destination Region
-    public override void DestinationApproval(bool approved, NavMeshPath path, Vector3 newDestination, StateId ApprovalState, float speed, float lerp)
-    {
-        if (!approved)
-        {
-            SetAgentTargetSpeed(speed, lerp);
-            return;
-        }
-        ApprovedDestinationStateId = ApprovalState;
-        //var (speed, lerp) = Owner.GetSpeedAndLerp(ApprovedDestinationStateId);
-        NavMeshObstacle o = Owner.Obstacle;
-        if (o.enabled && o.carving)
-        {
-            Owner.Obstacle.enabled = false;
-            _timer.Add(new SetDestinationDelay(Time.deltaTime + Mathf.Epsilon, newDestination, path, speed, lerp, SetDestination));
-            //  CoroutineRunner.Instance.StartCoroutine(DelayEnableroutine(path, newDestination, speed, lerp));
-            return;
-        }
-        SetDestination(path, newDestination, speed, lerp);
-    }
-    public void DestinationApprovalNew(NavMeshPath path, Vector3 newDestination, StateId ApprovalState)
-    {
-        if (ApprovalState != _currentStateId) { SetSpeedTier(SpeedTier.Idle); return; }
+  
 
-        NavMeshObstacle o = Owner.Obstacle;
-        if (o.enabled && o.carving)
-        {
-            Owner.Obstacle.enabled = false;
-           // _timer.Add(new SetDestinationDelay(Time.deltaTime + Mathf.Epsilon, newDestination, path, speed, lerp, SetDestination));
-            //  CoroutineRunner.Instance.StartCoroutine(DelayEnableroutine(path, newDestination, speed, lerp));
-            return;
-        }
-        //SetDestination(path, newDestination, speed, lerp);
-    }
-
-    private SpeedTier ResolveNewSpeed(StateId id)
+    private SpeedTier ResolveNewSpeed(StateId id, bool destinationreached)
     {
         SpeedTier newtier;
         switch (id)
@@ -115,10 +81,10 @@ public class FSMManager : FSMBase
             case StateId.Patrol or StateId.Flank:
                 newtier = SpeedTier.Walk;
                 break;
-            case StateId.Cover or StateId.Flee:
+            case StateId.Cover or StateId.Flee or StateId.Follow:
                 newtier = SpeedTier.Sprint;
                 break;
-            case StateId.Chase or StateId.Follow:
+            case StateId.Chase:
                 newtier = SpeedTier.Sprint;
                 break;
             default:
@@ -129,9 +95,10 @@ public class FSMManager : FSMBase
     }
 
     
-    protected override void SetDestination(NavMeshPath path, Vector3 destination, float newSpeed, float lerp)
+    protected override void SetDestination(NavMeshPath path, Vector3 destination, SpeedTier tier)
     {
-        SetAgentTargetSpeed(newSpeed, lerp);
+        SetSpeedTier(tier);
+        //SetAgentTargetSpeed(newSpeed, lerp);
         ToggleAgent(setActive: true);
         if (!Owner.Agent.SetPath(path))
             if (!Owner.Agent.SetDestination(destination)) Debug.LogError("Failed to set path");
@@ -163,6 +130,42 @@ public class FSMManager : FSMBase
         }
 
     }
+
+    public void TrySetDestination(NavMeshPath path, Vector3 newDestination, StateId destinationState)
+    {
+        if (destinationState != _currentStateId) { SetSpeedTier(SpeedTier.Idle); return; }
+
+        NavMeshObstacle o = Owner.Obstacle;
+        if (o.enabled && o.carving)
+        {
+            Owner.Obstacle.enabled = false;
+            // _timer.Add(new SetDestinationDelay(Time.deltaTime + Mathf.Epsilon, newDestination, path, speed, lerp, SetDestination));
+            //  CoroutineRunner.Instance.StartCoroutine(DelayEnableroutine(path, newDestination, speed, lerp));
+            return;
+        }
+      //  SetDestination(path, newDestination, speed, lerp);
+    }
+
+    public override void DestinationApproval(bool approved, NavMeshPath path, Vector3 newDestination, StateId ApprovalState, float speed, float lerp)
+    {
+        if (!approved)
+        {
+            SetAgentTargetSpeed(speed, lerp);
+            return;
+        }
+        ApprovedDestinationStateId = ApprovalState;
+        //var (speed, lerp) = Owner.GetSpeedAndLerp(ApprovedDestinationStateId);
+        NavMeshObstacle o = Owner.Obstacle;
+        if (o.enabled && o.carving)
+        {
+            Owner.Obstacle.enabled = false;
+           // _timer.Add(new SetDestinationDelay(Time.deltaTime + Mathf.Epsilon, newDestination, path, SetDestination));
+            //  CoroutineRunner.Instance.StartCoroutine(DelayEnableroutine(path, newDestination, speed, lerp));
+            return;
+        }
+     //   SetDestination(path, newDestination, speed, lerp);
+    }
+   
     #endregion
 
 
@@ -188,26 +191,51 @@ public class FSMManager : FSMBase
 
     private void CheckRemainingDistance()
     {
-        if (!Owner.Agent.enabled) return;
-        if (Owner.Agent.hasPath && !Owner.Agent.pathPending)
+        //if (!Owner.Agent.enabled) return;
+        if (HasPathAndMoving())
         {
             bool reached = HasReachedDestination();
             if (DestinationReached == reached) return;
             DestinationReached = reached;
             if (DestinationReached)
             {
-                ResetAgent();
+                TryResetAgent();
                 
                 
                 bool isStaleDestination = ApprovedDestinationStateId != _currentStateId;
                 SendNotification(NotifyOwnerNPC.DestinationReached(_currentStateId, isStaleDestination));
 
             }
-
+            
         }
     }
 
-    private bool RemainingDistance(out float remaining)
+    protected bool HasPathAndMoving()
+    {
+        if (Owner.Agent == null || !Owner.Agent.enabled) return false;
+        return Owner.Agent.hasPath && !Owner.Agent.pathPending && !Owner.Agent.isStopped;
+    }
+
+    void NewChasetick(float remainingDistance)
+    {
+        if (DestinationReached) return;
+       
+        if (remainingDistance > Owner.SprintEnterDist) { SetSpeedTier(SpeedTier.Sprint); }
+        else if (remainingDistance < Owner.SprintExitDist) { SetSpeedTier(SpeedTier.Walk); }
+        else if (_speedTier == SpeedTier.Idle) SetSpeedTier(SpeedTier.Walk);
+
+    }
+  
+    protected override void ChaseTick(float dt)
+    {
+        if (!HasPathAndMoving()) return; 
+        float remainingDistance = RemainingDistance();
+
+    }
+
+    private float RemainingDistance() => Owner?.Agent?.remainingDistance ?? float.MaxValue;
+    
+    /*private bool RemainingDistance(out float remaining)
     {
         if (Owner.Agent == null || !Owner.Agent.enabled) { remaining = float.MaxValue; return false; }
         if (Owner.Agent.hasPath && !Owner.Agent.pathPending)
@@ -217,11 +245,11 @@ public class FSMManager : FSMBase
         }
             remaining = float.MaxValue;
             return false;
-    }
+    }*/
 
     private bool HasReachedDestination() => Owner.Agent.remainingDistance <= (Owner.Agent.stoppingDistance + 0.25f);
 
-    private void OnTick(float dt)
+    private void FSMTick(float dt)
     {
         if(Owner is NPCController c)
         {
@@ -242,7 +270,7 @@ public class FSMManager : FSMBase
 
             if (t.RemainingTime <= 0)
             {
-                t.OnDone?.Invoke(t.Path, t.Destination, t.AgentSpeed, t.Lerp);
+                t.OnDone?.Invoke(t.Path, t.Destination, t.SpeedTier);
                 _timer.RemoveAt(i);
                 i--;
                 continue;
@@ -261,18 +289,18 @@ public class FSMManager : FSMBase
         public float RemainingTime;
         public readonly Vector3 Destination;
         public readonly NavMeshPath Path;
-        public readonly float AgentSpeed;
-        public readonly float Lerp;
+        public readonly SpeedTier SpeedTier;
+        //public readonly float AgentSpeed;
+        //public readonly float Lerp;
 
-        public readonly Action<NavMeshPath, Vector3, float, float> OnDone;
+        public readonly Action<NavMeshPath, Vector3, SpeedTier> OnDone;
 
-        public SetDestinationDelay(float time, Vector3 dest, NavMeshPath p, float speed, float lerp, Action<NavMeshPath, Vector3, float, float> cb)
+        public SetDestinationDelay(float time, Vector3 dest, NavMeshPath p, SpeedTier tier, Action<NavMeshPath, Vector3, SpeedTier> cb)
         {
             RemainingTime = time;
             Destination = dest;
             Path = p;
-            AgentSpeed = speed;
-            Lerp = lerp;
+            SpeedTier = tier;
             OnDone = cb;
         }
     }
