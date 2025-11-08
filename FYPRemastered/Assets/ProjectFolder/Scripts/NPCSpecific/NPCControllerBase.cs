@@ -8,9 +8,9 @@ using UnityEngine.AI;
 [RequireComponent(typeof(NavMeshObstacle))]
 public abstract class NPCControllerBase : ComponentEvents, IFSMOwner
 {
-    protected FieldOfViewManager _fovhandler;
+   // protected FieldOfViewManager _fovhandler;
     [SerializeField] protected FieldOfViewParams _fovParams;
-    protected Action<bool> OnVisibilityCallback;
+   // protected Action<bool> OnVisibilityCallback;
     protected Action<bool> OnAimCheckCallback;
     protected Action<bool> OnMeleeRangeCheckCallback;
 
@@ -74,6 +74,7 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner
 
     public float SprintExitDist => throw new NotImplementedException();
 
+    #region Obsolete region
     public void OnDestinationFound(StateId id, Vector3 destination, NavMeshPath p)
     {
         if (id != _state.Id || destination == Vector3.zero) return;
@@ -89,21 +90,26 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner
                 newSpeed = SprintSpeed;
                 break;
             default:
-                FSM?.DestinationApproval(approved: false, p, destination, id, 0f, 10f);
+            //    FSM?.DestinationApproval(approved: false, p, destination, id, 0f, 10f);
                 return;
         }
         //SetAgentTargetSpeed(newSpeed, 2f);
-        FSM?.DestinationApproval(approved: true, p, destination, id, newSpeed, 2f);
+     //   FSM?.DestinationApproval(approved: true, p, destination, id, newSpeed, 2f);
     }
 
     public void DestinationReached(StateId reachedInState, bool isStale)
     {
-    
+
         if (isStale) return;
         if (reachedInState == StateId.Patrol)
             FSM?.LookAroundAndContinue();
         // Future logic here for Flee/ Search states
     }
+    #endregion
+
+
+
+
 
 
     public (Vector3, Vector3?) GetTargetablePositionAndForward()
@@ -134,11 +140,11 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner
 
         SetPrimaryToPlayer();
         SetNavMeshAgentParams();
-        OnVisibilityCallback = OnVisibilityGained;
+       
         OnAimCheckCallback = OnAimEnter;
         OnMeleeRangeCheckCallback = OnMeleeRangeEnter;
         
-        _fovhandler = new FieldOfViewManager(_fovParams, OnVisibilityCallback, OnAimCheckCallback, OnMeleeRangeCheckCallback, new AITraceComponent());
+       
 
         FSM = new FSMManager(this);
         // _fsmController = new FSMManager();
@@ -175,8 +181,6 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
-        
-        OnVisibilityCallback = null;
         OnAimCheckCallback = null;
         OnMeleeRangeCheckCallback = null;
         base.UnRegisterLocalEvents(OwnerEM);
@@ -209,7 +213,7 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner
       //   if (FSM == null) return;
 
         FSM?.Tick(Time.deltaTime);
-        IsMoving = !FSM?.DestinationReached ?? false;
+        IsMoving = FSM?.IsMoving() ?? false;
 
        // _fovhandler?.Tick();
     }

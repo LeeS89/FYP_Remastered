@@ -26,7 +26,7 @@ public interface IZoneSink
 {
     bool TryGetCurrentZone(out int zone);
 
-    bool TrySwitchZone();
+    bool TrySwitchPatrolZone();
 }
 
 public interface IWaypointRepository

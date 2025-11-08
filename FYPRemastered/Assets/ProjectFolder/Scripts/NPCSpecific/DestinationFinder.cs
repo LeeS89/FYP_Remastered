@@ -70,7 +70,7 @@ public class DestinationFinder : IDestinationResolver
     }
     
 
-    public bool TrySwitchZone() => false;
+    public bool TrySwitchPatrolZone() => false;
    
    
     public void TryChaseTarget(ITargetable target) { }

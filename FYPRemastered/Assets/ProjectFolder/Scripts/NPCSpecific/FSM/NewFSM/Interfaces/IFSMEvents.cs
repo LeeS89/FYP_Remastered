@@ -10,9 +10,9 @@ public interface IFSMEvents : ITickable, IZoneSink
     void TakeCover(StateId id);
     void FollowGroup(StateId id);
 
-
-    void DestinationApproval(bool approved, NavMeshPath path, Vector3 newDestination, StateId ApprovalState, float newAgentpeed, float lerp);
-    Action TryRepath { get; }
+    bool IsMoving();
+   // void DestinationApproval(bool approved, NavMeshPath path, Vector3 newDestination, StateId ApprovalState, float newAgentpeed, float lerp);
+    Action<StateId> TryRepath { get; }
 
     //void BeginSearch();
     void ExitState();

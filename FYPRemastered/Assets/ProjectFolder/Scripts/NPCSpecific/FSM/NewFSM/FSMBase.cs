@@ -4,7 +4,7 @@ using UnityEngine.AI;
 
 public abstract class FSMBase : IFSMEvents
 {
-    public Action TryRepath { get; private set; }
+    public Action<StateId> TryRepath { get; protected set; }
     public bool DestinationReached { get; protected set; } = true;
     public bool HasLOS { get; set; }
     public StateNotificationProvider Notification { get; set; }
@@ -14,9 +14,9 @@ public abstract class FSMBase : IFSMEvents
     
     public Action<float> LateTick { get; protected set; }
 
-    protected Action<float> OnChaseTick;
+    protected Action<float> OnDistanceTick;
 
-    protected virtual void ChaseTick(float dt) { }
+   
 
     public ITargetable PrimaryTarget { get; set; }
 
@@ -37,17 +37,17 @@ public abstract class FSMBase : IFSMEvents
     public abstract void BeginChase(StateId id);
     public abstract void BeginFlank(StateId id);
     public abstract void BeginPatrol(StateId id);
-    public abstract void DestinationApproval(bool approved, NavMeshPath path, Vector3 newDestination, StateId ApprovalState, float newAgentpeed, float lerp);
+  //  public abstract void DestinationApproval(bool approved, NavMeshPath path, Vector3 newDestination, StateId ApprovalState, float newAgentpeed, float lerp);
     public abstract void ExitState();
     public abstract void FollowGroup(StateId id);
     public abstract void TakeCover(StateId id);
-    protected abstract void SetDestination(NavMeshPath path, Vector3 destination, SpeedTier tier);
+    protected abstract void SetDestination(NavMeshPath path, Vector3 destination, StateId current);
     public abstract void OnPathRequestComplete(in PathResult result);
     
 
 
     public virtual void LookAroundAndContinue() { }
-    public virtual bool TrySwitchZone() => false;
+    public virtual bool TrySwitchPatrolZone() => false;
 
     protected void SendNotification(in NotifyOwnerNPC n) => Notification?.Invoke(n);
 
@@ -57,8 +57,8 @@ public abstract class FSMBase : IFSMEvents
         return _pathFinder.TryGetCurrentZone(out zone);
     }
 
-    
-
+    public bool IsMoving() => _speedTier != SpeedTier.Idle;
+   
     protected enum SpeedTier
     {
         Idle,
