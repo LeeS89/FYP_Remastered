@@ -11,7 +11,7 @@ public interface IFSMEvents : ITickable, IZoneSink
     void FollowGroup(StateId id);
 
     bool IsMoving();
-   // void DestinationApproval(bool approved, NavMeshPath path, Vector3 newDestination, StateId ApprovalState, float newAgentpeed, float lerp);
+  
     Action<StateId> TryRepath { get; }
 
     //void BeginSearch();
@@ -23,23 +23,19 @@ public interface IFSMEvents : ITickable, IZoneSink
 
     bool HasLOS { get; }
 
-  //  Action GetNext { get; }
-
+ 
     void LookAroundAndContinue();
-   // Transform Transform { get; }
+  
+   // StateNotificationProvider Notification { get; set; }
 
-    StateNotificationProvider Notification { get; set; }
-
+    void OnInstanceDestroyed();
    // bool CurrentZone(out uint zone);
 }
 
 public interface IFSMOwner : ITargetable
 {
-  //  Transform Transform { get; }
-
+ 
     ITargetable PrimaryTarget { get; }
-
-   // ITargetable GameObject { get; }
 
     uint CurrentStateId { get; set; }
 
@@ -60,15 +56,15 @@ public interface IFSMOwner : ITargetable
 
     void LogUnhandled(IntentStateBase state, NotifyOwnerNPC notification) { }
 
-    //  void SetAgentTargetSpeed(float speed = 0, float lerpSpeed = 10);
-
-   // (float, float) GetSpeedAndLerp(StateId id);
-
+  
     void DestinationReached(StateId reachedInState, bool isStale);
 
     void OnDestinationFound(StateId id, Vector3 destination, NavMeshPath path);
 
     void SwitchTo(IIntentState next) { }
+
+    void Notify(in NotifyOwnerNPC n);
+
     IFSMEvents FSM { get; }
 
     float SprintEnterDist { get; }

@@ -7,16 +7,10 @@ public abstract class FSMBase : IFSMEvents
     public Action<StateId> TryRepath { get; protected set; }
     public bool DestinationReached { get; protected set; } = true;
     public bool HasLOS { get; set; }
-    public StateNotificationProvider Notification { get; set; }
+  //  public StateNotificationProvider Notification { get; set; }
     protected event Action<float> OnTick;
-
     public void Tick(float dt) => OnTick?.Invoke(dt);
-    
     public Action<float> LateTick { get; protected set; }
-
-    protected Action<float> OnDistanceTick;
-
-   
 
     public ITargetable PrimaryTarget { get; set; }
 
@@ -34,22 +28,26 @@ public abstract class FSMBase : IFSMEvents
     protected float _targetSpeed = 0f;
     protected float _lerpSpeed = 0f;
 
+    // State enter/ Exit methods
     public abstract void BeginChase(StateId id);
     public abstract void BeginFlank(StateId id);
     public abstract void BeginPatrol(StateId id);
-  //  public abstract void DestinationApproval(bool approved, NavMeshPath path, Vector3 newDestination, StateId ApprovalState, float newAgentpeed, float lerp);
     public abstract void ExitState();
     public abstract void FollowGroup(StateId id);
     public abstract void TakeCover(StateId id);
+
+
+    // Pathfinding methods
     protected abstract void SetDestination(NavMeshPath path, Vector3 destination, StateId current);
     public abstract void OnPathRequestComplete(in PathResult result);
-    
 
 
+    // Patrol state specific methods
     public virtual void LookAroundAndContinue() { }
     public virtual bool TrySwitchPatrolZone() => false;
 
-    protected void SendNotification(in NotifyOwnerNPC n) => Notification?.Invoke(n);
+    // 
+  //  protected void SendNotification(in NotifyOwnerNPC n) => Notification?.Invoke(n);
 
     public bool TryGetCurrentZone(out int zone)
     {
@@ -58,7 +56,10 @@ public abstract class FSMBase : IFSMEvents
     }
 
     public bool IsMoving() => _speedTier != SpeedTier.Idle;
-   
+
+    public abstract void OnInstanceDestroyed();
+    
+
     protected enum SpeedTier
     {
         Idle,
@@ -66,4 +67,51 @@ public abstract class FSMBase : IFSMEvents
         Sprint
     }
     protected SpeedTier _speedTier = SpeedTier.Idle;
+
+    protected void SetSpeedTier(SpeedTier tier)
+    {
+        if (tier == _speedTier) return;
+        _speedTier = tier;
+        var (speed, lerp) = tier switch
+        {
+            SpeedTier.Idle => (0f, 10f),
+            SpeedTier.Walk => (Owner.WalkSpeed, 2f),
+            SpeedTier.Sprint => (Owner.SprintSpeed, 2f),
+            _ => (0f, 10f)
+        };
+
+        SetAgentTargetSpeed(speed, lerp);
+
+    }
+
+    protected void SetAgentTargetSpeed(float speed, float lerpSpeed)
+    => (_lerpSpeed, _targetSpeed) = (lerpSpeed, speed);
+
+    protected void ToggleAgent(bool setActive)
+    {
+        if (Owner.Agent.enabled == setActive) return;
+        Owner.Agent.enabled = setActive;
+    }
+
+    // Used when the Agent is currently carving
+    // After uncarving, this delays setting a new destination
+    // for 1 frame to give the NavMesh enough time to update
+    protected struct SetDestinationDelay
+    {
+        public float RemainingTime;
+        public readonly Vector3 Destination;
+        public readonly NavMeshPath Path;
+        public readonly StateId Current;
+
+        public readonly Action<NavMeshPath, Vector3, StateId> OnDone;
+
+        public SetDestinationDelay(float time, Vector3 dest, NavMeshPath p, StateId c, Action<NavMeshPath, Vector3, StateId> cb)
+        {
+            RemainingTime = time;
+            Destination = dest;
+            Path = p;
+            Current = c;
+            OnDone = cb;
+        }
+    }
 }

@@ -148,7 +148,7 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner
 
         FSM = new FSMManager(this);
         // _fsmController = new FSMManager();
-        FSM.Notification = OnNotification;
+        //FSM.Notification = OnNotification;
 
         base.RegisterLocalEvents(OwnerEM);
         RegisterGlobalEvents();
@@ -228,7 +228,7 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner
    
     public abstract void LogUnhandled(IntentStateBase state, StateNotification notification);
 
-    public abstract void OnNotification(in NotifyOwnerNPC n);
+    public abstract void Notify(in NotifyOwnerNPC n);
 
     public abstract void SwitchTo(IIntentState next);
 

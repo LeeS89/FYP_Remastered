@@ -71,6 +71,6 @@ public class NPCController : NPCControllerBase
         _state?.Enter(this);
     }
 
-    public override void OnNotification(in NotifyOwnerNPC n) => _state.Handle(this, n);
+    public override void Notify(in NotifyOwnerNPC n) => _state.Handle(this, n);
     
 }

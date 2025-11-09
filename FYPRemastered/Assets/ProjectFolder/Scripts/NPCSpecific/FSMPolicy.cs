@@ -66,7 +66,7 @@ public readonly struct StateNotification
         => new(NotificationKind.DestinationReached, destKind, id, false, Vector3.zero, forward);
 }
 
-public delegate void StateNotificationProvider(in NotifyOwnerNPC n);
+//public delegate void StateNotificationProvider(in NotifyOwnerNPC n);
 
 
 

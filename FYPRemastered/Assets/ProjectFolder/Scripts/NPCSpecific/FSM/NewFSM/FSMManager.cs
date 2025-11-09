@@ -14,9 +14,6 @@ public class FSMManager : FSMBase
     private Action OnPatrolReached;
     private Action OnChaseReached;
 
-
-
-
     public FSMManager(IFSMOwner owner)
     {
         if (owner == null)
@@ -31,14 +28,12 @@ public class FSMManager : FSMBase
         Owner = owner;
       
         _pathFinder = new DestinationFinder(this);
-        TryRepath = TryFindDestination;
-       // OnLookAroundComplete = BeginPatrol;
+        TryRepath = TryGetNextDestination;
         CancelOrContinueRoutine = HasSwitchedState;
         LookAroundAction = LookAround;
         RemainingDistanceAction = SetSpeedByDistance;
         OnPatrolReached = LookAroundAndContinue;
        
-        //  OnDistanceTick = RemainingDistanceAction;
         OnTick += TimerTicks;
         OnTick += ClassUpdate;
         LateTick = OnLateTick;
@@ -46,7 +41,7 @@ public class FSMManager : FSMBase
 
    
 
-    private void SetSpeedTier(SpeedTier tier)
+    /*private void SetSpeedTier(SpeedTier tier)
     {
         if (tier == _speedTier) return;
         _speedTier = tier;
@@ -60,19 +55,19 @@ public class FSMManager : FSMBase
 
         SetAgentTargetSpeed(speed, lerp);
 
-    }
+    }*/
 
-    public void ToggleAgent(bool setActive)
+  /*  public void ToggleAgent(bool setActive)
     {
         if (Owner.Agent.enabled == setActive) return;
         Owner.Agent.enabled = setActive;
-    }
+    }*/
 
     private void TryResetAgent()
     {
         SetSpeedTier(SpeedTier.Idle);
         Owner.Agent.ResetPath();
-       // if (_currentStateId == StateId.Patrol) return;
+        if (_currentStateId == StateId.Patrol) return;
         Owner.Agent.enabled = false;
         Owner.Obstacle.enabled = true;
     }
@@ -102,100 +97,6 @@ public class FSMManager : FSMBase
     #endregion
 
 
-
-    #region Obsolete Region
-    public void TrySetDestination(NavMeshPath path, Vector3 newDestination, StateId destinationState)
-    {
-        if (destinationState != _currentStateId) { SetSpeedTier(SpeedTier.Idle); return; }
-
-        NavMeshObstacle o = Owner.Obstacle;
-        if (o.enabled && o.carving)
-        {
-            Owner.Obstacle.enabled = false;
-            // _timer.Add(new SetDestinationDelay(Time.deltaTime + Mathf.Epsilon, newDestination, path, speed, lerp, SetDestination));
-            //  CoroutineRunner.Instance.StartCoroutine(DelayEnableroutine(path, newDestination, speed, lerp));
-            return;
-        }
-        //  SetDestination(path, newDestination, speed, lerp);
-    }
-
-   /* public override void DestinationApproval(bool approved, NavMeshPath path, Vector3 newDestination, StateId ApprovalState, float speed, float lerp)
-    {
-        if (!approved)
-        {
-            SetAgentTargetSpeed(speed, lerp);
-            return;
-        }
-        ApprovedDestinationStateId = ApprovalState;
-        //var (speed, lerp) = Owner.GetSpeedAndLerp(ApprovedDestinationStateId);
-        NavMeshObstacle o = Owner.Obstacle;
-        if (o.enabled && o.carving)
-        {
-            Owner.Obstacle.enabled = false;
-            // _timer.Add(new SetDestinationDelay(Time.deltaTime + Mathf.Epsilon, newDestination, path, SetDestination));
-            //  CoroutineRunner.Instance.StartCoroutine(DelayEnableroutine(path, newDestination, speed, lerp));
-            return;
-        }
-        //   SetDestination(path, newDestination, speed, lerp);
-    }*/
-
-    private SpeedTier ResolveNewSpeed(StateId id, bool destinationreached)
-    {
-        SpeedTier newtier;
-        switch (id)
-        {
-            case StateId.Patrol or StateId.Flank:
-                newtier = SpeedTier.Walk;
-                break;
-            case StateId.Cover or StateId.Flee or StateId.Follow:
-                newtier = SpeedTier.Sprint;
-                break;
-            case StateId.Chase:
-                newtier = SpeedTier.Sprint;
-                break;
-            default:
-                newtier = SpeedTier.Idle;
-                break;
-        }
-        return newtier;
-    }
-
-    private void CheckRemainingDistanceOld()
-    {
-        //if (!Owner.Agent.enabled) return;
-        if (HasPathAndMoving())
-        {
-            bool reached = HasReachedDestination();
-            if (DestinationReached == reached) return;
-            DestinationReached = reached;
-            if (DestinationReached)
-            {
-                TryResetAgent();
-
-
-               // bool isStaleDestination = ApprovedDestinationStateId != _currentStateId;
-              //  SendNotification(NotifyOwnerNPC.DestinationReached(_currentStateId, isStaleDestination));
-
-            }
-
-        }
-    }
-
-
-    protected bool HasPathAndMoving()
-    {
-        if (Owner.Agent == null || !Owner.Agent.enabled) return false;
-        return Owner.Agent.hasPath && !Owner.Agent.pathPending && !Owner.Agent.isStopped;
-    }
-
-
-
-
-    private float RemainingDistance() => Owner?.Agent?.remainingDistance ?? float.MaxValue;
-    private bool HasReachedDestination() => Owner.Agent.remainingDistance <= (Owner.Agent.stoppingDistance + 0.25f);
-    #endregion
-
-
     #region Path Received & Validation
     public override void OnPathRequestComplete(in PathResult result)
     {
@@ -205,12 +106,11 @@ public class FSMManager : FSMBase
         StateId id = result.Id;
 
         if (result.Reason == PathCheckReason.ProbePathToPrimaryTarget && pathFound)
-        { SendNotification(NotifyOwnerNPC.PathToPrimaryAvailable(result.Id)); return; }
+        { Owner?.Notify(NotifyOwnerNPC.PathToPrimaryAvailable(result.Id)); return; }
     
-        if (!result.PathFound) { SendNotification(NotifyOwnerNPC.NoAvailablePath(_currentStateId)); Debug.LogError("NO Path Found!!"); return; }
+        if (!result.PathFound) { Owner.Notify(NotifyOwnerNPC.NoAvailablePath(_currentStateId)); Debug.LogError("NO Path Found!!"); return; }
         else
         {
-
             _currentDestination = result.Destination;
             _currentDestinaationForward = result.Forward;
             NavMeshObstacle o = Owner?.Obstacle;
@@ -221,8 +121,6 @@ public class FSMManager : FSMBase
                 return;
             }
             SetDestination(result.Path, _currentDestination, id);
-           // SendNotification(NotifyOwnerNPC.DestinationFound(result.Id, _currentDestination, result.Path));
-
         }
 
     }
@@ -233,8 +131,8 @@ public class FSMManager : FSMBase
 
 
     #region Tick Region
-    private void SetAgentTargetSpeed(float speed, float lerpSpeed)
-    => (_lerpSpeed, _targetSpeed) = (lerpSpeed, speed);
+   /* private void SetAgentTargetSpeed(float speed, float lerpSpeed)
+    => (_lerpSpeed, _targetSpeed) = (lerpSpeed, speed);*/
 
     private void UpdateAgentSpeed()
     {
@@ -252,18 +150,17 @@ public class FSMManager : FSMBase
         if (Mathf.Approximately(Owner.Agent.speed, _targetSpeed)) Owner.Agent.speed = _targetSpeed;
     }
 
-    
 
-    
 
     public void ClassUpdate(float dt)
     {
+
         if (!_hasValidDestination || Owner.Agent == null) return;
         StateId current = _currentStateId;
         NavMeshAgent a = Owner.Agent;
 
         if (a.pathPending) return;
-        // If Unity is recomputing, don’t judge this frame
+
         if (!a.enabled || !a.isOnNavMesh)
         {
             _hasValidDestination = false;
@@ -272,7 +169,7 @@ public class FSMManager : FSMBase
             return;
         }
 
-        // Hard blocked? (lost/partial/invalid/off-mesh)
+  
         if (!a.hasPath || a.pathStatus != NavMeshPathStatus.PathComplete)
         {
             _hasValidDestination = false;
@@ -281,17 +178,15 @@ public class FSMManager : FSMBase
 
             return;
         }
-      
-        var dist = a.remainingDistance;
 
-        // guard weird values
-        if (float.IsInfinity(dist) || float.IsNaN(dist)) return;
+        var dist = a.remainingDistance;
+       
+        if (/*float.IsInfinity(dist) || */float.IsNaN(dist)) return;
 
         float stopThreshold = (a.stoppingDistance + 0.25f);
         if (dist <= stopThreshold)
         {
-            // Per state Reached logic Action call here
-            _hasValidDestination = false;           // reached
+            _hasValidDestination = false;
             TryResetAgent(); // Resets path and Sets speed == 0f
             OnDestinationReached?.Invoke();
             return;
@@ -313,9 +208,9 @@ public class FSMManager : FSMBase
 
     }
 
+    private void OnLateTick(float dt) => UpdateAgentSpeed();
 
 
-    
 
     private void TimerTicks(float dt)
     {
@@ -329,8 +224,7 @@ public class FSMManager : FSMBase
                 SetAgentTargetSpeed(Owner.WalkSpeed, 2f);
             }
         }
-      //  CheckRemainingDistanceOld();
-     
+    
         for (int i = 0; i < _timer.Count; i++)
         {
             var t = _timer[i];
@@ -347,38 +241,23 @@ public class FSMManager : FSMBase
         }
     }
 
-    private void OnLateTick(float dt) => UpdateAgentSpeed();
+   
 
-    // Used when the Agent is currently carving
-    // After uncarving, this delays setting a new destination
-    // for 1 frame to give the NavMesh enough time to update
-    private struct SetDestinationDelay
-    {
-        public float RemainingTime;
-        public readonly Vector3 Destination;
-        public readonly NavMeshPath Path;
-        public readonly StateId Current;
-
-        public readonly Action<NavMeshPath, Vector3, StateId> OnDone;
-
-        public SetDestinationDelay(float time, Vector3 dest, NavMeshPath p, StateId c, Action<NavMeshPath, Vector3, StateId> cb)
-        {
-            RemainingTime = time;
-            Destination = dest;
-            Path = p;
-            Current = c;
-            OnDone = cb;
-        }
-    }
+    
     #endregion
 
 
     #region Patrol Region
     private Func<StateId, bool> CancelOrContinueRoutine;
     private Action LookAroundAction;
-   // private Action<StateId> OnLookAroundComplete;
+  
+    private void RoutineEnd(StateId current)
+    {
+        CancelRunningCoroutine();
+        TryGetNextDestination(current);
+    }
 
-    private void TryFindDestination(StateId current)
+    private void TryGetNextDestination(StateId current)
     {
         if (current != _currentStateId) return;
 
@@ -396,6 +275,7 @@ public class FSMManager : FSMBase
         _pathFinder?.TryGetDestination(request);
     }
 
+
     public override void BeginPatrol(StateId id)
     {
         OnDestinationReached = OnPatrolReached;
@@ -404,15 +284,12 @@ public class FSMManager : FSMBase
        
         if (_currentStateId != id) _currentStateId = id;
         TryRepath?.Invoke(id);
-        // var request = ValidateDestination.GetPatrolPoint(id, Owner, Owner.Path);
-        // _pathFinder?.TryGetDestination(request);
-
     }
 
     public override void LookAroundAndContinue()
     {
         if (_runningRoutine == null)
-            _runningRoutine = this.BeginPatrolRoutine(_currentStateId, Owner.Transform, Owner.MinWaitTime, Owner.MaxWaitTime, _currentDestinaationForward, LookAroundAction, CancelOrContinueRoutine, TryRepath);
+            _runningRoutine = this.BeginPatrolRoutine(_currentStateId, Owner.Transform, Owner.MinWaitTime, Owner.MaxWaitTime, _currentDestinaationForward, LookAroundAction, CancelOrContinueRoutine, RoutineEnd);
             //_runningRoutine = CoroutineRunner.Instance.StartCoroutine(PatrolWaitRoutine(_currentPatrolPoinfForward));
     }
   
@@ -475,5 +352,17 @@ public class FSMManager : FSMBase
         CancelRunningCoroutine();
         _pathFinder?.CancelAll();
     }
-    
+
+    public override void OnInstanceDestroyed()
+    {
+        TryRepath = null;
+        CancelOrContinueRoutine = null;
+        LookAroundAction = null;
+        RemainingDistanceAction = null;
+        OnPatrolReached = null;
+
+        OnTick -= TimerTicks;
+        OnTick -= ClassUpdate;
+        LateTick = null;
+    }
 }
