@@ -45,9 +45,9 @@ public interface IFSMOwner : ITargetable
 
     NavMeshObstacle Obstacle { get; }
 
-    float MaxWaitTime { get; }
+    float MaxPatrolPointWaitTime { get; }
 
-    float MinWaitTime { get; }
+    float MinPatrolPointWaitTime { get; }
 
     NavMeshPath Path { get; }
 
@@ -72,7 +72,13 @@ public interface IFSMOwner : ITargetable
 
 }
 
-public interface IFieldOfViewOwner
+public interface IFieldOfViewOwner : IFSMEvents
 {
     void FieldOfViewSweepResult(FOVResult result, bool withinAttackAngles);
+
+}
+
+public interface IFieldOfViewRunner : ITickable
+{
+    void SetFOVSweepFrequency(AlertPhase phase);
 }

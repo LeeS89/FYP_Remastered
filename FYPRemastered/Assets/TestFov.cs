@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEditor;
 using UnityEngine;
@@ -38,7 +39,7 @@ public class TestFov : MonoBehaviour, IFieldOfViewOwner
     // Update is called once per frame
     void Update()
     {
-        _fovHandler?.Tick();
+        _fovHandler?.Tick(Time.deltaTime);
     }
 
     public void FieldOfViewSweepResult(FOVResult result, bool withinAttackAngles)
@@ -52,7 +53,13 @@ public class TestFov : MonoBehaviour, IFieldOfViewOwner
     public float _horizontalAngleMultiplier;
     public float _verticalAngleMultiplier;
 
-   
+    public Action<StateId> TryRepath => throw new NotImplementedException();
+
+    public bool DestinationReached => throw new NotImplementedException();
+
+    public bool HasLOS => throw new NotImplementedException();
+
+    public Action<float> LateTick => throw new NotImplementedException();
 
     void OnDrawGizmos()
     {
@@ -100,5 +107,70 @@ public class TestFov : MonoBehaviour, IFieldOfViewOwner
 
 
 
+    }
+
+    public void BeginPatrol(StateId id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void BeginChase(StateId id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void BeginFlank(StateId id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void TakeCover(StateId id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void FollowGroup(StateId id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool IsMoving()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void ExitState()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void OnPathRequestComplete(in PathResult result)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void LookAroundAndContinue()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void OnInstanceDestroyed()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Tick(float dt)
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool TryGetCurrentZone(out int zone)
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool TrySwitchPatrolZone()
+    {
+        throw new NotImplementedException();
     }
 }

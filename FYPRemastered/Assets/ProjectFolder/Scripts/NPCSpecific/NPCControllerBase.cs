@@ -60,9 +60,9 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner
     [Min(0.5f)]
     [SerializeField] protected float _minWaitAtSeconds;
 
-    public float MaxWaitTime => _maxWaitAtSeconds;
+    public float MaxPatrolPointWaitTime => _maxWaitAtSeconds;
 
-    public float MinWaitTime => _minWaitAtSeconds;
+    public float MinPatrolPointWaitTime => _minWaitAtSeconds;
 
     public Transform Transform => _parentTransform == null ? transform : _parentTransform;
 
@@ -119,6 +119,8 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner
      => _parentTransform == null ? transform.position : _parentTransform.position;
 
 
+    private IDestinationResolver _destResolver;
+    private IFieldOfViewRunner _fovRunner;
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
@@ -146,7 +148,7 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner
         
        
 
-        FSM = new FSMManager(this);
+        FSM = new FSMManager(owner: this, resolver: _destResolver, runner: _fovRunner);
         // _fsmController = new FSMManager();
         //FSM.Notification = OnNotification;
 

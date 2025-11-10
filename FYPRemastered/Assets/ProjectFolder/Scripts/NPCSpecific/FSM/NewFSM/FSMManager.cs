@@ -13,8 +13,9 @@ public class FSMManager : FSMBase
     private Action OnDestinationReached;
     private Action OnPatrolReached;
     private Action OnChaseReached;
+    private FOVResult _currentFOVResult = FOVResult.TargetNotSeen;
 
-    public FSMManager(IFSMOwner owner)
+    public FSMManager(IFSMOwner owner, IDestinationResolver resolver, IFieldOfViewRunner runner)
     {
         if (owner == null)
         {
@@ -26,8 +27,9 @@ public class FSMManager : FSMBase
         }
 
         Owner = owner;
-      
-        _pathFinder = new DestinationFinder(this);
+
+        _pathFinder = resolver;//new DestinationFinder(this);
+        _fovHandler = runner;// new NPCFieldOfViewHandler(this, fovParams);
         TryRepath = TryGetNextDestination;
         CancelOrContinueRoutine = HasSwitchedState;
         LookAroundAction = LookAround;
@@ -39,30 +41,7 @@ public class FSMManager : FSMBase
         LateTick = OnLateTick;
     }
 
-   
-
-    /*private void SetSpeedTier(SpeedTier tier)
-    {
-        if (tier == _speedTier) return;
-        _speedTier = tier;
-        var (speed, lerp) = tier switch
-        {
-            SpeedTier.Idle => (0f, 10f),
-            SpeedTier.Walk => (Owner.WalkSpeed, 2f),
-            SpeedTier.Sprint => (Owner.SprintSpeed, 2f),
-            _=> (0f, 10f)
-        };
-
-        SetAgentTargetSpeed(speed, lerp);
-
-    }*/
-
-  /*  public void ToggleAgent(bool setActive)
-    {
-        if (Owner.Agent.enabled == setActive) return;
-        Owner.Agent.enabled = setActive;
-    }*/
-
+  
     private void TryResetAgent()
     {
         SetSpeedTier(SpeedTier.Idle);
@@ -73,7 +52,11 @@ public class FSMManager : FSMBase
     }
 
     #region Destination Region
-  
+
+    public override void FieldOfViewSweepResult(FOVResult result, bool withinAttackAngles)
+    {
+        
+    }
 
    
 
@@ -289,7 +272,7 @@ public class FSMManager : FSMBase
     public override void LookAroundAndContinue()
     {
         if (_runningRoutine == null)
-            _runningRoutine = this.BeginPatrolRoutine(_currentStateId, Owner.Transform, Owner.MinWaitTime, Owner.MaxWaitTime, _currentDestinaationForward, LookAroundAction, CancelOrContinueRoutine, RoutineEnd);
+            _runningRoutine = this.BeginPatrolRoutine(_currentStateId, Owner.Transform, Owner.MinPatrolPointWaitTime, Owner.MaxPatrolPointWaitTime, _currentDestinaationForward, LookAroundAction, CancelOrContinueRoutine, RoutineEnd);
             //_runningRoutine = CoroutineRunner.Instance.StartCoroutine(PatrolWaitRoutine(_currentPatrolPoinfForward));
     }
   

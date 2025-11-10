@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.AI;
 
-public abstract class FSMBase : IFSMEvents
+public abstract class FSMBase : IFieldOfViewOwner
 {
     public Action<StateId> TryRepath { get; protected set; }
     public bool DestinationReached { get; protected set; } = true;
@@ -14,7 +14,7 @@ public abstract class FSMBase : IFSMEvents
 
     public ITargetable PrimaryTarget { get; set; }
 
-    
+    protected IFieldOfViewRunner _fovHandler;
 
     protected StateId _currentStateId = StateId.None;
 
@@ -93,6 +93,8 @@ public abstract class FSMBase : IFSMEvents
         Owner.Agent.enabled = setActive;
     }
 
+    public virtual void FieldOfViewSweepResult(FOVResult result, bool withinAttackAngles) { }
+   
     // Used when the Agent is currently carving
     // After uncarving, this delays setting a new destination
     // for 1 frame to give the NavMesh enough time to update
@@ -114,4 +116,5 @@ public abstract class FSMBase : IFSMEvents
             OnDone = cb;
         }
     }
+
 }

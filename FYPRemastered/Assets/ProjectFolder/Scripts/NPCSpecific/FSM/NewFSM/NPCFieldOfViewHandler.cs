@@ -1,7 +1,8 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NPCFieldOfViewHandler
+public class NPCFieldOfViewHandler : IFieldOfViewRunner
 {
     private IFieldOfViewOwner _owner;
     private FOVParameters _params;
@@ -33,16 +34,6 @@ public class NPCFieldOfViewHandler
     }
 
 
-    public void Tick()
-    {
-        if (Time.time >= _nextCheckTime)
-        {
-            _nextCheckTime = Time.time + _fovSweepFrequency;
-            RunFOVSweep();
-        }
-    }
-
-
     private float GetCheckFrequency(AlertPhase phase)
     {
         return phase switch
@@ -55,7 +46,7 @@ public class NPCFieldOfViewHandler
         };
     }
 
-    public void OverrideFOVFrequency(AlertPhase phase)
+    public void SetFOVSweepFrequency(AlertPhase phase)
     {
         if (_currentAlertPhase == phase) return;
         _currentAlertPhase = phase;
@@ -80,14 +71,14 @@ public class NPCFieldOfViewHandler
 
         if (detectedCount == 0)
         {
-            _owner?.FieldOfViewSweepResult(result, inShootAngle);
+            _owner?.FieldOfViewSweepResult(FOVResult.TargetNotSeen, inShootAngle);
             TryChangeFOVFrequency(AlertPhase.Idle);
             return;
         }
 
         TryChangeFOVFrequency(AlertPhase.Heightened);
 
-        for(int i = 0; i < detectedCount; i++)
+        for (int i = 0; i < detectedCount; i++)
         {
             int hitCount;
             RunEvaluationPhase(_proximityDetectionResults[i], out hitCount, _params.addTargetFallbackPoints, targetMask);
@@ -95,15 +86,14 @@ public class NPCFieldOfViewHandler
             if (hitCount == 0) continue;
             result = RunTargetingPhase(hitCount, _params.blockingMask, targetMask);
 
-            if(result == FOVResult.TargetSeen)
-            {
-                inShootAngle = _params.useShootingAngleRestriction == false ? true :
-                    TargetWithinAimThreshold(_params.fovOrigin, _proximityDetectionResults[i].ClosestPointOnBounds(_params.fovOrigin.position), _params.halfHorizontalShootAngle);
+            if (result != FOVResult.TargetSeen) continue;
 
-                _owner?.FieldOfViewSweepResult(result, inShootAngle);
-                return;
-            }
-            
+            inShootAngle = !_params.useShootingAngleRestriction ? true :
+                TargetWithinAimThreshold(_params.fovOrigin, _proximityDetectionResults[i].ClosestPointOnBounds(_params.fovOrigin.position), _params.halfHorizontalShootAngle);
+
+            _owner?.FieldOfViewSweepResult(result, inShootAngle);
+            return;
+
         }
         _owner?.FieldOfViewSweepResult(FOVResult.TargetNotSeen, false);
     }
@@ -137,10 +127,22 @@ public class NPCFieldOfViewHandler
             return FOVResult.TargetSeen;
         }
 
-
         return FOVResult.TargetNotSeen;
     }
     private List<Vector3> _samplePoints = new(5);
+
+    public Action<float> LateTick { get; private set; } // Not used in class
+
+    public void Tick(float dt)
+    {
+        if (Time.time >= _nextCheckTime)
+        {
+            _nextCheckTime = Time.time + _fovSweepFrequency;
+            RunFOVSweep();
+        }
+    }
+
+
     private void RunEvaluationPhase(Collider targetCollider, out int hitCount, bool addFallbackPoints, LayerMask targetMask)
     {
         Vector3 closest = targetCollider.ClosestPointOnBounds(_params.fovOrigin.position);
@@ -210,6 +212,8 @@ public class NPCFieldOfViewHandler
 
         return count;
     }
+
+    
 }
 
 
