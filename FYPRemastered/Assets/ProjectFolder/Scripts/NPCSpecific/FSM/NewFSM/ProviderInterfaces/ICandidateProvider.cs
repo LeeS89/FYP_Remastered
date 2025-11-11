@@ -16,6 +16,8 @@ public interface IDestinationResolver : IZoneSink
     /*bool TryGetWaypointZone(out uint zone);
 
     bool TrySwitchWaypoints();*/
+    DestinationRequestCallback Callback { get; set; }
+
     void CancelAll();
 
     void TryGetDestination(in ValidateDestination req);

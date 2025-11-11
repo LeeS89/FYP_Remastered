@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class NPCFieldOfViewHandler : IFieldOfViewRunner
 {
-    private IFieldOfViewOwner _owner;
+  //  private IFieldOfViewOwner _owner;
     private FOVParameters _params;
     private AlertPhase _currentAlertPhase = AlertPhase.Idle;
     private float _fovSweepFrequency;
@@ -15,7 +15,7 @@ public class NPCFieldOfViewHandler : IFieldOfViewRunner
    
 
 
-    public NPCFieldOfViewHandler(IFieldOfViewOwner owner, FOVParameters fovParams)
+    public NPCFieldOfViewHandler(FOVParameters fovParams)
     {
         if(fovParams == null)
         {
@@ -25,7 +25,7 @@ public class NPCFieldOfViewHandler : IFieldOfViewRunner
             fovParams = new FOVParameters();
         }
 
-        _owner = owner;
+      //  _owner = owner;
         _params = fovParams;
         _evaluationHitPoints = new Vector3[_params.maxFovTargets];
         _proximityDetectionResults = new Collider[_params.maxFovTargets];
@@ -71,7 +71,8 @@ public class NPCFieldOfViewHandler : IFieldOfViewRunner
 
         if (detectedCount == 0)
         {
-            _owner?.FieldOfViewSweepResult(FOVResult.TargetNotSeen, inShootAngle);
+            OnFOVSweepComplete?.Invoke(FOVResult.TargetNotSeen, inShootAngle);
+           // _owner?.FieldOfViewSweepResult(FOVResult.TargetNotSeen, inShootAngle);
             TryChangeFOVFrequency(AlertPhase.Idle);
             return;
         }
@@ -91,12 +92,15 @@ public class NPCFieldOfViewHandler : IFieldOfViewRunner
             inShootAngle = !_params.useShootingAngleRestriction ? true :
                 TargetWithinAimThreshold(_params.fovOrigin, _proximityDetectionResults[i].ClosestPointOnBounds(_params.fovOrigin.position), _params.halfHorizontalShootAngle);
 
-            _owner?.FieldOfViewSweepResult(result, inShootAngle);
+            OnFOVSweepComplete?.Invoke(result, inShootAngle);
+           // _owner?.FieldOfViewSweepResult(result, inShootAngle);
             return;
 
         }
-        _owner?.FieldOfViewSweepResult(FOVResult.TargetNotSeen, false);
+        OnFOVSweepComplete?.Invoke(FOVResult.TargetNotSeen, false);
+       // _owner?.FieldOfViewSweepResult(FOVResult.TargetNotSeen, false);
     }
+    public Action<FOVResult, bool> OnFOVSweepComplete { get; set; }
 
     public bool TargetWithinAimThreshold(Transform origin, Vector3 targetPosition, float halfAngle, bool useLocalUp = true)
     {
@@ -132,6 +136,7 @@ public class NPCFieldOfViewHandler : IFieldOfViewRunner
     private List<Vector3> _samplePoints = new(5);
 
     public Action<float> LateTick { get; private set; } // Not used in class
+   
 
     public void Tick(float dt)
     {

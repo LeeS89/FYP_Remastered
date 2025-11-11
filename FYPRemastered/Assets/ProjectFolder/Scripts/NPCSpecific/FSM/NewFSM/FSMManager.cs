@@ -15,9 +15,9 @@ public class FSMManager : FSMBase
     private Action OnChaseReached;
     private FOVResult _currentFOVResult = FOVResult.TargetNotSeen;
 
-    public FSMManager(IFSMOwner owner, IDestinationResolver resolver, IFieldOfViewRunner runner)
+    public FSMManager(IFSMData data, IFSMNotifications notify, IDestinationResolver resolver, IFieldOfViewRunner runner)
     {
-        if (owner == null)
+        if (data == null)
         {
 #if UNITY_EDITOR
             Debug.LogError("Must Pass a valid FSMOwner");
@@ -26,10 +26,12 @@ public class FSMManager : FSMBase
 
         }
 
-        Owner = owner;
-
+        _ownerData = data;
+        _ownerNotifications = notify;
         _pathFinder = resolver;//new DestinationFinder(this);
         _fovHandler = runner;// new NPCFieldOfViewHandler(this, fovParams);
+
+        _pathFinder.Callback = OnPathRequestComplete;// New
         TryRepath = TryGetNextDestination;
         CancelOrContinueRoutine = HasSwitchedState;
         LookAroundAction = LookAround;
@@ -45,10 +47,10 @@ public class FSMManager : FSMBase
     private void TryResetAgent()
     {
         SetSpeedTier(SpeedTier.Idle);
-        Owner.Agent.ResetPath();
+        _ownerData.Agent.ResetPath();
         if (_currentStateId == StateId.Patrol) return;
-        Owner.Agent.enabled = false;
-        Owner.Obstacle.enabled = true;
+        _ownerData.Agent.enabled = false;
+        _ownerData.Obstacle.enabled = true;
     }
 
     #region Destination Region
@@ -65,8 +67,8 @@ public class FSMManager : FSMBase
     {
         if (current != _currentStateId) return;
         ToggleAgent(setActive: true);
-        if (Owner.Agent.SetPath(path) ||
-            Owner.Agent.SetDestination(destination)) _hasValidDestination = true;
+        if (_ownerData.Agent.SetPath(path) ||
+            _ownerData.Agent.SetDestination(destination)) _hasValidDestination = true;
         else
         {
 #if UNITY_EDITOR
@@ -89,17 +91,17 @@ public class FSMManager : FSMBase
         StateId id = result.Id;
 
         if (result.Reason == PathCheckReason.ProbePathToPrimaryTarget && pathFound)
-        { Owner?.Notify(NotifyOwnerNPC.PathToPrimaryAvailable(result.Id)); return; }
+        { _ownerNotifications?.Notify(NotifyOwnerNPC.PathToPrimaryAvailable(result.Id)); return; }
     
-        if (!result.PathFound) { Owner.Notify(NotifyOwnerNPC.NoAvailablePath(_currentStateId)); Debug.LogError("NO Path Found!!"); return; }
+        if (!result.PathFound) { _ownerNotifications?.Notify(NotifyOwnerNPC.NoAvailablePath(_currentStateId)); Debug.LogError("NO Path Found!!"); return; }
         else
         {
             _currentDestination = result.Destination;
             _currentDestinaationForward = result.Forward;
-            NavMeshObstacle o = Owner?.Obstacle;
+            NavMeshObstacle o = _ownerData?.Obstacle;
             if (o !=null && o.enabled && o.carving)
             {
-                Owner.Obstacle.enabled = false;
+                _ownerData.Obstacle.enabled = false;
                 _timer.Add(new SetDestinationDelay(Time.deltaTime + Mathf.Epsilon, _currentDestination, result.Path, id, SetDestination));
                 return;
             }
@@ -124,13 +126,13 @@ public class FSMManager : FSMBase
         float rate = (0.5f > 0f) ? Mathf.Max(0.01f, delta / 0.5f) : float.PositiveInfinity;
         a.speed = Mathf.MoveTowards(a.speed, _targetSpeed, rate * Time.deltaTime);*/
 
-        if (Owner.Agent == null) return;
-        float smoothedSpeed = Mathf.Lerp(Owner.Agent.speed, _targetSpeed, _lerpSpeed * Time.deltaTime);
-        Owner.Agent.speed = smoothedSpeed;
+        if (_ownerData.Agent == null) return;
+        float smoothedSpeed = Mathf.Lerp(_ownerData.Agent.speed, _targetSpeed, _lerpSpeed * Time.deltaTime);
+        _ownerData.Agent.speed = smoothedSpeed;
 
-        float _currentSpeed = Owner.Agent.speed;
+        float _currentSpeed = _ownerData.Agent.speed;
 
-        if (Mathf.Approximately(Owner.Agent.speed, _targetSpeed)) Owner.Agent.speed = _targetSpeed;
+        if (Mathf.Approximately(_ownerData.Agent.speed, _targetSpeed)) _ownerData.Agent.speed = _targetSpeed;
     }
 
 
@@ -138,9 +140,9 @@ public class FSMManager : FSMBase
     public void ClassUpdate(float dt)
     {
 
-        if (!_hasValidDestination || Owner.Agent == null) return;
+        if (!_hasValidDestination || _ownerData.Agent == null) return;
         StateId current = _currentStateId;
-        NavMeshAgent a = Owner.Agent;
+        NavMeshAgent a = _ownerData.Agent;
 
         if (a.pathPending) return;
 
@@ -180,12 +182,12 @@ public class FSMManager : FSMBase
 
     void SetSpeedByDistance(float remainingDistance)
     {
-        if (Owner.Agent == null || Owner.Agent.isStopped) return;
+        if (_ownerData.Agent == null || _ownerData.Agent.isStopped) return;
 
         if (_usesSpeedByDistance)
         {
-            if (remainingDistance > Owner.SprintEnterDist) { SetSpeedTier(SpeedTier.Sprint); }
-            else if (remainingDistance < Owner.SprintExitDist) { SetSpeedTier(SpeedTier.Walk); }
+            if (remainingDistance > _ownerData.SprintEnterDist) { SetSpeedTier(SpeedTier.Sprint); }
+            else if (remainingDistance < _ownerData.SprintExitDist) { SetSpeedTier(SpeedTier.Walk); }
         }
         else SetSpeedTier(SpeedTier.Walk);
 
@@ -197,14 +199,14 @@ public class FSMManager : FSMBase
 
     private void TimerTicks(float dt)
     {
-        if(Owner is NPCController c)
+        if(_ownerData is NPCController c)
         {
             if (c.TestSprint)
             {
-                SetAgentTargetSpeed(Owner.SprintSpeed, 2f);
+                SetAgentTargetSpeed(_ownerData.SprintSpeed, 2f);
             }else if (c.TestWalk)
             {
-                SetAgentTargetSpeed(Owner.WalkSpeed, 2f);
+                SetAgentTargetSpeed(_ownerData.WalkSpeed, 2f);
             }
         }
     
@@ -249,7 +251,7 @@ public class FSMManager : FSMBase
         switch (current)
         {
             case StateId.Patrol:
-                request = ValidateDestination.GetPatrolPoint(StateId.Patrol, Owner, Owner.Path);
+                request = ValidateDestination.GetPatrolPoint(StateId.Patrol, _ownerData, _ownerData.Path);
                 break;
             default:
                 return;
@@ -272,7 +274,7 @@ public class FSMManager : FSMBase
     public override void LookAroundAndContinue()
     {
         if (_runningRoutine == null)
-            _runningRoutine = this.BeginPatrolRoutine(_currentStateId, Owner.Transform, Owner.MinPatrolPointWaitTime, Owner.MaxPatrolPointWaitTime, _currentDestinaationForward, LookAroundAction, CancelOrContinueRoutine, RoutineEnd);
+            _runningRoutine = this.BeginPatrolRoutine(_currentStateId, _ownerData.Transform, _ownerData.MinPatrolPointWaitTime, _ownerData.MaxPatrolPointWaitTime, _currentDestinaationForward, LookAroundAction, CancelOrContinueRoutine, RoutineEnd);
             //_runningRoutine = CoroutineRunner.Instance.StartCoroutine(PatrolWaitRoutine(_currentPatrolPoinfForward));
     }
   
@@ -286,9 +288,9 @@ public class FSMManager : FSMBase
         }
         return true;
     }
-    
 
-    private void LookAround() => Owner.OwnerEM.TriggerAnimation(AnimationCue.Look);
+    // Change to Action
+    private void LookAround() { }//=> Owner.OwnerEM.TriggerAnimation(AnimationCue.Look);
 
     private void CancelRunningCoroutine()
     {

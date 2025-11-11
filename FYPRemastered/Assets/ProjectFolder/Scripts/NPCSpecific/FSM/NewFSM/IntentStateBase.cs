@@ -26,8 +26,8 @@ public abstract class IntentStateBase : IIntentState
     public virtual void Handle(IFSMOwner self, NotifyOwnerNPC n)
     {
        // if (n.Kind == NotificationKind.DestinationReached) self.DestinationReached(n.Id, n.HasReachedStaleDestination);
-        if (n.Kind == NotificationKind.DestinationFound) self.OnDestinationFound(n.Id, n.Destination, n.Path); // Obsolete line
-        else
+       // if (n.Kind == NotificationKind.DestinationFound) self.OnDestinationFound(n.Id, n.Destination, n.Path); // Obsolete line
+       //else
             self.LogUnhandled(this, n);
     }
         

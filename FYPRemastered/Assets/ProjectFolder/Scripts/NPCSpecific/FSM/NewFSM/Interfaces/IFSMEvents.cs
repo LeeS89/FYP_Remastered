@@ -19,7 +19,7 @@ public interface IFSMEvents : ITickable, IZoneSink
 
     bool DestinationReached { get; }
 
-    void OnPathRequestComplete(in PathResult result);
+   // void OnPathRequestComplete(in PathResult result);
 
     bool HasLOS { get; }
 
@@ -32,47 +32,80 @@ public interface IFSMEvents : ITickable, IZoneSink
    // bool CurrentZone(out uint zone);
 }
 
-public interface IFSMOwner : ITargetable
+public interface IFSMControl : ITickable
 {
- 
+    void BeginPatrol(StateId id);
+    void BeginChase(StateId id);
+    void BeginFlank(StateId id);
+    void TakeCover(StateId id);
+    void FollowGroup(StateId id);
+    void ExitState();
+
+    bool IsMoving();
+}
+
+public interface IFSMNotifications
+{
+    void Notify(in NotifyOwnerNPC n);
+    void OnAnimationIntent(AnimationCue cue);
+}
+
+public interface IFSMData : ITargetable
+{
     ITargetable PrimaryTarget { get; }
-
-    uint CurrentStateId { get; set; }
-
-    EnemyEventManager OwnerEM { get; }
-
     NavMeshAgent Agent { get; }
-
     NavMeshObstacle Obstacle { get; }
-
-    float MaxPatrolPointWaitTime { get; }
-
-    float MinPatrolPointWaitTime { get; }
-
     NavMeshPath Path { get; }
-
+    float MaxPatrolPointWaitTime { get; }
+    float MinPatrolPointWaitTime { get; }
     float WalkSpeed { get; }
     float SprintSpeed { get; }
-
-    void LogUnhandled(IntentStateBase state, NotifyOwnerNPC notification) { }
-
-  
-    void DestinationReached(StateId reachedInState, bool isStale);
-
-    void OnDestinationFound(StateId id, Vector3 destination, NavMeshPath path);
-
-    void SwitchTo(IIntentState next) { }
-
-    void Notify(in NotifyOwnerNPC n);
-
-    IFSMEvents FSM { get; }
-
     float SprintEnterDist { get; }
     float SprintExitDist { get; }
 
 }
 
-public interface IFieldOfViewOwner : IFSMEvents
+public interface IFSMOwner// : ITargetable
+{
+ 
+   // ITargetable PrimaryTarget { get; }
+
+   // uint CurrentStateId { get; set; }
+
+  //  EnemyEventManager OwnerEM { get; }
+
+   // NavMeshAgent Agent { get; }
+
+   // NavMeshObstacle Obstacle { get; }
+
+   // float MaxPatrolPointWaitTime { get; }
+
+  //  float MinPatrolPointWaitTime { get; }
+
+  //  NavMeshPath Path { get; }
+
+  //  float WalkSpeed { get; }
+  //  float SprintSpeed { get; }
+
+    void LogUnhandled(IntentStateBase state, NotifyOwnerNPC notification) { }
+
+  
+  //  void DestinationReached(StateId reachedInState, bool isStale);
+
+ //   void OnDestinationFound(StateId id, Vector3 destination, NavMeshPath path);
+
+    void SwitchTo(IIntentState next) { }
+
+  //  void Notify(in NotifyOwnerNPC n); // Remove
+
+    IFSMControl FSM { get; }
+
+   // float SprintEnterDist { get; }
+   // float SprintExitDist { get; }
+
+}
+
+public interface IFieldOfViewOwner //: IFSMEvents
 {
     void FieldOfViewSweepResult(FOVResult result, bool withinAttackAngles);
 
@@ -81,4 +114,5 @@ public interface IFieldOfViewOwner : IFSMEvents
 public interface IFieldOfViewRunner : ITickable
 {
     void SetFOVSweepFrequency(AlertPhase phase);
+    Action<FOVResult, bool> OnFOVSweepComplete { get; set; }
 }

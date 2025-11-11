@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -6,110 +7,76 @@ using UnityEngine.AI;
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(NavMeshObstacle))]
-public abstract class NPCControllerBase : ComponentEvents, IFSMOwner
+public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, IFSMNotifications
 {
-   // protected FieldOfViewManager _fovhandler;
-    [SerializeField] protected FieldOfViewParams _fovParams;
-   // protected Action<bool> OnVisibilityCallback;
-    protected Action<bool> OnAimCheckCallback;
-    protected Action<bool> OnMeleeRangeCheckCallback;
+    [Header("FOV Data")]
+    [SerializeField] protected FOVParameters _fovParams;
 
-    [SerializeField] protected Transform _parentTransform;
-    [SerializeField] protected Collider _targetableCollider;
+    // FSM Data
+    public ITargetable PrimaryTarget { get; set; }
+    public NavMeshAgent Agent { get; protected set; }
+    public NavMeshObstacle Obstacle { get; protected set; }
+    public NavMeshPath Path { get; protected set; }
 
+    [Header("Time to wait at each point when patrolling")]
+    [Range(0.5f, 15f)]
+    [SerializeField] protected float _maxWaitAtSeconds;
+    [Min(0.5f)]
+    [SerializeField] protected float _minWaitAtSeconds;
+    public float MaxPatrolPointWaitTime => _maxWaitAtSeconds;
+    public float MinPatrolPointWaitTime => _minWaitAtSeconds;
+    public float WalkSpeed => _walkSpeed;
+    public float SprintSpeed => _sprintSpeed;
     [Header("Agent Speed Params")]
     [SerializeField, Tooltip("Do Not Change - Synchronized with Walking animation")]
     protected float _walkSpeed = 0.9f;
     [SerializeField, Tooltip("Do Not Change - Synchronized with sprinting animation")]
     protected float _sprintSpeed = 3.6f;
+    // End FSM Data
 
-    [Header("Collider used for aiming towards when taking fire")]
-    [SerializeField] protected Collider _targetCollider;
+    // protected Action<bool> OnAimCheckCallback;
+    protected Action<bool> OnMeleeRangeCheckCallback;
 
-    public IFSMEvents FSM { get; protected set; }
+   
+
+    public IFSMControl FSM { get; protected set; }
     protected IIntentState _state;
 
-    public State CurrentState { get; protected set; }
-
-    [Header("Current Engage Target")]
-    public ITargetable PrimaryTarget { get; set; }
-
-
-    public EnemyEventManager OwnerEM { get; protected set; }
-    public NavMeshAgent Agent { get; protected set; }
-    public NavMeshObstacle Obstacle { get; protected set; }
-    public NavMeshPath Path { get; protected set; }
-    public Collider TargetableCollider { get; protected set; }
-    public bool IsMoving { get; private set; } = false;
+    protected EnemyEventManager _eManager;
+   
+   
+    
 
     public bool TestSprint;
     public bool TestWalk;
 
-    public float WalkSpeed => _walkSpeed;
-
-    public float SprintSpeed => _sprintSpeed;
-
-    protected Vector3 _currentDestination;
-    protected Vector3? _currentDestinationForward = null;
 
  
-    public uint CurrentStateId { get; set; }
-
-    [Range(0.5f, 15f)]
-    [SerializeField] protected float _maxWaitAtSeconds;
-    [Min(0.5f)]
-    [SerializeField] protected float _minWaitAtSeconds;
-
-    public float MaxPatrolPointWaitTime => _maxWaitAtSeconds;
-
-    public float MinPatrolPointWaitTime => _minWaitAtSeconds;
-
+    // ITargetable Data - This Gameobjects information for targeting purposes
+    // i.e. its LayerMask, Transform, Aim Trigger, etc.
+    [Header("The transform of this game object used for targeting purposes")]
+    [SerializeField] protected Transform _parentTransform;
     public Transform Transform => _parentTransform == null ? transform : _parentTransform;
 
+    [Header("Mask of this Gamobeject used for targeting purposes")]
+    [SerializeField] protected LayerMask _layerMask;
     public LayerMask LayerMask => throw new NotImplementedException();
-
-    public Transform RootTransform => throw new NotImplementedException();
+    [Header("Trigger area on the game object that other NPC's use as target area for aiming")]
+    [SerializeField] protected Collider _targetCollider;
+    public Collider TargetableCollider { get; protected set; }
+    public bool IsMoving { get; private set; } = false;
+    // End ITargetable Data
 
     public float SprintEnterDist => throw new NotImplementedException();
 
     public float SprintExitDist => throw new NotImplementedException();
 
-    #region Obsolete region
-    public void OnDestinationFound(StateId id, Vector3 destination, NavMeshPath p)
-    {
-        if (id != _state.Id || destination == Vector3.zero) return;
 
-        float newSpeed;
-
-        switch (id)
-        {
-            case StateId.Patrol or StateId.Flank or StateId.Chase or StateId.Search:
-                newSpeed = WalkSpeed;
-                break;
-            case StateId.Flee or StateId.Follow or StateId.Cover:
-                newSpeed = SprintSpeed;
-                break;
-            default:
-            //    FSM?.DestinationApproval(approved: false, p, destination, id, 0f, 10f);
-                return;
-        }
-        //SetAgentTargetSpeed(newSpeed, 2f);
-     //   FSM?.DestinationApproval(approved: true, p, destination, id, newSpeed, 2f);
-    }
-
-    public void DestinationReached(StateId reachedInState, bool isStale)
-    {
-
-        if (isStale) return;
-        if (reachedInState == StateId.Patrol)
-            FSM?.LookAroundAndContinue();
-        // Future logic here for Flee/ Search states
-    }
-    #endregion
-
-
-
-
+    // IFSMNotifications
+    public abstract void Notify(in NotifyOwnerNPC n);
+    public void OnAnimationIntent(AnimationCue cue)
+        => _eManager.TriggerAnimation(cue);
+    // End IFSMNotificationss
 
 
     public (Vector3, Vector3?) GetTargetablePositionAndForward()
@@ -122,9 +89,11 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner
     private IDestinationResolver _destResolver;
     private IFieldOfViewRunner _fovRunner;
 
+    private Dictionary<StateId, ICandidateProvider> _destinationProviders;
+
     public override void RegisterLocalEvents(EventManager eventManager)
     {
-        OwnerEM = eventManager as EnemyEventManager;
+        _eManager = eventManager as EnemyEventManager;
 
         if (_targetCollider == null)
         {
@@ -143,16 +112,20 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner
         SetPrimaryToPlayer();
         SetNavMeshAgentParams();
        
-        OnAimCheckCallback = OnAimEnter;
+      //  OnAimCheckCallback = OnAimEnter;
         OnMeleeRangeCheckCallback = OnMeleeRangeEnter;
+
+        _destinationProviders = new()
+        {
+            [StateId.Patrol] = new WaypointProvider()
+        };
         
-       
+        _destResolver = new DestinationFinder(_destinationProviders);
+        _fovRunner = new NPCFieldOfViewHandler(_fovParams);
 
-        FSM = new FSMManager(owner: this, resolver: _destResolver, runner: _fovRunner);
-        // _fsmController = new FSMManager();
-        //FSM.Notification = OnNotification;
-
-        base.RegisterLocalEvents(OwnerEM);
+        FSM = new FSMManager(data: this, notify: this, resolver: _destResolver, runner: _fovRunner);
+      
+        base.RegisterLocalEvents(_eManager);
         RegisterGlobalEvents();
     }
 
@@ -183,9 +156,9 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
-        OnAimCheckCallback = null;
+       // OnAimCheckCallback = null;
         OnMeleeRangeCheckCallback = null;
-        base.UnRegisterLocalEvents(OwnerEM);
+        base.UnRegisterLocalEvents(_eManager);
         UnRegisterGlobalEvents();
     }
 
@@ -202,35 +175,27 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner
     protected abstract void OnMeleeRangeEnter(bool targetInRange);
 
 
-   // protected abstract void SetAndChaseTarget(Transform targetPosition);
-
-  //  protected abstract void OnPathValidationResult(bool pathBlocked, FSMPolicy policy);
-
     protected abstract void Engage();
 
     protected abstract void OnDamageTaken(float remainingHealth);
 
     protected virtual void Update()
     {
-      //   if (FSM == null) return;
-
         FSM?.Tick(Time.deltaTime);
         IsMoving = FSM?.IsMoving() ?? false;
-
-       // _fovhandler?.Tick();
     }
 
     protected virtual void LateUpdate()
     {
         FSM?.LateTick?.Invoke(Time.deltaTime);
-        if (OwnerEM == null) return;
-        OwnerEM.TickAnimator(Agent.velocity, Agent.transform.forward);
+        if (_eManager == null) return;
+        _eManager.TickAnimator(Agent.velocity, Agent.transform.forward);
     }
 
    
     public abstract void LogUnhandled(IntentStateBase state, StateNotification notification);
 
-    public abstract void Notify(in NotifyOwnerNPC n);
+    
 
     public abstract void SwitchTo(IIntentState next);
 
@@ -239,5 +204,5 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner
     public Quaternion GetRotation()
          => _parentTransform == null ? transform.rotation : _parentTransform.rotation;
 
-   
+    
 }

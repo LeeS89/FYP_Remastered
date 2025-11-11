@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.AI;
 
-public abstract class FSMBase : IFieldOfViewOwner
+public abstract class FSMBase : IFSMControl//IFieldOfViewOwner
 {
     public Action<StateId> TryRepath { get; protected set; }
     public bool DestinationReached { get; protected set; } = true;
@@ -22,7 +22,8 @@ public abstract class FSMBase : IFieldOfViewOwner
 
     protected Coroutine _runningRoutine;
 
-    protected IFSMOwner Owner;
+    protected IFSMData _ownerData;
+    protected IFSMNotifications _ownerNotifications;
     protected Vector3 _currentDestination;
     protected Vector3? _currentDestinaationForward = null;
     protected float _targetSpeed = 0f;
@@ -75,8 +76,8 @@ public abstract class FSMBase : IFieldOfViewOwner
         var (speed, lerp) = tier switch
         {
             SpeedTier.Idle => (0f, 10f),
-            SpeedTier.Walk => (Owner.WalkSpeed, 2f),
-            SpeedTier.Sprint => (Owner.SprintSpeed, 2f),
+            SpeedTier.Walk => (_ownerData.WalkSpeed, 2f),
+            SpeedTier.Sprint => (_ownerData.SprintSpeed, 2f),
             _ => (0f, 10f)
         };
 
@@ -89,8 +90,8 @@ public abstract class FSMBase : IFieldOfViewOwner
 
     protected void ToggleAgent(bool setActive)
     {
-        if (Owner.Agent.enabled == setActive) return;
-        Owner.Agent.enabled = setActive;
+        if (_ownerData.Agent.enabled == setActive) return;
+        _ownerData.Agent.enabled = setActive;
     }
 
     public virtual void FieldOfViewSweepResult(FOVResult result, bool withinAttackAngles) { }

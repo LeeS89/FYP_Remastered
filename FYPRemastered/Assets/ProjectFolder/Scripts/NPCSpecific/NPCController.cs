@@ -48,9 +48,9 @@ public class NPCController : NPCControllerBase
 
         if (TestZone)
         {
-            int zone;
-            if (!FSM.TryGetCurrentZone(out zone)) Debug.LogError("No Valid Zone found");
-            else Debug.LogError("CurrentZone is: "+zone);
+          //  int zone;
+          //  if (!FSM.TryGetCurrentZone(out zone)) Debug.LogError("No Valid Zone found");
+          //  else Debug.LogError("CurrentZone is: "+zone);
             TestZone = false;
         }
     }

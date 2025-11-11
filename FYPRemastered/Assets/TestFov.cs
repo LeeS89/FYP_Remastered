@@ -14,7 +14,7 @@ public class TestFov : MonoBehaviour, IFieldOfViewOwner
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        _fovHandler = new NPCFieldOfViewHandler(this, _params);
+        _fovHandler = new NPCFieldOfViewHandler(_params);
        
         StartCoroutine(GetPlayerDelay());
     }

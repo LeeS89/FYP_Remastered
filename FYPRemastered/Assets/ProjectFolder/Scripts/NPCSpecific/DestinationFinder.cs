@@ -13,9 +13,9 @@ public class DestinationFinder : IDestinationResolver
     private ITargetable _followTarget;
     public ITargetable _attackTarget;*/
 
-    private readonly Dictionary<StateId, ICandidateProvider> _map;
+  //  private readonly Dictionary<StateId, ICandidateProvider> _map;
 
-    private readonly IFSMEvents Owner;
+   // private readonly IFSMEvents Owner;
 
     private WaitUntil _waitUntilPathCheckComplete;
     private bool _pathChecked;
@@ -33,21 +33,25 @@ public class DestinationFinder : IDestinationResolver
   
 
     private Queue<(List<(Vector3, Vector3?)>, ValidateDestination)> _pathQueue = new(10);
-   
-    public DestinationFinder(IFSMEvents owner)
+    private IReadOnlyDictionary<StateId, ICandidateProvider> _providerMap;
+
+
+    public DestinationFinder(IReadOnlyDictionary<StateId, ICandidateProvider> providers)
     {
-        Owner = owner;
+        _providerMap = providers;
+       // _map = providers;
+        //Owner = owner;
         PathCheckCallback = OnPathRequestcallback;
         _waitUntilPathCheckComplete = new WaitUntil(() => _pathChecked);
-        _map = new()
+       /* _map = new()
         {
             [StateId.Patrol] = new WaypointProvider()
-        };
+        };*/
     }
 
     public List<(Vector3 position, Vector3? forward)> TryGet(in ValidateDestination request)
     {
-        if (_map.TryGetValue(request.StateId, out var p)) return p.TryGet(request);
+        if (_providerMap.TryGetValue(request.StateId, out var p)) return p.TryGet(request);
 
         return null;
     }
@@ -56,7 +60,7 @@ public class DestinationFinder : IDestinationResolver
 
     public bool TryGetCurrentZone(out int zone)
     {
-        if (_map.TryGetValue(StateId.Patrol, out var p))
+        if (_providerMap.TryGetValue(StateId.Patrol, out var p))
         {
             if (p is WaypointProvider pr)
             {
@@ -96,7 +100,8 @@ public class DestinationFinder : IDestinationResolver
         if (destinations == null || destinations.Count == 0)
         {
             PathResult failResult = new PathResult(req.Reason, req.Path, false, Vector3.zero, req.StateId, null);
-            Owner.OnPathRequestComplete(failResult);
+            Callback?.Invoke(failResult);
+            //Owner.OnPathRequestComplete(failResult);
             return;
         }
         _pathQueue.Enqueue((destinations, req));
@@ -130,7 +135,8 @@ public class DestinationFinder : IDestinationResolver
                 if (!_isValid) continue;
                 
                 PathResult success = new PathResult(reqInfo.Reason, reqInfo.Path, true, pos, reqInfo.StateId, fwd);
-                Owner.OnPathRequestComplete(success);
+                Callback?.Invoke(success);
+               // Owner.OnPathRequestComplete(success);
                 found = true;
                 break;
             }
@@ -139,7 +145,8 @@ public class DestinationFinder : IDestinationResolver
             if (!found)
             {
                 PathResult failed = new PathResult(reqInfo.Reason, reqInfo.Path, false, Vector3.zero, reqInfo.StateId, null);
-                Owner.OnPathRequestComplete(failed);
+                Callback?.Invoke(failed);
+                //Owner.OnPathRequestComplete(failed);
             }
         }
         
@@ -147,8 +154,8 @@ public class DestinationFinder : IDestinationResolver
        
     }
 
+    public DestinationRequestCallback Callback { get; set; }
 
-    
     private void OnPathRequestcallback(bool pathFound/*in PathResult result*/)
     {
         _isValid = pathFound;
@@ -231,6 +238,7 @@ public class DestinationFinder : IDestinationResolver
         }*/
     public Transform FollowTarget { get; private set; } = null;
     public Vector3 LastKnownTargetPos { get; private set; }
+   
 
     public Collider GetAttackTarget(AttackTarget target)
     {
@@ -322,3 +330,5 @@ public readonly struct PathResult
     }
 
 }
+
+public delegate void DestinationRequestCallback(in PathResult result);
