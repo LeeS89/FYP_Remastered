@@ -28,9 +28,6 @@ public sealed class Flank : IntentStateBase
             case NotificationKind.NoAvailablePath://.NoFlankAvailable:
                 self.SwitchTo(TakeCover.Instance);
                 break;
-            case NotificationKind.TargetLOSLost:
-                //if(n.DestinationReached) Try Repath
-                break;
             default:
                 base.Handle(self, n);
                 break;

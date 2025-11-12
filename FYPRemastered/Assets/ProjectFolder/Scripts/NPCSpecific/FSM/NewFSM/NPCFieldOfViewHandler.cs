@@ -140,6 +140,13 @@ public class NPCFieldOfViewHandler : IFieldOfViewRunner
 
     public void Tick(float dt)
     {
+        if (_params.FOVTarget == null)
+        {
+#if UNITY_EDITOR
+            Debug.LogError("Must Provide a Target for the FOV Sweep");
+#endif
+            return;
+        }
         if (Time.time >= _nextCheckTime)
         {
             _nextCheckTime = Time.time + _fovSweepFrequency;
@@ -226,6 +233,7 @@ public class NPCFieldOfViewHandler : IFieldOfViewRunner
 
 public enum FOVResult
 {
+    None,
     TargetOutsideSweepRadius,
     TargetInsideSweepRadius,
     TargetSeen,

@@ -13,37 +13,58 @@ public class FSMManager : FSMBase
     private Action OnDestinationReached;
     private Action OnPatrolReached;
     private Action OnChaseReached;
-    private FOVResult _currentFOVResult = FOVResult.TargetNotSeen;
+    
 
-    public FSMManager(IFSMData data, IFSMNotifications notify, IDestinationResolver resolver, IFieldOfViewRunner runner)
+    public FSMManager(IFSMData data, IDestinationResolver resolver, IFieldOfViewRunner runner)
     {
         if (data == null)
         {
 #if UNITY_EDITOR
-            Debug.LogError("Must Pass a valid FSMOwner");
+            Debug.LogError("Must Pass valid Data");
 #endif
             return;
 
         }
-
         _ownerData = data;
-        _ownerNotifications = notify;
-        _pathFinder = resolver;//new DestinationFinder(this);
-        _fovHandler = runner;// new NPCFieldOfViewHandler(this, fovParams);
 
+        if (resolver == null)
+        {
+            Dictionary<StateId, ICandidateProvider> providers = new()
+            {
+                { StateId.Patrol, new WaypointProvider() }
+            };
+            _pathFinder = new DestinationFinder(providers);
+        }
+        else _pathFinder = resolver;
+
+        if (runner == null)
+        {
+            FOVParameters fovParams = new FOVParameters();
+            fovParams.ownerOrigin = data.Transform;
+            fovParams.FOVTarget = data.PrimaryTarget;
+            // Add FOV origin aswell
+            _fovHandler = new NPCFieldOfViewHandler(fovParams);
+        }
+        else _fovHandler = runner;
+        AssignActions();
+    }
+
+    private void AssignActions()
+    {
+        _fovHandler.OnFOVSweepComplete = FieldOfViewSweepResult;
         _pathFinder.Callback = OnPathRequestComplete;// New
         TryRepath = TryGetNextDestination;
         CancelOrContinueRoutine = HasSwitchedState;
         LookAroundAction = LookAround;
-        RemainingDistanceAction = SetSpeedByDistance;
+        RemainingDistanceAction = SetSpeedByDistance; // obsolete
         OnPatrolReached = LookAroundAndContinue;
-       
+
+        OnTick += _fovHandler.Tick;
         OnTick += TimerTicks;
         OnTick += ClassUpdate;
         LateTick = OnLateTick;
     }
 
-  
     private void TryResetAgent()
     {
         SetSpeedTier(SpeedTier.Idle);
@@ -56,9 +77,7 @@ public class FSMManager : FSMBase
     #region Destination Region
 
     public override void FieldOfViewSweepResult(FOVResult result, bool withinAttackAngles)
-    {
-        
-    }
+        => Notification?.Invoke(NotifyOwnerNPC.FOVUpdate(_currentStateId, result, withinAttackAngles));
 
    
 
@@ -91,9 +110,9 @@ public class FSMManager : FSMBase
         StateId id = result.Id;
 
         if (result.Reason == PathCheckReason.ProbePathToPrimaryTarget && pathFound)
-        { _ownerNotifications?.Notify(NotifyOwnerNPC.PathToPrimaryAvailable(result.Id)); return; }
+        { Notification?.Invoke(NotifyOwnerNPC.PathToPrimaryAvailable(result.Id)); return; }
     
-        if (!result.PathFound) { _ownerNotifications?.Notify(NotifyOwnerNPC.NoAvailablePath(_currentStateId)); Debug.LogError("NO Path Found!!"); return; }
+        if (!result.PathFound) { Notification?.Invoke(NotifyOwnerNPC.NoAvailablePath(_currentStateId)); Debug.LogError("NO Path Found!!"); return; }
         else
         {
             _currentDestination = result.Destination;
@@ -263,10 +282,11 @@ public class FSMManager : FSMBase
 
     public override void BeginPatrol(StateId id)
     {
-        OnDestinationReached = OnPatrolReached;
-        CancelRunningCoroutine();
         if (id != StateId.Patrol) return;
-       
+        _fovHandler.SetFOVSweepFrequency(AlertPhase.Idle);
+        OnDestinationReached = OnPatrolReached;
+       // CancelRunningCoroutine();
+        
         if (_currentStateId != id) _currentStateId = id;
         TryRepath?.Invoke(id);
     }
@@ -312,12 +332,20 @@ public class FSMManager : FSMBase
 
     public override void BeginChase(StateId id)
     {
-       // PathCheckReason reason = PathCheckReason.ValidatePathForDestination;
+        if (id != StateId.Chase) return;
+        _fovHandler.SetFOVSweepFrequency(AlertPhase.Alerted);
+        OnDestinationReached = OnChaseReached;
+        
+        if (_currentStateId != id) _currentStateId = id;
+        TryRepath?.Invoke(id);
     }
 
     public override void BeginFlank(StateId id)
     {
-        throw new NotImplementedException();
+        if (id != StateId.Flank) return;
+        _fovHandler.SetFOVSweepFrequency(AlertPhase.Alerted);
+        if (_currentStateId != id) _currentStateId = id;
+        TryRepath?.Invoke(id);
     }
 
     public override void TakeCover(StateId id)
@@ -345,7 +373,7 @@ public class FSMManager : FSMBase
         LookAroundAction = null;
         RemainingDistanceAction = null;
         OnPatrolReached = null;
-
+        _fovHandler.OnFOVSweepComplete = null;
         OnTick -= TimerTicks;
         OnTick -= ClassUpdate;
         LateTick = null;

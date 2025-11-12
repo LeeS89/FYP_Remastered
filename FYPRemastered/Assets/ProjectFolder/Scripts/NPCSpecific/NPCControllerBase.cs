@@ -7,12 +7,15 @@ using UnityEngine.AI;
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(NavMeshObstacle))]
-public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, IFSMNotifications
+public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData
 {
+    protected EnemyEventManager _eManager;
+    private bool _isInStateTransition = false;
+
     [Header("FOV Data")]
     [SerializeField] protected FOVParameters _fovParams;
 
-    // FSM Data
+    // FSM Data queried by the FSMManager 
     public ITargetable PrimaryTarget { get; set; }
     public NavMeshAgent Agent { get; protected set; }
     public NavMeshObstacle Obstacle { get; protected set; }
@@ -34,25 +37,14 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, 
     protected float _sprintSpeed = 3.6f;
     // End FSM Data
 
-    // protected Action<bool> OnAimCheckCallback;
     protected Action<bool> OnMeleeRangeCheckCallback;
-
-   
-
-    public IFSMControl FSM { get; protected set; }
-    protected IIntentState _state;
-
-    protected EnemyEventManager _eManager;
-   
-   
-    
 
     public bool TestSprint;
     public bool TestWalk;
 
 
  
-    // ITargetable Data - This Gameobjects information for targeting purposes
+    // ITargetable Data - This Gameobjects information for targeting purposes by other NPC's
     // i.e. its LayerMask, Transform, Aim Trigger, etc.
     [Header("The transform of this game object used for targeting purposes")]
     [SerializeField] protected Transform _parentTransform;
@@ -65,31 +57,38 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, 
     [SerializeField] protected Collider _targetCollider;
     public Collider TargetableCollider { get; protected set; }
     public bool IsMoving { get; private set; } = false;
+    public (Vector3, Vector3?) GetTargetablePositionAndForward()
+    => _parentTransform == null ? (transform.position, transform.forward) : (_parentTransform.position, _parentTransform.forward);
+
+    public Vector3 GetPosition()
+     => _parentTransform == null ? transform.position : _parentTransform.position;
+    public Quaternion GetRotation()
+        => _parentTransform == null ? transform.rotation : _parentTransform.rotation;
     // End ITargetable Data
 
+    // Possibly Redundant
     public float SprintEnterDist => throw new NotImplementedException();
 
     public float SprintExitDist => throw new NotImplementedException();
 
+    // FSMManager Composition
+    public IFSMControl FSM { get; protected set; }
+    private IDestinationResolver _destResolver;
+    private IFieldOfViewRunner _fovRunner;
+    private Dictionary<StateId, ICandidateProvider> _destinationProviders;
+    protected IIntentState _state;
+    // end FSMManager Composition
 
-    // IFSMNotifications
-    public abstract void Notify(in NotifyOwnerNPC n);
-    public void OnAnimationIntent(AnimationCue cue)
-        => _eManager.TriggerAnimation(cue);
+    // IFSMNotifications - For notifications received by the FSMManager, i.e. No valid destination, target lost, Target within melee/ shot range, etc.
+    public virtual void Notify(in NotifyOwnerNPC n)
+    {
+        if (_isInStateTransition || n.Id != _state.Id) return;
+        _state.Handle(this, n);
+    }
+    public void AnimationIntent(AnimationCue cue) => _eManager.TriggerAnimation(cue);
     // End IFSMNotificationss
 
 
-    public (Vector3, Vector3?) GetTargetablePositionAndForward()
-        => _parentTransform == null ? (transform.position, transform.forward) : (_parentTransform.position, _parentTransform.forward);
-
-    public Vector3 GetPosition()
-     => _parentTransform == null ? transform.position : _parentTransform.position;
-
-
-    private IDestinationResolver _destResolver;
-    private IFieldOfViewRunner _fovRunner;
-
-    private Dictionary<StateId, ICandidateProvider> _destinationProviders;
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
@@ -112,7 +111,6 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, 
         SetPrimaryToPlayer();
         SetNavMeshAgentParams();
        
-      //  OnAimCheckCallback = OnAimEnter;
         OnMeleeRangeCheckCallback = OnMeleeRangeEnter;
 
         _destinationProviders = new()
@@ -120,11 +118,15 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, 
             [StateId.Patrol] = new WaypointProvider()
         };
         
+        _fovParams.FOVTarget = PrimaryTarget;
         _destResolver = new DestinationFinder(_destinationProviders);
         _fovRunner = new NPCFieldOfViewHandler(_fovParams);
 
-        FSM = new FSMManager(data: this, notify: this, resolver: _destResolver, runner: _fovRunner);
-      
+        FSM = new FSMManager(data: this, /*notify: this, */resolver: _destResolver, runner: _fovRunner);
+        FSM.Notification = Notify;
+        FSM.OnAnimationIntent = AnimationIntent;
+
+
         base.RegisterLocalEvents(_eManager);
         RegisterGlobalEvents();
     }
@@ -156,7 +158,6 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, 
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
-       // OnAimCheckCallback = null;
         OnMeleeRangeCheckCallback = null;
         base.UnRegisterLocalEvents(_eManager);
         UnRegisterGlobalEvents();
@@ -168,41 +169,67 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, 
         SwitchTo(Patrol.Instance);
     }
 
+    protected override void DeathStatusUpdated(bool isDead)
+    {
+        if (OwnerIsDead == isDead) return;
+        base.DeathStatusUpdated(isDead);
+
+
+    }
+
     protected abstract void OnVisibilityGained(bool seen);
 
     protected abstract void OnAimEnter(bool aiming);
 
-    protected abstract void OnMeleeRangeEnter(bool targetInRange);
+    protected virtual void OnMeleeRangeEnter(bool targetInRange) { }
 
 
-    protected abstract void Engage();
+    protected void Engage() { }
 
     protected abstract void OnDamageTaken(float remainingHealth);
 
     protected virtual void Update()
     {
+        if(OwnerIsDead) return;
         FSM?.Tick(Time.deltaTime);
         IsMoving = FSM?.IsMoving() ?? false;
     }
 
     protected virtual void LateUpdate()
     {
+        if (OwnerIsDead) return;
         FSM?.LateTick?.Invoke(Time.deltaTime);
         if (_eManager == null) return;
         _eManager.TickAnimator(Agent.velocity, Agent.transform.forward);
     }
 
    
-    public abstract void LogUnhandled(IntentStateBase state, StateNotification notification);
+    public virtual void SwitchTo(IIntentState next)
+    {
+        if (next == null || _state == next) return;
 
-    
+        _isInStateTransition = true;
+        _state?.Exit(this);
+        _state = next;
+        _state?.Enter(this);
+        _isInStateTransition = false;
+    }
 
-    public abstract void SwitchTo(IIntentState next);
+    public void LogUnhandled(IntentStateBase state, in NotifyOwnerNPC notification)
+    {
+        throw new NotImplementedException();
+    }
 
-
-
-    public Quaternion GetRotation()
-         => _parentTransform == null ? transform.rotation : _parentTransform.rotation;
-
-    
+    private FOVResult _currentResult = FOVResult.TargetNotSeen;
+    public void HandleFOVSweepResult(FOVResult result, bool withinAttackAngles)
+    {
+        Debug.LogError("FOVResult: "+result.ToString());
+        if (_currentResult == result) return;
+        _currentResult = result;
+        if (_state == Patrol.Instance)
+        {
+            if(_currentResult == FOVResult.TargetSeen)
+                SwitchTo(ChaseState.Instance);
+        }
+    }
 }

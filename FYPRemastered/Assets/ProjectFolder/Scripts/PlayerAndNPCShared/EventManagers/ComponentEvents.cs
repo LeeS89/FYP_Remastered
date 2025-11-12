@@ -28,7 +28,7 @@ public abstract class ComponentEvents : MonoBehaviour
     protected virtual void OnSceneComplete() => BaseSceneManager._instance.OnSceneComplete -= OnSceneComplete; // Switch to Scene aggregator
 
     protected virtual void OnPlayerDeathStatusUpdated(bool isDead) => PlayerIsDead = isDead; 
-    public bool PlayerIsDead { get; protected set; }
+    public static bool PlayerIsDead { get; protected set; }
 
     public bool OwnerIsDead { get; protected set; } = false;
     protected virtual void DeathStatusUpdated(bool isDead) => OwnerIsDead = isDead;

@@ -40,15 +40,13 @@ public interface IFSMControl : ITickable
     void TakeCover(StateId id);
     void FollowGroup(StateId id);
     void ExitState();
-
     bool IsMoving();
+
+    delegate void OnNotifyOwner(in NotifyOwnerNPC n);
+    OnNotifyOwner Notification { get; set; }
+    Action<AnimationCue> OnAnimationIntent { get; set; }
 }
 
-public interface IFSMNotifications
-{
-    void Notify(in NotifyOwnerNPC n);
-    void OnAnimationIntent(AnimationCue cue);
-}
 
 public interface IFSMData : ITargetable
 {
@@ -65,47 +63,16 @@ public interface IFSMData : ITargetable
 
 }
 
-public interface IFSMOwner// : ITargetable
+public interface IFSMOwner
 {
- 
-   // ITargetable PrimaryTarget { get; }
-
-   // uint CurrentStateId { get; set; }
-
-  //  EnemyEventManager OwnerEM { get; }
-
-   // NavMeshAgent Agent { get; }
-
-   // NavMeshObstacle Obstacle { get; }
-
-   // float MaxPatrolPointWaitTime { get; }
-
-  //  float MinPatrolPointWaitTime { get; }
-
-  //  NavMeshPath Path { get; }
-
-  //  float WalkSpeed { get; }
-  //  float SprintSpeed { get; }
-
-    void LogUnhandled(IntentStateBase state, NotifyOwnerNPC notification) { }
-
-  
-  //  void DestinationReached(StateId reachedInState, bool isStale);
-
- //   void OnDestinationFound(StateId id, Vector3 destination, NavMeshPath path);
-
-    void SwitchTo(IIntentState next) { }
-
-  //  void Notify(in NotifyOwnerNPC n); // Remove
-
+    void LogUnhandled(IntentStateBase state, in NotifyOwnerNPC notification);
+    void SwitchTo(IIntentState next);
+    void HandleFOVSweepResult(FOVResult result, bool withinAttackAngles);
     IFSMControl FSM { get; }
-
-   // float SprintEnterDist { get; }
-   // float SprintExitDist { get; }
 
 }
 
-public interface IFieldOfViewOwner //: IFSMEvents
+public interface IFieldOfViewOwner 
 {
     void FieldOfViewSweepResult(FOVResult result, bool withinAttackAngles);
 

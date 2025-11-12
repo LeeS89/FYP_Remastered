@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.AI;
 
-public abstract class FSMBase : IFSMControl//IFieldOfViewOwner
+public abstract class FSMBase : IFSMControl
 {
     public Action<StateId> TryRepath { get; protected set; }
     public bool DestinationReached { get; protected set; } = true;
@@ -13,6 +13,8 @@ public abstract class FSMBase : IFSMControl//IFieldOfViewOwner
     public Action<float> LateTick { get; protected set; }
 
     public ITargetable PrimaryTarget { get; set; }
+    public IFSMControl.OnNotifyOwner Notification { get; set; }
+    public Action<AnimationCue> OnAnimationIntent { get; set; }
 
     protected IFieldOfViewRunner _fovHandler;
 
@@ -23,7 +25,7 @@ public abstract class FSMBase : IFSMControl//IFieldOfViewOwner
     protected Coroutine _runningRoutine;
 
     protected IFSMData _ownerData;
-    protected IFSMNotifications _ownerNotifications;
+   // protected IFSMNotifications _ownerNotifications;
     protected Vector3 _currentDestination;
     protected Vector3? _currentDestinaationForward = null;
     protected float _targetSpeed = 0f;

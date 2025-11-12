@@ -11,10 +11,10 @@ public class NPCController : NPCControllerBase
         else ChangeState(State.Chase, targetPosition);*/
     }
 
-    protected override void Engage()
+   /* protected override void Engage()
     {
         throw new System.NotImplementedException();
-    }
+    }*/
 
     protected override void OnAimEnter(bool aiming)
     {
@@ -26,11 +26,7 @@ public class NPCController : NPCControllerBase
         throw new System.NotImplementedException();
     }
 
-    protected override void OnMeleeRangeEnter(bool targetInRange)
-    {
-        throw new System.NotImplementedException();
-    }
-
+    
     protected override void OnVisibilityGained(bool seen)
     {
         throw new System.NotImplementedException();
@@ -58,19 +54,19 @@ public class NPCController : NPCControllerBase
 
   
 
-    public override void LogUnhandled(IntentStateBase state, StateNotification notification)
+    /*public override void LogUnhandled(IntentStateBase state, StateNotification notification)
     {
         
-    }
+    }*/
 
-    public override void SwitchTo(IIntentState next)
+    /*public override void SwitchTo(IIntentState next)
     {
         if (next == null || _state == next) return;
         _state?.Exit(this);
         _state = next;
         _state?.Enter(this);
-    }
+    }*/
 
-    public override void Notify(in NotifyOwnerNPC n) => _state.Handle(this, n);
+  //  public override void Notify(in NotifyOwnerNPC n) => _state.Handle(this, n);
     
 }
