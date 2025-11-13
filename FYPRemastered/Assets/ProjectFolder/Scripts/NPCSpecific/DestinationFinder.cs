@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.AI;
 
 
-public class DestinationFinder : IDestinationResolver
+public class DestinationFinder : IPathResolver
 {
    /* private ITargetable _primaryTarget;
     private ITargetable _secondaryTarget;

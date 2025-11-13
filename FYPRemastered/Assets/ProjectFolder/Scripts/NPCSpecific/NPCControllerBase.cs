@@ -73,7 +73,7 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData
 
     // FSMManager Composition
     public IFSMControl FSM { get; protected set; }
-    private IDestinationResolver _destResolver;
+    private IPathResolver _destResolver;
     private IFieldOfViewRunner _fovRunner;
     private Dictionary<StateId, ICandidateProvider> _destinationProviders;
     protected IIntentState _state;
@@ -225,6 +225,7 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData
     {
         Debug.LogError("FOVResult: "+result.ToString());
         if (_currentResult == result) return;
+        Debug.LogError("FOVResult when changed: " + result.ToString());
         _currentResult = result;
         if (_state == Patrol.Instance)
         {

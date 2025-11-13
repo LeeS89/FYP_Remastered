@@ -151641,7 +151641,7 @@ MonoBehaviour:
     waistHeightOffset: 1
     eyeHeightOffset: 1.8
     evaluationCapsuleRadius: 0.4
-    addTargetFallbackPoints: 0
+    addTargetFallbackPoints: 1
     fovHalfAngle: 50
     useSeparateVerticleAngle: 0
     verticalFovHalfAngle: 25

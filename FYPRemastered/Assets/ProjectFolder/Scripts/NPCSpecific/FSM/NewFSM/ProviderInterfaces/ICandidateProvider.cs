@@ -11,7 +11,14 @@ public interface ICandidateProvider
 
 }
 
-public interface IDestinationResolver : IZoneSink
+public interface IDestinationResolver : ICandidateProvider
+{
+    // GetWaypointZone
+    // TrySwitchWaypoints
+
+}
+
+public interface IPathResolver : IZoneSink
 {
     /*bool TryGetWaypointZone(out uint zone);
 
@@ -41,6 +48,13 @@ public interface IFlankPointSampler
 {
     List<FlankPointData> GetFlankPoints();
 }
+
+public class DestinationResolver
+{
+    private IReadOnlyDictionary<StateId, ICandidateProvider> _providers;
+
+}
+
 
 public abstract class DestinationProvider : ICandidateProvider
 {

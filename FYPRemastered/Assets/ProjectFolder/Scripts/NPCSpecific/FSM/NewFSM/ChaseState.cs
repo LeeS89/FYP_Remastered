@@ -3,10 +3,11 @@ using UnityEngine;
 public sealed class ChaseState : IntentStateBase
 {
     public static readonly ChaseState Instance = new();
-    private ChaseState() { }
+    private ChaseState() { Id = StateId.Chase; }
 
     public override void Enter(IFSMOwner self)
     {
+        self.FSM?.BeginChase(Id);
         // public void Chase();
         // Pass a struct containing the following information:
         // Destination Provider, Possible Func<List<Vector3>>

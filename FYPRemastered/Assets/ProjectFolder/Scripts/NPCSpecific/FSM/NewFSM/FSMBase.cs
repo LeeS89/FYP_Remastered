@@ -20,7 +20,7 @@ public abstract class FSMBase : IFSMControl
 
     protected StateId _currentStateId = StateId.None;
 
-    protected IDestinationResolver _pathFinder;
+    protected IPathResolver _pathFinder;
 
     protected Coroutine _runningRoutine;
 

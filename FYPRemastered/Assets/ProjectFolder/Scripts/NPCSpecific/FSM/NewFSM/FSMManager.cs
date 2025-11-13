@@ -15,7 +15,7 @@ public class FSMManager : FSMBase
     private Action OnChaseReached;
     
 
-    public FSMManager(IFSMData data, IDestinationResolver resolver, IFieldOfViewRunner runner)
+    public FSMManager(IFSMData data, IPathResolver resolver, IFieldOfViewRunner runner)
     {
         if (data == null)
         {
