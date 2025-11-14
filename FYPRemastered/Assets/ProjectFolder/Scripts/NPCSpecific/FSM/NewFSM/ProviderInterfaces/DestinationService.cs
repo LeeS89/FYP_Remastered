@@ -9,7 +9,7 @@ public sealed class DestinationService
     {
         _map = new()
         {
-            [DestinationKind.Patrol] = new WaypointProvider()
+            [DestinationKind.Patrol] = new WaypointProvider(WaypointRepo.Instance)
         };
     }
 

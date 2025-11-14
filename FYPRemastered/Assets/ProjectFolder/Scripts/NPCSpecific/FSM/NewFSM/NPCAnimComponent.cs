@@ -221,10 +221,18 @@ public class NPCAnimComponent : ComponentEvents
         _lookWeightCoroutine = null;
     }
 
-    private void ChangeLayerWeight(AnimationLayer layer, float from, float to, float duration, bool layerReady = false)
-       => StartCoroutine(FadeLayerWeight(layer, from, to, duration, layerReady));
+    private void BlendLayerWeight(AnimationLayer layer, float from, float to, float duration)
+    {
+        int index = (int)layer;
+        float currentWeight = _anim.GetLayerWeight(index);
+        to = Mathf.Clamp01(to);
+        if (Mathf.Approximately(currentWeight, to) || duration <= 0f) { _anim.SetLayerWeight(index, to); return; }
 
-    private IEnumerator FadeLayerWeight(AnimationLayer layer, float from, float to, float duration, bool layerReady = false)
+        StartCoroutine(BlendLayerWeightRoutine(layer, from, to, duration));
+    }
+
+
+    private IEnumerator BlendLayerWeightRoutine(AnimationLayer layer, float from, float to, float duration, bool layerReady = false)
     {
 
         if (layer == AnimationLayer.Alert)
@@ -250,6 +258,51 @@ public class NPCAnimComponent : ComponentEvents
 
 
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    private void ChangeLayerWeight(AnimationLayer layer, float from, float to, float duration, bool layerReady = false)
+       => StartCoroutine(FadeLayerWeight(layer, from, to, duration, layerReady));
+
+    private IEnumerator FadeLayerWeight(AnimationLayer layer, float from, float to, float duration, bool layerReady = false)
+    {
+
+        if (layer == AnimationLayer.Alert)
+        {
+            if (!layerReady) { _em.AimingLayerReady(false); } // Aiming animation is no longer playing -> Can no longer shoot
+        }
+
+        
+        float time = 0f;
+        while (time < duration)
+        {
+            float t = time / duration;
+            _anim.SetLayerWeight((int)layer, Mathf.Lerp(from, to, t));
+            time += Time.deltaTime;
+            yield return null;
+        }
+        _anim.SetLayerWeight((int)layer, to);
+
+        if (layer == AnimationLayer.Alert)
+        {
+            if (layerReady) { _em.AimingLayerReady(true); } // Aiming animation is finished -> Can now start Shooting
+        }
+
+
+    }
+   
     #endregion
 
 

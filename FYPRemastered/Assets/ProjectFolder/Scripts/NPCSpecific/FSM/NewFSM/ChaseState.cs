@@ -16,10 +16,10 @@ public sealed class ChaseState : IntentStateBase
         // MaxStopDistance
     }
 
-    public override void Exit(IFSMOwner self)
+   /* public override void Exit(IFSMOwner self)
     {
         // Public void CancelCurrent(token);
-    }
+    }*/
 
     public override void Handle(IFSMOwner self, NotifyOwnerNPC n)
     {

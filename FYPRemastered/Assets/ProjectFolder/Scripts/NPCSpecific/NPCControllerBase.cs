@@ -71,9 +71,20 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData
 
     public float SprintExitDist => throw new NotImplementedException();
 
+    [Header("Agent uses random stop distance between min & max during target pursuit")]
+    [SerializeField] protected float _minStopdistance = 4f;
+    [SerializeField] protected float _maxStopdistance = 12f;
+    public float GetAgentStoppingDistance(StateId currentState)
+    {
+        if (currentState != _state.Id) return 0f;
+
+        return currentState == StateId.Chase ? UnityEngine.Random.Range(_minStopdistance, _maxStopdistance) : 0f;
+    }
+
     // FSMManager Composition
     public IFSMControl FSM { get; protected set; }
-    private IPathResolver _destResolver;
+    private IPathResolver _pathFinder;
+    private IDestinationResolver _destinationResolver;
     private IFieldOfViewRunner _fovRunner;
     private Dictionary<StateId, ICandidateProvider> _destinationProviders;
     protected IIntentState _state;
@@ -115,14 +126,16 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData
 
         _destinationProviders = new()
         {
-            [StateId.Patrol] = new WaypointProvider()
+            [StateId.Patrol] = new WaypointProvider(WaypointRepo.Instance),
+            [StateId.Chase] = new TargetPointProvider(PrimaryTarget),
         };
         
+        _destinationResolver = new DestinationResolver(_destinationProviders);
         _fovParams.FOVTarget = PrimaryTarget;
-        _destResolver = new DestinationFinder(_destinationProviders);
+        _pathFinder = new PathFinder(_destinationResolver);
         _fovRunner = new NPCFieldOfViewHandler(_fovParams);
 
-        FSM = new FSMManager(data: this, /*notify: this, */resolver: _destResolver, runner: _fovRunner);
+        FSM = new FSMManager(data: this, /*notify: this, */resolver: _pathFinder, runner: _fovRunner);
         FSM.Notification = Notify;
         FSM.OnAnimationIntent = AnimationIntent;
 
@@ -229,8 +242,11 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData
         _currentResult = result;
         if (_state == Patrol.Instance)
         {
+            Debug.LogError("Moving to Chase state");
             if(_currentResult == FOVResult.TargetSeen)
                 SwitchTo(ChaseState.Instance);
         }
     }
+
+    
 }

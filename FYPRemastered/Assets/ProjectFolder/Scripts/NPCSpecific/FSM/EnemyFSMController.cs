@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using Random = UnityEngine.Random;
 
-
+[Obsolete("Use NPCController instead")]
 public sealed class EnemyFSMController : FSMControllerBase
 {
     [Header("Animation Components")]

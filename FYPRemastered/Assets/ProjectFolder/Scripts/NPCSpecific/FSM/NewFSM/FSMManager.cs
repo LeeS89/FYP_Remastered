@@ -31,9 +31,10 @@ public class FSMManager : FSMBase
         {
             Dictionary<StateId, ICandidateProvider> providers = new()
             {
-                { StateId.Patrol, new WaypointProvider() }
+                { StateId.Patrol, new WaypointProvider(WaypointRepo.Instance) }
             };
-            _pathFinder = new DestinationFinder(providers);
+            IDestinationResolver destResolver = new DestinationResolver(providers);
+            _pathFinder = new PathFinder(destResolver);
         }
         else _pathFinder = resolver;
 
@@ -67,6 +68,7 @@ public class FSMManager : FSMBase
 
     private void TryResetAgent()
     {
+        _hasValidDestination = false;
         SetSpeedTier(SpeedTier.Idle);
         _ownerData.Agent.ResetPath();
         if (_currentStateId == StateId.Patrol) return;
@@ -87,7 +89,12 @@ public class FSMManager : FSMBase
         if (current != _currentStateId) return;
         ToggleAgent(setActive: true);
         if (_ownerData.Agent.SetPath(path) ||
-            _ownerData.Agent.SetDestination(destination)) _hasValidDestination = true;
+            _ownerData.Agent.SetDestination(destination))
+        {
+            float stopdist = _ownerData.GetAgentStoppingDistance(current);
+            _ownerData.Agent.stoppingDistance = stopdist;
+            _hasValidDestination = true;
+        }
         else
         {
 #if UNITY_EDITOR
@@ -271,6 +278,9 @@ public class FSMManager : FSMBase
         {
             case StateId.Patrol:
                 request = ValidateDestination.GetPatrolPoint(StateId.Patrol, _ownerData, _ownerData.Path);
+                break;
+            case StateId.Chase:
+                request = ValidateDestination.GetTargetPosition(current, _ownerData.Path, PathCheckReason.ValidatePathForDestination, _ownerData, _ownerData.PrimaryTarget);
                 break;
             default:
                 return;

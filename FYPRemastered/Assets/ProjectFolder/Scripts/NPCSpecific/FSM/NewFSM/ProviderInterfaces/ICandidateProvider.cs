@@ -11,7 +11,7 @@ public interface ICandidateProvider
 
 }
 
-public interface IDestinationResolver : ICandidateProvider
+public interface IDestinationResolver : ICandidateProvider, IZoneSink
 {
     // GetWaypointZone
     // TrySwitchWaypoints
@@ -49,10 +49,36 @@ public interface IFlankPointSampler
     List<FlankPointData> GetFlankPoints();
 }
 
-public class DestinationResolver
+public class DestinationResolver : IDestinationResolver
 {
     private IReadOnlyDictionary<StateId, ICandidateProvider> _providers;
 
+    public DestinationResolver(IReadOnlyDictionary<StateId, ICandidateProvider> providers)
+    => _providers = providers;
+
+    public List<(Vector3 position, Vector3? forward)> TryGet(in ValidateDestination req)
+    {
+        if (_providers.TryGetValue(req.StateId, out var p)) return p.TryGet(req);
+
+        return null;
+    }
+
+    public bool TryGetCurrentZone(out int zone)
+    {
+        if(_providers.TryGetValue(StateId.Patrol, out var z))
+        {
+            if(z is IZoneSink zs)             {
+                return zs.TryGetCurrentZone(out zone);
+            }
+        }
+        zone = -1;
+        return false;
+    }
+
+    public bool TrySwitchPatrolZone()
+    {
+        throw new NotImplementedException();
+    }
 }
 
 
@@ -73,6 +99,26 @@ public abstract class DestinationProvider : ICandidateProvider
    
 }
 
+public sealed class TargetPointProvider : DestinationProvider
+{
+    private ITargetable _target;
+
+    public TargetPointProvider(ITargetable target)
+    {
+        Candidates.EnsureCapacity(1);
+        _target = target;
+    }
+
+
+    public override List<(Vector3 position, Vector3? forward)> TryGet(in ValidateDestination req)
+    {
+        if (Candidates == null || /*Candidates.Count == 0 || */_target == null || _target.Transform == null) return null;
+        Candidates.Clear();
+        Candidates.Add((_target.Transform.position, _target.Transform.forward));
+        return Candidates;
+    }
+}
+
 public sealed class WaypointProvider : DestinationProvider
 {
     private IWaypointRepository _repo;
@@ -82,9 +128,9 @@ public sealed class WaypointProvider : DestinationProvider
     private BlockData _wayPointBlock;
     private Action<BlockData> _wpRequestCB;
 
-    public WaypointProvider()
+    public WaypointProvider(IWaypointRepository repo)
     {
-        _repo = WaypointRepo.Instance;
+        _repo = repo;
         Candidates.EnsureCapacity(15);
         _wpRequestCB = OnWaypointBlockReceived;
         // this.RequestWaypointBlock(callback: _wpRequestCB);

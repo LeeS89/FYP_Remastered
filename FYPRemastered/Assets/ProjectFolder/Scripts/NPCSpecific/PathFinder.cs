@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.AI;
 
 
-public class DestinationFinder : IPathResolver
+public class PathFinder : IPathResolver
 {
    /* private ITargetable _primaryTarget;
     private ITargetable _secondaryTarget;
@@ -33,14 +33,16 @@ public class DestinationFinder : IPathResolver
   
 
     private Queue<(List<(Vector3, Vector3?)>, ValidateDestination)> _pathQueue = new(10);
-    private IReadOnlyDictionary<StateId, ICandidateProvider> _providerMap;
+   // private IReadOnlyDictionary<StateId, ICandidateProvider> _providerMap;
+    private IDestinationResolver _destResolver;
 
 
-    public DestinationFinder(IReadOnlyDictionary<StateId, ICandidateProvider> providers)
+    public PathFinder(IDestinationResolver destResolver/*IReadOnlyDictionary<StateId, ICandidateProvider> providers*/)
     {
-        _providerMap = providers;
+      //  _providerMap = providers;
        // _map = providers;
         //Owner = owner;
+        _destResolver = destResolver;
         PathCheckCallback = OnPathRequestcallback;
         _waitUntilPathCheckComplete = new WaitUntil(() => _pathChecked);
        /* _map = new()
@@ -51,16 +53,18 @@ public class DestinationFinder : IPathResolver
 
     public List<(Vector3 position, Vector3? forward)> TryGet(in ValidateDestination request)
     {
-        if (_providerMap.TryGetValue(request.StateId, out var p)) return p.TryGet(request);
+        return _destResolver.TryGet(request); 
+        // if (_providerMap.TryGetValue(request.StateId, out var p)) return p.TryGet(request);
 
-        return null;
+        //  return null;
     }
 
     
 
     public bool TryGetCurrentZone(out int zone)
     {
-        if (_providerMap.TryGetValue(StateId.Patrol, out var p))
+        return _destResolver.TryGetCurrentZone(out zone);
+        /*if (_providerMap.TryGetValue(StateId.Patrol, out var p))
         {
             if (p is WaypointProvider pr)
             {
@@ -70,7 +74,7 @@ public class DestinationFinder : IPathResolver
         }
 
         zone = 0;
-        return false;
+        return false;*/
     }
     
 

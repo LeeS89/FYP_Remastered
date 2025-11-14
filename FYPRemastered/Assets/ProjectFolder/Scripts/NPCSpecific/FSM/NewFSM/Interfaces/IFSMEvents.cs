@@ -60,6 +60,7 @@ public interface IFSMData : ITargetable
     float SprintSpeed { get; }
     float SprintEnterDist { get; }
     float SprintExitDist { get; }
+    float GetAgentStoppingDistance(StateId currentState);
 
 }
 

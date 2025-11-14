@@ -20,7 +20,7 @@ public abstract class IntentStateBase : IIntentState
     public abstract void Enter(IFSMOwner self);
 
 
-    public virtual void Exit(IFSMOwner self) { }// => CancelCurrent(Token)
+    public virtual void Exit(IFSMOwner self) => self?.FSM?.ExitState();
    
 
     public virtual void Handle(IFSMOwner self, NotifyOwnerNPC n)
