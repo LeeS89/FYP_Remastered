@@ -11,6 +11,10 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData
 {
     protected EnemyEventManager _eManager;
     private bool _isInStateTransition = false;
+    protected Action<AnimationLayer> _onAnimLayerToggleComplete;
+    protected bool _aimAnimLayerActive = false;
+
+    protected void OnAnimLayerToggleComplete(AnimationLayer layer) => _aimAnimLayerActive = true;
 
     [Header("FOV Data")]
     [SerializeField] protected FOVParameters _fovParams;
@@ -121,7 +125,8 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData
 
         SetPrimaryToPlayer();
         SetNavMeshAgentParams();
-       
+
+        _onAnimLayerToggleComplete = OnAnimLayerToggleComplete;
         OnMeleeRangeCheckCallback = OnMeleeRangeEnter;
 
         _destinationProviders = new()
@@ -243,8 +248,12 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData
         if (_state == Patrol.Instance)
         {
             Debug.LogError("Moving to Chase state");
-            if(_currentResult == FOVResult.TargetSeen)
+            if(_currentResult == FOVResult.TargetSeen) 
+            {
+                if(!_aimAnimLayerActive) _eManager.ToggleAnimationLayer(AnimationLayer.Aim, _onAnimLayerToggleComplete);
                 SwitchTo(ChaseState.Instance);
+            }
+                
         }
     }
 

@@ -285,7 +285,7 @@ public sealed class EnemyFSMController : FSMControllerBase
 
         }
 
-        _agentEventManager.ChangeAnimatorLayerWeight(AnimationLayer.Alert, 1, 0, 0.5f, true);
+        _agentEventManager.ChangeAnimatorLayerWeight(AnimationLayer.Aim, 1, 0, 0.5f, true);
 
         switch (contextState)
         {
@@ -395,7 +395,7 @@ public sealed class EnemyFSMController : FSMControllerBase
         {
             _alertStatus = AlertStatus.Alert;
 
-            _agentEventManager.ChangeAnimatorLayerWeight(AnimationLayer.Alert, 0, 1, 0.5f, true);
+            _agentEventManager.ChangeAnimatorLayerWeight(AnimationLayer.Aim, 0, 1, 0.5f, true);
 
             //_alertStatus = AlertStatus.Alert;
 

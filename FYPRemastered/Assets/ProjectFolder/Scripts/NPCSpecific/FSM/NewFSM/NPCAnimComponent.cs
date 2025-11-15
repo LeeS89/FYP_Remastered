@@ -36,7 +36,8 @@ public class NPCAnimComponent : ComponentEvents
     {
         _em = eventManager as EnemyEventManager;
         _em.OnAnimationTriggered = PlayAnimationType;
-        _em.OnChangeAnimatorLayerWeight = ChangeLayerWeight;
+        _em.OnToggleAnimationLayer = ToggleAnimationLayer;
+        // _em.OnChangeAnimatorLayerWeight = ChangeLayerWeight;
         _em.OnTargetSeen = AimTowardsTarget;
         _em.OnTickAnimator = UpdateAnimator;
         _anim = GetComponent<Animator>();
@@ -46,7 +47,8 @@ public class NPCAnimComponent : ComponentEvents
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
         _em.OnAnimationTriggered = null;
-        _em.OnChangeAnimatorLayerWeight = null;
+        _em.OnToggleAnimationLayer = null;
+        //   _em.OnChangeAnimatorLayerWeight = null;
         _em.OnTargetSeen = null;
         _em.OnTickAnimator = null;
         _em = null;
@@ -221,25 +223,25 @@ public class NPCAnimComponent : ComponentEvents
         _lookWeightCoroutine = null;
     }
 
-    private void BlendLayerWeight(AnimationLayer layer, float from, float to, float duration)
+    private void ToggleAnimationLayer(AnimationLayer layer, Action<AnimationLayer> completedCB = null)
+        => BlendLayerWeight(layer, 1f, completedCB);
+
+    private void ResetAnimationLayer(AnimationLayer layer)
+        => BlendLayerWeight(layer, 0f);
+
+    private void BlendLayerWeight(AnimationLayer layer, float targetWeight, Action<AnimationLayer> completedCB = null/*, float from, float to, float duration*/)
     {
         int index = (int)layer;
         float currentWeight = _anim.GetLayerWeight(index);
-        to = Mathf.Clamp01(to);
-        if (Mathf.Approximately(currentWeight, to) || duration <= 0f) { _anim.SetLayerWeight(index, to); return; }
+      
+        if (Mathf.Approximately(currentWeight, targetWeight)) { _anim.SetLayerWeight(index, targetWeight); completedCB?.Invoke(layer); return; }
 
-        StartCoroutine(BlendLayerWeightRoutine(layer, from, to, duration));
+        StartCoroutine(BlendLayerWeightRoutine(layer, currentWeight, targetWeight, 0.5f, completedCB));
     }
 
 
-    private IEnumerator BlendLayerWeightRoutine(AnimationLayer layer, float from, float to, float duration, bool layerReady = false)
+    private IEnumerator BlendLayerWeightRoutine(AnimationLayer layer, float from, float to, float duration, Action<AnimationLayer> completedCB = null)
     {
-
-        if (layer == AnimationLayer.Alert)
-        {
-            if (!layerReady) { _em.AimingLayerReady(false); } // Aiming animation is no longer playing -> Can no longer shoot
-        }
-
 
         float time = 0f;
         while (time < duration)
@@ -250,14 +252,10 @@ public class NPCAnimComponent : ComponentEvents
             yield return null;
         }
         _anim.SetLayerWeight((int)layer, to);
-
-        if (layer == AnimationLayer.Alert)
-        {
-            if (layerReady) { _em.AimingLayerReady(true); } // Aiming animation is finished -> Can now start Shooting
-        }
-
+        completedCB?.Invoke(layer);
 
     }
+   
 
 
 
@@ -279,7 +277,7 @@ public class NPCAnimComponent : ComponentEvents
     private IEnumerator FadeLayerWeight(AnimationLayer layer, float from, float to, float duration, bool layerReady = false)
     {
 
-        if (layer == AnimationLayer.Alert)
+        if (layer == AnimationLayer.Aim)
         {
             if (!layerReady) { _em.AimingLayerReady(false); } // Aiming animation is no longer playing -> Can no longer shoot
         }
@@ -295,7 +293,7 @@ public class NPCAnimComponent : ComponentEvents
         }
         _anim.SetLayerWeight((int)layer, to);
 
-        if (layer == AnimationLayer.Alert)
+        if (layer == AnimationLayer.Aim)
         {
             if (layerReady) { _em.AimingLayerReady(true); } // Aiming animation is finished -> Can now start Shooting
         }
@@ -311,7 +309,7 @@ public class NPCAnimComponent : ComponentEvents
 
 public enum AnimationLayer
 {
-    Alert = 1,
+    Aim = 1,
     Combat = 2,
     LookAround = 3
 }

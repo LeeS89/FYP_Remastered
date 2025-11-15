@@ -18,6 +18,7 @@ public class EnemyEventManager : EventManager
     public Action<AnimationCue> OnAnimationTriggered;
     public event Action<float, float> OnSpeedChanged;
     public Action<AnimationLayer, float, float, float, bool> OnChangeAnimatorLayerWeight;
+    public Action<AnimationLayer, Action<AnimationLayer>> OnToggleAnimationLayer;
     public event Action<bool> OnAimingLayerReady;
     public event Action OnDeathAnimationComplete;
 
@@ -142,6 +143,11 @@ public class EnemyEventManager : EventManager
     /// <param name="layerReady"></param>
     public void ChangeAnimatorLayerWeight(AnimationLayer layer, float from, float to, float duration, bool layerReady = false)
         => OnChangeAnimatorLayerWeight?.Invoke(layer, from, to, duration, layerReady);
+
+
+    public void ToggleAnimationLayer(AnimationLayer layer, Action<AnimationLayer> onLayerToggled)
+        => OnToggleAnimationLayer?.Invoke(layer, onLayerToggled);
+
 
     /// <summary>
     /// Used to alert the agents weapon to be ready to fire

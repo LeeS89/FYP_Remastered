@@ -218,7 +218,7 @@ public class EnemyAnimController
     private IEnumerator FadeLayerWeight(AnimationLayer layer, float from, float to, float duration, bool layerReady = false)
     {
 
-        if(layer == AnimationLayer.Alert)
+        if(layer == AnimationLayer.Aim)
         {
             if (!layerReady) { _eventManager.AimingLayerReady(false); } // Aiming animation is no longer playing -> Can no longer shoot
         }
@@ -234,7 +234,7 @@ public class EnemyAnimController
         }
         _anim.SetLayerWeight((int)layer, to);
 
-        if (layer == AnimationLayer.Alert)
+        if (layer == AnimationLayer.Aim)
         {
             if (layerReady) { _eventManager.AimingLayerReady(true); } // Aiming animation is finished -> Can now start Shooting
         }
