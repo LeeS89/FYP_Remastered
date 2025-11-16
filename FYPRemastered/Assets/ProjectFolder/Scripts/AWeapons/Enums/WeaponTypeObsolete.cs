@@ -134,6 +134,7 @@ public enum NotificationKind
     TargetMoved,
     TargetLeftArea,
     PathBlocked,
+    TargetFound,
     /*TargetLOSLost,
     TargetLOSConfirmed,*/
     FOVUpdate,

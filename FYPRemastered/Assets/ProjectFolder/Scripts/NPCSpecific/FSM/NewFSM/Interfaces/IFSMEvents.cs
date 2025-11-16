@@ -66,6 +66,7 @@ public interface IFSMData : ITargetable
 
 public interface IFSMOwner
 {
+    void BroadcastAlert();
     void LogUnhandled(IntentStateBase state, in NotifyOwnerNPC notification);
     void SwitchTo(IIntentState next);
     void HandleFOVSweepResult(FOVResult result, bool withinAttackAngles);
@@ -73,7 +74,8 @@ public interface IFSMOwner
 
 }
 
-public interface IFieldOfViewOwner 
+
+public interface IFieldOfViewOwner // Obsolete
 {
     void FieldOfViewSweepResult(FOVResult result, bool withinAttackAngles);
 

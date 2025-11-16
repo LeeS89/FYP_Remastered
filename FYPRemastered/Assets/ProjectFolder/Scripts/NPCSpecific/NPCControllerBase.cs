@@ -242,7 +242,7 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData
     public void HandleFOVSweepResult(FOVResult result, bool withinAttackAngles)
     {
         Debug.LogError("FOVResult: "+result.ToString());
-        if (_currentResult == result) return;
+        if (_currentResult == result || OwnerIsDead) return;
         Debug.LogError("FOVResult when changed: " + result.ToString());
         _currentResult = result;
         if (_state == Patrol.Instance)
@@ -257,5 +257,8 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData
         }
     }
 
-    
+    public void BroadcastAlert()
+    {
+        if (OwnerIsDead) return;
+    }
 }

@@ -8,24 +8,24 @@ public static class FSMExtension
     public static Coroutine BeginPatrolRoutine(this FSMManager m, StateId id, Transform t, float minWait, float maxWait, Vector3? forward, Action animationCB, Func<StateId, bool> canContinueCB, Action<StateId> OnDone)
         => CoroutineRunner.Instance.StartCoroutine(PatrolWaitRoutine(id, t, minWait, maxWait, forward, animationCB, canContinueCB, OnDone));
 
-    private static IEnumerator PatrolWaitRoutine(StateId id, Transform t, float minWait, float maxWait, Vector3? forward, Action animationCB, Func<StateId, bool> canContinueCB, Action<StateId> OnDone)
+    private static IEnumerator PatrolWaitRoutine(StateId id, Transform t, float minWait, float maxWait, Vector3? forward, Action animationCB, Func<StateId, bool> cantContinueCB, Action<StateId> OnDone)
     {
         if (forward != null)
         {
             Quaternion targetRot = Quaternion.LookRotation(forward.Value);
             while (Quaternion.Angle(t.rotation, targetRot) > 2.0f + Mathf.Epsilon)
             {
-                if (!canContinueCB?.Invoke(id) ?? false) yield break;
+                if (!cantContinueCB?.Invoke(id) ?? false) yield break;
                 t.rotation = Quaternion.Slerp(t.rotation, targetRot, Time.deltaTime * 2f);
                 yield return null;
             }
 
         }
-        if (!canContinueCB?.Invoke(id) ?? false) yield break;
+        if (cantContinueCB?.Invoke(id) ?? false) yield break;
 
         animationCB?.Invoke();
         //Owner.OwnerEM.TriggerAnimation(AnimationCue.Look);
-        if (!canContinueCB?.Invoke(id) ?? false) yield break;
+        if (cantContinueCB?.Invoke(id) ?? false) yield break;
       //  if (_currentStateId != StateId.Patrol) { _runningRoutine = null; yield break; }
 
         float _delayTime = Random.Range(minWait, maxWait);
@@ -36,7 +36,7 @@ public static class FSMExtension
             elapsedTime += Time.deltaTime;
             yield return null;
         }
-        if (!canContinueCB?.Invoke(id) ?? false) yield break;
+        if (cantContinueCB?.Invoke(id) ?? false) yield break;
         OnDone?.Invoke(id);
        
     }

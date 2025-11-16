@@ -119,11 +119,9 @@ public readonly struct NotifyOwnerNPC
     public readonly bool HasReachedStaleDestination;
     public readonly Vector3 Destination { get; }
     public readonly NavMeshPath Path;
-    //public readonly bool TargetSeen;
     public readonly FOVResult FOVResult;
     public readonly bool TargetWithinshootingAngles;
-    // public readonly float NewSpeed;
-    //  public readonly float Lerp;
+  
 
     private NotifyOwnerNPC(NotificationKind kind, StateId stateId, bool reachedStaleDestination, Vector3 dest, NavMeshPath path, FOVResult result, bool targetInshootAngles)
         => (Kind, Id, HasReachedStaleDestination, Destination, Path, FOVResult, TargetWithinshootingAngles) = (kind, stateId, reachedStaleDestination, dest, path, result, targetInshootAngles);
@@ -144,6 +142,9 @@ public readonly struct NotifyOwnerNPC
     public static NotifyOwnerNPC FOVUpdate(StateId id, FOVResult result, bool targetInShootingAngles)
         => new(NotificationKind.FOVUpdate, id, false, Vector3.zero, null, result, targetInShootingAngles);
 
+    public static NotifyOwnerNPC TargetFound(StateId id)
+        => new(NotificationKind.TargetFound, id, false, Vector3.zero, null, FOVResult.None, false);
+
   /*  public static NotifyOwnerNPC TargetLOSLost(StateId id)
         => new(NotificationKind.TargetLOSLost, id, false, Vector3.zero, null);
 
@@ -159,6 +160,4 @@ public readonly struct NotifyOwnerNPC
     public static NotifyOwnerNPC PathToPrimaryAvailable(StateId id)
         => new(NotificationKind.PathToPrimaryAvailable, id, false, Vector3.zero, null, FOVResult.None, false);
 
-    /*public static NotifyOwnerNPC DestinationReached(StateId id, bool StaleDestination)
-        => new(NotificationKind.DestinationReached, id, StaleDestination, Vector3.zero, null, StaleDestination, StaleDestination);*/
 }

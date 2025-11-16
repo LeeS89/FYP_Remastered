@@ -50,12 +50,22 @@ public class FSMManager : FSMBase
         AssignActions();
     }
 
+    private bool StateHasChanged(StateId id)
+    {
+        if(id != _currentStateId)
+        {
+            CancelRunningCoroutine();
+            return true;
+        }
+        return false;
+    }
+
     private void AssignActions()
     {
         _fovHandler.OnFOVSweepComplete = FieldOfViewSweepResult;
         _pathFinder.Callback = OnPathRequestComplete;// New
         TryRepath = TryGetNextDestination;
-        CancelOrContinueRoutine = HasSwitchedState;
+        CancelOrContinueRoutine = StateHasChanged;
         LookAroundAction = LookAround;
         RemainingDistanceAction = SetSpeedByDistance; // obsolete
         OnPatrolReached = LookAroundAndContinue;
@@ -79,7 +89,14 @@ public class FSMManager : FSMBase
     #region Destination Region
 
     public override void FieldOfViewSweepResult(FOVResult result, bool withinAttackAngles)
-        => Notification?.Invoke(NotifyOwnerNPC.FOVUpdate(_currentStateId, result, withinAttackAngles));
+    {
+        if (_currentStateId == StateId.Patrol || _currentStateId == StateId.Search)
+        {
+            Notification?.Invoke(NotifyOwnerNPC.TargetFound(_currentStateId));
+            return;
+        }
+        Notification?.Invoke(NotifyOwnerNPC.FOVUpdate(_currentStateId, result, withinAttackAngles));
+    }
 
    
 
@@ -112,7 +129,7 @@ public class FSMManager : FSMBase
     public override void OnPathRequestComplete(in PathResult result)
     {
 
-        if (result.Id != _currentStateId || result.Reason == PathCheckReason.Cancelled) return;
+        if (StateHasChanged(result.Id)/*result.Id != _currentStateId*/ || result.Reason == PathCheckReason.Cancelled) return;
         bool pathFound = result.PathFound;
         StateId id = result.Id;
 
@@ -270,7 +287,8 @@ public class FSMManager : FSMBase
 
     private void TryGetNextDestination(StateId current)
     {
-        if (current != _currentStateId) return;
+        if (StateHasChanged(current)) return;
+      //  if (current != _currentStateId) return;
 
         ValidateDestination request;
 
@@ -309,7 +327,7 @@ public class FSMManager : FSMBase
     }
   
 
-    private bool HasSwitchedState(StateId id)
+  /*  private bool HasSwitchedState(StateId id)
     {
         if (id != _currentStateId) 
         {
@@ -317,7 +335,7 @@ public class FSMManager : FSMBase
             return false; 
         }
         return true;
-    }
+    }*/
 
     // Change to Action
     private void LookAround() { }//=> Owner.OwnerEM.TriggerAnimation(AnimationCue.Look);
