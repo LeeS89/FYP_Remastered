@@ -119,6 +119,7 @@ public class SceneEventAggregator : MonoBehaviour
 
     #region Agent Zone Registry Events
     public event Action<FSMControllerBase, int> OnAgentZoneRegistered;
+    
     public event Action<FSMControllerBase, int> OnAgentZoneUnRegistered;
     public event Action<int, FSMControllerBase> OnAlertZoneAgents;
 
@@ -136,9 +137,25 @@ public class SceneEventAggregator : MonoBehaviour
     {
         OnAlertZoneAgents?.Invoke(zone, source);
     }
+
+    // NEW
+
+    public Action<IZoneAlertListener, int> OnRegisterAgentAndZone;
+    public void RegisterAgentAndZone(IZoneAlertListener agent, int zone)
+        => OnRegisterAgentAndZone?.Invoke(agent, zone);
+
+    public Action<IZoneAlertListener, int> OnUnRegisterAgentAndZone;
+    public void UnRegisterAgentAndZone(IZoneAlertListener agent, int zone)
+        => OnUnRegisterAgentAndZone?.Invoke(agent, zone);
+
+    public Func<int, IZoneAlertListener, bool> OnAlertAgentsInZone;
+    public bool AlertAgentsInZone(int zone, IZoneAlertListener listener)
+        => OnAlertAgentsInZone?.Invoke(zone, listener) ?? true; // if no subscribers, default to true
+    
+    // END NEW
     #endregion
 
-  
+
 
     #endregion
 }

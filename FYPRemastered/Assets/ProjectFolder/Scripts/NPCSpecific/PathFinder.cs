@@ -53,7 +53,7 @@ public class PathFinder : IPathResolver
 
     public List<(Vector3 position, Vector3? forward)> TryGet(in ValidateDestination request)
     {
-        return _destResolver.TryGet(request); 
+        return _destResolver?.TryGet(request); 
         // if (_providerMap.TryGetValue(request.StateId, out var p)) return p.TryGet(request);
 
         //  return null;

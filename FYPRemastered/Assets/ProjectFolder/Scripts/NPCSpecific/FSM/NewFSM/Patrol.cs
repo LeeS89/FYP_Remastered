@@ -29,7 +29,7 @@ public sealed class Patrol : IntentStateBase
                 // Error - Hold
                 break;
             case NotificationKind.TargetFound:
-                self.BroadcastAlert();
+                self.TryBroadcastAlert();
                 break;
             //case NotificationKind.TargetLOSConfirmed:
             // Notify Zone

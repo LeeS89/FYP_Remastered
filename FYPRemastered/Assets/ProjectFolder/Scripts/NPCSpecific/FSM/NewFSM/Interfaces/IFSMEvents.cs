@@ -66,12 +66,17 @@ public interface IFSMData : ITargetable
 
 public interface IFSMOwner
 {
-    void BroadcastAlert();
+    void TryBroadcastAlert(); // Remove, NPCControllerBase will handle this
     void LogUnhandled(IntentStateBase state, in NotifyOwnerNPC notification);
     void SwitchTo(IIntentState next);
     void HandleFOVSweepResult(FOVResult result, bool withinAttackAngles);
     IFSMControl FSM { get; }
 
+}
+
+public interface IZoneAlertListener
+{
+    void EnterAlertPhase();
 }
 
 

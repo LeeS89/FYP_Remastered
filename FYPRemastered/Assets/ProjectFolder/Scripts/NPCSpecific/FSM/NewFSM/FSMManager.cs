@@ -90,11 +90,11 @@ public class FSMManager : FSMBase
 
     public override void FieldOfViewSweepResult(FOVResult result, bool withinAttackAngles)
     {
-        if (_currentStateId == StateId.Patrol || _currentStateId == StateId.Search)
+       /* if (_currentStateId == StateId.Patrol || _currentStateId == StateId.Search)
         {
             Notification?.Invoke(NotifyOwnerNPC.TargetFound(_currentStateId));
             return;
-        }
+        }*/
         Notification?.Invoke(NotifyOwnerNPC.FOVUpdate(_currentStateId, result, withinAttackAngles));
     }
 

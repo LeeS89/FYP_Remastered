@@ -7,7 +7,7 @@ using UnityEngine.AI;
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(NavMeshObstacle))]
-public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData
+public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, IZoneAlertListener
 {
     protected EnemyEventManager _eManager;
     private bool _isInStateTransition = false;
@@ -257,8 +257,18 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData
         }
     }
 
-    public void BroadcastAlert()
+    public void TryBroadcastAlert()
     {
         if (OwnerIsDead) return;
+        if(SceneEventAggregator.Instance.AlertAgentsInZone(1, this))
+        {
+
+        }
+    }
+
+    public void EnterAlertPhase()
+    {
+        if (OwnerIsDead) return;
+        SwitchTo(ChaseState.Instance);
     }
 }
