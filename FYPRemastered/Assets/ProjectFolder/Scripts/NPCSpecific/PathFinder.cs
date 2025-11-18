@@ -34,10 +34,10 @@ public class PathFinder : IPathResolver
 
     private Queue<(List<(Vector3, Vector3?)>, ValidateDestination)> _pathQueue = new(10);
    // private IReadOnlyDictionary<StateId, ICandidateProvider> _providerMap;
-    private IDestinationResolver _destResolver;
+    private ICandidateProvider _destResolver;
 
 
-    public PathFinder(IDestinationResolver destResolver/*IReadOnlyDictionary<StateId, ICandidateProvider> providers*/)
+    public PathFinder(ICandidateProvider destResolver/*IReadOnlyDictionary<StateId, ICandidateProvider> providers*/)
     {
       //  _providerMap = providers;
        // _map = providers;
@@ -61,10 +61,10 @@ public class PathFinder : IPathResolver
 
     
 
-    public bool TryGetCurrentZone(out int zone)
+  /*  public bool TryGetCurrentZone(out int zone)
     {
         return _destResolver.TryGetCurrentZone(out zone);
-        /*if (_providerMap.TryGetValue(StateId.Patrol, out var p))
+        *//*if (_providerMap.TryGetValue(StateId.Patrol, out var p))
         {
             if (p is WaypointProvider pr)
             {
@@ -74,9 +74,11 @@ public class PathFinder : IPathResolver
         }
 
         zone = 0;
-        return false;*/
-    }
-    
+        return false;*//*
+    }*/
+    public int? TryGetCurrentZone() => _destResolver?.TryGetCurrentZone();
+
+
 
     public bool TrySwitchPatrolZone() => false;
    
@@ -252,6 +254,8 @@ public class PathFinder : IPathResolver
     }
 
     
+
+
     /* public Vector3? GetFollowTarget(MovementIntent intent)
 {
     Vector3? target;

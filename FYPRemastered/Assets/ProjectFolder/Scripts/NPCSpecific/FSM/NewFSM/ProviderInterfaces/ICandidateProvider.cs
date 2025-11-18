@@ -4,19 +4,19 @@ using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.AI;
 
-public interface ICandidateProvider
+public interface ICandidateProvider : IZoneSink
 {
     List<(Vector3 position, Vector3? forward)> TryGet(in ValidateDestination req);
   //  List<(Vector3, Vector3?)> Candidates { get; }
 
 }
 
-public interface IDestinationResolver : ICandidateProvider, IZoneSink
+/*public interface IDestinationResolver : ICandidateProvider*//*, IZoneSink*//*
 {
     // GetWaypointZone
     // TrySwitchWaypoints
 
-}
+}*/
 
 public interface IPathResolver : IZoneSink
 {
@@ -33,8 +33,8 @@ public interface IPathResolver : IZoneSink
 
 public interface IZoneSink
 {
-    bool TryGetCurrentZone(out int zone);
-
+//    bool TryGetCurrentZone(out int zone);
+    int? TryGetCurrentZone();
     bool TrySwitchPatrolZone();
 }
 
@@ -49,12 +49,14 @@ public interface IFlankPointSampler
     List<FlankPointData> GetFlankPoints();
 }
 
-public class DestinationResolver : IDestinationResolver
+public class DestinationResolver : ICandidateProvider
 {
     private IReadOnlyDictionary<StateId, ICandidateProvider> _providers;
 
     public DestinationResolver(IReadOnlyDictionary<StateId, ICandidateProvider> providers)
     => _providers = providers;
+
+    
 
     public List<(Vector3 position, Vector3? forward)> TryGet(in ValidateDestination req)
     {
@@ -63,7 +65,7 @@ public class DestinationResolver : IDestinationResolver
         return null;
     }
 
-    public bool TryGetCurrentZone(out int zone)
+    /*public bool TryGetCurrentZone(out int zone)
     {
         if(_providers.TryGetValue(StateId.Patrol, out var z))
         {
@@ -73,6 +75,16 @@ public class DestinationResolver : IDestinationResolver
         }
         zone = -1;
         return false;
+    }*/
+
+    public int? TryGetCurrentZone()
+    {
+        if (_providers.TryGetValue(StateId.Patrol, out var z))
+        {
+            if (z is IZoneSink zs)
+                return zs.TryGetCurrentZone();
+        }
+        return null;
     }
 
     public bool TrySwitchPatrolZone()
@@ -96,7 +108,13 @@ public abstract class DestinationProvider : ICandidateProvider
     }
    
     public abstract List<(Vector3 position, Vector3? forward)> TryGet(in ValidateDestination req);
-   
+
+   // public abstract bool TryGetCurrentZone(out int zone);
+
+    public virtual bool TrySwitchPatrolZone() => false;
+
+    public abstract int? TryGetCurrentZone();
+    
 }
 
 public sealed class TargetPointProvider : DestinationProvider
@@ -117,12 +135,22 @@ public sealed class TargetPointProvider : DestinationProvider
         Candidates.Add((_target.Transform.position, _target.Transform.forward));
         return Candidates;
     }
+
+   /* public override bool TryGetCurrentZone(out int zone)
+    {
+        zone = -1;
+        return false;
+       *//* throw new NotImplementedException();*//*
+    }*/
+
+    public override int? TryGetCurrentZone() => null;
+    
 }
 
 public sealed class WaypointProvider : DestinationProvider
 {
     private IWaypointRepository _repo;
-    public int CurrentWaypointZone { get; private set; }
+    public int? CurrentWaypointZone { get; private set; } = null;
 
     //public List<(Vector3, Vector3?)> Candidates { get; set; } = new();
     private BlockData _wayPointBlock;
@@ -168,7 +196,21 @@ public sealed class WaypointProvider : DestinationProvider
             Candidates.Add((_wayPointBlock._waypointPositions[i], _wayPointBlock._waypointForwards[i]));
     }
 
-   
+    /*public override bool TryGetCurrentZone(out int zone)
+    {
+        zone = CurrentWaypointZone.Value;
+        return CurrentWaypointZone >= 0;
+    }*/
+
+
+    public override bool TrySwitchPatrolZone()
+    {
+        return false;
+       // throw new NotImplementedException();
+    }
+
+    public override int? TryGetCurrentZone() => CurrentWaypointZone;
+
 }
 
 

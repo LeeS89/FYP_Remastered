@@ -52,11 +52,11 @@ public abstract class FSMBase : IFSMControl
     // 
   //  protected void SendNotification(in NotifyOwnerNPC n) => Notification?.Invoke(n);
 
-    public bool TryGetCurrentZone(out int zone)
+   /* public bool TryGetCurrentZone(out int zone)
     {
         if (_pathFinder == null) { zone = 0; return false; }
         return _pathFinder.TryGetCurrentZone(out zone);
-    }
+    }*/
 
     public bool IsMoving() => _speedTier != SpeedTier.Idle;
 
@@ -97,7 +97,13 @@ public abstract class FSMBase : IFSMControl
     }
 
     public virtual void FieldOfViewSweepResult(FOVResult result, bool withinAttackAngles) { }
-   
+
+    public int? TryGetPatrolZone() => _pathFinder?.TryGetCurrentZone();
+
+
+    //  public abstract bool TryGetPatrolZone(out int zone);
+
+
     // Used when the Agent is currently carving
     // After uncarving, this delays setting a new destination
     // for 1 frame to give the NavMesh enough time to update

@@ -28,9 +28,9 @@ public sealed class Patrol : IntentStateBase
             case NotificationKind.NoAvailablePath://.NoPatrolPointAvailable:
                 // Error - Hold
                 break;
-            case NotificationKind.TargetFound:
+           /* case NotificationKind.TargetFound:
                 self.TryBroadcastAlert();
-                break;
+                break;*/
             //case NotificationKind.TargetLOSConfirmed:
             // Notify Zone
             //  break;

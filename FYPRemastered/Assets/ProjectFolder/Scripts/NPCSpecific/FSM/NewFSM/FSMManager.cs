@@ -33,7 +33,7 @@ public class FSMManager : FSMBase
             {
                 { StateId.Patrol, new WaypointProvider(WaypointRepo.Instance) }
             };
-            IDestinationResolver destResolver = new DestinationResolver(providers);
+            ICandidateProvider destResolver = new DestinationResolver(providers);
             _pathFinder = new PathFinder(destResolver);
         }
         else _pathFinder = resolver;
@@ -308,10 +308,20 @@ public class FSMManager : FSMBase
     }
 
 
+    /*public override bool TryGetPatrolZone(out int zone)
+    {
+       if(_pathFinder != null)
+            return _pathFinder.TryGetCurrentZone(out zone);
+
+        zone = -1;
+        return false;
+    }*/
+
+
     public override void BeginPatrol(StateId id)
     {
         if (id != StateId.Patrol) return;
-        _fovHandler.SetFOVSweepFrequency(AlertPhase.Idle);
+        _fovHandler?.SetFOVSweepFrequency(AlertPhase.Idle);
         OnDestinationReached = OnPatrolReached;
        // CancelRunningCoroutine();
         
@@ -406,4 +416,6 @@ public class FSMManager : FSMBase
         OnTick -= ClassUpdate;
         LateTick = null;
     }
+
+    
 }

@@ -36,7 +36,8 @@ public class NPCAnimComponent : ComponentEvents
     {
         _em = eventManager as EnemyEventManager;
         _em.OnAnimationTriggered = PlayAnimationType;
-        _em.OnToggleAnimationLayer = ToggleAnimationLayer;
+       // _em.OnToggleAnimationLayer = ToggleAnimationLayer;
+        _em.OnTogglingAnimationLayer = ActivateAnimationLayer;
         // _em.OnChangeAnimatorLayerWeight = ChangeLayerWeight;
         _em.OnTargetSeen = AimTowardsTarget;
         _em.OnTickAnimator = UpdateAnimator;
@@ -47,7 +48,8 @@ public class NPCAnimComponent : ComponentEvents
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
         _em.OnAnimationTriggered = null;
-        _em.OnToggleAnimationLayer = null;
+        _em.OnTogglingAnimationLayer = null;
+        // _em.OnToggleAnimationLayer = null;
         //   _em.OnChangeAnimatorLayerWeight = null;
         _em.OnTargetSeen = null;
         _em.OnTickAnimator = null;
@@ -255,7 +257,42 @@ public class NPCAnimComponent : ComponentEvents
         completedCB?.Invoke(layer);
 
     }
-   
+
+    // NEW BLEND LAYER
+    private void ActivateAnimationLayer(AnimationLayer layer, Action completedCB = null)
+       => BlendingLayerWeight(layer, 1f, completedCB);
+
+    private void ResetingAnimationLayer(AnimationLayer layer)
+        => BlendingLayerWeight(layer, 0f);
+
+    private void BlendingLayerWeight(AnimationLayer layer, float targetWeight, Action completedCB = null/*, float from, float to, float duration*/)
+    {
+        int index = (int)layer;
+        float currentWeight = _anim.GetLayerWeight(index);
+
+        if (Mathf.Approximately(currentWeight, targetWeight)) { _anim.SetLayerWeight(index, targetWeight); completedCB?.Invoke(); return; }
+
+        StartCoroutine(BlendingLayerWeightRoutine(layer, currentWeight, targetWeight, 0.5f, completedCB));
+    }
+
+
+    private IEnumerator BlendingLayerWeightRoutine(AnimationLayer layer, float from, float to, float duration, Action completedCB = null)
+    {
+
+        float time = 0f;
+        while (time < duration)
+        {
+            float t = time / duration;
+            _anim.SetLayerWeight((int)layer, Mathf.Lerp(from, to, t));
+            time += Time.deltaTime;
+            yield return null;
+        }
+        _anim.SetLayerWeight((int)layer, to);
+        completedCB?.Invoke();
+
+    }
+    // END NEW BLEND LAYER
+
 
 
 

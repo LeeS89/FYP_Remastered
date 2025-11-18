@@ -71,11 +71,11 @@ public class WaypointResources : SceneResources
             SceneEventAggregator.Instance.AddDependancy(new PathRequestManager());
         }
 
-        exists = SceneEventAggregator.Instance.CheckDependancyExists(typeof(AgentZoneRegistry));
+        exists = SceneEventAggregator.Instance.CheckDependancyExists(typeof(AgentZoneRegistryNew));
 
         if (!exists)
         {
-            SceneEventAggregator.Instance.AddDependancy(new AgentZoneRegistry());
+            SceneEventAggregator.Instance.AddDependancy(new AgentZoneRegistryNew());
         }
 
         exists = SceneEventAggregator.Instance.CheckDependancyExists(typeof(PlayerFlankingResources));

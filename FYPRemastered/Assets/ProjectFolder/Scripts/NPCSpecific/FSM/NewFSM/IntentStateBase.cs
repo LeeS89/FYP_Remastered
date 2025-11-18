@@ -25,8 +25,8 @@ public abstract class IntentStateBase : IIntentState
 
     public virtual void Handle(IFSMOwner self, NotifyOwnerNPC n)
     {
-       // if(n.Kind == NotificationKind.FOVUpdate) self.HandleFOVSweepResult(n.FOVResult, n.TargetWithinshootingAngles);
-        /*else*/ self.LogUnhandled(this, n);
+        if(n.Kind == NotificationKind.FOVUpdate) self.HandleFOVSweepResult(n.FOVResult, n.TargetWithinshootingAngles);
+        else self.LogUnhandled(this, n);
     }
         
 

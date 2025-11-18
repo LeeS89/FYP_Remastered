@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -12,7 +13,9 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, 
     protected EnemyEventManager _eManager;
     private bool _isInStateTransition = false;
     protected Action<AnimationLayer> _onAnimLayerToggleComplete;
+    protected Action _onLayerToggleComplete;
     protected bool _aimAnimLayerActive = false;
+    protected int? _currentPatrolZone = null;
 
     protected void OnAnimLayerToggleComplete(AnimationLayer layer) => _aimAnimLayerActive = true;
 
@@ -88,7 +91,7 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, 
     // FSMManager Composition
     public IFSMControl FSM { get; protected set; }
     private IPathResolver _pathFinder;
-    private IDestinationResolver _destinationResolver;
+    private ICandidateProvider _destinationResolver;
     private IFieldOfViewRunner _fovRunner;
     private Dictionary<StateId, ICandidateProvider> _destinationProviders;
     protected IIntentState _state;
@@ -185,6 +188,22 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, 
     {
         base.OnSceneStarted();
         SwitchTo(Patrol.Instance);
+        
+        _currentPatrolZone = FSM?.TryGetPatrolZone();
+
+        if (_currentPatrolZone != null)
+        {
+            SceneEventAggregator.Instance.RegisterAgentAndZone(this, _currentPatrolZone.Value);
+#if UNITY_EDITOR
+            Debug.LogError("Successfully got zone: " + _currentPatrolZone);
+#endif
+        }
+        else
+        {
+#if UNITY_EDITOR
+            Debug.LogError("Failed to get zone");
+#endif
+        }
     }
 
     protected override void DeathStatusUpdated(bool isDead)
@@ -235,36 +254,54 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, 
 
     public void LogUnhandled(IntentStateBase state, in NotifyOwnerNPC notification)
     {
-        throw new NotImplementedException();
+        var Kind = notification.Kind;
+        Debug.LogError("Notification Kind from unhandled: "+ Kind.ToString());
     }
 
     private FOVResult _currentResult = FOVResult.TargetNotSeen;
     public void HandleFOVSweepResult(FOVResult result, bool withinAttackAngles)
     {
         Debug.LogError("FOVResult: "+result.ToString());
-        if (_currentResult == result || OwnerIsDead) return;
-        Debug.LogError("FOVResult when changed: " + result.ToString());
+        if (/*_currentResult == result || */OwnerIsDead) return;
+        //Debug.LogError("FOVResult when changed: " + result.ToString());
         _currentResult = result;
         if (_state == Patrol.Instance)
         {
-            Debug.LogError("Moving to Chase state");
+           // Debug.LogError("Moving to Chase state");
             if(_currentResult == FOVResult.TargetSeen) 
             {
-                if(!_aimAnimLayerActive) _eManager.ToggleAnimationLayer(AnimationLayer.Aim, _onAnimLayerToggleComplete);
-                SwitchTo(ChaseState.Instance);
+                TryBroadcastAlert();
+              //  if (!_aimAnimLayerActive) _eManager.ToggleAnimationLayer(AnimationLayer.Aim, _onAnimLayerToggleComplete);
+               // SwitchTo(ChaseState.Instance);
             }
-                
+            return;
         }
     }
 
-    public void TryBroadcastAlert()
+    protected void TryBroadcastAlert()
     {
-        if (OwnerIsDead) return;
-        if(SceneEventAggregator.Instance.AlertAgentsInZone(1, this))
+        if (OwnerIsDead || _currentPatrolZone == null) return;
+        if(SceneEventAggregator.Instance.AlertAgentsInZone(_currentPatrolZone.Value, this))
         {
-
+            //SwitchTo(ChaseState.Instance);
+            StartCoroutine(WaitRoutine());
+            Debug.LogError("Alert broadcasted to zone: " + _currentPatrolZone.Value);
         }
     }
+
+    private IEnumerator WaitRoutine()
+    {
+        bool done = false;
+        _eManager.TogglingAnimationLayer(AnimationLayer.Aim,
+            onComplete: () => done = true
+            );
+
+        while (!done) yield return null;
+        if (OwnerIsDead) yield break;
+        Debug.LogError("Moving to Chase state");
+        SwitchTo(ChaseState.Instance);
+    }
+
 
     public void EnterAlertPhase()
     {

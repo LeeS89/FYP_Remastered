@@ -133,7 +133,7 @@ public class AgentZoneRegistryNew : SceneResources
         if (!_zoneAgents[zone].Contains(agent))
         {
             _zoneAgents[zone].Add(agent);
-            //Debug.LogWarning("Agent Registered in Zone: "+zone);
+          //  Debug.LogError("Agent Registered in Zone: "+zone);
         }
             
     }

@@ -41,6 +41,9 @@ public interface IFSMControl : ITickable
     void FollowGroup(StateId id);
     void ExitState();
     bool IsMoving();
+  //  bool TryGetPatrolZone(out int zone);
+
+    int? TryGetPatrolZone();
 
     delegate void OnNotifyOwner(in NotifyOwnerNPC n);
     OnNotifyOwner Notification { get; set; }
@@ -66,7 +69,7 @@ public interface IFSMData : ITargetable
 
 public interface IFSMOwner
 {
-    void TryBroadcastAlert(); // Remove, NPCControllerBase will handle this
+   // void TryBroadcastAlert(); // Remove, NPCControllerBase will handle this
     void LogUnhandled(IntentStateBase state, in NotifyOwnerNPC notification);
     void SwitchTo(IIntentState next);
     void HandleFOVSweepResult(FOVResult result, bool withinAttackAngles);
