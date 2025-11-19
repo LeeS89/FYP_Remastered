@@ -146,7 +146,7 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, 
         FSM = new FSMManager(data: this, /*notify: this, */resolver: _pathFinder, runner: _fovRunner);
         FSM.Notification = Notify;
         FSM.OnAnimationIntent = AnimationIntent;
-
+        FSM.OnWaypointZoneReceived = OnWaypointZoneReceived;
 
         base.RegisterLocalEvents(_eManager);
         RegisterGlobalEvents();
@@ -184,12 +184,21 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, 
         UnRegisterGlobalEvents();
     }
 
+    protected override void OnSceneComplete()
+    {
+        base.OnSceneComplete();
+        FSM.Notification = null;
+        FSM.OnAnimationIntent = null;
+        FSM.OnWaypointZoneReceived = null;
+    }
+
     protected override void OnSceneStarted()
     {
         base.OnSceneStarted();
+
         SwitchTo(Patrol.Instance);
         
-        _currentPatrolZone = FSM?.TryGetPatrolZone();
+       /* _currentPatrolZone = FSM?.TryGetPatrolZone();
 
         if (_currentPatrolZone != null)
         {
@@ -203,7 +212,27 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, 
 #if UNITY_EDITOR
             Debug.LogError("Failed to get zone");
 #endif
-        }
+        }*/
+    }
+
+    /// <summary>
+    /// Handles the event triggered when a waypoint zone is received, updating the patrol zone if necessary.
+    /// </summary>
+    /// <remarks>If the received zone is different from the current patrol zone and the operation is
+    /// successful,  the method updates the patrol zone and registers the agent with the new zone. If the agent was 
+    /// previously registered with another zone, it is unregistered from that zone first.</remarks>
+    /// <param name="success">Indicates whether the waypoint zone was successfully received. If <see langword="false"/>, no action is taken.</param>
+    /// <param name="zone">The identifier of the received waypoint zone. Must be a non-negative integer.</param>
+    protected void OnWaypointZoneReceived(bool success, int zone)
+    {
+#if UNITY_EDITOR
+        Debug.LogError("Successfully got zone: " + zone);
+#endif
+        if (_currentPatrolZone == zone || !success || zone < 0) return;
+        if(_currentPatrolZone != null) SceneEventAggregator.Instance.UnregisterAgentAndZone(this, _currentPatrolZone.Value);
+        _currentPatrolZone = zone;
+        SceneEventAggregator.Instance.RegisterAgentAndZone(this, zone);
+
     }
 
     protected override void DeathStatusUpdated(bool isDead)
@@ -285,7 +314,7 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, 
         {
             //SwitchTo(ChaseState.Instance);
             StartCoroutine(WaitRoutine());
-            Debug.LogError("Alert broadcasted to zone: " + _currentPatrolZone.Value);
+            Debug.LogError("Alert broadcasted to zone: " + _currentPatrolZone);
         }
     }
 

@@ -6,7 +6,7 @@ public abstract class FSMBase : IFSMControl
 {
     public Action<StateId> TryRepath { get; protected set; }
     public bool DestinationReached { get; protected set; } = true;
-    public bool HasLOS { get; set; }
+    //public bool HasLOS { get; set; }
   //  public StateNotificationProvider Notification { get; set; }
     protected event Action<float> OnTick;
     public void Tick(float dt) => OnTick?.Invoke(dt);
@@ -15,6 +15,7 @@ public abstract class FSMBase : IFSMControl
     public ITargetable PrimaryTarget { get; set; }
     public IFSMControl.OnNotifyOwner Notification { get; set; }
     public Action<AnimationCue> OnAnimationIntent { get; set; }
+    public Action<bool, int> OnWaypointZoneReceived { get; set; }
 
     protected IFieldOfViewRunner _fovHandler;
 
@@ -27,7 +28,7 @@ public abstract class FSMBase : IFSMControl
     protected IFSMData _ownerData;
    // protected IFSMNotifications _ownerNotifications;
     protected Vector3 _currentDestination;
-    protected Vector3? _currentDestinaationForward = null;
+    protected Vector3? _currentDestinationForward = null;
     protected float _targetSpeed = 0f;
     protected float _lerpSpeed = 0f;
 

@@ -145,7 +145,7 @@ public class SceneEventAggregator : MonoBehaviour
         => OnRegisterAgentAndZone?.Invoke(agent, zone);
 
     public Action<IZoneAlertListener, int> OnUnRegisterAgentAndZone;
-    public void UnRegisterAgentAndZone(IZoneAlertListener agent, int zone)
+    public void UnregisterAgentAndZone(IZoneAlertListener agent, int zone)
         => OnUnRegisterAgentAndZone?.Invoke(agent, zone);
 
     public Func<int, IZoneAlertListener, bool> OnAlertAgentsInZone;

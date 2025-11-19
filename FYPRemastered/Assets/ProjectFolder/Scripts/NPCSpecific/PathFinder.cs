@@ -316,6 +316,19 @@ public readonly struct PathRequestInfo
 
 }
 
+
+public readonly struct DestinationResult
+{
+    public readonly List<(Vector3 position, Vector3? forward)> Candidates;
+    public readonly int PatrolZone;
+
+    public DestinationResult(List<(Vector3 position, Vector3? forward)> candidates, int zone)
+    {
+        Candidates = candidates;
+        PatrolZone = zone;
+    }
+}
+
 public readonly struct PathResult
 {
 
@@ -328,7 +341,6 @@ public readonly struct PathResult
 
     public PathResult(PathCheckReason reason, NavMeshPath path, bool found, Vector3 pos, StateId id, Vector3? fwd = null)
     {
-   
         Reason = reason;
         Path = path;
         Id = id;

@@ -129,7 +129,7 @@ public class FSMManager : FSMBase
     public override void OnPathRequestComplete(in PathResult result)
     {
 
-        if (StateHasChanged(result.Id)/*result.Id != _currentStateId*/ || result.Reason == PathCheckReason.Cancelled) return;
+        if (StateHasChanged(result.Id) || result.Reason == PathCheckReason.Cancelled) return;
         bool pathFound = result.PathFound;
         StateId id = result.Id;
 
@@ -140,7 +140,7 @@ public class FSMManager : FSMBase
         else
         {
             _currentDestination = result.Destination;
-            _currentDestinaationForward = result.Forward;
+            _currentDestinationForward = result.Forward;
             NavMeshObstacle o = _ownerData?.Obstacle;
             if (o !=null && o.enabled && o.carving)
             {
@@ -153,8 +153,6 @@ public class FSMManager : FSMBase
 
     }
 
-  
-   
     #endregion
 
 
@@ -295,7 +293,7 @@ public class FSMManager : FSMBase
         switch (current)
         {
             case StateId.Patrol:
-                request = ValidateDestination.GetPatrolPoint(StateId.Patrol, _ownerData, _ownerData.Path);
+                request = ValidateDestination.GetPatrolPoint(StateId.Patrol, _ownerData, _ownerData.Path, OnWaypointZoneReceived);
                 break;
             case StateId.Chase:
                 request = ValidateDestination.GetTargetPosition(current, _ownerData.Path, PathCheckReason.ValidatePathForDestination, _ownerData, _ownerData.PrimaryTarget);
@@ -332,7 +330,7 @@ public class FSMManager : FSMBase
     public override void LookAroundAndContinue()
     {
         if (_runningRoutine == null)
-            _runningRoutine = this.BeginPatrolRoutine(_currentStateId, _ownerData.Transform, _ownerData.MinPatrolPointWaitTime, _ownerData.MaxPatrolPointWaitTime, _currentDestinaationForward, LookAroundAction, CancelOrContinueRoutine, RoutineEnd);
+            _runningRoutine = this.BeginPatrolRoutine(_currentStateId, _ownerData.Transform, _ownerData.MinPatrolPointWaitTime, _ownerData.MaxPatrolPointWaitTime, _currentDestinationForward, LookAroundAction, CancelOrContinueRoutine, RoutineEnd);
             //_runningRoutine = CoroutineRunner.Instance.StartCoroutine(PatrolWaitRoutine(_currentPatrolPoinfForward));
     }
   
@@ -361,7 +359,7 @@ public class FSMManager : FSMBase
 
     
 
-    public override bool TrySwitchPatrolZone() => _pathFinder.TrySwitchPatrolZone();
+    public override bool TrySwitchPatrolZone() => _pathFinder?.TrySwitchPatrolZone() ?? false;
     #endregion
 
 
