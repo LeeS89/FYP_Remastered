@@ -16,6 +16,7 @@ public abstract class FSMBase : IFSMControl
     public IFSMControl.OnNotifyOwner Notification { get; set; }
     public Action<AnimationCue> OnAnimationIntent { get; set; }
     public Action<bool, int> OnWaypointZoneReceived { get; set; }
+    public Action<Vector3> OnMapDestinationToZone { get; set; }
 
     protected IFieldOfViewRunner _fovHandler;
 

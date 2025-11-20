@@ -15,7 +15,8 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, 
     protected Action<AnimationLayer> _onAnimLayerToggleComplete;
     protected Action _onLayerToggleComplete;
     protected bool _aimAnimLayerActive = false;
-    protected int? _currentPatrolZone = null;
+ //   protected int? _currentPatrolZone = null;
+    protected ZoneId _zoneId = ZoneId.Unknown;
 
     protected void OnAnimLayerToggleComplete(AnimationLayer layer) => _aimAnimLayerActive = true;
 
@@ -146,10 +147,49 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, 
         FSM = new FSMManager(data: this, /*notify: this, */resolver: _pathFinder, runner: _fovRunner);
         FSM.Notification = Notify;
         FSM.OnAnimationIntent = AnimationIntent;
-        FSM.OnWaypointZoneReceived = OnWaypointZoneReceived;
+       // FSM.OnWaypointZoneReceived = OnWaypointZoneReceived;
+        FSM.OnMapDestinationToZone = MapDestinationToZone;
 
         base.RegisterLocalEvents(_eManager);
         RegisterGlobalEvents();
+    }
+
+    /// <summary>
+    /// Maps the specified destination to a zone and updates the agent's current zone accordingly.
+    /// </summary>
+    /// <remarks>This method determines the zone corresponding to the given destination and updates the
+    /// agent's current zone if it differs from the previously assigned zone. If no zone is found for the destination,
+    /// the agent is assigned to a default zone.  The method also handles the registration and unregistration of the
+    /// agent with the appropriate zone using the <see cref="SceneEventAggregator"/>. If the zone changes, the agent is
+    /// unregistered from the previous zone and registered with the new one.  This method is intended to be used within
+    /// the agent's internal state management and should not be called directly in most cases.</remarks>
+    /// <param name="destination">The destination position in world coordinates to map to a zone.</param>
+    protected void MapDestinationToZone(Vector3 destination)
+    {
+        ZoneId id;
+        bool found = this.GetZoneId(destination, out id);
+        if (found)
+        {
+            if (id == _zoneId || id == ZoneId.Unknown) return;
+            else
+            {
+                SceneEventAggregator.Instance.UnregisterAgentAndZone(this, _zoneId);
+                _zoneId = id;
+                SceneEventAggregator.Instance.RegisterAgentAndZone(this, _zoneId);
+                Debug.LogError("Zone ID on start: " + _zoneId.ToString());
+                FSM.OnMapDestinationToZone = null;
+            }
+        }
+        else
+        {
+#if UNITY_EDITOR
+            Debug.LogError("No Zone ID found on start");
+#endif
+            SceneEventAggregator.Instance.UnregisterAgentAndZone(this, _zoneId);
+            _zoneId = ZoneId.ZoneA;
+            SceneEventAggregator.Instance.RegisterAgentAndZone(this, _zoneId);
+            FSM.OnMapDestinationToZone = null;
+        }
     }
 
     protected void SetPrimaryToPlayer()
@@ -187,6 +227,7 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, 
     protected override void OnSceneComplete()
     {
         base.OnSceneComplete();
+        FSM.OnMapDestinationToZone = null;
         FSM.Notification = null;
         FSM.OnAnimationIntent = null;
         FSM.OnWaypointZoneReceived = null;
@@ -195,7 +236,6 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, 
     protected override void OnSceneStarted()
     {
         base.OnSceneStarted();
-
         SwitchTo(Patrol.Instance);
         
        /* _currentPatrolZone = FSM?.TryGetPatrolZone();
@@ -225,13 +265,13 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, 
     /// <param name="zone">The identifier of the received waypoint zone. Must be a non-negative integer.</param>
     protected void OnWaypointZoneReceived(bool success, int zone)
     {
-#if UNITY_EDITOR
+/*#if UNITY_EDITOR
         Debug.LogError("Successfully got zone: " + zone);
 #endif
         if (_currentPatrolZone == zone || !success || zone < 0) return;
         if(_currentPatrolZone != null) SceneEventAggregator.Instance.UnregisterAgentAndZone(this, _currentPatrolZone.Value);
         _currentPatrolZone = zone;
-        SceneEventAggregator.Instance.RegisterAgentAndZone(this, zone);
+        SceneEventAggregator.Instance.RegisterAgentAndZone(this, zone);*/
 
     }
 
@@ -309,12 +349,12 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, 
 
     protected void TryBroadcastAlert()
     {
-        if (OwnerIsDead || _currentPatrolZone == null) return;
-        if(SceneEventAggregator.Instance.AlertAgentsInZone(_currentPatrolZone.Value, this))
+        if (OwnerIsDead || _zoneId == ZoneId.Unknown) return;
+        if(SceneEventAggregator.Instance.AlertAgentsInZone(_zoneId, this))
         {
             //SwitchTo(ChaseState.Instance);
             StartCoroutine(WaitRoutine());
-            Debug.LogError("Alert broadcasted to zone: " + _currentPatrolZone);
+            Debug.LogError("Alert broadcasted to zone: " + _zoneId);
         }
     }
 

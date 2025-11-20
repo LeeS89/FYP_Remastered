@@ -140,16 +140,16 @@ public class SceneEventAggregator : MonoBehaviour
 
     // NEW
 
-    public Action<IZoneAlertListener, int> OnRegisterAgentAndZone;
-    public void RegisterAgentAndZone(IZoneAlertListener agent, int zone)
+    public Action<IZoneAlertListener, ZoneId> OnRegisterAgentAndZone;
+    public void RegisterAgentAndZone(IZoneAlertListener agent, ZoneId zone)
         => OnRegisterAgentAndZone?.Invoke(agent, zone);
 
-    public Action<IZoneAlertListener, int> OnUnRegisterAgentAndZone;
-    public void UnregisterAgentAndZone(IZoneAlertListener agent, int zone)
+    public Action<IZoneAlertListener, ZoneId> OnUnRegisterAgentAndZone;
+    public void UnregisterAgentAndZone(IZoneAlertListener agent, ZoneId zone)
         => OnUnRegisterAgentAndZone?.Invoke(agent, zone);
 
-    public Func<int, IZoneAlertListener, bool> OnAlertAgentsInZone;
-    public bool AlertAgentsInZone(int zone, IZoneAlertListener listener)
+    public Func<ZoneId, IZoneAlertListener, bool> OnAlertAgentsInZone;
+    public bool AlertAgentsInZone(ZoneId zone, IZoneAlertListener listener)
         => OnAlertAgentsInZone?.Invoke(zone, listener) ?? true; // if no subscribers, default to true
     
     // END NEW

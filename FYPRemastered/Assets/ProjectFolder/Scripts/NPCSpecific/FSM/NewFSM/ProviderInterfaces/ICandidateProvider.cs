@@ -250,7 +250,7 @@ public readonly struct ValidateDestination
         WaypointZoneCallback = waypointZoneCallback;
     }
 
-    public static ValidateDestination GetPatrolPoint(StateId id, ITargetable caller, NavMeshPath path, Action<bool, int> waypointZoneCB)
+    public static ValidateDestination GetPatrolPoint(StateId id, ITargetable caller, NavMeshPath path, Action<bool, int> waypointZoneCB = null)
         => new ValidateDestination(id, PathCheckReason.ValidatePathForDestination, caller, null, path, 0, 0, waypointZoneCB);
 
     public static ValidateDestination GetFlankPoint(StateId id, NavMeshPath path, ITargetable caller, ITargetable flankTarget, uint maxFlankSteps = 15, uint minFlankSteps = 4)
