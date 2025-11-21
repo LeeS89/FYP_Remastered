@@ -159,9 +159,7 @@ public class FSMManager : FSMBase
 
 
     #region Tick Region
-   /* private void SetAgentTargetSpeed(float speed, float lerpSpeed)
-    => (_lerpSpeed, _targetSpeed) = (lerpSpeed, speed);*/
-
+  
     private void UpdateAgentSpeed()
     {
         /*var a = Owner.Agent; if (!a) return;
@@ -209,7 +207,7 @@ public class FSMManager : FSMBase
 
         var dist = a.remainingDistance;
        
-        if (/*float.IsInfinity(dist) || */float.IsNaN(dist)) return;
+        if (float.IsNaN(dist)) return;
 
         float stopThreshold = (a.stoppingDistance + 0.25f);
         if (dist <= stopThreshold)
@@ -242,7 +240,7 @@ public class FSMManager : FSMBase
 
     private void TimerTicks(float dt)
     {
-        if(_ownerData is NPCController c)
+        if(_ownerData is NPCController c) // Delete later
         {
             if (c.TestSprint)
             {
@@ -308,16 +306,6 @@ public class FSMManager : FSMBase
     }
 
 
-    /*public override bool TryGetPatrolZone(out int zone)
-    {
-       if(_pathFinder != null)
-            return _pathFinder.TryGetCurrentZone(out zone);
-
-        zone = -1;
-        return false;
-    }*/
-
-
     public override void BeginPatrol(StateId id)
     {
         if (id != StateId.Patrol) return;
@@ -336,16 +324,6 @@ public class FSMManager : FSMBase
             //_runningRoutine = CoroutineRunner.Instance.StartCoroutine(PatrolWaitRoutine(_currentPatrolPoinfForward));
     }
   
-
-  /*  private bool HasSwitchedState(StateId id)
-    {
-        if (id != _currentStateId) 
-        {
-            CancelRunningCoroutine();
-            return false; 
-        }
-        return true;
-    }*/
 
     // Change to Action
     private void LookAround() { }//=> Owner.OwnerEM.TriggerAnimation(AnimationCue.Look);

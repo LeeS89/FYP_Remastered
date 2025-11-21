@@ -1,7 +1,8 @@
+using System;
 using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
 
+[Obsolete]
 public class EnemyAnimController
 {
     private Animator _anim;

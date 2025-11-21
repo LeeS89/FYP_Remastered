@@ -10,6 +10,7 @@ public class EnemyEventManager : EventManager
     public event Action<bool> OnDestinationReached;
     //public event Action<Vector3, int> OnDestinationUpdated;  
     public Action<bool> OnTargetSeen;
+    
     public event Action<bool> OnRotateTowardsTarget;
     public event Action OnPathInvalid;
     //public event Action<AIDestinationRequestData> OnPathRequested;
@@ -126,6 +127,9 @@ public class EnemyEventManager : EventManager
    
 
     public void TargetSeen(bool seen) => OnTargetSeen?.Invoke(seen);
+
+    public Action<bool, Vector3?> OnAimTowardsTarget;
+    public void AimTowardsTarget(bool aim, Vector3? target = null) => OnAimTowardsTarget?.Invoke(aim, target);
 
 
     public void FacingTarget(bool facingTarget)

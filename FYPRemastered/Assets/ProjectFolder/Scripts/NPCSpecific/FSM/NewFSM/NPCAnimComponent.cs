@@ -17,11 +17,12 @@ public class NPCAnimComponent : ComponentEvents
     private AnimationCue currentAction = AnimationCue.None;
 
     [Header("Anim IK Params")]
-    [SerializeField] private Transform lookTarget;
+   // [SerializeField] private Transform lookTarget;
+    [SerializeField] private Vector3? lookTarget;
 
     private float _targetLookWeight = 0f;
     private float _currentLookWeight = 0f;
-    private Coroutine _lookWeightCoroutine;
+    private Coroutine _runningRoutine;
     [SerializeField] private float _blendSpeed = 5f;
 
     [Header("Weights")]
@@ -39,7 +40,8 @@ public class NPCAnimComponent : ComponentEvents
        // _em.OnToggleAnimationLayer = ToggleAnimationLayer;
         _em.OnTogglingAnimationLayer = ActivateAnimationLayer;
         // _em.OnChangeAnimatorLayerWeight = ChangeLayerWeight;
-        _em.OnTargetSeen = AimTowardsTarget;
+        //_em.OnTargetSeen = AimTowardsTarget;
+        _em.OnAimTowardsTarget = AimAtTarget;
         _em.OnTickAnimator = UpdateAnimator;
         _anim = GetComponent<Animator>();
     }
@@ -49,9 +51,10 @@ public class NPCAnimComponent : ComponentEvents
     {
         _em.OnAnimationTriggered = null;
         _em.OnTogglingAnimationLayer = null;
+        _em.OnAimTowardsTarget = null;
         // _em.OnToggleAnimationLayer = null;
         //   _em.OnChangeAnimatorLayerWeight = null;
-        _em.OnTargetSeen = null;
+        //  _em.OnTargetSeen = null;
         _em.OnTickAnimator = null;
         _em = null;
         _anim = null;
@@ -65,6 +68,8 @@ public class NPCAnimComponent : ComponentEvents
         _anim.SetFloat("direction", direction);
         _lastDirection = direction;
     }
+
+   
 
     public void UpdateAnimator(Vector3 velocity, Vector3 forward)
     {
@@ -197,6 +202,46 @@ public class NPCAnimComponent : ComponentEvents
 
 
     #region IK Region
+
+    private void OnAnimatorIK(int layerIndex)
+    {
+        if (_anim == null)
+            return;
+
+        if (!lookTarget.HasValue || _currentLookWeight <= 0f)
+        {
+            _anim.SetLookAtWeight(0f);
+            return;
+        }
+
+        _anim.SetLookAtWeight(
+            _currentLookWeight,
+            bodyWeight,
+            headWeight,
+            eyesWeight,
+            clampWeight
+        );
+
+        _anim.SetLookAtPosition(lookTarget.Value);
+
+    }
+
+    private void AimAtTarget(bool aim, Vector3? target = null)
+    {
+        lookTarget = target;
+        float newTargetWeight = (aim && lookTarget.HasValue) ? 1f : 0f;
+        if (Mathf.Approximately(_targetLookWeight, newTargetWeight)) { return; }
+
+        _targetLookWeight = newTargetWeight;
+
+        if (_runningRoutine != null)
+        {
+            StopCoroutine(_runningRoutine);
+        }
+
+        _runningRoutine = StartCoroutine(BlendLookWeight(_targetLookWeight));
+    }
+
     private void AimTowardsTarget(bool targetInSight)
     {
         float newtargetWeight = targetInSight ? 1f : 0f;
@@ -205,12 +250,12 @@ public class NPCAnimComponent : ComponentEvents
 
         _targetLookWeight = newtargetWeight;
 
-        if (_lookWeightCoroutine != null)
+        if (_runningRoutine != null)
         {
-            StopCoroutine(_lookWeightCoroutine);
+            StopCoroutine(_runningRoutine);
         }
 
-        _lookWeightCoroutine = StartCoroutine(BlendLookWeight(_targetLookWeight));
+        _runningRoutine = StartCoroutine(BlendLookWeight(_targetLookWeight));
     }
 
     private IEnumerator BlendLookWeight(float targetWeight)
@@ -222,7 +267,7 @@ public class NPCAnimComponent : ComponentEvents
         }
 
         _currentLookWeight = targetWeight;
-        _lookWeightCoroutine = null;
+        _runningRoutine = null;
     }
 
     private void ToggleAnimationLayer(AnimationLayer layer, Action<AnimationLayer> completedCB = null)

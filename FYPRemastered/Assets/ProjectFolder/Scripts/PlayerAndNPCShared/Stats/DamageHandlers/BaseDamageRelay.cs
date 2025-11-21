@@ -66,19 +66,18 @@ public class BaseDamageRelay : ComponentEvents, IDamageable
 
     public LayerMask LayerMask => _selfTargetMask;
 
-   
+    public Vector3 Forward => _parentTransform != null ? _parentTransform.forward : transform.forward;
+
+
     /* public Vector3 GetTargetablePosition()
          => _parentTransform == null ? transform.position : _parentTransform.position;*/
 
 
 
-    public (Vector3, Vector3?) GetTargetablePositionAndForward()
-        => _parentTransform == null ? (transform.position, transform.forward) : (_parentTransform.position, _parentTransform.forward);
-
-    public Vector3 GetPosition()
+    public Vector3 Position()
         => _parentTransform == null ? transform.position : _parentTransform.position;
 
-    public Quaternion GetRotation()
+    public Quaternion Rotation()
     {
         throw new System.NotImplementedException();
     }

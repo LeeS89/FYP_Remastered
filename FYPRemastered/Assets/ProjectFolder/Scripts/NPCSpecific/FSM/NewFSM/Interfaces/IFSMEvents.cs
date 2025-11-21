@@ -48,7 +48,7 @@ public interface IFSMControl : ITickable
     delegate void OnNotifyOwner(in NotifyOwnerNPC n);
     OnNotifyOwner Notification { get; set; }
     Action<AnimationCue> OnAnimationIntent { get; set; }
-    Action<bool, int> OnWaypointZoneReceived { get; set; }
+  
 
     Action<Vector3> OnMapDestinationToZone { get; set; }
 

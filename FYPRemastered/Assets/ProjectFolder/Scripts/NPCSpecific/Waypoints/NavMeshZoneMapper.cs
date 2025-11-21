@@ -21,7 +21,7 @@ public static class NavMeshZoneMapper
 
     }
 
-    public static bool GetZoneId(this NPCControllerBase self, Vector3 pos, out ZoneId zone)
+    public static bool GetZoneId(this NPCController self, Vector3 pos, out ZoneId zone)
     {
        // var pos = self.transform.position;
         if (NavMesh.SamplePosition(pos, out NavMeshHit hit, 1.0f, NavMesh.AllAreas))

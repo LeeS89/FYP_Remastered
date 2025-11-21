@@ -18,7 +18,7 @@ public abstract class DestinationProviderBase
 }
 
 
-
+[Obsolete]
 public sealed class DestinationProviderOld 
 {
     public int CurrentWaypointZone { get; private set; } = 0;
@@ -54,7 +54,7 @@ public sealed class DestinationProviderOld
         if(destinationOverride != null)
         {
             _candidates.Clear();
-            _candidates.Add(destinationOverride.GetTargetablePositionAndForward());
+           // _candidates.Add(destinationOverride.GetTargetablePositionAndForward());
             return _candidates;
         }
         else if(_providers.TryGetValue(Kind, out var p)) return p.GetCandidates();

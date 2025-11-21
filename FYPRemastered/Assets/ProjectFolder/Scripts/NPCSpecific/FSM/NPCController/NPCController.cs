@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -8,22 +7,15 @@ using UnityEngine.AI;
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(NavMeshObstacle))]
-public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, IZoneAlertListener
+public partial class NPCController : ComponentEvents, IFSMOwner, IFSMData, IZoneAlertListener
 {
     protected EnemyEventManager _eManager;
     private bool _isInStateTransition = false;
-    protected Action<AnimationLayer> _onAnimLayerToggleComplete;
     protected Action _onLayerToggleComplete;
-    protected bool _aimAnimLayerActive = false;
- //   protected int? _currentPatrolZone = null;
     protected ZoneId _zoneId = ZoneId.Unknown;
 
-    protected void OnAnimLayerToggleComplete(AnimationLayer layer) => _aimAnimLayerActive = true;
 
-    [Header("FOV Data")]
-    [SerializeField] protected FOVParameters _fovParams;
-
-    // FSM Data queried by the FSMManager 
+    // Data queried by the FSMManager 
     public ITargetable PrimaryTarget { get; set; }
     public NavMeshAgent Agent { get; protected set; }
     public NavMeshObstacle Obstacle { get; protected set; }
@@ -56,21 +48,20 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, 
     // i.e. its LayerMask, Transform, Aim Trigger, etc.
     [Header("The transform of this game object used for targeting purposes")]
     [SerializeField] protected Transform _parentTransform;
-    public Transform Transform => _parentTransform == null ? transform : _parentTransform;
+    public Transform Transform => _parentTransform != null ? _parentTransform : transform;
+    public Vector3 Forward => _parentTransform != null ? _parentTransform.forward : transform.forward;
 
     [Header("Mask of this Gamobeject used for targeting purposes")]
     [SerializeField] protected LayerMask _layerMask;
-    public LayerMask LayerMask => throw new NotImplementedException();
+    public LayerMask LayerMask => _layerMask;
     [Header("Trigger area on the game object that other NPC's use as target area for aiming")]
     [SerializeField] protected Collider _targetCollider;
     public Collider TargetableCollider { get; protected set; }
     public bool IsMoving { get; private set; } = false;
-    public (Vector3, Vector3?) GetTargetablePositionAndForward()
-    => _parentTransform == null ? (transform.position, transform.forward) : (_parentTransform.position, _parentTransform.forward);
 
-    public Vector3 GetPosition()
+    public Vector3 Position()
      => _parentTransform == null ? transform.position : _parentTransform.position;
-    public Quaternion GetRotation()
+    public Quaternion Rotation()
         => _parentTransform == null ? transform.rotation : _parentTransform.rotation;
     // End ITargetable Data
 
@@ -78,6 +69,8 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, 
     public float SprintEnterDist => throw new NotImplementedException();
 
     public float SprintExitDist => throw new NotImplementedException();
+
+
 
     [Header("Agent uses random stop distance between min & max during target pursuit")]
     [SerializeField] protected float _minStopdistance = 4f;
@@ -89,14 +82,7 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, 
         return currentState == StateId.Chase ? UnityEngine.Random.Range(_minStopdistance, _maxStopdistance) : 0f;
     }
 
-    // FSMManager Composition
-    public IFSMControl FSM { get; protected set; }
-    private IPathResolver _pathFinder;
-    private ICandidateProvider _destinationResolver;
-    private IFieldOfViewRunner _fovRunner;
-    private Dictionary<StateId, ICandidateProvider> _destinationProviders;
-    protected IIntentState _state;
-    // end FSMManager Composition
+    
 
     // IFSMNotifications - For notifications received by the FSMManager, i.e. No valid destination, target lost, Target within melee/ shot range, etc.
     public virtual void Notify(in NotifyOwnerNPC n)
@@ -107,52 +93,6 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, 
     public void AnimationIntent(AnimationCue cue) => _eManager.TriggerAnimation(cue);
     // End IFSMNotificationss
 
-
-
-    public override void RegisterLocalEvents(EventManager eventManager)
-    {
-        _eManager = eventManager as EnemyEventManager;
-
-        if (_targetCollider == null)
-        {
-            if (!TryGetComponent<Collider>(out var coll))
-            {
-                TargetableCollider = gameObject.AddComponent<BoxCollider>();
-            }
-            else
-                TargetableCollider = coll;
-        }
-        else
-        {
-            TargetableCollider = _targetCollider;
-        }
-
-        SetPrimaryToPlayer();
-        SetNavMeshAgentParams();
-
-        _onAnimLayerToggleComplete = OnAnimLayerToggleComplete;
-        OnMeleeRangeCheckCallback = OnMeleeRangeEnter;
-
-        _destinationProviders = new()
-        {
-            [StateId.Patrol] = new WaypointProvider(WaypointRepo.Instance),
-            [StateId.Chase] = new TargetPointProvider(PrimaryTarget),
-        };
-        
-        _destinationResolver = new DestinationResolver(_destinationProviders);
-        _fovParams.FOVTarget = PrimaryTarget;
-        _pathFinder = new PathFinder(_destinationResolver);
-        _fovRunner = new NPCFieldOfViewHandler(_fovParams);
-
-        FSM = new FSMManager(data: this, /*notify: this, */resolver: _pathFinder, runner: _fovRunner);
-        FSM.Notification = Notify;
-        FSM.OnAnimationIntent = AnimationIntent;
-       // FSM.OnWaypointZoneReceived = OnWaypointZoneReceived;
-        FSM.OnMapDestinationToZone = MapDestinationToZone;
-
-        base.RegisterLocalEvents(_eManager);
-        RegisterGlobalEvents();
-    }
 
     /// <summary>
     /// Maps the specified destination to a zone and updates the agent's current zone accordingly.
@@ -192,89 +132,7 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, 
         }
     }
 
-    protected void SetPrimaryToPlayer()
-    {
-        if(!GameManager.Instance.TryGetPlayer(out var player))
-        {
-#if UNITY_EDITOR
-            Debug.LogError("Failed to retrieve player ref");
-#endif
-            return;
-        }
-        PrimaryTarget = player;
-        //PrimaryTarget = GameManager.Instance.TryGetPlayer();
-    }
-
-    private void SetNavMeshAgentParams()
-    {
-        string errorMessage = "";
-        if (TryGetComponent<NavMeshAgent>(out var agent)) Agent = agent;
-        else errorMessage += "Must Provide a NavMeshAgent Component - ";
-
-        if (TryGetComponent<NavMeshObstacle>(out var ob)) Obstacle = ob;
-        else errorMessage += "Must Provide a NavMeshObstacle Component - ";
-
-        Path = new NavMeshPath();
-    }
-
-    public override void UnRegisterLocalEvents(EventManager eventManager)
-    {
-        OnMeleeRangeCheckCallback = null;
-        base.UnRegisterLocalEvents(_eManager);
-        UnRegisterGlobalEvents();
-    }
-
-    protected override void OnSceneComplete()
-    {
-        base.OnSceneComplete();
-        FSM.OnMapDestinationToZone = null;
-        FSM.Notification = null;
-        FSM.OnAnimationIntent = null;
-        FSM.OnWaypointZoneReceived = null;
-    }
-
-    protected override void OnSceneStarted()
-    {
-        base.OnSceneStarted();
-        SwitchTo(Patrol.Instance);
-        
-       /* _currentPatrolZone = FSM?.TryGetPatrolZone();
-
-        if (_currentPatrolZone != null)
-        {
-            SceneEventAggregator.Instance.RegisterAgentAndZone(this, _currentPatrolZone.Value);
-#if UNITY_EDITOR
-            Debug.LogError("Successfully got zone: " + _currentPatrolZone);
-#endif
-        }
-        else
-        {
-#if UNITY_EDITOR
-            Debug.LogError("Failed to get zone");
-#endif
-        }*/
-    }
-
-    /// <summary>
-    /// Handles the event triggered when a waypoint zone is received, updating the patrol zone if necessary.
-    /// </summary>
-    /// <remarks>If the received zone is different from the current patrol zone and the operation is
-    /// successful,  the method updates the patrol zone and registers the agent with the new zone. If the agent was 
-    /// previously registered with another zone, it is unregistered from that zone first.</remarks>
-    /// <param name="success">Indicates whether the waypoint zone was successfully received. If <see langword="false"/>, no action is taken.</param>
-    /// <param name="zone">The identifier of the received waypoint zone. Must be a non-negative integer.</param>
-    protected void OnWaypointZoneReceived(bool success, int zone)
-    {
-/*#if UNITY_EDITOR
-        Debug.LogError("Successfully got zone: " + zone);
-#endif
-        if (_currentPatrolZone == zone || !success || zone < 0) return;
-        if(_currentPatrolZone != null) SceneEventAggregator.Instance.UnregisterAgentAndZone(this, _currentPatrolZone.Value);
-        _currentPatrolZone = zone;
-        SceneEventAggregator.Instance.RegisterAgentAndZone(this, zone);*/
-
-    }
-
+   
     protected override void DeathStatusUpdated(bool isDead)
     {
         if (OwnerIsDead == isDead) return;
@@ -283,16 +141,16 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, 
 
     }
 
-    protected abstract void OnVisibilityGained(bool seen);
+    protected virtual void OnVisibilityGained(bool seen) { }
 
-    protected abstract void OnAimEnter(bool aiming);
+    protected virtual void OnAimEnter(bool aiming) { }
 
     protected virtual void OnMeleeRangeEnter(bool targetInRange) { }
 
 
     protected void Engage() { }
 
-    protected abstract void OnDamageTaken(float remainingHealth);
+    protected virtual void OnDamageTaken(float remainingHealth) { }
 
     protected virtual void Update()
     {
@@ -312,7 +170,7 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, 
    
     public virtual void SwitchTo(IIntentState next)
     {
-        if (next == null || _state == next) return;
+        if (next == null || _state == next || OwnerIsDead) return;
 
         _isInStateTransition = true;
         _state?.Exit(this);
@@ -340,8 +198,9 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, 
             if(_currentResult == FOVResult.TargetSeen) 
             {
                 TryBroadcastAlert();
-              //  if (!_aimAnimLayerActive) _eManager.ToggleAnimationLayer(AnimationLayer.Aim, _onAnimLayerToggleComplete);
-               // SwitchTo(ChaseState.Instance);
+                _eManager.AimTowardsTarget(aim: true, PrimaryTarget?.Position());
+                //  if (!_aimAnimLayerActive) _eManager.ToggleAnimationLayer(AnimationLayer.Aim, _onAnimLayerToggleComplete);
+                // SwitchTo(ChaseState.Instance);
             }
             return;
         }
@@ -349,32 +208,38 @@ public abstract class NPCControllerBase : ComponentEvents, IFSMOwner, IFSMData, 
 
     protected void TryBroadcastAlert()
     {
-        if (OwnerIsDead || _zoneId == ZoneId.Unknown) return;
+        if (OwnerIsDead) return;
         if(SceneEventAggregator.Instance.AlertAgentsInZone(_zoneId, this))
         {
             //SwitchTo(ChaseState.Instance);
-            StartCoroutine(WaitRoutine());
+            EnterAlertPhase();
+           // StartCoroutine(WaitRoutine());
             Debug.LogError("Alert broadcasted to zone: " + _zoneId);
         }
     }
 
-    private IEnumerator WaitRoutine()
+    private IEnumerator WaitAndSwitchStateRoutine(AnimationLayer layer, IIntentState newState = null)
     {
         bool done = false;
-        _eManager.TogglingAnimationLayer(AnimationLayer.Aim,
+        _eManager.TogglingAnimationLayer(layer,
             onComplete: () => done = true
             );
 
-        while (!done) yield return null;
+        while (!done)
+        {
+            if (OwnerIsDead) yield break;
+            yield return null;
+        }
         if (OwnerIsDead) yield break;
         Debug.LogError("Moving to Chase state");
-        SwitchTo(ChaseState.Instance);
+        SwitchTo(newState);
     }
 
 
     public void EnterAlertPhase()
     {
         if (OwnerIsDead) return;
-        SwitchTo(ChaseState.Instance);
+        StartCoroutine(WaitAndSwitchStateRoutine(AnimationLayer.Aim, ChaseState.Instance));
+       // SwitchTo(ChaseState.Instance);
     }
 }

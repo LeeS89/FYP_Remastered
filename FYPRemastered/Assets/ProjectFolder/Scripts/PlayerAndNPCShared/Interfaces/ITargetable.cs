@@ -2,11 +2,11 @@ using UnityEngine;
 
 public interface ITargetable
 {
-    (Vector3, Vector3?) GetTargetablePositionAndForward();
+    Vector3 Forward { get; }
 
-    Vector3 GetPosition();
+    Vector3 Position();
 
-    Quaternion GetRotation();
+    Quaternion Rotation();
 
     Transform Transform { get; }
 
