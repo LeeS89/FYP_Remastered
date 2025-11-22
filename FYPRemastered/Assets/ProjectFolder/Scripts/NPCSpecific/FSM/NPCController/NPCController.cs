@@ -198,7 +198,7 @@ public partial class NPCController : ComponentEvents, IFSMOwner, IFSMData, IZone
             if(_currentResult == FOVResult.TargetSeen) 
             {
                 TryBroadcastAlert();
-                _eManager.AimTowardsTarget(aim: true, PrimaryTarget?.Position());
+                _eManager.AimTowardsTarget(aim: true, PrimaryTarget?.Transform);
                 //  if (!_aimAnimLayerActive) _eManager.ToggleAnimationLayer(AnimationLayer.Aim, _onAnimLayerToggleComplete);
                 // SwitchTo(ChaseState.Instance);
             }

@@ -8377,6 +8377,59 @@ Transform:
   - {fileID: 1940621589}
   m_Father: {fileID: 1064652805}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &99692067
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 99692068}
+  - component: {fileID: 99692069}
+  m_Layer: 4
+  m_Name: TargetableCollider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &99692068
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 99692067}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1863641519}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &99692069
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 99692067}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.035965, y: 1.7152128, z: 0.61201286}
+  m_Center: {x: 0.0787549, y: 1.2108064, z: 0.014566898}
 --- !u!1001 &104379427
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -18306,6 +18359,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7da4a2fe5c8f6474d8c6992fc46f3374, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  lookTarget: {fileID: 0}
   _blendSpeed: 5
   lookAtWeight: 1
   bodyWeight: 0.3
@@ -116657,7 +116711,7 @@ MonoBehaviour:
   _maxStopdistance: 12
   _fovParams:
     fovOrigin: {fileID: 1599725691}
-    maxFovTargets: 5
+    maxFovTargets: 10
     blockingMask:
       serializedVersion: 2
       m_Bits: 537
@@ -116828,6 +116882,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 266043405}
+  - {fileID: 99692068}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!1001 &1863965890
@@ -152430,6 +152485,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7da4a2fe5c8f6474d8c6992fc46f3374, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  lookTarget: {fileID: 0}
   _blendSpeed: 5
   lookAtWeight: 1
   bodyWeight: 0.3
@@ -154698,7 +154754,7 @@ MonoBehaviour:
   _maxStopdistance: 12
   _fovParams:
     fovOrigin: {fileID: 6998231476891555256}
-    maxFovTargets: 5
+    maxFovTargets: 10
     blockingMask:
       serializedVersion: 2
       m_Bits: 537

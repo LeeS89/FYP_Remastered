@@ -18,7 +18,7 @@ public class NPCAnimComponent : ComponentEvents
 
     [Header("Anim IK Params")]
    // [SerializeField] private Transform lookTarget;
-    [SerializeField] private Vector3? lookTarget;
+    [SerializeField] private Transform lookTarget;
 
     private float _targetLookWeight = 0f;
     private float _currentLookWeight = 0f;
@@ -208,7 +208,7 @@ public class NPCAnimComponent : ComponentEvents
         if (_anim == null)
             return;
 
-        if (!lookTarget.HasValue || _currentLookWeight <= 0f)
+        if (lookTarget == null || _currentLookWeight <= 0f)
         {
             _anim.SetLookAtWeight(0f);
             return;
@@ -222,14 +222,14 @@ public class NPCAnimComponent : ComponentEvents
             clampWeight
         );
 
-        _anim.SetLookAtPosition(lookTarget.Value);
+        _anim.SetLookAtPosition(lookTarget.position);
 
     }
 
-    private void AimAtTarget(bool aim, Vector3? target = null)
+    private void AimAtTarget(bool aim, Transform target = null)
     {
         lookTarget = target;
-        float newTargetWeight = (aim && lookTarget.HasValue) ? 1f : 0f;
+        float newTargetWeight = (aim && lookTarget != null) ? 1f : 0f;
         if (Mathf.Approximately(_targetLookWeight, newTargetWeight)) { return; }
 
         _targetLookWeight = newTargetWeight;
@@ -260,6 +260,7 @@ public class NPCAnimComponent : ComponentEvents
 
     private IEnumerator BlendLookWeight(float targetWeight)
     {
+        Debug.LogError("Blending Look Weight");
         while (!Mathf.Approximately(_currentLookWeight, targetWeight))
         {
             _currentLookWeight = Mathf.Lerp(_currentLookWeight, targetWeight, Time.deltaTime * _blendSpeed);

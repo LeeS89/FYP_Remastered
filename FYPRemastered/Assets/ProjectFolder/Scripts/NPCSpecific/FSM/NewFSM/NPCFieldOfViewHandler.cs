@@ -158,6 +158,8 @@ public class NPCFieldOfViewHandler : IFieldOfViewRunner
     private void RunEvaluationPhase(Collider targetCollider, out int hitCount, bool addFallbackPoints, LayerMask targetMask)
     {
         Vector3 closest = targetCollider.ClosestPointOnBounds(_params.fovOrigin.position);
+        Vector3 colCenter = targetCollider.bounds.center;
+        _samplePoints.Add(colCenter);
         _samplePoints.Add(closest);
         _samplePoints.Add(targetCollider.bounds.center + Vector3.up * targetCollider.bounds.extents.y);
         _samplePoints.Add(targetCollider.bounds.center - Vector3.right * targetCollider.bounds.extents.x);
@@ -183,8 +185,8 @@ public class NPCFieldOfViewHandler : IFieldOfViewRunner
 
         Vector3 waistPos = _params.ownerOrigin.TransformPoint(0f, _params.waistHeightOffset, 0f);
         Vector3 eyePos = _params.ownerOrigin.TransformPoint(0f, _params.eyeHeightOffset, 0f);
-        Vector3 center = (waistPos + eyePos) * 0.5f;
-        Vector3 direction = TargetingUtility.GetDirectionToTarget(closest, center);
+        Vector3 centerPos = (waistPos + eyePos) * 0.5f;
+        Vector3 direction = TargetingUtility.GetDirectionToTarget(colCenter, centerPos);
        
         hitCount = this.EvaluateViewCone(
         waistPos,
@@ -199,13 +201,29 @@ public class NPCFieldOfViewHandler : IFieldOfViewRunner
 
         
         if (hitCount > 0 && addFallbackPoints)
-            AddFallbackPoints(targetCollider, _evaluationHitPoints, ref hitCount);
+           AddFallbackPoints(targetCollider, _evaluationHitPoints, ref hitCount);
+    }
+
+    private void GetSamplePoints(Collider target, List<Vector3> points)
+    {
+        if (target == null || points == null) { return; }
+        points.Add(target.ClosestPointOnBounds(_params.fovOrigin.position));
+        points.Add(target.bounds.center);
+        points.Add(target.bounds.center + Vector3.up * target.bounds.extents.y);
+        points.Add(target.bounds.center - Vector3.right * target.bounds.extents.x);
+        points.Add(target.bounds.center + Vector3.right * target.bounds.extents.x);
+    }
+
+    private void AddExtraSamplePoints()
+    {
+
     }
 
     private void AddFallbackPoints(Collider target, Vector3[] hitPoints, ref int startIndex)
     {
         if (target == null) { return; }
-
+        hitPoints[startIndex++] = target.ClosestPointOnBounds(_params.fovOrigin.position);
+        hitPoints[startIndex++] = target.bounds.center;
         hitPoints[startIndex++] = target.bounds.center + Vector3.up * target.bounds.extents.y;
         hitPoints[startIndex++] = target.bounds.center - Vector3.right * target.bounds.extents.x;
         hitPoints[startIndex++] = target.bounds.center + Vector3.right * target.bounds.extents.x;
@@ -469,9 +487,13 @@ internal static class FOVHandlerExtension
         var t = hitInfo.transform;
         if (((1 << hitInfo.collider.gameObject.layer) & targetMask) != 0
             && (t == targetTransform) || t.IsChildOf(targetTransform))
+        {
+            Debug.DrawLine(from.position, target, Color.green, 0.1f);
             return true;
+        }
 
 
+        Debug.DrawLine(from.position, target, Color.red, 0.1f);
         return false;
     }
 
@@ -485,7 +507,12 @@ internal static class FOVHandlerExtension
     {
 
         if (Physics.Linecast(from.position, target, out hit, blockingMask))
+        {
+            string hitName = hit.transform != null ? hit.transform.name : "null";
+            Debug.LogError("Name of hit target: "+hitName);
             hitTarget = true;
+        }
+           
         else
             hitTarget = false;
     }

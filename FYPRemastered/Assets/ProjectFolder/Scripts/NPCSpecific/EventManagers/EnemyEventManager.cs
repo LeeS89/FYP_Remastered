@@ -128,8 +128,8 @@ public class EnemyEventManager : EventManager
 
     public void TargetSeen(bool seen) => OnTargetSeen?.Invoke(seen);
 
-    public Action<bool, Vector3?> OnAimTowardsTarget;
-    public void AimTowardsTarget(bool aim, Vector3? target = null) => OnAimTowardsTarget?.Invoke(aim, target);
+    public Action<bool, Transform> OnAimTowardsTarget;
+    public void AimTowardsTarget(bool aim, Transform target = null) => OnAimTowardsTarget?.Invoke(aim, target);
 
 
     public void FacingTarget(bool facingTarget)
