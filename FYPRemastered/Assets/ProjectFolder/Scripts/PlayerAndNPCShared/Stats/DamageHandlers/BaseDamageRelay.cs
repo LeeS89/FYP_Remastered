@@ -1,18 +1,23 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Collider))]
 public class BaseDamageRelay : ComponentEvents, IDamageable
 {
     [SerializeField] private Transform _parentTransform;
-    public Collider TargetableCollider { get; private set; }
+    [SerializeField] private Collider _targetableCollider;
+    public Collider TargetableCollider => _targetableCollider;
 
    
     public override void RegisterLocalEvents(EventManager eventManager)
     {
         //base.RegisterLocalEvents(eventManager);
         _eventManager = eventManager;
-        TargetableCollider = GetComponent<Collider>();
-        //_targetableCollider = GetComponent<Collider>();
+        if(_targetableCollider == null)
+        {
+            if(TryGetComponent<Collider>(out var col))
+                _targetableCollider = col;
+            else _targetableCollider = gameObject.AddComponent<BoxCollider>();
+        }
+        
     }
 
 

@@ -508,8 +508,8 @@ internal static class FOVHandlerExtension
 
         if (Physics.Linecast(from.position, target, out hit, blockingMask))
         {
-            string hitName = hit.transform != null ? hit.transform.name : "null";
-            Debug.LogError("Name of hit target: "+hitName);
+            //string hitName = hit.transform != null ? hit.transform.name : "null";
+           // Debug.LogError("Name of hit target: "+hitName);
             hitTarget = true;
         }
            

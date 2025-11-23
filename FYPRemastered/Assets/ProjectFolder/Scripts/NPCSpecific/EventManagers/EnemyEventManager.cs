@@ -83,20 +83,16 @@ public class EnemyEventManager : EventManager
         throw new System.NotImplementedException();
     }*/
 
-    public void FieldOfViewCallback(bool seen, bool inShootingangle)
+    public void FieldOfViewCallback(bool seen, bool inShootingangle) // Obsolete
     {
         OnFieldOfViewCallback(seen, inShootingangle);
     }
 
-    public void PursuitConditionChanged(bool permission)
+    public void PursuitConditionChanged(bool permission) // Obsolete
     {
         OnPursuitConditionChanged?.Invoke(permission);
     }
 
-    /* public void WaypointsUpdated(WaypointData wpData)
-     {
-         OnWaypointsUpdated?.Invoke(wpData);
-     }*/
 
     /// <summary>
     /// Animation actions other than Locomotion i.e. Melee, Look around etc
@@ -110,29 +106,32 @@ public class EnemyEventManager : EventManager
     /// </summary>
     /// <param name="moveSpeed"></param>
     /// <param name="lerpSpeed"></param>
-    public void SpeedChanged(float moveSpeed, float lerpSpeed) => OnSpeedChanged?.Invoke(moveSpeed, lerpSpeed);
+    public void SpeedChanged(float moveSpeed, float lerpSpeed) => OnSpeedChanged?.Invoke(moveSpeed, lerpSpeed); // Obsolete
 
 
-    public void PathInvalid()
+    public void PathInvalid() // Obsolete
     {
         OnPathInvalid?.Invoke();
     }
 
    
-    public void DestinationReached(bool reached)
+    public void DestinationReached(bool reached) // Obsolete
     {
         OnDestinationReached?.Invoke(reached);
     }
 
    
 
-    public void TargetSeen(bool seen) => OnTargetSeen?.Invoke(seen);
+    public void TargetSeen(bool seen) => OnTargetSeen?.Invoke(seen); // Obsolete
 
-    public Action<bool, Transform> OnAimTowardsTarget;
-    public void AimTowardsTarget(bool aim, Transform target = null) => OnAimTowardsTarget?.Invoke(aim, target);
+    public Action<Transform> OnSetLookTarget;
+    public void SetLookTarget(Transform target) => OnSetLookTarget?.Invoke(target);
+
+    public Action<bool> OnAimTowardsTarget;
+    public void AimTowardsTarget(bool aim) => OnAimTowardsTarget?.Invoke(aim);
 
 
-    public void FacingTarget(bool facingTarget)
+    public void FacingTarget(bool facingTarget) // Obsolete
     {
         OnFacingTarget?.Invoke(facingTarget);
     }
@@ -162,7 +161,7 @@ public class EnemyEventManager : EventManager
     /// Used to alert the agents weapon to be ready to fire
     /// </summary>
     /// <param name="isReady"></param>
-    public void AimingLayerReady(bool isReady)
+    public void AimingLayerReady(bool isReady) // Obsolete
     {
         OnAimingLayerReady?.Invoke(isReady);
     }
@@ -198,42 +197,33 @@ public class EnemyEventManager : EventManager
         OnDeathAnimationComplete?.Invoke();
     }
 
-    public void RequestStationaryState(AlertStatus status)
+    public void RequestStationaryState(AlertStatus status) // Obsolete
     {
         OnRequestStationaryState?.Invoke(status);
     }
 
-   /* public void RequestChasingState()
-    {
-        OnRequestChasingState?.Invoke();
-    }*/
 
-   /* public void PendingNewDestination(bool pending)
-    {
-        OnPendingNewDestination?.Invoke(pending);
-    }*/
-
-    public void DestinationApplied()
+    public void DestinationApplied() // Obsolete
     {
         OnDestinationApplied?.Invoke();
     }
 
-    public void AlertStatusChanged(AlertStatus status)
+    public void AlertStatusChanged(AlertStatus status)// Obsolete
     {
         OnAlertStatusChanged?.Invoke(status);
     }
 
-    public void RotateAtPatrolPoint(Vector3 point)
+    public void RotateAtPatrolPoint(Vector3 point) // Obsolete
     {
         OnRotateAtPatrolPoint?.Invoke(point);
     }
 
-    public void DestinationRequested(AIDestinationType type)
+    public void DestinationRequested(AIDestinationType type) // Obsolete
     {
         OnDestinationRequested?.Invoke(type);
     }
 
-    public void DestinationRequestStatus(bool complete, bool success)
+    public void DestinationRequestStatus(bool complete, bool success) // Obsolete
     {
         OnDestinationRequestStatus?.Invoke(complete, success);
     }

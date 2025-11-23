@@ -53,6 +53,9 @@ public partial class NPCController
         FSM.OnAnimationIntent = AnimationIntent;
         FSM.OnMapDestinationToZone = MapDestinationToZone;
 
+        OnTargetSeen = TargetSeen;
+        OnTargetLost = TargetLost;
+
         base.RegisterLocalEvents(_eManager);
         RegisterGlobalEvents();
     }
@@ -79,11 +82,14 @@ public partial class NPCController
         FSM.OnMapDestinationToZone = null;
         FSM.Notification = null;
         FSM.OnAnimationIntent = null;
+        OnTargetSeen = null;
+        OnTargetLost = null;
     }
 
     protected override void OnSceneStarted()
     {
         base.OnSceneStarted();
+        _eManager.SetLookTarget(PrimaryTarget?.Transform);
         SwitchTo(Patrol.Instance);
 
     }

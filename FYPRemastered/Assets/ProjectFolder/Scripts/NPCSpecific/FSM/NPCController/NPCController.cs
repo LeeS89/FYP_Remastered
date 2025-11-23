@@ -70,6 +70,14 @@ public partial class NPCController : ComponentEvents, IFSMOwner, IFSMData, IZone
 
     public float SprintExitDist => throw new NotImplementedException();
 
+    [Header(@"How many consecutive FOV results required to ""See ""or ""Lose ""the target")]
+    [SerializeField] private uint _requiredSeenStreak = 3;
+    [SerializeField] private uint _requiredNotSeenStreak = 5;
+    private bool _isTargetVisible = false;
+    private uint _currentSeenStreak = 0;
+    private uint _currentNotSeenStreak = 0;
+    private Action OnTargetSeen;
+    private Action OnTargetLost;
 
 
     [Header("Agent uses random stop distance between min & max during target pursuit")]
@@ -188,22 +196,64 @@ public partial class NPCController : ComponentEvents, IFSMOwner, IFSMData, IZone
     private FOVResult _currentResult = FOVResult.TargetNotSeen;
     public void HandleFOVSweepResult(FOVResult result, bool withinAttackAngles)
     {
-        Debug.LogError("FOVResult: "+result.ToString());
-        if (/*_currentResult == result || */OwnerIsDead) return;
+        //Debug.LogError("FOVResult: "+result.ToString());
+        if (OwnerIsDead) return;
+        result.CalculateFOVResultStreak(
+            ref _isTargetVisible,
+            ref _currentSeenStreak,
+            ref _currentNotSeenStreak,
+            _requiredSeenStreak,
+            _requiredNotSeenStreak,
+            onSeenStable: OnTargetSeen,
+            onNotSeenStable: OnTargetLost
+            );
         //Debug.LogError("FOVResult when changed: " + result.ToString());
-        _currentResult = result;
+        /*    _currentResult = result;
+            if (_state == Patrol.Instance)
+            {
+               // Debug.LogError("Moving to Chase state");
+                if(_currentResult == FOVResult.TargetSeen) 
+                {
+                    TryBroadcastAlert();
+                    _eManager.AimTowardsTarget(aim: true, PrimaryTarget?.Transform);
+                    //  if (!_aimAnimLayerActive) _eManager.ToggleAnimationLayer(AnimationLayer.Aim, _onAnimLayerToggleComplete);
+                    // SwitchTo(ChaseState.Instance);
+                }
+                return;
+            }*/
+
+
+        /* if (_currentResult == result) return;
+         _currentResult = result;
+         if(_currentResult == FOVResult.TargetSeen)
+         {
+             _eManager.AimTowardsTarget(aim: true);
+             if (_state == Patrol.Instance)
+             {
+                 TryBroadcastAlert();
+                 return;
+             }
+         }
+         else _eManager.AimTowardsTarget(aim: false);*/
+    }
+
+    private void TargetSeen()
+    {
+        if (OwnerIsDead) return;
+        Debug.LogError("FOVResult: Target Seen");
+        _eManager.AimTowardsTarget(aim: true);
         if (_state == Patrol.Instance)
         {
-           // Debug.LogError("Moving to Chase state");
-            if(_currentResult == FOVResult.TargetSeen) 
-            {
-                TryBroadcastAlert();
-                _eManager.AimTowardsTarget(aim: true, PrimaryTarget?.Transform);
-                //  if (!_aimAnimLayerActive) _eManager.ToggleAnimationLayer(AnimationLayer.Aim, _onAnimLayerToggleComplete);
-                // SwitchTo(ChaseState.Instance);
-            }
+            TryBroadcastAlert();
             return;
         }
+    }
+
+    private void TargetLost()
+    {
+        if (OwnerIsDead) return;
+        Debug.LogError("FOVResult: Target Lost");
+        _eManager.AimTowardsTarget(aim: false);
     }
 
     protected void TryBroadcastAlert()

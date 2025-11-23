@@ -18,7 +18,8 @@ public class NPCAnimComponent : ComponentEvents
 
     [Header("Anim IK Params")]
    // [SerializeField] private Transform lookTarget;
-    [SerializeField] private Transform lookTarget;
+    [SerializeField] private Transform _lookTarget;
+    private void SetLookTarget(Transform target) => _lookTarget = target;
 
     private float _targetLookWeight = 0f;
     private float _currentLookWeight = 0f;
@@ -41,6 +42,7 @@ public class NPCAnimComponent : ComponentEvents
         _em.OnTogglingAnimationLayer = ActivateAnimationLayer;
         // _em.OnChangeAnimatorLayerWeight = ChangeLayerWeight;
         //_em.OnTargetSeen = AimTowardsTarget;
+        _em.OnSetLookTarget = SetLookTarget;
         _em.OnAimTowardsTarget = AimAtTarget;
         _em.OnTickAnimator = UpdateAnimator;
         _anim = GetComponent<Animator>();
@@ -52,6 +54,7 @@ public class NPCAnimComponent : ComponentEvents
         _em.OnAnimationTriggered = null;
         _em.OnTogglingAnimationLayer = null;
         _em.OnAimTowardsTarget = null;
+        _em.OnSetLookTarget = null;
         // _em.OnToggleAnimationLayer = null;
         //   _em.OnChangeAnimatorLayerWeight = null;
         //  _em.OnTargetSeen = null;
@@ -205,10 +208,10 @@ public class NPCAnimComponent : ComponentEvents
 
     private void OnAnimatorIK(int layerIndex)
     {
-        if (_anim == null)
+        if (_lookTarget == null || _anim == null)
             return;
 
-        if (lookTarget == null || _currentLookWeight <= 0f)
+        if (_currentLookWeight <= 0f)
         {
             _anim.SetLookAtWeight(0f);
             return;
@@ -222,14 +225,14 @@ public class NPCAnimComponent : ComponentEvents
             clampWeight
         );
 
-        _anim.SetLookAtPosition(lookTarget.position);
+        _anim.SetLookAtPosition(_lookTarget.position);
 
     }
 
-    private void AimAtTarget(bool aim, Transform target = null)
+    private void AimAtTarget(bool aim)
     {
-        lookTarget = target;
-        float newTargetWeight = (aim && lookTarget != null) ? 1f : 0f;
+        if (_lookTarget == null) return;
+        float newTargetWeight = aim ? 1f : 0f;
         if (Mathf.Approximately(_targetLookWeight, newTargetWeight)) { return; }
 
         _targetLookWeight = newTargetWeight;
@@ -241,6 +244,7 @@ public class NPCAnimComponent : ComponentEvents
 
         _runningRoutine = StartCoroutine(BlendLookWeight(_targetLookWeight));
     }
+
 
     private void AimTowardsTarget(bool targetInSight)
     {
