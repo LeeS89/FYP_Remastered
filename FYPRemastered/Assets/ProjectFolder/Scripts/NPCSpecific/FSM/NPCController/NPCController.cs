@@ -78,6 +78,7 @@ public partial class NPCController : ComponentEvents, IFSMOwner, IFSMData, IZone
     private uint _currentNotSeenStreak = 0;
     private Action OnTargetSeen;
     private Action OnTargetLost;
+    private bool _rotatingTowardsTarget = false;
 
 
     [Header("Agent uses random stop distance between min & max during target pursuit")]
@@ -170,6 +171,7 @@ public partial class NPCController : ComponentEvents, IFSMOwner, IFSMData, IZone
     protected virtual void LateUpdate()
     {
         if (OwnerIsDead) return;
+        this.RotateTowardsTarget(PrimaryTarget?.Transform, _rotatingTowardsTarget);
         FSM?.LateTick?.Invoke(Time.deltaTime);
         if (_eManager == null) return;
         _eManager.TickAnimator(Agent.velocity, Agent.transform.forward);
@@ -179,7 +181,7 @@ public partial class NPCController : ComponentEvents, IFSMOwner, IFSMData, IZone
     public virtual void SwitchTo(IIntentState next)
     {
         if (next == null || _state == next || OwnerIsDead) return;
-
+        
         _isInStateTransition = true;
         _state?.Exit(this);
         _state = next;
@@ -247,6 +249,8 @@ public partial class NPCController : ComponentEvents, IFSMOwner, IFSMData, IZone
             TryBroadcastAlert();
             return;
         }
+        if (_state == ChaseState.Instance || _state == FollowGroup.Instance)
+            _rotatingTowardsTarget = true;
     }
 
     private void TargetLost()
@@ -254,6 +258,9 @@ public partial class NPCController : ComponentEvents, IFSMOwner, IFSMData, IZone
         if (OwnerIsDead) return;
         Debug.LogError("FOVResult: Target Lost");
         _eManager.AimTowardsTarget(aim: false);
+        if (_state == ChaseState.Instance || _state == FollowGroup.Instance)
+            _rotatingTowardsTarget = false;
+
     }
 
     protected void TryBroadcastAlert()

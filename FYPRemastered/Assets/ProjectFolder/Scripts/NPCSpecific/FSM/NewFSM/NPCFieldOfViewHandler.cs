@@ -186,7 +186,7 @@ public class NPCFieldOfViewHandler : IFieldOfViewRunner
         Vector3 waistPos = _params.ownerOrigin.TransformPoint(0f, _params.waistHeightOffset, 0f);
         Vector3 eyePos = _params.ownerOrigin.TransformPoint(0f, _params.eyeHeightOffset, 0f);
         Vector3 centerPos = (waistPos + eyePos) * 0.5f;
-        Vector3 direction = TargetingUtility.GetDirectionToTarget(colCenter, centerPos);
+        Vector3 direction = TargetingUtility.GetDirectionToTarget(closest, centerPos);
        
         hitCount = this.EvaluateViewCone(
         waistPos,
