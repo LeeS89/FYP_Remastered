@@ -66,7 +66,7 @@ public class FSMManager : FSMBase
         _pathFinder.Callback = OnPathRequestComplete;// New
         TryRepath = TryGetNextDestination;
         CancelOrContinueRoutine = StateHasChanged;
-        LookAroundAction = LookAround;
+        LookAroundAction = LookAround; // Obsolete
         RemainingDistanceAction = SetSpeedByDistance; // obsolete
         OnPatrolReached = LookAroundAndContinue;
 
@@ -214,6 +214,7 @@ public class FSMManager : FSMBase
         {
             _hasValidDestination = false;
             TryResetAgent(); // Resets path and Sets speed == 0f
+            Debug.LogError("Reached Destination");
             OnDestinationReached?.Invoke();
             return;
         }
@@ -320,7 +321,7 @@ public class FSMManager : FSMBase
     public override void LookAroundAndContinue()
     {
         if (_runningRoutine == null)
-            _runningRoutine = this.BeginPatrolRoutine(_currentStateId, _ownerData.Transform, _ownerData.MinPatrolPointWaitTime, _ownerData.MaxPatrolPointWaitTime, _currentDestinationForward, LookAroundAction, CancelOrContinueRoutine, RoutineEnd);
+            _runningRoutine = this.BeginPatrolRoutine(_currentStateId, _ownerData.Transform, _ownerData.MinPatrolPointWaitTime, _ownerData.MaxPatrolPointWaitTime, _currentDestinationForward, OnAnimationIntent, CancelOrContinueRoutine, RoutineEnd);
             //_runningRoutine = CoroutineRunner.Instance.StartCoroutine(PatrolWaitRoutine(_currentPatrolPoinfForward));
     }
   

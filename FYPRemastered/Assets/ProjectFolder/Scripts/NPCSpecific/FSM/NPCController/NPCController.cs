@@ -78,7 +78,7 @@ public partial class NPCController : ComponentEvents, IFSMOwner, IFSMData, IZone
     private uint _currentNotSeenStreak = 0;
     private Action OnTargetSeen;
     private Action OnTargetLost;
-    private bool _rotatingTowardsTarget = false;
+    private bool _aimingAtTarget = false;
 
 
     [Header("Agent uses random stop distance between min & max during target pursuit")]
@@ -171,7 +171,8 @@ public partial class NPCController : ComponentEvents, IFSMOwner, IFSMData, IZone
     protected virtual void LateUpdate()
     {
         if (OwnerIsDead) return;
-        this.RotateTowardsTarget(PrimaryTarget?.Transform, _rotatingTowardsTarget);
+        TryRotateAndAimTowardsTarget();
+        //this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: CanRotateTowardsTarget());
         FSM?.LateTick?.Invoke(Time.deltaTime);
         if (_eManager == null) return;
         _eManager.TickAnimator(Agent.velocity, Agent.transform.forward);
@@ -195,7 +196,7 @@ public partial class NPCController : ComponentEvents, IFSMOwner, IFSMData, IZone
         Debug.LogError("Notification Kind from unhandled: "+ Kind.ToString());
     }
 
-    private FOVResult _currentResult = FOVResult.TargetNotSeen;
+    private FOVResult _currentFOVResult = FOVResult.TargetNotSeen;
     public void HandleFOVSweepResult(FOVResult result, bool withinAttackAngles)
     {
         //Debug.LogError("FOVResult: "+result.ToString());
@@ -209,58 +210,43 @@ public partial class NPCController : ComponentEvents, IFSMOwner, IFSMData, IZone
             onSeenStable: OnTargetSeen,
             onNotSeenStable: OnTargetLost
             );
-        //Debug.LogError("FOVResult when changed: " + result.ToString());
-        /*    _currentResult = result;
-            if (_state == Patrol.Instance)
-            {
-               // Debug.LogError("Moving to Chase state");
-                if(_currentResult == FOVResult.TargetSeen) 
-                {
-                    TryBroadcastAlert();
-                    _eManager.AimTowardsTarget(aim: true, PrimaryTarget?.Transform);
-                    //  if (!_aimAnimLayerActive) _eManager.ToggleAnimationLayer(AnimationLayer.Aim, _onAnimLayerToggleComplete);
-                    // SwitchTo(ChaseState.Instance);
-                }
-                return;
-            }*/
-
-
-        /* if (_currentResult == result) return;
-         _currentResult = result;
-         if(_currentResult == FOVResult.TargetSeen)
-         {
-             _eManager.AimTowardsTarget(aim: true);
-             if (_state == Patrol.Instance)
-             {
-                 TryBroadcastAlert();
-                 return;
-             }
-         }
-         else _eManager.AimTowardsTarget(aim: false);*/
     }
 
     private void TargetSeen()
     {
         if (OwnerIsDead) return;
         Debug.LogError("FOVResult: Target Seen");
-        _eManager.AimTowardsTarget(aim: true);
+        _currentFOVResult = FOVResult.TargetSeen;
+      //  _eManager.AimTowardsTarget(aim: true);
         if (_state == Patrol.Instance)
         {
             TryBroadcastAlert();
             return;
         }
-        if (_state == ChaseState.Instance || _state == FollowGroup.Instance)
-            _rotatingTowardsTarget = true;
     }
 
     private void TargetLost()
     {
         if (OwnerIsDead) return;
         Debug.LogError("FOVResult: Target Lost");
-        _eManager.AimTowardsTarget(aim: false);
-        if (_state == ChaseState.Instance || _state == FollowGroup.Instance)
-            _rotatingTowardsTarget = false;
+        _currentFOVResult = FOVResult.TargetNotSeen;
+     //   _eManager.AimTowardsTarget(aim: false);
+    }
 
+    private void TryRotateAndAimTowardsTarget()
+    {
+        if (OwnerIsDead) return;
+        if (_state == ChaseState.Instance || _state == FollowGroup.Instance)
+            if (!IsMoving || _currentFOVResult == FOVResult.TargetSeen)
+            {
+                this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: true);
+                if (!_aimingAtTarget) { _aimingAtTarget = true; _eManager.AimTowardsTarget(aim: true); }
+            }
+            else
+            {
+                this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: false);
+                if (_aimingAtTarget) { _aimingAtTarget = false; _eManager.AimTowardsTarget(aim: false); }
+            }
     }
 
     protected void TryBroadcastAlert()
