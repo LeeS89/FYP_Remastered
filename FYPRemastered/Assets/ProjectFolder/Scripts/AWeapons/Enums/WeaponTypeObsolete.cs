@@ -131,18 +131,19 @@ public enum PolicyIntentResult
 
 public enum NotificationKind
 {
+    NoCurrentState,
     TargetMoved,
     TargetLeftArea,
-    PathBlocked,
-    TargetFound,
+    PathBlocked, // Obsolete
+    TargetFound, // Obsolete
     /*TargetLOSLost,
     TargetLOSConfirmed,*/
     FOVUpdate,
     NoAvailablePath,
     CoverExposed,
     PathToPrimaryAvailable,
-    DestinationFound,
-    DestinationReached
+    DestinationFound, // Obsolete
+    DestinationReached // Obsolete
 }
 
 public enum PolicyHaltReason

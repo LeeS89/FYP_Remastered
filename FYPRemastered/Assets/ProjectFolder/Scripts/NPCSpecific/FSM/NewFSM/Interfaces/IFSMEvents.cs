@@ -32,14 +32,16 @@ public interface IFSMEvents : ITickable, IZoneSink
    // bool CurrentZone(out uint zone);
 }
 
-public interface IFSMControl : ITickable
+public interface IFSMControl : IFSMState, ITickable
 {
+    StateId CurrentState { get; }
+
     void BeginPatrol(StateId id);
     void BeginChase(StateId id);
     void BeginFlank(StateId id);
     void TakeCover(StateId id);
     void FollowGroup(StateId id);
-    void ExitState();
+   // void ExitState();
     bool IsMoving();
   //  bool TryGetPatrolZone(out int zone);
 

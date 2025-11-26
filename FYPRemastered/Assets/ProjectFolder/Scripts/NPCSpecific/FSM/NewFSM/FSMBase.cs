@@ -10,13 +10,15 @@ public abstract class FSMBase : IFSMControl
   //  public StateNotificationProvider Notification { get; set; }
     protected event Action<float> OnTick;
     public void Tick(float dt) => OnTick?.Invoke(dt);
-    public Action<float> LateTick { get; protected set; }
+    public Action<float> OnLateTick { get; protected set; }
 
     public ITargetable PrimaryTarget { get; set; }
     public IFSMControl.OnNotifyOwner Notification { get; set; }
     public Action<AnimationCue> OnAnimationIntent { get; set; }
     public Action<bool, int> OnWaypointZoneReceived { get; set; }
     public Action<Vector3> OnMapDestinationToZone { get; set; }
+
+    public StateId CurrentState => throw new NotImplementedException();
 
     protected IFieldOfViewRunner _fovHandler;
 
@@ -101,6 +103,21 @@ public abstract class FSMBase : IFSMControl
     public virtual void FieldOfViewSweepResult(FOVResult result, bool withinAttackAngles) { }
 
     public int? TryGetPatrolZone() => _pathFinder?.TryGetCurrentZone();
+
+    public void EnterState(StateId id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void OnDestinationReached()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void LateTick(float dt)
+    {
+        throw new NotImplementedException();
+    }
 
 
     //  public abstract bool TryGetPatrolZone(out int zone);

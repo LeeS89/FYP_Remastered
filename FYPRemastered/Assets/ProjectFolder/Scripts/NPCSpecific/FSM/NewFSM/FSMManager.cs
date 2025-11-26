@@ -73,7 +73,7 @@ public class FSMManager : FSMBase
         OnTick += _fovHandler.Tick;
         OnTick += TimerTicks;
         OnTick += ClassUpdate;
-        LateTick = OnLateTick;
+        base.OnLateTick = OnLateTick;
     }
 
     private void TryResetAgent()
@@ -393,7 +393,7 @@ public class FSMManager : FSMBase
         _fovHandler.OnFOVSweepComplete = null;
         OnTick -= TimerTicks;
         OnTick -= ClassUpdate;
-        LateTick = null;
+        base.OnLateTick = null;
     }
 
     

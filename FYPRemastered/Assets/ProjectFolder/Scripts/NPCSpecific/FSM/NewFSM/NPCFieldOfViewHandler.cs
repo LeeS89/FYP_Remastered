@@ -135,7 +135,7 @@ public class NPCFieldOfViewHandler : IFieldOfViewRunner
     }
     private List<Vector3> _samplePoints = new(5);
 
-    public Action<float> LateTick { get; private set; } // Not used in class
+    public Action<float> OnLateTick { get; private set; } // Not used in class
    
 
     public void Tick(float dt)
@@ -243,7 +243,10 @@ public class NPCFieldOfViewHandler : IFieldOfViewRunner
         return count;
     }
 
-    
+    public void LateTick(float dt)
+    {
+        throw new NotImplementedException();
+    }
 }
 
 

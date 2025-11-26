@@ -7,5 +7,7 @@ public interface ITickable
     //event Action<float> OnTick;
     void Tick(float dt);
 
-    Action<float> LateTick { get; }
+    void LateTick(float dt);
+
+    Action<float> OnLateTick { get; }
 }
