@@ -15,7 +15,7 @@ public class FSMManager : FSMBase
     private Action OnChaseReached;
     
 
-    public FSMManager(IFSMData data, IPathResolver resolver, IFieldOfViewRunner runner)
+    public FSMManager(IAgentData data, IPathResolver resolver, IFieldOfViewRunner runner)
     {
         if (data == null)
         {
@@ -375,7 +375,7 @@ public class FSMManager : FSMBase
         throw new NotImplementedException();
     }
 
-    public override void ExitState()
+    public override void ExitState(StateId id)
     {
         TryResetAgent();
         OnDestinationReached = null;

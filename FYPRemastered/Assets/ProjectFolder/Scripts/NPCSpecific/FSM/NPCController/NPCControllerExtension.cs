@@ -40,7 +40,7 @@ public static class NPCControllerExtension
     }
 
 
-    public static void RotateTowardsTarget(this IFSMData controller, Transform target, bool rotate)
+    public static void RotateTowardsTarget(this IAgentData controller, Transform target, bool rotate)
     {
         if (controller == null || target == null ||
             controller.Agent == null || controller.Transform == null) return;

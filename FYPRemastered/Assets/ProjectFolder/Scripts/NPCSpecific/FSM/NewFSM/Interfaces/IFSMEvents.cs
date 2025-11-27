@@ -57,7 +57,7 @@ public interface IFSMControl : IFSMState, ITickable
     }
 
 
-public interface IFSMData : ITargetable
+public interface IAgentData : ITargetable
 {
     ITargetable PrimaryTarget { get; }
     NavMeshAgent Agent { get; }

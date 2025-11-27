@@ -1,5 +1,7 @@
+using System;
 using UnityEngine;
 
+[Obsolete("", true)]
 public sealed class NPCDecisionPolicy
 {
     public static readonly NPCDecisionPolicy Instance = new();

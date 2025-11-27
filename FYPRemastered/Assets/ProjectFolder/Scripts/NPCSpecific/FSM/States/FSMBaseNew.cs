@@ -5,7 +5,7 @@ using UnityEngine;
 public partial class FSMBaseNew : IFSMControl
 {
     private IReadOnlyDictionary<StateId, IFSMState> _states;
-    private IFSMData _ownerData;
+    private IAgentData _ownerData;
     private IPathResolver _pathFinder;
     private IFieldOfViewRunner _fovHandler;
     public StateId CurrentState { get; } = StateId.None;
@@ -14,6 +14,7 @@ public partial class FSMBaseNew : IFSMControl
     public Action<AnimationCue> OnAnimationIntent { get; set; }
     public Action<Vector3> OnMapDestinationToZone { get; set; }
 
+    #region Obsolete
     // Obsolete
     public Action<float> OnLateTick => throw new NotImplementedException();
 
@@ -44,7 +45,7 @@ public partial class FSMBaseNew : IFSMControl
         throw new NotImplementedException();
     }
     // End Obsolete
-
+    #endregion
 
     public void EnterState(StateId id)
     {
@@ -53,7 +54,7 @@ public partial class FSMBaseNew : IFSMControl
         // else => Notify state doesnt exist
     }
 
-    public void ExitState()
+    public void ExitState(StateId id)
     {
         throw new NotImplementedException();
     }

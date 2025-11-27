@@ -7,7 +7,7 @@ using UnityEngine.AI;
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(NavMeshObstacle))]
-public partial class NPCController : ComponentEvents, IFSMOwner, IFSMData, IZoneAlertListener
+public partial class NPCController : ComponentEvents, IFSMOwner, IAgentData, IZoneAlertListener
 {
     protected EnemyEventManager _eManager;
     private bool _isInStateTransition = false;
@@ -179,7 +179,7 @@ public partial class NPCController : ComponentEvents, IFSMOwner, IFSMData, IZone
     }
 
    
-    public virtual void SwitchTo(IIntentState next)
+    public void SwitchTo(IIntentState next)
     {
         if (next == null || _state == next || OwnerIsDead) return;
         

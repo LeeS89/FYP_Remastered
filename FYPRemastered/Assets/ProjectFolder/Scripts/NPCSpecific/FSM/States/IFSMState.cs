@@ -4,7 +4,7 @@ public interface IFSMState
 {
     void EnterState(StateId id);
 
-    void ExitState();
+    void ExitState(StateId id);
 
     void OnDestinationReached();
 }

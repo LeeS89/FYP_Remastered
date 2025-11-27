@@ -28,7 +28,7 @@ public abstract class FSMBase : IFSMControl
 
     protected Coroutine _runningRoutine;
 
-    protected IFSMData _ownerData;
+    protected IAgentData _ownerData;
    // protected IFSMNotifications _ownerNotifications;
     protected Vector3 _currentDestination;
     protected Vector3? _currentDestinationForward = null;
@@ -39,7 +39,7 @@ public abstract class FSMBase : IFSMControl
     public abstract void BeginChase(StateId id);
     public abstract void BeginFlank(StateId id);
     public abstract void BeginPatrol(StateId id);
-    public abstract void ExitState();
+    public abstract void ExitState(StateId id);
     public abstract void FollowGroup(StateId id);
     public abstract void TakeCover(StateId id);
 
