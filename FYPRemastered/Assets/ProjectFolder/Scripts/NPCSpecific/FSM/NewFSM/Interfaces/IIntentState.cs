@@ -5,7 +5,7 @@ public interface IIntentState
 {
     void Enter(IFSMOwner self);
     void Exit(IFSMOwner self);
-    void Handle(IFSMOwner self, NotifyOwnerNPC notification);
+    void Handle(IFSMOwner self, OwnerNPCNotification notification);
 
     StateId Id { get; }
 

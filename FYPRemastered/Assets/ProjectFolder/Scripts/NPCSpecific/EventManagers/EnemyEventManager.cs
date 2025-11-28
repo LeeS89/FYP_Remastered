@@ -128,7 +128,7 @@ public class EnemyEventManager : EventManager
     public void SetLookTarget(Transform target) => OnSetLookTarget?.Invoke(target);
 
     public Action<bool> OnAimTowardsTarget;
-    public void AimTowardsTarget(bool aim) => OnAimTowardsTarget?.Invoke(aim);
+    public void AimAtTarget(bool aim) => OnAimTowardsTarget?.Invoke(aim);
 
 
     public void FacingTarget(bool facingTarget) // Obsolete

@@ -47,7 +47,7 @@ public interface IFSMControl : IFSMState, ITickable
 
     int? TryGetPatrolZone();
 
-    delegate void OnNotifyOwner(in NotifyOwnerNPC n);
+    delegate void OnNotifyOwner(in OwnerNPCNotification n);
     OnNotifyOwner Notification { get; set; }
     Action<AnimationCue> OnAnimationIntent { get; set; }
   
@@ -76,7 +76,7 @@ public interface IAgentData : ITargetable
 public interface IFSMOwner
 {
    // void TryBroadcastAlert(); // Remove, NPCControllerBase will handle this
-    void LogUnhandled(IntentStateBase state, in NotifyOwnerNPC notification);
+    void LogUnhandled(IntentStateBase state, in OwnerNPCNotification notification);
     void SwitchTo(IIntentState next);
     void HandleFOVSweepResult(FOVResult result, bool withinAttackAngles);
     IFSMControl FSM { get; }

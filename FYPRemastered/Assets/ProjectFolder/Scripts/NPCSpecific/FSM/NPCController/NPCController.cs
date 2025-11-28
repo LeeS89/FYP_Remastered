@@ -94,7 +94,7 @@ public partial class NPCController : ComponentEvents, IFSMOwner, IAgentData, IZo
     
 
     // IFSMNotifications - For notifications received by the FSMManager, i.e. No valid destination, target lost, Target within melee/ shot range, etc.
-    public virtual void Notify(in NotifyOwnerNPC n)
+    public virtual void Notify(in OwnerNPCNotification n)
     {
         if (_isInStateTransition || n.Id != _state.Id) return;
         _state.Handle(this, n);
@@ -171,7 +171,7 @@ public partial class NPCController : ComponentEvents, IFSMOwner, IAgentData, IZo
     protected virtual void LateUpdate()
     {
         if (OwnerIsDead) return;
-        TryRotateAndAimTowardsTarget();
+        TryRotateAndAimAtTarget();
         //this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: CanRotateTowardsTarget());
         FSM?.OnLateTick?.Invoke(Time.deltaTime);
         if (_eManager == null) return;
@@ -190,7 +190,7 @@ public partial class NPCController : ComponentEvents, IFSMOwner, IAgentData, IZo
         _isInStateTransition = false;
     }
 
-    public void LogUnhandled(IntentStateBase state, in NotifyOwnerNPC notification)
+    public void LogUnhandled(IntentStateBase state, in OwnerNPCNotification notification)
     {
         var Kind = notification.Kind;
         Debug.LogError("Notification Kind from unhandled: "+ Kind.ToString());
@@ -233,19 +233,19 @@ public partial class NPCController : ComponentEvents, IFSMOwner, IAgentData, IZo
      //   _eManager.AimTowardsTarget(aim: false);
     }
 
-    private void TryRotateAndAimTowardsTarget()
+    private void TryRotateAndAimAtTarget()
     {
         if (OwnerIsDead) return;
         if (_state == ChaseState.Instance || _state == FollowGroup.Instance)
             if (!IsMoving || _currentFOVResult == FOVResult.TargetSeen)
             {
                 this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: true);
-                if (!_aimingAtTarget) { _aimingAtTarget = true; _eManager.AimTowardsTarget(aim: true); }
+                if (!_aimingAtTarget) { _aimingAtTarget = true; _eManager.AimAtTarget(aim: true); }
             }
             else
             {
                 this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: false);
-                if (_aimingAtTarget) { _aimingAtTarget = false; _eManager.AimTowardsTarget(aim: false); }
+                if (_aimingAtTarget) { _aimingAtTarget = false; _eManager.AimAtTarget(aim: false); }
             }
     }
 

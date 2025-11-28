@@ -23,7 +23,7 @@ public abstract class IntentStateBase : IIntentState
     public virtual void Exit(IFSMOwner self) => self?.FSM?.ExitState(Id);
    
 
-    public virtual void Handle(IFSMOwner self, NotifyOwnerNPC n)
+    public virtual void Handle(IFSMOwner self, OwnerNPCNotification n)
     {
         if(n.Kind == NotificationKind.FOVUpdate) self.HandleFOVSweepResult(n.FOVResult, n.TargetWithinshootingAngles);
         else self.LogUnhandled(this, n);

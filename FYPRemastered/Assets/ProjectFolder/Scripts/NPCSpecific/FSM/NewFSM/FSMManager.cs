@@ -95,7 +95,7 @@ public class FSMManager : FSMBase
             Notification?.Invoke(NotifyOwnerNPC.TargetFound(_currentStateId));
             return;
         }*/
-        Notification?.Invoke(NotifyOwnerNPC.FOVUpdate(_currentStateId, result, withinAttackAngles));
+        Notification?.Invoke(OwnerNPCNotification.FOVUpdate(_currentStateId, result, withinAttackAngles));
     }
 
    
@@ -134,9 +134,9 @@ public class FSMManager : FSMBase
         StateId id = result.Id;
 
         if (result.Reason == PathCheckReason.ProbePathToPrimaryTarget && pathFound)
-        { Notification?.Invoke(NotifyOwnerNPC.PathToPrimaryAvailable(result.Id)); return; }
+        { Notification?.Invoke(OwnerNPCNotification.PathToPrimaryAvailable(result.Id)); return; }
     
-        if (!result.PathFound) { Notification?.Invoke(NotifyOwnerNPC.NoAvailablePath(_currentStateId)); Debug.LogError("NO Path Found!!"); return; }
+        if (!result.PathFound) { Notification?.Invoke(OwnerNPCNotification.NoAvailablePath(_currentStateId)); Debug.LogError("NO Path Found!!"); return; }
         else
         {
             _currentDestination = result.Destination;

@@ -21,7 +21,7 @@ public sealed class ChaseState : IntentStateBase
         // Public void CancelCurrent(token);
     }*/
 
-    public override void Handle(IFSMOwner self, NotifyOwnerNPC n)
+    public override void Handle(IFSMOwner self, OwnerNPCNotification n)
     {
         switch (n.Kind)
         {

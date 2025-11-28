@@ -1,13 +1,13 @@
+using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [Obsolete("", true)]
-public sealed class NPCDecisionPolicy
+public static class NPCDecisionPolicy
 {
-    public static readonly NPCDecisionPolicy Instance = new();
-    private NPCDecisionPolicy() { }
-
-    public void ResolveNextState(IFSMOwner self, NotifyOwnerNPC n, /*StateId currentState*/IntentStateBase sb)
+    
+    public static void ResolveNextState(IFSMOwner self, OwnerNPCNotification n, /*StateId currentState*/IntentStateBase sb)
     {
         NotificationKind kind = n.Kind;
         switch (kind)
@@ -21,4 +21,17 @@ public sealed class NPCDecisionPolicy
         }
         
     }
+
+
+    public static void HandleNotification(IFSMOwner delf, OwnerNPCNotification n)
+    {
+
+    }
+
+  /*  extension(IEnumerable<int> source)
+    {
+        public IEnumerable<int> WhereGreaterThan(int threshold)
+        => source.Where(x => x > threshold);
+    }*/
+
 }
