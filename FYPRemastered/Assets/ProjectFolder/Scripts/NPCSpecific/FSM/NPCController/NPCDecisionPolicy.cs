@@ -1,12 +1,11 @@
-using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-[Obsolete("", true)]
+
 public static class NPCDecisionPolicy
 {
-    
+
     public static void ResolveNextState(IFSMOwner self, OwnerNPCNotification n, /*StateId currentState*/IntentStateBase sb)
     {
         NotificationKind kind = n.Kind;
@@ -19,19 +18,54 @@ public static class NPCDecisionPolicy
                 self.LogUnhandled(sb, n); // Change
                 break;
         }
-        
+
     }
 
 
-    public static void HandleNotification(IFSMOwner delf, OwnerNPCNotification n)
+    public static BrainDecision HandleNotification(this IFSMOwner self, in OwnerNPCNotification n)
     {
+        var state = self.FSM.CurrentStateId;
 
+        return state switch
+        {
+            StateId.Patrol => DecidePatrol(self, n),
+            StateId.Chase => DecideChase(self, n),
+            StateId.Flank => DecideFlank(self, n),
+            _ => BrainDecision.None,
+        };
     }
 
-  /*  extension(IEnumerable<int> source)
+    private static BrainDecision DecidePatrol(IFSMOwner self, in OwnerNPCNotification n)
+    {
+        return BrainDecision.None;
+    }
+
+    private static BrainDecision DecideChase(IFSMOwner self, in OwnerNPCNotification n)
+    {
+        return BrainDecision.None;
+    }
+
+    private static BrainDecision DecideFlank(IFSMOwner self, in OwnerNPCNotification n)
+    {
+        return BrainDecision.None;
+    }
+    
+   /* extension(IEnumerable<int> source)
     {
         public IEnumerable<int> WhereGreaterThan(int threshold)
         => source.Where(x => x > threshold);
     }*/
+}
+
+
+public readonly struct BrainDecision
+{
+    public StateId NextIntent { get; }
+    public bool BroadcastZoneAlert { get; }
+
+    public static BrainDecision None => new BrainDecision();
 
 }
+
+
+

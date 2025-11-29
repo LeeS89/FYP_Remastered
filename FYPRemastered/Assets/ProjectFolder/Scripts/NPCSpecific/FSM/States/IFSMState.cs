@@ -2,9 +2,11 @@ using UnityEngine;
 
 public interface IFSMState
 {
-    void EnterState(StateId id);
+    void EnterState();
 
-    void ExitState(StateId id);
+    void ExitState();
 
     void OnDestinationReached();
+
+    StateId Id { get; }
 }

@@ -32,9 +32,11 @@ public interface IFSMEvents : ITickable, IZoneSink
    // bool CurrentZone(out uint zone);
 }
 
-public interface IFSMControl : IFSMState, ITickable
+public interface IFSMControl : /*IFSMState, */ITickable
 {
-    StateId CurrentState { get; }
+    StateId CurrentStateId { get; }
+
+    void SwitchTo(StateId state);
 
     void BeginPatrol(StateId id);
     void BeginChase(StateId id);

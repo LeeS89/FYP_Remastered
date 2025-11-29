@@ -18,7 +18,7 @@ public abstract class FSMBase : IFSMControl
     public Action<bool, int> OnWaypointZoneReceived { get; set; }
     public Action<Vector3> OnMapDestinationToZone { get; set; }
 
-    public StateId CurrentState => throw new NotImplementedException();
+    public StateId CurrentStateId => throw new NotImplementedException();
 
     protected IFieldOfViewRunner _fovHandler;
 
@@ -115,6 +115,11 @@ public abstract class FSMBase : IFSMControl
     }
 
     public void LateTick(float dt)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void SwitchTo(StateId state)
     {
         throw new NotImplementedException();
     }

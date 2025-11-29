@@ -8,12 +8,12 @@ public sealed class FSMPatrolState : FSMBaseState
     public FSMPatrolState(IAgentData data, IPathResolver resolver) : base(data, resolver) { }
     
 
-    public override void EnterState(StateId id)
+    public override void EnterState()
     {
         throw new System.NotImplementedException();
     }
 
-    public override void ExitState(StateId id)
+    public override void ExitState()
     {
         throw new System.NotImplementedException();
     }

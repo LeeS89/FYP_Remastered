@@ -8,11 +8,15 @@ public partial class FSMBaseNew : IFSMControl
     private IAgentData _ownerData;
     private IPathResolver _pathFinder;
     private IFieldOfViewRunner _fovHandler;
-    public StateId CurrentState { get; } = StateId.None;
+
+    private IFSMState _current;
+    public StateId CurrentStateId => _current?.Id ?? StateId.None;
 
     public IFSMControl.OnNotifyOwner Notification { get; set; }
     public Action<AnimationCue> OnAnimationIntent { get; set; }
     public Action<Vector3> OnMapDestinationToZone { get; set; }
+
+    private bool _isInStateTransition = false;
 
     #region Obsolete
     // Obsolete
@@ -47,19 +51,21 @@ public partial class FSMBaseNew : IFSMControl
     // End Obsolete
     #endregion
 
-    public void EnterState(StateId id)
+   
+    public void SwitchTo(StateId next)
     {
-        if (_states != null && _states.TryGetValue(id, out var state))
-            state.EnterState(id);
-        // else => Notify state doesnt exist
+        if (next == CurrentStateId || next == StateId.None) return;
+
+
+        if(_states != null && _states.TryGetValue(next, out var nextstate))
+        {
+            _current?.ExitState();
+            _current = nextstate;
+            _current.EnterState();
+        }   // else => Notify state doesnt exist
     }
 
-    public void ExitState(StateId id)
-    {
-        throw new NotImplementedException();
-    }
 
-  
 
     public bool IsMoving()
     {
