@@ -5,25 +5,30 @@ using Random = UnityEngine.Random;
 
 public sealed class FSMPatrolState : FSMBaseState
 {
-    public FSMPatrolState(IAgentData data, IPathResolver resolver) : base(data, resolver) { }
+    public FSMPatrolState(IAgentData data, IPathResolver resolver, IFSMStateContext stateContext) : base(data, resolver, stateContext) { }
     
 
-    public override void EnterState()
-    {
-        throw new System.NotImplementedException();
-    }
+    public override void EnterState() => TryGetNewDestination();
 
-    public override void ExitState()
-    {
-        throw new System.NotImplementedException();
-    }
 
     public override void OnDestinationReached()
     {
-        throw new System.NotImplementedException();
+        if (!ContinueRoutine) return;
+
+        if (_runningRoutine == null)
+            _runningRoutine = CoroutineRunner.Instance.StartCoroutine(PatrolWaitRoutine(
+                _ownerData.Transform, _ownerData.MinPatrolPointWaitTime, _ownerData.MaxPatrolPointWaitTime, 
+                _stateContext.CurrentDestinationForward));
     }
 
-    private IEnumerator PatrolWaitRoutine(Transform t, float minWait, float maxWait, Vector3? forward, Action<AnimationCue> animationCB, Func<StateId, bool> cantContinueCB, Action<StateId> OnDone)
+    public override void TryGetNewDestination()
+    {
+        ContinueRoutine = true;
+        var request = ValidateDestination.GetPatrolPoint(_ownerData, _ownerData.Path);
+        _pathFinder?.TryGetDestination(request);
+    }
+
+    private IEnumerator PatrolWaitRoutine(Transform t, float minWait, float maxWait, Vector3? forward)
     {
         Debug.LogError("Patrol wait routine called");
         if (forward != null)
@@ -38,8 +43,8 @@ public sealed class FSMPatrolState : FSMBaseState
         }
         if (!ContinueRoutine) yield break;
 
-        animationCB?.Invoke(AnimationCue.Look);
-       
+        _stateContext?.OnAnimationIntent?.Invoke(AnimationCue.Look);
+      
         float _delayTime = Random.Range(minWait, maxWait);
         float elapsedTime = 0.0f;
 
@@ -49,7 +54,7 @@ public sealed class FSMPatrolState : FSMBaseState
             yield return null;
         }
         if (!ContinueRoutine) yield break;
-        /*OnDone?.Invoke(id);*/ // Continue to next destination
+        TryGetNewDestination();
 
     }
 }

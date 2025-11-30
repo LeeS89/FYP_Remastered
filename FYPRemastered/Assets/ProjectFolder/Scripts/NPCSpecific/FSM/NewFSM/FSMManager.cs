@@ -294,10 +294,10 @@ public class FSMManager : FSMBase
         switch (current)
         {
             case StateId.Patrol:
-                request = ValidateDestination.GetPatrolPoint(StateId.Patrol, _ownerData, _ownerData.Path/*, OnWaypointZoneReceived*/);
+                request = ValidateDestination.GetPatrolPoint(_ownerData, _ownerData.Path/*, OnWaypointZoneReceived*/);
                 break;
             case StateId.Chase:
-                request = ValidateDestination.GetTargetPosition(current, _ownerData.Path, PathCheckReason.ValidatePathForDestination, _ownerData, _ownerData.PrimaryTarget);
+                request = ValidateDestination.GetTargetPosition(_ownerData.Path, PathCheckReason.ValidatePathForDestination, _ownerData, _ownerData.PrimaryTarget);
                 break;
             default:
                 return;

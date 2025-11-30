@@ -109,10 +109,10 @@ public abstract class FSMBase : IFSMControl
         throw new NotImplementedException();
     }
 
-    public void OnDestinationReached()
+   /* public void OnDestinationReached()
     {
         throw new NotImplementedException();
-    }
+    }*/
 
     public void LateTick(float dt)
     {

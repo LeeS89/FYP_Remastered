@@ -9,5 +9,5 @@ public interface ITickable
 
     void LateTick(float dt);
 
-    Action<float> OnLateTick { get; }
+    //Action<float> OnLateTick { get; }
 }

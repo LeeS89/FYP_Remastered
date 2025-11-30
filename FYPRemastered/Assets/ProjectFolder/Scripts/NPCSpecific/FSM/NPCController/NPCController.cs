@@ -173,7 +173,7 @@ public partial class NPCController : ComponentEvents, IFSMOwner, IAgentData, IZo
         if (OwnerIsDead) return;
         TryRotateAndAimAtTarget();
         //this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: CanRotateTowardsTarget());
-        FSM?.OnLateTick?.Invoke(Time.deltaTime);
+        FSM?.LateTick(Time.deltaTime);
         if (_eManager == null) return;
         _eManager.TickAnimator(Agent.velocity, Agent.transform.forward);
     }

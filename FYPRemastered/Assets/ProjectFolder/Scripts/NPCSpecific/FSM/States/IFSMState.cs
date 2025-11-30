@@ -8,5 +8,7 @@ public interface IFSMState
 
     void OnDestinationReached();
 
+    void TryGetNewDestination();
+
     StateId Id { get; }
 }

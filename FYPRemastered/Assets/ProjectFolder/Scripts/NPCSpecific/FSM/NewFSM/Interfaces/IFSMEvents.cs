@@ -32,6 +32,7 @@ public interface IFSMEvents : ITickable, IZoneSink
    // bool CurrentZone(out uint zone);
 }
 
+// Obsolete
 public interface IFSMControl : /*IFSMState, */ITickable
 {
     StateId CurrentStateId { get; }
@@ -43,20 +44,38 @@ public interface IFSMControl : /*IFSMState, */ITickable
     void BeginFlank(StateId id);
     void TakeCover(StateId id);
     void FollowGroup(StateId id);
-   // void ExitState();
+    // void ExitState();
     bool IsMoving();
-  //  bool TryGetPatrolZone(out int zone);
+    //  bool TryGetPatrolZone(out int zone);
 
     int? TryGetPatrolZone();
 
     delegate void OnNotifyOwner(in OwnerNPCNotification n);
     OnNotifyOwner Notification { get; set; }
     Action<AnimationCue> OnAnimationIntent { get; set; }
-  
+
 
     Action<Vector3> OnMapDestinationToZone { get; set; }
 
-    }
+}
+
+public interface IFSMControlNew : IFSMStateContext, ITickable
+{
+    StateId CurrentStateId { get; }
+    void SwitchTo(StateId state);
+
+    delegate void OnNotifyOwner(in OwnerNPCNotification n);
+    OnNotifyOwner Notification { get; set; }
+}
+
+public interface IFSMStateContext
+{
+    Action<AnimationCue> OnAnimationIntent { get; set; }
+    Action<Vector3> OnMapDestinationToZone { get; set; }
+    Vector3? CurrentDestinationForward { get; }
+
+    bool IsStationary();
+}
 
 
 public interface IAgentData : ITargetable

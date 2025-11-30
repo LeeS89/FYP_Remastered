@@ -237,7 +237,7 @@ public readonly struct ValidateDestination
         NavMeshPath path,
         uint maxFlankSteps,
         uint minFlankSteps,
-        Action<bool, int> waypointZoneCallback = null
+        Action<bool, int> waypointZoneCallback = null // Obsolete
         )
     {
         StateId = stateId;
@@ -250,12 +250,12 @@ public readonly struct ValidateDestination
         WaypointZoneCallback = waypointZoneCallback;
     }
 
-    public static ValidateDestination GetPatrolPoint(StateId id, ITargetable caller, NavMeshPath path, Action<bool, int> waypointZoneCB = null)
-        => new ValidateDestination(id, PathCheckReason.ValidatePathForDestination, caller, null, path, 0, 0, waypointZoneCB);
+    public static ValidateDestination GetPatrolPoint(ITargetable caller, NavMeshPath path, Action<bool, int> waypointZoneCB = null)
+        => new ValidateDestination(StateId.Patrol, PathCheckReason.ValidatePathForDestination, caller, null, path, 0, 0, waypointZoneCB);
 
-    public static ValidateDestination GetFlankPoint(StateId id, NavMeshPath path, ITargetable caller, ITargetable flankTarget, uint maxFlankSteps = 15, uint minFlankSteps = 4)
-        => new ValidateDestination(id, PathCheckReason.ValidatePathForDestination, caller, flankTarget, path, maxFlankSteps, minFlankSteps);
+    public static ValidateDestination GetFlankPoint(NavMeshPath path, ITargetable caller, ITargetable flankTarget, uint maxFlankSteps = 15, uint minFlankSteps = 4)
+        => new ValidateDestination(StateId.Flank, PathCheckReason.ValidatePathForDestination, caller, flankTarget, path, maxFlankSteps, minFlankSteps);
 
-    public static ValidateDestination GetTargetPosition(StateId id, NavMeshPath path, PathCheckReason reason, ITargetable caller, ITargetable target)
-        => new ValidateDestination(id, reason, caller, target, path, 0, 0);
+    public static ValidateDestination GetTargetPosition(NavMeshPath path, PathCheckReason reason, ITargetable caller, ITargetable target)
+        => new ValidateDestination(StateId.Chase, reason, caller, target, path, 0, 0);
 }
