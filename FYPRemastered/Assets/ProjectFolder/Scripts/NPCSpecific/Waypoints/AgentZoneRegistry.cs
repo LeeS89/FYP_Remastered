@@ -224,7 +224,7 @@ public class AgentZoneRegistryNew : SceneResources
         foreach (var agent in agents)
         {
             if (agent != source)
-                agent.EnterAlertPhase();
+                agent.OnZoneAlertReceived();
         }
         return true;
     }

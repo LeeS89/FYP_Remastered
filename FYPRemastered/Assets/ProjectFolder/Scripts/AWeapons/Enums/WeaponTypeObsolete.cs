@@ -138,6 +138,7 @@ public enum NotificationKind
     TargetFound, // Obsolete
     /*TargetLOSLost,
     TargetLOSConfirmed,*/
+    ZoneAlert,
     FOVUpdate,
     NoAvailablePath,
     CoverExposed,

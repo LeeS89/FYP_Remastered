@@ -63,7 +63,7 @@ public class BaseDamageRelay : ComponentEvents, IDamageable
         _eventManager = null;
     }
 
-    public bool IsMoving { get; private set; } = false;
+    public bool IsStationary { get; private set; } = false;
 
     public Transform Transform => _parentTransform != null ? _parentTransform : transform;
 

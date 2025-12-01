@@ -22,9 +22,9 @@ public static class NPCDecisionPolicy
     }
 
 
-    public static BrainDecision HandleNotification(this IFSMOwner self, in OwnerNPCNotification n)
+    public static BrainDecision Decide(this NPCController self, in OwnerNPCNotification n)
     {
-        var state = self.FSM.CurrentStateId;
+        var state = n.Id;
 
         return state switch
         {
@@ -35,17 +35,42 @@ public static class NPCDecisionPolicy
         };
     }
 
-    private static BrainDecision DecidePatrol(IFSMOwner self, in OwnerNPCNotification n)
+    private static BrainDecision DecidePatrol(NPCController self, in OwnerNPCNotification n)
+    {
+        switch (n.Kind)
+        {
+            case NotificationKind.FOVUpdate:
+                if (n.FOVResult == FOVResult.TargetSeen)
+                {
+                    return new BrainDecision
+                    (
+                        nextIntent: StateId.Chase,
+                        broadcastAlert: true,
+                        CombatOrder.None
+                    );
+                }
+                break;
+            case NotificationKind.ZoneAlert:
+                return new BrainDecision
+                    (
+                        nextIntent: StateId.Chase,
+                        broadcastAlert: false,
+                        CombatOrder.None
+                    );
+               
+            default:
+                return BrainDecision.None;// Or Log Unhandled
+        }
+
+        return BrainDecision.None;
+    }
+
+    private static BrainDecision DecideChase(NPCController self, in OwnerNPCNotification n)
     {
         return BrainDecision.None;
     }
 
-    private static BrainDecision DecideChase(IFSMOwner self, in OwnerNPCNotification n)
-    {
-        return BrainDecision.None;
-    }
-
-    private static BrainDecision DecideFlank(IFSMOwner self, in OwnerNPCNotification n)
+    private static BrainDecision DecideFlank(NPCController self, in OwnerNPCNotification n)
     {
         return BrainDecision.None;
     }
@@ -60,12 +85,26 @@ public static class NPCDecisionPolicy
 
 public readonly struct BrainDecision
 {
-    public StateId NextIntent { get; }
-    public bool BroadcastZoneAlert { get; }
+    public readonly StateId NextIntent;
+    public readonly bool BroadcastZoneAlert;
+    public readonly CombatOrder CombatOrder;
+
+    public BrainDecision(StateId nextIntent, bool broadcastAlert, CombatOrder order)
+    {
+        NextIntent = nextIntent;
+        BroadcastZoneAlert = broadcastAlert;
+        CombatOrder = order;
+    }
 
     public static BrainDecision None => new BrainDecision();
 
 }
 
 
-
+public enum CombatOrder
+{
+    None,
+    HoldFire,
+    FireAtWill,
+    MeleeAttack
+}

@@ -108,7 +108,7 @@ public class FSMManager : FSMBase
         if (_ownerData.Agent.SetPath(path) ||
             _ownerData.Agent.SetDestination(destination))
         {
-            float stopdist = _ownerData.GetAgentStoppingDistance(current);
+            float stopdist = _ownerData.OnRequestAgentStoppingDistance?.Invoke(current) ?? 0f;//_ownerData.GetAgentStoppingDistance(current);
             _ownerData.Agent.stoppingDistance = stopdist;
             _hasValidDestination = true;
         }

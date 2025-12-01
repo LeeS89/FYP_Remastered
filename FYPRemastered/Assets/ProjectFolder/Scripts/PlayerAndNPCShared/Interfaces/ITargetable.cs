@@ -12,7 +12,7 @@ public interface ITargetable
 
     Collider TargetableCollider { get; }
 
-    bool IsMoving { get; }
+    bool IsStationary { get; }
 
     LayerMask LayerMask { get; }
 }

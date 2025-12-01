@@ -28,7 +28,7 @@ public partial class FSMBaseNew : IFSMControlNew
     private event Action<float> OnTick;
     private List<SetDestinationDelay> _timer = new(2);
     private IFSMState _current;
-    private bool _isInStateTransition = false;
+    public bool IsInStateTransition { get; private set; } = false;
     private bool _hasValidDestination = false;
     private float _lerpSpeed = 0f;
     private float _targetSpeed = 0f;
@@ -52,6 +52,7 @@ public partial class FSMBaseNew : IFSMControlNew
         _fovHandler = runner;
         _states = states;
         _pathFinder.Callback = OnPathRequestComplete;
+        _fovHandler.OnFOVSweepComplete = FieldOfViewSweepResult;
         OnTick += _fovHandler.Tick;
         OnTick += TimerTicks;
         OnTick += ClassUpdate;
@@ -60,15 +61,15 @@ public partial class FSMBaseNew : IFSMControlNew
     #region State Transition & FOV Frequency Updates
     public void SwitchTo(StateId next)
     {
-        if (next == CurrentStateId || next == StateId.None) return;
+        if (next == CurrentStateId || next == StateId.None) return; // Allow for none and make current null
 
         if (_states != null && _states.TryGetValue(next, out var nextstate))
         {
-            _isInStateTransition = true;
+            IsInStateTransition = true;
             _current?.ExitState();
             _current = nextstate;
             _current.EnterState();
-            _isInStateTransition = false;
+            IsInStateTransition = false;
             UpdateFOVFrequency(CurrentStateId);
         }   // else => Notify state doesnt exist
     }
@@ -85,6 +86,9 @@ public partial class FSMBaseNew : IFSMControlNew
         };
         _fovHandler.SetFOVSweepFrequency(phase);
     }
+
+    private void FieldOfViewSweepResult(FOVResult result, bool withinAttackAngles)
+        => Notification?.Invoke(OwnerNPCNotification.FOVUpdate(CurrentStateId, result, withinAttackAngles));
     #endregion
 
     #region Tick Region
@@ -201,7 +205,7 @@ public partial class FSMBaseNew : IFSMControlNew
         if (_ownerData.Agent.SetPath(path) ||
             _ownerData.Agent.SetDestination(destination))
         {
-            float stopdist = _ownerData.GetAgentStoppingDistance(current);
+            float stopdist = _ownerData?.OnRequestAgentStoppingDistance?.Invoke(current) ?? 0f;
             _ownerData.Agent.stoppingDistance = stopdist;
             _hasValidDestination = true;
         }

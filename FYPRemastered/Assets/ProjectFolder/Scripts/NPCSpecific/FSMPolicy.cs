@@ -127,6 +127,9 @@ public readonly struct OwnerNPCNotification
         => (Kind, Id, HasReachedStaleDestination, Destination, Path, FOVResult, TargetWithinshootingAngles) = (kind, stateId, reachedStaleDestination, dest, path, result, targetInshootAngles);
 
 
+    public static OwnerNPCNotification ZoneAlertReceived(StateId id)
+        => new(NotificationKind.ZoneAlert, id, false, Vector3.zero, null, FOVResult.None, false);
+
     public static OwnerNPCNotification DestinationFound(StateId stateId, Vector3 dest, NavMeshPath path)
         => new(NotificationKind.DestinationFound, stateId, false, dest, path, FOVResult.None, false);
 

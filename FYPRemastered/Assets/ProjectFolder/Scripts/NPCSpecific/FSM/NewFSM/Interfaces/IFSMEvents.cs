@@ -62,6 +62,7 @@ public interface IFSMControl : /*IFSMState, */ITickable
 public interface IFSMControlNew : IFSMStateContext, ITickable
 {
     StateId CurrentStateId { get; }
+    bool IsInStateTransition { get; }
     void SwitchTo(StateId state);
 
     delegate void OnNotifyOwner(in OwnerNPCNotification n);
@@ -90,11 +91,12 @@ public interface IAgentData : ITargetable
     float SprintSpeed { get; }
     float SprintEnterDist { get; }
     float SprintExitDist { get; }
-    float GetAgentStoppingDistance(StateId currentState);
+    Func<StateId, float> OnRequestAgentStoppingDistance { get; }
+    //float GetAgentStoppingDistance(StateId currentState);
 
 }
 
-public interface IFSMOwner
+public interface IFSMOwner // Maybe Obsolete
 {
    // void TryBroadcastAlert(); // Remove, NPCControllerBase will handle this
     void LogUnhandled(IntentStateBase state, in OwnerNPCNotification notification);
@@ -104,9 +106,11 @@ public interface IFSMOwner
 
 }
 
+
 public interface IZoneAlertListener
 {
-    void EnterAlertPhase();
+    void OnZoneAlertReceived();
+  //  void EnterAlertPhase();
 }
 
 
