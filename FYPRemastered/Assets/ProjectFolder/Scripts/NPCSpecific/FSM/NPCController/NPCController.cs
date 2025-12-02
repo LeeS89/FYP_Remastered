@@ -13,6 +13,7 @@ public partial class NPCController : ComponentEvents, IAgentData, IZoneAlertList
     //   private bool _isInStateTransition = false;
     protected Action _onLayerToggleComplete;
     protected ZoneId _zoneId = ZoneId.Unknown;
+    private CombatOrder _combatOrder = CombatOrder.None;
 
 
     // Data queried by the FSMManager 
@@ -89,7 +90,6 @@ public partial class NPCController : ComponentEvents, IAgentData, IZoneAlertList
     public float GetAgentStoppingDistance(StateId currentState)
     {
         if (currentState != _fsmManager.CurrentStateId) return 0f;
-
         return currentState == StateId.Chase ? UnityEngine.Random.Range(_minStopdistance, _maxStopdistance) : 0f;
     }
 
@@ -100,7 +100,7 @@ public partial class NPCController : ComponentEvents, IAgentData, IZoneAlertList
     {
         if (_fsmManager.IsInStateTransition || n.Id != _fsmManager.CurrentStateId) return;
         var decision = this.Decide(n);
-
+       
         if (decision.BroadcastZoneAlert)
         {
             TryBroadcastAlert(decision.NextIntent);
@@ -270,6 +270,20 @@ public partial class NPCController : ComponentEvents, IAgentData, IZoneAlertList
                 this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: false);
                 if (_aimingAtTarget) { _aimingAtTarget = false; _eManager.AimAtTarget(aim: false); }
             }
+    }
+    private void TryRotateAndAimAtTargetNew()
+    {
+        if (OwnerIsDead || _fsmManager == null) return;
+        if (_combatOrder != CombatOrder.None)
+        {
+            this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: true);
+            if (!_aimingAtTarget) { _aimingAtTarget = true; _eManager.AimAtTarget(aim: true); }
+        }
+        else
+        {
+            this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: false);
+            if (_aimingAtTarget) { _aimingAtTarget = false; _eManager.AimAtTarget(aim: false); }
+        }
     }
 
     protected void TryBroadcastAlert(StateId nextIntent)
