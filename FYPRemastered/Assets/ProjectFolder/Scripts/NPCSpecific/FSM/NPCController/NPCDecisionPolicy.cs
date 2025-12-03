@@ -22,57 +22,65 @@ public static class NPCDecisionPolicy
     }
 
 
-    public static BrainDecision Decide(this NPCController self, in OwnerNPCNotification n)
+    public static bool TryDecide(this INPCBrainContext self, in OwnerNPCNotification n, out BrainDecision decision)
     {
         var state = n.Id;
+        decision = default;
 
         return state switch
         {
-            StateId.Patrol => DecidePatrol(self, n),
-            StateId.Chase => DecideChase(self, n),
-            StateId.Flank => DecideFlank(self, n),
-            _ => BrainDecision.None,
+            StateId.Patrol => DecidePatrol(self, n, out decision),
+            StateId.Chase => DecideChase(self, n, out decision),
+            StateId.Flank => DecideFlank(self, n, out decision),
+            _ => false
         };
     }
 
-    private static BrainDecision DecidePatrol(NPCController self, in OwnerNPCNotification n)
+    private static bool DecidePatrol(INPCBrainContext self, in OwnerNPCNotification n, out BrainDecision d)
     {
+        d = default;
+
         switch (n.Kind)
         {
             case NotificationKind.FOVUpdate:
                 if (n.FOVResult == FOVResult.TargetSeen)
                 {
-                    return new BrainDecision
+                    d = new BrainDecision
                     (
                         nextIntent: StateId.Chase,
                         broadcastAlert: true,
                         CombatOrder.None
                     );
+                    return true;
                 }
                 break;
             case NotificationKind.ZoneAlert:
-                return new BrainDecision
+
+                d = new BrainDecision
                     (
                         nextIntent: StateId.Chase,
                         broadcastAlert: false,
                         CombatOrder.None
                     );
+                return true;
                
             default:
-                return BrainDecision.None;// Or Log Unhandled
+                return false;// Or Log Unhandled
         }
 
-        return BrainDecision.None;
+        return false;
     }
 
-    private static BrainDecision DecideChase(NPCController self, in OwnerNPCNotification n)
+    private static bool DecideChase(INPCBrainContext self, in OwnerNPCNotification n, out BrainDecision d)
     {
-        return BrainDecision.None;
+        d = default;
+        return false;
     }
 
-    private static BrainDecision DecideFlank(NPCController self, in OwnerNPCNotification n)
+    private static bool DecideFlank(INPCBrainContext self, in OwnerNPCNotification n, out BrainDecision d)
     {
-        return BrainDecision.None;
+        d = default;
+        return false;
     }
     
    /* extension(IEnumerable<int> source)

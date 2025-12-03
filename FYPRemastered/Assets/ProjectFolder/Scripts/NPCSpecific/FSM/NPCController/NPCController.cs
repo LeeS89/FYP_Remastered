@@ -7,7 +7,7 @@ using UnityEngine.AI;
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(NavMeshObstacle))]
-public partial class NPCController : ComponentEvents, IAgentData, IZoneAlertListener
+public partial class NPCController : ComponentEvents, IAgentData, INPCBrainContext, IZoneAlertListener
 {
     protected EnemyEventManager _eManager;
     //   private bool _isInStateTransition = false;
@@ -43,6 +43,11 @@ public partial class NPCController : ComponentEvents, IAgentData, IZoneAlertList
     public bool TestSprint;
     public bool TestWalk;
 
+    [Header("Data used by the Brain component")]
+    public StateId CurrentFSMState => _fsmManager?.CurrentStateId ?? StateId.None;
+    public CombatOrder CurrentOrder { get; private set; } = CombatOrder.None;
+    public FOVResult CurrentFOVState { get; private set; } = FOVResult.None;
+    // End Brain data
 
 
     // ITargetable Data - This Gameobjects information for targeting purposes by other NPC's
@@ -73,6 +78,8 @@ public partial class NPCController : ComponentEvents, IAgentData, IZoneAlertList
 
     public Func<StateId, float> OnRequestAgentStoppingDistance { get; private set; }
 
+    
+
     [Header(@"How many consecutive FOV results required to ""See ""or ""Lose ""the target")]
     [SerializeField] private uint _requiredSeenStreak = 3;
     [SerializeField] private uint _requiredNotSeenStreak = 5;
@@ -99,7 +106,8 @@ public partial class NPCController : ComponentEvents, IAgentData, IZoneAlertList
     public void Notify(in OwnerNPCNotification n)
     {
         if (_fsmManager.IsInStateTransition || n.Id != _fsmManager.CurrentStateId) return;
-        var decision = this.Decide(n);
+     
+        if (!this.TryDecide(n, out var decision)) return;
        
         if (decision.BroadcastZoneAlert)
         {
@@ -216,7 +224,7 @@ public partial class NPCController : ComponentEvents, IAgentData, IZoneAlertList
         Debug.LogError("Notification Kind from unhandled: "+ Kind.ToString());
     }
 
-    private FOVResult _currentFOVResult = FOVResult.TargetNotSeen;
+   
     public void HandleFOVSweepResult(FOVResult result, bool withinAttackAngles)
     {
         //Debug.LogError("FOVResult: "+result.ToString());
@@ -232,13 +240,15 @@ public partial class NPCController : ComponentEvents, IAgentData, IZoneAlertList
             );
     }
 
+    private void SetFOVState(FOVResult result) { if (CurrentFOVState == result) return; CurrentFOVState = result; }
+
     private void TargetSeen()
     {
         if (OwnerIsDead) return;
         Debug.LogError("FOVResult: Target Seen");
-        _currentFOVResult = FOVResult.TargetSeen;
+        SetFOVState(FOVResult.TargetSeen);
         //  _eManager.AimTowardsTarget(aim: true);
-        var n = OwnerNPCNotification.FOVUpdate(_fsmManager.CurrentStateId, _currentFOVResult, false);
+        var n = OwnerNPCNotification.FOVUpdate(_fsmManager.CurrentStateId, CurrentFOVState, false);
         Notify(n);
 
        /* if (_fsmManager.CurrentStateId == StateId.Patrol)
@@ -252,7 +262,7 @@ public partial class NPCController : ComponentEvents, IAgentData, IZoneAlertList
     {
         if (OwnerIsDead) return;
         Debug.LogError("FOVResult: Target Lost");
-        _currentFOVResult = FOVResult.TargetNotSeen;
+        CurrentFOVState = FOVResult.TargetNotSeen;
      //   _eManager.AimTowardsTarget(aim: false);
     }
 
@@ -260,7 +270,7 @@ public partial class NPCController : ComponentEvents, IAgentData, IZoneAlertList
     {
         if (OwnerIsDead || _fsmManager == null) return;
         if (_fsmManager.CurrentStateId == StateId.Chase || _fsmManager.CurrentStateId == StateId.Follow)
-            if (IsStationary || _currentFOVResult == FOVResult.TargetSeen)
+            if (IsStationary || CurrentFOVState == FOVResult.TargetSeen)
             {
                 this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: true);
                 if (!_aimingAtTarget) { _aimingAtTarget = true; _eManager.AimAtTarget(aim: true); }
