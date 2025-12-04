@@ -57,9 +57,8 @@ public partial class NPCController
         _fsmManager.Notification = Notify;
         _fsmManager.OnAnimationIntent = AnimationIntent;
         _fsmManager.OnMapDestinationToZone = MapDestinationToZone;///// maybe when entering patrol
-        
-        OnTargetSeen = TargetSeen;
-        OnTargetLost = TargetLost;
+
+        OnStableFOVResult = StableFOVResultConfirmed;
         OnRequestAgentStoppingDistance = GetAgentStoppingDistance;
 
         base.RegisterLocalEvents(_eManager);

@@ -43,13 +43,15 @@ public static class NPCDecisionPolicy
         switch (n.Kind)
         {
             case NotificationKind.FOVUpdate:
-                if (n.FOVResult == FOVResult.TargetSeen)
+          
+                if (TargetSeen(n.FOVResult))
                 {
                     d = new BrainDecision
                     (
                         nextIntent: StateId.Chase,
                         broadcastAlert: true,
-                        CombatOrder.None
+                        CombatOrder.None,
+                        resetFOVResult: true
                     );
                     return true;
                 }
@@ -70,6 +72,9 @@ public static class NPCDecisionPolicy
 
         return false;
     }
+
+    private static bool TargetSeen(FOVResult result) => result == FOVResult.TargetSeen || result == FOVResult.TargetSeenAndWithinMeleeRadius
+                    || result == FOVResult.TargetSeenAndWithinShootingAngles;
 
     private static bool DecideChase(INPCBrainContext self, in OwnerNPCNotification n, out BrainDecision d)
     {
@@ -96,12 +101,14 @@ public readonly struct BrainDecision
     public readonly StateId NextIntent;
     public readonly bool BroadcastZoneAlert;
     public readonly CombatOrder CombatOrder;
+    public readonly bool ResetFOVResult;
 
-    public BrainDecision(StateId nextIntent, bool broadcastAlert, CombatOrder order)
+    public BrainDecision(StateId nextIntent, bool broadcastAlert, CombatOrder order, bool resetFOVResult = false)
     {
         NextIntent = nextIntent;
         BroadcastZoneAlert = broadcastAlert;
         CombatOrder = order;
+        ResetFOVResult = resetFOVResult;
     }
 
     public static BrainDecision None => new BrainDecision();

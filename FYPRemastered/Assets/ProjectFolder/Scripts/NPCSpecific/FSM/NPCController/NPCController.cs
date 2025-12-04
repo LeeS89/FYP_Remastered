@@ -86,6 +86,7 @@ public partial class NPCController : ComponentEvents, IAgentData, INPCBrainConte
     private bool _isTargetVisible = false;
     private uint _currentSeenStreak = 0;
     private uint _currentNotSeenStreak = 0;
+    private Action<FOVResult> OnStableFOVResult;
     private Action OnTargetSeen;
     private Action OnTargetLost;
     private bool _aimingAtTarget = false;
@@ -229,18 +230,25 @@ public partial class NPCController : ComponentEvents, IAgentData, INPCBrainConte
     {
         //Debug.LogError("FOVResult: "+result.ToString());
         if (OwnerIsDead) return;
-        result.CalculateFOVResultStreak(
-            ref _isTargetVisible,
+        result.CalculateFOVResultStreakNew(
             ref _currentSeenStreak,
             ref _currentNotSeenStreak,
             _requiredSeenStreak,
             _requiredNotSeenStreak,
-            onSeenStable: OnTargetSeen,
-            onNotSeenStable: OnTargetLost
+            onResultStable: OnStableFOVResult
             );
     }
 
     private void SetFOVState(FOVResult result) { if (CurrentFOVState == result) return; CurrentFOVState = result; }
+
+    private void StableFOVResultConfirmed(FOVResult result)
+    {
+        if (OwnerIsDead) return;
+        Debug.LogError("Stable FOVResult: "+result.ToString());
+        SetFOVState(result);
+        var n = OwnerNPCNotification.FOVUpdate(_fsmManager.CurrentStateId, CurrentFOVState, false);
+        Notify(n);
+    }
 
     private void TargetSeen()
     {

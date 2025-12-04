@@ -257,7 +257,9 @@ public enum FOVResult
     None,
     TargetOutsideSweepRadius,
     TargetInsideSweepRadius,
-    TargetSeen,
+    TargetSeen, // Seen but outside of meelee and shooting range
+    TargetSeenAndWithinMeleeRadius,
+    TargetSeenAndWithinShootingAngles,
     TargetNotSeen
 }
 
