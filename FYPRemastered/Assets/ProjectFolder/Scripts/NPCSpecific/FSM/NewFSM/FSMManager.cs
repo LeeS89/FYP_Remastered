@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.AI;
 
 
-
+[Obsolete("Use FSMBaseNew instead", false)]
 public class FSMManager : FSMBase
 {
     private List<SetDestinationDelay> _timer = new(2);
@@ -95,7 +95,7 @@ public class FSMManager : FSMBase
             Notification?.Invoke(NotifyOwnerNPC.TargetFound(_currentStateId));
             return;
         }*/
-        Notification?.Invoke(OwnerNPCNotification.FOVUpdate(_currentStateId, result, withinAttackAngles));
+        Notification?.Invoke(NPCNotification.FOVUpdate(/*_currentStateId, */result, withinAttackAngles));
     }
 
    
@@ -134,9 +134,9 @@ public class FSMManager : FSMBase
         StateId id = result.Id;
 
         if (result.Reason == PathCheckReason.ProbePathToPrimaryTarget && pathFound)
-        { Notification?.Invoke(OwnerNPCNotification.PathToPrimaryAvailable(result.Id)); return; }
+        { Notification?.Invoke(NPCNotification.PathToPrimaryAvailable(/*result.Id*/)); return; }
     
-        if (!result.PathFound) { Notification?.Invoke(OwnerNPCNotification.NoAvailablePath(_currentStateId)); Debug.LogError("NO Path Found!!"); return; }
+        if (!result.PathFound) { Notification?.Invoke(NPCNotification.NoAvailablePath(/*_currentStateId*/)); Debug.LogError("NO Path Found!!"); return; }
         else
         {
             _currentDestination = result.Destination;

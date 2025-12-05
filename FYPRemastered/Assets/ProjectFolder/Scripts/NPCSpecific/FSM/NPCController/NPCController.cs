@@ -7,7 +7,7 @@ using UnityEngine.AI;
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(NavMeshObstacle))]
-public partial class NPCController : ComponentEvents, IAgentData, INPCBrainContext, IZoneAlertListener
+public partial class NPCController : ComponentEvents, IAgentData, INPCBrainContext, INotificationListener
 {
     protected EnemyEventManager _eManager;
     //   private bool _isInStateTransition = false;
@@ -104,9 +104,9 @@ public partial class NPCController : ComponentEvents, IAgentData, INPCBrainConte
 
 
     // IFSMNotifications - For notifications received by the FSMManager, i.e. No valid destination, target lost, Target within melee/ shot range, etc.
-    public void Notify(in OwnerNPCNotification n)
+    public void Notify(in NPCNotification n)
     {
-        if (_fsmManager.IsInStateTransition || n.Id != _fsmManager.CurrentStateId) return;
+        if (_fsmManager.IsInStateTransition /*|| n.Id != _fsmManager.CurrentStateId*/) return;
      
         if (!this.TryDecide(n, out var decision)) return;
        
@@ -116,16 +116,16 @@ public partial class NPCController : ComponentEvents, IAgentData, INPCBrainConte
             return;
         }
 
+        if(decision.NewFOVStatus != FOVResult.None)
+            ApplyFOVStatusUpdate(decision.NewFOVStatus);
+
+
         if (decision.NextIntent != StateId.None)
             _fsmManager.SwitchTo(decision.NextIntent);
 
     }
 
-    public void OnZoneAlertReceived()
-    {
-        var n = OwnerNPCNotification.ZoneAlertReceived(_fsmManager.CurrentStateId);
-        Notify(n);
-    }
+    private void ApplyFOVStatusUpdate(FOVResult result) => CurrentFOVState = result; 
 
     public void AnimationIntent(AnimationCue cue) => _eManager.TriggerAnimation(cue);
     // End IFSMNotificationss
@@ -219,7 +219,7 @@ public partial class NPCController : ComponentEvents, IAgentData, INPCBrainConte
         _isInStateTransition = false;*/
     }
 
-    public void LogUnhandled(IntentStateBase state, in OwnerNPCNotification notification)
+    public void LogUnhandled(IntentStateBase state, in NPCNotification notification)
     {
         var Kind = notification.Kind;
         Debug.LogError("Notification Kind from unhandled: "+ Kind.ToString());
@@ -239,14 +239,14 @@ public partial class NPCController : ComponentEvents, IAgentData, INPCBrainConte
             );
     }
 
-    private void SetFOVState(FOVResult result) { if (CurrentFOVState == result) return; CurrentFOVState = result; }
+    
 
     private void StableFOVResultConfirmed(FOVResult result)
     {
         if (OwnerIsDead) return;
         Debug.LogError("Stable FOVResult: "+result.ToString());
-        SetFOVState(result);
-        var n = OwnerNPCNotification.FOVUpdate(_fsmManager.CurrentStateId, CurrentFOVState, false);
+        ApplyFOVStatusUpdate(result);
+        var n = NPCNotification.FOVUpdate(/*_fsmManager.CurrentStateId,*/ CurrentFOVState, false);
         Notify(n);
     }
 
@@ -254,9 +254,9 @@ public partial class NPCController : ComponentEvents, IAgentData, INPCBrainConte
     {
         if (OwnerIsDead) return;
         Debug.LogError("FOVResult: Target Seen");
-        SetFOVState(FOVResult.TargetSeen);
+        ApplyFOVStatusUpdate(FOVResult.TargetSeen);
         //  _eManager.AimTowardsTarget(aim: true);
-        var n = OwnerNPCNotification.FOVUpdate(_fsmManager.CurrentStateId, CurrentFOVState, false);
+        var n = NPCNotification.FOVUpdate(/*_fsmManager.CurrentStateId, */CurrentFOVState, false);
         Notify(n);
 
        /* if (_fsmManager.CurrentStateId == StateId.Patrol)

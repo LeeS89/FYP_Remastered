@@ -15,7 +15,7 @@ public sealed class Flank : IntentStateBase
         // MaxStopDistance
     }
 
-    public override void Handle(IFSMOwner self, OwnerNPCNotification n)
+    public override void Handle(IFSMOwner self, NPCNotification n)
     {
         switch (n.Kind)
         {

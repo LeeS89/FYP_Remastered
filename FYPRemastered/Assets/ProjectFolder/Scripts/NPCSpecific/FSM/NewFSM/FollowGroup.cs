@@ -16,7 +16,7 @@ public sealed class FollowGroup : IntentStateBase
 
     }
 
-    public override void Handle(IFSMOwner self, OwnerNPCNotification n)
+    public override void Handle(IFSMOwner self, NPCNotification n)
     {
         switch (n.Kind)
         {

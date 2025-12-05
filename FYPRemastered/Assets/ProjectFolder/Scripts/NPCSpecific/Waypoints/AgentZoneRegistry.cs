@@ -174,7 +174,7 @@ public class AgentZoneRegistry : SceneResources
 }*/
 public class AgentZoneRegistryNew : SceneResources
 {
-    private Dictionary<ZoneId, List<IZoneAlertListener>> _zoneAgents = new();
+    private Dictionary<ZoneId, List<INotificationListener>> _zoneAgents = new();
     private readonly HashSet<ZoneId> _alertedZones = new();
 
     public override async Task LoadResources()
@@ -196,10 +196,10 @@ public class AgentZoneRegistryNew : SceneResources
         await Task.CompletedTask;
     }
 
-    private void Register(IZoneAlertListener agent, ZoneId zone)
+    private void Register(INotificationListener agent, ZoneId zone)
     {
         if (!_zoneAgents.ContainsKey(zone))
-            _zoneAgents[zone] = new List<IZoneAlertListener>();
+            _zoneAgents[zone] = new List<INotificationListener>();
 
         if (!_zoneAgents[zone].Contains(agent))
         {
@@ -209,13 +209,13 @@ public class AgentZoneRegistryNew : SceneResources
             
     }
 
-    public void Unregister(IZoneAlertListener agent, ZoneId zone)
+    public void Unregister(INotificationListener agent, ZoneId zone)
     {
         if (_zoneAgents.TryGetValue(zone, out var list))
             list.Remove(agent);
     }
 
-    private bool AlertZone(ZoneId zone, IZoneAlertListener source)
+    private bool AlertZone(ZoneId zone, INotificationListener source)
     {
         if (!_alertedZones.Add(zone)) return false; // Already alerted => Create function to reset alerted zones 
 
@@ -224,17 +224,20 @@ public class AgentZoneRegistryNew : SceneResources
         foreach (var agent in agents)
         {
             if (agent != source)
-                agent.OnZoneAlertReceived();
+            {
+                var n = NPCNotification.ZoneAlert();
+                agent.Notify(n);
+            }
         }
         return true;
     }
 
-    public IReadOnlyList<IZoneAlertListener> GetAgentsInZone(ZoneId zone)
+    public IReadOnlyList<INotificationListener> GetAgentsInZone(ZoneId zone)
     {
         if (_zoneAgents.TryGetValue(zone, out var agents))
             return agents;
 
-        return Array.Empty<IZoneAlertListener>();
+        return Array.Empty<INotificationListener>();
     }
 
     public void ClearAll()

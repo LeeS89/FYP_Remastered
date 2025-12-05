@@ -50,7 +50,7 @@ public interface IFSMControl : /*IFSMState, */ITickable
 
     int? TryGetPatrolZone();
 
-    delegate void OnNotifyOwner(in OwnerNPCNotification n);
+    delegate void OnNotifyOwner(in NPCNotification n);
     OnNotifyOwner Notification { get; set; }
     Action<AnimationCue> OnAnimationIntent { get; set; }
 
@@ -65,7 +65,7 @@ public interface IFSMControlNew : IFSMStateContext, ITickable
     bool IsInStateTransition { get; }
     void SwitchTo(StateId state);
 
-    delegate void OnNotifyOwner(in OwnerNPCNotification n);
+    delegate void OnNotifyOwner(in NPCNotification n);
     OnNotifyOwner Notification { get; set; }
 }
 
@@ -99,7 +99,7 @@ public interface IAgentData : ITargetable
 public interface IFSMOwner // Maybe Obsolete
 {
    // void TryBroadcastAlert(); // Remove, NPCControllerBase will handle this
-    void LogUnhandled(IntentStateBase state, in OwnerNPCNotification notification);
+    void LogUnhandled(IntentStateBase state, in NPCNotification notification);
     void SwitchTo(IIntentState next);
     void HandleFOVSweepResult(FOVResult result, bool withinAttackAngles);
     IFSMControl FSM { get; }
@@ -107,9 +107,9 @@ public interface IFSMOwner // Maybe Obsolete
 }
 
 
-public interface IZoneAlertListener
+public interface INotificationListener
 {
-    void OnZoneAlertReceived();
+    void Notify(in NPCNotification n);
   //  void EnterAlertPhase();
 }
 

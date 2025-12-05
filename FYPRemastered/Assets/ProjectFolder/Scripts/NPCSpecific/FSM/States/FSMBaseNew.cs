@@ -88,7 +88,7 @@ public partial class FSMBaseNew : IFSMControlNew
     }
 
     private void FieldOfViewSweepResult(FOVResult result, bool withinAttackAngles)
-        => Notification?.Invoke(OwnerNPCNotification.FOVUpdate(CurrentStateId, result, withinAttackAngles));
+        => Notification?.Invoke(NPCNotification.FOVUpdate(/*CurrentStateId, */result, withinAttackAngles));
     #endregion
 
     #region Tick Region
@@ -177,9 +177,9 @@ public partial class FSMBaseNew : IFSMControlNew
         StateId id = result.Id;
 
         if (result.Reason == PathCheckReason.ProbePathToPrimaryTarget && pathFound)
-        { Notification?.Invoke(OwnerNPCNotification.PathToPrimaryAvailable(result.Id)); return; }
+        { Notification?.Invoke(NPCNotification.PathToPrimaryAvailable(/*result.Id*/)); return; }
 
-        if (!result.PathFound) { Notification?.Invoke(OwnerNPCNotification.NoAvailablePath(CurrentStateId)); Debug.LogError("NO Path Found!!"); return; }
+        if (!result.PathFound) { Notification?.Invoke(NPCNotification.NoAvailablePath(/*CurrentStateId*/)); Debug.LogError("NO Path Found!!"); return; }
         else
         {
             Vector3 currentDestination = result.Destination;

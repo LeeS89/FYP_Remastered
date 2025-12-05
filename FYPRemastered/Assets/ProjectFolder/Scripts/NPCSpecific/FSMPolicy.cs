@@ -108,11 +108,11 @@ public readonly struct StateNotification
 
 
 
-public readonly struct OwnerNPCNotification
+public readonly struct NPCNotification
 {
     public readonly NotificationKind Kind { get; }
 
-    public readonly StateId Id;
+   // public readonly StateId Id;
 
     
     public readonly bool HasReachedStaleDestination;
@@ -121,24 +121,24 @@ public readonly struct OwnerNPCNotification
     public readonly bool TargetWithinshootingAngles;
   
 
-    private OwnerNPCNotification(NotificationKind kind, StateId stateId, bool reachedStaleDestination, Vector3 dest, FOVResult result, bool targetInshootAngles)
-        => (Kind, Id, HasReachedStaleDestination, Destination, FOVResult, TargetWithinshootingAngles) = (kind, stateId, reachedStaleDestination, dest, result, targetInshootAngles);
+    private NPCNotification(NotificationKind kind, /*StateId stateId, */bool reachedStaleDestination, Vector3 dest, FOVResult result, bool targetInshootAngles)
+        => (Kind,/* Id,*/ HasReachedStaleDestination, Destination, FOVResult, TargetWithinshootingAngles) = (kind, /*stateId,*/ reachedStaleDestination, dest, result, targetInshootAngles);
 
 
-    public static OwnerNPCNotification ZoneAlertReceived(StateId id)
-        => new(NotificationKind.ZoneAlert, id, false, Vector3.zero, FOVResult.None, false);
+    public static NPCNotification ZoneAlert(/*StateId id*/)
+        => new(NotificationKind.ZoneAlert, /*id,*/ false, Vector3.zero, FOVResult.None, false);
 
    /* public static OwnerNPCNotification TargetMoved(StateId id)
         => new(NotificationKind.TargetMoved, id, false, Vector3.zero, null, FOVResult.None, false);*/
 
-    public static OwnerNPCNotification TargetLeftArea(StateId id, Vector3 dest)
-        => new(NotificationKind.TargetLeftArea, id, false, dest, FOVResult.None, false);
+    public static NPCNotification TargetLeftArea(/*StateId id,*/ Vector3 dest)
+        => new(NotificationKind.TargetLeftArea, /*id,*/ false, dest, FOVResult.None, false);
 
-    public static OwnerNPCNotification PathBlocked(StateId id)
-        => new(NotificationKind.PathBlocked, id, false, Vector3.zero, FOVResult.None, false);
+    public static NPCNotification PathBlocked(/*StateId id*/)
+        => new(NotificationKind.PathBlocked, /*id, */false, Vector3.zero, FOVResult.None, false);
 
-    public static OwnerNPCNotification FOVUpdate(StateId id, FOVResult result, bool targetInShootingAngles)
-        => new(NotificationKind.FOVUpdate, id, targetInShootingAngles, Vector3.zero, result, targetInShootingAngles);
+    public static NPCNotification FOVUpdate(/*StateId id,*/ FOVResult result, bool targetInShootingAngles)
+        => new(NotificationKind.FOVUpdate, /*id,*/ targetInShootingAngles, Vector3.zero, result, targetInShootingAngles);
 
  /*   public static OwnerNPCNotification TargetFound(StateId id)
         => new(NotificationKind.TargetFound, id, false, Vector3.zero, null, FOVResult.None, false);*/
@@ -149,13 +149,13 @@ public readonly struct OwnerNPCNotification
     public static NotifyOwnerNPC TargetLOSConfirmed(StateId id)
         => new(NotificationKind.TargetLOSConfirmed, id, false, Vector3.zero, null);*/
 
-    public static OwnerNPCNotification NoAvailablePath(StateId id)
-        => new(NotificationKind.NoAvailablePath, id, false, Vector3.zero, FOVResult.None, false);
+    public static NPCNotification NoAvailablePath(/*StateId id*/)
+        => new(NotificationKind.NoAvailablePath, /*id, */false, Vector3.zero, FOVResult.None, false);
 
-    public static OwnerNPCNotification CoverExposed(StateId id)
-        => new(NotificationKind.CoverExposed, id, false, Vector3.zero, FOVResult.None, false);
+    public static NPCNotification CoverExposed(/*StateId id*/)
+        => new(NotificationKind.CoverExposed, /*id, */false, Vector3.zero, FOVResult.None, false);
 
-    public static OwnerNPCNotification PathToPrimaryAvailable(StateId id)
-        => new(NotificationKind.PathToPrimaryAvailable, id, false, Vector3.zero, FOVResult.None, false);
+    public static NPCNotification PathToPrimaryAvailable(/*StateId id*/)
+        => new(NotificationKind.PathToPrimaryAvailable, /*id, */false, Vector3.zero, FOVResult.None, false);
 
 }
