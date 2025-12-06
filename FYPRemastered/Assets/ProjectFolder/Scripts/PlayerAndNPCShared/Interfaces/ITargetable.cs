@@ -14,5 +14,7 @@ public interface ITargetable
 
     bool IsStationary { get; }
 
+    bool IsDead { get; }
+
     LayerMask LayerMask { get; }
 }

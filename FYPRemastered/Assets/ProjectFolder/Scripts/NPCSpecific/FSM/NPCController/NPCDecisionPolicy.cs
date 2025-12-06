@@ -101,14 +101,16 @@ public readonly struct BrainDecision
     public readonly bool BroadcastZoneAlert;
     public readonly CombatOrder CombatOrder;
     public readonly FOVResult NewFOVStatus;
+    public readonly RotationOrder RotationOrder;
     /*public readonly bool ResetFOVResult;*/
 
-    public BrainDecision(StateId nextIntent, bool broadcastAlert = false, CombatOrder order = CombatOrder.None, FOVResult newFOVStatus = FOVResult.None)
+    public BrainDecision(StateId nextIntent, bool broadcastAlert = false, RotationOrder rOrder = RotationOrder.None, CombatOrder cOrder = CombatOrder.None, FOVResult newFOVStatus = FOVResult.None)
     {
         NextIntent = nextIntent;
         BroadcastZoneAlert = broadcastAlert;
-        CombatOrder = order;
+        CombatOrder = cOrder;
         NewFOVStatus = newFOVStatus;
+        RotationOrder = rOrder;
       //  ResetFOVResult = resetFOVResult;
     }
 
@@ -123,4 +125,11 @@ public enum CombatOrder
     HoldFire,
     FireAtWill,
     MeleeAttack
+}
+
+public enum RotationOrder
+{
+    None,
+    RotateTowardsTarget,
+    StopRotating
 }

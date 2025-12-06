@@ -73,6 +73,8 @@ public class BaseDamageRelay : ComponentEvents, IDamageable
 
     public Vector3 Forward => _parentTransform != null ? _parentTransform.forward : transform.forward;
 
+    public bool IsDead { get; private set; } = false;
+
 
     /* public Vector3 GetTargetablePosition()
          => _parentTransform == null ? transform.position : _parentTransform.position;*/

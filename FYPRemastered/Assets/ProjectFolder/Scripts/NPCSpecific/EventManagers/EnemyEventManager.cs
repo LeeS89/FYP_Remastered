@@ -154,8 +154,18 @@ public class EnemyEventManager : EventManager
 
 
     public Action<AnimationLayer, Action> OnTogglingAnimationLayer;
-    public void TogglingAnimationLayer(AnimationLayer layer, Action onComplete)
+    public void TogglingAnimationLayer(AnimationLayer layer, Action onComplete = null)
         => OnTogglingAnimationLayer?.Invoke(layer, onComplete);
+
+    ////// NEW TODAY (DECEMBER 6th)
+    public Action<AnimationLayer, bool, Action> OnTogglingAnimationLayerNew;
+    public void TogglingAnimationLayerNew(AnimationLayer layer, bool activate, Action onComplete = null)
+        => OnTogglingAnimationLayerNew?.Invoke(layer, activate, onComplete);
+    ///// END DECEMBER 6th
+
+    public Func<AnimationLayer, bool> OnGetLayerActiveState;
+
+    public bool IsLayerActive(AnimationLayer layer) => OnGetLayerActiveState?.Invoke(layer) ?? true;
 
     /// <summary>
     /// Used to alert the agents weapon to be ready to fire

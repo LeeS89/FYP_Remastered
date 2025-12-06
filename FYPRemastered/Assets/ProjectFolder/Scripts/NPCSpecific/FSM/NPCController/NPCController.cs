@@ -78,7 +78,7 @@ public partial class NPCController : ComponentEvents, IAgentData, INPCBrainConte
 
     public Func<StateId, float> OnRequestAgentStoppingDistance { get; private set; }
 
-    
+    public bool IsDead { get; private set; } = false;
 
     [Header(@"How many consecutive FOV results required to ""See ""or ""Lose ""the target")]
     [SerializeField] private uint _requiredSeenStreak = 3;
@@ -111,17 +111,31 @@ public partial class NPCController : ComponentEvents, IAgentData, INPCBrainConte
         if (!this.TryDecide(n, out var decision)) return;
        
         if (decision.BroadcastZoneAlert)
-        {
             TryBroadcastAlert(decision.NextIntent);
+
+        if (decision.RotationOrder != RotationOrder.None)
             return;
-        }
 
-        if(decision.NewFOVStatus != FOVResult.None)
+        if (decision.NewFOVStatus != FOVResult.None)
             ApplyFOVStatusUpdate(decision.NewFOVStatus);
-
 
         if (decision.NextIntent != StateId.None)
             _fsmManager.SwitchTo(decision.NextIntent);
+
+    }
+
+    private void UpdateCombatOrder(CombatOrder order)
+    {
+        if (order == CurrentOrder) return;
+        CancelCurrentCombatOrder();
+        CurrentOrder = order;
+        
+        if (OwnerIsDead || (bool)PrimaryTarget?.IsDead) return;
+        // Apply Order/ Start order
+    }
+
+    private void CancelCurrentCombatOrder()
+    {
 
     }
 
@@ -304,16 +318,33 @@ public partial class NPCController : ComponentEvents, IAgentData, INPCBrainConte
         }
     }
 
-    protected void TryBroadcastAlert(StateId nextIntent)
+    protected void TryBroadcastAlert(StateId nextIntent = StateId.None)
     {
         if (OwnerIsDead) return;
         if(SceneEventAggregator.Instance.AlertAgentsInZone(_zoneId, this))
         {
             //SwitchTo(ChaseState.Instance);
-            EnterAlertPhase(nextIntent);
+         //   EnterAlertPhase(nextIntent);
            // StartCoroutine(WaitRoutine());
             Debug.LogError("Alert broadcasted to zone: " + _zoneId);
         }
+    }
+
+    private IEnumerator WaitForAnimLayerFadeRoutine(AnimationLayer layer, bool activate, Action OnDone = null)
+    {
+        if(_eManager.IsLayerActive(layer) == activate)
+        {
+            // Layer is already in the requested state (activate/ !activate)
+            OnDone?.Invoke();
+            yield break;
+        }
+
+        _eManager.TogglingAnimationLayerNew(layer, activate);
+
+        while (_eManager.IsLayerActive(layer) != activate)
+            yield return null;
+
+        OnDone?.Invoke();
     }
 
     private IEnumerator WaitAndSwitchStateRoutine(AnimationLayer layer, StateId nextIntent = StateId.None)
@@ -337,7 +368,7 @@ public partial class NPCController : ComponentEvents, IAgentData, INPCBrainConte
     public void EnterAlertPhase(StateId nextIntent)
     {
         if (OwnerIsDead) return;
-        StartCoroutine(WaitAndSwitchStateRoutine(AnimationLayer.Aim, nextIntent));
+        StartCoroutine(WaitAndSwitchStateRoutine(AnimationLayer.Aim, nextIntent)); // change to new
        // SwitchTo(ChaseState.Instance);
     }
 

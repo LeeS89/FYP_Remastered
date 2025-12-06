@@ -39,7 +39,9 @@ public class NPCAnimComponent : ComponentEvents
         _em = eventManager as EnemyEventManager;
         _em.OnAnimationTriggered = PlayAnimationType;
        // _em.OnToggleAnimationLayer = ToggleAnimationLayer;
-        _em.OnTogglingAnimationLayer = ActivateAnimationLayer;
+       // _em.OnTogglingAnimationLayer = ActivateAnimationLayer; // OLD DEC
+        _em.OnTogglingAnimationLayerNew = ToggleAnimationLayer;
+        _em.OnGetLayerActiveState = IsLayerActive;
         // _em.OnChangeAnimatorLayerWeight = ChangeLayerWeight;
         //_em.OnTargetSeen = AimTowardsTarget;
         _em.OnSetLookTarget = SetLookTarget;
@@ -52,9 +54,10 @@ public class NPCAnimComponent : ComponentEvents
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
         _em.OnAnimationTriggered = null;
-        _em.OnTogglingAnimationLayer = null;
+        _em.OnTogglingAnimationLayerNew = null;
         _em.OnAimTowardsTarget = null;
         _em.OnSetLookTarget = null;
+        _em.OnGetLayerActiveState = null;
         // _em.OnToggleAnimationLayer = null;
         //   _em.OnChangeAnimatorLayerWeight = null;
         //  _em.OnTargetSeen = null;
@@ -308,7 +311,27 @@ public class NPCAnimComponent : ComponentEvents
 
     }
 
+    //// NEW DECEMBER 6th
+    private void ToggleAnimationLayer(AnimationLayer layer, bool activate, Action completedCB = null)
+       => BlendingLayerWeightNew(layer, activate, completedCB);
+
+    private void BlendingLayerWeightNew(AnimationLayer layer, bool activate, Action completedCB = null/*, float from, float to, float duration*/)
+    {
+        int index = (int)layer;
+        float targetWeight = activate ? 1f : 0f;
+        float currentWeight = _anim.GetLayerWeight(index);
+
+        if (Mathf.Approximately(currentWeight, targetWeight)) { _anim.SetLayerWeight(index, targetWeight); completedCB?.Invoke(); return; }
+
+        StartCoroutine(BlendingLayerWeightRoutine(layer, currentWeight, targetWeight, 0.5f, completedCB));
+    }
+
+
+    ///// END DECEMBER 6th
+
     // NEW BLEND LAYER
+    private bool IsLayerActive(AnimationLayer layer) => _anim.GetLayerWeight((int)layer) == 1;
+
     private void ActivateAnimationLayer(AnimationLayer layer, Action completedCB = null)
        => BlendingLayerWeight(layer, 1f, completedCB);
 
