@@ -29,7 +29,7 @@ public static class NPCDecisionPolicy
 
         return state switch
         {
-            StateId.Patrol => DecidePatrol(self, n, out decision),
+            StateId.Patrol or StateId.Search => DecidePatrol(self, n, out decision),
             StateId.Chase => DecideChase(self, n, out decision),
             StateId.Flank => DecideFlank(self, n, out decision),
             _ => false
@@ -44,7 +44,7 @@ public static class NPCDecisionPolicy
         {
             case NotificationKind.FOVUpdate:
 
-                if (n.FOVResult == self.CurrentFOVState) return false;
+                if (!FOVStatusChanged(self, n.FOVResult)) return false;
                 if (TargetSeen(n.FOVResult))
                 {
                     d = new BrainDecision
@@ -78,7 +78,26 @@ public static class NPCDecisionPolicy
     private static bool DecideChase(INPCBrainContext self, in NPCNotification n, out BrainDecision d)
     {
         d = default;
-        return false;
+
+        switch (n.Kind)
+        {
+            case NotificationKind.FOVUpdate:
+                if (!FOVStatusChanged(self, n.FOVResult)) return false;
+                CombatOrder newCombatOrder = DecideNextCombatOrder(self.CurrentComOrder, n.FOVResult);
+                RotationOrder newRotOrder = DecideNextRotationOrder(self.CurrentRotOrder, n.FOVResult);
+                d = new BrainDecision
+                    (
+                        nextIntent: StateId.None,
+                        false,
+                        newRotOrder,
+                        newCombatOrder,
+                        n.FOVResult
+                    );
+                return true;
+            default:
+                return false;
+        }
+       
     }
 
     private static bool DecideFlank(INPCBrainContext self, in NPCNotification n, out BrainDecision d)
@@ -86,7 +105,35 @@ public static class NPCDecisionPolicy
         d = default;
         return false;
     }
-    
+
+    private static bool FOVStatusChanged(INPCBrainContext c, FOVResult r) => c.CurrentFOVState != r;
+
+    private static RotationOrder DecideNextRotationOrder(RotationOrder currentOrder, FOVResult newFOVStatus)
+    {
+        RotationOrder newOrder;
+
+        if (newFOVStatus == FOVResult.TargetSeen || newFOVStatus == FOVResult.TargetSeenAndWithinShootingAngles
+            || newFOVStatus == FOVResult.TargetSeenAndWithinMeleeRadius) { newOrder = RotationOrder.RotateTowardsTarget; }
+        else newOrder = RotationOrder.StopRotating;
+
+        if (newOrder == currentOrder) return RotationOrder.None; // Already executing order, do nothing
+
+        return newOrder;
+    }
+
+    private static CombatOrder DecideNextCombatOrder(CombatOrder currentOrder, FOVResult newFOVStatus)
+    {
+        CombatOrder newOrder;
+        if (newFOVStatus == FOVResult.TargetSeenAndWithinShootingAngles)
+            newOrder = CombatOrder.FireAtWill;
+        else if (newFOVStatus == FOVResult.TargetSeenAndWithinMeleeRadius)
+            newOrder = CombatOrder.MeleeAttack;
+        else newOrder = CombatOrder.FireAtWill;
+
+        if(newOrder == currentOrder) return CombatOrder.None; // Already executing order, do nothing
+
+        return newOrder;
+    }
    /* extension(IEnumerable<int> source)
     {
         public IEnumerable<int> WhereGreaterThan(int threshold)
@@ -104,7 +151,8 @@ public readonly struct BrainDecision
     public readonly RotationOrder RotationOrder;
     /*public readonly bool ResetFOVResult;*/
 
-    public BrainDecision(StateId nextIntent, bool broadcastAlert = false, RotationOrder rOrder = RotationOrder.None, CombatOrder cOrder = CombatOrder.None, FOVResult newFOVStatus = FOVResult.None)
+    public BrainDecision(StateId nextIntent, bool broadcastAlert = false, RotationOrder rOrder = RotationOrder.None, 
+        CombatOrder cOrder = CombatOrder.None, FOVResult newFOVStatus = FOVResult.None)
     {
         NextIntent = nextIntent;
         BroadcastZoneAlert = broadcastAlert;

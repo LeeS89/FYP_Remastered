@@ -5,6 +5,7 @@ using UnityEngine.AI;
 
 
 
+
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(NavMeshObstacle))]
 public partial class NPCController : ComponentEvents, IAgentData, INPCBrainContext, INotificationListener
@@ -13,8 +14,6 @@ public partial class NPCController : ComponentEvents, IAgentData, INPCBrainConte
     //   private bool _isInStateTransition = false;
     protected Action _onLayerToggleComplete;
     protected ZoneId _zoneId = ZoneId.Unknown;
-    private CombatOrder _combatOrder = CombatOrder.None;
-
 
     // Data queried by the FSMManager 
     public ITargetable PrimaryTarget { get; set; }
@@ -45,8 +44,10 @@ public partial class NPCController : ComponentEvents, IAgentData, INPCBrainConte
 
     [Header("Data used by the Brain component")]
     public StateId CurrentFSMState => _fsmManager?.CurrentStateId ?? StateId.None;
-    public CombatOrder CurrentOrder { get; private set; } = CombatOrder.None;
+    public CombatOrder CurrentComOrder { get; private set; } = CombatOrder.None;
+    public RotationOrder CurrentRotOrder { get; private set; } = RotationOrder.None;
     public FOVResult CurrentFOVState { get; private set; } = FOVResult.None;
+    private bool TargetDead() => PrimaryTarget?.IsDead ?? true;
     // End Brain data
 
 
@@ -79,6 +80,7 @@ public partial class NPCController : ComponentEvents, IAgentData, INPCBrainConte
     public Func<StateId, float> OnRequestAgentStoppingDistance { get; private set; }
 
     public bool IsDead { get; private set; } = false;
+
 
     [Header(@"How many consecutive FOV results required to ""See ""or ""Lose ""the target")]
     [SerializeField] private uint _requiredSeenStreak = 3;
@@ -114,7 +116,10 @@ public partial class NPCController : ComponentEvents, IAgentData, INPCBrainConte
             TryBroadcastAlert(decision.NextIntent);
 
         if (decision.RotationOrder != RotationOrder.None)
-            return;
+            CurrentRotOrder = decision.RotationOrder;
+
+        if (decision.CombatOrder != CombatOrder.None)
+            UpdateCombatOrder(decision.CombatOrder);
 
         if (decision.NewFOVStatus != FOVResult.None)
             ApplyFOVStatusUpdate(decision.NewFOVStatus);
@@ -126,12 +131,19 @@ public partial class NPCController : ComponentEvents, IAgentData, INPCBrainConte
 
     private void UpdateCombatOrder(CombatOrder order)
     {
-        if (order == CurrentOrder) return;
+        if (order == CurrentComOrder) return;
         CancelCurrentCombatOrder();
-        CurrentOrder = order;
+        CurrentComOrder = order;
         
-        if (OwnerIsDead || (bool)PrimaryTarget?.IsDead) return;
+        if (OwnerIsDead || TargetDead()) return;
         // Apply Order/ Start order
+        if(CurrentComOrder == CombatOrder.FireAtWill)
+        {
+            if (_eManager && !_eManager.IsLayerActive(AnimationLayer.Aim))
+                StartCoroutine(WaitForAnimLayerFadeRoutine(AnimationLayer.Aim, true));
+            if (!_aimingAtTarget) { _aimingAtTarget = true; _eManager.AimAtTarget(aim: true); }
+        }
+        //
     }
 
     private void CancelCurrentCombatOrder()
@@ -213,7 +225,7 @@ public partial class NPCController : ComponentEvents, IAgentData, INPCBrainConte
     protected virtual void LateUpdate()
     {
         if (OwnerIsDead) return;
-        TryRotateAndAimAtTarget();
+        TryRotateAndAimAtTargetNew();
         //this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: CanRotateTowardsTarget());
         _fsmManager?.LateTick(Time.deltaTime);
         if (_eManager == null) return;
@@ -305,8 +317,12 @@ public partial class NPCController : ComponentEvents, IAgentData, INPCBrainConte
     }
     private void TryRotateAndAimAtTargetNew()
     {
-        if (OwnerIsDead || _fsmManager == null) return;
-        if (_combatOrder != CombatOrder.None)
+        if (OwnerIsDead || TargetDead()) return;
+  
+        bool rotate = CurrentRotOrder == RotationOrder.RotateTowardsTarget;
+        this.RotateTowardsTarget(PrimaryTarget.Transform, rotate);
+
+       /* if (_combatOrder != CombatOrder.None)
         {
             this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: true);
             if (!_aimingAtTarget) { _aimingAtTarget = true; _eManager.AimAtTarget(aim: true); }
@@ -315,7 +331,7 @@ public partial class NPCController : ComponentEvents, IAgentData, INPCBrainConte
         {
             this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: false);
             if (_aimingAtTarget) { _aimingAtTarget = false; _eManager.AimAtTarget(aim: false); }
-        }
+        }*/
     }
 
     protected void TryBroadcastAlert(StateId nextIntent = StateId.None)
