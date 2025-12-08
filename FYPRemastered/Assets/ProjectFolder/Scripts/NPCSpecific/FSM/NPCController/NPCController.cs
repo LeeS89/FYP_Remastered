@@ -3,9 +3,6 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
-
-
-
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(NavMeshObstacle))]
 public partial class NPCController : ComponentEvents, IAgentData, INPCBrainContext, INotificationListener
@@ -85,12 +82,12 @@ public partial class NPCController : ComponentEvents, IAgentData, INPCBrainConte
     [Header(@"How many consecutive FOV results required to ""See ""or ""Lose ""the target")]
     [SerializeField] private uint _requiredSeenStreak = 3;
     [SerializeField] private uint _requiredNotSeenStreak = 5;
-    private bool _isTargetVisible = false;
+  //  private bool _isTargetVisible = false;
     private uint _currentSeenStreak = 0;
     private uint _currentNotSeenStreak = 0;
     private Action<FOVResult> OnStableFOVResult;
-    private Action OnTargetSeen;
-    private Action OnTargetLost;
+  //  private Action OnTargetSeen;
+   // private Action OnTargetLost;
     private bool _aimingAtTarget = false;
 
 
@@ -139,9 +136,9 @@ public partial class NPCController : ComponentEvents, IAgentData, INPCBrainConte
         // Apply Order/ Start order
         if(CurrentComOrder == CombatOrder.FireAtWill)
         {
-            if (_eManager && !_eManager.IsLayerActive(AnimationLayer.Aim))
+            if (!_animationControl?.IsAnimationLayerActive(AnimationLayer.Aim) ?? true)
                 StartCoroutine(WaitForAnimLayerFadeRoutine(AnimationLayer.Aim, true));
-            if (!_aimingAtTarget) { _aimingAtTarget = true; _eManager.AimAtTarget(aim: true); }
+            if (!_aimingAtTarget) { _aimingAtTarget = true; _animationControl?.IkLookAtTarget(look: true); }
         }
         //
     }
@@ -153,7 +150,7 @@ public partial class NPCController : ComponentEvents, IAgentData, INPCBrainConte
 
     private void ApplyFOVStatusUpdate(FOVResult result) => CurrentFOVState = result; 
 
-    public void AnimationIntent(AnimationCue cue) => _eManager.TriggerAnimation(cue);
+    public void AnimationIntent(AnimationCue cue) => _animationControl?.PlayClip(cue);
     // End IFSMNotificationss
 
 
@@ -229,7 +226,7 @@ public partial class NPCController : ComponentEvents, IAgentData, INPCBrainConte
         //this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: CanRotateTowardsTarget());
         _fsmManager?.LateTick(Time.deltaTime);
         if (_eManager == null) return;
-        _eManager.TickAnimator(Agent.velocity, Agent.transform.forward);
+        _animationControl?.Tick(Agent.velocity, Agent.transform.forward);
     }
 
 
@@ -307,12 +304,12 @@ public partial class NPCController : ComponentEvents, IAgentData, INPCBrainConte
             if (IsStationary || CurrentFOVState == FOVResult.TargetSeen)
             {
                 this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: true);
-                if (!_aimingAtTarget) { _aimingAtTarget = true; _eManager.AimAtTarget(aim: true); }
+                if (!_aimingAtTarget) { _aimingAtTarget = true; _animationControl?.IkLookAtTarget(look: true); }
             }
             else
             {
                 this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: false);
-                if (_aimingAtTarget) { _aimingAtTarget = false; _eManager.AimAtTarget(aim: false); }
+                if (_aimingAtTarget) { _aimingAtTarget = false; _animationControl?.IkLookAtTarget(look: false); }
             }
     }
     private void TryRotateAndAimAtTargetNew()
@@ -348,21 +345,16 @@ public partial class NPCController : ComponentEvents, IAgentData, INPCBrainConte
 
     private IEnumerator WaitForAnimLayerFadeRoutine(AnimationLayer layer, bool activate, Action OnDone = null)
     {
-        if(_eManager.IsLayerActive(layer) == activate)
-        {
-            // Layer is already in the requested state (activate/ !activate)
-            OnDone?.Invoke();
-            yield break;
-        }
+        if (_animationControl == null) { OnDone?.Invoke(); yield break; }
+        _animationControl.ToggleAnimationLayer(layer, activate);
 
-        _eManager.TogglingAnimationLayerNew(layer, activate);
-
-        while (_eManager.IsLayerActive(layer) != activate)
+        while (_animationControl.IsAnimationLayerActive(layer) != activate)
             yield return null;
 
         OnDone?.Invoke();
     }
 
+    [Obsolete]
     private IEnumerator WaitAndSwitchStateRoutine(AnimationLayer layer, StateId nextIntent = StateId.None)
     {
         bool done = false;

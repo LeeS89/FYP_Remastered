@@ -116762,7 +116762,7 @@ MonoBehaviour:
   _layerMask:
     serializedVersion: 2
     m_Bits: 0
-  _targetCollider: {fileID: 0}
+  _targetCollider: {fileID: 99692069}
   _requiredSeenStreak: 3
   _requiredNotSeenStreak: 5
   _minStopdistance: 4
@@ -154776,7 +154776,7 @@ MonoBehaviour:
   _layerMask:
     serializedVersion: 2
     m_Bits: 0
-  _targetCollider: {fileID: 0}
+  _targetCollider: {fileID: 226800903}
   _requiredSeenStreak: 3
   _requiredNotSeenStreak: 5
   _minStopdistance: 4

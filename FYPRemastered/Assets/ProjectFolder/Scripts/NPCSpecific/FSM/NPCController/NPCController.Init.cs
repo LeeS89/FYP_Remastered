@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -7,16 +8,19 @@ public partial class NPCController
     // FSMManager Composition - Partly obsolete
     [Header("FOV Data")]
     [SerializeField] protected FOVParameters _fovParams;
-   // public IFSMControl FSM { get; protected set; }
+
+    // FSMManager Composition
     private IPathResolver _pathFinder;
     private ICandidateProvider _destinationResolver;
     private IFieldOfViewRunner _fovRunner;
     private Dictionary<StateId, ICandidateProvider> _destinationProviders;
- //   protected IIntentState _state;
-    // end FSMManager Composition
-
     private IFSMControlNew _fsmManager;
     private Dictionary<StateId, IFSMState> _fsmStates = new(5);
+    // end FSMManager Composition
+    //   protected IIntentState _state;
+   
+    private INpcAnimationControl _animationControl;
+  
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
@@ -36,10 +40,24 @@ public partial class NPCController
             TargetableCollider = _targetCollider;
         }
 
+        var anim = GetComponentsInChildren<MonoBehaviour>(true).OfType<INpcAnimationControl>().FirstOrDefault();
+        if (anim != null) _animationControl = anim;
+
         SetPrimaryToPlayer();
         SetNavMeshAgentParams();
         OnMeleeRangeCheckCallback = OnMeleeRangeEnter;
 
+        SetupFSM();
+
+        OnStableFOVResult = StableFOVResultConfirmed;
+        OnRequestAgentStoppingDistance = GetAgentStoppingDistance;
+
+        base.RegisterLocalEvents(_eManager);
+        RegisterGlobalEvents();
+    }
+
+    private void SetupFSM()
+    {
         _destinationProviders = new()
         {
             [StateId.Patrol] = new WaypointProvider(WaypointRepo.Instance),
@@ -57,12 +75,6 @@ public partial class NPCController
         _fsmManager.Notification = Notify;
         _fsmManager.OnAnimationIntent = AnimationIntent;
         _fsmManager.OnMapDestinationToZone = MapDestinationToZone;///// maybe when entering patrol
-
-        OnStableFOVResult = StableFOVResultConfirmed;
-        OnRequestAgentStoppingDistance = GetAgentStoppingDistance;
-
-        base.RegisterLocalEvents(_eManager);
-        RegisterGlobalEvents();
     }
 
     private void SetNavMeshAgentParams()
@@ -88,14 +100,14 @@ public partial class NPCController
         _fsmManager.OnAnimationIntent = null;
         _fsmManager.OnMapDestinationToZone = null;
         OnRequestAgentStoppingDistance = null;
-        OnTargetSeen = null;
-        OnTargetLost = null;
+       // OnTargetSeen = null;
+       // OnTargetLost = null;
     }
 
     protected override void OnSceneStarted()
     {
         base.OnSceneStarted();
-        _eManager.SetLookTarget(PrimaryTarget?.Transform);
+        _animationControl?.SetIKLookTarget(PrimaryTarget?.Transform);
         _fsmManager?.SwitchTo(StateId.Patrol);
     }
 

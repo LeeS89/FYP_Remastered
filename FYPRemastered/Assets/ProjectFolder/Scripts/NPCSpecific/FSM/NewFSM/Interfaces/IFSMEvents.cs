@@ -69,9 +69,8 @@ public interface IFSMControlNew : IFSMStateContext, ITickable
     OnNotifyOwner Notification { get; set; }
 }
 
-public interface IFSMStateContext
+public interface IFSMStateContext : IAnimationCueSource
 {
-    Action<AnimationCue> OnAnimationIntent { get; set; }
     Action<Vector3> OnMapDestinationToZone { get; set; }
     Vector3? CurrentDestinationForward { get; }
 

@@ -1,11 +1,40 @@
 using System;
-using System.Collections.Generic;
+
 using UnityEngine;
-using UnityEngine.UIElements;
-using static EnemyAnimController;
+
 
 public class EnemyEventManager : EventManager
 {
+    #region To be made obsolete + re enable later
+      public Action<AnimationCue> OnAnimationTriggered;
+    /// <summary>
+    /// Animation actions other than Locomotion i.e. Melee, Look around etc
+    /// </summary>
+    /// <param name="action"></param>
+     public void TriggerAnimation(AnimationCue action) => OnAnimationTriggered?.Invoke(action);
+
+    ////// NEW TODAY (DECEMBER 6th)
+      public Action<AnimationLayer, bool, Action> OnTogglingAnimationLayerNew;
+    public void TogglingAnimationLayerNew(AnimationLayer layer, bool activate, Action onComplete = null)
+        => OnTogglingAnimationLayerNew?.Invoke(layer, activate, onComplete);
+    ///// END DECEMBER 6th
+
+     public Func<AnimationLayer, bool> OnGetLayerActiveState;
+
+     public bool IsLayerActive(AnimationLayer layer) => OnGetLayerActiveState?.Invoke(layer) ?? true;
+
+      public Action<Transform> OnSetLookTarget;
+      public void SetLookTarget(Transform target) => OnSetLookTarget?.Invoke(target);
+
+     public Action<bool> OnAimTowardsTarget;
+      public void AimAtTarget(bool aim) => OnAimTowardsTarget?.Invoke(aim);
+
+    public Action<Vector3, Vector3> OnTickAnimator;
+
+    public void TickAnimator(Vector3 velocity, Vector3 forward) => OnTickAnimator?.Invoke(velocity, forward);
+    #endregion
+
+
     // Nav mesh agent events
     public event Action<bool> OnDestinationReached;
     //public event Action<Vector3, int> OnDestinationUpdated;  
@@ -16,7 +45,7 @@ public class EnemyEventManager : EventManager
     //public event Action<AIDestinationRequestData> OnPathRequested;
 
     // Animation events
-    public Action<AnimationCue> OnAnimationTriggered;
+    
     public event Action<float, float> OnSpeedChanged;
     public Action<AnimationLayer, float, float, float, bool> OnChangeAnimatorLayerWeight;
     public Action<AnimationLayer, Action<AnimationLayer>> OnToggleAnimationLayer;
@@ -94,11 +123,7 @@ public class EnemyEventManager : EventManager
     }
 
 
-    /// <summary>
-    /// Animation actions other than Locomotion i.e. Melee, Look around etc
-    /// </summary>
-    /// <param name="action"></param>
-    public void TriggerAnimation(AnimationCue action) => OnAnimationTriggered?.Invoke(action);
+  
 
 
     /// <summary>
@@ -124,11 +149,9 @@ public class EnemyEventManager : EventManager
 
     public void TargetSeen(bool seen) => OnTargetSeen?.Invoke(seen); // Obsolete
 
-    public Action<Transform> OnSetLookTarget;
-    public void SetLookTarget(Transform target) => OnSetLookTarget?.Invoke(target);
+  
 
-    public Action<bool> OnAimTowardsTarget;
-    public void AimAtTarget(bool aim) => OnAimTowardsTarget?.Invoke(aim);
+   
 
 
     public void FacingTarget(bool facingTarget) // Obsolete
@@ -157,15 +180,9 @@ public class EnemyEventManager : EventManager
     public void TogglingAnimationLayer(AnimationLayer layer, Action onComplete = null)
         => OnTogglingAnimationLayer?.Invoke(layer, onComplete);
 
-    ////// NEW TODAY (DECEMBER 6th)
-    public Action<AnimationLayer, bool, Action> OnTogglingAnimationLayerNew;
-    public void TogglingAnimationLayerNew(AnimationLayer layer, bool activate, Action onComplete = null)
-        => OnTogglingAnimationLayerNew?.Invoke(layer, activate, onComplete);
-    ///// END DECEMBER 6th
+ 
 
-    public Func<AnimationLayer, bool> OnGetLayerActiveState;
-
-    public bool IsLayerActive(AnimationLayer layer) => OnGetLayerActiveState?.Invoke(layer) ?? true;
+   
 
     /// <summary>
     /// Used to alert the agents weapon to be ready to fire
@@ -266,7 +283,5 @@ public class EnemyEventManager : EventManager
     public void UpdateChaseTarget(Transform target) => OnUpdateChaseTarget?.Invoke(target);
 
 
-    public Action<Vector3, Vector3> OnTickAnimator;
-
-    public void TickAnimator(Vector3 velocity, Vector3 forward) => OnTickAnimator?.Invoke(velocity, forward);
+   
 }
