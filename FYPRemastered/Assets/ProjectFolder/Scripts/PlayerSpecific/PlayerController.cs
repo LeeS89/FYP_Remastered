@@ -3,7 +3,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(PlayerEventManager))]
-public sealed class PlayerController : ComponentEvents
+public sealed class PlayerController : ComponentEvents, ITargetable
 {
     [Header("Locomotion Params")]
     [SerializeField] private float _moveSpeed = 4.0f;
@@ -25,13 +25,38 @@ public sealed class PlayerController : ComponentEvents
     private LocomotionHandler _locomotion;
     private RotationHandler _rotationHandler;
     private GrabHandler _grabHandler;
-
-
-
-   
     public bool InputEnabled { get; private set; } = false;
 
-   
+    [Header("ITargetable Info - Used by NPC's for targeting/ FOV purposes")]
+    [SerializeField] private Collider _targetableCollider;
+    [SerializeField] private LayerMask _selfTargetMask;
+
+
+    #region ITargetable Implementation
+
+    public Vector3 Forward => transform.forward;
+    public Transform Transform => transform;
+
+    public Collider TargetableCollider => _targetableCollider;
+
+    public bool _testMove = true;
+    public bool IsStationary => _testMove;//_locomotion != null ? !_locomotion.CanMoveForward : true;
+
+    public bool IsDead { get; private set; } = false;
+
+    public LayerMask LayerMask => _selfTargetMask;
+
+    public Vector3 Position()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public Quaternion Rotation()
+    {
+        throw new System.NotImplementedException();
+    }
+    #endregion ITargetable Implementation
+
     public override void RegisterLocalEvents(EventManager eventManager)
     {
         _playerEventManager = eventManager as PlayerEventManager;
@@ -39,14 +64,15 @@ public sealed class PlayerController : ComponentEvents
         base.RegisterLocalEvents(_playerEventManager);
 
         if (TryGetComponent<CharacterController>(out CharacterController characterController))
-        {
             _controller = characterController;
-        }
-        else
+
+        if(_targetableCollider == null)
         {
-#if UNITY_EDITOR
-            Debug.LogWarning("Character controller not found, please ensure component exists before use");
-#endif
+            Collider col = GetComponentInChildren<Collider>();
+            if (col != null)
+                _targetableCollider = col;
+            else
+                _targetableCollider = gameObject.AddComponent<BoxCollider>();
         }
 
         _playerEventManager.OnPlayerRotate += HandleRotation;
@@ -165,4 +191,6 @@ public sealed class PlayerController : ComponentEvents
         _grabHandler = null;
         _playerEventManager = null;
     }
+
+   
 }

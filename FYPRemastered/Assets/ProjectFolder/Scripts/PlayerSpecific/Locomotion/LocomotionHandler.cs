@@ -3,6 +3,10 @@ using UnityEngine;
 
 public class LocomotionHandler
 {
+    /// <summary>
+    /// NOTE: Need to update class to reduce circular dependencies later
+    /// </summary>
+
     //NEW
     private PlayerEventManager _eventManager;
     private Transform _playerTransform;

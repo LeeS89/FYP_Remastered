@@ -2,21 +2,21 @@ using UnityEngine;
 
 public class BaseDamageRelay : ComponentEvents, IDamageable
 {
-    [SerializeField] private Transform _parentTransform;
-    [SerializeField] private Collider _targetableCollider;
-    public Collider TargetableCollider => _targetableCollider;
+  //  [SerializeField] private Transform _parentTransform;
+   // [SerializeField] private Collider _targetableCollider;
+    //public Collider TargetableCollider => _targetableCollider;
 
    
     public override void RegisterLocalEvents(EventManager eventManager)
     {
         //base.RegisterLocalEvents(eventManager);
         _eventManager = eventManager;
-        if(_targetableCollider == null)
+       /* if(_targetableCollider == null)
         {
             if(TryGetComponent<Collider>(out var col))
                 _targetableCollider = col;
             else _targetableCollider = gameObject.AddComponent<BoxCollider>();
-        }
+        }*/
         
     }
 
@@ -63,17 +63,17 @@ public class BaseDamageRelay : ComponentEvents, IDamageable
         _eventManager = null;
     }
 
-    public bool IsStationary { get; private set; } = false;
+  //  public bool IsStationary { get; private set; } = true;
 
-    public Transform Transform => _parentTransform != null ? _parentTransform : transform;
+   // public Transform Transform => _parentTransform != null ? _parentTransform : transform;
 
-    [SerializeField] protected LayerMask _selfTargetMask;
+  //  [SerializeField] protected LayerMask _selfTargetMask;
 
-    public LayerMask LayerMask => _selfTargetMask;
+   // public LayerMask LayerMask => _selfTargetMask;
 
-    public Vector3 Forward => _parentTransform != null ? _parentTransform.forward : transform.forward;
+   // public Vector3 Forward => _parentTransform != null ? _parentTransform.forward : transform.forward;
 
-    public bool IsDead { get; private set; } = false;
+   // public bool IsDead { get; private set; } = false;
 
 
     /* public Vector3 GetTargetablePosition()
@@ -81,11 +81,11 @@ public class BaseDamageRelay : ComponentEvents, IDamageable
 
 
 
-    public Vector3 Position()
+  /*  public Vector3 Position()
         => _parentTransform == null ? transform.position : _parentTransform.position;
 
     public Quaternion Rotation()
     {
         throw new System.NotImplementedException();
-    }
+    }*/
 }

@@ -314,6 +314,8 @@ public class NPCAnimComponent : ComponentEvents, INpcAnimationControl
     #endregion
 
 }
+
+#region Old Implementation backup
 /*[RequireComponent(typeof(Animator))]
 public class NPCAnimComponent : ComponentEvents
 {
@@ -728,6 +730,7 @@ public class NPCAnimComponent : ComponentEvents
 
 
 }*/
+#endregion
 
 public enum AnimationLayer
 {

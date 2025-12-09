@@ -116802,12 +116802,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bee573a46eb891940b1392ede30cf816, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _parentTransform: {fileID: 1863641519}
-  _targetableCollider: {fileID: 99692069}
   _testDeath: 0
-  _selfTargetMask:
-    serializedVersion: 2
-    m_Bits: 16
 --- !u!114 &1863641514
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -150982,12 +150977,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bee573a46eb891940b1392ede30cf816, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _parentTransform: {fileID: 8070524998269774116}
-  _targetableCollider: {fileID: 226800903}
   _testDeath: 0
-  _selfTargetMask:
-    serializedVersion: 2
-    m_Bits: 16
 --- !u!1 &238048844205016106
 GameObject:
   m_ObjectHideFlags: 0
@@ -152162,6 +152152,14 @@ PrefabInstance:
     - target: {fileID: 7300394724241211646, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7447672074397387331, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
+      propertyPath: _targetableCollider
+      value: 
+      objectReference: {fileID: 3718215761319188344}
+    - target: {fileID: 7447672074397387331, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
+      propertyPath: _selfTargetMask.m_Bits
+      value: 520
       objectReference: {fileID: 0}
     - target: {fileID: 8025562586149453778, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
       propertyPath: m_LocalPosition.x

@@ -94,7 +94,11 @@ public partial class FSMBaseNew : IFSMControlNew
     #region Tick Region
 
     public void Tick(float dt) => OnTick?.Invoke(dt);
-    public void LateTick(float dt) => UpdateAgentSpeed();
+    public void LateTick(float dt)
+    {
+        UpdateAgentSpeed();
+        _current?.LateTick(dt);
+    }
 
 
     public void ClassUpdate(float dt)
@@ -208,6 +212,7 @@ public partial class FSMBaseNew : IFSMControlNew
             float stopdist = _ownerData?.OnRequestAgentStoppingDistance?.Invoke(current) ?? 0f;
             _ownerData.Agent.stoppingDistance = stopdist;
             _hasValidDestination = true;
+            _current?.OnDestinationSet();
         }
         else
         {

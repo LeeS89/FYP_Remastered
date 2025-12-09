@@ -1,5 +1,7 @@
+using System;
 using UnityEngine;
 
+[Obsolete]
 public sealed class ChaseState : IntentStateBase
 {
     public static readonly ChaseState Instance = new();
