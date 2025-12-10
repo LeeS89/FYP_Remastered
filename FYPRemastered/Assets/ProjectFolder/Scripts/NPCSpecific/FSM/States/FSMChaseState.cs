@@ -41,7 +41,7 @@ public class FSMChaseState : FSMBaseState
 
         if (_timeSinceLastRepath <= 0f)
         {
-            if(!_ownerData.PrimaryTarget.IsStationary)
+            if(!_ownerData.PrimaryTarget.IsStationary) // Target is moving, need to repath
             {
                 _hasDestination = false;
                 TryGetNewDestination();
