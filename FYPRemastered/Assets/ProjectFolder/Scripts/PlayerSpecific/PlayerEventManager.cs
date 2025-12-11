@@ -1,6 +1,11 @@
 using System;
 using UnityEngine;
 
+public interface Test3 : Test2
+{
+    void Help();
+}
+
 public class PlayerEventManager : EventManager
 {
     public event Action<Quaternion> OnPlayerRotate;

@@ -7,7 +7,7 @@ using UnityEngine.AI;
 /// <summary>
 /// Class used to to limit concurrent path calculations to a set number per frame
 /// </summary>
-public class PathRequestManager : SceneResources, IUpdateableResource
+public class PathRequestManager : SceneResources, IUpdateableResource // Change to ITickable
 {
  
     private Queue<ResourceRequests> _pathRequestQueue = new Queue<ResourceRequests>();

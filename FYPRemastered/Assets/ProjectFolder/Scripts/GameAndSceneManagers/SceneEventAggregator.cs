@@ -1,6 +1,4 @@
-using NUnit.Framework;
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 
@@ -159,3 +157,167 @@ public class SceneEventAggregator : MonoBehaviour
 
     #endregion
 }
+
+public class SceneEventBus : ISceneServiceProvider
+{
+    #region Global Scene Events
+    
+    public event Action<ResourceRequest> OnResourceReleased;
+    //public event Action<List<Type>> OnDependanciesAdded;
+    public event Action<SceneResources> OnDependancyAdded;
+    public event Func<Type, bool> OnCheckDependencyExists;
+
+    // new way
+    public delegate void ResourcesRequestedHandler(in ResourceRequests request);
+    public event ResourcesRequestedHandler OnResourceRequested;
+    // public event Action<ResourceRequests> OnResourcesRequested;
+
+    public void ResourceRequested(in ResourceRequests request) => OnResourceRequested?.Invoke(request);
+
+
+    public void ReleaseResource(ResourceRequest request) => OnResourceReleased?.Invoke(request);
+
+
+    public void AddDependancy(SceneResources resource)
+    {
+        // Invoke the event with the resource
+        OnDependancyAdded?.Invoke(resource);
+    }
+
+    public bool CheckDependancyExists(Type dependency) => OnCheckDependencyExists?.Invoke(dependency) ?? false;
+
+    #endregion
+
+
+    #region AI Agent Events
+
+    #region Player Flanking Point Events
+    /// <summary>
+    /// Events used with Enemy AI system to notify when the closest flanking point to player has changed.
+    /// When there is an active Alert status - OnClosestPointToPlayerChanged will be invoked by the player when ever they stop moving
+    /// This in turn runs the ClosestPointToPlayerJob to find the closest point to player. Once job completes,
+    /// OnClosestPointToPlayerJobComplete notifies all interested parties with the index of the closest point to player.
+    /// </summary>
+    public event Action OnClosestPointToPlayerChanged;
+    public event Action<int> OnClosestFlankPointToPlayerJobComplete;
+    public event Action OnRunClosestPointToPlayerJob;
+    //public event Action<ResourceRequest> OnFlankPointsRequested;
+
+    public void ClosestPointToPlayerchanged() // Player will invoke this event, and the scene manager will listen to it
+    {
+        OnClosestPointToPlayerChanged?.Invoke();
+    }
+
+    public void ClosestFlankPointToPlayerJobComplete(int pointIndex)
+    {
+        OnClosestFlankPointToPlayerJobComplete?.Invoke(pointIndex);
+    }
+
+    public void RunClosestPointToPlayerJob()
+    {
+        OnRunClosestPointToPlayerJob?.Invoke();
+    }
+
+ 
+    #endregion Scene Events
+
+    #region Agent Zone Registry Events
+    public event Action<FSMControllerBase, int> OnAgentZoneRegistered;
+
+    public event Action<FSMControllerBase, int> OnAgentZoneUnRegistered;
+    public event Action<int, FSMControllerBase> OnAlertZoneAgents;
+
+    public void RegisterAgentAndZone(FSMControllerBase agent, int zone)
+    {
+        OnAgentZoneRegistered?.Invoke(agent, zone);
+    }
+
+    public void UnRegisterAgentAndZone(FSMControllerBase agent, int zone)
+    {
+        OnAgentZoneUnRegistered?.Invoke(agent, zone);
+    }
+
+    public void AlertZoneAgents(int zone, FSMControllerBase source)
+    {
+        OnAlertZoneAgents?.Invoke(zone, source);
+    }
+
+    // NEW
+
+    public Action<INotificationListener, ZoneId> OnRegisterAgentAndZone;
+    public void RegisterAgentAndZone(INotificationListener agent, ZoneId zone)
+        => OnRegisterAgentAndZone?.Invoke(agent, zone);
+
+    public Action<INotificationListener, ZoneId> OnUnRegisterAgentAndZone;
+    public void UnregisterAgentAndZone(INotificationListener agent, ZoneId zone)
+        => OnUnRegisterAgentAndZone?.Invoke(agent, zone);
+
+    public Func<ZoneId, INotificationListener, bool> OnAlertAgentsInZone;
+    public bool AlertAgentsInZone(ZoneId zone, INotificationListener listener)
+        => OnAlertAgentsInZone?.Invoke(zone, listener) ?? true; // if no subscribers, default to true
+
+    // END NEW
+    #endregion
+
+
+
+    #endregion
+}
+
+public interface ISceneServiceProvider : IAIServiceProvider, IPoolServiceProvider
+{
+    // IPoolService PoolService { get; }
+}
+
+public interface IAIServiceProvider
+{
+    // IPathService PathService { get; }
+    // IWaypointService WaypointService { get; }
+    // IZoneService ZoneService { get; }
+    // IFlankingPointService FlankingPointService { get; }
+}
+
+public interface IPoolServiceProvider
+{
+    // IPoolService PoolService { get; }
+}
+
+public interface Test1
+{
+    void Helping();
+}
+public interface Test2 : Test1 { }
+
+
+public class TestClass1
+{
+    public virtual void TestMethod<T>(T one) { }
+}
+
+public class TestClass2 : TestClass1
+{
+    public override void TestMethod<Test3>(Test3 one)
+    {
+       // one.Help();
+        base.TestMethod(one);
+    }
+   
+}
+
+
+public interface IBase { }
+public interface IChild : IBase { }
+
+public abstract class Handler<T> where T : IBase
+{
+    public abstract void Handle(T obj);
+}
+
+public class ChildHandler : Handler<IChild>
+{
+    public override void Handle(IChild obj)
+    {
+        // Can assume IChild here
+    }
+}
+
