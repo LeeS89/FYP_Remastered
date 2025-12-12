@@ -158,7 +158,7 @@ public class SceneEventAggregator : MonoBehaviour
     #endregion
 }
 
-public class SceneEventBus : ISceneServiceProvider
+public class SceneServiceBus : ISceneServiceProvider
 {
     #region Global Scene Events
     
@@ -253,6 +253,15 @@ public class SceneEventBus : ISceneServiceProvider
         => OnUnRegisterAgentAndZone?.Invoke(agent, zone);
 
     public Func<ZoneId, INotificationListener, bool> OnAlertAgentsInZone;
+
+    public IWaypointService WaypointService => throw new NotImplementedException();
+
+    public IAgentZoneAlertService AgentZoneService => throw new NotImplementedException();
+
+    public IFlankService FlankService => throw new NotImplementedException();
+
+    public IPoolService PoolService => throw new NotImplementedException();
+
     public bool AlertAgentsInZone(ZoneId zone, INotificationListener listener)
         => OnAlertAgentsInZone?.Invoke(zone, listener) ?? true; // if no subscribers, default to true
 
@@ -264,22 +273,56 @@ public class SceneEventBus : ISceneServiceProvider
     #endregion
 }
 
-public interface ISceneServiceProvider : IAIServiceProvider, IPoolServiceProvider
+public interface ISceneServiceProvider : ISceneAIServices, IScenePoolServices
 {
     // IPoolService PoolService { get; }
 }
 
-public interface IAIServiceProvider
+public interface ISceneAIServices
 {
     // IPathService PathService { get; }
-    // IWaypointService WaypointService { get; }
-    // IZoneService ZoneService { get; }
-    // IFlankingPointService FlankingPointService { get; }
+    IWaypointService WaypointService { get; }
+    IAgentZoneAlertService AgentZoneService { get; }
+    IFlankService FlankService { get; }
 }
 
-public interface IPoolServiceProvider
+public interface IWaypointService : IDestinationService
 {
-    // IPoolService PoolService { get; }
+    void RequestWaypointBlock(Action<BlockData> requestCallback);
+}
+
+public interface IFlankService : IDestinationService
+{
+    void RequestFlankPoint();
+}
+
+public interface IScenePoolServices
+{
+    IPoolService PoolService { get; }
+}
+
+public interface IAgentZoneAlertService
+{
+    void RegisterAgentAndZone(INotificationListener agent, ZoneId zone);
+    void UnregisterAgentAndZone(INotificationListener agent, ZoneId zone);
+    bool TryAlertAgentsInZone(ZoneId zone, INotificationListener listener);
+}
+
+public interface  IPoolService
+{
+    
+}
+
+public interface IDestinationService
+{
+    DestinationServiceId ServiceId { get; }
+}
+
+public enum DestinationServiceId
+{
+    WaypointService,
+    FlankPointService,
+    TargetPointService
 }
 
 public interface Test1

@@ -108,7 +108,7 @@ public enum DestinationKind
 
 public enum PathCheckReason
 {
-    ProbePathToPrimaryTarget,
+    ProbePath,
     ValidatePathForDestination,
     Cancelled
 }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Unity.XR.CoreUtils;
 using UnityEngine;
 
+[Obsolete("", false)]
 public abstract class DestinationProviderBase
 {
     protected List<(Vector3, Vector3?)> _candidates = new();

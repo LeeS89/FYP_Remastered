@@ -133,7 +133,7 @@ public class FSMManager : FSMBase
         bool pathFound = result.PathFound;
         StateId id = result.Id;
 
-        if (result.Reason == PathCheckReason.ProbePathToPrimaryTarget && pathFound)
+        if (result.Reason == PathCheckReason.ProbePath && pathFound)
         { Notification?.Invoke(NPCNotification.PathToPrimaryAvailable(/*result.Id*/)); return; }
     
         if (!result.PathFound) { Notification?.Invoke(NPCNotification.NoAvailablePath(/*_currentStateId*/)); Debug.LogError("NO Path Found!!"); return; }

@@ -180,7 +180,7 @@ public partial class FSMBaseNew : IFSMControlNew
         bool pathFound = result.PathFound;
         StateId id = result.Id;
 
-        if (result.Reason == PathCheckReason.ProbePathToPrimaryTarget && pathFound)
+        if (result.Reason == PathCheckReason.ProbePath && pathFound)
         { Notification?.Invoke(NPCNotification.PathToPrimaryAvailable(/*result.Id*/)); return; }
 
         if (!result.PathFound) { Notification?.Invoke(NPCNotification.NoAvailablePath(/*CurrentStateId*/)); Debug.LogError("NO Path Found!!"); return; }

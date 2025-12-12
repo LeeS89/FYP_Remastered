@@ -352,3 +352,51 @@ public readonly struct PathResult
 }
 
 public delegate void DestinationRequestCallback(in PathResult result);
+
+
+
+/*[Obsolete]
+public class TestEnumClass
+{
+    private readonly Testenum _testenum;
+
+    public TestEnum2 _test2 { get; set; }
+
+    public TestEnumClass(Testenum testenum)
+    {
+        _testenum = testenum;
+        _testenum = Testenum.Maybe;
+    }
+
+    public enum TestEnum2
+    {
+        Alpha,
+        Beta,
+        Gamma
+    }
+
+
+}
+
+public class Test56
+{
+    private TestEnumClass _class;
+
+    public Test56()
+    {
+        _class = new TestEnumClass(Testenum.Yes);
+        if (_class._test2 == TestEnumClass.TestEnum2.Beta) return;
+
+       
+    }
+}
+
+
+
+
+public enum Testenum
+{
+    Yes,
+    No,
+    Maybe
+}*/

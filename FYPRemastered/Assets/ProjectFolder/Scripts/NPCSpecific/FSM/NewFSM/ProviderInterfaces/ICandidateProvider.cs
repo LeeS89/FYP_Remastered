@@ -11,6 +11,7 @@ public interface ICandidateProvider : IZoneSink
 
 }
 
+
 /*public interface IDestinationResolver : ICandidateProvider*//*, IZoneSink*//*
 {
     // GetWaypointZone
@@ -117,6 +118,7 @@ public abstract class DestinationProvider : ICandidateProvider
     
 }
 
+
 public sealed class TargetPointProvider : DestinationProvider
 {
     private ITargetable _target;
@@ -218,6 +220,7 @@ public sealed class WaypointProvider : DestinationProvider
 }
 
 
+
 public readonly struct ValidateDestination
 {
     public readonly StateId StateId;
@@ -258,4 +261,166 @@ public readonly struct ValidateDestination
 
     public static ValidateDestination GetTargetPosition(NavMeshPath path, PathCheckReason reason, ITargetable caller, ITargetable target)
         => new ValidateDestination(StateId.Chase, reason, caller, target, path, 0, 0);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+public interface ICandidateProviderNew : IZoneSink
+{
+    List<(Vector3 position, Vector3? forward)> TryGet(in ValidateDestination req);
+    //  List<(Vector3, Vector3?)> Candidates { get; }
+
+}
+
+
+
+
+public abstract class DestinationProviderNew : ICandidateProviderNew
+{
+    public List<(Vector3, Vector3?)> Candidates { get; set; } = new();
+
+    protected virtual void ShuffleCandidateList<T>(List<T> candidates)
+    {
+        for (int i = 0; i < candidates.Count; i++)
+        {
+            int randIndex = UnityEngine.Random.Range(i, candidates.Count);
+            (candidates[i], candidates[randIndex]) = (candidates[randIndex], candidates[i]);
+        }
+    }
+
+    public abstract List<(Vector3 position, Vector3? forward)> TryGet(in ValidateDestination req);
+
+    // public abstract bool TryGetCurrentZone(out int zone);
+
+    public virtual bool TrySwitchPatrolZone() => false;
+
+    public abstract int? TryGetCurrentZone();
+
+}
+
+public sealed class WaypointProviderNew : DestinationProviderNew
+{
+    private IWaypointService _service;
+    //private IWaypointRepository _repo;
+    public int CurrentWaypointZone { get; private set; } = -1;
+
+    //public List<(Vector3, Vector3?)> Candidates { get; set; } = new();
+    private BlockData _wayPointBlock;
+    private Action<BlockData> _wpRequestCB;
+    private Action<bool, int> OnDelayedCandidateRequest;
+
+    public WaypointProviderNew(IWaypointService waypointService)
+    {
+        _service = waypointService;
+        Candidates.EnsureCapacity(15);
+        _wpRequestCB = OnWaypointBlockReceived;
+        // this.RequestWaypointBlock(callback: _wpRequestCB);
+        _service.RequestWaypointBlock(requestCallback: _wpRequestCB);
+    }
+
+    private void SendRequest() => _service.RequestWaypointBlock(requestCallback: _wpRequestCB);
+
+
+    public override List<(Vector3 position, Vector3? forward)> TryGet(in ValidateDestination req)
+    {
+        if (Candidates == null) { Candidates = new List<(Vector3, Vector3?)>(); SendRequest(); return null; }
+        
+        if (Candidates == null || Candidates.Count == 0)
+        {
+            req.WaypointZoneCallback?.Invoke(false, -1);
+            return null;
+        }
+
+        if (Candidates.Count > 1)
+        {
+            var temp = Candidates[0];
+            Candidates.RemoveAt(0);
+            ShuffleCandidateList(Candidates);
+            Candidates.Add(temp);
+        }
+        req.WaypointZoneCallback?.Invoke(true, CurrentWaypointZone); // Change later to remove
+        return Candidates;
+    }
+
+    private void SortCandidates()
+    {
+        if (Candidates.Count > 1)
+        {
+            var temp = Candidates[0];
+            Candidates.RemoveAt(0);
+            ShuffleCandidateList(Candidates);
+            Candidates.Add(temp);
+        }
+
+    }
+/*
+    public override List<(Vector3 position, Vector3? forward)> TryGet(in ValidateDestination req)
+    {
+        if (Candidates == null || Candidates.Count == 0)
+        {
+            req.WaypointZoneCallback?.Invoke(false, -1);
+            return null;
+        }
+
+        if (Candidates.Count > 1)
+        {
+            var temp = Candidates[0];
+            Candidates.RemoveAt(0);
+            ShuffleCandidateList(Candidates);
+            Candidates.Add(temp);
+        }
+        req.WaypointZoneCallback?.Invoke(true, CurrentWaypointZone);
+        return Candidates;
+    }*/
+
+
+
+    private void OnWaypointBlockReceived(BlockData wpb)
+    {
+        _wayPointBlock = wpb;
+        if (_wayPointBlock == null)
+        {
+            Debug.LogError("Waypoint block data is null. Cannot set waypoints.");
+            return;
+        }
+        CurrentWaypointZone = _wayPointBlock._blockZone;
+
+        for (int i = 0; i < _wayPointBlock._waypointPositions.Length; i++)
+            Candidates.Add((_wayPointBlock._waypointPositions[i], _wayPointBlock._waypointForwards[i]));
+    }
+
+    /*public override bool TryGetCurrentZone(out int zone)
+    {
+        zone = CurrentWaypointZone.Value;
+        return CurrentWaypointZone >= 0;
+    }*/
+
+
+    public override bool TrySwitchPatrolZone()
+    {
+        return false;
+        // throw new NotImplementedException();
+    }
+
+    public override int? TryGetCurrentZone() => CurrentWaypointZone;
+
 }
