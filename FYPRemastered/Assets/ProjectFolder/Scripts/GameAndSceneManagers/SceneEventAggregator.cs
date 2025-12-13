@@ -286,12 +286,12 @@ public interface ISceneAIServices
     IFlankService FlankService { get; }
 }
 
-public interface IWaypointService : IDestinationService
+public interface IWaypointService //: IDestinationService
 {
     void RequestWaypointBlock(Action<BlockData> requestCallback);
 }
 
-public interface IFlankService : IDestinationService
+public interface IFlankService //: IDestinationService
 {
     void RequestFlankPoint();
 }
