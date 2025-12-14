@@ -1,5 +1,8 @@
+using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 
 public class SceneEventAggregator : MonoBehaviour
@@ -262,6 +265,8 @@ public class SceneServiceBus : ISceneServiceProvider
 
     public IPoolService PoolService => throw new NotImplementedException();
 
+    public IPathService PathService => throw new NotImplementedException();
+
     public bool AlertAgentsInZone(ZoneId zone, INotificationListener listener)
         => OnAlertAgentsInZone?.Invoke(zone, listener) ?? true; // if no subscribers, default to true
 
@@ -280,15 +285,20 @@ public interface ISceneServiceProvider : ISceneAIServices, IScenePoolServices
 
 public interface ISceneAIServices
 {
-    // IPathService PathService { get; }
+    IPathService PathService { get; }
     IWaypointService WaypointService { get; }
     IAgentZoneAlertService AgentZoneService { get; }
     IFlankService FlankService { get; }
 }
 
+public interface IPathService
+{
+    void TryGetPath(Vector3 from, Vector3 to, NavMeshPath path, Action<bool> onRequestComplete);
+}
+
 public interface IWaypointService //: IDestinationService
 {
-    void RequestWaypointBlock(Action<BlockData> requestCallback);
+    bool TryGetWaypoints(List<Vector3> candidates);
 }
 
 public interface IFlankService //: IDestinationService

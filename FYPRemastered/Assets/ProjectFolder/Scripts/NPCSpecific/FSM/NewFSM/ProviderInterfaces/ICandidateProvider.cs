@@ -334,15 +334,15 @@ public sealed class WaypointProviderNew : DestinationProviderNew
         Candidates.EnsureCapacity(15);
         _wpRequestCB = OnWaypointBlockReceived;
         // this.RequestWaypointBlock(callback: _wpRequestCB);
-        _service.RequestWaypointBlock(requestCallback: _wpRequestCB);
+      //  _service.RequestWaypointBlock(requestCallback: _wpRequestCB);
     }
 
-    private void SendRequest() => _service.RequestWaypointBlock(requestCallback: _wpRequestCB);
+  //  private void SendRequest() => _service.RequestWaypointBlock(requestCallback: _wpRequestCB);
 
 
     public override List<(Vector3 position, Vector3? forward)> TryGet(in ValidateDestination req)
     {
-        if (Candidates == null) { Candidates = new List<(Vector3, Vector3?)>(); SendRequest(); return null; }
+        if (Candidates == null) { Candidates = new List<(Vector3, Vector3?)>(); /*SendRequest();*/ return null; }
         
         if (Candidates == null || Candidates.Count == 0)
         {

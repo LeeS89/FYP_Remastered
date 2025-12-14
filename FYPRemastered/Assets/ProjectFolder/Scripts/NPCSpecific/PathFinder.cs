@@ -390,9 +390,8 @@ public delegate void DestinationRequestCallback(in PathResult result);
 
 public class PathFinderNew : IPathResolver
 {
-  
-    private readonly IWaypointService _waypointService;
-    private readonly IFlankService _flankService;
+
+    private readonly IPathService _pathService;
 
 
     private WaitUntil _waitUntilPathCheckComplete;
@@ -403,10 +402,10 @@ public class PathFinderNew : IPathResolver
     private uint _activeGen;
     private Action<bool> PathCheckCallback;
 
-    public int CurrentWaypointZone { get; private set; } = 0;
+    
 
     private Coroutine _runningRoutine;
-    List<(Vector3 position, Vector3? forward)> samples = new(50);
+
     private bool _isValid = false;
 
 

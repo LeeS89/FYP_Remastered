@@ -1,4 +1,6 @@
+using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -6,7 +8,7 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 
 
-public class WaypointResources : SceneResources
+public class WaypointResources : SceneResources, IWaypointService
 {
     private WaypointBlockData _waypointBlockData;
   
@@ -117,6 +119,26 @@ public class WaypointResources : SceneResources
   
     }
 
+    //NEW SETUP
+    public bool TryGetWaypoints(List<Vector3> candidates)
+    {
+        if(_waypointBlockData != null)
+        {
+            foreach(var blockData in _waypointBlockData.blockDataArray)
+            {
+                if (!blockData._inUse)
+                {
+                    blockData._inUse = true;
+                    candidates.AddRange(blockData._waypointPositions);
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+    //END NEW SETUP
+
 
     protected override void ResourceReleased(ResourceRequest request)
     {
@@ -133,18 +155,20 @@ public class WaypointResources : SceneResources
 
     }
 
-   /* public void ReturnWaypointBlock(BlockData bd)
-    {
-        if (!_waypointBlockData.blockDataArray.Contains(bd)) { return; }
+ 
 
-        int index = Array.FindIndex(_waypointBlockData.blockDataArray, block => block == bd);
+    /* public void ReturnWaypointBlock(BlockData bd)
+     {
+         if (!_waypointBlockData.blockDataArray.Contains(bd)) { return; }
 
-        if (index >= 0)
-        {
-            _waypointBlockData.blockDataArray[index]._inUse = false;
-        }
+         int index = Array.FindIndex(_waypointBlockData.blockDataArray, block => block == bd);
 
-    }*/
+         if (index >= 0)
+         {
+             _waypointBlockData.blockDataArray[index]._inUse = false;
+         }
+
+     }*/
 
 
     /* protected void LoadWaypoints() // Create WaypointManager Component Later
