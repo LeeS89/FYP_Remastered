@@ -12,14 +12,8 @@ public interface ICandidateProvider : IZoneSink
 }
 
 
-/*public interface IDestinationResolver : ICandidateProvider*//*, IZoneSink*//*
-{
-    // GetWaypointZone
-    // TrySwitchWaypoints
 
-}*/
-
-public interface IPathResolver : IZoneSink
+public interface IPathResolver// : IZoneSink
 {
     /*bool TryGetWaypointZone(out uint zone);
 
@@ -28,10 +22,14 @@ public interface IPathResolver : IZoneSink
 
     void CancelAll();
 
+    void ProcessDestinationCandidates(StateId id, PathCheckReason reason, List<Vector3> candidates, NavMeshPath path, Vector3 fromPos);
+
+    [Obsolete]
     void TryGetDestination(in ValidateDestination req);
    // List<(Vector3 position, Vector3? forward)> TryGet(in ValidateDestination request);
 }
 
+[Obsolete]
 public interface IZoneSink
 {
 //    bool TryGetCurrentZone(out int zone);

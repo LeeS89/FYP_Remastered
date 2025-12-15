@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.AI;
 
+[Obsolete]
 public abstract class FSMBase : IFSMControl
 {
     public Action<StateId> TryRepath { get; protected set; }
@@ -102,7 +103,7 @@ public abstract class FSMBase : IFSMControl
 
     public virtual void FieldOfViewSweepResult(FOVResult result, bool withinAttackAngles) { }
 
-    public int? TryGetPatrolZone() => _pathFinder?.TryGetCurrentZone();
+    public int? TryGetPatrolZone() => -1;//_pathFinder?.TryGetCurrentZone();
 
     public void EnterState(StateId id)
     {

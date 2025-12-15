@@ -338,9 +338,9 @@ public class FSMManager : FSMBase
         }
     }
 
-    
 
-    public override bool TrySwitchPatrolZone() => _pathFinder?.TrySwitchPatrolZone() ?? false;
+
+    public override bool TrySwitchPatrolZone() => false;//_pathFinder?.TrySwitchPatrolZone() ?? false;
     #endregion
 
 

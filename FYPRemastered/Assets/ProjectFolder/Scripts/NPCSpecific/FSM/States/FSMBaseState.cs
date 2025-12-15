@@ -1,3 +1,5 @@
+using NUnit.Framework;
+using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class FSMBaseState : IFSMState
@@ -7,18 +9,23 @@ public abstract class FSMBaseState : IFSMState
     protected readonly IFSMStateContext _stateContext;
     protected Coroutine _runningRoutine;
     protected bool _hasDestination = false;
+   
 
-
+    protected List<Vector3> _candidateDestinations = new();
     public bool ContinueRoutine { get; protected set; } = true;
 
-    public StateId Id { get; protected set; } = StateId.None;
+    public StateId GetId() => _id;
+    protected readonly StateId _id = StateId.None;
 
-    public FSMBaseState(IAgentData data, IPathResolver resolver, IFSMStateContext stateContext)
+    public FSMBaseState(IAgentData data, IPathResolver resolver, IFSMStateContext stateContext, StateId id)
     {
         _ownerData = data;
         _pathFinder = resolver;
         _stateContext = stateContext;
+        _id = id;
     }
+
+    protected bool IsStationary() => _stateContext?.IsStationary() ?? true;
 
     public virtual void EnterState() { _hasDestination = false; }
     public abstract void TryGetNewDestination();

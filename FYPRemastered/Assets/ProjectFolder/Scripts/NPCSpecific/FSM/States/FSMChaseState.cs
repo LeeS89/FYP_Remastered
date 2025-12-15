@@ -5,8 +5,9 @@ public class FSMChaseState : FSMBaseState
     private float _repathInterval = 0.25f;
     private float _timeSinceLastRepath = 0f;
 
-    public FSMChaseState(IAgentData data, IPathResolver resolver, IFSMStateContext stateContext) : base(data, resolver, stateContext)
-        => Id = StateId.Chase;
+    public FSMChaseState(IAgentData data, IPathResolver resolver, IFSMStateContext stateContext)
+        : base(data, resolver, stateContext, StateId.Chase) { }
+
     
 
     public override void EnterState()

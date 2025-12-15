@@ -1,11 +1,18 @@
 using System.Collections;
+using Unity.XR.CoreUtils;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 public sealed class FSMPatrolState : FSMBaseState
 {
-    public FSMPatrolState(IAgentData data, IPathResolver resolver, IFSMStateContext stateContext) : base(data, resolver, stateContext)
-        => Id = StateId.Patrol;
+    private readonly IWaypointService _waypointService;
+
+    public FSMPatrolState(IAgentData data, IPathResolver resolver, IFSMStateContext stateContext) 
+        : base(data, resolver, stateContext, StateId.Patrol)
+    {
+        _candidateDestinations.EnsureCapacity(10);
+    }
+        
     
 
     public override void EnterState() => TryGetNewDestination();

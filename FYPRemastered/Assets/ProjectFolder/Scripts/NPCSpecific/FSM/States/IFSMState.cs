@@ -12,5 +12,5 @@ public interface IFSMState : ITickable
 
     void TryGetNewDestination();
 
-    StateId Id { get; }
+    StateId GetId();
 }

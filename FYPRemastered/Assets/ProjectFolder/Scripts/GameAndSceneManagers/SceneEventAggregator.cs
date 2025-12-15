@@ -298,12 +298,14 @@ public interface IPathService
 
 public interface IWaypointService //: IDestinationService
 {
-    bool TryGetWaypoints(List<Vector3> candidates);
+    bool TryGetWaypoints(object requester, List<Vector3> buffer);
+
+    bool TryReleaseWaypoints(object requester, List<Vector3> buffer);
 }
 
 public interface IFlankService //: IDestinationService
 {
-    void RequestFlankPoint();
+    bool TryGetFlankCandidates(Vector3 flankTargetPos, List<Vector3> buffer);
 }
 
 public interface IScenePoolServices

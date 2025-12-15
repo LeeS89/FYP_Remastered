@@ -253,7 +253,12 @@ public class PathFinder : IPathResolver
         return null;
     }
 
-    
+    public void ProcessDestinationCandidates(StateId id, PathCheckReason reason, List<Vector3> candidates, NavMeshPath path, Vector3 fromPos)
+    {
+        throw new NotImplementedException();
+    }
+
+
 
 
     /* public Vector3? GetFollowTarget(MovementIntent intent)
@@ -411,40 +416,20 @@ public class PathFinderNew : IPathResolver
 
     private Queue<(List<(Vector3, Vector3?)>, ValidateDestination)> _pathQueue = new(10);
     // private IReadOnlyDictionary<StateId, ICandidateProvider> _providerMap;
-    private ICandidateProvider _destResolver;
+    //private ICandidateProvider _destResolver;
 
 
-    public PathFinderNew(ICandidateProvider destResolver/*IReadOnlyDictionary<StateId, ICandidateProvider> providers*/)
+    public PathFinderNew(IPathService pathService)
     {
-        //  _providerMap = providers;
-        // _map = providers;
-        //Owner = owner;
-        _destResolver = destResolver;
+        _pathService = pathService;
         PathCheckCallback = OnPathRequestcallback;
         _waitUntilPathCheckComplete = new WaitUntil(() => _pathChecked);
-        /* _map = new()
-         {
-             [StateId.Patrol] = new WaypointProvider()
-         };*/
+        
     }
 
+    [Obsolete]
     public List<(Vector3 position, Vector3? forward)> TryGet(in ValidateDestination request)
-    {
-        return _destResolver?.TryGet(request);
-        // if (_providerMap.TryGetValue(request.StateId, out var p)) return p.TryGet(request);
-
-        //  return null;
-    }
-
-    public int? TryGetCurrentZone() => _destResolver?.TryGetCurrentZone();
-
-
-
-    public bool TrySwitchPatrolZone() => false;
-
-
-    public void TryChaseTarget(ITargetable target) { }
-
+       => null;
 
     public void CancelAll()
     {
@@ -461,7 +446,81 @@ public class PathFinderNew : IPathResolver
         }
     }
 
+    private readonly struct PathRequest
+    {
+        public readonly StateId StateId;
+        public readonly Vector3 From;
+        public readonly List<Vector3> Candidates;
+        public readonly NavMeshPath Path;
+        public readonly PathCheckReason Reason;
 
+        public PathRequest(StateId id, Vector3 from, List<Vector3> candidates, NavMeshPath path, PathCheckReason reason)
+            => (StateId, From, Candidates, Path, Reason) = (id, from, candidates, path, reason);
+
+    }
+
+    private Queue<PathRequest> _requests = new(15);
+
+    public void ProcessDestinationCandidates(StateId id, PathCheckReason reason, List<Vector3> candidates, NavMeshPath path, Vector3 fromPos)
+    {
+        if (candidates == null || candidates.Count == 0)
+        {
+            PathResult failResult = new PathResult(reason, path, false, Vector3.zero, id);
+            Callback?.Invoke(failResult);
+            return;
+        }
+        _requests.Enqueue( new PathRequest(id, fromPos, candidates, path, reason));
+        if(_runningRoutine == null)
+            _runningRoutine = CoroutineRunner.Instance.StartCoroutine(PathFindRoutineNewer(_requests));
+    }
+
+    private IEnumerator PathFindRoutineNewer(Queue<PathRequest> q)
+    {
+
+        while (q.Count > 0)
+        {
+            bool found = false;
+            var request = q.Dequeue();
+
+            _activeGen = Gen;
+
+            foreach(var point in request.Candidates)
+            {
+                if (_activeGen != Gen) break;
+
+                _pathChecked = false;
+                _isValid = false;
+
+                Vector3 from = LineOfSightUtility.GetClosestPointOnNavMesh(request.From);
+                Vector3 to = LineOfSightUtility.GetClosestPointOnNavMesh(point);
+                _pathService?.TryGetPath(from, to, request.Path, PathCheckCallback);
+
+                yield return _waitUntilPathCheckComplete;
+
+                if (_activeGen != Gen) break;
+                if (!_isValid) continue;
+
+                PathResult success = new PathResult(request.Reason, request.Path, true, to, request.StateId);
+                Callback?.Invoke(success);
+
+                found = true;
+                break;
+            }
+
+            if (_activeGen != Gen) break;
+            if (!found)
+            {
+                PathResult failed = new PathResult(request.Reason, request.Path, false, Vector3.zero, request.StateId);
+                Callback?.Invoke(failed);
+            }
+
+        }
+
+        _runningRoutine = null;
+
+    }
+
+    [Obsolete]
     public void TryGetDestination(in ValidateDestination req)
     {
         List<(Vector3 position, Vector3? forward)> destinations;
@@ -478,6 +537,7 @@ public class PathFinderNew : IPathResolver
             _runningRoutine = CoroutineRunner.Instance.StartCoroutine(PathFindRoutineNew(_pathQueue));
     }
 
+    [Obsolete]
     private IEnumerator PathFindRoutineNew(Queue<(List<(Vector3, Vector3?)>, ValidateDestination)> q)
     {
 
@@ -522,6 +582,7 @@ public class PathFinderNew : IPathResolver
         _runningRoutine = null;
 
     }
+    
 
     public DestinationRequestCallback Callback { get; set; }
 
@@ -533,129 +594,5 @@ public class PathFinderNew : IPathResolver
 
 
 
-    #region Redundant
-    /*
-        public void TryGetPath(in PathRequestInfo info)
-        {
-            if (_runningRoutine == null)
-                _runningRoutine = CoroutineRunner.Instance.StartCoroutine(PathFindRoutineOld(info));
-        }
-
-
-        private IEnumerator PathFindRoutineOld(PathRequestInfo info)
-        {
-            foreach (var (pos, fwd) in info.Points)
-            {
-                _pathChecked = false;
-                _isValid = false;
-
-                this.RequestValidPath(LineOfSightUtility.GetClosestPointOnNavMesh(info.StartPos),
-                    LineOfSightUtility.GetClosestPointOnNavMesh(pos), info.Path, PathCheckCallback);
-
-                yield return _waitUntilPathCheckComplete;
-
-                if (!_isValid) continue;
-
-                PathResult result = new PathResult(info.Reason, true, pos, info.Id, fwd);
-                Owner.OnPathRequestComplete(result);
-                _runningRoutine = null;
-                yield break;
-            }
-            PathResult failResult = new PathResult(info.Reason, false, Vector3.zero, info.Id, null);
-            Owner.OnPathRequestComplete(failResult);
-            _runningRoutine = null;
-        }*/
-    /*public void TryGetWaypoint(DestinationKind target)
-    {
-        if (_currentWaypointPair.HasValue)
-        {
-            _waypointPairs.Remove(_currentWaypointPair.Value);
-            ShuffleCandidateList(_waypointPairs);
-            _waypointPairs.Add(_currentWaypointPair.Value);
-        }
-        else
-        {
-            ShuffleCandidateList(_waypointPairs);
-        }
-        for(int i = 0; i < _waypointPairs.Count; i++)
-        {
-            samples.Add((_waypointPairs[i].position, _waypointPairs[i].forward));
-        }
-
-        if (_runningRoutine == null)
-            _runningRoutine = CoroutineRunner.Instance.StartCoroutine(WaypointRoutine(target, samples));
-    }*/
-    /*
-        private IEnumerator WaypointRoutine(DestinationKind target, List<(Vector3 position, Vector3? forward)> samples)
-        {
-            foreach (var (pos, fwd) in samples)
-            {
-                _pathChecked = false;
-                _isValid = false;
-
-                this.RequestValidPath(LineOfSightUtility.GetClosestPointOnNavMesh(Owner.Transform.position),
-                    LineOfSightUtility.GetClosestPointOnNavMesh(pos), _path, PathCheckCallback);
-
-                yield return _waitUntilPathCheckComplete;
-
-                if (!_isValid) continue;
-
-                Owner.OnPathRequestComplete(target, _isValid, pos, fwd);
-                yield break;
-            }
-            Owner.OnPathRequestComplete(target, false, Vector3.zero, null);
-        }*/
-    public Transform FollowTarget { get; private set; } = null;
-    public Vector3 LastKnownTargetPos { get; private set; }
-
-
-    public Collider GetAttackTarget(AttackTarget target)
-    {
-        /* if (target == AttackTarget.Primary) return _primaryTarget?.GetTargetableCollider();
-         else return _secondaryTarget?.GetTargetableCollider();*/
-        return null;
-    }
-
-
-
-
-    /* public Vector3? GetFollowTarget(MovementIntent intent)
-{
-    Vector3? target;
-    switch (intent)
-    {
-        case MovementIntent.FollowPrimary:
-            target = _primaryTarget?.GetTargetablePositionAndForward();
-            break;
-        case MovementIntent.FollowSecondary:
-            target = _secondaryTarget?.GetTargetablePositionAndForward();
-            break;
-        default:
-            target = null;
-            break;
-    }
-    return target;
-}*/
-
-
-    /*  public void GetPrimaryTarget()
-      {
-          if(!GameManager.Instance.TryGetPlayer(out _primaryTarget))
-          {
-  #if UNITY_EDITOR
-              Debug.LogError("Player ITargetable not found");
-  #endif
-          }
-          else
-          {
-  #if UNITY_EDITOR
-              Debug.LogError("Player ITargetable found");
-  #endif
-          }
-      }*/
-
-
-
-
-    #endregion
+   
 }

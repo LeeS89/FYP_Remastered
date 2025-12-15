@@ -14,7 +14,7 @@ public partial class FSMBaseNew : IFSMControlNew
     // End Injected Dependancies
 
     // Used by owning Monobehaviour via interface
-    public StateId CurrentStateId => _current?.Id ?? StateId.None;
+    public StateId CurrentStateId => _current?.GetId() ?? StateId.None;
     public IFSMControlNew.OnNotifyOwner Notification { get; set; }
     // End used by owning Monobehaviour
     
