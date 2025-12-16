@@ -30,10 +30,33 @@ public sealed class FSMPatrolState : FSMBaseState
 
     public override void TryGetNewDestination()
     {
+        if(_candidateDestinations.Count == 0)
+        {
+            if(_waypointService == null || !_waypointService.TryGetWaypoints(this, _candidateDestinations))
+            {
+                DestinationResult failedResult = new DestinationResult
+                (
+                    ReasonForDestinationCheck.ValidatePathForDestination,
+                    _ownerData.Path,
+                    false,
+                    Vector3.zero,
+                    _id
+                );
+                    
+                base.OnPathResultReceived(in failedResult);
+                return;
+            }
+        }
+
         ContinueRoutine = true;
-        var request = ValidateDestination.GetPatrolPoint(_ownerData, _ownerData.Path);
-        _pathFinder?.TryGetDestination(request);
+        _pathFinder?.ProcessDestinationCandidates(_id, ReasonForDestinationCheck.ValidatePathForDestination,
+            _candidateDestinations, _ownerData.Path, _ownerData.Position(), _validationCallback);
+
+        /*var request = ValidateDestination.GetPatrolPoint(_ownerData, _ownerData.Path);
+        _pathFinder?.TryGetDestination(request);*/
     }
+
+  
 
     private IEnumerator PatrolWaitRoutine(Transform t, float minWait, float maxWait, Vector3? forward)
     {

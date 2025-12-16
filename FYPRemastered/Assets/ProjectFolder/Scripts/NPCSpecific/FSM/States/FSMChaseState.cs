@@ -21,7 +21,7 @@ public class FSMChaseState : FSMBaseState
     public override void TryGetNewDestination()
     {
         if (_ownerData == null || _ownerData.Path == null || _ownerData.PrimaryTarget == null) return;
-        var request = ValidateDestination.GetTargetPosition(_ownerData.Path, PathCheckReason.ValidatePathForDestination, _ownerData, _ownerData.PrimaryTarget);
+        var request = ValidateDestination.GetTargetPosition(_ownerData.Path, ReasonForDestinationCheck.ValidatePathForDestination, _ownerData, _ownerData.PrimaryTarget);
         _pathFinder?.TryGetDestination(request);
     }
 
@@ -51,4 +51,6 @@ public class FSMChaseState : FSMBaseState
             _timeSinceLastRepath = _repathInterval;
         }
     }
+
+    
 }

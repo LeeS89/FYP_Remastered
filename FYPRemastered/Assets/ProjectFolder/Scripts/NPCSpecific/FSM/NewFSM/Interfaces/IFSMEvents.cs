@@ -73,8 +73,9 @@ public interface IFSMStateContext : IAnimationCueSource
 {
     Action<Vector3> OnMapDestinationToZone { get; set; }
     Vector3? CurrentDestinationForward { get; }
-
     bool IsStationary();
+
+    void OnDestinationResultReceived(in DestinationResult result);
 }
 
 

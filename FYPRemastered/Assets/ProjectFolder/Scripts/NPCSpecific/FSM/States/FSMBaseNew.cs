@@ -9,7 +9,7 @@ public partial class FSMBaseNew : IFSMControlNew
     // Injected Dependancies
     private IReadOnlyDictionary<StateId, IFSMState> _states;
     private IAgentData _ownerData;
-    private IPathResolver _pathFinder;
+   // private IPathResolver _pathFinder;
     private IFieldOfViewRunner _fovHandler;
     // End Injected Dependancies
 
@@ -48,10 +48,10 @@ public partial class FSMBaseNew : IFSMControlNew
     public FSMBaseNew(IAgentData data, IPathResolver resolver, IFieldOfViewRunner runner, IReadOnlyDictionary<StateId, IFSMState> states)
     {
         _ownerData = data;
-        _pathFinder = resolver;
+       // _pathFinder = resolver;
         _fovHandler = runner;
         _states = states;
-        _pathFinder.Callback = OnPathRequestComplete;
+      //  _pathFinder.Callback = OnDestinationResultReceived;
         _fovHandler.OnFOVSweepComplete = FieldOfViewSweepResult;
         OnTick += _fovHandler.Tick;
         OnTick += TimerTicks;
@@ -173,14 +173,14 @@ public partial class FSMBaseNew : IFSMControlNew
     #region Destination result & Setting region
     private bool StateHasChanged(StateId id) => id != CurrentStateId;
 
-    public void OnPathRequestComplete(in PathResult result)
+    public void OnDestinationResultReceived(in DestinationResult result)
     {
 
-        if (StateHasChanged(result.Id) || result.Reason == PathCheckReason.Cancelled) return;
+        if (StateHasChanged(result.Id) || result.Reason == ReasonForDestinationCheck.Cancelled) return;
         bool pathFound = result.PathFound;
         StateId id = result.Id;
 
-        if (result.Reason == PathCheckReason.ProbePath && pathFound)
+        if (result.Reason == ReasonForDestinationCheck.ProbePath && pathFound)
         { Notification?.Invoke(NPCNotification.PathToPrimaryAvailable(/*result.Id*/)); return; }
 
         if (!result.PathFound) { Notification?.Invoke(NPCNotification.NoAvailablePath(/*CurrentStateId*/)); Debug.LogError("NO Path Found!!"); return; }

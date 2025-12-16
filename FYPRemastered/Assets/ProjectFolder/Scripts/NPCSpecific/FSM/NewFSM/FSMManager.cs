@@ -126,14 +126,14 @@ public class FSMManager : FSMBase
 
 
     #region Path Received & Validation
-    public override void OnPathRequestComplete(in PathResult result)
+    public override void OnPathRequestComplete(in DestinationResult result)
     {
 
-        if (StateHasChanged(result.Id) || result.Reason == PathCheckReason.Cancelled) return;
+        if (StateHasChanged(result.Id) || result.Reason == ReasonForDestinationCheck.Cancelled) return;
         bool pathFound = result.PathFound;
         StateId id = result.Id;
 
-        if (result.Reason == PathCheckReason.ProbePath && pathFound)
+        if (result.Reason == ReasonForDestinationCheck.ProbePath && pathFound)
         { Notification?.Invoke(NPCNotification.PathToPrimaryAvailable(/*result.Id*/)); return; }
     
         if (!result.PathFound) { Notification?.Invoke(NPCNotification.NoAvailablePath(/*_currentStateId*/)); Debug.LogError("NO Path Found!!"); return; }
@@ -297,7 +297,7 @@ public class FSMManager : FSMBase
                 request = ValidateDestination.GetPatrolPoint(_ownerData, _ownerData.Path/*, OnWaypointZoneReceived*/);
                 break;
             case StateId.Chase:
-                request = ValidateDestination.GetTargetPosition(_ownerData.Path, PathCheckReason.ValidatePathForDestination, _ownerData, _ownerData.PrimaryTarget);
+                request = ValidateDestination.GetTargetPosition(_ownerData.Path, ReasonForDestinationCheck.ValidatePathForDestination, _ownerData, _ownerData.PrimaryTarget);
                 break;
             default:
                 return;

@@ -88768,6 +88768,7 @@ MonoBehaviour:
   _rigidbody: {fileID: 1425476011}
   _kinematicWhileSelected: 1
   _throwWhenUnselected: 1
+  _forceKinematicDisabled: 0
 --- !u!54 &1425476011
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -152887,6 +152888,7 @@ MonoBehaviour:
   _rigidbody: {fileID: 5294623008744083407}
   _kinematicWhileSelected: 1
   _throwWhenUnselected: 1
+  _forceKinematicDisabled: 0
 --- !u!114 &5294623008744083409
 MonoBehaviour:
   m_ObjectHideFlags: 0

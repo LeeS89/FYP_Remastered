@@ -144,7 +144,7 @@ public class TestFov : MonoBehaviour, IFieldOfViewOwner
         throw new NotImplementedException();
     }
 
-    public void OnPathRequestComplete(in PathResult result)
+    public void OnPathRequestComplete(in DestinationResult result)
     {
         throw new NotImplementedException();
     }

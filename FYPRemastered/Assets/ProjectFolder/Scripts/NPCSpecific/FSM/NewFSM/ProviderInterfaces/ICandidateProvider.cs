@@ -18,11 +18,14 @@ public interface IPathResolver// : IZoneSink
     /*bool TryGetWaypointZone(out uint zone);
 
     bool TrySwitchWaypoints();*/
-    DestinationRequestCallback Callback { get; set; }
+    [Obsolete]
+    DestinationValidationCallback Callback { get; set; }
 
     void CancelAll();
 
-    void ProcessDestinationCandidates(StateId id, PathCheckReason reason, List<Vector3> candidates, NavMeshPath path, Vector3 fromPos);
+   /* [Obsolete]
+    void ProcessDestinationCandidates(StateId id, PathCheckReason reason, List<Vector3> candidates, NavMeshPath path, Vector3 fromPos);*/
+    void ProcessDestinationCandidates(StateId id, ReasonForDestinationCheck reason, List<Vector3> candidates, NavMeshPath path, Vector3 fromPos, DestinationValidationCallback callBack);
 
     [Obsolete]
     void TryGetDestination(in ValidateDestination req);
@@ -225,14 +228,14 @@ public readonly struct ValidateDestination
     public readonly ITargetable Caller;
     public readonly ITargetable Target;
     public readonly NavMeshPath Path;
-    public readonly PathCheckReason Reason;
+    public readonly ReasonForDestinationCheck Reason;
     public readonly Action<bool, int> WaypointZoneCallback;
     public readonly uint MaxFlankSteps;
     public readonly uint MinFlankSteps;
 
     private ValidateDestination(
         StateId stateId,
-        PathCheckReason reason,
+        ReasonForDestinationCheck reason,
         ITargetable caller,
         ITargetable target,
         NavMeshPath path,
@@ -252,12 +255,12 @@ public readonly struct ValidateDestination
     }
 
     public static ValidateDestination GetPatrolPoint(ITargetable caller, NavMeshPath path, Action<bool, int> waypointZoneCB = null)
-        => new ValidateDestination(StateId.Patrol, PathCheckReason.ValidatePathForDestination, caller, null, path, 0, 0, waypointZoneCB);
+        => new ValidateDestination(StateId.Patrol, ReasonForDestinationCheck.ValidatePathForDestination, caller, null, path, 0, 0, waypointZoneCB);
 
     public static ValidateDestination GetFlankPoint(NavMeshPath path, ITargetable caller, ITargetable flankTarget, uint maxFlankSteps = 15, uint minFlankSteps = 4)
-        => new ValidateDestination(StateId.Flank, PathCheckReason.ValidatePathForDestination, caller, flankTarget, path, maxFlankSteps, minFlankSteps);
+        => new ValidateDestination(StateId.Flank, ReasonForDestinationCheck.ValidatePathForDestination, caller, flankTarget, path, maxFlankSteps, minFlankSteps);
 
-    public static ValidateDestination GetTargetPosition(NavMeshPath path, PathCheckReason reason, ITargetable caller, ITargetable target)
+    public static ValidateDestination GetTargetPosition(NavMeshPath path, ReasonForDestinationCheck reason, ITargetable caller, ITargetable target)
         => new ValidateDestination(StateId.Chase, reason, caller, target, path, 0, 0);
 }
 

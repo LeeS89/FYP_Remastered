@@ -47,7 +47,7 @@ public abstract class FSMBase : IFSMControl
 
     // Pathfinding methods
     protected abstract void SetDestination(NavMeshPath path, Vector3 destination, StateId current);
-    public abstract void OnPathRequestComplete(in PathResult result);
+    public abstract void OnPathRequestComplete(in DestinationResult result);
 
 
     // Patrol state specific methods
