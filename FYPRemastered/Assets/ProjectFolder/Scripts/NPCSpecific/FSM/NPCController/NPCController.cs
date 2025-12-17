@@ -78,6 +78,13 @@ public partial class NPCController : ComponentEvents, IAgentData, INPCBrainConte
 
     public bool IsDead { get; private set; } = false;
 
+    [Range(5,12)]
+    [SerializeField] private int _maxFlankSteps = 5;
+    [Min(4)]
+    [SerializeField] private int _minFlankSteps = 2;
+    public int MaxFlankSteps => _maxFlankSteps;
+
+    public int MinFlankSteps => _minFlankSteps;
 
     [Header(@"How many consecutive FOV results required to ""See ""or ""Lose ""the target")]
     [SerializeField] private uint _requiredSeenStreak = 3;

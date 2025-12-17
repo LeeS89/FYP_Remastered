@@ -414,7 +414,7 @@ public class PlayerFlankingResourcesNew : SceneResources, IFlankService, IUpdate
         request.FlankCallback?.Invoke(buffer.Count > 0);
     }
 
-    public bool TryGetFlankCandidates(Vector3 flankTargetPos, int numSteps, List<Vector3> buffer)
+    public bool TryGetFlankCandidates(Vector3 flankTargetPos, int numSteps, List<Vector3> buffer, Action OnRequestComplete)
     {
         throw new NotImplementedException();
     }

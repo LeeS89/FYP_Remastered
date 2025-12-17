@@ -15,7 +15,7 @@ public sealed class FSMPatrolState : FSMBaseState
         
     
 
-    public override void EnterState() => TryGetNewDestination();
+    public override void EnterState() => ValidateCandidateDestinations();
 
 
     public override void OnDestinationReached()
@@ -28,7 +28,7 @@ public sealed class FSMPatrolState : FSMBaseState
                 _stateContext.CurrentDestinationForward));
     }
 
-    public override void TryGetNewDestination()
+    public override void ValidateCandidateDestinations()
     {
         if(_candidateDestinations.Count == 0)
         {
@@ -48,6 +48,13 @@ public sealed class FSMPatrolState : FSMBaseState
             }
         }
 
+        if(_candidateDestinations.Count > 1)
+        {
+            var temp = _candidateDestinations[0];
+            _candidateDestinations.RemoveAt(0);
+            ShuffleCandidateList(_candidateDestinations);
+            _candidateDestinations.Add(temp);
+        }
         ContinueRoutine = true;
         _pathFinder?.ProcessDestinationCandidates(_id, ReasonForDestinationCheck.ValidatePathForDestination,
             _candidateDestinations, _ownerData.Path, _ownerData.Position(), _validationCallback);
@@ -84,7 +91,7 @@ public sealed class FSMPatrolState : FSMBaseState
             yield return null;
         }
         if (!ContinueRoutine) yield break;
-        TryGetNewDestination();
+        ValidateCandidateDestinations();
 
     }
 }

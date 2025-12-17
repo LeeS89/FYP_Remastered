@@ -87,6 +87,8 @@ public interface IAgentData : ITargetable
     NavMeshPath Path { get; }
     float MaxPatrolPointWaitTime { get; }
     float MinPatrolPointWaitTime { get; }
+    int MaxFlankSteps { get; }
+    int MinFlankSteps { get; }
     float WalkSpeed { get; }
     float SprintSpeed { get; }
     float SprintEnterDist { get; }

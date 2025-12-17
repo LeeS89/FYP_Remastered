@@ -10,7 +10,8 @@ public interface IFSMState : ITickable
 
     void OnDestinationSet();
 
-    void TryGetNewDestination();
+    void ValidateCandidateDestinations();
+
 
     StateId GetId();
 }

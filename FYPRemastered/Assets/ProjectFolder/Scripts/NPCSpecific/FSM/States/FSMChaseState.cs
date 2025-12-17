@@ -14,11 +14,11 @@ public class FSMChaseState : FSMBaseState
     {
         base.EnterState();
         _timeSinceLastRepath = _repathInterval;
-        TryGetNewDestination();
+        ValidateCandidateDestinations();
     }
 
 
-    public override void TryGetNewDestination()
+    public override void ValidateCandidateDestinations()
     {
         if (_ownerData == null || _ownerData.Path == null || _ownerData.PrimaryTarget == null) return;
         var request = ValidateDestination.GetTargetPosition(_ownerData.Path, ReasonForDestinationCheck.ValidatePathForDestination, _ownerData, _ownerData.PrimaryTarget);
@@ -45,7 +45,7 @@ public class FSMChaseState : FSMBaseState
             if(!_ownerData.PrimaryTarget.IsStationary) // Target is moving, need to repath
             {
                 _hasDestination = false;
-                TryGetNewDestination();
+                ValidateCandidateDestinations();
             }
 
             _timeSinceLastRepath = _repathInterval;

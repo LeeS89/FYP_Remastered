@@ -1,4 +1,3 @@
-using NUnit.Framework;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -30,7 +29,8 @@ public abstract class FSMBaseState : IFSMState
     protected bool IsStationary() => _stateContext?.IsStationary() ?? true;
 
     public virtual void EnterState() { _hasDestination = false; }
-    public abstract void TryGetNewDestination();
+    public abstract void ValidateCandidateDestinations();
+    public virtual void RetrieveCandidateDestinations() { }
     protected virtual void OnPathResultReceived(in DestinationResult result)
         => _stateContext?.OnDestinationResultReceived(in result);
 
@@ -51,5 +51,16 @@ public abstract class FSMBaseState : IFSMState
     public virtual void Tick(float dt) { }
     
     public virtual void LateTick(float dt) { }
+
+    protected virtual void ShuffleCandidateList<T>(List<T> candidates)
+    {
+        for (int i = 0; i < candidates.Count; i++)
+        {
+            int randIndex = Random.Range(i, candidates.Count);
+            (candidates[i], candidates[randIndex]) = (candidates[randIndex], candidates[i]);
+        }
+    }
+
     
+   
 }

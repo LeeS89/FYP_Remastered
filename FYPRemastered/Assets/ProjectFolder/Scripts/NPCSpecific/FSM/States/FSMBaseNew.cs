@@ -112,7 +112,7 @@ public partial class FSMBaseNew : IFSMControlNew
         {
             _hasValidDestination = false;
             TryResetAgent();
-            _current?.TryGetNewDestination();
+            _current?.ValidateCandidateDestinations();
             return;
         }
 
@@ -121,7 +121,7 @@ public partial class FSMBaseNew : IFSMControlNew
         {
             _hasValidDestination = false;
             TryResetAgent();
-            _current?.TryGetNewDestination();
+            _current?.ValidateCandidateDestinations();
             return;
         }
 
@@ -221,7 +221,7 @@ public partial class FSMBaseNew : IFSMControlNew
 #endif
             _hasValidDestination = false;
             TryResetAgent();
-            _current?.TryGetNewDestination();
+            _current?.ValidateCandidateDestinations();
         }
     }
 
