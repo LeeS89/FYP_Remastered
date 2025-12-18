@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Unity.Burst;
 using Unity.Collections;
@@ -118,73 +121,117 @@ public class ClosestPointToPlayerJob : SceneResources
        
     }
 }
-public class ClosestPointToPlayerJobNew : SceneResources
+
+
+
+
+
+
+
+
+
+
+
+
+public class ClosestPointToPlayerJobNew : SceneResources, IClosestFlankPointService, ITickable
 {
 
-    //public UniformZoneGridManager zoneGridManager;
-
-    
-    private NativeList<Vector3> _samplePositions;
-    private NativeArray<float> _threadDistances;
-    private NativeArray<int> _threadIndices;
     private SamplePointDataSO _samplePointData;
+    private NativeList<Vector3> _samplePositions;
+    private NativeArray<int> _closestIndices;
+    private NativeArray<Vector3> _targetPositions;
+
+    private readonly List<PendingRequest> _pendingRequests = new(20);
+    private readonly List<PendingRequest> _activeRequests = new(20);
+    private bool _jobScheduled;
+    private JobHandle _jobHandle;
+
 
     public ClosestPointToPlayerJobNew(SamplePointDataSO samplePointData)
     {
         _samplePointData = samplePointData;
-        AddSamplePointData(_samplePointData);
-        SceneEventAggregator.Instance.OnRunClosestPointToPlayerJob += RunClosestPointJob;
+        int count = samplePointData.savedPoints.Count;
+        _samplePositions = new NativeList<Vector3>(count, Allocator.Persistent);
+
+        foreach (var pos in _samplePointData.savedPoints)
+            _samplePositions.Add(pos.position);
     }
 
 
-    public void AddSamplePointData(SamplePointDataSO sampleData)
+    public void RequestClosestIndex(int id, Vector3 targetPosition, Action<int, int, bool> OnRequestComplete)
     {
-       
-        _samplePositions = new NativeList<Vector3>(5000, Allocator.Persistent);
-        
-        foreach (var pos in sampleData.savedPoints)
+        if(!_samplePositions.IsCreated || _samplePositions.Length == 0)
         {
-            _samplePositions.Add(pos.position);
+            OnRequestComplete?.Invoke(id, -1, false);
+            return;
         }
 
-        int length = _samplePositions.Length;
-       
-        _threadDistances = new NativeArray<float>(length, Allocator.Persistent);
-        _threadIndices = new NativeArray<int>(length, Allocator.Persistent);
-        
+        _pendingRequests.Add(new PendingRequest
+        {
+            RequestId = id,
+            TargetPosition = targetPosition,
+            OnRequestComplete = OnRequestComplete
+        });
     }
 
-    public void RunClosestPointJob()
+    public void Tick(float dt)
     {
-        using (var sampleArray = _samplePositions.ToArray(Allocator.TempJob))
+        if(!_jobScheduled && _pendingRequests.Count > 0)
+            ScheduleJob();
+
+        if(_jobScheduled && _jobHandle.IsCompleted)
         {
-            var job = new ClosestPointJob
-            {
-                samplePositions = sampleArray,
-                playerPosition = GameManager.Instance.GetPlayerPosition(PlayerPart.Position).position,
-                threadDistances = _threadDistances,
-                threadIndices = _threadIndices
-            };
+            _jobHandle.Complete();
+            DispatchResults();
+            _jobScheduled = false;
+        }
+    }
 
-            var jobHandle = job.Schedule(sampleArray.Length, 64);
-            jobHandle.Complete();
+    private void ScheduleJob()
+    {
+        _activeRequests.Clear();
+        _activeRequests.AddRange(_pendingRequests);
+        _pendingRequests.Clear();
 
-            float min = float.MaxValue;
-            int minIndex = -1;
+        int count = _activeRequests.Count;
+        if (count == 0) return;
 
-            for (int i = 0; i < _threadDistances.Length; i++)
-            {
-                if (_threadDistances[i] < min)
-                {
-                    min = _threadDistances[i];
-                    minIndex = i;
-                }
-            }
 
-           // BaseSceneManager._instance.ClosestPointToPlayerJobComplete(minIndex);
-            SceneEventAggregator.Instance.ClosestFlankPointToPlayerJobComplete(minIndex);
-            //return minIndex;
-            //zoneGridManager.SetNearestIndexToPlayer(minIndex);
+        EnsureCapacity(ref _targetPositions, count);
+        EnsureCapacity(ref _closestIndices, count);
+
+        for(int i = 0; i < count; i++)
+            _targetPositions[i] = _pendingRequests[i].TargetPosition;
+
+        var job = new ClosestIndexJob
+        {
+            SamplePositions = _samplePositions.AsArray(),
+            TargetPositions = _targetPositions,
+            ClosestIndices = _closestIndices
+        };
+
+        _jobHandle = job.Schedule(count, 64);
+        _jobScheduled = true;
+    }
+
+    private void DispatchResults()
+    {
+        int count = _activeRequests.Count;
+        for(int i = 0; i < count; i++)
+        {
+            var request = _pendingRequests[i];
+            int closestIndex = _closestIndices[i];
+            request.OnRequestComplete?.Invoke(request.RequestId, closestIndex, closestIndex >= 0);
+        }
+        _activeRequests.Clear();
+    }   
+
+    private static void EnsureCapacity<T>(ref NativeArray<T> array, int needed) where T : struct
+    {
+        if(!array.IsCreated || array.Length < needed)
+        {
+            if(array.IsCreated) array.Dispose();
+            array = new NativeArray<T>(needed, Allocator.Persistent);
         }
     }
 
@@ -192,31 +239,54 @@ public class ClosestPointToPlayerJobNew : SceneResources
     {
         if (_samplePositions.IsCreated)
             _samplePositions.Dispose();
-        if (_threadDistances.IsCreated)
-            _threadDistances.Dispose();
-        if (_threadIndices.IsCreated)
-            _threadIndices.Dispose();
+        if (_closestIndices.IsCreated)
+            _closestIndices.Dispose();
+        if (_targetPositions.IsCreated)
+            _targetPositions.Dispose();
     }
 
 
-
-    [BurstCompile]
-    public struct ClosestPointJob : IJobParallelFor
+    private struct PendingRequest
     {
-        public NativeArray<Vector3> samplePositions;
-        [ReadOnly] public Vector3 playerPosition;
-        
-        public NativeArray<float> threadDistances;
-        public NativeArray<int> threadIndices;
+        public int RequestId;
+        public Vector3 TargetPosition;
+        public Action<int, int, bool> OnRequestComplete;
+    }
+
+    
+    [BurstCompile]
+    public struct ClosestIndexJob : IJobParallelFor
+    {
+        [ReadOnly] public NativeArray<Vector3> SamplePositions;
+        [ReadOnly] public NativeArray<Vector3> TargetPositions;
+
+        public NativeArray<int> ClosestIndices;
 
         public void Execute(int index)
         {
-            float distance = Vector3.Distance(samplePositions[index], playerPosition);
-            threadDistances[index] = distance;
-            threadIndices[index] = index;
-            
-        }
+            Vector3 target = TargetPositions[index];
 
-       
+            float bestDistance = float.MaxValue;
+            int bestIndex = -1;
+
+            for (int i = 0; i < SamplePositions.Length; i++)
+            {
+                Vector3 sample = SamplePositions[i];
+                Vector3 delta = sample - target;
+                float distanceSq = delta.sqrMagnitude;
+                if (distanceSq < bestDistance)
+                {
+                    bestDistance = distanceSq;
+                    bestIndex = i;
+                }
+            }
+            ClosestIndices[index] = bestIndex;
+        }
     }
+
+
+    public void LateTick(float dt) { }
+
+
+
 }

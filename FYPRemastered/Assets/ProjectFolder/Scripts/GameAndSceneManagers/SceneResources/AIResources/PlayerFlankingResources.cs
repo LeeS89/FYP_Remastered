@@ -227,14 +227,49 @@ public class PlayerFlankingResources : SceneResources, IUpdateableResource
         
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 public class PlayerFlankingResourcesNew : SceneResources, IFlankService, IUpdateableResource
 {
     private AsyncOperationHandle<SamplePointDataSO> _flankPointHandle;
     private SamplePointDataSO _flankPointDataSO;
     private List<FlankPointData> _savedPoints;
-    private int _nearestPointToPlayer = 0;
+   // private int _nearestPointToPlayer = 0;
     Collider playerCollider;
     /*Vector3 top;*/
+    private IClosestFlankPointService _closestFlankPointService;
+
+    public PlayerFlankingResourcesNew(IClosestFlankPointService closestFlankPointService, string sceneName)
+    {
+        _closestFlankPointService = closestFlankPointService;
+    }
 
     public override async Task LoadResources()
     {
@@ -258,8 +293,8 @@ public class PlayerFlankingResourcesNew : SceneResources, IFlankService, IUpdate
 
                 if (_flankPointDataSO != null)
                 {
-                    SceneEventAggregator.Instance.OnClosestFlankPointToPlayerJobComplete += SetNearestIndexToPlayer; // => Dont forget to unsubscribe
-                    SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;
+                   // SceneEventAggregator.Instance.OnClosestFlankPointToPlayerJobComplete += SetNearestIndexToPlayer; // => Dont forget to unsubscribe
+                   // SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;
                   //  SceneEventAggregator.Instance.OnAIResourceRequested += AIResourceRequested; // => Dont forget to unsubscribe
                     _savedPoints = new List<FlankPointData>(_flankPointDataSO.savedPoints);
                     //SceneEventAggregator.Instance.OnFlankPointsRequested += ResourceRequested; // => Dont forget to unsubscribe
@@ -326,6 +361,7 @@ public class PlayerFlankingResourcesNew : SceneResources, IFlankService, IUpdate
 
     }
 
+    [Obsolete]
     protected override void NotifyClassDependancies()
     {
         bool exists = SceneEventAggregator.Instance.CheckDependancyExists(typeof(ClosestPointToPlayerJob));
@@ -336,12 +372,7 @@ public class PlayerFlankingResourcesNew : SceneResources, IFlankService, IUpdate
 
     }
 
-    private void SetNearestIndexToPlayer(int nearestPointIndex)
-    {
-
-        _nearestPointToPlayer = nearestPointIndex;
-    }
-
+    [Obsolete]
     protected override void ResourceRequested(in ResourceRequests request)
     {
         AIResourceType type = request.AIResourceType;
@@ -349,7 +380,7 @@ public class PlayerFlankingResourcesNew : SceneResources, IFlankService, IUpdate
         switch (type)
         {
             case AIResourceType.FlankPointCandidates:
-                ProcessFlankPointCandidatesRequest(in request);
+              //  ProcessFlankPointCandidatesRequest(in request);
                 break;
             case AIResourceType.FlankPointEvaluationMasks:
                 ProcessFlankPointEvaluationMaskRequest(in request);
@@ -362,8 +393,8 @@ public class PlayerFlankingResourcesNew : SceneResources, IFlankService, IUpdate
         }
     }
 
-   
 
+    [Obsolete]
     private void ProcessFlankPointEvaluationMaskRequest(in ResourceRequests request)
     {
         LayerMask blockingMask = _flankPointDataSO.flankBlockingMask;
@@ -372,55 +403,98 @@ public class PlayerFlankingResourcesNew : SceneResources, IFlankService, IUpdate
         request.FlankPointTargetAndBlockingMasksCallback?.Invoke(blockingMask, targetMask, secondaryTargetMask);
     }
 
-    private void ProcessFlankPointCandidatesRequest(in ResourceRequests request)
+   
+
+    public void TryGetFlankCandidates(Vector3 flankTargetPos, int numSteps, List<Vector3> buffer, Action<bool> OnRequestComplete)
     {
-        int step = request.FlankCandidateSteps;
-        var buffer = request.FlankCandidates;
-        if (_savedPoints == null || _savedPoints.Count == 0 ||
-            _nearestPointToPlayer < 0 || _nearestPointToPlayer >= _savedPoints.Count)
+        if(_closestFlankPointService == null) OnRequestComplete?.Invoke(false);
+
+        int id = _nextId++;
+
+        _pendingRequests[id] = new FlankRequest
         {
-            request.FlankCallback?.Invoke(false);
+            FlankSteps = numSteps,
+            Buffer = buffer,
+            OnRequestComplete = OnRequestComplete
+        };
+
+        _closestFlankPointService?.RequestClosestIndex(id, flankTargetPos, OnClosestIndexReceived);
+    }
+
+    private void OnClosestIndexReceived(int requestId, int closestIndex, bool success)
+    {
+        if(_pendingRequests.TryGetValue(requestId, out var req))
+        {
+            _pendingRequests.Remove(requestId);
+
+            req.Buffer.Clear();
+
+            if(!success || closestIndex < 0)
+            {
+                req.OnRequestComplete?.Invoke(false);
+                return;
+            }
+
+            ProcessFlankPointCandidatesRequestNew(closestIndex, in req);
+
+        }
+
+    }
+
+    private void ProcessFlankPointCandidatesRequestNew(int index, in FlankRequest request)
+    {
+        int step = request.FlankSteps;
+        var buffer = request.Buffer;
+        if (_savedPoints == null || _savedPoints.Count == 0 ||
+            index < 0 || index >= _savedPoints.Count)
+        {
+            request.OnRequestComplete?.Invoke(false);
             return;
         }
 
-        FlankPointData playerPoint = _savedPoints[_nearestPointToPlayer];
+        FlankPointData targetPoint = _savedPoints[index];
 
         StepEntry stepEntry = null;
-        for (int i = 0; i < playerPoint.stepLinks.Count; i++)
+        for (int i = 0; i < targetPoint.stepLinks.Count; i++)
         {
-            if (playerPoint.stepLinks[i].step == step)
+            if (targetPoint.stepLinks[i].step == step)
             {
-                stepEntry = playerPoint.stepLinks[i];
+                stepEntry = targetPoint.stepLinks[i];
                 break;
             }
         }
 
         if (stepEntry != null)
         {
-            foreach (int index in stepEntry.reachableIndices)
+            foreach (int i in stepEntry.reachableIndices)
             {
-                if (index >= 0 && index < _savedPoints.Count)
+                if (i >= 0 && i < _savedPoints.Count)
                 {
-                    var point = _savedPoints[index];
+                    var point = _savedPoints[i];
                     if (!point.inUse)
                     {
-                        buffer.Add(point);
+                        buffer.Add(point.position);
                     }
 
                 }
             }
         }
 
-        request.FlankCallback?.Invoke(buffer.Count > 0);
+        request.OnRequestComplete?.Invoke(true);
     }
 
-    public bool TryGetFlankCandidates(Vector3 flankTargetPos, int numSteps, List<Vector3> buffer, Action OnRequestComplete)
+    private struct FlankRequest
     {
-        throw new NotImplementedException();
+        public int FlankSteps;
+        public List<Vector3> Buffer;
+        public Action<bool> OnRequestComplete;
     }
 
+    private int _nextId = 1;
+    private readonly Dictionary<int, FlankRequest> _pendingRequests = new(25);
 
 
+    [Obsolete]
     public void UpdateResource()
     {
         return;

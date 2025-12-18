@@ -7,7 +7,7 @@ using Random = UnityEngine.Random;
 public class FSMFlankState : FSMBaseState
 {
     private IFlankService _flankService;
-    private Action _onFlankCandidatesReceived;
+    private Action<bool> _onFlankCandidatesReceived;
     private List<int> _flankStepsToTry = new();
 
     public FSMFlankState(IAgentData data, IPathResolver resolver, IFSMStateContext stateContext) 
@@ -55,9 +55,9 @@ public class FSMFlankState : FSMBaseState
         throw new System.NotImplementedException();
     }
 
-    private void OnCandidatesReceived()
+    private void OnCandidatesReceived(bool success)
     {
-
+        // if ! success or no candidates, Send PathResult with found = false
     }
 
     private void SortStepsToTry()

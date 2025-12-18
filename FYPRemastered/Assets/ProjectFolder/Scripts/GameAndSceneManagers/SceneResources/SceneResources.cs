@@ -30,13 +30,14 @@ public abstract class SceneResources
     }
 
 
-
+    [Obsolete]
     protected virtual void ResourceRequested(in ResourceRequests request) { }
 
    
 
     protected virtual void ResourceReleased(ResourceRequest request) { }
 
+    [Obsolete]
     protected virtual void NotifyClassDependancies() { }
 
     protected virtual void InitializePools() { }

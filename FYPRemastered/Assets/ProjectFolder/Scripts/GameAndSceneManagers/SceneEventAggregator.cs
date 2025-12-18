@@ -305,7 +305,12 @@ public interface IWaypointService //: IDestinationService
 
 public interface IFlankService //: IDestinationService
 {
-    bool TryGetFlankCandidates(Vector3 flankTargetPos, int numSteps, List<Vector3> buffer, Action OnRequestComplete);
+    void TryGetFlankCandidates(Vector3 flankTargetPos, int numSteps, List<Vector3> buffer, Action<bool> OnRequestComplete);
+}
+
+public interface IClosestFlankPointService
+{
+    void RequestClosestIndex(int id, Vector3 targetPosition, Action<int, int, bool> OnRequestComplete);
 }
 
 public interface IScenePoolServices
