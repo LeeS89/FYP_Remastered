@@ -229,6 +229,8 @@ public class SceneServiceBus : ISceneServiceProvider
 
     public event Action<FSMControllerBase, int> OnAgentZoneUnRegistered;
     public event Action<int, FSMControllerBase> OnAlertZoneAgents;
+    public event Action OnSceneBegin;
+    public event Action OnSceneEnd;
 
     public void RegisterAgentAndZone(FSMControllerBase agent, int zone)
     {
@@ -259,7 +261,7 @@ public class SceneServiceBus : ISceneServiceProvider
 
     public IWaypointService WaypointService => throw new NotImplementedException();
 
-    public IAgentZoneAlertService AgentZoneService => throw new NotImplementedException();
+    public INpcService NpcService => throw new NotImplementedException();
 
     public IFlankService FlankService => throw new NotImplementedException();
 
@@ -267,8 +269,15 @@ public class SceneServiceBus : ISceneServiceProvider
 
     public IPathService PathService => throw new NotImplementedException();
 
+    public IPlayerRefService PlayerRefService => throw new NotImplementedException();
+
     public bool AlertAgentsInZone(ZoneId zone, INotificationListener listener)
         => OnAlertAgentsInZone?.Invoke(zone, listener) ?? true; // if no subscribers, default to true
+
+    public void OnTargetableDied(ITargetable targetable)
+    {
+        throw new NotImplementedException();
+    }
 
     // END NEW
     #endregion
@@ -278,16 +287,43 @@ public class SceneServiceBus : ISceneServiceProvider
     #endregion
 }
 
-public interface ISceneServiceProvider : ISceneAIServices, IScenePoolServices
+public interface ISceneServiceProvider : ISceneAIServices, IScenePoolServices, ISceneService
 {
     // IPoolService PoolService { get; }
 }
 
-public interface ISceneAIServices
+public interface IGlobalServices
 {
+    ISceneService SceneService { get; }
+}
+
+public interface ISceneService
+{
+    event Action OnSceneBegin;
+    event Action OnSceneEnd;
+    void OnTargetableDied(ITargetable targetable);
+}
+
+public interface IGameManager
+{
+    void PlayerDied();
+    void PlayerRespawned();
+}
+
+
+public interface IPlayerRefService
+{
+    event Action OnPlayerDied;
+    event Action OnPlayerRespawned;
+    ITargetable GetPlayer();
+}
+
+public interface ISceneAIServices : ISceneService
+{
+    IPlayerRefService PlayerRefService { get; }
     IPathService PathService { get; }
     IWaypointService WaypointService { get; }
-    IAgentZoneAlertService AgentZoneService { get; }
+    INpcService NpcService { get; }
     IFlankService FlankService { get; }
 }
 
@@ -318,7 +354,7 @@ public interface IScenePoolServices
     IPoolService PoolService { get; }
 }
 
-public interface IAgentZoneAlertService
+public interface INpcService
 {
     void RegisterAgentAndZone(INotificationListener agent, ZoneId zone);
     void UnregisterAgentAndZone(INotificationListener agent, ZoneId zone);
@@ -330,11 +366,21 @@ public interface  IPoolService
     
 }
 
+
+public interface IServicable<TServices, TManager>
+{
+    void Load(TServices services, TManager manager);
+    void Unload();
+}
+
+
+[Obsolete]
 public interface IDestinationService
 {
     DestinationServiceId ServiceId { get; }
 }
 
+[Obsolete]
 public enum DestinationServiceId
 {
     WaypointService,

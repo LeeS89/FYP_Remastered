@@ -197,11 +197,11 @@ public abstract class EventManager : MonoBehaviour
 
 
 
-public class EventManagerBase<TServices> : MonoBehaviour
+public class EventManagerBase : MonoBehaviour
 {
     protected List<ComponentEvents> _cachedListeners;
 
-    protected TServices _services;
+ 
 
     /// <summary>
     /// Finds all Interface components within the object hierarchy and 
@@ -332,7 +332,7 @@ public class EventManagerBase<TServices> : MonoBehaviour
 
 }
 
-public class EVB : EventManagerBase<ISceneAIServices>
+public class EVB : EventManagerBase
 {
     
 }

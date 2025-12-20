@@ -131,6 +131,7 @@ public partial class NPCController : ComponentEvents, IAgentData, INPCBrainConte
         if (decision.NextIntent != StateId.None)
             _fsmManager.SwitchTo(decision.NextIntent);
 
+
     }
 
     private void UpdateCombatOrder(CombatOrder order)
@@ -149,6 +150,8 @@ public partial class NPCController : ComponentEvents, IAgentData, INPCBrainConte
         }
         //
     }
+
+   
 
     private void CancelCurrentCombatOrder()
     {
