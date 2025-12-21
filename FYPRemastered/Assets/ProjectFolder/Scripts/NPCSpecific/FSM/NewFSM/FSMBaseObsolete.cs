@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.AI;
 
 [Obsolete]
-public abstract class FSMBase : IFSMControl
+public abstract class FSMBaseObsolete : IFSMControl
 {
     public Action<StateId> TryRepath { get; protected set; }
     public bool DestinationReached { get; protected set; } = true;

@@ -28,11 +28,11 @@ public class FSMFlankState : FSMBaseState
     {
         if (_flankStepsToTry.Count == 0)
         {
-            DestinationResult noPathResult = new DestinationResult
+            DestinationResultNew noPathResult = new DestinationResultNew
             (
                 ReasonForDestinationCheck.ValidatePathForDestination,
                 null,
-                false,
+                PathResult.CandidatesNullOrEmpty,
                 Vector3.zero,
                 StateId.Flank
             );
@@ -50,7 +50,7 @@ public class FSMFlankState : FSMBaseState
         
     }
 
-    protected override void OnPathResultReceived(in DestinationResult result)
+    protected override void OnPathResultReceived(in DestinationResultNew result)
     {
         throw new System.NotImplementedException();
     }

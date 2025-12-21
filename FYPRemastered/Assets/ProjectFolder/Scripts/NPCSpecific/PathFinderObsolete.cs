@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-
-public class PathFinder : IPathResolver
+[Obsolete]
+public class PathFinderObsolete : IPathResolver
 {
    /* private ITargetable _primaryTarget;
     private ITargetable _secondaryTarget;
@@ -37,7 +37,7 @@ public class PathFinder : IPathResolver
     private ICandidateProvider _destResolver;
 
 
-    public PathFinder(ICandidateProvider destResolver/*IReadOnlyDictionary<StateId, ICandidateProvider> providers*/)
+    public PathFinderObsolete(ICandidateProvider destResolver/*IReadOnlyDictionary<StateId, ICandidateProvider> providers*/)
     {
       //  _providerMap = providers;
        // _map = providers;
@@ -263,6 +263,11 @@ public class PathFinder : IPathResolver
         throw new NotImplementedException();
     }
 
+    public void ProcessDestinationCandidates(StateId id, ReasonForDestinationCheck reason, List<Vector3> candidates, NavMeshPath path, Vector3 fromPos, DestinationValidationCallbackNew callBack)
+    {
+        throw new NotImplementedException();
+    }
+
 
 
 
@@ -307,6 +312,7 @@ public class PathFinder : IPathResolver
     #endregion
 }
 
+[Obsolete]
 public readonly struct PathRequestInfo
 {
     public readonly List<(Vector3, Vector3?)> Points;
@@ -328,7 +334,7 @@ public readonly struct PathRequestInfo
 }
 
 
-
+[Obsolete]
 public readonly struct DestinationResult
 {
 
@@ -351,6 +357,8 @@ public readonly struct DestinationResult
 
 }
 
+
+[Obsolete]
 public delegate void DestinationValidationCallback(in DestinationResult result);
 
 
@@ -378,10 +386,35 @@ public delegate void DestinationValidationCallback(in DestinationResult result);
 
 
 
+public delegate void DestinationValidationCallbackNew(in DestinationResultNew result);
 
 
 
 
+
+
+public readonly struct DestinationResultNew
+{
+
+    public readonly ReasonForDestinationCheck Reason;
+    public readonly NavMeshPath Path;
+    public readonly PathResult PathResult;
+    public readonly Vector3 Destination;
+    public readonly Vector3? Forward;
+    public readonly StateId Id;
+
+    public DestinationResultNew(ReasonForDestinationCheck reason, NavMeshPath path, PathResult result, Vector3 dest, StateId id, Vector3? fwd = null)
+    {
+        Reason = reason;
+        Path = path;
+        Id = id;
+        PathResult = result;
+        //PathFound = found;
+        Destination = dest;
+        Forward = fwd;
+    }
+
+}
 
 
 
@@ -399,18 +432,14 @@ public class PathFinderNew : IPathResolver
 
     public uint Gen { get; private set; }
     private uint _activeGen;
-    private Action<bool> PathCheckCallback;
+    private Action<PathResult> PathCheckCallback;
 
     
 
     private Coroutine _runningRoutine;
 
-    private bool _isValid = false;
+    private PathResult _lastResult;
 
-    [Obsolete]
-    private Queue<(List<(Vector3, Vector3?)>, ValidateDestination)> _pathQueue = new(10);
-    // private IReadOnlyDictionary<StateId, ICandidateProvider> _providerMap;
-    //private ICandidateProvider _destResolver;
 
 
     public PathFinderNew(IPathService pathService)
@@ -421,10 +450,7 @@ public class PathFinderNew : IPathResolver
         
     }
 
-    [Obsolete]
-    public List<(Vector3 position, Vector3? forward)> TryGet(in ValidateDestination request)
-       => null;
-
+   
     public void CancelAll()
     {
         Gen++;
@@ -433,45 +459,45 @@ public class PathFinderNew : IPathResolver
             CoroutineRunner.Instance.StopCoroutine(_runningRoutine);
             _runningRoutine = null;
         }
-        while (_pathQueue.Count > 0)
+        while (_requests.Count > 0)
         {
-            var (_, req) = _pathQueue.Dequeue();
-            DestinationResult cancelled = new DestinationResult(ReasonForDestinationCheck.Cancelled, req.Path, false, Vector3.zero, req.StateId);
+            var req = _requests.Dequeue();
+            DestinationResultNew cancelled = new DestinationResultNew(ReasonForDestinationCheck.Cancelled, req.Path, PathResult.RequestCancelled, Vector3.zero, req.StateId);
         }
     }
 
-    private readonly struct PathRequest
+    private readonly struct DestinationRequest
     {
         public readonly StateId StateId;
         public readonly Vector3 From;
         public readonly List<Vector3> Candidates;
         public readonly NavMeshPath Path;
         public readonly ReasonForDestinationCheck Reason;
-        public readonly DestinationValidationCallback Callback;
+        public readonly DestinationValidationCallbackNew Callback;
 
-        public PathRequest(StateId id, Vector3 from, List<Vector3> candidates, NavMeshPath path, ReasonForDestinationCheck reason, DestinationValidationCallback cb)
+        public DestinationRequest(StateId id, Vector3 from, List<Vector3> candidates, NavMeshPath path, ReasonForDestinationCheck reason, DestinationValidationCallbackNew cb)
             => (StateId, From, Candidates, Path, Reason, Callback) = (id, from, candidates, path, reason, cb);
 
     }
 
-   
 
-    private Queue<PathRequest> _requests = new(15);
 
-    public void ProcessDestinationCandidates(StateId id, ReasonForDestinationCheck reason, List<Vector3> candidates, NavMeshPath path, Vector3 fromPos, DestinationValidationCallback callback)
+    private Queue<DestinationRequest> _requests = new(15);
+
+    public void ProcessDestinationCandidates(StateId id, ReasonForDestinationCheck reason, List<Vector3> candidates, NavMeshPath path, Vector3 fromPos, DestinationValidationCallbackNew callback)
     {
         if (candidates == null || candidates.Count == 0)
         {
-            DestinationResult failResult = new DestinationResult(reason, path, false, Vector3.zero, id);
+            DestinationResultNew failResult = new DestinationResultNew(reason, path, PathResult.CandidatesNullOrEmpty, Vector3.zero, id);
             callback?.Invoke(failResult);
             return;
         }
-        _requests.Enqueue( new PathRequest(id, fromPos, candidates, path, reason, callback));
+        _requests.Enqueue( new DestinationRequest(id, fromPos, candidates, path, reason, callback));
         if(_runningRoutine == null)
             _runningRoutine = CoroutineRunner.Instance.StartCoroutine(PathFindRoutineNewer(_requests));
     }
 
-    private IEnumerator PathFindRoutineNewer(Queue<PathRequest> q)
+    private IEnumerator PathFindRoutineNewer(Queue<DestinationRequest> q)
     {
 
         while (q.Count > 0)
@@ -486,18 +512,28 @@ public class PathFinderNew : IPathResolver
                 if (_activeGen != Gen) break;
 
                 _pathChecked = false;
-                _isValid = false;
+                _lastResult = PathResult.None;
+                //_isValid = false;
 
                 Vector3 from = LineOfSightUtility.GetClosestPointOnNavMesh(request.From);
                 Vector3 to = LineOfSightUtility.GetClosestPointOnNavMesh(point);
-                _pathService?.TryGetPath(from, to, request.Path, PathCheckCallback);
+                _pathService?.RequestPath(from, to, request.Path, PathCheckCallback);
 
                 yield return _waitUntilPathCheckComplete;
 
                 if (_activeGen != Gen) break;
-                if (!_isValid) continue;
+                if(_lastResult == PathResult.NullPathParameter)
+                {
+                    DestinationResultNew nullPath = new DestinationResultNew(request.Reason, request.Path, PathResult.NullPathParameter, Vector3.zero, request.StateId);
+                    request.Callback?.Invoke(nullPath);
+                    break;
+                }
 
-                DestinationResult success = new DestinationResult(request.Reason, request.Path, true, to, request.StateId);
+                if (_lastResult == PathResult.Failed) continue;
+                
+               // if (!_isValid) continue;
+
+                DestinationResultNew success = new DestinationResultNew(request.Reason, request.Path, PathResult.Success, to, request.StateId);
                 request.Callback?.Invoke(success);
 
                 found = true;
@@ -507,7 +543,7 @@ public class PathFinderNew : IPathResolver
             if (_activeGen != Gen) break;
             if (!found)
             {
-                DestinationResult failed = new DestinationResult(request.Reason, request.Path, false, Vector3.zero, request.StateId);
+                DestinationResultNew failed = new DestinationResultNew(request.Reason, request.Path, PathResult.Failed, Vector3.zero, request.StateId);
                 request.Callback?.Invoke(failed);
             }
 
@@ -517,21 +553,36 @@ public class PathFinderNew : IPathResolver
 
     }
 
+  
+
+   //public DestinationValidationCallback Callback { get; set; }
+
+    private void OnPathRequestcallback(PathResult result)//bool pathFound/*in PathResult result*/)
+    {
+       // _isValid = pathFound;
+        _lastResult = result;
+        _pathChecked = true;
+    }
+
+
+
+    #region Obsolete
+
     [Obsolete]
     public void TryGetDestination(in ValidateDestination req)
     {
-        List<(Vector3 position, Vector3? forward)> destinations;
-        destinations = TryGet(req);
-        if (destinations == null || destinations.Count == 0)
-        {
-            DestinationResult failResult = new DestinationResult(req.Reason, req.Path, false, Vector3.zero, req.StateId, null);
-            Callback?.Invoke(failResult);
-            //Owner.OnPathRequestComplete(failResult);
-            return;
-        }
-        _pathQueue.Enqueue((destinations, req));
-        if (_runningRoutine == null)
-            _runningRoutine = CoroutineRunner.Instance.StartCoroutine(PathFindRoutineNew(_pathQueue));
+        /*   List<(Vector3 position, Vector3? forward)> destinations = new();
+         //  destinations = TryGet(req);
+           if (destinations == null || destinations.Count == 0)
+           {
+               //DestinationResult failResult = new DestinationResult(req.Reason, req.Path, false, Vector3.zero, req.StateId, null);
+              // Callback?.Invoke(failResult);
+               //Owner.OnPathRequestComplete(failResult);
+               return;
+           }
+           _pathQueue.Enqueue((destinations, req));
+           if (_runningRoutine == null)
+               _runningRoutine = CoroutineRunner.Instance.StartCoroutine(PathFindRoutineNew(_pathQueue));*/
     }
 
     [Obsolete]
@@ -550,18 +601,19 @@ public class PathFinderNew : IPathResolver
                 if (_activeGen != Gen) break;
 
                 _pathChecked = false;
-                _isValid = false;
+                _lastResult = PathResult.None;
+                //_isValid = false;
 
-                this.RequestValidPath(LineOfSightUtility.GetClosestPointOnNavMesh(reqInfo.Caller.Position()),
-                     LineOfSightUtility.GetClosestPointOnNavMesh(pos), reqInfo.Path, PathCheckCallback);
+                //  this.RequestValidPath(LineOfSightUtility.GetClosestPointOnNavMesh(reqInfo.Caller.Position()),
+                //      LineOfSightUtility.GetClosestPointOnNavMesh(pos), reqInfo.Path, PathCheckCallback);
 
                 yield return _waitUntilPathCheckComplete;
 
                 if (_activeGen != Gen) break;
-                if (!_isValid) continue;
+                //   if (!_isValid) continue;
 
-                DestinationResult success = new DestinationResult(reqInfo.Reason, reqInfo.Path, true, pos, reqInfo.StateId, fwd);
-                Callback?.Invoke(success);
+                //   DestinationResult success = new DestinationResult(reqInfo.Reason, reqInfo.Path, true, pos, reqInfo.StateId, fwd);
+                //   Callback?.Invoke(success);
                 // Owner.OnPathRequestComplete(success);
                 found = true;
                 break;
@@ -570,8 +622,8 @@ public class PathFinderNew : IPathResolver
             if (_activeGen != Gen) break;
             if (!found)
             {
-                DestinationResult failed = new DestinationResult(reqInfo.Reason, reqInfo.Path, false, Vector3.zero, reqInfo.StateId, null);
-                Callback?.Invoke(failed);
+                //    DestinationResult failed = new DestinationResult(reqInfo.Reason, reqInfo.Path, false, Vector3.zero, reqInfo.StateId, null);
+                //  Callback?.Invoke(failed);
                 //Owner.OnPathRequestComplete(failed);
             }
         }
@@ -579,15 +631,7 @@ public class PathFinderNew : IPathResolver
         _runningRoutine = null;
 
     }
-    
 
-    public DestinationValidationCallback Callback { get; set; }
+    #endregion
 
-    private void OnPathRequestcallback(bool pathFound/*in PathResult result*/)
-    {
-        _isValid = pathFound;
-        _pathChecked = true;
-    }
-
-   
 }

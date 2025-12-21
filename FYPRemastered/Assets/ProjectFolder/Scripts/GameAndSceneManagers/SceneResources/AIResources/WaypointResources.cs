@@ -64,12 +64,12 @@ public class WaypointResources : SceneResources, IWaypointService
 
     protected override void NotifyClassDependancies()
     {
-        bool exists = SceneEventAggregator.Instance.CheckDependancyExists(typeof(PathRequestManager));
+        bool exists = SceneEventAggregator.Instance.CheckDependancyExists(typeof(PathRequestManagerObsolete));
 
         if (!exists)
         {
 
-            SceneEventAggregator.Instance.AddDependancy(new PathRequestManager());
+            SceneEventAggregator.Instance.AddDependancy(new PathRequestManagerObsolete());
         }
 
         exists = SceneEventAggregator.Instance.CheckDependancyExists(typeof(AgentZoneRegistryNew));
@@ -274,12 +274,12 @@ public class WaypointResourcesNew : SceneResources, IWaypointService
     [Obsolete]
     protected override void NotifyClassDependancies()
     {
-        bool exists = SceneEventAggregator.Instance.CheckDependancyExists(typeof(PathRequestManager));
+        bool exists = SceneEventAggregator.Instance.CheckDependancyExists(typeof(PathRequestManagerObsolete));
 
         if (!exists)
         {
 
-            SceneEventAggregator.Instance.AddDependancy(new PathRequestManager());
+            SceneEventAggregator.Instance.AddDependancy(new PathRequestManagerObsolete());
         }
 
         exists = SceneEventAggregator.Instance.CheckDependancyExists(typeof(AgentZoneRegistryNew));

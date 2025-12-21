@@ -34,11 +34,11 @@ public sealed class FSMPatrolState : FSMBaseState
         {
             if(_waypointService == null || !_waypointService.TryGetWaypoints(this, _candidateDestinations))
             {
-                DestinationResult failedResult = new DestinationResult
+                DestinationResultNew failedResult = new DestinationResultNew
                 (
                     ReasonForDestinationCheck.ValidatePathForDestination,
                     _ownerData.Path,
-                    false,
+                    PathResult.CandidatesNullOrEmpty,
                     Vector3.zero,
                     _id
                 );

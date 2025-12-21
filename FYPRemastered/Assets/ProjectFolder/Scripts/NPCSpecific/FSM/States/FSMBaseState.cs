@@ -8,7 +8,7 @@ public abstract class FSMBaseState : IFSMState
     protected readonly IFSMStateContext _stateContext;
     protected Coroutine _runningRoutine;
     protected bool _hasDestination = false;
-    protected DestinationValidationCallback _validationCallback;
+    protected DestinationValidationCallbackNew _validationCallback;
 
 
     protected List<Vector3> _candidateDestinations = new();
@@ -31,7 +31,7 @@ public abstract class FSMBaseState : IFSMState
     public virtual void EnterState() { _hasDestination = false; }
     public abstract void ValidateCandidateDestinations();
     public virtual void RetrieveCandidateDestinations() { }
-    protected virtual void OnPathResultReceived(in DestinationResult result)
+    protected virtual void OnPathResultReceived(in DestinationResultNew result)
         => _stateContext?.OnDestinationResultReceived(in result);
 
     public virtual void ExitState()

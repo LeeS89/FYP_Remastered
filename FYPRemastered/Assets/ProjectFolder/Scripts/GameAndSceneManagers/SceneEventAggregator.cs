@@ -329,7 +329,7 @@ public interface ISceneAIServices : ISceneService
 
 public interface IPathService
 {
-    void TryGetPath(Vector3 from, Vector3 to, NavMeshPath path, Action<bool> onRequestComplete);
+    void RequestPath(Vector3 from, Vector3 to, NavMeshPath path, Action<PathResult> onRequestComplete);
 }
 
 public interface IWaypointService //: IDestinationService

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
+[Obsolete]
 public readonly struct FSMPolicyResult
 {
    // public readonly bool PathBlocked;
@@ -41,7 +42,7 @@ public readonly struct FSMPolicyValidation
     }
 }
 
-
+[Obsolete]
 public readonly struct PathRequest
 {
    // public readonly AIResourceType AIResourceType;

@@ -66,7 +66,7 @@ public partial class NPCController
 
         _destinationResolver = new DestinationResolver(_destinationProviders);
         _fovParams.FOVTarget = PrimaryTarget;
-        _pathFinder = new PathFinder(_destinationResolver);
+        _pathFinder = new PathFinderObsolete(_destinationResolver);
         _fovRunner = new NPCFieldOfViewHandler(_fovParams);
 
         _fsmManager = new FSMBaseNew(data: this, resolver: _pathFinder, runner: _fovRunner, _fsmStates);

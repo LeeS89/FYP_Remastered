@@ -173,18 +173,19 @@ public partial class FSMBaseNew : IFSMControlNew
     #region Destination result & Setting region
     private bool StateHasChanged(StateId id) => id != CurrentStateId;
 
-    public void OnDestinationResultReceived(in DestinationResult result)
+    public void OnDestinationResultReceived(in DestinationResultNew result)
     {
 
         if (StateHasChanged(result.Id) || result.Reason == ReasonForDestinationCheck.Cancelled) return;
-        bool pathFound = result.PathFound;
+        PathResult pathResult = result.PathResult;
+        //bool pathFound = result.PathFound;
         StateId id = result.Id;
 
-        if (result.Reason == ReasonForDestinationCheck.ProbePath && pathFound)
+        if (result.Reason == ReasonForDestinationCheck.ProbePath && pathResult == PathResult.Success)
         { Notification?.Invoke(NPCNotification.PathToPrimaryAvailable(/*result.Id*/)); return; }
 
-        if (!result.PathFound) { Notification?.Invoke(NPCNotification.NoAvailablePath(/*CurrentStateId*/)); Debug.LogError("NO Path Found!!"); return; }
-        else
+        if (/*!result.PathFound*/pathResult == PathResult.Failed) { Notification?.Invoke(NPCNotification.NoAvailablePath(/*CurrentStateId*/)); Debug.LogError("NO Path Found!!"); return; }
+        else if(pathResult == PathResult.Success)
         {
             Vector3 currentDestination = result.Destination;
             CurrentDestinationForward = result.Forward;

@@ -398,3 +398,319 @@ public class PoolLoader : SceneResources, IUpdateableResource
 
    
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+public class PoolLoaderNew : SceneResources, IPoolService, ITickable
+{
+    /// NEW LOADER
+    private readonly Dictionary<string, PoolManagerBase> _cache = new();
+    private readonly HashSet<string> _loading = new();
+    private readonly Dictionary<string, List<PoolRequest>> _waiters = new();
+   // private readonly Queue<ResourceRequests> _queue = new();
+    private bool _isProcessing;
+    private readonly Dictionary<string, AsyncOperationHandle<GameObject>> _assetHandles = new();
+    private readonly HashSet<string> _poolsToLoad = new(10);
+
+   
+    //ConcurrentDictionary
+    //////// END NEW LOADER
+
+    /// <summary>
+    // CancellationToken
+    /// </summary>
+    // NEW FUNCTIONS
+    public void RequestPoolObsolete(in ResourceRequests req)
+    {
+        if(_cache.TryGetValue(req.PoolId.Id, out var pool))
+        {
+            req.PoolRequesterCallback?.Invoke(req.PoolId.Id, pool);
+            return;
+        }
+        // If Requested pool has not already been loaded, queue request for loading
+      //  _queue.Enqueue(req);
+        if(!_isProcessing) _ = ProcessQueue();
+    }
+
+    private async Task ProcessQueue()
+    {
+        _isProcessing = true;
+       
+        while(_requestQueue.Count > 0)
+        {
+            var req = _requestQueue.Dequeue();
+
+            // Checking if the requested pool has any dependent pools that also need to be loaded
+            PoolIdSO pId = req.PoolId;
+
+            if(pId._fxPools != null)
+            {
+                foreach(var poolId in pId._fxPools)
+                {
+                    if(!_cache.ContainsKey(poolId.Id))
+                        await LoadPoolAsync(poolId, notifyWaiters: false);
+                }
+            }
+
+
+            // Another request earlier in the queue may have loaded it already
+            if (_cache.TryGetValue(req.PoolId.Id, out var pool))
+            {
+                req.Callback?.Invoke(PoolRequestResult.Success, req.PoolId.Id, pool);
+                continue;
+            }
+
+            // If it's already loading, add this requester to the waiters
+            if (_loading.Contains(req.PoolId.Id))
+            {
+                _waiters[req.PoolId.Id].Add(req);
+                continue;
+            }
+
+            _loading.Add(req.PoolId.Id);
+            _waiters[req.PoolId.Id] = new List<PoolRequest> { req };
+
+            _= LoadPoolAsync(req.PoolId, notifyWaiters: true);
+
+           
+        }
+        _isProcessing = false;
+    }
+
+
+
+    private async Task LoadPoolAsync(PoolIdSO poolId, bool notifyWaiters)
+    {
+        try
+        {
+            string address = poolId.Id;
+            if (string.IsNullOrEmpty(address)) throw new Exception("Invalid address passed for pool");
+            address = address.Trim();
+
+            var handle = Addressables.LoadAssetAsync<GameObject>(address);
+            var prefab = await handle.Task;
+
+            if (handle.Status != AsyncOperationStatus.Succeeded || prefab == null)
+                throw new Exception($"Addressables load failed for '{poolId}' ({handle.Status}).");
+
+
+
+            _assetHandles[address] = handle;
+            PoolKind kind = poolId.Kind;
+
+            PoolManagerBase pool = kind switch
+            {
+                PoolKind.ParticleSystem => new PoolManager<ParticleSystem>(this, prefab.GetComponent<ParticleSystem>()),
+                PoolKind.Audio => new PoolManager<AudioSource>(this, prefab.GetComponent<AudioSource>()),
+                _ => new PoolManager<GameObject>(this, prefab)
+            };
+
+            _cache[address] = pool;
+
+            pool.PreWarmPool(poolId._prewarmCount);
+
+            if (!notifyWaiters) return;
+
+            if(_waiters.TryGetValue(poolId.Id, out var waiters))
+            {
+                _waiters.Remove(poolId.Id);
+                _loading.Remove(poolId.Id);
+
+                foreach (var waiter in waiters)
+                    waiter.Callback?.Invoke(PoolRequestResult.Success, poolId.Id, pool);
+            }
+           
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Error loading resources: {e.Message}");
+        }
+    }
+    // END NEW FUNCTIONS
+
+    [Header("Handles auto return to pools for Audio & SFX pools")]
+    private int _maxTrackedPoolObjects = 256;
+    private List<PoolObjectTracker> _jobs = new();
+
+
+    private static bool _addressablesready;
+
+    private static bool _catalogReady = false;
+
+    //private static readonly Dictionary<string, PoolAddressSO> _addrToSO = new();
+    private static readonly Dictionary<string, GameObject> _addrToSOTemp = new();
+    //AsyncOperationHandle<IList<PoolAddressSO>> _poolAddressHandle = new();
+    private readonly Dictionary<string, PoolManagerBase> _pools = new();
+    private readonly Dictionary<PoolIdSO, AsyncOperationHandle<GameObject>> _handles = new();
+
+
+   
+
+    public void Testr()
+    {
+        // Check if pool exists
+        // If it does exist => Invoke callback
+        // If it doesnt exist => add the struct to queue
+    }
+
+
+    /// <summary>
+    /// Asynchronously loads and initializes resources required for the scene, including creating and pre-warming object
+    /// pools.
+    /// </summary>
+    /// <remarks>This method retrieves resource locations with a label matching the current scene and loads the corresponding
+    /// assets.  It filters the resources to include only those with a matching configuration in the internal
+    /// address-to-configuration mapping. For each loaded asset, an appropriate object pool is created based on the
+    /// resource type, and the pool is pre-warmed to the specified size.  Event handlers for resource requests and
+    /// releases are registered with the <see cref="SceneEventAggregator"/> to manage resource usage
+    /// dynamically.</remarks>
+    /// <returns></returns>
+    public override async Task LoadResources(/*string sceneName*/)
+    {
+        SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;
+
+        SceneEventAggregator.Instance.OnResourceReleased += ResourceReleased;
+        _jobs.EnsureCapacity(_maxTrackedPoolObjects);
+        await Task.CompletedTask;
+       
+    }
+
+    protected override void InitializePools()
+    {
+        /*foreach(var pool in _pools)
+        {
+
+        }
+        foreach (var pool in _pools.Values)
+        {
+            pool.Initialize();
+        }*/
+    }
+
+    [Obsolete]
+    protected override void ResourceRequested(in ResourceRequests req)
+    {
+        if (req.PoolId == null || string.IsNullOrEmpty(req.PoolId.Id)) return;
+        
+        if (_cache.TryGetValue(req.PoolId.Id, out var pool))
+        {
+            req.PoolRequesterCallback?.Invoke(req.PoolId.Id, pool);
+            return;
+        }
+
+        //_queue.Enqueue(req);
+        if (!_isProcessing) _ = ProcessQueue();
+
+
+
+    }
+
+    private readonly Queue<PoolRequest> _requestQueue = new(10);
+
+    public void RequestPool(PoolIdSO poolIdRef, Action<PoolRequestResult, string, IPoolManager> cb)
+    {
+        if(poolIdRef == null)         
+        {
+            cb?.Invoke(PoolRequestResult.NullPoolIdRef, null, null);
+            return;
+        }
+        if(string.IsNullOrEmpty(poolIdRef.Id))
+        {
+            cb?.Invoke(PoolRequestResult.EmptyStringPoolId, null, null);
+            return;
+        }
+        _requestQueue.Enqueue(new PoolRequest(poolIdRef, cb));
+        if (!_isProcessing) _ = ProcessQueue();
+    }
+
+    private readonly struct PoolRequest
+    {
+        public readonly PoolIdSO PoolId;
+        public readonly Action<PoolRequestResult, string, IPoolManager> Callback;
+        public PoolRequest(PoolIdSO poolId, Action<PoolRequestResult, string, IPoolManager> callback)
+        {
+            PoolId = poolId;
+            Callback = callback;
+        }
+    }
+
+
+
+    public override bool SchedulePoolObjectRelease(IPoolManager pool, UnityEngine.Object item, float seconds)
+    {
+        if (_jobs.Count == _maxTrackedPoolObjects) { return false; }
+        _jobs.Add(new PoolObjectTracker(pool, item, seconds));
+        return true;
+    }
+
+  
+    public void Tick(float dt)
+    {
+        if (_jobs == null || _jobs.Count == 0) { return; }
+
+        for (int i = _jobs.Count - 1; i >= 0; i--)
+        {
+            var job = _jobs[i];
+            job.TimeRemaining -= dt; // Modify the copy of the struct
+            _jobs[i] = job; // Copy struct back to list after modification of the copy
+
+            if (job.TimeRemaining <= 0f)
+            {
+                job.Pool.Release(job.Item);
+
+                int last = _jobs.Count - 1;
+                if (i != last)
+                {
+                    _jobs[i] = _jobs[last];
+                }
+                _jobs.RemoveAt(last);
+            }
+
+        }
+    }
+
+    public void LateTick(float dt) { }
+   
+}
+
+
+public enum PoolRequestResult
+{
+    Success,
+    Failed,
+    NullPoolIdRef,
+    EmptyStringPoolId
+}

@@ -75,7 +75,7 @@ public interface IFSMStateContext : IAnimationCueSource
     Vector3? CurrentDestinationForward { get; }
     bool IsStationary();
 
-    void OnDestinationResultReceived(in DestinationResult result);
+    void OnDestinationResultReceived(in DestinationResultNew result);
 }
 
 

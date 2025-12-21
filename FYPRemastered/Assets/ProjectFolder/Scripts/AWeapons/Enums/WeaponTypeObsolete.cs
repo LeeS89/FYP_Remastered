@@ -110,7 +110,7 @@ public enum ReasonForDestinationCheck
 {
     ProbePath,
     ValidatePathForDestination,
-    Cancelled
+    Cancelled // Obsolete
 }
 
 public enum PolicyIntentResult

@@ -18,14 +18,14 @@ public interface IPathResolver// : IZoneSink
     /*bool TryGetWaypointZone(out uint zone);
 
     bool TrySwitchWaypoints();*/
-    [Obsolete]
-    DestinationValidationCallback Callback { get; set; }
+   /* [Obsolete]
+    DestinationValidationCallback Callback { get; set; }*/
 
     void CancelAll();
 
    /* [Obsolete]
     void ProcessDestinationCandidates(StateId id, PathCheckReason reason, List<Vector3> candidates, NavMeshPath path, Vector3 fromPos);*/
-    void ProcessDestinationCandidates(StateId id, ReasonForDestinationCheck reason, List<Vector3> candidates, NavMeshPath path, Vector3 fromPos, DestinationValidationCallback callBack);
+    void ProcessDestinationCandidates(StateId id, ReasonForDestinationCheck reason, List<Vector3> candidates, NavMeshPath path, Vector3 fromPos, DestinationValidationCallbackNew callBack);
 
     [Obsolete]
     void TryGetDestination(in ValidateDestination req);

@@ -5,7 +5,7 @@ using UnityEngine.AI;
 
 
 [Obsolete("Use FSMBaseNew instead", false)]
-public class FSMManager : FSMBase
+public class FSMManagerObsolete : FSMBaseObsolete
 {
     private List<SetDestinationDelay> _timer = new(2);
     protected bool _hasValidDestination = false;
@@ -15,7 +15,7 @@ public class FSMManager : FSMBase
     private Action OnChaseReached;
     
 
-    public FSMManager(IAgentData data, IPathResolver resolver, IFieldOfViewRunner runner)
+    public FSMManagerObsolete(IAgentData data, IPathResolver resolver, IFieldOfViewRunner runner)
     {
         if (data == null)
         {
@@ -34,7 +34,7 @@ public class FSMManager : FSMBase
                 { StateId.Patrol, new WaypointProvider(WaypointRepo.Instance) }
             };
             ICandidateProvider destResolver = new DestinationResolver(providers);
-            _pathFinder = new PathFinder(destResolver);
+            _pathFinder = new PathFinderObsolete(destResolver);
         }
         else _pathFinder = resolver;
 
@@ -63,7 +63,7 @@ public class FSMManager : FSMBase
     private void AssignActions()
     {
         _fovHandler.OnFOVSweepComplete = FieldOfViewSweepResult;
-        _pathFinder.Callback = OnPathRequestComplete;// New
+        //_pathFinder.Callback = OnPathRequestComplete;// New
         TryRepath = TryGetNextDestination;
         CancelOrContinueRoutine = StateHasChanged;
         LookAroundAction = LookAround; // Obsolete
