@@ -5,8 +5,8 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
-
-public class PlayerFlankingResources : SceneResources, IUpdateableResource
+[Obsolete]
+public class PlayerFlankingResourcesObsolete : SceneResources, IUpdateableResource
 {
     private AsyncOperationHandle<SamplePointDataSO> _flankPointHandle;
     private SamplePointDataSO _flankPointDataSO;
@@ -256,13 +256,13 @@ public class PlayerFlankingResources : SceneResources, IUpdateableResource
 
 
 
-public class PlayerFlankingResourcesNew : SceneResources, IFlankService, IUpdateableResource
+public class PlayerFlankingResourcesNew : SceneResources, IFlankService, ITickable
 {
     private AsyncOperationHandle<SamplePointDataSO> _flankPointHandle;
     private SamplePointDataSO _flankPointDataSO;
     private List<FlankPointData> _savedPoints;
    // private int _nearestPointToPlayer = 0;
-    Collider playerCollider;
+   // Collider playerCollider;
     /*Vector3 top;*/
     private IClosestFlankPointService _closestFlankPointService;
 
@@ -275,7 +275,7 @@ public class PlayerFlankingResourcesNew : SceneResources, IFlankService, IUpdate
     {
         try
         {
-            playerCollider = GameManager.Instance.GetPlayerCollider(PlayerPart.DefenceCollider);
+           // playerCollider = GameManager.Instance.GetPlayerCollider(PlayerPart.DefenceCollider);
 
             // NotifyDependancies(); // => Needs Closest Point Job
             // Load the asset from Addressables
@@ -311,7 +311,7 @@ public class PlayerFlankingResourcesNew : SceneResources, IFlankService, IUpdate
                 Debug.LogError("Failed to load the flank point data from Addressables.");
             }
 
-            NotifyClassDependancies(); // => Needs Closest Point Job
+            //NotifyClassDependancies(); // => Needs Closest Point Job
             // Subscribe to the resource requested event
             /*SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;*/
             //SceneEventAggregator.Instance.OnResourceReleased += ResourceReleased;
@@ -327,7 +327,7 @@ public class PlayerFlankingResourcesNew : SceneResources, IFlankService, IUpdate
     {
         try
         {
-            playerCollider = null;
+           // playerCollider = null;
             _savedPoints.Clear();
             _savedPoints = null;
             _flankPointDataSO = null;
@@ -494,38 +494,11 @@ public class PlayerFlankingResourcesNew : SceneResources, IFlankService, IUpdate
     private readonly Dictionary<int, FlankRequest> _pendingRequests = new(25);
 
 
-    [Obsolete]
-    public void UpdateResource()
-    {
-        return;
-        if(_savedPoints == null || _savedPoints.Count == 0) { return; }
-        Vector3 top = playerCollider.bounds.center + Vector3.up * playerCollider.bounds.extents.y;
-        /*Collider playerPos = GameManager.Instance.GetPlayerCollider(PlayerPart.DefenceCollider);
-        center = playerPos.bounds.center + Vector3.up * playerPos.bounds.extents.y;*/
-        //Transform playerPos = GameManager.Instance.GetPlayerPosition(PlayerPart.DefenceCollider);
-        int mask = LayerMask.GetMask("Default", "Water", "PlayerDefence");
-        //Debug.LogError("MASK IS: "+mask);
-        foreach (var point in _savedPoints)
-        {
-            if(Physics.Linecast(point.position, top, out RaycastHit hit, mask))
-            {
-                //Debug.LogError("Hit layer: " + LayerMask.LayerToName(hit.collider.gameObject.layer) + "GameObject name: "+hit.collider.gameObject.name);
-               
-                if (hit.collider == playerCollider)
-                {
-                    //Debug.LogError("Hit Player Defence Collider");
-                    Debug.DrawLine(point.position, top, Color.green);
-                }
-                else
-                {
-                    Debug.DrawLine(point.position, top, Color.red);
-                }
-            }
-            
-        }
+    
 
-        
-    }
+    public void Tick(float dt) { }
+    
 
+    public void LateTick(float dt) { }
     
 }

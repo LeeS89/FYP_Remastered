@@ -6,8 +6,8 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
-
-public class PoolLoader : SceneResources, IUpdateableResource
+[Obsolete]
+public class PoolLoaderObsolete : SceneResources, IUpdateableResource
 {
     /// NEW LOADER
     private readonly Dictionary<string, PoolManagerBase> _cache = new();
@@ -440,12 +440,9 @@ public class PoolLoaderNew : SceneResources, IPoolService, ITickable
     private readonly Dictionary<string, PoolManagerBase> _cache = new();
     private readonly HashSet<string> _loading = new();
     private readonly Dictionary<string, List<PoolRequest>> _waiters = new();
-   // private readonly Queue<ResourceRequests> _queue = new();
     private bool _isProcessing;
     private readonly Dictionary<string, AsyncOperationHandle<GameObject>> _assetHandles = new();
-    private readonly HashSet<string> _poolsToLoad = new(10);
-
-   
+    
     //ConcurrentDictionary
     //////// END NEW LOADER
 
@@ -453,18 +450,7 @@ public class PoolLoaderNew : SceneResources, IPoolService, ITickable
     // CancellationToken
     /// </summary>
     // NEW FUNCTIONS
-    public void RequestPoolObsolete(in ResourceRequests req)
-    {
-        if(_cache.TryGetValue(req.PoolId.Id, out var pool))
-        {
-            req.PoolRequesterCallback?.Invoke(req.PoolId.Id, pool);
-            return;
-        }
-        // If Requested pool has not already been loaded, queue request for loading
-      //  _queue.Enqueue(req);
-        if(!_isProcessing) _ = ProcessQueue();
-    }
-
+  
     private async Task ProcessQueue()
     {
         _isProcessing = true;
@@ -566,19 +552,7 @@ public class PoolLoaderNew : SceneResources, IPoolService, ITickable
     private List<PoolObjectTracker> _jobs = new();
 
 
-    private static bool _addressablesready;
-
-    private static bool _catalogReady = false;
-
-    //private static readonly Dictionary<string, PoolAddressSO> _addrToSO = new();
-    private static readonly Dictionary<string, GameObject> _addrToSOTemp = new();
-    //AsyncOperationHandle<IList<PoolAddressSO>> _poolAddressHandle = new();
-    private readonly Dictionary<string, PoolManagerBase> _pools = new();
-    private readonly Dictionary<PoolIdSO, AsyncOperationHandle<GameObject>> _handles = new();
-
-
-   
-
+  
     public void Testr()
     {
         // Check if pool exists
@@ -608,36 +582,7 @@ public class PoolLoaderNew : SceneResources, IPoolService, ITickable
        
     }
 
-    protected override void InitializePools()
-    {
-        /*foreach(var pool in _pools)
-        {
-
-        }
-        foreach (var pool in _pools.Values)
-        {
-            pool.Initialize();
-        }*/
-    }
-
-    [Obsolete]
-    protected override void ResourceRequested(in ResourceRequests req)
-    {
-        if (req.PoolId == null || string.IsNullOrEmpty(req.PoolId.Id)) return;
-        
-        if (_cache.TryGetValue(req.PoolId.Id, out var pool))
-        {
-            req.PoolRequesterCallback?.Invoke(req.PoolId.Id, pool);
-            return;
-        }
-
-        //_queue.Enqueue(req);
-        if (!_isProcessing) _ = ProcessQueue();
-
-
-
-    }
-
+  
     private readonly Queue<PoolRequest> _requestQueue = new(10);
 
     public void RequestPool(PoolIdSO poolIdRef, Action<PoolRequestResult, string, IPoolManager> cb)
@@ -652,8 +597,15 @@ public class PoolLoaderNew : SceneResources, IPoolService, ITickable
             cb?.Invoke(PoolRequestResult.EmptyStringPoolId, null, null);
             return;
         }
-        _requestQueue.Enqueue(new PoolRequest(poolIdRef, cb));
-        if (!_isProcessing) _ = ProcessQueue();
+
+        if(_cache.TryGetValue(poolIdRef.Id, out var pool))
+            cb?.Invoke(PoolRequestResult.Success, poolIdRef.Id, pool);
+        else
+        {
+            _requestQueue.Enqueue(new PoolRequest(poolIdRef, cb));
+            if (!_isProcessing) _ = ProcessQueue();
+        }
+        
     }
 
     private readonly struct PoolRequest

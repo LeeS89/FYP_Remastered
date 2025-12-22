@@ -79,6 +79,7 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
         }
     }
 
+    [Obsolete]
     protected virtual void GatherScenePools()
     {
         _scenePoolsToLoad = new(10);

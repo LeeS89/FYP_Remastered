@@ -7,7 +7,7 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 
 [Obsolete]
-public class WaypointResources : SceneResources, IWaypointService
+public class WaypointResourcesObsolete : SceneResources, IWaypointService
 {
     private WaypointBlockData _waypointBlockData;
   
@@ -79,11 +79,11 @@ public class WaypointResources : SceneResources, IWaypointService
             SceneEventAggregator.Instance.AddDependancy(new AgentZoneRegistryNew());
         }
 
-        exists = SceneEventAggregator.Instance.CheckDependancyExists(typeof(PlayerFlankingResources));
+        exists = SceneEventAggregator.Instance.CheckDependancyExists(typeof(PlayerFlankingResourcesObsolete));
 
         if (!exists)
         {
-            SceneEventAggregator.Instance.AddDependancy(new PlayerFlankingResources());
+            SceneEventAggregator.Instance.AddDependancy(new PlayerFlankingResourcesObsolete());
         }
         else
         {
@@ -289,11 +289,11 @@ public class WaypointResourcesNew : SceneResources, IWaypointService
             SceneEventAggregator.Instance.AddDependancy(new AgentZoneRegistryNew());
         }
 
-        exists = SceneEventAggregator.Instance.CheckDependancyExists(typeof(PlayerFlankingResources));
+        exists = SceneEventAggregator.Instance.CheckDependancyExists(typeof(PlayerFlankingResourcesObsolete));
 
         if (!exists)
         {
-            SceneEventAggregator.Instance.AddDependancy(new PlayerFlankingResources());
+            SceneEventAggregator.Instance.AddDependancy(new PlayerFlankingResourcesObsolete());
         }
         else
         {
