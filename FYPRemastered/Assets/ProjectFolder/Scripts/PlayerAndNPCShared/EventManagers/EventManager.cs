@@ -197,11 +197,30 @@ public abstract class EventManager : MonoBehaviour
 
 
 
-public class EventManagerBase : MonoBehaviour
+public abstract class EventManagerBase : MonoBehaviour
 {
     protected List<ComponentEvents> _cachedListeners;
 
- 
+    List<IServicable<ISceneServiceProvider, EventManagerBase>> _servicables = new();
+
+    public void Init(ISceneServiceProvider sProvider)
+    {
+        var servicables = GetComponentsInChildren<MonoBehaviour>(true);
+        foreach (var mb in servicables)
+        {
+            if (mb is IServicable<ISceneServiceProvider, EventManagerBase> servicable)
+            {
+                _servicables.Add(servicable);
+            }
+        }
+
+       
+
+        foreach(var s in _servicables)
+        {
+            s.Load(sProvider, this);
+        }
+    }
 
     /// <summary>
     /// Finds all Interface components within the object hierarchy and 

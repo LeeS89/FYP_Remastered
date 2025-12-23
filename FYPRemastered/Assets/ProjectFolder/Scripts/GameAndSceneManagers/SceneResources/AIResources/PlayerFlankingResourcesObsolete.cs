@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.ResourceManagement.ResourceLocations;
 
 [Obsolete]
 public class PlayerFlankingResourcesObsolete : SceneResources, IUpdateableResource
@@ -500,5 +501,9 @@ public class PlayerFlankingResourcesNew : SceneResources, IFlankService, ITickab
     
 
     public void LateTick(float dt) { }
-    
+
+    public Task InitialiseAsync(IResourceLocation location)
+    {
+        throw new NotImplementedException();
+    }
 }

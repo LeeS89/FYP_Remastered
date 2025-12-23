@@ -1,8 +1,10 @@
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.ResourceManagement.ResourceLocations;
 
 
 public class SceneEventAggregator : MonoBehaviour
@@ -164,6 +166,7 @@ public class SceneEventAggregator : MonoBehaviour
 public class SceneServiceBus : ISceneServiceProvider
 {
  
+    private readonly string _sceneName;
     public event Action OnSceneBegin;
     public event Action OnSceneEnd;
 
@@ -173,6 +176,26 @@ public class SceneServiceBus : ISceneServiceProvider
     private IPoolService _poolService;
     private IPathService _pathService;
     private IGameManager _gameManager;
+
+    public SceneServiceBus(string sceneName)
+    {
+        _sceneName = sceneName;
+    }
+
+    public async Task InitialiseServicesAsync()
+    {
+
+        // Initialise Waypoint Service
+        _waypointService = await ServiceFactory.TryCreateAsync<WaypointBlockData, IWaypointService, WaypointResourcesNew>(_sceneName, "Waypoints");
+         
+        if(_waypointService == null)
+            Debug.LogError("Failed to initialise Waypoint Service");
+        else
+            Debug.LogError("Waypoint Service Initialised");
+        /* // Initialise Flank Service
+         _flankService = await ServiceFactory.TryCreateAsync<FlankPointBlockData, IFlankService, FlankPointServiceNew>(_sceneName, "FlankPointService")
+             ?? throw new Exception("Failed to initialise Flank Point Service");*/
+    }
 
 
     public IWaypointService WaypointService => throw new NotImplementedException();
@@ -344,14 +367,19 @@ public interface IPathService
     void RequestPath(Vector3 from, Vector3 to, NavMeshPath path, Action<PathResult> onRequestComplete);
 }
 
-public interface IWaypointService //: IDestinationService
+public interface IAddressableService
+{
+    Task InitialiseAsync(IResourceLocation location);
+}
+
+public interface IWaypointService : IAddressableService
 {
     bool TryGetWaypoints(object requester, List<Vector3> buffer);
 
     bool TryReleaseWaypoints(object requester, List<Vector3> buffer);
 }
 
-public interface IFlankService //: IDestinationService
+public interface IFlankService : IAddressableService
 {
     void TryGetFlankCandidates(Vector3 flankTargetPos, int numSteps, List<Vector3> buffer, Action<bool> OnRequestComplete);
 }

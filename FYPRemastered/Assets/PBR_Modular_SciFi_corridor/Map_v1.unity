@@ -83836,6 +83836,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 730729865798543561, guid: 92b5e8197e5dcb8429c18479688e37b6, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1730306358030552484, guid: 92b5e8197e5dcb8429c18479688e37b6, type: 3}
       propertyPath: m_LocalPosition.x
       value: -1.7441821
@@ -83887,7 +83891,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7785938470125478005, guid: 92b5e8197e5dcb8429c18479688e37b6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2024641099}
   m_SourcePrefab: {fileID: 100100000, guid: 92b5e8197e5dcb8429c18479688e37b6, type: 3}
 --- !u!1 &1331774430
 GameObject:
@@ -116764,6 +116771,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   _targetCollider: {fileID: 99692069}
+  _maxFlankSteps: 5
+  _minFlankSteps: 2
   _requiredSeenStreak: 3
   _requiredNotSeenStreak: 5
   _minStopdistance: 4
@@ -143731,6 +143740,28 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1492823950214695312, guid: e20b42959f728594693cc25718a6d6e7, type: 3}
   m_PrefabInstance: {fileID: 2023248427}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2024641094 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7785938470125478005, guid: 92b5e8197e5dcb8429c18479688e37b6, type: 3}
+  m_PrefabInstance: {fileID: 1331571718}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2024641099
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2024641094}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eeea1f19dce3de5439a9eeffb0aff7b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _eventManagers: []
+  _waypointBlockData: {fileID: 0}
+  _waypointManager: {fileID: 0}
+  _enemy: {fileID: 0}
+  _testspawn: 0
 --- !u!1 &2025055381
 GameObject:
   m_ObjectHideFlags: 0
@@ -154777,6 +154808,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   _targetCollider: {fileID: 226800903}
+  _maxFlankSteps: 5
+  _minFlankSteps: 2
   _requiredSeenStreak: 3
   _requiredNotSeenStreak: 5
   _minStopdistance: 4

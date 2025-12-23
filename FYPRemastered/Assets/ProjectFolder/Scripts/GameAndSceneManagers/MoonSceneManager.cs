@@ -171,7 +171,7 @@ public class MoonSceneManagerNew : BaseSceneManager
     [SerializeField] private WaypointManager _waypointManager;
     private SceneResourceManager _resources;
 
-   
+    private SceneServiceBus _sceneServiceBus;
 
 
     // public Dictionary<GameObject, float> stats = new Dictionary<GameObject, float>();
@@ -184,6 +184,7 @@ public class MoonSceneManagerNew : BaseSceneManager
 
     private async void Start()
     {
+        
         await SetupScene(); // Will be called by Game Manager once fully tested
     }
 
@@ -202,27 +203,44 @@ public class MoonSceneManagerNew : BaseSceneManager
 
     }
 
-   
+    private IWaypointService _waypointService;
 
     public override async Task SetupScene()
     {
-       
-        _resources = new SceneResourceManager(new WaypointResourcesObsolete(), new PoolLoaderObsolete());
+        string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
 
-        await _resources.LoadResourcesAsync();
-        await _resources.LoadDependancies();
+        _sceneServiceBus = new SceneServiceBus(sceneName); 
+
+        await _sceneServiceBus.InitialiseServicesAsync();
+        // await _resources.LoadResourcesAsync();
+        //  await _resources.LoadDependancies();
 
         RegisterGettableComponents();
 
         LoadActiveSceneEventManagers();
 
         SceneStarted();
-        
+
+    }
+
+  //  private List<IServicable> _servicables;
+
+    protected void LoadActiveSceneEventManagersNew()
+    {
+        _eventManagers = new List<EventManager>();
+
+        _eventManagers.AddRange(FindObjectsByType<EventManager>(FindObjectsInactive.Include, FindObjectsSortMode.None));
+
+        foreach (var eventManager in _eventManagers)
+        {
+            if (eventManager is not CombatEventManager)
+            {
+                eventManager.BindComponentsToEvents();
+            }
+        }
     }
 
 
-
-   
 
 
     protected override void UnloadSceneResources()

@@ -28,7 +28,9 @@ MonoBehaviour:
   - m_GUID: 68176bf3450091e468e20392c97f8d1b
     m_Address: MoonSceneWP
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - Map_v1
+    - Waypoints
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 6b63f10b5a4877b4c8b0b80a43f5a334, type: 2}

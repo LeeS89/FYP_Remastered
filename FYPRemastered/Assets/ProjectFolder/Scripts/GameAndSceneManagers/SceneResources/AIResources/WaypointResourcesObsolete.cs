@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.ResourceManagement.ResourceLocations;
 
 
 [Obsolete]
@@ -174,7 +175,12 @@ public class WaypointResourcesObsolete : SceneResources, IWaypointService
 
     }
 
-  
+    public Task InitialiseAsync(IResourceLocation location)
+    {
+        throw new NotImplementedException();
+    }
+
+
 
 
 
@@ -221,10 +227,63 @@ public class WaypointResourcesNew : SceneResources, IWaypointService
     private WaypointBlockData _waypointBlockData;
     private Dictionary<object, BlockData> _inUseBlockTracker = new(20);
 
+    public async Task InitialiseAsync(IResourceLocation location)
+    {
+        try
+        {
+  
+            // Load the asset from Addressables
+            var waypointHandle = Addressables.LoadAssetAsync<WaypointBlockData>(location);
+
+            // Wait for the asset to be loaded
+            await waypointHandle.Task;
+
+            // Check if the loading succeeded
+            if (waypointHandle.Status == AsyncOperationStatus.Succeeded)
+            {
+                // Asset is loaded successfully, cast it to the correct type
+                _waypointBlockData = waypointHandle.Result;
+
+                if (_waypointBlockData != null)
+                {
+
+                    foreach (var blockData in _waypointBlockData.blockDataArray)
+                    {
+                        blockData._inUse = false;
+                    }
+                }
+                else
+                {
+                    Debug.LogError("Loaded waypoint block data is null.");
+                }
+            }
+            else
+            {
+
+                Debug.LogError("Failed to load the waypoint data from Addressables.");
+            }
+
+            //NotifyClassDependancies();
+            // Subscribe to the resource requested event
+            // ResourceRequestBus<WaypointBlockRequest>.On += WaypointsRequested; /// NEW WAY to test
+            // SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;
+            // SceneEventAggregator.Instance.OnAIResourceRequested += AIResourceRequested; /////// CURRENT WAY
+            //   SceneEventAggregator.Instance.OnResourceReleased += ResourceReleased;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Error loading waypoint resources: {e.Message}");
+        }
+    }
+
     public override async Task LoadResources()
     {
         try
         {
+         /*   var waypointHandleNew = Addressables.LoadAssetAsync<WaypointBlockData>("MoonSceneWP");
+
+            await waypointHandleNew.Task;
+            _waypointBlockData = waypointHandleNew.Result;*/
             //NotifyDependancies();
             // Load the asset from Addressables
             var waypointHandle = Addressables.LoadAssetAsync<ScriptableObject>("MoonSceneWP");
@@ -362,6 +421,8 @@ public class WaypointResourcesNew : SceneResources, IWaypointService
 
         return false;
     }
+
+   
     //END NEW SETUP
 
 }
