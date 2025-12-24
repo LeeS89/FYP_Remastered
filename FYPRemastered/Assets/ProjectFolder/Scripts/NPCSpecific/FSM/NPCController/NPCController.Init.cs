@@ -47,7 +47,7 @@ public partial class NPCController
         SetNavMeshAgentParams();
         OnMeleeRangeCheckCallback = OnMeleeRangeEnter;
 
-        SetupFSM();
+        ConstructFSM();
 
         OnStableFOVResult = StableFOVResultConfirmed;
         OnRequestAgentStoppingDistance = GetAgentStoppingDistance;
@@ -56,7 +56,7 @@ public partial class NPCController
         RegisterGlobalEvents();
     }
 
-    private void SetupFSM()
+    private void ConstructFSM()
     {
         _destinationProviders = new()
         {
@@ -124,22 +124,54 @@ public partial class NPCController
         PrimaryTarget = player;
     }
 }
-/*public partial class NPCController
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+public partial class NPCControllerNew
 {
-    // FSMManager Composition
+    // FSMManager Composition - Partly obsolete
     [Header("FOV Data")]
     [SerializeField] protected FOVParameters _fovParams;
-    public IFSMControl FSM { get; protected set; }
+    protected AgentEventManager _eManager;
+    // FSMManager Composition
     private IPathResolver _pathFinder;
     private ICandidateProvider _destinationResolver;
     private IFieldOfViewRunner _fovRunner;
     private Dictionary<StateId, ICandidateProvider> _destinationProviders;
-    protected IIntentState _state;
+    private IFSMControlNew _fsmManager;
+    private Dictionary<StateId, IFSMState> _fsmStates = new(5);
     // end FSMManager Composition
+    //   protected IIntentState _state;
+   
+    private INpcAnimationControl _animationControl;
+    private ISceneAIServices _services;
 
-    public override void RegisterLocalEvents(EventManager eventManager)
+    public  void RegisterLocalEvents(EventManager eventManager)
     {
-        _eManager = eventManager as EnemyEventManager;
+       // _eManager = eventManager as EnemyEventManager;
 
         if (_targetCollider == null)
         {
@@ -155,10 +187,40 @@ public partial class NPCController
             TargetableCollider = _targetCollider;
         }
 
+        var anim = GetComponentsInChildren<MonoBehaviour>(true).OfType<INpcAnimationControl>().FirstOrDefault();
+        if (anim != null) _animationControl = anim;
+
         SetPrimaryToPlayer();
         SetNavMeshAgentParams();
         OnMeleeRangeCheckCallback = OnMeleeRangeEnter;
 
+        ConstructFSM();
+
+        OnStableFOVResult = StableFOVResultConfirmed;
+        OnRequestAgentStoppingDistance = GetAgentStoppingDistance;
+
+       // base.RegisterLocalEvents(_eManager);
+       // RegisterGlobalEvents();
+    }
+
+    public override void Init(ISceneAIServices services, AgentEventManager manager)
+    {
+        if(manager == null)
+        {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            Debug.LogError(manager + " is null in NPCControllerNew Init");
+#endif
+            _eManager = gameObject.AddComponent<AgentEventManager>();
+        }
+        else
+            _eManager = manager;
+
+        _services = services;
+    }
+
+
+    private void ConstructFSM()
+    {
         _destinationProviders = new()
         {
             [StateId.Patrol] = new WaypointProvider(WaypointRepo.Instance),
@@ -167,19 +229,16 @@ public partial class NPCController
 
         _destinationResolver = new DestinationResolver(_destinationProviders);
         _fovParams.FOVTarget = PrimaryTarget;
-        _pathFinder = new PathFinder(_destinationResolver);
+        if(_services.TryGetPathService(out var service)) _pathFinder = new PathFinderNew(service);
+
         _fovRunner = new NPCFieldOfViewHandler(_fovParams);
 
-        FSM = new FSMManager(data: this, resolver: _pathFinder, runner: _fovRunner);
-        FSM.Notification = Notify;
-        FSM.OnAnimationIntent = AnimationIntent;
-        FSM.OnMapDestinationToZone = MapDestinationToZone;
-
-        OnTargetSeen = TargetSeen;
-        OnTargetLost = TargetLost;
-
-        base.RegisterLocalEvents(_eManager);
-        RegisterGlobalEvents();
+        _fsmManager = new FSMBaseNew(data: this, resolver: _pathFinder, runner: _fovRunner, _fsmStates);
+        _fsmStates.TryAdd(StateId.Patrol, new FSMPatrolState(data: this, resolver: _pathFinder, stateContext: _fsmManager));
+        _fsmStates.TryAdd(StateId.Chase, new FSMChaseState(data: this, resolver: _pathFinder, stateContext: _fsmManager));
+        _fsmManager.Notification = Notify;
+        _fsmManager.OnAnimationIntent = AnimationIntent;
+        _fsmManager.OnMapDestinationToZone = MapDestinationToZone;///// maybe when entering patrol
     }
 
     private void SetNavMeshAgentParams()
@@ -191,29 +250,29 @@ public partial class NPCController
         Path = new NavMeshPath();
     }
 
-    public override void UnRegisterLocalEvents(EventManager eventManager)
+    public void UnRegisterLocalEvents(EventManager eventManager)
     {
         OnMeleeRangeCheckCallback = null;
-        base.UnRegisterLocalEvents(_eManager);
-        UnRegisterGlobalEvents();
+      //  base.UnRegisterLocalEvents(_eManager);
+      //  UnRegisterGlobalEvents();
     }
 
-    protected override void OnSceneComplete()
+    protected void OnSceneComplete()
     {
-        base.OnSceneComplete();
-        FSM.OnMapDestinationToZone = null;
-        FSM.Notification = null;
-        FSM.OnAnimationIntent = null;
-        OnTargetSeen = null;
-        OnTargetLost = null;
+       // base.OnSceneComplete();
+        _fsmManager.Notification = null;
+        _fsmManager.OnAnimationIntent = null;
+        _fsmManager.OnMapDestinationToZone = null;
+        OnRequestAgentStoppingDistance = null;
+       // OnTargetSeen = null;
+       // OnTargetLost = null;
     }
 
-    protected override void OnSceneStarted()
+    protected void OnSceneStarted()
     {
-        base.OnSceneStarted();
-        _eManager.SetLookTarget(PrimaryTarget?.Transform);
-        SwitchTo(Patrol.Instance);
-
+       // base.OnSceneStarted();
+        _animationControl?.SetIKLookTarget(PrimaryTarget?.Transform);
+        _fsmManager?.SwitchTo(StateId.Patrol);
     }
 
 
@@ -228,4 +287,7 @@ public partial class NPCController
         }
         PrimaryTarget = player;
     }
-}*/
+
+    
+}
+

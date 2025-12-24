@@ -38,3 +38,26 @@ public abstract class ComponentEvents : MonoBehaviour
 
     // protected virtual void OnPlayerRespawned() { }
 }
+
+
+public abstract class ComponentInit<TServices, TManager> : MonoBehaviour, IServicable<TServices, TManager>
+    where TServices : class
+    where TManager : EventManagerBase
+{
+    public bool OwnerIsDead { get; protected set; } = false;
+
+    public abstract void Init(TServices services, TManager manager);
+    
+    void IServicable.Init(ISceneServiceProvider provider, EventManagerBase manager)
+    {
+        if (provider is not TServices s) return;
+        if (manager is not TManager m) return;
+        Init(s, m);
+    }
+
+    public void Unload()
+    {
+        throw new System.NotImplementedException();
+    }
+
+}

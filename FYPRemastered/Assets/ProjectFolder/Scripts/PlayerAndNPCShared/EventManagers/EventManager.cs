@@ -201,25 +201,19 @@ public abstract class EventManagerBase : MonoBehaviour
 {
     protected List<ComponentEvents> _cachedListeners;
 
-    List<IServicable<ISceneServiceProvider, EventManagerBase>> _servicables = new();
+    List<IServicable> _servicables = new();
 
-    public void Init(ISceneServiceProvider sProvider)
+    public void Init(ISceneServiceProvider serviceProvider)
     {
-        var servicables = GetComponentsInChildren<MonoBehaviour>(true);
-        foreach (var mb in servicables)
-        {
-            if (mb is IServicable<ISceneServiceProvider, EventManagerBase> servicable)
-            {
-                _servicables.Add(servicable);
-            }
-        }
+        var monoBehaviours = GetComponentsInChildren<MonoBehaviour>(true);
 
-       
+        foreach(var mb in monoBehaviours)
+            if(mb is IServicable s)
+                _servicables.Add(s);
 
         foreach(var s in _servicables)
-        {
-            s.Load(sProvider, this);
-        }
+            s.Init(serviceProvider, this);
+      
     }
 
     /// <summary>

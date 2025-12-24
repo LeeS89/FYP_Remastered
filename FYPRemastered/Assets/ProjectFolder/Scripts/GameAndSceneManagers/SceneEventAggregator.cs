@@ -177,10 +177,8 @@ public class SceneServiceBus : ISceneServiceProvider
     private IPathService _pathService;
     private IGameManager _gameManager;
 
-    public SceneServiceBus(string sceneName)
-    {
-        _sceneName = sceneName;
-    }
+    public SceneServiceBus(string sceneName) => _sceneName = sceneName;
+
 
     public async Task InitialiseServicesAsync()
     {
@@ -191,7 +189,12 @@ public class SceneServiceBus : ISceneServiceProvider
         if(_waypointService == null)
             Debug.LogError("Failed to initialise Waypoint Service");
         else
+        {
+            // _NpcService is only used in scenes containing waypoints
+            
             Debug.LogError("Waypoint Service Initialised");
+        }
+            
         /* // Initialise Flank Service
          _flankService = await ServiceFactory.TryCreateAsync<FlankPointBlockData, IFlankService, FlankPointServiceNew>(_sceneName, "FlankPointService")
              ?? throw new Exception("Failed to initialise Flank Point Service");*/
@@ -211,12 +214,25 @@ public class SceneServiceBus : ISceneServiceProvider
     public IPlayerRefService PlayerRefService => throw new NotImplementedException();
 
    
+    private bool IsPlayer(ITargetable targetable)
+    {
+        if (_gameManager == null) return false;
+        return targetable == _gameManager.GetPlayer();
+    }
+
     public void OnTargetableDied(ITargetable targetable)
     {
         if (targetable == null) return;
 
-        if(_gameManager != null && targetable == _gameManager.GetPlayer())
+        if(IsPlayer(targetable))
             _gameManager.PlayerDied();
+    }
+
+    public void OnTargetableRespawned(ITargetable targetable)
+    {
+        if (targetable == null) return;
+        if (IsPlayer(targetable))
+            _gameManager.PlayerRespawned();
     }
 
     public bool TryGetPathService(out IPathService pathService)
@@ -234,7 +250,9 @@ public class SceneServiceBus : ISceneServiceProvider
 
     public bool TryGetNpcService(out INpcService npcService)
     {
-        throw new NotImplementedException();
+        if(_npcService == null) _npcService = new AgentZoneRegistryNew();
+        npcService = _npcService;
+        return _npcService != null;
     }
 
     public bool TryGetFlankService(out IFlankService flankService)
@@ -329,6 +347,7 @@ public interface ISceneService
     event Action OnSceneBegin;
     event Action OnSceneEnd;
     void OnTargetableDied(ITargetable targetable);
+    void OnTargetableRespawned(ITargetable targetable);
 }
 
 public interface IGameManager : IPlayerRefService
@@ -405,13 +424,18 @@ public interface INpcService
 public interface  IPoolService
 {
     void RequestPool(PoolIdSO poolIdRef, Action<PoolRequestResult, string, IPoolManager> onRequestComplete);
+  
 }
 
-
-public interface IServicable<TServices, TManager>
+public interface IServicable
 {
-    void Load(TServices services, TManager manager);
+    void Init(ISceneServiceProvider provider, EventManagerBase manager);
     void Unload();
+}
+public interface IServicable<TServices, TManager> : IServicable
+{
+    void Init(TServices services, TManager manager);
+    
 }
 
 

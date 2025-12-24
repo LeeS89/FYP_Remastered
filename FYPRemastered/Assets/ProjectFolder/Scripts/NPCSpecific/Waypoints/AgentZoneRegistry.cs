@@ -172,7 +172,7 @@ public class AgentZoneRegistry : SceneResources
     }
 
 }*/
-public class AgentZoneRegistryNew : SceneResources
+public class AgentZoneRegistryNew : SceneResources, INpcService
 {
     private Dictionary<ZoneId, List<INotificationListener>> _zoneAgents = new();
     private readonly HashSet<ZoneId> _alertedZones = new();
@@ -245,4 +245,18 @@ public class AgentZoneRegistryNew : SceneResources
         _zoneAgents.Clear();
     }
 
+    public void RegisterAgentAndZone(INotificationListener agent, ZoneId zone)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void UnregisterAgentAndZone(INotificationListener agent, ZoneId zone)
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool TryAlertAgentsInZone(ZoneId zone, INotificationListener listener)
+    {
+        throw new NotImplementedException();
+    }
 }

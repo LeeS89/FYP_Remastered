@@ -392,15 +392,38 @@ public partial class NPCController : ComponentEvents, IAgentData, INPCBrainConte
 
     
 }
-/*[RequireComponent(typeof(NavMeshAgent))]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(NavMeshObstacle))]
-public partial class NPCController : ComponentEvents, IFSMOwner, IAgentData, IZoneAlertListener
+public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEventManager>, IAgentData, INPCBrainContext, INotificationListener
 {
-    protected EnemyEventManager _eManager;
-    private bool _isInStateTransition = false;
+    //protected EnemyEventManager _eManager;
+    //   private bool _isInStateTransition = false;
     protected Action _onLayerToggleComplete;
     protected ZoneId _zoneId = ZoneId.Unknown;
-
 
     // Data queried by the FSMManager 
     public ITargetable PrimaryTarget { get; set; }
@@ -429,8 +452,15 @@ public partial class NPCController : ComponentEvents, IFSMOwner, IAgentData, IZo
     public bool TestSprint;
     public bool TestWalk;
 
+    [Header("Data used by the Brain component")]
+    public StateId CurrentFSMState => _fsmManager?.CurrentStateId ?? StateId.None;
+    public CombatOrder CurrentComOrder { get; private set; } = CombatOrder.None;
+    public RotationOrder CurrentRotOrder { get; private set; } = RotationOrder.None;
+    public FOVResult CurrentFOVState { get; private set; } = FOVResult.None;
+    private bool TargetDead() => PrimaryTarget?.IsDead ?? true;
+    // End Brain data
 
- 
+
     // ITargetable Data - This Gameobjects information for targeting purposes by other NPC's
     // i.e. its LayerMask, Transform, Aim Trigger, etc.
     [Header("The transform of this game object used for targeting purposes")]
@@ -444,7 +474,7 @@ public partial class NPCController : ComponentEvents, IFSMOwner, IAgentData, IZo
     [Header("Trigger area on the game object that other NPC's use as target area for aiming")]
     [SerializeField] protected Collider _targetCollider;
     public Collider TargetableCollider { get; protected set; }
-    public bool IsMoving { get; private set; } = false;
+    public bool IsStationary { get; private set; } = false;
 
     public Vector3 Position()
      => _parentTransform == null ? transform.position : _parentTransform.position;
@@ -457,14 +487,27 @@ public partial class NPCController : ComponentEvents, IFSMOwner, IAgentData, IZo
 
     public float SprintExitDist => throw new NotImplementedException();
 
+    public Func<StateId, float> OnRequestAgentStoppingDistance { get; private set; }
+
+    public bool IsDead { get; private set; } = false;
+
+    [Range(5,12)]
+    [SerializeField] private int _maxFlankSteps = 5;
+    [Min(4)]
+    [SerializeField] private int _minFlankSteps = 2;
+    public int MaxFlankSteps => _maxFlankSteps;
+
+    public int MinFlankSteps => _minFlankSteps;
+
     [Header(@"How many consecutive FOV results required to ""See ""or ""Lose ""the target")]
     [SerializeField] private uint _requiredSeenStreak = 3;
     [SerializeField] private uint _requiredNotSeenStreak = 5;
-    private bool _isTargetVisible = false;
+  //  private bool _isTargetVisible = false;
     private uint _currentSeenStreak = 0;
     private uint _currentNotSeenStreak = 0;
-    private Action OnTargetSeen;
-    private Action OnTargetLost;
+    private Action<FOVResult> OnStableFOVResult;
+  //  private Action OnTargetSeen;
+   // private Action OnTargetLost;
     private bool _aimingAtTarget = false;
 
 
@@ -473,20 +516,64 @@ public partial class NPCController : ComponentEvents, IFSMOwner, IAgentData, IZo
     [SerializeField] protected float _maxStopdistance = 12f;
     public float GetAgentStoppingDistance(StateId currentState)
     {
-        if (currentState != _state.Id) return 0f;
-
+        if (currentState != _fsmManager.CurrentStateId) return 0f;
         return currentState == StateId.Chase ? UnityEngine.Random.Range(_minStopdistance, _maxStopdistance) : 0f;
     }
 
-    
+
 
     // IFSMNotifications - For notifications received by the FSMManager, i.e. No valid destination, target lost, Target within melee/ shot range, etc.
-    public virtual void Notify(in OwnerNPCNotification n)
+    public void Notify(in NPCNotification n)
     {
-        if (_isInStateTransition || n.Id != _state.Id) return;
-        _state.Handle(this, n);
+        if (_fsmManager.IsInStateTransition /*|| n.Id != _fsmManager.CurrentStateId*/) return;
+     
+        if (!this.TryDecide(n, out var decision)) return;
+       
+        if (decision.BroadcastZoneAlert)
+            TryBroadcastAlert(decision.NextIntent);
+
+        if (decision.RotationOrder != RotationOrder.None)
+            CurrentRotOrder = decision.RotationOrder;
+
+        if (decision.CombatOrder != CombatOrder.None)
+            UpdateCombatOrder(decision.CombatOrder);
+
+        if (decision.NewFOVStatus != FOVResult.None)
+            ApplyFOVStatusUpdate(decision.NewFOVStatus);
+
+        if (decision.NextIntent != StateId.None)
+            _fsmManager.SwitchTo(decision.NextIntent);
+
+
     }
-    public void AnimationIntent(AnimationCue cue) => _eManager.TriggerAnimation(cue);
+
+    private void UpdateCombatOrder(CombatOrder order)
+    {
+        if (order == CurrentComOrder) return;
+        CancelCurrentCombatOrder();
+        CurrentComOrder = order;
+        
+        if (OwnerIsDead || TargetDead()) return;
+        // Apply Order/ Start order
+        if(CurrentComOrder == CombatOrder.FireAtWill)
+        {
+            if (!_animationControl?.IsAnimationLayerActive(AnimationLayer.Aim) ?? true)
+                StartCoroutine(WaitForAnimLayerFadeRoutine(AnimationLayer.Aim, true));
+            if (!_aimingAtTarget) { _aimingAtTarget = true; _animationControl?.IkLookAtTarget(look: true); }
+        }
+        //
+    }
+
+   
+
+    private void CancelCurrentCombatOrder()
+    {
+
+    }
+
+    private void ApplyFOVStatusUpdate(FOVResult result) => CurrentFOVState = result; 
+
+    public void AnimationIntent(AnimationCue cue) => _animationControl?.PlayClip(cue);
     // End IFSMNotificationss
 
 
@@ -513,7 +600,7 @@ public partial class NPCController : ComponentEvents, IFSMOwner, IAgentData, IZo
                 _zoneId = id;
                 SceneEventAggregator.Instance.RegisterAgentAndZone(this, _zoneId);
                 Debug.LogError("Zone ID on start: " + _zoneId.ToString());
-                FSM.OnMapDestinationToZone = null;
+                _fsmManager.OnMapDestinationToZone = null;
             }
         }
         else
@@ -524,15 +611,15 @@ public partial class NPCController : ComponentEvents, IFSMOwner, IAgentData, IZo
             SceneEventAggregator.Instance.UnregisterAgentAndZone(this, _zoneId);
             _zoneId = ZoneId.ZoneA;
             SceneEventAggregator.Instance.RegisterAgentAndZone(this, _zoneId);
-            FSM.OnMapDestinationToZone = null;
+            _fsmManager.OnMapDestinationToZone = null;
         }
     }
 
    
-    protected override void DeathStatusUpdated(bool isDead)
+    protected void DeathStatusUpdated(bool isDead)
     {
         if (OwnerIsDead == isDead) return;
-        base.DeathStatusUpdated(isDead);
+     //   base.DeathStatusUpdated(isDead);
 
 
     }
@@ -551,104 +638,147 @@ public partial class NPCController : ComponentEvents, IFSMOwner, IAgentData, IZo
     protected virtual void Update()
     {
         if(OwnerIsDead) return;
-        FSM?.Tick(Time.deltaTime);
-        IsMoving = FSM?.IsMoving() ?? false;
+        _fsmManager?.Tick(Time.deltaTime);
+        IsStationary = _fsmManager?.IsStationary() ?? true;
     }
 
     protected virtual void LateUpdate()
     {
         if (OwnerIsDead) return;
-        TryRotateAndAimAtTarget();
+        TryRotateAndAimAtTargetNew();
         //this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: CanRotateTowardsTarget());
-        FSM?.LateTick(Time.deltaTime);
+        _fsmManager?.LateTick(Time.deltaTime);
         if (_eManager == null) return;
-        _eManager.TickAnimator(Agent.velocity, Agent.transform.forward);
+        _animationControl?.Tick(Agent.velocity, Agent.transform.forward);
     }
 
-   
+
+    [Obsolete]
     public void SwitchTo(IIntentState next)
     {
-        if (next == null || _state == next || OwnerIsDead) return;
+       /* if (next == null || _state == next || OwnerIsDead) return;
         
         _isInStateTransition = true;
         _state?.Exit(this);
         _state = next;
         _state?.Enter(this);
-        _isInStateTransition = false;
+        _isInStateTransition = false;*/
     }
 
-    public void LogUnhandled(IntentStateBase state, in OwnerNPCNotification notification)
+    public void LogUnhandled(IntentStateBase state, in NPCNotification notification)
     {
         var Kind = notification.Kind;
         Debug.LogError("Notification Kind from unhandled: "+ Kind.ToString());
     }
 
-    private FOVResult _currentFOVResult = FOVResult.TargetNotSeen;
+   
     public void HandleFOVSweepResult(FOVResult result, bool withinAttackAngles)
     {
         //Debug.LogError("FOVResult: "+result.ToString());
         if (OwnerIsDead) return;
-        result.CalculateFOVResultStreak(
-            ref _isTargetVisible,
+        result.CalculateFOVResultStreakNew(
             ref _currentSeenStreak,
             ref _currentNotSeenStreak,
             _requiredSeenStreak,
             _requiredNotSeenStreak,
-            onSeenStable: OnTargetSeen,
-            onNotSeenStable: OnTargetLost
+            onResultStable: OnStableFOVResult
             );
+    }
+
+    
+
+    private void StableFOVResultConfirmed(FOVResult result)
+    {
+        if (OwnerIsDead) return;
+        Debug.LogError("Stable FOVResult: "+result.ToString());
+        ApplyFOVStatusUpdate(result);
+        var n = NPCNotification.FOVUpdate(/*_fsmManager.CurrentStateId,*/ CurrentFOVState, false);
+        Notify(n);
     }
 
     private void TargetSeen()
     {
         if (OwnerIsDead) return;
         Debug.LogError("FOVResult: Target Seen");
-        _currentFOVResult = FOVResult.TargetSeen;
-      //  _eManager.AimTowardsTarget(aim: true);
-        if (_state == Patrol.Instance)
+        ApplyFOVStatusUpdate(FOVResult.TargetSeen);
+        //  _eManager.AimTowardsTarget(aim: true);
+        var n = NPCNotification.FOVUpdate(/*_fsmManager.CurrentStateId, */CurrentFOVState, false);
+        Notify(n);
+
+       /* if (_fsmManager.CurrentStateId == StateId.Patrol)
         {
             TryBroadcastAlert();
             return;
-        }
+        }*/
     }
 
     private void TargetLost()
     {
         if (OwnerIsDead) return;
         Debug.LogError("FOVResult: Target Lost");
-        _currentFOVResult = FOVResult.TargetNotSeen;
+        CurrentFOVState = FOVResult.TargetNotSeen;
      //   _eManager.AimTowardsTarget(aim: false);
     }
 
     private void TryRotateAndAimAtTarget()
     {
-        if (OwnerIsDead) return;
-        if (_state == ChaseState.Instance || _state == FollowGroup.Instance)
-            if (!IsMoving || _currentFOVResult == FOVResult.TargetSeen)
+        if (OwnerIsDead || _fsmManager == null) return;
+        if (_fsmManager.CurrentStateId == StateId.Chase || _fsmManager.CurrentStateId == StateId.Follow)
+            if (IsStationary || CurrentFOVState == FOVResult.TargetSeen)
             {
                 this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: true);
-                if (!_aimingAtTarget) { _aimingAtTarget = true; _eManager.AimAtTarget(aim: true); }
+                if (!_aimingAtTarget) { _aimingAtTarget = true; _animationControl?.IkLookAtTarget(look: true); }
             }
             else
             {
                 this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: false);
-                if (_aimingAtTarget) { _aimingAtTarget = false; _eManager.AimAtTarget(aim: false); }
+                if (_aimingAtTarget) { _aimingAtTarget = false; _animationControl?.IkLookAtTarget(look: false); }
             }
     }
+    private void TryRotateAndAimAtTargetNew()
+    {
+        if (OwnerIsDead || TargetDead()) return;
+  
+        bool rotate = CurrentRotOrder == RotationOrder.RotateTowardsTarget;
+        this.RotateTowardsTarget(PrimaryTarget.Transform, rotate);
 
-    protected void TryBroadcastAlert()
+       /* if (_combatOrder != CombatOrder.None)
+        {
+            this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: true);
+            if (!_aimingAtTarget) { _aimingAtTarget = true; _eManager.AimAtTarget(aim: true); }
+        }
+        else
+        {
+            this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: false);
+            if (_aimingAtTarget) { _aimingAtTarget = false; _eManager.AimAtTarget(aim: false); }
+        }*/
+    }
+
+    protected void TryBroadcastAlert(StateId nextIntent = StateId.None)
     {
         if (OwnerIsDead) return;
         if(SceneEventAggregator.Instance.AlertAgentsInZone(_zoneId, this))
         {
             //SwitchTo(ChaseState.Instance);
-            EnterAlertPhase();
+         //   EnterAlertPhase(nextIntent);
            // StartCoroutine(WaitRoutine());
             Debug.LogError("Alert broadcasted to zone: " + _zoneId);
         }
     }
 
-    private IEnumerator WaitAndSwitchStateRoutine(AnimationLayer layer, IIntentState newState = null)
+    private IEnumerator WaitForAnimLayerFadeRoutine(AnimationLayer layer, bool activate, Action OnDone = null)
+    {
+        if (_animationControl == null) { OnDone?.Invoke(); yield break; }
+        _animationControl.ToggleAnimationLayer(layer, activate);
+
+        while (_animationControl.IsAnimationLayerActive(layer) != activate)
+            yield return null;
+
+        OnDone?.Invoke();
+    }
+
+    [Obsolete]
+    private IEnumerator WaitAndSwitchStateRoutine(AnimationLayer layer, StateId nextIntent = StateId.None)
     {
         bool done = false;
         _eManager.TogglingAnimationLayer(layer,
@@ -662,14 +792,16 @@ public partial class NPCController : ComponentEvents, IFSMOwner, IAgentData, IZo
         }
         if (OwnerIsDead) yield break;
         Debug.LogError("Moving to Chase state");
-        SwitchTo(newState);
+        _fsmManager?.SwitchTo(nextIntent);
     }
 
 
-    public void EnterAlertPhase()
+    public void EnterAlertPhase(StateId nextIntent)
     {
         if (OwnerIsDead) return;
-        StartCoroutine(WaitAndSwitchStateRoutine(AnimationLayer.Aim, ChaseState.Instance));
+        StartCoroutine(WaitAndSwitchStateRoutine(AnimationLayer.Aim, nextIntent)); // change to new
        // SwitchTo(ChaseState.Instance);
     }
-}*/
+
+    
+}
