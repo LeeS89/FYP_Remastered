@@ -7,14 +7,15 @@ public sealed class FSMPatrolState : FSMBaseState
 {
     private readonly IWaypointService _waypointService;
 
-    public FSMPatrolState(IAgentData data, IPathResolver resolver, IFSMStateContext stateContext) 
+    public FSMPatrolState(IWaypointService waypointService, IAgentData data, IPathResolver resolver, IFSMStateContext stateContext) 
         : base(data, resolver, stateContext, StateId.Patrol)
     {
+        _waypointService = waypointService;
         _candidateDestinations.EnsureCapacity(10);
     }
         
     
-
+    
     public override void EnterState() => ValidateCandidateDestinations();
 
 

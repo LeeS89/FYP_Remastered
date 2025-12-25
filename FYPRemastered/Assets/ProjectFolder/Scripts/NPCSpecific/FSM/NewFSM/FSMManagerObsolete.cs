@@ -42,7 +42,7 @@ public class FSMManagerObsolete : FSMBaseObsolete
         {
             FOVParameters fovParams = new FOVParameters();
             fovParams.ownerOrigin = data.Transform;
-            fovParams.FOVTarget = data.PrimaryTarget;
+          //  fovParams.FOVTarget = data.PrimaryTarget;
             // Add FOV origin aswell
             _fovHandler = new NPCFieldOfViewHandler(fovParams);
         }
@@ -241,7 +241,7 @@ public class FSMManagerObsolete : FSMBaseObsolete
 
     private void TimerTicks(float dt)
     {
-        if(_ownerData is NPCController c) // Delete later
+        if(_ownerData is NPCControllerObsolete c) // Delete later
         {
             if (c.TestSprint)
             {
@@ -297,13 +297,13 @@ public class FSMManagerObsolete : FSMBaseObsolete
                 request = ValidateDestination.GetPatrolPoint(_ownerData, _ownerData.Path/*, OnWaypointZoneReceived*/);
                 break;
             case StateId.Chase:
-                request = ValidateDestination.GetTargetPosition(_ownerData.Path, ReasonForDestinationCheck.ValidatePathForDestination, _ownerData, _ownerData.PrimaryTarget);
+               // request = ValidateDestination.GetTargetPosition(_ownerData.Path, ReasonForDestinationCheck.ValidatePathForDestination, _ownerData, _ownerData.PrimaryTarget);
                 break;
             default:
                 return;
         }
 
-        _pathFinder?.TryGetDestination(request);
+      //  _pathFinder?.TryGetDestination(request);
     }
 
 

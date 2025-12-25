@@ -200,19 +200,6 @@ public class SceneServiceBus : ISceneServiceProvider
              ?? throw new Exception("Failed to initialise Flank Point Service");*/
     }
 
-
-    public IWaypointService WaypointService => throw new NotImplementedException();
-
-    public INpcService NpcService => throw new NotImplementedException();
-
-    public IFlankService FlankService => throw new NotImplementedException();
-
-    public IPoolService PoolService => throw new NotImplementedException();
-
-    public IPathService PathService => throw new NotImplementedException();
-
-    public IPlayerRefService PlayerRefService => throw new NotImplementedException();
-
    
     private bool IsPlayer(ITargetable targetable)
     {
@@ -268,7 +255,11 @@ public class SceneServiceBus : ISceneServiceProvider
         return true;
     }
 
-
+    public bool TryGetPlayerRefService(out IPlayerRefService playerRefService)
+    {
+        playerRefService = _gameManager;
+        return _gameManager != null;
+    }
 
 
     #region Obsolete
@@ -366,7 +357,7 @@ public interface IPlayerRefService
 
 public interface ISceneAIServices : ISceneService
 {
-    IPlayerRefService PlayerRefService { get; }
+    bool TryGetPlayerRefService(out IPlayerRefService playerRefService);
 
     bool TryGetPathService(out IPathService pathService);
    // IPathService PathService { get; }

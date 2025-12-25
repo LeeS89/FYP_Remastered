@@ -4,9 +4,10 @@ public class FSMChaseState : FSMBaseState
 {
     private float _repathInterval = 0.25f;
     private float _timeSinceLastRepath = 0f;
+    private ITargetable _target;
 
-    public FSMChaseState(IAgentData data, IPathResolver resolver, IFSMStateContext stateContext)
-        : base(data, resolver, stateContext, StateId.Chase) { }
+    public FSMChaseState(ITargetable target, IAgentData data, IPathResolver resolver, IFSMStateContext stateContext)
+        : base(data, resolver, stateContext, StateId.Chase) { _target = target; }
 
     
 
@@ -20,8 +21,8 @@ public class FSMChaseState : FSMBaseState
 
     public override void ValidateCandidateDestinations()
     {
-        if (_ownerData == null || _ownerData.Path == null || _ownerData.PrimaryTarget == null) return;
-        var request = ValidateDestination.GetTargetPosition(_ownerData.Path, ReasonForDestinationCheck.ValidatePathForDestination, _ownerData, _ownerData.PrimaryTarget);
+        if (_ownerData == null || _ownerData.Path == null || _target == null /*_ownerData.PrimaryTarget == null*/) return;
+        var request = ValidateDestination.GetTargetPosition(_ownerData.Path, ReasonForDestinationCheck.ValidatePathForDestination, _ownerData, _target/*_ownerData.PrimaryTarget*/);
         _pathFinder?.TryGetDestination(request);
     }
 
@@ -37,12 +38,12 @@ public class FSMChaseState : FSMBaseState
 
     public override void LateTick(float dt)
     {
-        if (!_hasDestination || _ownerData == null || _ownerData.PrimaryTarget == null) return;
+        if (!_hasDestination || _ownerData == null || _target == null/*_ownerData.PrimaryTarget == null*/) return;
         _timeSinceLastRepath -= dt;
 
         if (_timeSinceLastRepath <= 0f)
         {
-            if(!_ownerData.PrimaryTarget.IsStationary) // Target is moving, need to repath
+            if(!_target.IsStationary/*!_ownerData.PrimaryTarget.IsStationary*/) // Target is moving, need to repath
             {
                 _hasDestination = false;
                 ValidateCandidateDestinations();

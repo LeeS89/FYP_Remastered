@@ -44,7 +44,8 @@ public abstract class ComponentInit<TServices, TManager> : MonoBehaviour, IServi
     where TServices : class
     where TManager : EventManagerBase
 {
-    public bool OwnerIsDead { get; protected set; } = false;
+  //  public bool OwnerIsDead { get; protected set; } = false;
+    public bool IsDead { get; protected set; } = false;
 
     public abstract void Init(TServices services, TManager manager);
     

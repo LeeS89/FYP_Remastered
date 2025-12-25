@@ -143,7 +143,7 @@ public partial class FSMBaseNew : IFSMControlNew
 
     private void TimerTicks(float dt)
     {
-        if (_ownerData is NPCController c) // Delete later
+        if (_ownerData is NPCControllerObsolete c) // Delete later
         {
             if (c.TestSprint)
                 (_lerpSpeed, _targetSpeed) = (_ownerData.SprintSpeed, 2f);

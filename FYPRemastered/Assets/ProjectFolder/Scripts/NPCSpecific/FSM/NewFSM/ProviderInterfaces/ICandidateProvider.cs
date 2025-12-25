@@ -50,7 +50,7 @@ public interface IFlankPointSampler
 {
     List<FlankPointData> GetFlankPoints();
 }
-
+[Obsolete]
 public class DestinationResolver : ICandidateProvider
 {
     private IReadOnlyDictionary<StateId, ICandidateProvider> _providers;
@@ -95,7 +95,7 @@ public class DestinationResolver : ICandidateProvider
     }
 }
 
-
+[Obsolete]
 public abstract class DestinationProvider : ICandidateProvider
 {
     public List<(Vector3, Vector3?)> Candidates { get; set; } = new();
@@ -119,7 +119,7 @@ public abstract class DestinationProvider : ICandidateProvider
     
 }
 
-
+[Obsolete]
 public sealed class TargetPointProvider : DestinationProvider
 {
     private ITargetable _target;
@@ -150,6 +150,7 @@ public sealed class TargetPointProvider : DestinationProvider
     
 }
 
+[Obsolete]
 public sealed class WaypointProvider : DestinationProvider
 {
     private IWaypointRepository _repo;

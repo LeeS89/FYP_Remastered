@@ -1,5 +1,7 @@
+using System;
 using UnityEngine;
 
+[Obsolete]
 public sealed class Flank : IntentStateBase
 {
     public static readonly Flank Instance = new();

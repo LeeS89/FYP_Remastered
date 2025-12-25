@@ -5,7 +5,7 @@ using UnityEngine.AI;
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(NavMeshObstacle))]
-public partial class NPCController : ComponentEvents, IAgentData, INPCBrainContext, INotificationListener
+public partial class NPCControllerObsolete : ComponentEvents, IAgentData, INPCBrainContext, INotificationListener
 {
     protected EnemyEventManager _eManager;
     //   private bool _isInStateTransition = false;
@@ -445,6 +445,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
     protected float _walkSpeed = 0.9f;
     [SerializeField, Tooltip("Do Not Change - Synchronized with sprinting animation")]
     protected float _sprintSpeed = 3.6f;
+    public Func<StateId, float> OnRequestAgentStoppingDistance { get; private set; }
     // End FSM Data
 
     protected Action<bool> OnMeleeRangeCheckCallback;
@@ -487,9 +488,9 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
 
     public float SprintExitDist => throw new NotImplementedException();
 
-    public Func<StateId, float> OnRequestAgentStoppingDistance { get; private set; }
+    
 
-    public bool IsDead { get; private set; } = false;
+ 
 
     [Range(5,12)]
     [SerializeField] private int _maxFlankSteps = 5;
@@ -553,7 +554,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
         CancelCurrentCombatOrder();
         CurrentComOrder = order;
         
-        if (OwnerIsDead || TargetDead()) return;
+        if (IsDead || TargetDead()) return;
         // Apply Order/ Start order
         if(CurrentComOrder == CombatOrder.FireAtWill)
         {
@@ -618,7 +619,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
    
     protected void DeathStatusUpdated(bool isDead)
     {
-        if (OwnerIsDead == isDead) return;
+        if (IsDead == isDead) return;
      //   base.DeathStatusUpdated(isDead);
 
 
@@ -637,14 +638,14 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
 
     protected virtual void Update()
     {
-        if(OwnerIsDead) return;
+        if(IsDead) return;
         _fsmManager?.Tick(Time.deltaTime);
         IsStationary = _fsmManager?.IsStationary() ?? true;
     }
 
     protected virtual void LateUpdate()
     {
-        if (OwnerIsDead) return;
+        if (IsDead) return;
         TryRotateAndAimAtTargetNew();
         //this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: CanRotateTowardsTarget());
         _fsmManager?.LateTick(Time.deltaTime);
@@ -675,7 +676,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
     public void HandleFOVSweepResult(FOVResult result, bool withinAttackAngles)
     {
         //Debug.LogError("FOVResult: "+result.ToString());
-        if (OwnerIsDead) return;
+        if (IsDead) return;
         result.CalculateFOVResultStreakNew(
             ref _currentSeenStreak,
             ref _currentNotSeenStreak,
@@ -689,7 +690,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
 
     private void StableFOVResultConfirmed(FOVResult result)
     {
-        if (OwnerIsDead) return;
+        if (IsDead) return;
         Debug.LogError("Stable FOVResult: "+result.ToString());
         ApplyFOVStatusUpdate(result);
         var n = NPCNotification.FOVUpdate(/*_fsmManager.CurrentStateId,*/ CurrentFOVState, false);
@@ -698,7 +699,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
 
     private void TargetSeen()
     {
-        if (OwnerIsDead) return;
+        if (IsDead) return;
         Debug.LogError("FOVResult: Target Seen");
         ApplyFOVStatusUpdate(FOVResult.TargetSeen);
         //  _eManager.AimTowardsTarget(aim: true);
@@ -714,7 +715,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
 
     private void TargetLost()
     {
-        if (OwnerIsDead) return;
+        if (IsDead) return;
         Debug.LogError("FOVResult: Target Lost");
         CurrentFOVState = FOVResult.TargetNotSeen;
      //   _eManager.AimTowardsTarget(aim: false);
@@ -722,7 +723,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
 
     private void TryRotateAndAimAtTarget()
     {
-        if (OwnerIsDead || _fsmManager == null) return;
+        if (IsDead || _fsmManager == null) return;
         if (_fsmManager.CurrentStateId == StateId.Chase || _fsmManager.CurrentStateId == StateId.Follow)
             if (IsStationary || CurrentFOVState == FOVResult.TargetSeen)
             {
@@ -737,7 +738,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
     }
     private void TryRotateAndAimAtTargetNew()
     {
-        if (OwnerIsDead || TargetDead()) return;
+        if (IsDead || TargetDead()) return;
   
         bool rotate = CurrentRotOrder == RotationOrder.RotateTowardsTarget;
         this.RotateTowardsTarget(PrimaryTarget.Transform, rotate);
@@ -756,7 +757,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
 
     protected void TryBroadcastAlert(StateId nextIntent = StateId.None)
     {
-        if (OwnerIsDead) return;
+        if (IsDead) return;
         if(SceneEventAggregator.Instance.AlertAgentsInZone(_zoneId, this))
         {
             //SwitchTo(ChaseState.Instance);
@@ -787,10 +788,10 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
 
         while (!done)
         {
-            if (OwnerIsDead) yield break;
+            if (IsDead) yield break;
             yield return null;
         }
-        if (OwnerIsDead) yield break;
+        if (IsDead) yield break;
         Debug.LogError("Moving to Chase state");
         _fsmManager?.SwitchTo(nextIntent);
     }
@@ -798,7 +799,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
 
     public void EnterAlertPhase(StateId nextIntent)
     {
-        if (OwnerIsDead) return;
+        if (IsDead) return;
         StartCoroutine(WaitAndSwitchStateRoutine(AnimationLayer.Aim, nextIntent)); // change to new
        // SwitchTo(ChaseState.Instance);
     }
