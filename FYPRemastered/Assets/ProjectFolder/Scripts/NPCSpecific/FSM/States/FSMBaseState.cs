@@ -8,6 +8,7 @@ public abstract class FSMBaseState : IFSMState
     protected readonly IFSMStateContext _stateContext;
     protected Coroutine _runningRoutine;
     protected bool _hasDestination = false;
+    protected bool _isInState = false;
     protected DestinationValidationCallbackNew _validationCallback;
 
 
@@ -26,9 +27,10 @@ public abstract class FSMBaseState : IFSMState
         _validationCallback = OnPathResultReceived;
     }
 
+    protected bool OwnerDataNull() => _ownerData == null || _ownerData.Path == null;
     protected bool IsStationary() => _stateContext?.IsStationary() ?? true;
 
-    public virtual void EnterState() { _hasDestination = false; }
+    public virtual void EnterState() { _isInState = true; _hasDestination = false; }
     public abstract void ValidateCandidateDestinations();
     public virtual void RetrieveCandidateDestinations() { }
     protected virtual void OnPathResultReceived(in DestinationResultNew result)
@@ -36,6 +38,7 @@ public abstract class FSMBaseState : IFSMState
 
     public virtual void ExitState()
     {
+        _isInState = false;
         _pathFinder?.CancelAll();
         if (_runningRoutine != null)
         {

@@ -21,7 +21,7 @@ public class FSMChaseState : FSMBaseState
 
     public override void ValidateCandidateDestinations()
     {
-        if (_ownerData == null || _ownerData.Path == null || _target == null /*_ownerData.PrimaryTarget == null*/) return;
+        if (OwnerDataNull() || _target == null /*_ownerData.PrimaryTarget == null*/) return;
         var request = ValidateDestination.GetTargetPosition(_ownerData.Path, ReasonForDestinationCheck.ValidatePathForDestination, _ownerData, _target/*_ownerData.PrimaryTarget*/);
         _pathFinder?.TryGetDestination(request);
     }
@@ -38,7 +38,7 @@ public class FSMChaseState : FSMBaseState
 
     public override void LateTick(float dt)
     {
-        if (!_hasDestination || _ownerData == null || _target == null/*_ownerData.PrimaryTarget == null*/) return;
+        if (!_isInState || !_hasDestination || OwnerDataNull() || _target == null/*_ownerData.PrimaryTarget == null*/) return;
         _timeSinceLastRepath -= dt;
 
         if (_timeSinceLastRepath <= 0f)
