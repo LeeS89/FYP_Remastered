@@ -53,12 +53,15 @@ public abstract class ComponentInit<TServices, TManager> : MonoBehaviour, IServi
     {
         if (provider is not TServices s) return;
         if (manager is not TManager m) return;
+        
+       // provider.OnSceneBegin += OnSceneBegin;
+       // provider.OnSceneEnd += OnSceneEnd;
         Init(s, m);
     }
 
-    public void Unload()
-    {
-        throw new System.NotImplementedException();
-    }
+    public abstract void Unload();
+    protected virtual void OnSceneBegin() { }
+    protected virtual void OnSceneEnd() { }
+   
 
 }

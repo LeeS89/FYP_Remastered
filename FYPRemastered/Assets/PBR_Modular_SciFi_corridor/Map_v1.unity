@@ -116741,6 +116741,7 @@ GameObject:
   - component: {fileID: 1863641514}
   - component: {fileID: 1863641512}
   - component: {fileID: 1863641511}
+  - component: {fileID: 1863641520}
   m_Layer: 4
   m_Name: TestRunner2 (1)
   m_TagString: Untagged
@@ -116928,6 +116929,58 @@ Transform:
   - {fileID: 99692068}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+--- !u!114 &1863641520
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1863641510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0dad097637c8ea848a99d762118e5a81, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _maxWaitAtSeconds: 7
+  _minWaitAtSeconds: 0.5
+  _walkSpeed: 0.9
+  _sprintSpeed: 3.6
+  TestSprint: 0
+  TestWalk: 0
+  _parentTransform: {fileID: 1863641519}
+  _layerMask:
+    serializedVersion: 2
+    m_Bits: 0
+  _targetCollider: {fileID: 99692069}
+  _maxFlankSteps: 10
+  _minFlankSteps: 4
+  _requiredSeenStreak: 3
+  _requiredNotSeenStreak: 5
+  _minStopdistance: 4
+  _maxStopdistance: 12
+  _fovParams:
+    fovOrigin: {fileID: 1599725691}
+    maxFovTargets: 10
+    blockingMask:
+      serializedVersion: 2
+      m_Bits: 537
+    fovRadius: 25
+    ownerOrigin: {fileID: 1863641519}
+    waistHeightOffset: 1
+    eyeHeightOffset: 1.8
+    evaluationCapsuleRadius: 0.4
+    addTargetFallbackPoints: 0
+    fovHalfAngle: 50
+    useSeparateVerticleAngle: 0
+    verticalFovHalfAngle: 25
+    useShootingAngleRestriction: 1
+    halfHorizontalShootAngle: 15
+    idleFOVCheckFrequency: 1
+    heightenedFOVCheckFrequency: 0.5
+    suspiciousFOVCheckFrequency: 0.25
+    alertedFOVCheckFrequency: 0.1
+    alertToSuspiciousDelaySeconds: 3
+    suspiciousToIdleDelaySeconds: 5
 --- !u!1001 &1863965890
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -153216,7 +153269,7 @@ GameObject:
   - component: {fileID: 4565709518911953609}
   - component: {fileID: 8895819321149061180}
   - component: {fileID: 210860844461334392}
-  - component: {fileID: 8950683044442760029}
+  - component: {fileID: 8950683044442760030}
   m_Layer: 4
   m_Name: TestRunner2
   m_TagString: Untagged
@@ -154785,7 +154838,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6697218256617432362}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8950683044442760029
+--- !u!114 &8950683044442760030
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -154794,7 +154847,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6179558967993662372}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fd260b1ebb9d04544a84d028c42e8a54, type: 3}
+  m_Script: {fileID: 11500000, guid: 0dad097637c8ea848a99d762118e5a81, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _maxWaitAtSeconds: 7
@@ -154808,8 +154861,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   _targetCollider: {fileID: 226800903}
-  _maxFlankSteps: 5
-  _minFlankSteps: 2
+  _maxFlankSteps: 10
+  _minFlankSteps: 4
   _requiredSeenStreak: 3
   _requiredNotSeenStreak: 5
   _minStopdistance: 4

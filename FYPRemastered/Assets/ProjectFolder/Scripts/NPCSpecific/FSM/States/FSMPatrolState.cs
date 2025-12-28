@@ -16,7 +16,7 @@ public sealed class FSMPatrolState : FSMBaseState
         
     
     
-    public override void EnterState() => ValidateCandidateDestinations();
+    public override void EnterState() => RetrieveCandidateDestinations();
 
 
     public override void OnDestinationReached()
@@ -29,11 +29,11 @@ public sealed class FSMPatrolState : FSMBaseState
                 _stateContext.CurrentDestinationForward));
     }
 
-    public override void ValidateCandidateDestinations()
+    protected override void RetrieveCandidateDestinations()
     {
-        if(_candidateDestinations.Count == 0)
+        if (_candidateDestinations.Count == 0)
         {
-            if(_waypointService == null || !_waypointService.TryGetWaypoints(this, _candidateDestinations))
+            if (_waypointService == null || !_waypointService.TryGetWaypoints(this, _candidateDestinations))
             {
                 DestinationResultNew failedResult = new DestinationResultNew
                 (
@@ -43,12 +43,16 @@ public sealed class FSMPatrolState : FSMBaseState
                     Vector3.zero,
                     _id
                 );
-                    
+
                 base.OnPathResultReceived(in failedResult);
                 return;
             }
         }
+        ValidateCandidateDestinations();
+    }
 
+    public override void ValidateCandidateDestinations()
+    {
         if(_candidateDestinations.Count > 1)
         {
             var temp = _candidateDestinations[0];

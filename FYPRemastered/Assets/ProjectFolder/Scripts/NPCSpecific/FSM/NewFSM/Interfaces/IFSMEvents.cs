@@ -81,7 +81,7 @@ public interface IFSMStateContext : IAnimationCueSource
 
 public interface IAgentData : ITargetable
 {
-   // ITargetable PrimaryTarget { get; }
+    ITargetable PrimaryTarget { get; }
     NavMeshAgent Agent { get; }
     NavMeshObstacle Obstacle { get; }
     NavMeshPath Path { get; }

@@ -7,15 +7,13 @@ using Random = UnityEngine.Random;
 public class FSMFlankState : FSMBaseState
 {
     private IFlankService _flankService;
-    private ITargetable _target;
     private Action<bool> _onFlankCandidatesReceived;
     private List<int> _flankStepsToTry = new();
 
-    public FSMFlankState(IFlankService flankService, ITargetable target, IAgentData data, IPathResolver resolver, IFSMStateContext stateContext) 
+    public FSMFlankState(IFlankService flankService, IAgentData data, IPathResolver resolver, IFSMStateContext stateContext) 
         : base(data, resolver, stateContext, StateId.Flank)
     {
         _flankService = flankService;
-        _target = target;
         _candidateDestinations.EnsureCapacity(25);
         _flankStepsToTry.EnsureCapacity(10);
         _onFlankCandidatesReceived = OnCandidatesReceived;
@@ -27,7 +25,7 @@ public class FSMFlankState : FSMBaseState
         SortStepsToTry();
     }
 
-    public override void RetrieveCandidateDestinations()
+    protected override void RetrieveCandidateDestinations()
     {
         if (_flankStepsToTry.Count == 0)
         {
@@ -45,7 +43,7 @@ public class FSMFlankState : FSMBaseState
         // In DestinationResult, change found bool to result enum with values Found, NotFound, NoPrimaryTarget
         int stepsToTry = _flankStepsToTry[0];
         _flankStepsToTry.RemoveAt(0);
-        _flankService?.TryGetFlankCandidates(_target.Position()/*_ownerData.PrimaryTarget.Position()*/, stepsToTry, _candidateDestinations, _onFlankCandidatesReceived);
+        _flankService?.TryGetFlankCandidates(_ownerData.PrimaryTarget.Position(), stepsToTry, _candidateDestinations, _onFlankCandidatesReceived);
     }
 
     public override void ValidateCandidateDestinations()
@@ -60,6 +58,7 @@ public class FSMFlankState : FSMBaseState
 
     private void OnCandidatesReceived(bool success)
     {
+        if (!_isInState) return;
         // if ! success or no candidates, Send PathResult with found = false
     }
 

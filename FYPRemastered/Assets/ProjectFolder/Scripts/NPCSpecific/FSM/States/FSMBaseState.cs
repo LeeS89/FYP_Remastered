@@ -32,9 +32,12 @@ public abstract class FSMBaseState : IFSMState
 
     public virtual void EnterState() { _isInState = true; _hasDestination = false; }
     public abstract void ValidateCandidateDestinations();
-    public virtual void RetrieveCandidateDestinations() { }
+    protected virtual void RetrieveCandidateDestinations() { }
     protected virtual void OnPathResultReceived(in DestinationResultNew result)
-        => _stateContext?.OnDestinationResultReceived(in result);
+    {
+        if (!_isInState) return;
+        _stateContext?.OnDestinationResultReceived(in result);
+    }
 
     public virtual void ExitState()
     {
