@@ -116736,11 +116736,9 @@ GameObject:
   - component: {fileID: 1863641519}
   - component: {fileID: 1863641518}
   - component: {fileID: 1863641517}
-  - component: {fileID: 1863641516}
   - component: {fileID: 1863641515}
   - component: {fileID: 1863641514}
   - component: {fileID: 1863641512}
-  - component: {fileID: 1863641511}
   - component: {fileID: 1863641520}
   m_Layer: 4
   m_Name: TestRunner2 (1)
@@ -116749,58 +116747,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1863641511
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1863641510}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fd260b1ebb9d04544a84d028c42e8a54, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _maxWaitAtSeconds: 7
-  _minWaitAtSeconds: 0.5
-  _walkSpeed: 0.9
-  _sprintSpeed: 3.6
-  TestSprint: 0
-  TestWalk: 0
-  _parentTransform: {fileID: 1863641519}
-  _layerMask:
-    serializedVersion: 2
-    m_Bits: 0
-  _targetCollider: {fileID: 99692069}
-  _maxFlankSteps: 5
-  _minFlankSteps: 2
-  _requiredSeenStreak: 3
-  _requiredNotSeenStreak: 5
-  _minStopdistance: 4
-  _maxStopdistance: 12
-  _fovParams:
-    fovOrigin: {fileID: 1599725691}
-    maxFovTargets: 10
-    blockingMask:
-      serializedVersion: 2
-      m_Bits: 537
-    fovRadius: 25
-    ownerOrigin: {fileID: 1863641519}
-    waistHeightOffset: 1
-    eyeHeightOffset: 1.8
-    evaluationCapsuleRadius: 0.4
-    addTargetFallbackPoints: 0
-    fovHalfAngle: 50
-    useSeparateVerticleAngle: 0
-    verticalFovHalfAngle: 25
-    useShootingAngleRestriction: 1
-    halfHorizontalShootAngle: 15
-    idleFOVCheckFrequency: 1
-    heightenedFOVCheckFrequency: 0.5
-    suspiciousFOVCheckFrequency: 0.25
-    alertedFOVCheckFrequency: 0.1
-    alertToSuspiciousDelaySeconds: 3
-    suspiciousToIdleDelaySeconds: 5
 --- !u!114 &1863641512
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -116850,19 +116796,6 @@ NavMeshObstacle:
   m_CarveOnlyStationary: 0
   m_Center: {x: 0, y: 1, z: 0}
   m_TimeToStationary: 0.5
---- !u!114 &1863641516
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1863641510}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f5d6e71e80e349548aca2fca6f29d3ee, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _testRespawn: 0
 --- !u!54 &1863641517
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -151112,19 +151045,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &434941016991225415
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6179558967993662372}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f5d6e71e80e349548aca2fca6f29d3ee, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _testRespawn: 0
 --- !u!1 &455928717344341558
 GameObject:
   m_ObjectHideFlags: 0
@@ -153265,11 +153185,11 @@ GameObject:
   - component: {fileID: 8070524998269774116}
   - component: {fileID: 5247023209646184639}
   - component: {fileID: 3273731175326554301}
-  - component: {fileID: 434941016991225415}
   - component: {fileID: 4565709518911953609}
   - component: {fileID: 8895819321149061180}
   - component: {fileID: 210860844461334392}
   - component: {fileID: 8950683044442760030}
+  - component: {fileID: 8950683044442760031}
   m_Layer: 4
   m_Name: TestRunner2
   m_TagString: Untagged
@@ -154890,6 +154810,19 @@ MonoBehaviour:
     alertedFOVCheckFrequency: 0.1
     alertToSuspiciousDelaySeconds: 3
     suspiciousToIdleDelaySeconds: 5
+--- !u!114 &8950683044442760031
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6179558967993662372}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9eb00770dd0468a41b37de612cbaade3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _testRespawn: 0
 --- !u!4 &8992343795732171483
 Transform:
   m_ObjectHideFlags: 0

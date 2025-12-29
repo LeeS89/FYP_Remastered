@@ -1,33 +1,31 @@
 using System;
-
 using UnityEngine;
 
-
-public class EnemyEventManager : EventManager
+public class AgentEventManager : EventManagerBase
 {
     #region To be made obsolete + re enable later
-      public Action<AnimationCue> OnAnimationTriggered;
+    public Action<AnimationCue> OnAnimationTriggered;
     /// <summary>
     /// Animation actions other than Locomotion i.e. Melee, Look around etc
     /// </summary>
     /// <param name="action"></param>
-     public void TriggerAnimation(AnimationCue action) => OnAnimationTriggered?.Invoke(action);
+    public void TriggerAnimation(AnimationCue action) => OnAnimationTriggered?.Invoke(action);
 
     ////// NEW TODAY (DECEMBER 6th)
-      public Action<AnimationLayer, bool, Action> OnTogglingAnimationLayerNew;
+    public Action<AnimationLayer, bool, Action> OnTogglingAnimationLayerNew;
     public void TogglingAnimationLayerNew(AnimationLayer layer, bool activate, Action onComplete = null)
         => OnTogglingAnimationLayerNew?.Invoke(layer, activate, onComplete);
     ///// END DECEMBER 6th
 
-     public Func<AnimationLayer, bool> OnGetLayerActiveState;
+    public Func<AnimationLayer, bool> OnGetLayerActiveState;
 
-     public bool IsLayerActive(AnimationLayer layer) => OnGetLayerActiveState?.Invoke(layer) ?? true;
+    public bool IsLayerActive(AnimationLayer layer) => OnGetLayerActiveState?.Invoke(layer) ?? true;
 
-      public Action<Transform> OnSetLookTarget;
-      public void SetLookTarget(Transform target) => OnSetLookTarget?.Invoke(target);
+    public Action<Transform> OnSetLookTarget;
+    public void SetLookTarget(Transform target) => OnSetLookTarget?.Invoke(target);
 
-     public Action<bool> OnAimTowardsTarget;
-      public void AimAtTarget(bool aim) => OnAimTowardsTarget?.Invoke(aim);
+    public Action<bool> OnAimTowardsTarget;
+    public void AimAtTarget(bool aim) => OnAimTowardsTarget?.Invoke(aim);
 
     public Action<Vector3, Vector3> OnTickAnimator;
 
@@ -39,17 +37,17 @@ public class EnemyEventManager : EventManager
     public event Action<bool> OnDestinationReached;
     //public event Action<Vector3, int> OnDestinationUpdated;  
     public Action<bool> OnTargetSeen;
-    
+
     public event Action<bool> OnRotateTowardsTarget;
     public event Action OnPathInvalid;
     //public event Action<AIDestinationRequestData> OnPathRequested;
 
     // Animation events
-    
+
     public event Action<float, float> OnSpeedChanged;
     public Action<AnimationLayer, float, float, float, bool> OnChangeAnimatorLayerWeight;
     public Action<AnimationLayer, Action<AnimationLayer>> OnToggleAnimationLayer;
-    
+
     public event Action<bool> OnAimingLayerReady;
     public event Action OnDeathAnimationComplete;
 
@@ -60,7 +58,7 @@ public class EnemyEventManager : EventManager
     //Patrolling events
     //public event Action<WaypointData> OnWaypointsUpdated;
 
-   
+
 
     //public event Action<bool> OnReload;
 
@@ -69,11 +67,11 @@ public class EnemyEventManager : EventManager
     public event Action<bool> OnMelee;
     public event Action OnMeleeAttackPerformed;
 
-  //  private List<ComponentEvents> _cachedListeners;
+    //  private List<ComponentEvents> _cachedListeners;
 
     // Chasing Events
     public event Action<AlertStatus> OnRequestStationaryState;
-   // public event Action OnRequestChasingState;
+    // public event Action OnRequestChasingState;
     public event Action<AIDestinationType> OnDestinationRequested;
     public event Action<bool> OnPendingNewDestination;
     public event Action<bool, bool> OnDestinationRequestStatus;
@@ -123,7 +121,7 @@ public class EnemyEventManager : EventManager
     }
 
 
-  
+
 
 
     /// <summary>
@@ -139,26 +137,26 @@ public class EnemyEventManager : EventManager
         OnPathInvalid?.Invoke();
     }
 
-   
+
     public void DestinationReached(bool reached) // Obsolete
     {
         OnDestinationReached?.Invoke(reached);
     }
 
-   
+
 
     public void TargetSeen(bool seen) => OnTargetSeen?.Invoke(seen); // Obsolete
 
-  
 
-   
+
+
 
 
     public void FacingTarget(bool facingTarget) // Obsolete
     {
         OnFacingTarget?.Invoke(facingTarget);
     }
-  
+
 
     /// <summary>
     /// Used to switch between aiming and non-aiming layers
@@ -180,9 +178,9 @@ public class EnemyEventManager : EventManager
     public void TogglingAnimationLayer(AnimationLayer layer, Action onComplete = null)
         => OnTogglingAnimationLayer?.Invoke(layer, onComplete);
 
- 
 
-   
+
+
 
     /// <summary>
     /// Used to alert the agents weapon to be ready to fire
@@ -193,11 +191,11 @@ public class EnemyEventManager : EventManager
         OnAimingLayerReady?.Invoke(isReady);
     }
 
-   
-   /* public void Reload(bool isReloading)
-    {
-        OnReload?.Invoke(isReloading);
-    }*/
+
+    /* public void Reload(bool isReloading)
+     {
+         OnReload?.Invoke(isReloading);
+     }*/
 
     public void MeleeTriggered(bool isMelee)
     {
@@ -283,19 +281,5 @@ public class EnemyEventManager : EventManager
     public void UpdateChaseTarget(Transform target) => OnUpdateChaseTarget?.Invoke(target);
 
 
-   
+
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

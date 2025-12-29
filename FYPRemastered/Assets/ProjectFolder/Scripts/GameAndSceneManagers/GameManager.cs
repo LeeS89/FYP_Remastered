@@ -16,7 +16,7 @@ public enum PlayerPart
     DefenceCollider
 }
 
-public class GameManager : MonoBehaviour
+public class GameManager : MonoBehaviour, IGameManager
 {
     public GameObject Player { get; private set; }
     public GameObject PlayerDefenceCollider { get; private set; }
@@ -25,6 +25,8 @@ public class GameManager : MonoBehaviour
     public static event Action<bool> OnPlayerDeathStatusChanged;
     //public static event Action OnPlayerRespawn;
     public static event Action<bool> OnPlayerMoved;
+    public event Action OnPlayerDied;
+    public event Action OnPlayerRespawned;
 
     private bool _playerHasMoved = false;
     
@@ -281,5 +283,20 @@ public class GameManager : MonoBehaviour
     {
         OnPlayerMoved?.Invoke(playerMoved);
         //_onPlayerMovedinternal?.Invoke(_playerHasMoved);
+    }
+
+    public void PlayerDied()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void PlayerRespawned()
+    {
+        throw new NotImplementedException();
+    }
+
+    public ITargetable GetPlayer()
+    {
+        throw new NotImplementedException();
     }
 }

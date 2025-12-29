@@ -1,0 +1,138 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using UnityEngine;
+
+public abstract class SceneManagementBase : MonoBehaviour, ISceneManager
+{
+    public static SceneManagementBase _instance { get; private set; }
+
+    [SerializeField] protected List<EventManagerBase> _eventManagers;
+
+    protected List<PoolIdSO> _scenePoolsToLoad;
+
+    protected virtual void Awake()
+    {
+        _instance = this;
+    }
+
+    #region Scene Events
+    public event Action OnSceneStarted;
+    public event Action OnSceneComplete;
+
+    public void SceneStarted()
+    {
+        //GameManager.Instance.SetPlayer();
+        OnSceneStarted?.Invoke();
+    }
+
+    public void SceneComplete()
+    {
+        OnSceneComplete?.Invoke();
+    }
+
+    protected virtual void RegisterGettableComponents()
+    {
+        ComponentRegistry.SetCapacities<IDamageable>(20);
+        //ComponentRegistry.SetCapacities<IDeflectable>(100);
+
+        var damageables = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None).OfType<IDamageable>();
+        int count = damageables.Count();
+        Debug.LogError($"Found {count} IDamageable components in scene {gameObject.scene.name}");
+        foreach (var d in damageables)
+        {
+            ComponentRegistry.Register<IDamageable>(((MonoBehaviour)d).gameObject, d);
+        }
+        // ComponentRegistry.TrimAll();
+        //int count = damageables.Count();
+        //Debug.LogError($"Registered {count} IDamageable components in scene {gameObject.scene.name}");
+    }
+
+
+
+    #endregion
+
+    #region Abstract Functions
+    public abstract Task SetupScene();
+
+
+
+    protected abstract void UnloadSceneResources();
+    #endregion
+
+    #region Shared Scene Functions
+
+    protected virtual void LoadActiveSceneEventManagers(SceneServiceBus services)
+    {
+        _eventManagers = new List<EventManagerBase>();
+
+        _eventManagers.AddRange(FindObjectsByType<EventManagerBase>(FindObjectsInactive.Include, FindObjectsSortMode.None));
+
+        foreach (var eventManager in _eventManagers)
+        {
+            //if (eventManager is not CombatEventManager)
+           // {
+                eventManager.Init(services);//.BindComponentsToEvents();
+           //}
+        }
+    }
+
+    [Obsolete]
+    protected virtual void GatherScenePools()
+    {
+        _scenePoolsToLoad = new(10);
+        var behaviours = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        var results = new List<IPoolOwner>();
+
+        foreach (var b in behaviours)
+        {
+            if (b is IPoolOwner po)
+            {
+                _scenePoolsToLoad.AddRange(po.GetPoolIds());
+            }
+        }
+
+
+
+    }
+    #endregion
+
+
+
+    #region Obsolete Code
+    [Obsolete]
+    protected abstract Task LoadSceneResources();
+    //protected virtual void LoadWaypoints() { }
+    // public virtual void RegisterAgentAndZone(EnemyFSMController agent, int zone) { }
+    public virtual void UnregisterAgentAndZone(EnemyFSMController agent, int zone) { }
+    //public virtual void AlertZoneAgents(int zone, EnemyFSMController source) { }
+
+    // public virtual void EnqueuePathRequest(DestinationRequestData request) { }
+
+    //public virtual UniformZoneGridManager GetGridManager() => null;
+
+    /// <summary>
+    /// Events used with Enemy AI system to notify when the closest flanking point to player has changed.
+    /// When there is an active Alert status - OnClosestPointToPlayerChanged will be invoked by the player when ever they stop moving
+    /// This in turn runs the ClosestPointToPlayerJob to find the closest point to player. Once job completes,
+    /// OnClosestPointToPlayerJobComplete notifies all interested parties with the index of the closest point to player.
+    /// </summary>
+    public event Action OnClosestPointToPlayerChanged; // => Moving to Scene event aggregator
+    public event Action<int> OnClosestPointToPlayerJobComplete; // => Moving to Scene event aggregator
+
+    public void ClosestPointToPlayerchanged() // Player will invoke this event, and the scene manager will listen to it
+    {
+        OnClosestPointToPlayerChanged?.Invoke();
+    }
+
+    [Obsolete("Use Scene Event Aggregator instead")]
+    public void ClosestPointToPlayerJobComplete(int pointIndex)
+    {
+        OnClosestPointToPlayerJobComplete?.Invoke(pointIndex);
+    }
+
+
+    //public virtual void GetBulletPool(ref PoolManager manager) { }
+    #endregion
+}

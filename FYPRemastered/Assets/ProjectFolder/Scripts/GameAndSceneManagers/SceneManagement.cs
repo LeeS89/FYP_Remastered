@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class SceneManagement : BaseSceneManager
+public class SceneManagement : SceneManagementBase
 {
     [SerializeField] private WaypointBlockData _waypointBlockData;
     [SerializeField] private WaypointManager _waypointManager;
@@ -53,7 +53,7 @@ public class SceneManagement : BaseSceneManager
 
         RegisterGettableComponents();
 
-        LoadActiveSceneEventManagers();
+        LoadActiveSceneEventManagers(_sceneServiceBus);
 
         SceneStarted();
 

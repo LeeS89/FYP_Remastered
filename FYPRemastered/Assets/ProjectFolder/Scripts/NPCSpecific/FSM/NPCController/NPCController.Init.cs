@@ -49,6 +49,10 @@ public partial class NPCController
 
         if (_services.TryGetPlayerRefService(out _playerRefService))
             PrimaryTarget = _playerRefService.GetPlayer();
+        else
+        {
+            Debug.LogError("NULL PLAYER REF");
+        }
     }
 
     private void SetTargetableCollider()

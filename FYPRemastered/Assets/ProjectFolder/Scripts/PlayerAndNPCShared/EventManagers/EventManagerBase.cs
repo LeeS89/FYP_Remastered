@@ -1,14 +1,27 @@
+using Oculus.Interaction.Input;
+using ProjectRemaster.Combat;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using ProjectRemaster.Combat;
-using Oculus.Interaction.Input;
 
-public abstract class EventManager : MonoBehaviour
+public abstract class EventManagerBase : MonoBehaviour
 {
     protected List<ComponentEvents> _cachedListeners;
 
-    
+    List<IServicable> _servicables = new();
+
+    public void Init(ISceneServiceProvider serviceProvider)
+    {
+        var monoBehaviours = GetComponentsInChildren<MonoBehaviour>(true);
+
+        foreach (var mb in monoBehaviours)
+            if (mb is IServicable s)
+                _servicables.Add(s);
+
+        foreach (var s in _servicables)
+            s.Init(serviceProvider, this);
+
+    }
 
     /// <summary>
     /// Finds all Interface components within the object hierarchy and 
@@ -23,7 +36,7 @@ public abstract class EventManager : MonoBehaviour
 
         foreach (var listener in _cachedListeners)
         {
-            listener.RegisterLocalEvents(this);
+            // listener.RegisterLocalEvents(this);
         }
     }
 
@@ -31,7 +44,7 @@ public abstract class EventManager : MonoBehaviour
     {
         foreach (var listener in _cachedListeners)
         {
-            listener.UnRegisterLocalEvents(this);
+            // listener.UnRegisterLocalEvents(this);
         }
         _cachedListeners?.Clear();
         _cachedListeners = null;
@@ -76,22 +89,6 @@ public abstract class EventManager : MonoBehaviour
 
     public void SpendResources(ResourceCost resource/*Dictionary<StatEntry, float> stash*/) => OnSpendResources?.Invoke(resource/*stash*/);
 
-    /*public delegate bool TrySpendResource(ResourceCost resource, out float remaining);
-    public event TrySpendResource OnTrySpendResource;
-
-    public bool SpendResource(ResourceCost resource, out float remaining)
-    {
-        var handler = OnTrySpendResource;
-        if (handler == null)
-        {
-            remaining = 0f;
-            return false;
-        }
-        return handler(resource, out remaining);
-    }*/
-    //    public event Func<bool> OnSpendResource;
-
-    //  public bool SpendResource() => OnSpendResource?.Invoke() ?? false;
 
 
 
@@ -102,13 +99,7 @@ public abstract class EventManager : MonoBehaviour
         OnNotifyDamage?.Invoke(baseDamage, dType, statusEffectChancePercentage, damageOverTime, duration);
     }
 
-    //GunSetup(GameObject gunOwner, EventManager eventManager, Transform bulletSpawnLocaiton, int clipCapacity, Transform target = null)
-    /*public event Action<GameObject, EventManager,Transform, int, Transform> OnSetupGun;
 
-    public void SetupGun(GameObject gunOwner, EventManager eventManager, Transform bulletSpawnLocation, int clipCapacity, Transform target = null)
-    {
-        OnSetupGun?.Invoke(gunOwner, eventManager, bulletSpawnLocation, clipCapacity, target);
-    }*/
 
     public event Action<FireConditions> OnTryShoot;
 
@@ -125,7 +116,7 @@ public abstract class EventManager : MonoBehaviour
 
     public void OutOfAmmo() => OnOutOfAmmo?.Invoke();
 
-    
+
 
 
     public event Action<Vector3, float, float> OnKnockbackTriggered;
@@ -134,14 +125,6 @@ public abstract class EventManager : MonoBehaviour
     {
         OnKnockbackTriggered?.Invoke(direction, force, duration);
     }
-
-    // Gun Events
-    public event Action OnFireWeapon;
-
-    public void FireWeapon() => OnFireWeapon?.Invoke();
-
-
-
 
 
 
@@ -168,11 +151,3 @@ public abstract class EventManager : MonoBehaviour
     public void TriggerReleased() => OnTriggerReleased?.Invoke();
 
 }
-
-
-
-
-
-
-
-

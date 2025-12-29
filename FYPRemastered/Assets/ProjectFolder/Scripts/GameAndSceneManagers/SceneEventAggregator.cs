@@ -182,7 +182,7 @@ public class SceneServiceBus : ISceneServiceProvider
 
     public async Task InitialiseServicesAsync()
     {
-
+       // _gameManager = GameManager.Instance;
         // Initialise Waypoint Service
         _waypointService = await ServiceFactory.TryCreateAsync<WaypointBlockData, IWaypointService, WaypointResourcesNew>(_sceneName, "Waypoints");
          
