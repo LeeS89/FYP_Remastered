@@ -13,10 +13,10 @@ public sealed class FSMPatrolState : FSMBaseState
         _waypointService = waypointService;
         _candidateDestinations.EnsureCapacity(10);
     }
-        
-    
-    
-    public override void EnterState() => RetrieveCandidateDestinations();
+
+
+
+    public override void EnterState() { base.EnterState(); RetrieveCandidateDestinations(); }
 
 
     public override void OnDestinationReached()
@@ -55,6 +55,7 @@ public sealed class FSMPatrolState : FSMBaseState
     {
         if(_candidateDestinations.Count > 1)
         {
+         
             var temp = _candidateDestinations[0];
             _candidateDestinations.RemoveAt(0);
             ShuffleCandidateList(_candidateDestinations);

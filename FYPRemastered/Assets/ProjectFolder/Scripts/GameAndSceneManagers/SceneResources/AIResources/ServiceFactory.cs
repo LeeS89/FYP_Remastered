@@ -37,8 +37,21 @@ public static class ServiceFactory
         return svc;
     }
 
+    public static async Task<TConcrete?> TryCreateAsync<TAsset, TConcrete>(
+       string sceneLabel,
+       string featureLabel)
+       where TConcrete : class, IAddressableService, new()
+    {
+        var loc = await TryGetSingleLocationAsync<TAsset>(sceneLabel, featureLabel);
+        if (loc == null) return null;
 
-    
+        var svc = new TConcrete();
+        await svc.InitialiseAsync(loc);
+        return svc;
+    }
+
+
+
 }
 
 

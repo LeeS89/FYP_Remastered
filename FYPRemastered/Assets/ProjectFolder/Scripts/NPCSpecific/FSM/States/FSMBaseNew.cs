@@ -175,7 +175,7 @@ public partial class FSMBaseNew : IFSMControlNew
 
     public void OnDestinationResultReceived(in DestinationResultNew result)
     {
-
+        Debug.LogError("Destination Result Received at source");
         if (StateHasChanged(result.Id) || result.Reason == ReasonForDestinationCheck.Cancelled) return;
         PathResult pathResult = result.PathResult;
         //bool pathFound = result.PathFound;

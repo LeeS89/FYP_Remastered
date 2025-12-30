@@ -138,7 +138,7 @@ public class PathRequestManagerNew : SceneResources, IPathService, ITickable // 
     public void Tick(float dt)
     {
         if (_pathRequestQueue.Count == 0) { return; }
-
+        Debug.LogError("Ticking Path Requests");
         ExecutePathRequests();
     }
 

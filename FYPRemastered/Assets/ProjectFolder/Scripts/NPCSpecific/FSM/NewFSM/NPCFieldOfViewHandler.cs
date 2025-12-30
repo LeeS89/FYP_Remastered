@@ -143,7 +143,7 @@ public class NPCFieldOfViewHandler : IFieldOfViewRunner
         if (_params.FOVTarget == null)
         {
 #if UNITY_EDITOR
-            Debug.LogError("Must Provide a Target for the FOV Sweep");
+           // Debug.LogError("Must Provide a Target for the FOV Sweep");
 #endif
             return;
         }

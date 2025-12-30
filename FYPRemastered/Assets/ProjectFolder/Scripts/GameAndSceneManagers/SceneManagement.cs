@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class SceneManagement : SceneManagementBase
+public class SceneManagement : SceneManagementBase, ISceneService
 {
     [SerializeField] private WaypointBlockData _waypointBlockData;
     [SerializeField] private WaypointManager _waypointManager;
@@ -16,6 +16,9 @@ public class SceneManagement : SceneManagementBase
     // Test Variables
     public EnemyFSMController _enemy;
     public bool _testspawn = false;
+
+    public event Action OnSceneBegin;
+    public event Action OnSceneEnd;
 
     /// End Test
 
@@ -35,17 +38,27 @@ public class SceneManagement : SceneManagementBase
             _testspawn = false;
         }
 
-        _resources?.UpdateResources();
+        _sceneServiceBus?.Tick(Time.deltaTime);
+        //_resources?.UpdateResources();
 
     }
 
- 
+    public void OnTargetableDied(ITargetable targetable)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void OnTargetableRespawned(ITargetable targetable)
+    {
+        throw new NotImplementedException();
+    }
+
 
     public override async Task SetupScene()
     {
         string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
 
-        _sceneServiceBus = new SceneServiceBus(sceneName);
+        _sceneServiceBus = new SceneServiceBus(sceneName, this);
 
         await _sceneServiceBus.InitialiseServicesAsync();
         // await _resources.LoadResourcesAsync();
@@ -55,7 +68,8 @@ public class SceneManagement : SceneManagementBase
 
         LoadActiveSceneEventManagers(_sceneServiceBus);
 
-        SceneStarted();
+        OnSceneBegin?.Invoke();
+        //SceneStarted();
 
     }
 
@@ -133,6 +147,8 @@ public class SceneManagement : SceneManagementBase
         }
 
     }
+
+   
 
     //public override void UnregisterAgentAndZone(EnemyFSMController agent, int zone) => _zoneAgentRegistry.Unregister(agent, zone);
     //public override void RegisterAgentAndZone(EnemyFSMController agent, int zone) => _zoneAgentRegistry.Register(agent, zone);

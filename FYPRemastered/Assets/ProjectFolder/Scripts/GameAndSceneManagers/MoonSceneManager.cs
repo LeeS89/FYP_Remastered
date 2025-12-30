@@ -209,7 +209,7 @@ public class MoonSceneManagerNew : BaseSceneManager
     {
         string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
 
-        _sceneServiceBus = new SceneServiceBus(sceneName); 
+      //  _sceneServiceBus = new SceneServiceBus(sceneName); 
 
         await _sceneServiceBus.InitialiseServicesAsync();
         // await _resources.LoadResourcesAsync();

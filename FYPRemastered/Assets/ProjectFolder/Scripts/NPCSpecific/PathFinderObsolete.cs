@@ -492,6 +492,7 @@ public class PathFinderNew : IPathResolver
             callback?.Invoke(failResult);
             return;
         }
+   
         _requests.Enqueue( new DestinationRequest(id, fromPos, candidates, path, reason, callback));
         if(_runningRoutine == null)
             _runningRoutine = CoroutineRunner.Instance.StartCoroutine(PathFindRoutineNewer(_requests));
@@ -530,9 +531,9 @@ public class PathFinderNew : IPathResolver
                 }
 
                 if (_lastResult == PathResult.Failed) continue;
-                
-               // if (!_isValid) continue;
 
+                // if (!_isValid) continue;
+                Debug.LogError("Sending successful Callback");
                 DestinationResultNew success = new DestinationResultNew(request.Reason, request.Path, PathResult.Success, to, request.StateId);
                 request.Callback?.Invoke(success);
 

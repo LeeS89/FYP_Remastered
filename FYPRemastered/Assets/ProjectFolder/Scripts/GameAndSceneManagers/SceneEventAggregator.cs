@@ -170,34 +170,52 @@ public class SceneServiceBus : ISceneServiceProvider
     public event Action OnSceneBegin;
     public event Action OnSceneEnd;
 
+    private List<ITickable> _tickables = new(5);
     private IWaypointService _waypointService;
     private INpcService _npcService;
     private IFlankService _flankService;
     private IPoolService _poolService;
     private IPathService _pathService;
     private IGameManager _gameManager;
+    private ISceneService _sceneService;
 
-    public SceneServiceBus(string sceneName) => _sceneName = sceneName;
+    //private PathRequestManagerNew _pathService;
+
+    public SceneServiceBus(string sceneName, ISceneService sceneService)
+    {
+        _sceneService = sceneService;
+        _sceneName = sceneName;
+    }
 
 
     public async Task InitialiseServicesAsync()
     {
        // _gameManager = GameManager.Instance;
         // Initialise Waypoint Service
-        _waypointService = await ServiceFactory.TryCreateAsync<WaypointBlockData, IWaypointService, WaypointResourcesNew>(_sceneName, "Waypoints");
+        WaypointResourcesNew wp = await ServiceFactory.TryCreateAsync<WaypointBlockData, WaypointResourcesNew>(_sceneName, "Waypoints");
          
-        if(_waypointService == null)
+        if(wp == null)
             Debug.LogError("Failed to initialise Waypoint Service");
         else
         {
             // _NpcService is only used in scenes containing waypoints
-            
+            if(wp is ITickable t) _tickables.Add(t);
+            _waypointService = wp;
             Debug.LogError("Waypoint Service Initialised");
         }
             
         /* // Initialise Flank Service
          _flankService = await ServiceFactory.TryCreateAsync<FlankPointBlockData, IFlankService, FlankPointServiceNew>(_sceneName, "FlankPointService")
              ?? throw new Exception("Failed to initialise Flank Point Service");*/
+    }
+
+    public void Tick(float dt)
+    {
+        if (_tickables == null || _tickables.Count == 0) return;
+
+        foreach(var t in _tickables)
+            t.Tick(dt);
+
     }
 
    
@@ -224,7 +242,12 @@ public class SceneServiceBus : ISceneServiceProvider
 
     public bool TryGetPathService(out IPathService pathService)
     {
-        if(_pathService == null) _pathService = new PathRequestManagerNew();
+        if(_pathService == null)
+        {
+            PathRequestManagerNew ps = new PathRequestManagerNew();
+            if(ps is ITickable t) _tickables.Add(t);
+            _pathService = ps;
+        }
         pathService = _pathService;
         return true;
     }
@@ -261,6 +284,11 @@ public class SceneServiceBus : ISceneServiceProvider
         return _gameManager != null;
     }
 
+    public bool TryGetSceneService(out ISceneService sceneService)
+    {
+        sceneService = _sceneService;
+        return _sceneService != null;
+    }
 
     #region Obsolete
     [Obsolete]
@@ -321,16 +349,14 @@ public class SceneServiceBus : ISceneServiceProvider
 
 
 
-
-
-public interface ISceneServiceProvider : ISceneAIServices, IScenePoolServices, ISceneService
+public interface ISceneServiceProvider : ISceneAIServices, IScenePoolServices, IGlobalServices
 {
     // IPoolService PoolService { get; }
 }
 
 public interface IGlobalServices
 {
-    ISceneService SceneService { get; }
+    bool TryGetSceneService(out ISceneService sceneService);
 }
 
 public interface ISceneService
@@ -355,7 +381,7 @@ public interface IPlayerRefService
     ITargetable GetPlayer();
 }
 
-public interface ISceneAIServices : ISceneService
+public interface ISceneAIServices : IGlobalServices
 {
     bool TryGetPlayerRefService(out IPlayerRefService playerRefService);
 

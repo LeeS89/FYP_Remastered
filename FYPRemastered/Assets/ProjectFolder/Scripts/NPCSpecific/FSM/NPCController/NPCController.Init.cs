@@ -19,7 +19,7 @@ public partial class NPCController
     // end FSMManager Composition
 
     private INpcAnimationControl _animationControl;
-    private ISceneAIServices _services;
+    private ISceneAIServices _aiServices;
     private IPlayerRefService _playerRefService;
 
 
@@ -45,9 +45,9 @@ public partial class NPCController
 
     protected void SetPrimaryTarget()
     {
-        if (_services == null) return;
+        if (_aiServices == null) return;
 
-        if (_services.TryGetPlayerRefService(out _playerRefService))
+        if (_aiServices.TryGetPlayerRefService(out _playerRefService))
             PrimaryTarget = _playerRefService.GetPlayer();
         else
         {
@@ -84,8 +84,8 @@ public partial class NPCController
         else
             _eManager = manager;
 
-        _services = services;
-        _services.OnSceneBegin += OnSceneBegin;
+        _aiServices = services;
+        _sceneService.OnSceneBegin += OnSceneBegin;
     }
 
     private void ConstructFSM()
@@ -98,20 +98,20 @@ public partial class NPCController
 
          _destinationResolver = new DestinationResolver(_destinationProviders);*/
         _fovParams.FOVTarget = PrimaryTarget;
-        if (_services.TryGetPathService(out var pathService)) _pathFinder = new PathFinderNew(pathService);
+        if (_aiServices.TryGetPathService(out var pathService)) _pathFinder = new PathFinderNew(pathService);
 
         _fovRunner = new NPCFieldOfViewHandler(_fovParams);
 
         _fsmManager = new FSMBaseNew(data: this, resolver: _pathFinder, runner: _fovRunner, _fsmStates);
 
-        if (_services.TryGetWaypointService(out var wpService))
+        if (_aiServices.TryGetWaypointService(out var wpService))
         {
             IFSMState patrolState = new FSMPatrolState(wpService, data: this, resolver: _pathFinder, stateContext: _fsmManager);
             StateId pid = patrolState.GetId();
             _fsmStates.TryAdd(pid, patrolState);
         }
 
-        if (_services.TryGetFlankService(out var flankService))
+        if (_aiServices.TryGetFlankService(out var flankService))
         {
             IFSMState flankState = new FSMFlankState(flankService, data: this, _pathFinder, _fsmManager);
             StateId fid = flankState.GetId();
@@ -145,7 +145,7 @@ public partial class NPCController
 
     protected override void OnSceneEnd()
     {
-        _services.OnSceneEnd -= OnSceneEnd;
+        _sceneService.OnSceneEnd -= OnSceneEnd;
         _fsmManager.Notification = null;
         _fsmManager.OnAnimationIntent = null;
         _fsmManager.OnMapDestinationToZone = null;
@@ -157,7 +157,7 @@ public partial class NPCController
 
     protected override void OnSceneBegin()
     {
-        _services.OnSceneBegin -= OnSceneBegin;
+        _sceneService.OnSceneBegin -= OnSceneBegin;
         _animationControl?.SetIKLookTarget(PrimaryTarget?.Transform);
         _fsmManager?.SwitchTo(StateId.Patrol);
     }

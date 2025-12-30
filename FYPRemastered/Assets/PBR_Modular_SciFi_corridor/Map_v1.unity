@@ -18378,7 +18378,7 @@ GameObject:
   - component: {fileID: 266043405}
   - component: {fileID: 266043408}
   - component: {fileID: 266043407}
-  - component: {fileID: 266043406}
+  - component: {fileID: 266043409}
   m_Layer: 4
   m_Name: SoldierMecanim
   m_TagString: Untagged
@@ -18404,25 +18404,6 @@ Transform:
   - {fileID: 605914147}
   m_Father: {fileID: 1863641519}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
---- !u!114 &266043406
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 266043404}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7da4a2fe5c8f6474d8c6992fc46f3374, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _lookTarget: {fileID: 0}
-  _blendSpeed: 5
-  lookAtWeight: 1
-  bodyWeight: 0.3
-  headWeight: 0.7
-  eyesWeight: 0
-  clampWeight: 0.5
 --- !u!114 &266043407
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18461,6 +18442,25 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &266043409
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 266043404}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cde2243792512574e957925a9a688fab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _lookTarget: {fileID: 0}
+  _blendSpeed: 5
+  lookAtWeight: 1
+  bodyWeight: 0.3
+  headWeight: 0.7
+  eyesWeight: 0
+  clampWeight: 0.5
 --- !u!1001 &269935695
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -116740,6 +116740,7 @@ GameObject:
   - component: {fileID: 1863641514}
   - component: {fileID: 1863641512}
   - component: {fileID: 1863641520}
+  - component: {fileID: 1863641521}
   m_Layer: 4
   m_Name: TestRunner2 (1)
   m_TagString: Untagged
@@ -116914,6 +116915,19 @@ MonoBehaviour:
     alertedFOVCheckFrequency: 0.1
     alertToSuspiciousDelaySeconds: 3
     suspiciousToIdleDelaySeconds: 5
+--- !u!114 &1863641521
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1863641510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9eb00770dd0468a41b37de612cbaade3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _testRespawn: 0
 --- !u!1001 &1863965890
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -152533,7 +152547,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 4644028827054525788}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7da4a2fe5c8f6474d8c6992fc46f3374, type: 3}
+  m_Script: {fileID: 11500000, guid: cde2243792512574e957925a9a688fab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _lookTarget: {fileID: 0}
