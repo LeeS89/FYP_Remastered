@@ -349,10 +349,13 @@ public class SceneServiceBus : ISceneServiceProvider
 
 
 
-public interface ISceneServiceProvider : ISceneAIServices, IScenePoolServices, IGlobalServices
+public interface ISceneServiceProvider : ISceneAIServices, IScenePoolServices//, IGlobalServices
 {
-    // IPoolService PoolService { get; }
+    bool TryGetSceneService(out ISceneService sceneService);
 }
+
+//public interface IService : IGlobalServices { }
+
 
 public interface IGlobalServices
 {
@@ -381,7 +384,7 @@ public interface IPlayerRefService
     ITargetable GetPlayer();
 }
 
-public interface ISceneAIServices : IGlobalServices
+public interface ISceneAIServices// : IGlobalServices
 {
     bool TryGetPlayerRefService(out IPlayerRefService playerRefService);
 

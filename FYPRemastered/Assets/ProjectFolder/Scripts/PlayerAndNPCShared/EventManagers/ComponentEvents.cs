@@ -46,7 +46,7 @@ public abstract class ComponentInit<TServices, TManager> : MonoBehaviour, IServi
 {
   //  public bool OwnerIsDead { get; protected set; } = false;
     public bool IsDead { get; protected set; } = false;
-    protected ISceneService _sceneService;
+    private ISceneService _sceneService;
 
     public abstract void Init(TServices services, TManager manager);
     
@@ -55,15 +55,26 @@ public abstract class ComponentInit<TServices, TManager> : MonoBehaviour, IServi
         if (provider is not TServices s) return;
         if (manager is not TManager m) return;
         
-        provider.TryGetSceneService(out _sceneService);
-       // provider.OnSceneBegin += OnSceneBegin;
-       // provider.OnSceneEnd += OnSceneEnd;
+        if(provider.TryGetSceneService(out _sceneService))
+        {
+            _sceneService.OnSceneBegin += SceneBegin;
+            _sceneService.OnSceneEnd += SceneEnd;
+        }
+       
         Init(s, m);
     }
 
     public abstract void Unload();
     protected virtual void OnSceneBegin() { }
     protected virtual void OnSceneEnd() { }
+
+    private void SceneBegin() { _sceneService.OnSceneBegin -= SceneBegin; OnSceneBegin(); }
+    private void SceneEnd() 
+    {
+        _sceneService.OnSceneEnd -= SceneEnd; 
+        OnSceneEnd();
+        _sceneService = null;
+    }
    
 
 }

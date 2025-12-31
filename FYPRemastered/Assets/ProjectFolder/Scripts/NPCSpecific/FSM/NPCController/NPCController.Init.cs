@@ -85,7 +85,6 @@ public partial class NPCController
             _eManager = manager;
 
         _aiServices = services;
-        _sceneService.OnSceneBegin += OnSceneBegin;
     }
 
     private void ConstructFSM()
@@ -145,7 +144,6 @@ public partial class NPCController
 
     protected override void OnSceneEnd()
     {
-        _sceneService.OnSceneEnd -= OnSceneEnd;
         _fsmManager.Notification = null;
         _fsmManager.OnAnimationIntent = null;
         _fsmManager.OnMapDestinationToZone = null;
@@ -157,7 +155,6 @@ public partial class NPCController
 
     protected override void OnSceneBegin()
     {
-        _sceneService.OnSceneBegin -= OnSceneBegin;
         _animationControl?.SetIKLookTarget(PrimaryTarget?.Transform);
         _fsmManager?.SwitchTo(StateId.Patrol);
     }
