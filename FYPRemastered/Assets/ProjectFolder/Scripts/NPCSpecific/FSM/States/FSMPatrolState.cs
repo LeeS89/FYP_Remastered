@@ -21,7 +21,7 @@ public sealed class FSMPatrolState : FSMBaseState
 
     public override void OnDestinationReached()
     {
-        if (!ContinueRoutine) return;
+        if (!_isInState || _ownerData == null) return;
 
         if (_runningRoutine == null)
             _runningRoutine = CoroutineRunner.Instance.StartCoroutine(PatrolWaitRoutine(
@@ -61,7 +61,7 @@ public sealed class FSMPatrolState : FSMBaseState
             ShuffleCandidateList(_candidateDestinations);
             _candidateDestinations.Add(temp);
         }
-        ContinueRoutine = true;
+        //ContinueRoutine = true;
         _pathFinder?.ProcessDestinationCandidates(_id, ReasonForDestinationCheck.ValidatePathForDestination,
             _candidateDestinations, _ownerData.Path, _ownerData.Position(), _validationCallback);
 
@@ -84,7 +84,7 @@ public sealed class FSMPatrolState : FSMBaseState
             }
 
         }
-        if (!ContinueRoutine) yield break;
+        if (!_isInState) yield break;
 
         _stateContext?.OnAnimationIntent?.Invoke(AnimationCue.Look);
       
@@ -96,8 +96,9 @@ public sealed class FSMPatrolState : FSMBaseState
             elapsedTime += Time.deltaTime;
             yield return null;
         }
-        if (!ContinueRoutine) yield break;
+        if (!_isInState) yield break;
         ValidateCandidateDestinations();
 
+        _runningRoutine = null;
     }
 }

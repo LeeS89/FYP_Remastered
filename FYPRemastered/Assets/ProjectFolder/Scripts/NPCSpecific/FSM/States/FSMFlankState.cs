@@ -27,7 +27,7 @@ public class FSMFlankState : FSMBaseState
 
     protected override void RetrieveCandidateDestinations()
     {
-        if (_flankStepsToTry.Count == 0)
+        if (_flankStepsToTry.Count == 0) // Add in arbitrary steps, 5 to 8 etc.
         {
             DestinationResultNew noPathResult = new DestinationResultNew
             (

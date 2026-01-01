@@ -11,9 +11,7 @@ public partial class NPCController
     protected AgentEventManager _eManager;
     // FSMManager Composition
     private IPathResolver _pathFinder;
-    private ICandidateProvider _destinationResolver;
     private IFieldOfViewRunner _fovRunner;
-    private Dictionary<StateId, ICandidateProvider> _destinationProviders;
     private IFSMControlNew _fsmManager;
     private Dictionary<StateId, IFSMState> _fsmStates = new(5);
     // end FSMManager Composition

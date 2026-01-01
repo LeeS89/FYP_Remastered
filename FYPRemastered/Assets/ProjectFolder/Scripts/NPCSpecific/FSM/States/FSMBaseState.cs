@@ -13,7 +13,6 @@ public abstract class FSMBaseState : IFSMState
 
 
     protected List<Vector3> _candidateDestinations = new();
-    public bool ContinueRoutine { get; protected set; } = true;
 
     public StateId GetId() => _id;
     protected readonly StateId _id = StateId.None;
@@ -45,7 +44,6 @@ public abstract class FSMBaseState : IFSMState
         _pathFinder?.CancelAll();
         if (_runningRoutine != null)
         {
-            ContinueRoutine = false;
             CoroutineRunner.Instance.StopCoroutine(_runningRoutine);
             _runningRoutine = null;
         }
