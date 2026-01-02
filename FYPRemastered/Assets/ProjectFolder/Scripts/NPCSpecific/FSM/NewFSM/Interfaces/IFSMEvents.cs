@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -78,6 +79,36 @@ public interface IFSMStateContext : IAnimationCueSource
     void OnDestinationResultReceived(in DestinationResultNew result);
 }
 
+
+public interface IFsmDeps
+{
+    NavMeshAgent Agent();
+    NavMeshObstacle Obstacle();
+    float WalkSpeed { get; }
+    float SprintSpeed { get; }
+
+}
+
+public interface IFsmStateDeps
+{
+    ITargetable NpcOwner { get; }
+    IPathResolver PathResolver { get; }
+    NavMeshPath Path();
+}
+
+public interface IPatrolDeps : IFsmStateDeps
+{
+    float MaxTimeAtPatrolPoint { get; }
+    float MinTimeAtPatrolPoint { get; }
+}
+
+public interface IChaseDeps : IFlankDeps
+{
+    float MinStoppingDistance { get; }
+    float MaxStoppingDistance { get; }
+}
+
+public interface IFlankDeps : IFsmStateDeps { ITargetable Target { get; } }
 
 public interface IAgentData : ITargetable
 {

@@ -9,6 +9,7 @@ public partial class FSMBaseNew : IFSMControlNew
     // Injected Dependancies
     private IReadOnlyDictionary<StateId, IFSMState> _states;
     private IAgentData _ownerData;
+    private IFsmDeps _deps;
    // private IPathResolver _pathFinder;
     private IFieldOfViewRunner _fovHandler;
     // End Injected Dependancies
@@ -48,6 +49,18 @@ public partial class FSMBaseNew : IFSMControlNew
     public FSMBaseNew(IAgentData data, IPathResolver resolver, IFieldOfViewRunner runner, IReadOnlyDictionary<StateId, IFSMState> states)
     {
         _ownerData = data;
+       // _pathFinder = resolver;
+        _fovHandler = runner;
+        _states = states;
+      //  _pathFinder.Callback = OnDestinationResultReceived;
+        _fovHandler.OnFOVSweepComplete = FieldOfViewSweepResult;
+        OnTick += _fovHandler.Tick;
+        OnTick += TimerTicks;
+        OnTick += ClassUpdate;
+    }
+    public FSMBaseNew(IFsmDeps deps, IFieldOfViewRunner runner, IReadOnlyDictionary<StateId, IFSMState> states)
+    {
+        _deps = deps;
        // _pathFinder = resolver;
         _fovHandler = runner;
         _states = states;
@@ -103,8 +116,8 @@ public partial class FSMBaseNew : IFSMControlNew
 
     public void ClassUpdate(float dt)
     {
-        if (!_hasValidDestination || _ownerData.Agent == null) return;
-        NavMeshAgent a = _ownerData.Agent;
+        if (!_hasValidDestination || _deps.Agent() == null /*_ownerData.Agent == null*/) return;
+        NavMeshAgent a = _deps.Agent();//_ownerData.Agent;
 
         if (a.pathPending) return;
 
@@ -143,13 +156,13 @@ public partial class FSMBaseNew : IFSMControlNew
 
     private void TimerTicks(float dt)
     {
-        if (_ownerData is NPCControllerObsolete c) // Delete later
+       /* if (_ownerData is NPCControllerObsolete c) // Delete later
         {
             if (c.TestSprint)
                 (_lerpSpeed, _targetSpeed) = (_ownerData.SprintSpeed, 2f);
             else if (c.TestWalk)
                 (_lerpSpeed, _targetSpeed) = (_ownerData.WalkSpeed, 2f);
-        }
+        }*/
 
         for (int i = 0; i < _timer.Count; i++)
         {
@@ -191,10 +204,10 @@ public partial class FSMBaseNew : IFSMControlNew
             CurrentDestinationForward = result.Forward;
             OnMapDestinationToZone?.Invoke(currentDestination);
 
-            NavMeshObstacle o = _ownerData?.Obstacle;
+            NavMeshObstacle o = _deps.Obstacle();//_ownerData?.Obstacle;
             if (o != null && o.enabled && o.carving)
             {
-                _ownerData.Obstacle.enabled = false;
+                _deps.Obstacle().enabled = false;//_ownerData.Obstacle.enabled = false;
                 _timer.Add(new SetDestinationDelay(Time.deltaTime + Mathf.Epsilon, currentDestination, result.Path, id, SetDestination));
                 return;
             }
@@ -207,11 +220,11 @@ public partial class FSMBaseNew : IFSMControlNew
     {
         if (current != CurrentStateId) return;
         ToggleAgent(setActive: true);
-        if (_ownerData.Agent.SetPath(path) ||
-            _ownerData.Agent.SetDestination(destination))
+        if (/*_ownerData.Agent*/_deps.Agent().SetPath(path) ||
+            /*_ownerData.Agent*/_deps.Agent().SetDestination(destination))
         {
-            float stopdist = _ownerData?.OnRequestAgentStoppingDistance?.Invoke(current) ?? 0f;
-            _ownerData.Agent.stoppingDistance = stopdist;
+           // float stopdist = _ownerData?.OnRequestAgentStoppingDistance?.Invoke(current) ?? 0f; /////////////// FIX HERE
+          //  _ownerData.Agent.stoppingDistance = stopdist;
             _hasValidDestination = true;
             _current?.OnDestinationSet();
         }
@@ -228,8 +241,8 @@ public partial class FSMBaseNew : IFSMControlNew
 
     protected void ToggleAgent(bool setActive)
     {
-        if (_ownerData.Agent.enabled == setActive) return;
-        _ownerData.Agent.enabled = setActive;
+        if (/*_ownerData.Agent*/_deps.Agent().enabled == setActive) return;
+        /*_ownerData.Agent*/_deps.Agent().enabled = setActive;
     }
     #endregion
 
@@ -242,8 +255,8 @@ public partial class FSMBaseNew : IFSMControlNew
         var (speed, lerp) = tier switch
         {
             SpeedTier.Idle => (0f, 10f),
-            SpeedTier.Walk => (_ownerData.WalkSpeed, 2f),
-            SpeedTier.Sprint => (_ownerData.SprintSpeed, 2f),
+            SpeedTier.Walk => (/*_ownerData*/_deps.WalkSpeed, 2f),
+            SpeedTier.Sprint => (/*_ownerData*/_deps.SprintSpeed, 2f),
             _ => (0f, 10f)
         };
 
@@ -257,24 +270,25 @@ public partial class FSMBaseNew : IFSMControlNew
         float rate = (0.5f > 0f) ? Mathf.Max(0.01f, delta / 0.5f) : float.PositiveInfinity;
         a.speed = Mathf.MoveTowards(a.speed, _targetSpeed, rate * Time.deltaTime);*/
 
-        if (_ownerData.Agent == null) return;
-        float smoothedSpeed = Mathf.Lerp(_ownerData.Agent.speed, _targetSpeed, _lerpSpeed * Time.deltaTime);
-        _ownerData.Agent.speed = smoothedSpeed;
+        if (/*_ownerData.Agent*/_deps.Agent() == null) return;
+        float smoothedSpeed = Mathf.Lerp(/*_ownerData.Agent*/_deps.Agent().speed, _targetSpeed, _lerpSpeed * Time.deltaTime);
+        /*_ownerData.Agent*/_deps.Agent().speed = smoothedSpeed;
 
-        float _currentSpeed = _ownerData.Agent.speed;
+        float _currentSpeed = /*_ownerData.Agent*/_deps.Agent().speed;
 
-        if (Mathf.Approximately(_ownerData.Agent.speed, _targetSpeed)) _ownerData.Agent.speed = _targetSpeed;
+        if (Mathf.Approximately(/*_ownerData.Agent*/_deps.Agent().speed, _targetSpeed)) /*_ownerData.Agent*/_deps.Agent().speed = _targetSpeed;
     }
 
     
     private void SetAgentSpeedByDistance(float remainingDistance)
     {
-        if (_ownerData.Agent == null || _ownerData.Agent.isStopped) return;
+        if (/*_ownerData.Agent*/_deps.Agent() == null || /*_ownerData.Agent*/_deps.Agent().isStopped) return;
 
         if (_usesSpeedByDistance)
         {
-            if (remainingDistance > _ownerData.SprintEnterDist) { SetSpeedTier(SpeedTier.Sprint); }
-            else if (remainingDistance < _ownerData.SprintExitDist) { SetSpeedTier(SpeedTier.Walk); }
+            //////////////////// FIX HERE //////////////////////////////
+            /*if (remainingDistance > _ownerData.SprintEnterDist) { SetSpeedTier(SpeedTier.Sprint); }
+            else if (remainingDistance < _ownerData.SprintExitDist) { SetSpeedTier(SpeedTier.Walk); }*/
         }
         else SetSpeedTier(SpeedTier.Walk);
     }
@@ -285,10 +299,10 @@ public partial class FSMBaseNew : IFSMControlNew
     {
         _hasValidDestination = false;
         SetSpeedTier(SpeedTier.Idle);
-        _ownerData.Agent.ResetPath();
+        /*_ownerData.Agent*/_deps.Agent().ResetPath();
         if (CurrentStateId == StateId.Patrol) return;
         ToggleAgent(false);
-        _ownerData.Obstacle.enabled = true;
+        /*_ownerData.Obstacle*/_deps.Agent().enabled = true;
     }
 
 

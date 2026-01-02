@@ -8,6 +8,7 @@ using UnityEngine.AI;
 [RequireComponent(typeof(NavMeshObstacle))]
 public partial class NPCController : ComponentInit<ISceneAIServices, AgentEventManager>, IAgentData, INPCBrainContext, INotificationListener
 {
+    [SerializeField] private AgentFsmDeps agentFsmDeps;
     //protected EnemyEventManager _eManager;
     //   private bool _isInStateTransition = false;
     protected Action _onLayerToggleComplete;

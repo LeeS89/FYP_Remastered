@@ -116875,6 +116875,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0dad097637c8ea848a99d762118e5a81, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  agentFsmDeps:
+    _agent: {fileID: 0}
+    _obstacle: {fileID: 0}
+    _maxTimeAtWaypoint: 0
+    _minTimeAtWaypoint: 0
+    _maxFlankSteps: 0
+    _minFlankSteps: 0
+    _minStoppingdistance: 0
+    _maxStoppingDistance: 0
+    _sprintSpeed: 0
+    _walkSpeed: 0
   _maxWaitAtSeconds: 7
   _minWaitAtSeconds: 0.5
   _walkSpeed: 0.9
@@ -154784,6 +154795,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0dad097637c8ea848a99d762118e5a81, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  agentFsmDeps:
+    _agent: {fileID: 0}
+    _obstacle: {fileID: 0}
+    _maxTimeAtWaypoint: 0
+    _minTimeAtWaypoint: 0
+    _maxFlankSteps: 0
+    _minFlankSteps: 0
+    _minStoppingdistance: 0
+    _maxStoppingDistance: 0
+    _sprintSpeed: 0
+    _walkSpeed: 0
   _maxWaitAtSeconds: 7
   _minWaitAtSeconds: 0.5
   _walkSpeed: 0.9
