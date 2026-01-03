@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.AI;
 
 [System.Serializable]
-public class AgentFsmDeps : IFsmDeps, IPatrolDeps, IChaseDeps
+public class AgentFsmDeps : IFsmDeps, IPatrolDeps, IChaseDeps, IFlankDeps
 {
     [Header("Agent Components")]
     [SerializeField] private NavMeshAgent _agent;
@@ -29,9 +29,18 @@ public class AgentFsmDeps : IFsmDeps, IPatrolDeps, IChaseDeps
 
     // FSM Deps
     public IPathResolver _pathResolver;
-    public ITargetable _owner;
-    public ITargetable _target;
+    private ITargetable _owner;
+    private ITargetable _target;
+    public IWaypointService _waypointService;
+    public IFlankService _flankService;
 
+
+    public void SetOwner(ITargetable owner) => _owner = owner;
+    public void SetPath(NavMeshPath path) => _path = path;
+    public void SetAgentRef(NavMeshAgent agent) { if (_agent == null) _agent = agent; }
+    public void SetTarget(ITargetable target) => _target = target;
+
+    public void SetObstacleRef(NavMeshObstacle obstacle) { if(_obstacle == null) _obstacle = obstacle; }
 
     public NavMeshAgent Agent()
     {
@@ -67,11 +76,13 @@ public class AgentFsmDeps : IFsmDeps, IPatrolDeps, IChaseDeps
         return _path;
     }
 
+    public IWaypointService WaypointService => _waypointService;
     public float MaxTimeAtPatrolPoint => _maxTimeAtWaypoint;
     public float MinTimeAtPatrolPoint => _minTimeAtWaypoint;
 
-    public int MaxFlankSteps() => _maxFlankSteps;
-    public int MinFlankSteps() => _minFlankSteps;
+    public IFlankService FlankService => _flankService;
+    public int MaxFlankSteps => _maxFlankSteps;
+    public int MinFlankSteps => _minFlankSteps;
 
     public float SprintSpeed => _sprintSpeed;
     public float WalkSpeed => _walkSpeed;
@@ -85,4 +96,6 @@ public class AgentFsmDeps : IFsmDeps, IPatrolDeps, IChaseDeps
     public float MaxStoppingDistance => _maxStoppingDistance;
 
     public ITargetable Target => _target;
+
+    
 }

@@ -70,10 +70,13 @@ public interface IFSMControlNew : IFSMStateContext, ITickable
     OnNotifyOwner Notification { get; set; }
 }
 
-public interface IFSMStateContext : IAnimationCueSource
+public interface ITargetRef { ITargetable Target { get; } }
+
+public interface IFSMStateContext : IAnimationCueSource//, ITargetRef
 {
+  //  ITargetable Owner { get; }
     Action<Vector3> OnMapDestinationToZone { get; set; }
-    Vector3? CurrentDestinationForward { get; }
+    Vector3? CurrentDestinationForward { get; } // Obsolete
     bool IsStationary();
 
     void OnDestinationResultReceived(in DestinationResultNew result);
@@ -98,17 +101,23 @@ public interface IFsmStateDeps
 
 public interface IPatrolDeps : IFsmStateDeps
 {
+    IWaypointService WaypointService { get; }
     float MaxTimeAtPatrolPoint { get; }
     float MinTimeAtPatrolPoint { get; }
 }
 
-public interface IChaseDeps : IFlankDeps
+public interface IChaseDeps : IFsmStateDeps, ITargetRef
 {
     float MinStoppingDistance { get; }
     float MaxStoppingDistance { get; }
 }
 
-public interface IFlankDeps : IFsmStateDeps { ITargetable Target { get; } }
+public interface IFlankDeps : IFsmStateDeps, ITargetRef 
+{
+    IFlankService FlankService { get; }
+    int MaxFlankSteps { get; }
+    int MinFlankSteps { get; }
+}
 
 public interface IAgentData : ITargetable
 {

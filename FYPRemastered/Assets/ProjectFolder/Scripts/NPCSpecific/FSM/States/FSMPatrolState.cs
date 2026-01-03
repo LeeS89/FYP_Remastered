@@ -6,11 +6,19 @@ using Random = UnityEngine.Random;
 public sealed class FSMPatrolState : FSMBaseState
 {
     private readonly IWaypointService _waypointService;
+    private readonly IPatrolDeps _patrolDeps;
 
-    public FSMPatrolState(IWaypointService waypointService, IAgentData data, IPathResolver resolver, IFSMStateContext stateContext) 
+    /*public FSMPatrolState(IWaypointService waypointService, IAgentData data, IPathResolver resolver, IFSMStateContext stateContext) 
         : base(data, resolver, stateContext, StateId.Patrol)
     {
         _waypointService = waypointService;
+        _candidateDestinations.EnsureCapacity(10);
+    }*/
+    public FSMPatrolState(IPatrolDeps deps, IFSMStateContext stateContext) 
+        : base(deps, stateContext, StateId.Patrol)
+    {
+        _patrolDeps = deps;
+        _waypointService = _patrolDeps.WaypointService;
         _candidateDestinations.EnsureCapacity(10);
     }
 
@@ -21,11 +29,11 @@ public sealed class FSMPatrolState : FSMBaseState
 
     public override void OnDestinationReached()
     {
-        if (!_isInState || _ownerData == null) return;
+        if (!_isInState || _owner/*_ownerData*/ == null) return;
 
         if (_runningRoutine == null)
             _runningRoutine = CoroutineRunner.Instance.StartCoroutine(PatrolWaitRoutine(
-                _ownerData.Transform, _ownerData.MinPatrolPointWaitTime, _ownerData.MaxPatrolPointWaitTime, 
+                _owner.Transform/*_ownerData.Transform*/, _patrolDeps.MinTimeAtPatrolPoint/*_ownerData.MinPatrolPointWaitTime*/, _patrolDeps.MaxTimeAtPatrolPoint/*_ownerData.MaxPatrolPointWaitTime*/, 
                 _stateContext.CurrentDestinationForward));
     }
 
@@ -38,7 +46,7 @@ public sealed class FSMPatrolState : FSMBaseState
                 DestinationResultNew failedResult = new DestinationResultNew
                 (
                     ReasonForDestinationCheck.ValidatePathForDestination,
-                    _ownerData.Path,
+                    _path/*_ownerData.Path*/,
                     PathResult.CandidatesNullOrEmpty,
                     Vector3.zero,
                     _id
@@ -62,8 +70,8 @@ public sealed class FSMPatrolState : FSMBaseState
             _candidateDestinations.Add(temp);
         }
         //ContinueRoutine = true;
-        _pathFinder?.ProcessDestinationCandidates(_id, ReasonForDestinationCheck.ValidatePathForDestination,
-            _candidateDestinations, _ownerData.Path, _ownerData.Position(), _validationCallback);
+        _pathResolver?.ProcessDestinationCandidates(_id, ReasonForDestinationCheck.ValidatePathForDestination,
+            _candidateDestinations, _path/*_ownerData.Path*/, _owner.Position()/*_ownerData.Position()*/, _validationCallback);
 
         /*var request = ValidateDestination.GetPatrolPoint(_ownerData, _ownerData.Path);
         _pathFinder?.TryGetDestination(request);*/

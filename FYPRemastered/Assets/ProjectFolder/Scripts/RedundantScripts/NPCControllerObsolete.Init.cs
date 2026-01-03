@@ -246,7 +246,7 @@ public partial class NPCControllerNew
 
         _fsmManager = new FSMBaseNew(data: this, resolver: _pathFinder, runner: _fovRunner, _fsmStates);
 
-        if (_services.TryGetWaypointService(out var wpService))
+       /* if (_services.TryGetWaypointService(out var wpService))
         { 
             IFSMState patrolState = new FSMPatrolState(wpService, data: this, resolver: _pathFinder, stateContext: _fsmManager);
             StateId pid = patrolState.GetId();
@@ -262,7 +262,7 @@ public partial class NPCControllerNew
       
         IFSMState chaseState = new FSMChaseState(PrimaryTarget, data: this, resolver: _pathFinder, stateContext: _fsmManager);
         StateId cid = chaseState.GetId();
-        _fsmStates.TryAdd(cid, chaseState);
+        _fsmStates.TryAdd(cid, chaseState);*/
        
         _fsmManager.Notification = Notify;
         _fsmManager.OnAnimationIntent = AnimationIntent;

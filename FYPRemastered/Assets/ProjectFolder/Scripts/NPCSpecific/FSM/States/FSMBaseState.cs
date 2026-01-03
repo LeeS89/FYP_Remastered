@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public abstract class FSMBaseState : IFSMState
 {
-    protected readonly IPathResolver _pathFinder;
+    protected readonly IPathResolver _pathResolver;
     protected readonly IAgentData _ownerData;
     protected readonly IFSMStateContext _stateContext;
     protected Coroutine _runningRoutine;
@@ -14,13 +15,27 @@ public abstract class FSMBaseState : IFSMState
 
     protected List<Vector3> _candidateDestinations = new();
 
+    //new
+    protected readonly ITargetable _owner;
+    protected NavMeshPath _path;
+    // end new
+
     public StateId GetId() => _id;
     protected readonly StateId _id = StateId.None;
 
-    public FSMBaseState(IAgentData data, IPathResolver resolver, IFSMStateContext stateContext, StateId id)
+    /*public FSMBaseState(IAgentData data, IPathResolver resolver, IFSMStateContext stateContext, StateId id)
     {
         _ownerData = data;
-        _pathFinder = resolver;
+        _pathResolver = resolver;
+        _stateContext = stateContext;
+        _id = id;
+        _validationCallback = OnPathResultReceived;
+    }*/
+    public FSMBaseState(IFsmStateDeps deps, IFSMStateContext stateContext, StateId id)
+    {
+        _owner = deps.NpcOwner;
+        _path = deps.Path();
+        _pathResolver = deps.PathResolver;
         _stateContext = stateContext;
         _id = id;
         _validationCallback = OnPathResultReceived;
@@ -41,7 +56,7 @@ public abstract class FSMBaseState : IFSMState
     public virtual void ExitState()
     {
         _isInState = false;
-        _pathFinder?.CancelAll();
+        _pathResolver?.CancelAll();
         if (_runningRoutine != null)
         {
             CoroutineRunner.Instance.StopCoroutine(_runningRoutine);

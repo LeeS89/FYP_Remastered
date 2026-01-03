@@ -6,14 +6,24 @@ using Random = UnityEngine.Random;
 
 public class FSMFlankState : FSMBaseState
 {
+    private IFlankDeps _deps;
     private IFlankService _flankService;
     private Action<bool> _onFlankCandidatesReceived;
     private List<int> _flankStepsToTry = new();
 
-    public FSMFlankState(IFlankService flankService, IAgentData data, IPathResolver resolver, IFSMStateContext stateContext) 
+   /* public FSMFlankState(IFlankService flankService, IAgentData data, IPathResolver resolver, IFSMStateContext stateContext) 
         : base(data, resolver, stateContext, StateId.Flank)
     {
         _flankService = flankService;
+        _candidateDestinations.EnsureCapacity(25);
+        _flankStepsToTry.EnsureCapacity(10);
+        _onFlankCandidatesReceived = OnCandidatesReceived;
+    }*/
+    public FSMFlankState(IFlankDeps deps, IFSMStateContext stateContext) 
+        : base(deps, stateContext, StateId.Flank)
+    {
+        _deps = deps;
+        _flankService = _deps.FlankService;
         _candidateDestinations.EnsureCapacity(25);
         _flankStepsToTry.EnsureCapacity(10);
         _onFlankCandidatesReceived = OnCandidatesReceived;
@@ -43,7 +53,7 @@ public class FSMFlankState : FSMBaseState
         // In DestinationResult, change found bool to result enum with values Found, NotFound, NoPrimaryTarget
         int stepsToTry = _flankStepsToTry[0];
         _flankStepsToTry.RemoveAt(0);
-        _flankService?.TryGetFlankCandidates(_ownerData.PrimaryTarget.Position(), stepsToTry, _candidateDestinations, _onFlankCandidatesReceived);
+        _flankService?.TryGetFlankCandidates(/*_ownerData.PrimaryTarget.Position()*/_deps.Target.Position(), stepsToTry, _candidateDestinations, _onFlankCandidatesReceived);
     }
 
     public override void ValidateCandidateDestinations()
@@ -66,16 +76,16 @@ public class FSMFlankState : FSMBaseState
     {
         _flankStepsToTry.Clear();
 
-        int randomIndex = Random.Range(_ownerData.MinFlankSteps, _ownerData.MaxFlankSteps + 1);
+        int randomIndex = Random.Range(/*_ownerData.MinFlankSteps*/_deps.MinFlankSteps, /*_ownerData.MaxFlankSteps + 1*/_deps.MaxFlankSteps +1);
 
         int temp = randomIndex;
-        while (temp >= 4) // 4 will eventually be changed to a passed minSteps parameter
+        while (temp >= _deps.MinFlankSteps) // 4 will eventually be changed to a passed minSteps parameter
         {
             _flankStepsToTry.Add(temp);
             temp--;
         }
         temp = randomIndex + 1;
-        while (temp <= _ownerData.MaxFlankSteps)
+        while (temp <= /*_ownerData.MaxFlankSteps*/_deps.MaxFlankSteps)
         {
             _flankStepsToTry.Add(temp);
             temp++;

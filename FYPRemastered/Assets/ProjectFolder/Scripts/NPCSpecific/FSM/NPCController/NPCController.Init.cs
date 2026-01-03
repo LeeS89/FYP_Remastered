@@ -5,6 +5,7 @@ using UnityEngine.AI;
 
 public partial class NPCController
 {
+    [SerializeField] private AgentFsmDeps _fsmDeps;
     // FSMManager Composition - Partly obsolete
     [Header("FOV Data")]
     [SerializeField] protected FOVParameters _fovParams;
@@ -31,7 +32,7 @@ public partial class NPCController
         var anim = GetComponentsInChildren<MonoBehaviour>(true).OfType<INpcAnimationControl>().FirstOrDefault();
         if (anim != null) _animationControl = anim;
 
-        SetPrimaryTarget();
+        //SetPrimaryTarget();
 
         OnMeleeRangeCheckCallback = OnMeleeRangeEnter;
 
@@ -87,6 +88,7 @@ public partial class NPCController
 
     private void ConstructFSM()
     {
+        SetPrimaryTarget();
         /* _destinationProviders = new()
          {
              [StateId.Patrol] = new WaypointProvider(WaypointRepo.Instance),
@@ -94,28 +96,37 @@ public partial class NPCController
          };
 
          _destinationResolver = new DestinationResolver(_destinationProviders);*/
+        _fsmDeps.SetOwner(this);
+        _fsmDeps.SetTarget(PrimaryTarget);
+        _fsmDeps.SetAgentRef(Agent);
+        _fsmDeps.SetObstacleRef(Obstacle);
+        _fsmDeps.SetPath(new NavMeshPath());
+
         _fovParams.FOVTarget = PrimaryTarget;
-        if (_aiServices.TryGetPathService(out var pathService)) _pathFinder = new PathFinderNew(pathService);
+        if (_aiServices.TryGetPathService(out var pathService)) _fsmDeps._pathResolver = new PathFinderNew(pathService);//_pathFinder = new PathFinderNew(pathService);
 
         _fovRunner = new NPCFieldOfViewHandler(_fovParams);
 
         _fsmManager = new FSMBaseNew(data: this, resolver: _pathFinder, runner: _fovRunner, _fsmStates);
 
-        if (_aiServices.TryGetWaypointService(out var wpService))
+        if (_aiServices.TryGetWaypointService(out _fsmDeps._waypointService))
         {
-            IFSMState patrolState = new FSMPatrolState(wpService, data: this, resolver: _pathFinder, stateContext: _fsmManager);
+            //IFSMState patrolState = new FSMPatrolState(wpService, data: this, resolver: _pathFinder, stateContext: _fsmManager);
+            IFSMState patrolState = new FSMPatrolState(deps: _fsmDeps, /*data: this, resolver: _pathFinder,*/ stateContext: _fsmManager);
             StateId pid = patrolState.GetId();
             _fsmStates.TryAdd(pid, patrolState);
         }
 
-        if (_aiServices.TryGetFlankService(out var flankService))
+        if (_aiServices.TryGetFlankService(out _fsmDeps._flankService))
         {
-            IFSMState flankState = new FSMFlankState(flankService, data: this, _pathFinder, _fsmManager);
+            IFSMState flankState = new FSMFlankState(deps: _fsmDeps, /*data: this, _pathFinder,*/ _fsmManager);
+            //IFSMState flankState = new FSMFlankState(flankService, data: this, _pathFinder, _fsmManager);
             StateId fid = flankState.GetId();
             _fsmStates.TryAdd(fid, flankState);
         }
 
-        IFSMState chaseState = new FSMChaseState(PrimaryTarget, data: this, resolver: _pathFinder, stateContext: _fsmManager);
+        //IFSMState chaseState = new FSMChaseState(PrimaryTarget, data: this, resolver: _pathFinder, stateContext: _fsmManager);
+        IFSMState chaseState = new FSMChaseState(deps: _fsmDeps, stateContext: _fsmManager);
         StateId cid = chaseState.GetId();
         _fsmStates.TryAdd(cid, chaseState);
 
