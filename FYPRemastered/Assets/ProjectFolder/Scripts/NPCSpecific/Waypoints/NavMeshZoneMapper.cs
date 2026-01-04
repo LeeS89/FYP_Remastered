@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -21,6 +22,7 @@ public static class NavMeshZoneMapper
 
     }
 
+    [Obsolete]
     public static bool GetZoneId(this NPCControllerObsolete self, Vector3 pos, out ZoneId zone)
     {
        // var pos = self.transform.position;

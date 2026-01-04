@@ -66,8 +66,9 @@ public interface IFSMControlNew : IFSMStateContext, ITickable
     bool IsInStateTransition { get; }
     void SwitchTo(StateId state);
 
-    delegate void OnNotifyOwner(in NPCNotification n);
-    OnNotifyOwner Notification { get; set; }
+    //delegate void OnNotifyOwner(in NPCNotification n);
+   // OnNotifyOwner Notification { get; set; }
+    Notification Notification { get; set; }
 }
 
 public interface ITargetRef { ITargetable Target { get; } }
@@ -165,5 +166,7 @@ public interface IFieldOfViewOwner // Obsolete
 public interface IFieldOfViewRunner : ITickable
 {
     void SetFOVSweepFrequency(AlertPhase phase);
-    Action<FOVResult, bool> OnFOVSweepComplete { get; set; }
+    //Action<FOVResult, bool> OnFOVSweepComplete { get; set; }
+    // Action<NPCNotification> OnFOVSweepCompleted { get; set; }
+    Notification OnFOVSweepComplete { get; set; }
 }

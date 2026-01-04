@@ -5,6 +5,7 @@ using Random = UnityEngine.Random;
 
 public static class FSMExtension
 {
+    [Obsolete]
     public static Coroutine BeginPatrolRoutine(this FSMManagerObsolete m, StateId id, Transform t, float minWait, float maxWait, Vector3? forward, Action<AnimationCue> animationCB, Func<StateId, bool> canContinueCB, Action<StateId> OnDone)
         => CoroutineRunner.Instance.StartCoroutine(PatrolWaitRoutine(id, t, minWait, maxWait, forward, animationCB, canContinueCB, OnDone));
 

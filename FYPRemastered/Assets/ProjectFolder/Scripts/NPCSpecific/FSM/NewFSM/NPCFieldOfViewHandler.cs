@@ -12,8 +12,11 @@ public class NPCFieldOfViewHandler : IFieldOfViewRunner
     private Vector3[] _evaluationHitPoints;
     private Collider[] _proximityDetectionResults;
     private RaycastHit[] _hitBuffer = new RaycastHit[10];
-   
+    private ITargetRef _fovTarget;
 
+    //public Action<FOVResult, bool> OnFOVSweepComplete { get; set; }
+   // public Action<NPCNotification> OnFOVSweepCompleted { get; set; }
+    public Notification OnFOVSweepComplete { get; set; }
 
     public NPCFieldOfViewHandler(FOVParameters fovParams)
     {
@@ -32,6 +35,30 @@ public class NPCFieldOfViewHandler : IFieldOfViewRunner
         _nextCheckTime = Time.time + GetCheckFrequency(_currentAlertPhase);
         _fovSweepFrequency = GetCheckFrequency(_currentAlertPhase);
     }
+    public NPCFieldOfViewHandler(FOVParameters fovParams, ITargetRef fovTarget, Notification onSweepComplete)
+    {
+        if(fovParams == null)
+        {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            Debug.LogError("FieldOfViewManager: FOV Params is null, adding default.");
+#endif
+            fovParams = new FOVParameters();
+        }
+
+      //  _owner = owner;
+        _params = fovParams;
+        _evaluationHitPoints = new Vector3[_params.maxFovTargets];
+        _proximityDetectionResults = new Collider[_params.maxFovTargets];
+        _nextCheckTime = Time.time + GetCheckFrequency(_currentAlertPhase);
+        _fovSweepFrequency = GetCheckFrequency(_currentAlertPhase);
+        OnFOVSweepComplete = onSweepComplete;
+    }
+
+    private void SendResult(FOVResult result)
+    {
+        var n = NPCNotification.FOVUpdate(result, false);
+        OnFOVSweepComplete?.Invoke(n);
+    } 
 
 
     private float GetCheckFrequency(AlertPhase phase)
@@ -71,8 +98,8 @@ public class NPCFieldOfViewHandler : IFieldOfViewRunner
 
         if (detectedCount == 0)
         {
-            OnFOVSweepComplete?.Invoke(FOVResult.TargetNotSeen, inShootAngle);
-           // _owner?.FieldOfViewSweepResult(FOVResult.TargetNotSeen, inShootAngle);
+            //OnFOVSweepComplete?.Invoke(FOVResult.TargetNotSeen, inShootAngle);
+            SendResult(FOVResult.TargetNotSeen);
             TryChangeFOVFrequency(AlertPhase.Idle);
             return;
         }
@@ -92,15 +119,16 @@ public class NPCFieldOfViewHandler : IFieldOfViewRunner
             inShootAngle = !_params.useShootingAngleRestriction ? true :
                 TargetWithinAimThreshold(_params.fovOrigin, _proximityDetectionResults[i].ClosestPointOnBounds(_params.fovOrigin.position), _params.halfHorizontalShootAngle);
 
-            OnFOVSweepComplete?.Invoke(result, inShootAngle);
-           // _owner?.FieldOfViewSweepResult(result, inShootAngle);
+            result = inShootAngle == true ? FOVResult.TargetSeenAndWithinShootingAngles : FOVResult.TargetSeen;
+            SendResult(result);
+            //OnFOVSweepComplete?.Invoke(result, inShootAngle);
             return;
 
         }
-        OnFOVSweepComplete?.Invoke(FOVResult.TargetNotSeen, false);
-       // _owner?.FieldOfViewSweepResult(FOVResult.TargetNotSeen, false);
+        //OnFOVSweepComplete?.Invoke(FOVResult.TargetNotSeen, false);
+        SendResult(FOVResult.TargetNotSeen);
     }
-    public Action<FOVResult, bool> OnFOVSweepComplete { get; set; }
+    
 
     public bool TargetWithinAimThreshold(Transform origin, Vector3 targetPosition, float halfAngle, bool useLocalUp = true)
     {

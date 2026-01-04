@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -20,7 +21,6 @@ public partial class NPCController
     private INpcAnimationControl _animationControl;
     private ISceneAIServices _aiServices;
     private IPlayerRefService _playerRefService;
-
 
 
     public override void Init(ISceneAIServices services, AgentEventManager manager)
@@ -89,13 +89,7 @@ public partial class NPCController
     private void ConstructFSM()
     {
         SetPrimaryTarget();
-        /* _destinationProviders = new()
-         {
-             [StateId.Patrol] = new WaypointProvider(WaypointRepo.Instance),
-             [StateId.Chase] = new TargetPointProvider(PrimaryTarget),
-         };
-
-         _destinationResolver = new DestinationResolver(_destinationProviders);*/
+  
         _fsmDeps.SetOwner(this);
         _fsmDeps.SetTarget(PrimaryTarget);
         _fsmDeps.SetAgentRef(Agent);
@@ -105,9 +99,11 @@ public partial class NPCController
         _fovParams.FOVTarget = PrimaryTarget;
         if (_aiServices.TryGetPathService(out var pathService)) _fsmDeps._pathResolver = new PathFinderNew(pathService);//_pathFinder = new PathFinderNew(pathService);
 
-        _fovRunner = new NPCFieldOfViewHandler(_fovParams);
+       // _fovRunner = new NPCFieldOfViewHandler(_fovParams);
+        _fovRunner = new NPCFieldOfViewHandler(_fovParams, _fsmDeps, onSweepComplete: Notify);
 
-        _fsmManager = new FSMBaseNew(data: this, resolver: _pathFinder, runner: _fovRunner, _fsmStates);
+       // _fsmManager = new FSMBaseNew(data: this, resolver: _pathFinder, runner: _fovRunner, _fsmStates);
+        _fsmManager = new FSMBaseNew(deps: _fsmDeps, _fsmStates, fsmCallback: Notify);
 
         if (_aiServices.TryGetWaypointService(out _fsmDeps._waypointService))
         {

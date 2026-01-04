@@ -5,7 +5,6 @@ using UnityEngine.AI;
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(NavMeshObstacle))]
-[Obsolete]
 public partial class NPCControllerObsolete : ComponentEvents, IAgentData, INPCBrainContext, INotificationListener
 {
     protected EnemyEventManager _eManager;

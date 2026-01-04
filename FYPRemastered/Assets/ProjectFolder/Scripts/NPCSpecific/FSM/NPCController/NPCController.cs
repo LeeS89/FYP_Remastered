@@ -230,6 +230,7 @@ public partial class NPCController : ComponentInit<ISceneAIServices, AgentEventM
         if (IsDead) return;
         _fsmManager?.Tick(Time.deltaTime);
         IsStationary = _fsmManager?.IsStationary() ?? true;
+        _fovRunner?.Tick(Time.deltaTime);
     }
 
     protected virtual void LateUpdate()
@@ -382,3 +383,5 @@ public partial class NPCController : ComponentInit<ISceneAIServices, AgentEventM
                                                                                    // SwitchTo(ChaseState.Instance);
     }
 }
+
+public delegate void Notification(in NPCNotification n);

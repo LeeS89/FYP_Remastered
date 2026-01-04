@@ -8,15 +8,15 @@ public partial class FSMBaseNew : IFSMControlNew
 {
     // Injected Dependancies
     private IReadOnlyDictionary<StateId, IFSMState> _states;
-    private IAgentData _ownerData;
+   // private IAgentData _ownerData;
     private IFsmDeps _deps;
    // private IPathResolver _pathFinder;
-    private IFieldOfViewRunner _fovHandler;
+  //  private IFieldOfViewRunner _fovHandler;
     // End Injected Dependancies
-
+    public Notification Notification { get; set; }
     // Used by owning Monobehaviour via interface
     public StateId CurrentStateId => _current?.GetId() ?? StateId.None;
-    public IFSMControlNew.OnNotifyOwner Notification { get; set; }
+    //public IFSMControlNew.OnNotifyOwner Notification { get; set; }
     // End used by owning Monobehaviour
     
     // Actions Invoked from individual states
@@ -46,7 +46,7 @@ public partial class FSMBaseNew : IFSMControlNew
     private SpeedTier _speedTier = SpeedTier.Idle;
 
 
-    public FSMBaseNew(IAgentData data, IPathResolver resolver, IFieldOfViewRunner runner, IReadOnlyDictionary<StateId, IFSMState> states)
+/*    public FSMBaseNew(IAgentData data, IPathResolver resolver, IFieldOfViewRunner runner, IReadOnlyDictionary<StateId, IFSMState> states)
     {
         _ownerData = data;
        // _pathFinder = resolver;
@@ -57,16 +57,16 @@ public partial class FSMBaseNew : IFSMControlNew
         OnTick += _fovHandler.Tick;
         OnTick += TimerTicks;
         OnTick += ClassUpdate;
-    }
-    public FSMBaseNew(IFsmDeps deps, IFieldOfViewRunner runner, IReadOnlyDictionary<StateId, IFSMState> states)
+    }*/
+    public FSMBaseNew(IFsmDeps deps, IReadOnlyDictionary<StateId, IFSMState> states, Notification fsmCallback)
     {
         _deps = deps;
-       // _pathFinder = resolver;
-        _fovHandler = runner;
+        Notification = fsmCallback;
+       // _fovHandler = runner;
         _states = states;
-      //  _pathFinder.Callback = OnDestinationResultReceived;
-        _fovHandler.OnFOVSweepComplete = FieldOfViewSweepResult;
-        OnTick += _fovHandler.Tick;
+
+       // _fovHandler.OnFOVSweepComplete = FieldOfViewSweepResult;
+       // OnTick += _fovHandler.Tick;
         OnTick += TimerTicks;
         OnTick += ClassUpdate;
     }
@@ -97,7 +97,7 @@ public partial class FSMBaseNew : IFSMControlNew
             StateId.Search => AlertPhase.Suspicious,
             _ => AlertPhase.Idle
         };
-        _fovHandler.SetFOVSweepFrequency(phase);
+        //_fovHandler.SetFOVSweepFrequency(phase);
     }
 
     private void FieldOfViewSweepResult(FOVResult result, bool withinAttackAngles)

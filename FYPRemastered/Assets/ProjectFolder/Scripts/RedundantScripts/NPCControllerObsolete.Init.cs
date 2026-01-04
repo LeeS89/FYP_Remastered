@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
 
+[Obsolete("", true)]
 public partial class NPCControllerObsolete
 {
     // FSMManager Composition - Partly obsolete
@@ -69,7 +71,7 @@ public partial class NPCControllerObsolete
         _pathFinder = new PathFinderObsolete(_destinationResolver);
         _fovRunner = new NPCFieldOfViewHandler(_fovParams);
 
-        _fsmManager = new FSMBaseNew(data: this, resolver: _pathFinder, runner: _fovRunner, _fsmStates);
+    //    _fsmManager = new FSMBaseNew(data: this, resolver: _pathFinder, runner: _fovRunner, _fsmStates);
        // _fsmStates.TryAdd(StateId.Patrol, new FSMPatrolState(data: this, resolver: _pathFinder, stateContext: _fsmManager));
        // _fsmStates.TryAdd(StateId.Chase, new FSMChaseState(data: this, resolver: _pathFinder, stateContext: _fsmManager));
         _fsmManager.Notification = Notify;
@@ -244,7 +246,7 @@ public partial class NPCControllerNew
 
         _fovRunner = new NPCFieldOfViewHandler(_fovParams);
 
-        _fsmManager = new FSMBaseNew(data: this, resolver: _pathFinder, runner: _fovRunner, _fsmStates);
+       // _fsmManager = new FSMBaseNew(data: this, resolver: _pathFinder, runner: _fovRunner, _fsmStates);
 
        /* if (_services.TryGetWaypointService(out var wpService))
         { 

@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.AI;
 
 
-[Obsolete("Use FSMBaseNew instead", false)]
+[Obsolete("Use FSMBaseNew instead", true)]
 public class FSMManagerObsolete : FSMBaseObsolete
 {
     private List<SetDestinationDelay> _timer = new(2);
@@ -62,7 +62,7 @@ public class FSMManagerObsolete : FSMBaseObsolete
 
     private void AssignActions()
     {
-        _fovHandler.OnFOVSweepComplete = FieldOfViewSweepResult;
+        //_fovHandler.OnFOVSweepComplete = FieldOfViewSweepResult;
         //_pathFinder.Callback = OnPathRequestComplete;// New
         TryRepath = TryGetNextDestination;
         CancelOrContinueRoutine = StateHasChanged;
@@ -320,8 +320,8 @@ public class FSMManagerObsolete : FSMBaseObsolete
 
     public override void LookAroundAndContinue()
     {
-        if (_runningRoutine == null)
-            _runningRoutine = this.BeginPatrolRoutine(_currentStateId, _ownerData.Transform, _ownerData.MinPatrolPointWaitTime, _ownerData.MaxPatrolPointWaitTime, _currentDestinationForward, OnAnimationIntent, CancelOrContinueRoutine, RoutineEnd);
+       // if (_runningRoutine == null)
+            //_runningRoutine = this.BeginPatrolRoutine(_currentStateId, _ownerData.Transform, _ownerData.MinPatrolPointWaitTime, _ownerData.MaxPatrolPointWaitTime, _currentDestinationForward, OnAnimationIntent, CancelOrContinueRoutine, RoutineEnd);
             //_runningRoutine = CoroutineRunner.Instance.StartCoroutine(PatrolWaitRoutine(_currentPatrolPoinfForward));
     }
   
@@ -390,7 +390,7 @@ public class FSMManagerObsolete : FSMBaseObsolete
         LookAroundAction = null;
         RemainingDistanceAction = null;
         OnPatrolReached = null;
-        _fovHandler.OnFOVSweepComplete = null;
+       // _fovHandler.OnFOVSweepComplete = null;
         OnTick -= TimerTicks;
         OnTick -= ClassUpdate;
         base.OnLateTick = null;
