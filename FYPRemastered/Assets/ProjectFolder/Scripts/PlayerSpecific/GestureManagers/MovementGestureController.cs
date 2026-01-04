@@ -22,7 +22,7 @@ public class MovementGestureController : BaseGesture
     public static bool _rightHandActive = false;
 
     private PlayerEventManager _playerEventManager;
-    [SerializeField] public bool IsGrabbing { get; private set; } = false;
+    public bool IsGrabbing { get; private set; } = false;
     
 
     private void ResetFields()

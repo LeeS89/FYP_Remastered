@@ -11,7 +11,7 @@ public sealed class DeflectableProjectile : ProjectileBase, IFreezeAndDeflectabl
     
     [Header("How close to the camera can freezeable projectile be before it gets culled")]
     [SerializeField] private float _cullDistance = 0.5f;
-    [SerializeField] public float DistanceToPlayer { get; private set; }
+    public float DistanceToPlayer { get; private set; }
 
 
     private GameObject _componentRegistryTargetObj;
