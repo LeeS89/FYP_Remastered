@@ -122,19 +122,19 @@ public interface IFlankDeps : IFsmStateDeps, ITargetRef
 
 public interface IAgentData : ITargetable
 {
-    ITargetable PrimaryTarget { get; }
+  //  ITargetable PrimaryTarget { get; }
     NavMeshAgent Agent { get; }
     NavMeshObstacle Obstacle { get; }
     NavMeshPath Path { get; }
-    float MaxPatrolPointWaitTime { get; }
-    float MinPatrolPointWaitTime { get; }
-    int MaxFlankSteps { get; }
-    int MinFlankSteps { get; }
-    float WalkSpeed { get; }
-    float SprintSpeed { get; }
+ //   float MaxPatrolPointWaitTime { get; }
+  //  float MinPatrolPointWaitTime { get; }
+   // int MaxFlankSteps { get; }
+  //  int MinFlankSteps { get; }
+ //   float WalkSpeed { get; }
+ //   float SprintSpeed { get; }
     float SprintEnterDist { get; }
     float SprintExitDist { get; }
-    Func<StateId, float> OnRequestAgentStoppingDistance { get; }
+    //Func<StateId, float> OnRequestAgentStoppingDistance { get; }
     //float GetAgentStoppingDistance(StateId currentState);
 
 }
@@ -152,7 +152,7 @@ public interface IFSMOwner // Maybe Obsolete
 
 public interface INotificationListener
 {
-    void Notify(in NPCNotification n);
+    void OnNotify(in NPCNotification n);
   //  void EnterAlertPhase();
 }
 

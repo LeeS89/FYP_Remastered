@@ -108,9 +108,9 @@ public class FSMManagerObsolete : FSMBaseObsolete
         if (_ownerData.Agent.SetPath(path) ||
             _ownerData.Agent.SetDestination(destination))
         {
-            float stopdist = _ownerData.OnRequestAgentStoppingDistance?.Invoke(current) ?? 0f;//_ownerData.GetAgentStoppingDistance(current);
+         /*   float stopdist = _ownerData.OnRequestAgentStoppingDistance?.Invoke(current) ?? 0f;//_ownerData.GetAgentStoppingDistance(current);
             _ownerData.Agent.stoppingDistance = stopdist;
-            _hasValidDestination = true;
+            _hasValidDestination = true;*/
         }
         else
         {
@@ -245,10 +245,10 @@ public class FSMManagerObsolete : FSMBaseObsolete
         {
             if (c.TestSprint)
             {
-                SetAgentTargetSpeed(_ownerData.SprintSpeed, 2f);
+               // SetAgentTargetSpeed(_ownerData.SprintSpeed, 2f);
             }else if (c.TestWalk)
             {
-                SetAgentTargetSpeed(_ownerData.WalkSpeed, 2f);
+             //   SetAgentTargetSpeed(_ownerData.WalkSpeed, 2f);
             }
         }
     

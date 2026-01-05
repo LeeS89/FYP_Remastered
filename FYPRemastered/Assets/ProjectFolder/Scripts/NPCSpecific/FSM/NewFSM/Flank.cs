@@ -28,7 +28,7 @@ public sealed class Flank : IntentStateBase
                 self.SwitchTo(ChaseState.Instance);
                 break;
             case NotificationKind.NoAvailablePath://.NoFlankAvailable:
-                self.SwitchTo(TakeCover.Instance);
+                self.SwitchTo(TakeCoverObsolete.Instance);
                 break;
             default:
                 base.Handle(self, n);

@@ -19,6 +19,8 @@ public enum PlayerPart
 public class GameManager : MonoBehaviour, IGameManager
 {
     public GameObject Player { get; private set; }
+    private ITargetable _player;
+
     public GameObject PlayerDefenceCollider { get; private set; }
 
     public static GameManager Instance { get; private set; }
@@ -203,10 +205,27 @@ public class GameManager : MonoBehaviour, IGameManager
         return playerPart;
     }
 
+    public ITargetable TryGetPlayer()
+    {
+        /*if (Player == null) { player = null; return false; }
+        player = Player.GetComponentInChildren<ITargetable>();
+        return player != null;*/
+        throw new NotImplementedException();
+    }
+
+    public bool IsPlayerRef(ITargetable compareTarget)
+    {
+        if (_player == null || compareTarget == null) return false;
+        return compareTarget == _player;
+    }
+
     public bool TryGetPlayer(out ITargetable player)
     {
         if (Player == null) { player = null; return false; }
-        player = Player.GetComponentInChildren<ITargetable>();
+        if(_player == null)
+        _player = Player.GetComponentInChildren<ITargetable>();
+
+        player = _player;
         return player != null;
     }
 
@@ -295,8 +314,5 @@ public class GameManager : MonoBehaviour, IGameManager
         throw new NotImplementedException();
     }
 
-    public ITargetable GetPlayer()
-    {
-        throw new NotImplementedException();
-    }
+    
 }

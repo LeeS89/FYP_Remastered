@@ -2,7 +2,7 @@ using System;
 
 using UnityEngine;
 
-
+[Obsolete]
 public class EnemyEventManager : EventManager
 {
     #region To be made obsolete + re enable later

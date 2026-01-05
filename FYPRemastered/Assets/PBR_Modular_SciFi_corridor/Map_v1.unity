@@ -118209,10 +118209,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0dad097637c8ea848a99d762118e5a81, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _maxWaitAtSeconds: 7
-  _minWaitAtSeconds: 0.5
-  _walkSpeed: 0.9
-  _sprintSpeed: 3.6
   TestSprint: 0
   TestWalk: 0
   _parentTransform: {fileID: 1863641519}
@@ -118220,12 +118216,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   _targetCollider: {fileID: 99692069}
-  _maxFlankSteps: 10
-  _minFlankSteps: 4
   _requiredSeenStreak: 3
   _requiredNotSeenStreak: 5
-  _minStopdistance: 4
-  _maxStopdistance: 12
   _fsmDeps:
     _agent: {fileID: 1863641518}
     _obstacle: {fileID: 1863641515}
@@ -118233,6 +118225,7 @@ MonoBehaviour:
     _minTimeAtWaypoint: 0.5
     _maxFlankSteps: 12
     _minFlankSteps: 4
+    _useRandomStopDistance: 1
     _minStoppingdistance: 4
     _maxStoppingDistance: 12
     _sprintSpeed: 3.6
@@ -118243,6 +118236,29 @@ MonoBehaviour:
     blockingMask:
       serializedVersion: 2
       m_Bits: 537
+    fovRadius: 25
+    ownerOrigin: {fileID: 1863641519}
+    waistHeightOffset: 1
+    eyeHeightOffset: 1.8
+    evaluationCapsuleRadius: 0.4
+    addTargetFallbackPoints: 0
+    fovHalfAngle: 50
+    useSeparateVerticleAngle: 0
+    verticalFovHalfAngle: 25
+    useShootingAngleRestriction: 1
+    halfHorizontalShootAngle: 15
+    idleFOVCheckFrequency: 1
+    heightenedFOVCheckFrequency: 0.5
+    suspiciousFOVCheckFrequency: 0.25
+    alertedFOVCheckFrequency: 0.1
+    alertToSuspiciousDelaySeconds: 3
+    suspiciousToIdleDelaySeconds: 5
+  _fovDeps:
+    fovOrigin: {fileID: 1599725691}
+    maxFovTargets: 10
+    blockingMask:
+      serializedVersion: 2
+      m_Bits: 17
     fovRadius: 25
     ownerOrigin: {fileID: 1863641519}
     waistHeightOffset: 1
@@ -156389,10 +156405,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0dad097637c8ea848a99d762118e5a81, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _maxWaitAtSeconds: 7
-  _minWaitAtSeconds: 0.5
-  _walkSpeed: 0.9
-  _sprintSpeed: 3.6
   TestSprint: 0
   TestWalk: 0
   _parentTransform: {fileID: 8070524998269774116}
@@ -156400,12 +156412,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   _targetCollider: {fileID: 226800903}
-  _maxFlankSteps: 10
-  _minFlankSteps: 4
   _requiredSeenStreak: 3
   _requiredNotSeenStreak: 5
-  _minStopdistance: 4
-  _maxStopdistance: 12
   _fsmDeps:
     _agent: {fileID: 5247023209646184639}
     _obstacle: {fileID: 4565709518911953609}
@@ -156413,6 +156421,7 @@ MonoBehaviour:
     _minTimeAtWaypoint: 0.5
     _maxFlankSteps: 12
     _minFlankSteps: 4
+    _useRandomStopDistance: 1
     _minStoppingdistance: 4
     _maxStoppingDistance: 12
     _sprintSpeed: 3.6
@@ -156423,6 +156432,29 @@ MonoBehaviour:
     blockingMask:
       serializedVersion: 2
       m_Bits: 537
+    fovRadius: 25
+    ownerOrigin: {fileID: 8070524998269774116}
+    waistHeightOffset: 1
+    eyeHeightOffset: 1.8
+    evaluationCapsuleRadius: 0.4
+    addTargetFallbackPoints: 0
+    fovHalfAngle: 50
+    useSeparateVerticleAngle: 0
+    verticalFovHalfAngle: 25
+    useShootingAngleRestriction: 1
+    halfHorizontalShootAngle: 15
+    idleFOVCheckFrequency: 1
+    heightenedFOVCheckFrequency: 0.5
+    suspiciousFOVCheckFrequency: 0.25
+    alertedFOVCheckFrequency: 0.1
+    alertToSuspiciousDelaySeconds: 3
+    suspiciousToIdleDelaySeconds: 5
+  _fovDeps:
+    fovOrigin: {fileID: 6998231476891555256}
+    maxFovTargets: 10
+    blockingMask:
+      serializedVersion: 2
+      m_Bits: 17
     fovRadius: 25
     ownerOrigin: {fileID: 8070524998269774116}
     waistHeightOffset: 1

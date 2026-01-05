@@ -5,6 +5,7 @@ using UnityEngine.AI;
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(NavMeshObstacle))]
+[Obsolete("", true)]
 public partial class NPCControllerObsolete : ComponentEvents, IAgentData, INPCBrainContext, INotificationListener
 {
     protected EnemyEventManager _eManager;
@@ -110,7 +111,7 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, INPCBr
 
 
     // IFSMNotifications - For notifications received by the FSMManager, i.e. No valid destination, target lost, Target within melee/ shot range, etc.
-    public void Notify(in NPCNotification n)
+    public void OnNotify(in NPCNotification n)
     {
         if (_fsmManager.IsInStateTransition /*|| n.Id != _fsmManager.CurrentStateId*/) return;
      
@@ -280,7 +281,7 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, INPCBr
         Debug.LogError("Stable FOVResult: "+result.ToString());
         ApplyFOVStatusUpdate(result);
         var n = NPCNotification.FOVUpdate(/*_fsmManager.CurrentStateId,*/ CurrentFOVState, false);
-        Notify(n);
+        OnNotify(n);
     }
 
     private void TargetSeen()
@@ -290,7 +291,7 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, INPCBr
         ApplyFOVStatusUpdate(FOVResult.TargetSeen);
         //  _eManager.AimTowardsTarget(aim: true);
         var n = NPCNotification.FOVUpdate(/*_fsmManager.CurrentStateId, */CurrentFOVState, false);
-        Notify(n);
+        OnNotify(n);
 
        /* if (_fsmManager.CurrentStateId == StateId.Patrol)
         {
@@ -390,7 +391,30 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, INPCBr
        // SwitchTo(ChaseState.Instance);
     }
 
-    
+    public void TryBroadcastAlert()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void SwitchState(StateId intentState)
+    {
+        throw new NotImplementedException();
+    }
+
+    void INPCBrainContext.UpdateCombatOrder(CombatOrder newOrder)
+    {
+        UpdateCombatOrder(newOrder);
+    }
+
+    public void UpdateFovStatus(FOVResult newStatus)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void UpdateRotationOrder(RotationOrder newOrder)
+    {
+        throw new NotImplementedException();
+    }
 }
 
 
@@ -524,7 +548,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
 
 
     // IFSMNotifications - For notifications received by the FSMManager, i.e. No valid destination, target lost, Target within melee/ shot range, etc.
-    public void Notify(in NPCNotification n)
+    public void OnNotify(in NPCNotification n)
     {
         if (_fsmManager.IsInStateTransition /*|| n.Id != _fsmManager.CurrentStateId*/) return;
      
@@ -694,7 +718,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
         Debug.LogError("Stable FOVResult: "+result.ToString());
         ApplyFOVStatusUpdate(result);
         var n = NPCNotification.FOVUpdate(/*_fsmManager.CurrentStateId,*/ CurrentFOVState, false);
-        Notify(n);
+        OnNotify(n);
     }
 
     private void TargetSeen()
@@ -704,7 +728,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
         ApplyFOVStatusUpdate(FOVResult.TargetSeen);
         //  _eManager.AimTowardsTarget(aim: true);
         var n = NPCNotification.FOVUpdate(/*_fsmManager.CurrentStateId, */CurrentFOVState, false);
-        Notify(n);
+        OnNotify(n);
 
        /* if (_fsmManager.CurrentStateId == StateId.Patrol)
         {
@@ -804,5 +828,28 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
        // SwitchTo(ChaseState.Instance);
     }
 
-    
+    public void TryBroadcastAlert()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void SwitchState(StateId intentState)
+    {
+        throw new NotImplementedException();
+    }
+
+    void INPCBrainContext.UpdateCombatOrder(CombatOrder newOrder)
+    {
+        UpdateCombatOrder(newOrder);
+    }
+
+    public void UpdateFovStatus(FOVResult newStatus)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void UpdateRotationOrder(RotationOrder newOrder)
+    {
+        throw new NotImplementedException();
+    }
 }

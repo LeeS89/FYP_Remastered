@@ -9,35 +9,18 @@ using UnityEngine.AI;
 public partial class NPCController : ComponentInit<ISceneAIServices, AgentEventManager>, IAgentData, INPCBrainContext, INotificationListener
 {
     
-    //protected EnemyEventManager _eManager;
     //   private bool _isInStateTransition = false;
     protected Action _onLayerToggleComplete;
     protected ZoneId _zoneId = ZoneId.Unknown;
 
     // Data queried by the FSMManager 
-    public ITargetable PrimaryTarget { get; set; }
+    private ITargetable _primaryTarget;// { get; set; }
     public NavMeshAgent Agent { get; protected set; }
     public NavMeshObstacle Obstacle { get; protected set; }
     public NavMeshPath Path { get; protected set; }
 
-    [Header("Time to wait at each point when patrolling")]
-    [Range(0.5f, 15f)]
-    [SerializeField] protected float _maxWaitAtSeconds;
-    [Min(0.5f)]
-    [SerializeField] protected float _minWaitAtSeconds;
-    public float MaxPatrolPointWaitTime => _maxWaitAtSeconds;
-    public float MinPatrolPointWaitTime => _minWaitAtSeconds;
-    public float WalkSpeed => _walkSpeed;
-    public float SprintSpeed => _sprintSpeed;
-    [Header("Agent Speed Params")]
-    [SerializeField, Tooltip("Do Not Change - Synchronized with Walking animation")]
-    protected float _walkSpeed = 0.9f;
-    [SerializeField, Tooltip("Do Not Change - Synchronized with sprinting animation")]
-    protected float _sprintSpeed = 3.6f;
-    public Func<StateId, float> OnRequestAgentStoppingDistance { get; private set; }
     // End FSM Data
 
-    protected Action<bool> OnMeleeRangeCheckCallback;
 
     public bool TestSprint;
     public bool TestWalk;
@@ -47,7 +30,7 @@ public partial class NPCController : ComponentInit<ISceneAIServices, AgentEventM
     public CombatOrder CurrentComOrder { get; private set; } = CombatOrder.None;
     public RotationOrder CurrentRotOrder { get; private set; } = RotationOrder.None;
     public FOVResult CurrentFOVState { get; private set; } = FOVResult.None;
-    private bool TargetDead() => PrimaryTarget?.IsDead ?? true;
+    private bool TargetDead() => _primaryTarget?.IsDead ?? true;
     // End Brain data
 
 
@@ -79,16 +62,6 @@ public partial class NPCController : ComponentInit<ISceneAIServices, AgentEventM
 
 
 
-
-
-    [Range(5, 12)]
-    [SerializeField] private int _maxFlankSteps = 5;
-    [Min(4)]
-    [SerializeField] private int _minFlankSteps = 2;
-    public int MaxFlankSteps => _maxFlankSteps;
-
-    public int MinFlankSteps => _minFlankSteps;
-
     [Header(@"How many consecutive FOV results required to ""See ""or ""Lose ""the target")]
     [SerializeField] private uint _requiredSeenStreak = 3;
     [SerializeField] private uint _requiredNotSeenStreak = 5;
@@ -101,19 +74,8 @@ public partial class NPCController : ComponentInit<ISceneAIServices, AgentEventM
     private bool _aimingAtTarget = false;
 
 
-    [Header("Agent uses random stop distance between min & max during target pursuit")]
-    [SerializeField] protected float _minStopdistance = 4f;
-    [SerializeField] protected float _maxStopdistance = 12f;
-    public float GetAgentStoppingDistance(StateId currentState)
-    {
-        if (currentState != _fsmManager.CurrentStateId) return 0f;
-        return currentState == StateId.Chase ? UnityEngine.Random.Range(_minStopdistance, _maxStopdistance) : 0f;
-    }
-
-
-
     // IFSMNotifications - For notifications received by the FSMManager, i.e. No valid destination, target lost, Target within melee/ shot range, etc.
-    public void Notify(in NPCNotification n)
+    public void OnNotify(in NPCNotification n)
     {
         if (_fsmManager.IsInStateTransition /*|| n.Id != _fsmManager.CurrentStateId*/) return;
 
@@ -137,7 +99,7 @@ public partial class NPCController : ComponentInit<ISceneAIServices, AgentEventM
 
     }
 
-    private void UpdateCombatOrder(CombatOrder order)
+    public void UpdateCombatOrder(CombatOrder order)
     {
         if (order == CurrentComOrder) return;
         CancelCurrentCombatOrder();
@@ -218,9 +180,7 @@ public partial class NPCController : ComponentInit<ISceneAIServices, AgentEventM
 
     protected virtual void OnAimEnter(bool aiming) { }
 
-    protected virtual void OnMeleeRangeEnter(bool targetInRange) { }
-
-
+   
     protected void Engage() { }
 
     protected virtual void OnDamageTaken(float remainingHealth) { }
@@ -240,6 +200,8 @@ public partial class NPCController : ComponentInit<ISceneAIServices, AgentEventM
         //this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: CanRotateTowardsTarget());
         _fsmManager?.LateTick(Time.deltaTime);
         if (_eManager == null) return;
+
+        if (Agent == null) return;
         _animationControl?.Tick(Agent.velocity, Agent.transform.forward);
     }
 
@@ -273,7 +235,7 @@ public partial class NPCController : ComponentInit<ISceneAIServices, AgentEventM
         Debug.LogError("Stable FOVResult: " + result.ToString());
         ApplyFOVStatusUpdate(result);
         var n = NPCNotification.FOVUpdate(/*_fsmManager.CurrentStateId,*/ CurrentFOVState, false);
-        Notify(n);
+        OnNotify(n);
     }
 
     private void TargetSeen()
@@ -283,7 +245,7 @@ public partial class NPCController : ComponentInit<ISceneAIServices, AgentEventM
         ApplyFOVStatusUpdate(FOVResult.TargetSeen);
         //  _eManager.AimTowardsTarget(aim: true);
         var n = NPCNotification.FOVUpdate(/*_fsmManager.CurrentStateId, */CurrentFOVState, false);
-        Notify(n);
+        OnNotify(n);
 
         /* if (_fsmManager.CurrentStateId == StateId.Patrol)
          {
@@ -306,12 +268,12 @@ public partial class NPCController : ComponentInit<ISceneAIServices, AgentEventM
         if (_fsmManager.CurrentStateId == StateId.Chase || _fsmManager.CurrentStateId == StateId.Follow)
             if (IsStationary || CurrentFOVState == FOVResult.TargetSeen)
             {
-                this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: true);
+                this.RotateTowardsTarget(_primaryTarget?.Transform, rotate: true);
                 if (!_aimingAtTarget) { _aimingAtTarget = true; _animationControl?.IkLookAtTarget(look: true); }
             }
             else
             {
-                this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: false);
+                this.RotateTowardsTarget(_primaryTarget?.Transform, rotate: false);
                 if (_aimingAtTarget) { _aimingAtTarget = false; _animationControl?.IkLookAtTarget(look: false); }
             }
     }
@@ -320,7 +282,7 @@ public partial class NPCController : ComponentInit<ISceneAIServices, AgentEventM
         if (IsDead || TargetDead()) return;
 
         bool rotate = CurrentRotOrder == RotationOrder.RotateTowardsTarget;
-        this.RotateTowardsTarget(PrimaryTarget.Transform, rotate);
+        this.RotateTowardsTarget(_primaryTarget.Transform, rotate);
 
         /* if (_combatOrder != CombatOrder.None)
          {
@@ -381,6 +343,26 @@ public partial class NPCController : ComponentInit<ISceneAIServices, AgentEventM
         if (IsDead) return;
         StartCoroutine(WaitAndSwitchStateRoutine(AnimationLayer.Aim, nextIntent)); // change to new
                                                                                    // SwitchTo(ChaseState.Instance);
+    }
+
+    public void TryBroadcastAlert()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void SwitchState(StateId intentState)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void UpdateFovStatus(FOVResult newStatus)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void UpdateRotationOrder(RotationOrder newOrder)
+    {
+        throw new NotImplementedException();
     }
 }
 

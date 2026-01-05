@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
 
-[Obsolete("", true)]
+
 public partial class NPCControllerObsolete
 {
     // FSMManager Composition - Partly obsolete
@@ -74,7 +74,7 @@ public partial class NPCControllerObsolete
     //    _fsmManager = new FSMBaseNew(data: this, resolver: _pathFinder, runner: _fovRunner, _fsmStates);
        // _fsmStates.TryAdd(StateId.Patrol, new FSMPatrolState(data: this, resolver: _pathFinder, stateContext: _fsmManager));
        // _fsmStates.TryAdd(StateId.Chase, new FSMChaseState(data: this, resolver: _pathFinder, stateContext: _fsmManager));
-        _fsmManager.Notification = Notify;
+        _fsmManager.Notification = OnNotify;
         _fsmManager.OnAnimationIntent = AnimationIntent;
         _fsmManager.OnMapDestinationToZone = MapDestinationToZone;///// maybe when entering patrol
     }
@@ -196,8 +196,8 @@ public partial class NPCControllerNew
     {
         if (_services == null) return;
 
-        if(_services.TryGetPlayerRefService(out _playerRefService))
-            PrimaryTarget = _playerRefService.GetPlayer();
+     /*   if(_services.TryGetPlayerRefService(out _playerRefService))
+            PrimaryTarget = _playerRefService.TryGetPlayer();*/
     }
 
     private void SetTargetableCollider()
@@ -266,7 +266,7 @@ public partial class NPCControllerNew
         StateId cid = chaseState.GetId();
         _fsmStates.TryAdd(cid, chaseState);*/
        
-        _fsmManager.Notification = Notify;
+        _fsmManager.Notification = OnNotify;
         _fsmManager.OnAnimationIntent = AnimationIntent;
         _fsmManager.OnMapDestinationToZone = MapDestinationToZone;///// maybe when entering patrol
     }

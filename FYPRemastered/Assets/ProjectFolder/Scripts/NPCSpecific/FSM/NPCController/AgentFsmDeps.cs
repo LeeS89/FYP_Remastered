@@ -20,6 +20,10 @@ public class AgentFsmDeps : IFsmDeps, IPatrolDeps, IChaseDeps, IFlankDeps
     [SerializeField] private int _maxFlankSteps;
     [Min(4)]
     [SerializeField] private int _minFlankSteps;
+
+    [Header("(Used in Chasing State only) - If using Random stop distance - the agent will stop moving to its destination\n" +
+        "once it reaches its randomly generated stop distance between min and max - otherwise uses min")]
+    [SerializeField] private bool _useRandomStopDistance = true;
     [SerializeField] private float _minStoppingdistance;
     [SerializeField] private float _maxStoppingDistance;
 

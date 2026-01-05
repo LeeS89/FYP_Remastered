@@ -82,16 +82,19 @@ public sealed class FSMPatrolState : FSMBaseState
     private IEnumerator PatrolWaitRoutine(Transform t, float minWait, float maxWait, Vector3? forward)
     {
         Debug.LogError("Patrol wait routine called");
-        if (forward != null)
-        {
-            Quaternion targetRot = Quaternion.LookRotation(forward.Value);
+       // if (forward != null)
+     //   {
+            float randomAngle = Random.Range(-180, 180);
+            Vector3 dirOffset = Quaternion.AngleAxis(randomAngle, _owner.Transform.up) * _owner.Transform.forward;
+            Quaternion targetRot = Quaternion.LookRotation(dirOffset, _owner.Transform.up);
+            //Quaternion targetRot = Quaternion.LookRotation(forward.Value);
             while (Quaternion.Angle(t.rotation, targetRot) > 2.0f + Mathf.Epsilon)
             {
                 t.rotation = Quaternion.Slerp(t.rotation, targetRot, Time.deltaTime * 2f);
                 yield return null;
             }
 
-        }
+       // }
         if (!_isInState) yield break;
 
         _stateContext?.OnAnimationIntent?.Invoke(AnimationCue.Look);

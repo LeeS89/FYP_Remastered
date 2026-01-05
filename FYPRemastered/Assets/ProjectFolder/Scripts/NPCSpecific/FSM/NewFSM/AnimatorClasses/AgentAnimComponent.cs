@@ -261,6 +261,7 @@ public class AgentAnimComponent : ComponentInit<ISceneAIServices, AgentEventMana
 
     public void Tick(Vector3 velocity, Vector3 forward)
     {
+        if (_anim == null) return;
         velocity.y = 0f;
 
         // Dead-zone: treat micro-movement as zero

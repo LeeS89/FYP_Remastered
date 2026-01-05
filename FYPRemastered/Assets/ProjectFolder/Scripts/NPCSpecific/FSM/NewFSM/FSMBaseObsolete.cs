@@ -80,15 +80,15 @@ public abstract class FSMBaseObsolete : IFSMControl
     {
         if (tier == _speedTier) return;
         _speedTier = tier;
-        var (speed, lerp) = tier switch
+       /* var (speed, lerp) = tier switch
         {
             SpeedTier.Idle => (0f, 10f),
             SpeedTier.Walk => (_ownerData.WalkSpeed, 2f),
             SpeedTier.Sprint => (_ownerData.SprintSpeed, 2f),
             _ => (0f, 10f)
-        };
+        };*/
 
-        SetAgentTargetSpeed(speed, lerp);
+     //   SetAgentTargetSpeed(speed, lerp);
 
     }
 

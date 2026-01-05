@@ -226,7 +226,7 @@ public class AgentZoneRegistryNew : SceneResources, INpcService
             if (agent != source)
             {
                 var n = NPCNotification.ZoneAlert();
-                agent.Notify(n);
+                agent.OnNotify(n);
             }
         }
         return true;

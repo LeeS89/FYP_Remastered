@@ -190,7 +190,7 @@ public class SceneServiceBus : ISceneServiceProvider
 
     public async Task InitialiseServicesAsync()
     {
-       // _gameManager = GameManager.Instance;
+        _gameManager = GameManager.Instance;
         // Initialise Waypoint Service
         WaypointResourcesNew wp = await ServiceFactory.TryCreateAsync<WaypointBlockData, WaypointResourcesNew>(_sceneName, "Waypoints");
          
@@ -222,7 +222,7 @@ public class SceneServiceBus : ISceneServiceProvider
     private bool IsPlayer(ITargetable targetable)
     {
         if (_gameManager == null) return false;
-        return targetable == _gameManager.GetPlayer();
+        return _gameManager.IsPlayerRef(targetable);//targetable == _gameManager.TryGetPlayer();
     }
 
     public void OnTargetableDied(ITargetable targetable)
@@ -372,6 +372,7 @@ public interface ISceneService
 
 public interface IGameManager : IPlayerRefService
 {
+    bool IsPlayerRef(ITargetable compareTarget);
     void PlayerDied();
     void PlayerRespawned();
 }
@@ -381,7 +382,7 @@ public interface IPlayerRefService
 {
     event Action OnPlayerDied;
     event Action OnPlayerRespawned;
-    ITargetable GetPlayer();
+    bool TryGetPlayer(out ITargetable player);
 }
 
 public interface ISceneAIServices// : IGlobalServices
