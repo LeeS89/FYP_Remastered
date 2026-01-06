@@ -26,10 +26,10 @@ public partial class NPCController : ComponentInit<ISceneAIServices, AgentEventM
     public bool TestWalk;
 
     [Header("Data used by the Brain component")]
-    public StateId CurrentFSMState => _fsmManager?.CurrentStateId ?? StateId.None;
+    public StateId CurrentFsmState => _fsmManager?.CurrentStateId ?? StateId.None;
     public CombatOrder CurrentComOrder { get; private set; } = CombatOrder.None;
     public RotationOrder CurrentRotOrder { get; private set; } = RotationOrder.None;
-    public FOVResult CurrentFOVState { get; private set; } = FOVResult.None;
+    public FOVResult CurrentFovState { get; private set; } = FOVResult.None;
     private bool TargetDead() => _primaryTarget?.IsDead ?? true;
     // End Brain data
 
@@ -79,6 +79,8 @@ public partial class NPCController : ComponentInit<ISceneAIServices, AgentEventM
     {
         if (_fsmManager.IsInStateTransition /*|| n.Id != _fsmManager.CurrentStateId*/) return;
 
+      //  if (n.Kind == NotificationKind.FOVUpdate) Debug.LogError("FOV Result: "+n.FOVResult.ToString());
+
         if (!this.TryDecide(n, out var decision)) return;
 
         if (decision.BroadcastZoneAlert)
@@ -123,7 +125,7 @@ public partial class NPCController : ComponentInit<ISceneAIServices, AgentEventM
 
     }
 
-    private void ApplyFOVStatusUpdate(FOVResult result) => CurrentFOVState = result;
+    private void ApplyFOVStatusUpdate(FOVResult result) => CurrentFovState = result;
 
     public void AnimationIntent(AnimationCue cue) => _animationControl?.PlayClip(cue);
     // End IFSMNotificationss
@@ -234,7 +236,7 @@ public partial class NPCController : ComponentInit<ISceneAIServices, AgentEventM
         if (IsDead) return;
         Debug.LogError("Stable FOVResult: " + result.ToString());
         ApplyFOVStatusUpdate(result);
-        var n = NPCNotification.FOVUpdate(/*_fsmManager.CurrentStateId,*/ CurrentFOVState, false);
+        var n = NPCNotification.FOVUpdate(/*_fsmManager.CurrentStateId,*/ CurrentFovState, false);
         OnNotify(n);
     }
 
@@ -244,7 +246,7 @@ public partial class NPCController : ComponentInit<ISceneAIServices, AgentEventM
         Debug.LogError("FOVResult: Target Seen");
         ApplyFOVStatusUpdate(FOVResult.TargetSeen);
         //  _eManager.AimTowardsTarget(aim: true);
-        var n = NPCNotification.FOVUpdate(/*_fsmManager.CurrentStateId, */CurrentFOVState, false);
+        var n = NPCNotification.FOVUpdate(/*_fsmManager.CurrentStateId, */CurrentFovState, false);
         OnNotify(n);
 
         /* if (_fsmManager.CurrentStateId == StateId.Patrol)
@@ -258,7 +260,7 @@ public partial class NPCController : ComponentInit<ISceneAIServices, AgentEventM
     {
         if (IsDead) return;
         Debug.LogError("FOVResult: Target Lost");
-        CurrentFOVState = FOVResult.TargetNotSeen;
+        CurrentFovState = FOVResult.TargetNotSeen;
         //   _eManager.AimTowardsTarget(aim: false);
     }
 
@@ -266,7 +268,7 @@ public partial class NPCController : ComponentInit<ISceneAIServices, AgentEventM
     {
         if (IsDead || _fsmManager == null) return;
         if (_fsmManager.CurrentStateId == StateId.Chase || _fsmManager.CurrentStateId == StateId.Follow)
-            if (IsStationary || CurrentFOVState == FOVResult.TargetSeen)
+            if (IsStationary || CurrentFovState == FOVResult.TargetSeen)
             {
                 this.RotateTowardsTarget(_primaryTarget?.Transform, rotate: true);
                 if (!_aimingAtTarget) { _aimingAtTarget = true; _animationControl?.IkLookAtTarget(look: true); }
@@ -295,6 +297,8 @@ public partial class NPCController : ComponentInit<ISceneAIServices, AgentEventM
              if (_aimingAtTarget) { _aimingAtTarget = false; _eManager.AimAtTarget(aim: false); }
          }*/
     }
+
+    
 
     protected void TryBroadcastAlert(StateId nextIntent = StateId.None)
     {
@@ -345,20 +349,24 @@ public partial class NPCController : ComponentInit<ISceneAIServices, AgentEventM
                                                                                    // SwitchTo(ChaseState.Instance);
     }
 
+
     public void TryBroadcastAlert()
     {
-        throw new NotImplementedException();
+        if (IsDead || _alertService == null) return;
+        _alertService.TryAlertAgentsInZone(_zoneId, this);
     }
 
     public void SwitchState(StateId intentState)
     {
-        throw new NotImplementedException();
+        if (_fsmManager == null) return;
+        if (intentState == StateId.None || intentState == _fsmManager.CurrentStateId) return;
+        _fsmManager.SwitchTo(intentState);
     }
 
-    public void UpdateFovStatus(FOVResult newStatus)
-    {
-        throw new NotImplementedException();
-    }
+    public void UpdateCurrentFovStatus(FOVResult newStatus) => CurrentFovState = newStatus;
+    // Sets Sweep Frequency
+    public void UpdateFovAlertPhase(AlertPhase newPhase) => _fovRunner?.SetAlertPhase(newPhase);
+
 
     public void UpdateRotationOrder(RotationOrder newOrder)
     {

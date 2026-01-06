@@ -58,10 +58,10 @@ public partial class FSMBaseNew : IFSMControlNew
         OnTick += TimerTicks;
         OnTick += ClassUpdate;
     }*/
-    public FSMBaseNew(IFsmDeps deps, IReadOnlyDictionary<StateId, IFSMState> states, Notification fsmCallback)
+    public FSMBaseNew(IFsmDeps deps, IReadOnlyDictionary<StateId, IFSMState> states, Notification fsmNotifications)
     {
         _deps = deps;
-        Notification = fsmCallback;
+        Notification = fsmNotifications;
        // _fovHandler = runner;
         _states = states;
 
@@ -83,7 +83,7 @@ public partial class FSMBaseNew : IFSMControlNew
             _current = nextstate;
             _current.EnterState();
             IsInStateTransition = false;
-            UpdateFOVFrequency(CurrentStateId);
+           // UpdateFOVFrequency(CurrentStateId);
         }   // else => Notify state doesnt exist
     }
 

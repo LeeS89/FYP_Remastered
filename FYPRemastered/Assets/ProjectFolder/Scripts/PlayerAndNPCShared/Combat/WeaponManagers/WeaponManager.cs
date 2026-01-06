@@ -19,8 +19,8 @@ public class WeaponManager : WeaponManagerBase
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
-        _pEventManager = eventManager as PlayerEventManager;
-        base.RegisterLocalEvents(_pEventManager);
+       // _pEventManager = eventManager as PlayerEventManager;
+      //  base.RegisterLocalEvents(_pEventManager);
 
 
     }
@@ -98,6 +98,16 @@ public class WeaponManager : WeaponManagerBase
         return false;
     }
 
-   // private IEquippable[] _slots = new IEquippable[2];
+    public override void Init(IPlaceholderService services, PlayerEventManager manager)
+    {
+       // throw new System.NotImplementedException();
+    }
+
+    public override void Unload()
+    {
+       // throw new System.NotImplementedException();
+    }
+
+    // private IEquippable[] _slots = new IEquippable[2];
     #endregion
 }

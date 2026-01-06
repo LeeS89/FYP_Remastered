@@ -68,6 +68,9 @@ public abstract class ComponentInit<TServices, TManager> : MonoBehaviour, IServi
     protected virtual void OnSceneBegin() { }
     protected virtual void OnSceneEnd() { }
 
+    protected virtual void OnDeath(ITargetable targetable) => _sceneService?.OnTargetableDied(targetable);
+    protected virtual void OnRespawn(ITargetable targetable) => _sceneService?.OnTargetableRespawned(targetable);
+
     private void SceneBegin() { _sceneService.OnSceneBegin -= SceneBegin; OnSceneBegin(); }
     private void SceneEnd() 
     {

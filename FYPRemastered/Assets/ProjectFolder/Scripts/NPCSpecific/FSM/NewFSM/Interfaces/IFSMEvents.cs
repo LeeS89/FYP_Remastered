@@ -165,7 +165,7 @@ public interface IFieldOfViewOwner // Obsolete
 
 public interface IFieldOfViewRunner : ITickable
 {
-    void SetFOVSweepFrequency(AlertPhase phase);
+    void SetAlertPhase(AlertPhase phase);
     //Action<FOVResult, bool> OnFOVSweepComplete { get; set; }
     // Action<NPCNotification> OnFOVSweepCompleted { get; set; }
     Notification OnFOVSweepComplete { get; set; }

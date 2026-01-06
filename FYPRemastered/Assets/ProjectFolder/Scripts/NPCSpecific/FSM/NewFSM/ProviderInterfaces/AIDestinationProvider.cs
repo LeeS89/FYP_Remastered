@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+[Obsolete("", true)]
 public class AIDestinationProvider
 {
     
@@ -17,8 +19,8 @@ public interface ICandidateDestinationProvider : IZoneSink
 
 public static class DestExtension
 {
-    public static void TestGet(this DestinationServiceId id)
+   /* public static void TestGet(this DestinationServiceId id)
     {
 
-    }
+    }*/
 }

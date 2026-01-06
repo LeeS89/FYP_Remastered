@@ -47,7 +47,7 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
         {
             Debug.LogWarning("Character controller not found, please ensure component exists before use");
         }
-        _playerEventManager = eventManager as PlayerEventManager;
+       // _playerEventManager = eventManager as PlayerEventManager;
         _playerEventManager.OnKnockbackTriggered += ApplyKnockback;
         _playerEventManager.OnPlayerRotate += HandleRotation;
         _playerEventManager.OnPlayerHeightUpdated += AdjustPlayerHeight;

@@ -2,14 +2,15 @@ using UnityEngine;
 
 public interface INPCBrainContext : ITargetable
 {
-    StateId CurrentFSMState { get; }
+    StateId CurrentFsmState { get; }
     CombatOrder CurrentComOrder { get; }
     RotationOrder CurrentRotOrder { get; }
-    FOVResult CurrentFOVState { get; }
+    FOVResult CurrentFovState { get; }
 
     void TryBroadcastAlert();
     void SwitchState(StateId intentState);
     void UpdateCombatOrder(CombatOrder newOrder);
-    void UpdateFovStatus(FOVResult newStatus);
+    void UpdateCurrentFovStatus(FOVResult newStatus);
+    void UpdateFovAlertPhase(AlertPhase newPhase);
     void UpdateRotationOrder(RotationOrder newOrder);
 }

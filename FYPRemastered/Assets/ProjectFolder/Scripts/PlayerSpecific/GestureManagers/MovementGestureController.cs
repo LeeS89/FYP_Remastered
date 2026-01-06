@@ -45,7 +45,7 @@ public class MovementGestureController : BaseGesture
     }
 
 
-    public override void RegisterLocalEvents(EventManager eventManager)
+    /*public override void RegisterLocalEvents(EventManager eventManager)
     {
         if (eventManager == null) { return; }
         _playerEventManager = eventManager as PlayerEventManager;
@@ -53,18 +53,23 @@ public class MovementGestureController : BaseGesture
         ResetFields();
         RegisterGlobalEvents();
         
+    }*/
+
+    public override void Init(IPlaceholderService services, PlayerEventManager manager)
+    {
+        _playerEventManager = manager;
+        ResetFields();
     }
 
-  
-
-    public override void UnRegisterLocalEvents(EventManager eventManager)
+   /* public override void UnRegisterLocalEvents(EventManager eventManager)
     {
         base.UnRegisterLocalEvents(_playerEventManager);
         base.UnRegisterGlobalEvents();
         ResetFields();   
-    }
+    }*/
 
-   
+    public override void Unload()
+        => ResetFields();
 
     public override void OnGestureRecognized()
     {
@@ -153,11 +158,12 @@ public class MovementGestureController : BaseGesture
         }
     }
 
-    protected override void DeathStatusUpdated(bool isDead)
+    // Need to fix this, update to new system
+    protected /*override*/ void DeathStatusUpdated(bool isDead)
     {
-        base.DeathStatusUpdated(isDead);
+       // base.DeathStatusUpdated(isDead);
 
-        if (OwnerIsDead)
+        if (/*OwnerIsDead*/IsDead)
         {
             ResetStates();
         }  
@@ -174,11 +180,18 @@ public class MovementGestureController : BaseGesture
 
    
 
-    protected override void OnSceneComplete()
+   /* protected override void OnSceneComplete()
     {
         base.OnSceneComplete();
         ResetStates();
         _playerEventManager = null;
+    }*/
+
+    protected override void OnSceneEnd()
+    {
+        ResetStates();
+        _playerEventManager = null;
     }
 
+   
 }

@@ -24,7 +24,7 @@ public static class NPCDecisionPolicy
 
     public static bool TryDecide(this INPCBrainContext self, in NPCNotification n, out BrainDecision decision)
     {
-        var state = self.CurrentFSMState;
+        var state = self.CurrentFsmState;
         decision = default;
 
         return state switch
@@ -106,7 +106,7 @@ public static class NPCDecisionPolicy
         return false;
     }
 
-    private static bool FOVStatusChanged(INPCBrainContext c, FOVResult r) => c.CurrentFOVState != r;
+    private static bool FOVStatusChanged(INPCBrainContext c, FOVResult r) => c.CurrentFovState != r;
 
     private static RotationOrder DecideNextRotationOrder(RotationOrder currentOrder, FOVResult newFOVStatus)
     {

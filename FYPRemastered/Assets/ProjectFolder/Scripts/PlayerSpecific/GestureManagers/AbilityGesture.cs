@@ -16,7 +16,7 @@ public class AbilityGesture : BaseGesture
 
    
 
-    public override void RegisterLocalEvents(EventManager eventManager)
+   /* public override void RegisterLocalEvents(EventManager eventManager)
     {
         if (eventManager == null) return;
 
@@ -27,11 +27,20 @@ public class AbilityGesture : BaseGesture
         poolCallback = OnPoolReceived;
         this.RequestPool(_poolId, poolCallback);
        
+    }*/
+
+    public override void Init(IPlaceholderService services, PlayerEventManager manager)
+    {
+        _pEventManager = manager;
+
+        if (_poolId == null) return;
+        poolCallback = OnPoolReceived;
+        this.RequestPool(_poolId, poolCallback);
     }
 
     public override void OnGestureRecognized()
     {
-        if (OwnerIsDead) return;
+        if (IsDead/*OwnerIsDead*/) return;
         if (_pEventManager == null || _poolManager == null || _abilityPools == null) return;
         // var ability = AbilityResources.SetAbilityPools(_abilityId, now: Time.time, _abilityPools);//AbilityResources.SetImpactPhasePool(_abilityId, now: Time.time, _poolManager);
         _pEventManager.TryUseAbility(_abilityId, _origins);
@@ -50,11 +59,18 @@ public class AbilityGesture : BaseGesture
         _abilityPools[CuePhase.Impact] = _poolManager;
     }
 
-    protected override void DeathStatusUpdated(bool isDead)
+    // Need to fix and update to new system
+    protected /*override*/ void DeathStatusUpdated(bool isDead)
     {
-        base.DeathStatusUpdated(isDead);
+      //  base.DeathStatusUpdated(isDead);
 
         if (isDead) OnGestureReleased();
     }
 
+    
+
+    public override void Unload()
+    {
+        throw new NotImplementedException();
+    }
 }

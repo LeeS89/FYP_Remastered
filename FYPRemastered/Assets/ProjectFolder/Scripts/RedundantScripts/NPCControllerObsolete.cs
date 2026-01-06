@@ -41,10 +41,10 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, INPCBr
     public bool TestWalk;
 
     [Header("Data used by the Brain component")]
-    public StateId CurrentFSMState => _fsmManager?.CurrentStateId ?? StateId.None;
+    public StateId CurrentFsmState => _fsmManager?.CurrentStateId ?? StateId.None;
     public CombatOrder CurrentComOrder { get; private set; } = CombatOrder.None;
     public RotationOrder CurrentRotOrder { get; private set; } = RotationOrder.None;
-    public FOVResult CurrentFOVState { get; private set; } = FOVResult.None;
+    public FOVResult CurrentFovState { get; private set; } = FOVResult.None;
     private bool TargetDead() => PrimaryTarget?.IsDead ?? true;
     // End Brain data
 
@@ -159,7 +159,7 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, INPCBr
 
     }
 
-    private void ApplyFOVStatusUpdate(FOVResult result) => CurrentFOVState = result; 
+    private void ApplyFOVStatusUpdate(FOVResult result) => CurrentFovState = result; 
 
     public void AnimationIntent(AnimationCue cue) => _animationControl?.PlayClip(cue);
     // End IFSMNotificationss
@@ -280,7 +280,7 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, INPCBr
         if (OwnerIsDead) return;
         Debug.LogError("Stable FOVResult: "+result.ToString());
         ApplyFOVStatusUpdate(result);
-        var n = NPCNotification.FOVUpdate(/*_fsmManager.CurrentStateId,*/ CurrentFOVState, false);
+        var n = NPCNotification.FOVUpdate(/*_fsmManager.CurrentStateId,*/ CurrentFovState, false);
         OnNotify(n);
     }
 
@@ -290,7 +290,7 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, INPCBr
         Debug.LogError("FOVResult: Target Seen");
         ApplyFOVStatusUpdate(FOVResult.TargetSeen);
         //  _eManager.AimTowardsTarget(aim: true);
-        var n = NPCNotification.FOVUpdate(/*_fsmManager.CurrentStateId, */CurrentFOVState, false);
+        var n = NPCNotification.FOVUpdate(/*_fsmManager.CurrentStateId, */CurrentFovState, false);
         OnNotify(n);
 
        /* if (_fsmManager.CurrentStateId == StateId.Patrol)
@@ -304,7 +304,7 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, INPCBr
     {
         if (OwnerIsDead) return;
         Debug.LogError("FOVResult: Target Lost");
-        CurrentFOVState = FOVResult.TargetNotSeen;
+        CurrentFovState = FOVResult.TargetNotSeen;
      //   _eManager.AimTowardsTarget(aim: false);
     }
 
@@ -312,7 +312,7 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, INPCBr
     {
         if (OwnerIsDead || _fsmManager == null) return;
         if (_fsmManager.CurrentStateId == StateId.Chase || _fsmManager.CurrentStateId == StateId.Follow)
-            if (IsStationary || CurrentFOVState == FOVResult.TargetSeen)
+            if (IsStationary || CurrentFovState == FOVResult.TargetSeen)
             {
                 this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: true);
                 if (!_aimingAtTarget) { _aimingAtTarget = true; _animationControl?.IkLookAtTarget(look: true); }
@@ -406,12 +406,17 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, INPCBr
         UpdateCombatOrder(newOrder);
     }
 
-    public void UpdateFovStatus(FOVResult newStatus)
+    public void UpdateCurrentFovStatus(FOVResult newStatus)
     {
         throw new NotImplementedException();
     }
 
     public void UpdateRotationOrder(RotationOrder newOrder)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void UpdateFovAlertPhase(AlertPhase newPhase)
     {
         throw new NotImplementedException();
     }
@@ -478,10 +483,10 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
     public bool TestWalk;
 
     [Header("Data used by the Brain component")]
-    public StateId CurrentFSMState => _fsmManager?.CurrentStateId ?? StateId.None;
+    public StateId CurrentFsmState => _fsmManager?.CurrentStateId ?? StateId.None;
     public CombatOrder CurrentComOrder { get; private set; } = CombatOrder.None;
     public RotationOrder CurrentRotOrder { get; private set; } = RotationOrder.None;
-    public FOVResult CurrentFOVState { get; private set; } = FOVResult.None;
+    public FOVResult CurrentFovState { get; private set; } = FOVResult.None;
     private bool TargetDead() => PrimaryTarget?.IsDead ?? true;
     // End Brain data
 
@@ -596,7 +601,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
 
     }
 
-    private void ApplyFOVStatusUpdate(FOVResult result) => CurrentFOVState = result; 
+    private void ApplyFOVStatusUpdate(FOVResult result) => CurrentFovState = result; 
 
     public void AnimationIntent(AnimationCue cue) => _animationControl?.PlayClip(cue);
     // End IFSMNotificationss
@@ -717,7 +722,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
         if (IsDead) return;
         Debug.LogError("Stable FOVResult: "+result.ToString());
         ApplyFOVStatusUpdate(result);
-        var n = NPCNotification.FOVUpdate(/*_fsmManager.CurrentStateId,*/ CurrentFOVState, false);
+        var n = NPCNotification.FOVUpdate(/*_fsmManager.CurrentStateId,*/ CurrentFovState, false);
         OnNotify(n);
     }
 
@@ -727,7 +732,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
         Debug.LogError("FOVResult: Target Seen");
         ApplyFOVStatusUpdate(FOVResult.TargetSeen);
         //  _eManager.AimTowardsTarget(aim: true);
-        var n = NPCNotification.FOVUpdate(/*_fsmManager.CurrentStateId, */CurrentFOVState, false);
+        var n = NPCNotification.FOVUpdate(/*_fsmManager.CurrentStateId, */CurrentFovState, false);
         OnNotify(n);
 
        /* if (_fsmManager.CurrentStateId == StateId.Patrol)
@@ -741,7 +746,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
     {
         if (IsDead) return;
         Debug.LogError("FOVResult: Target Lost");
-        CurrentFOVState = FOVResult.TargetNotSeen;
+        CurrentFovState = FOVResult.TargetNotSeen;
      //   _eManager.AimTowardsTarget(aim: false);
     }
 
@@ -749,7 +754,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
     {
         if (IsDead || _fsmManager == null) return;
         if (_fsmManager.CurrentStateId == StateId.Chase || _fsmManager.CurrentStateId == StateId.Follow)
-            if (IsStationary || CurrentFOVState == FOVResult.TargetSeen)
+            if (IsStationary || CurrentFovState == FOVResult.TargetSeen)
             {
                 this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: true);
                 if (!_aimingAtTarget) { _aimingAtTarget = true; _animationControl?.IkLookAtTarget(look: true); }
@@ -843,12 +848,17 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
         UpdateCombatOrder(newOrder);
     }
 
-    public void UpdateFovStatus(FOVResult newStatus)
+    public void UpdateCurrentFovStatus(FOVResult newStatus)
     {
         throw new NotImplementedException();
     }
 
     public void UpdateRotationOrder(RotationOrder newOrder)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void UpdateFovAlertPhase(AlertPhase newPhase)
     {
         throw new NotImplementedException();
     }

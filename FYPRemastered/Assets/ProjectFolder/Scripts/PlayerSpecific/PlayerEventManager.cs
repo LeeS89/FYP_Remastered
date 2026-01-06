@@ -6,7 +6,7 @@ public interface Test3 : Test2
     void Help();
 }
 
-public class PlayerEventManager : EventManager
+public class PlayerEventManager : EventManagerBase
 {
     public event Action<Quaternion> OnPlayerRotate;
     public event Action<Vector3> OnPlayerHeightUpdated;

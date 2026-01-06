@@ -172,7 +172,7 @@ public class AgentZoneRegistry : SceneResources
     }
 
 }*/
-public class AgentZoneRegistryNew : SceneResources, INpcService
+public class AgentZoneRegistryNew : SceneResources, IAgentAlertService
 {
     private Dictionary<ZoneId, List<INotificationListener>> _zoneAgents = new();
     private readonly HashSet<ZoneId> _alertedZones = new();
@@ -180,7 +180,7 @@ public class AgentZoneRegistryNew : SceneResources, INpcService
     public override async Task LoadResources()
     {
         SceneEventAggregator.Instance.OnRegisterAgentAndZone = Register;
-        SceneEventAggregator.Instance.OnAlertAgentsInZone = AlertZone;
+        SceneEventAggregator.Instance.OnAlertAgentsInZone = TryAlertZone;
         SceneEventAggregator.Instance.OnUnRegisterAgentAndZone = Unregister;
         await Task.CompletedTask; 
     }
@@ -215,7 +215,7 @@ public class AgentZoneRegistryNew : SceneResources, INpcService
             list.Remove(agent);
     }
 
-    private bool AlertZone(ZoneId zone, INotificationListener source)
+    private bool TryAlertZone(ZoneId zone, INotificationListener source)
     {
         if (!_alertedZones.Add(zone)) return false; // Already alerted => Create function to reset alerted zones 
 

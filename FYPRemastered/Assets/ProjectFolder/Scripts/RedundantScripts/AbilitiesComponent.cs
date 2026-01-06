@@ -29,8 +29,8 @@ public class AbilitiesComponent : BaseAbilitiesObsolete
 
     public override void RegisterLocalEvents(EventManager eventManager)
     {
-        _playerEventManager = eventManager as PlayerEventManager;
-        base.RegisterLocalEvents(_playerEventManager);
+     //   _playerEventManager = eventManager as PlayerEventManager;
+     //   base.RegisterLocalEvents(_playerEventManager);
         _traceComp = new PlayerTraceManager(_maxTraceResults);
         _bulletTraceresults = new IFreezeAndDeflectable[_maxTraceResults];
        // _deflectables = new List<IDeflectable>();
@@ -42,7 +42,7 @@ public class AbilitiesComponent : BaseAbilitiesObsolete
 
     public override void UnRegisterLocalEvents(EventManager eventManager)
     {
-        base.UnRegisterLocalEvents(_playerEventManager);
+     //   base.UnRegisterLocalEvents(_playerEventManager);
         Array.Clear(_bulletTraceresults, 0, _bulletTraceresults.Length);
         
         UnRegisterGlobalEvents();

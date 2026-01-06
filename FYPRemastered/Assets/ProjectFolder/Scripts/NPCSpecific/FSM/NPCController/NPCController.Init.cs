@@ -22,6 +22,7 @@ public partial class NPCController
     private INpcAnimationControl _animationControl;
     private ISceneAIServices _aiServices;
     private IPlayerRefService _playerRefService;
+    private IAgentAlertService _alertService;
     private Notification _componentNotifications;
 
     public override void Init(ISceneAIServices services, AgentEventManager manager)
@@ -86,6 +87,7 @@ public partial class NPCController
             _eManager = manager;
 
         _aiServices = services;
+       
     }
 
     private void ConstructFovRunner()
@@ -109,10 +111,16 @@ public partial class NPCController
         //_fovRunner = new NPCFieldOfViewHandler(_fovParams, _fsmDeps, onSweepComplete: _componentNotifications);
 
        // _fsmManager = new FSMBaseNew(data: this, resolver: _pathFinder, runner: _fovRunner, _fsmStates);
-        _fsmManager = new FSMBaseNew(deps: _fsmDeps, _fsmStates, fsmCallback: _componentNotifications);
+        _fsmManager = new FSMBaseNew(deps: _fsmDeps, _fsmStates, fsmNotifications: _componentNotifications);
 
         if (_aiServices.TryGetWaypointService(out _fsmDeps._waypointService))
         {
+            if (!_aiServices.TryGetAgentAlertService(out _alertService))
+            {
+#if UNITY_EDITOR
+                Debug.LogError("Failed to retrieve alert service");
+#endif
+            }
             //IFSMState patrolState = new FSMPatrolState(wpService, data: this, resolver: _pathFinder, stateContext: _fsmManager);
             IFSMState patrolState = new FSMPatrolState(deps: _fsmDeps, /*data: this, resolver: _pathFinder,*/ stateContext: _fsmManager);
             StateId pid = patrolState.GetId();

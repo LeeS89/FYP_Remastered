@@ -310,7 +310,7 @@ public class FSMManagerObsolete : FSMBaseObsolete
     public override void BeginPatrol(StateId id)
     {
         if (id != StateId.Patrol) return;
-        _fovHandler?.SetFOVSweepFrequency(AlertPhase.Idle);
+        _fovHandler?.SetAlertPhase(AlertPhase.Idle);
         OnDestinationReached = OnPatrolReached;
        // CancelRunningCoroutine();
         
@@ -350,7 +350,7 @@ public class FSMManagerObsolete : FSMBaseObsolete
     public override void BeginChase(StateId id)
     {
         if (id != StateId.Chase) return;
-        _fovHandler.SetFOVSweepFrequency(AlertPhase.Alerted);
+        _fovHandler.SetAlertPhase(AlertPhase.Alerted);
         OnDestinationReached = OnChaseReached;
         
         if (_currentStateId != id) _currentStateId = id;
@@ -360,7 +360,7 @@ public class FSMManagerObsolete : FSMBaseObsolete
     public override void BeginFlank(StateId id)
     {
         if (id != StateId.Flank) return;
-        _fovHandler.SetFOVSweepFrequency(AlertPhase.Alerted);
+        _fovHandler.SetAlertPhase(AlertPhase.Alerted);
         if (_currentStateId != id) _currentStateId = id;
         TryRepath?.Invoke(id);
     }

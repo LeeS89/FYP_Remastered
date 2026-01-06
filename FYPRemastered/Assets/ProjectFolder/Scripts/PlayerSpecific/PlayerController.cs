@@ -3,7 +3,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(PlayerEventManager))]
-public sealed class PlayerController : ComponentEvents, ITargetable
+public sealed class PlayerController : ComponentInit<IPlaceholderService, PlayerEventManager>/*ComponentEvents*/, ITargetable
 {
     [Header("Locomotion Params")]
     [SerializeField] private float _moveSpeed = 4.0f;
@@ -21,7 +21,7 @@ public sealed class PlayerController : ComponentEvents, ITargetable
 
     [Header("Player Controller Components")]
     private CharacterController _controller;
-    private PlayerEventManager _playerEventManager;
+    private PlayerEventManager _eManager;
     private LocomotionHandler _locomotion;
     private RotationHandler _rotationHandler;
     private GrabHandler _grabHandler;
@@ -42,7 +42,7 @@ public sealed class PlayerController : ComponentEvents, ITargetable
     public bool _testMove = true;
     public bool IsStationary => _testMove;//_locomotion != null ? !_locomotion.CanMoveForward : true;
 
-    public bool IsDead { get; private set; } = false;
+   // public bool IsDead { get; private set; } = false;
 
     public LayerMask LayerMask => _selfTargetMask;
 
@@ -57,11 +57,11 @@ public sealed class PlayerController : ComponentEvents, ITargetable
     }
     #endregion ITargetable Implementation
 
-    public override void RegisterLocalEvents(EventManager eventManager)
+    public /*override*/ void RegisterLocalEvents(EventManager eventManager)
     {
-        _playerEventManager = eventManager as PlayerEventManager;
+       // _eManager = eventManager as PlayerEventManager;
     
-        base.RegisterLocalEvents(_playerEventManager);
+        //base.RegisterLocalEvents(_eManager);
 
         if (TryGetComponent<CharacterController>(out CharacterController characterController))
             _controller = characterController;
@@ -75,34 +75,66 @@ public sealed class PlayerController : ComponentEvents, ITargetable
                 _targetableCollider = gameObject.AddComponent<BoxCollider>();
         }
 
-        _playerEventManager.OnPlayerRotate += HandleRotation;
-        _playerEventManager.OnPlayerHeightUpdated += AdjustPlayerHeight;
-        _playerEventManager.OnMovementUpdated += ApplyPlayerMovement;
+        _eManager.OnPlayerRotate += HandleRotation;
+        _eManager.OnPlayerHeightUpdated += AdjustPlayerHeight;
+        _eManager.OnMovementUpdated += ApplyPlayerMovement;
        // _playerEventManager.OnDeathStatusUpdated += DeathStatusUpdated;
 
-        _grabHandler = new GrabHandler(_playerEventManager, GetComponentsInChildren<HandGrabInteractor>(false));
-        _locomotion = new LocomotionHandler(_playerEventManager, transform, _moveSpeed, _gravity);
+        _grabHandler = new GrabHandler(_eManager, GetComponentsInChildren<HandGrabInteractor>(false));
+        _locomotion = new LocomotionHandler(_eManager, transform, _moveSpeed, _gravity);
        
         SetupRotationHandler();
 
-        RegisterGlobalEvents();
+       // RegisterGlobalEvents();
+    }
+
+    public override void Init(IPlaceholderService services, PlayerEventManager manager)
+    {
+        _eManager = manager;
+        if (TryGetComponent<CharacterController>(out CharacterController characterController))
+            _controller = characterController;
+
+        if (_targetableCollider == null)
+        {
+            Collider col = GetComponentInChildren<Collider>();
+            if (col != null)
+                _targetableCollider = col;
+            else
+                _targetableCollider = gameObject.AddComponent<BoxCollider>();
+        }
+
+        _eManager.OnPlayerRotate += HandleRotation;
+        _eManager.OnPlayerHeightUpdated += AdjustPlayerHeight;
+        _eManager.OnMovementUpdated += ApplyPlayerMovement;
+
+        _grabHandler = new GrabHandler(_eManager, GetComponentsInChildren<HandGrabInteractor>(false));
+        _locomotion = new LocomotionHandler(_eManager, transform, _moveSpeed, _gravity);
+
+        SetupRotationHandler();
     }
 
 
     private void SetupRotationHandler()
     {
         var cfg = new RotationHandler.Config(_camera, transform, _rotationSpeed, _rotationThreshold, _stopRotationThreshold);
-        _rotationHandler = new RotationHandler(_playerEventManager, cfg);
+        _rotationHandler = new RotationHandler(_eManager, cfg);
     }
 
-    public override void UnRegisterLocalEvents(EventManager eventManager)
+   /* public override void UnRegisterLocalEvents(EventManager eventManager)
     {
-        base.UnRegisterLocalEvents(_playerEventManager);
+        base.UnRegisterLocalEvents(_eManager);
         //_playerEventManager.OnDeathStatusUpdated -= DeathStatusUpdated;
-        _playerEventManager.OnMovementUpdated -= ApplyPlayerMovement;
-        _playerEventManager.OnPlayerRotate -= HandleRotation;
-        _playerEventManager.OnPlayerHeightUpdated -= AdjustPlayerHeight;
+        _eManager.OnMovementUpdated -= ApplyPlayerMovement;
+        _eManager.OnPlayerRotate -= HandleRotation;
+        _eManager.OnPlayerHeightUpdated -= AdjustPlayerHeight;
         base.UnRegisterGlobalEvents();
+    }*/
+
+    public override void Unload()
+    {
+        _eManager.OnMovementUpdated -= ApplyPlayerMovement;
+        _eManager.OnPlayerRotate -= HandleRotation;
+        _eManager.OnPlayerHeightUpdated -= AdjustPlayerHeight;
     }
 
 
@@ -154,31 +186,44 @@ public sealed class PlayerController : ComponentEvents, ITargetable
 
     private void ApplyPlayerMovement(Vector3 velocity)
     {
-        if (_controller == null || OwnerIsDead) { return; }
+        if (_controller == null || IsDead/*OwnerIsDead*/) { return; }
 
         _controller.Move(velocity * Time.deltaTime);
 
     }
 
+    protected override void OnSceneBegin()
+        => InputEnabled = true;
 
+    protected override void OnSceneEnd()
+    {
+        InputEnabled = false;
+        _locomotion?.OnInstanceDestroyed();
+        _locomotion = null;
+        _rotationHandler?.OnInstanceDestroyed();
+        _rotationHandler = null;
 
-    protected override void OnSceneStarted()
+        _grabHandler.OnInstanceDestroyed();
+        _grabHandler = null;
+        _eManager = null;
+    }
+    /*protected override void OnSceneStarted()
     {
         base.OnSceneStarted();
         InputEnabled = true;
-    }
+    }*/
 
     
 
-    protected override void DeathStatusUpdated(bool isDead)
+    private/*protected*/ /*override*/ void DeathStatusUpdated(bool isDead)
     {
-        base.DeathStatusUpdated(isDead);
+       // base.DeathStatusUpdated(isDead);
 
-        InputEnabled = !OwnerIsDead;
+      //  InputEnabled = !OwnerIsDead;
        
     }
 
-    protected override void OnSceneComplete()
+   /* protected override void OnSceneComplete()
     {
         base.OnSceneComplete();
         InputEnabled = false;
@@ -189,8 +234,10 @@ public sealed class PlayerController : ComponentEvents, ITargetable
        
         _grabHandler.OnInstanceDestroyed();
         _grabHandler = null;
-        _playerEventManager = null;
-    }
+        _eManager = null;
+    }*/
 
-   
+  
+
+    
 }

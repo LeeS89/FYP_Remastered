@@ -73,7 +73,7 @@ public class NPCFieldOfViewHandler : IFieldOfViewRunner
         };
     }
 
-    public void SetFOVSweepFrequency(AlertPhase phase)
+    public void SetAlertPhase(AlertPhase phase)
     {
         if (_currentAlertPhase == phase) return;
         _currentAlertPhase = phase;
@@ -282,8 +282,8 @@ public class NPCFieldOfViewHandlerNew : IFieldOfViewRunner
     private FovDeps _deps;
 
     private AlertPhase _currentAlertPhase = AlertPhase.Idle;
-    private float _fovSweepFrequency;
-    private float _nextCheckTime = 0f;
+    private float _sweepFrequency;
+    private float _nextSweepTime = 0f;
     private Vector3[] _evaluationHitPoints;
     private Collider[] _proximityDetectionResults;
     private RaycastHit[] _hitBuffer = new RaycastHit[10];
@@ -306,8 +306,8 @@ public class NPCFieldOfViewHandlerNew : IFieldOfViewRunner
         _deps = deps;
         _evaluationHitPoints = new Vector3[_deps.maxFovTargets];
         _proximityDetectionResults = new Collider[_deps.maxFovTargets];
-        _nextCheckTime = Time.time + GetCheckFrequency(_currentAlertPhase);
-        _fovSweepFrequency = GetCheckFrequency(_currentAlertPhase);
+        _nextSweepTime = Time.time + GetCheckFrequency(_currentAlertPhase);
+        _sweepFrequency = GetCheckFrequency(_currentAlertPhase);
         OnFOVSweepComplete = onSweepComplete;
     }
 
@@ -330,18 +330,18 @@ public class NPCFieldOfViewHandlerNew : IFieldOfViewRunner
         };
     }
 
-    public void SetFOVSweepFrequency(AlertPhase phase)
+    public void SetAlertPhase(AlertPhase phase)
     {
         if (_currentAlertPhase == phase) return;
         _currentAlertPhase = phase;
-        _fovSweepFrequency = GetCheckFrequency(_currentAlertPhase);
+        _sweepFrequency = GetCheckFrequency(_currentAlertPhase);
     }
 
     private void TryChangeFOVFrequency(AlertPhase phase)
     {
         if (phase <= _currentAlertPhase) return;
         _currentAlertPhase = phase;
-        _fovSweepFrequency = GetCheckFrequency(_currentAlertPhase);
+        _sweepFrequency = GetCheckFrequency(_currentAlertPhase);
 
     }
 
@@ -432,9 +432,9 @@ public class NPCFieldOfViewHandlerNew : IFieldOfViewRunner
 #endif
             return;
         }
-        if (Time.time >= _nextCheckTime)
+        if (Time.time >= _nextSweepTime)
         {
-            _nextCheckTime = Time.time + _fovSweepFrequency;
+            _nextSweepTime = Time.time + _sweepFrequency;
             RunFOVSweep();
         }
     }

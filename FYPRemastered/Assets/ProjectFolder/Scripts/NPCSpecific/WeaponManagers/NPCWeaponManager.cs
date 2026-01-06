@@ -135,6 +135,16 @@ public sealed class NPCWeaponManager : WeaponManagerBase
         }
         _eEventManager.TriggerAnimation(cueToBroadcast);
     }
+
+    public override void Init(IPlaceholderService services, PlayerEventManager manager)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public override void Unload()
+    {
+        throw new System.NotImplementedException();
+    }
     #endregion
 
 

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public abstract class BaseGesture : ComponentEvents
+public abstract class BaseGesture : ComponentInit<IPlaceholderService, PlayerEventManager>/*ComponentEvents*/
 {
 
     public abstract void OnGestureRecognized();
@@ -10,23 +10,17 @@ public abstract class BaseGesture : ComponentEvents
    
     protected virtual void ResetStates() { }
 
-    protected override void OnSceneStarted() { }
+  //  protected override void OnSceneStarted() { }
 
 
-    protected override void OnSceneComplete() { }
+  //  protected override void OnSceneComplete() { }
 
 
-    protected override void OnPlayerDeathStatusUpdated(bool isDead)
+  /*  protected override void OnPlayerDeathStatusUpdated(bool isDead)
     {
         base.OnPlayerDeathStatusUpdated(isDead);
-    }
+    }*/
 
 
-   // protected override void OnPlayerRespawned() {  InputEnabled = true; }
-
-  //  protected override void RegisterGlobalEvents() { }
-
-
-   // protected override void UnRegisterGlobalEvents() { }
     
 }

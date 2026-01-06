@@ -172,7 +172,7 @@ public class SceneServiceBus : ISceneServiceProvider
 
     private List<ITickable> _tickables = new(5);
     private IWaypointService _waypointService;
-    private INpcService _npcService;
+    private IAgentAlertService _npcService;
     private IFlankService _flankService;
     private IPoolService _poolService;
     private IPathService _pathService;
@@ -258,7 +258,7 @@ public class SceneServiceBus : ISceneServiceProvider
         return _waypointService != null;
     }
 
-    public bool TryGetNpcService(out INpcService npcService)
+    public bool TryGetAgentAlertService(out IAgentAlertService npcService)
     {
         if(_npcService == null) _npcService = new AgentZoneRegistryNew();
         npcService = _npcService;
@@ -349,7 +349,7 @@ public class SceneServiceBus : ISceneServiceProvider
 
 
 
-public interface ISceneServiceProvider : ISceneAIServices, IScenePoolServices//, IGlobalServices
+public interface ISceneServiceProvider : ISceneAIServices, IScenePoolServices, IPlaceholderService
 {
     bool TryGetSceneService(out ISceneService sceneService);
 }
@@ -357,10 +357,6 @@ public interface ISceneServiceProvider : ISceneAIServices, IScenePoolServices//,
 //public interface IService : IGlobalServices { }
 
 
-public interface IGlobalServices
-{
-    bool TryGetSceneService(out ISceneService sceneService);
-}
 
 public interface ISceneService
 {
@@ -385,7 +381,7 @@ public interface IPlayerRefService
     bool TryGetPlayer(out ITargetable player);
 }
 
-public interface ISceneAIServices// : IGlobalServices
+public interface ISceneAIServices
 {
     bool TryGetPlayerRefService(out IPlayerRefService playerRefService);
 
@@ -395,12 +391,14 @@ public interface ISceneAIServices// : IGlobalServices
     bool TryGetWaypointService(out IWaypointService waypointService);
    // IWaypointService WaypointService { get; }
 
-    bool TryGetNpcService(out INpcService npcService);
+    bool TryGetAgentAlertService(out IAgentAlertService npcService);
    // INpcService NpcService { get; }
 
     bool TryGetFlankService(out IFlankService flankService);
    // IFlankService FlankService { get; }
 }
+
+public interface IPlaceholderService { }
 
 public interface IPathService
 {
@@ -435,7 +433,7 @@ public interface IScenePoolServices
    // IPoolService PoolService { get; }
 }
 
-public interface INpcService
+public interface IAgentAlertService
 {
     void RegisterAgentAndZone(INotificationListener agent, ZoneId zone);
     void UnregisterAgentAndZone(INotificationListener agent, ZoneId zone);
@@ -460,19 +458,6 @@ public interface IServicable<TServices, TManager> : IServicable
 }
 
 
-[Obsolete]
-public interface IDestinationService
-{
-    DestinationServiceId ServiceId { get; }
-}
-
-[Obsolete]
-public enum DestinationServiceId
-{
-    WaypointService,
-    FlankPointService,
-    TargetPointService
-}
 
 public interface Test1
 {
