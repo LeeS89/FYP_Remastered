@@ -128,6 +128,10 @@ public partial class NPCController : ComponentInit<ISceneAIServices, AgentEventM
     private void ApplyFOVStatusUpdate(FOVResult result) => CurrentFovState = result;
 
     public void AnimationIntent(AnimationCue cue) => _animationControl?.PlayClip(cue);
+
+    public void RotateToTarget(bool rotate) => _fsmManager?.RotateToTarget(rotate);
+   
+
     // End IFSMNotificationss
 
 
@@ -372,6 +376,8 @@ public partial class NPCController : ComponentInit<ISceneAIServices, AgentEventM
     {
         throw new NotImplementedException();
     }
+
+   
 }
 
 public delegate void Notification(in NPCNotification n);

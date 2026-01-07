@@ -420,6 +420,11 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, INPCBr
     {
         throw new NotImplementedException();
     }
+
+    public void RotateToTarget(bool rotate)
+    {
+        throw new NotImplementedException();
+    }
 }
 
 
@@ -859,6 +864,11 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
     }
 
     public void UpdateFovAlertPhase(AlertPhase newPhase)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void RotateToTarget(bool rotate)
     {
         throw new NotImplementedException();
     }

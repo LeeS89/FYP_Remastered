@@ -9,7 +9,7 @@ public partial class FSMBaseNew : IFSMControlNew
     // Injected Dependancies
     private IReadOnlyDictionary<StateId, IFSMState> _states;
    // private IAgentData _ownerData;
-    private IFsmDeps _deps;
+    private IFsmControllerDeps _deps;
    // private IPathResolver _pathFinder;
   //  private IFieldOfViewRunner _fovHandler;
     // End Injected Dependancies
@@ -27,6 +27,7 @@ public partial class FSMBaseNew : IFSMControlNew
 
     // Internal Members
     private event Action<float> OnTick;
+    private event Action<float> OnLateTick;
     private List<SetDestinationDelay> _timer = new(2);
     private IFSMState _current;
     public bool IsInStateTransition { get; private set; } = false;
@@ -34,6 +35,7 @@ public partial class FSMBaseNew : IFSMControlNew
     private float _lerpSpeed = 0f;
     private float _targetSpeed = 0f;
     private bool _usesSpeedByDistance = false;
+    private bool _rotateToTarget = false;
     // End internal members
 
 
@@ -46,29 +48,15 @@ public partial class FSMBaseNew : IFSMControlNew
     private SpeedTier _speedTier = SpeedTier.Idle;
 
 
-/*    public FSMBaseNew(IAgentData data, IPathResolver resolver, IFieldOfViewRunner runner, IReadOnlyDictionary<StateId, IFSMState> states)
-    {
-        _ownerData = data;
-       // _pathFinder = resolver;
-        _fovHandler = runner;
-        _states = states;
-      //  _pathFinder.Callback = OnDestinationResultReceived;
-        _fovHandler.OnFOVSweepComplete = FieldOfViewSweepResult;
-        OnTick += _fovHandler.Tick;
-        OnTick += TimerTicks;
-        OnTick += ClassUpdate;
-    }*/
-    public FSMBaseNew(IFsmDeps deps, IReadOnlyDictionary<StateId, IFSMState> states, Notification fsmNotifications)
+    public FSMBaseNew(IFsmControllerDeps deps, IReadOnlyDictionary<StateId, IFSMState> states, Notification fsmNotifications)
     {
         _deps = deps;
         Notification = fsmNotifications;
-       // _fovHandler = runner;
         _states = states;
 
-       // _fovHandler.OnFOVSweepComplete = FieldOfViewSweepResult;
-       // OnTick += _fovHandler.Tick;
         OnTick += TimerTicks;
         OnTick += ClassUpdate;
+       // OnLateTick += RotateTowardsTarget;
     }
 
     #region State Transition & FOV Frequency Updates
@@ -86,7 +74,7 @@ public partial class FSMBaseNew : IFSMControlNew
            // UpdateFOVFrequency(CurrentStateId);
         }   // else => Notify state doesnt exist
     }
-
+/*
     private void UpdateFOVFrequency(StateId current)
     {
         AlertPhase phase;
@@ -98,10 +86,10 @@ public partial class FSMBaseNew : IFSMControlNew
             _ => AlertPhase.Idle
         };
         //_fovHandler.SetFOVSweepFrequency(phase);
-    }
-
+    }*/
+/*
     private void FieldOfViewSweepResult(FOVResult result, bool withinAttackAngles)
-        => Notification?.Invoke(NPCNotification.FOVUpdate(/*CurrentStateId, */result, withinAttackAngles));
+        => Notification?.Invoke(NPCNotification.FOVUpdate(*//*CurrentStateId, *//*result, withinAttackAngles));*/
     #endregion
 
     #region Tick Region
@@ -109,6 +97,7 @@ public partial class FSMBaseNew : IFSMControlNew
     public void Tick(float dt) => OnTick?.Invoke(dt);
     public void LateTick(float dt)
     {
+        OnLateTick?.Invoke(dt);
         UpdateAgentSpeed();
         _current?.LateTick(dt);
     }
@@ -304,6 +293,72 @@ public partial class FSMBaseNew : IFSMControlNew
         ToggleAgent(false);
         /*_ownerData.Obstacle*/_deps.Agent().enabled = true;
     }
+
+    public void RotateToTarget(bool rotate)
+    {
+        if (NullOwnerOrTarget() || _rotateToTarget == rotate) return;
+
+        _rotateToTarget = rotate;
+        _deps.Agent().updateRotation = !_rotateToTarget;
+
+        if (_rotateToTarget) OnLateTick += RotateTowardsTarget;
+        else OnLateTick -= RotateTowardsTarget;
+
+    }
+
+    private bool NullOwnerOrTarget() => _deps.Target == null || _deps.Target.Transform == null || _deps.Owner == null
+            || _deps.Owner.Transform == null || _deps.Agent() == null;
+
+    private void RotateTowardsTarget(float _/*IAgentData controller, *//*Transform target,*//* bool rotate*/)
+    {
+        if (_deps.Target == null || _deps.Target.Transform == null || _deps.Owner == null
+            || _deps.Owner.Transform == null || _deps.Agent() == null) return;
+
+        /* if (controller == null || target == null ||
+             controller.Agent == null || controller.Transform == null) return;*/
+        NavMeshAgent agent = _deps.Agent();
+
+      /*  if (!_rotateToTarget)
+        {
+            if (!agent.updateRotation) agent.updateRotation = true;
+            return;
+        }
+        if (agent.updateRotation) agent.updateRotation = false;*/
+      
+
+        Transform t = _deps.Owner.Transform;//controller.Transform;
+        Transform target = _deps.Target.Transform;
+        Vector3 toTarget = target.position - t.position;
+        toTarget.y = 0;
+
+        if (toTarget.sqrMagnitude < 0.0001f) return;
+
+        Vector3 forward = t.forward;
+        forward.y = 0;
+
+        float dot = Vector3.Dot(forward.normalized, toTarget.normalized);
+        float angle = Mathf.Acos(dot) * Mathf.Rad2Deg;
+
+        const float precisionThreshold = 1f;
+        Quaternion targetRotation = Quaternion.LookRotation(toTarget);
+
+        if (angle < precisionThreshold)
+        {
+            t.rotation = Quaternion.Slerp(
+                t.rotation,
+                targetRotation,
+                1f);
+            return;
+        }
+
+        t.rotation = Quaternion.Slerp(
+            t.rotation,
+            targetRotation,
+            Time.deltaTime * 5f);
+
+    }
+
+    
 
 
     // Used when the Agent is currently carving

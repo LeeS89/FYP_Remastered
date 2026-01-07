@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.AI;
 
 [System.Serializable]
-public class AgentFsmDeps : IFsmDeps, IPatrolDeps, IChaseDeps, IFlankDeps
+public class AgentFsmDeps : IFsmControllerDeps, IPatrolDeps, IChaseDeps, IFlankDeps
 {
     [Header("Agent Components")]
     [SerializeField] private NavMeshAgent _agent;
@@ -91,7 +91,7 @@ public class AgentFsmDeps : IFsmDeps, IPatrolDeps, IChaseDeps, IFlankDeps
     public float SprintSpeed => _sprintSpeed;
     public float WalkSpeed => _walkSpeed;
 
-    public ITargetable NpcOwner => _owner;
+    public ITargetable Owner => _owner;
 
     public IPathResolver PathResolver => _pathResolver;
 

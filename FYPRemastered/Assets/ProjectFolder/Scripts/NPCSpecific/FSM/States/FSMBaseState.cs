@@ -33,7 +33,7 @@ public abstract class FSMBaseState : IFSMState
     }*/
     public FSMBaseState(IFsmStateDeps deps, IFSMStateContext stateContext, StateId id)
     {
-        _owner = deps.NpcOwner;
+        _owner = deps.Owner;
         _path = deps.Path();
         _pathResolver = deps.PathResolver;
         _stateContext = stateContext;

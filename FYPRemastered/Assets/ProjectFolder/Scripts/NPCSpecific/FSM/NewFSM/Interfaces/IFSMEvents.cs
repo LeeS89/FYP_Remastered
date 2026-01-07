@@ -66,6 +66,7 @@ public interface IFSMControlNew : IFSMStateContext, ITickable
     bool IsInStateTransition { get; }
     void SwitchTo(StateId state);
 
+    void RotateToTarget(bool rotate);
     //delegate void OnNotifyOwner(in NPCNotification n);
    // OnNotifyOwner Notification { get; set; }
     Notification Notification { get; set; }
@@ -86,34 +87,43 @@ public interface IFSMStateContext : IAnimationCueSource//, ITargetRef
 
 public interface IFsmDeps
 {
+    ITargetable Owner { get; }
+    /* NavMeshAgent Agent();
+     NavMeshObstacle Obstacle();
+     float WalkSpeed { get; }
+     float SprintSpeed { get; }*/
+
+}
+
+public interface IFsmControllerDeps : IFsmDeps, ITargetRef
+{
     NavMeshAgent Agent();
     NavMeshObstacle Obstacle();
     float WalkSpeed { get; }
     float SprintSpeed { get; }
-
 }
 
-public interface IFsmStateDeps
+public interface IFsmStateDeps : IFsmDeps
 {
-    ITargetable NpcOwner { get; }
+    //ITargetable NpcOwner { get; }
     IPathResolver PathResolver { get; }
     NavMeshPath Path();
 }
 
-public interface IPatrolDeps : IFsmStateDeps
+public interface IPatrolDeps : IFsmStateDeps, IFsmDeps
 {
     IWaypointService WaypointService { get; }
     float MaxTimeAtPatrolPoint { get; }
     float MinTimeAtPatrolPoint { get; }
 }
 
-public interface IChaseDeps : IFsmStateDeps, ITargetRef
+public interface IChaseDeps : IFsmStateDeps, ITargetRef, IFsmDeps
 {
     float MinStoppingDistance { get; }
     float MaxStoppingDistance { get; }
 }
 
-public interface IFlankDeps : IFsmStateDeps, ITargetRef 
+public interface IFlankDeps : IFsmStateDeps, ITargetRef, IFsmDeps
 {
     IFlankService FlankService { get; }
     int MaxFlankSteps { get; }

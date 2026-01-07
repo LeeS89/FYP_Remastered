@@ -13,4 +13,5 @@ public interface INPCBrainContext : ITargetable
     void UpdateCurrentFovStatus(FOVResult newStatus);
     void UpdateFovAlertPhase(AlertPhase newPhase);
     void UpdateRotationOrder(RotationOrder newOrder);
+    void RotateToTarget(bool rotate);
 }
