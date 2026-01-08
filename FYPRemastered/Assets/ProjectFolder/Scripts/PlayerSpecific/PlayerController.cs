@@ -35,7 +35,9 @@ public sealed class PlayerController : ComponentInit<IPlaceholderService, Player
     #region ITargetable Implementation
 
     public Vector3 Forward => transform.forward;
-    public Transform Transform => transform;
+
+    [SerializeField] private Transform _rootTransform;
+    public Transform Transform => _rootTransform == null ? transform : _rootTransform;
 
     public Collider TargetableCollider => _targetableCollider;
 
@@ -47,9 +49,7 @@ public sealed class PlayerController : ComponentInit<IPlaceholderService, Player
     public LayerMask LayerMask => _selfTargetMask;
 
     public Vector3 Position()
-    {
-        throw new System.NotImplementedException();
-    }
+    => _rootTransform == null ? transform.position : _rootTransform.position;
 
     public Quaternion Rotation()
     {

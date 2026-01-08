@@ -4,7 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
-public partial class FSMBaseNew : IFSMControlNew
+public /*partial*/ class FSMBaseNew : IFSMControlNew
 {
     // Injected Dependancies
     private IReadOnlyDictionary<StateId, IFSMState> _states;

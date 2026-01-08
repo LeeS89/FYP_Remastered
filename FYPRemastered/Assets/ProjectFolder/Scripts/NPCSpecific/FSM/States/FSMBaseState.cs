@@ -5,10 +5,10 @@ using UnityEngine.AI;
 public abstract class FSMBaseState : IFSMState
 {
     protected readonly IPathResolver _pathResolver;
-    protected readonly IAgentData _ownerData;
+    //protected readonly IAgentData _ownerData;
     protected readonly IFSMStateContext _stateContext;
     protected Coroutine _runningRoutine;
-    protected bool _hasDestination = false;
+    //protected bool _hasDestination = false;
     protected bool _isInState = false;
     protected DestinationValidationCallbackNew _validationCallback;
 
@@ -41,10 +41,10 @@ public abstract class FSMBaseState : IFSMState
         _validationCallback = OnPathResultReceived;
     }
 
-    protected bool OwnerDataNull() => _ownerData == null || _ownerData.Path == null;
+    protected bool OwnerDataNull() => _owner == null || _path == null;
     protected bool IsStationary() => _stateContext?.IsStationary() ?? true;
 
-    public virtual void EnterState() { _isInState = true; _hasDestination = false; }
+    public virtual void EnterState() { _isInState = true; /*_hasDestination = false;*/ }
     public abstract void ValidateCandidateDestinations();
     protected virtual void RetrieveCandidateDestinations() { }
     protected virtual void OnPathResultReceived(in DestinationResultNew result)
@@ -63,9 +63,9 @@ public abstract class FSMBaseState : IFSMState
             _runningRoutine = null;
         }
     }
-    public virtual void OnDestinationReached() => _hasDestination = false;
+    public virtual void OnDestinationReached() { }/*=> _hasDestination = false;*/
 
-    public virtual void OnDestinationSet() => _hasDestination = true;
+    public virtual void OnDestinationSet() { }/*=> _hasDestination = true;*/
 
     public virtual void Tick(float dt) { }
     

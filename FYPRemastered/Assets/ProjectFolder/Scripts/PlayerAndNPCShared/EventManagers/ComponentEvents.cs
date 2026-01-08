@@ -63,13 +63,13 @@ public abstract class ComponentInit<TServices, TManager> : MonoBehaviour, IServi
        
         Init(s, m);
     }
-
+    
     public abstract void Unload();
     protected virtual void OnSceneBegin() { }
     protected virtual void OnSceneEnd() { }
 
-    protected virtual void OnDeath(ITargetable targetable) => _sceneService?.OnTargetableDied(targetable);
-    protected virtual void OnRespawn(ITargetable targetable) => _sceneService?.OnTargetableRespawned(targetable);
+    //protected virtual void OnDeath(ITargetable targetable) => _sceneService?.OnTargetableDied(targetable);
+  //  protected virtual void OnRespawn(ITargetable targetable) => _sceneService?.OnTargetableRespawned(targetable);
 
     private void SceneBegin() { _sceneService.OnSceneBegin -= SceneBegin; OnSceneBegin(); }
     private void SceneEnd() 
@@ -79,5 +79,67 @@ public abstract class ComponentInit<TServices, TManager> : MonoBehaviour, IServi
         _sceneService = null;
     }
    
+
+}
+public abstract class TargetableInit<TServices, TManager> : ComponentInit<TServices, TManager>, IServicable<TServices, TManager>, ITargetable
+    where TServices : class
+    where TManager : EventManagerBase
+{
+  //  public bool OwnerIsDead { get; protected set; } = false;
+    public bool IsDead { get; protected set; } = false;
+
+    public Vector3 Forward => throw new System.NotImplementedException();
+
+    public Transform Transform => throw new System.NotImplementedException();
+
+    public Collider TargetableCollider => throw new System.NotImplementedException();
+
+    public bool IsStationary => throw new System.NotImplementedException();
+
+    public LayerMask LayerMask => throw new System.NotImplementedException();
+
+    private ISceneService _sceneService;
+
+   // public abstract void Init(TServices services, TManager manager);
+    
+   /* void IServicable.Init(ISceneServiceProvider provider, EventManagerBase manager)
+    {
+        if (provider is not TServices s) return;
+        if (manager is not TManager m) return;
+        
+        if(provider.TryGetSceneService(out _sceneService))
+        {
+            _sceneService.OnSceneBegin += SceneBegin;
+            _sceneService.OnSceneEnd += SceneEnd;
+        }
+       
+        Init(s, m);
+    }*/
+
+  //  public abstract void Unload();
+    //protected virtual void OnSceneBegin() { }
+    //protected virtual void OnSceneEnd() { }
+
+    protected virtual void OnDeath(ITargetable targetable) => _sceneService?.OnTargetableDied(targetable);
+    protected virtual void OnRespawn(ITargetable targetable) => _sceneService?.OnTargetableRespawned(targetable);
+
+    public Vector3 Position()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public Quaternion Rotation()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    // private void SceneBegin() { _sceneService.OnSceneBegin -= SceneBegin; OnSceneBegin(); }
+    /*private void SceneEnd() 
+    {
+        _sceneService.OnSceneEnd -= SceneEnd; 
+        OnSceneEnd();
+        _sceneService = null;
+    }
+   */
 
 }

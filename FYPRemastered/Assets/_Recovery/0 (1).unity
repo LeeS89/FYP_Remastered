@@ -153771,10 +153771,6 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7447672074397387331, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
-      propertyPath: _rootTransform
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 7447672074397387331, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
       propertyPath: _targetableCollider
       value: 
       objectReference: {fileID: 3718215761319188344}

@@ -24,17 +24,48 @@ public class FSMChaseState : FSMBaseState
     public override void EnterState()
     {
         base.EnterState();
-        _timeSinceLastRepath = _repathInterval;
+        //_timeSinceLastRepath = _repathInterval;
+        RetrieveCandidateDestinations();
+        //ValidateCandidateDestinations();
+    }
+
+    protected override void RetrieveCandidateDestinations()
+    {
+        
+        if (_candidateDestinations == null || TargetIsNull()) return;
+
+        Vector3 chaseTargetPos = _deps.Target.Position();
+
+        if(_candidateDestinations.Count == 0) _candidateDestinations.Add(chaseTargetPos);
+        else _candidateDestinations[0] = chaseTargetPos;
+
         ValidateCandidateDestinations();
     }
 
 
     public override void ValidateCandidateDestinations()
     {
-        if (OwnerDataNull() || _deps.Target == null /*_ownerData.PrimaryTarget == null*/) return;
-        var request = ValidateDestination.GetTargetPosition(/*_ownerData.Path*/_path, ReasonForDestinationCheck.ValidatePathForDestination, /*_ownerData*/_owner, _deps.Target/*_ownerData.PrimaryTarget*/);
-        _pathResolver?.TryGetDestination(request);
+        if (OwnerDataNull()) return;
+        Debug.LogError("Sending Chase request to path manager");
+        _pathResolver?.ProcessDestinationCandidates(_id, ReasonForDestinationCheck.ValidatePathForDestination,
+            _candidateDestinations, _path, _owner.Position(), _validationCallback);
+       // var request = ValidateDestination.GetTargetPosition(/*_ownerData.Path*/_path, ReasonForDestinationCheck.ValidatePathForDestination, /*_ownerData*/_owner, _deps.Target/*_ownerData.PrimaryTarget*/);
+       // _pathResolver?.TryGetDestination(request);
     }
+
+   
+    public override void OnDestinationSet()
+    {
+        Debug.LogError("Destination Set In Chase State");
+        base.OnDestinationSet();
+        if (!_isInState || TargetIsNull()) return;
+
+        // Target moved - Repath
+        if (!_deps.Target.IsStationary)
+            RetrieveCandidateDestinations();
+    }
+
+    private bool TargetIsNull() => _deps == null || _deps.Target == null;
 
     public override void OnDestinationReached()
     {
@@ -48,14 +79,15 @@ public class FSMChaseState : FSMBaseState
 
     public override void LateTick(float dt)
     {
-        if (!_isInState || !_hasDestination || OwnerDataNull() || _deps.Target == null/*_ownerData.PrimaryTarget == null*/) return;
+        return;
+        if (!_isInState /*|| !_hasDestination*/ || OwnerDataNull() || _deps.Target == null/*_ownerData.PrimaryTarget == null*/) return;
         _timeSinceLastRepath -= dt;
 
         if (_timeSinceLastRepath <= 0f)
         {
             if(!_deps.Target.IsStationary/*!_ownerData.PrimaryTarget.IsStationary*/) // Target is moving, need to repath
             {
-                _hasDestination = false;
+               // _hasDestination = false;
                 ValidateCandidateDestinations();
             }
 

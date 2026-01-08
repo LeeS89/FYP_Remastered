@@ -78,7 +78,6 @@ public static class NPCDecisionPolicy
     private static bool DecideChase(INPCBrainContext self, in NPCNotification n, out BrainDecision d)
     {
         d = default;
-
         switch (n.Kind)
         {
             case NotificationKind.FOVUpdate:

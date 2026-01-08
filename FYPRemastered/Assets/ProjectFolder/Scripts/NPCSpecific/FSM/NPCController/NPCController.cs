@@ -197,7 +197,12 @@ public partial class NPCController : ComponentInit<ISceneAIServices, AgentEventM
         _fsmManager?.Tick(Time.deltaTime);
         IsStationary = _fsmManager?.IsStationary() ?? true;
         _fovRunner?.Tick(Time.deltaTime);
+
+        if (_testStateCheck)
+            Debug.LogError("Currentstate: "+_fsmManager?.CurrentStateId.ToString());
     }
+
+    public bool _testStateCheck = false;
 
     protected virtual void LateUpdate()
     {
