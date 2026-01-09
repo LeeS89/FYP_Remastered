@@ -118209,13 +118209,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0dad097637c8ea848a99d762118e5a81, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _rootTransform: {fileID: 1863641519}
+  _targetCollider: {fileID: 99692069}
+  _selfTargetMask:
+    serializedVersion: 2
+    m_Bits: 16
   TestSprint: 0
   TestWalk: 0
-  _parentTransform: {fileID: 1863641519}
-  _layerMask:
-    serializedVersion: 2
-    m_Bits: 0
-  _targetCollider: {fileID: 99692069}
   _requiredSeenStreak: 3
   _requiredNotSeenStreak: 5
   _testStateCheck: 0
@@ -153773,7 +153773,11 @@ PrefabInstance:
     - target: {fileID: 7447672074397387331, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
       propertyPath: _rootTransform
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 5567585102503042835}
+    - target: {fileID: 7447672074397387331, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
+      propertyPath: _targetCollider
+      value: 
+      objectReference: {fileID: 3718215761319188344}
     - target: {fileID: 7447672074397387331, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
       propertyPath: _targetableCollider
       value: 
@@ -156410,13 +156414,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0dad097637c8ea848a99d762118e5a81, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _rootTransform: {fileID: 8070524998269774116}
+  _targetCollider: {fileID: 226800903}
+  _selfTargetMask:
+    serializedVersion: 2
+    m_Bits: 16
   TestSprint: 0
   TestWalk: 0
-  _parentTransform: {fileID: 8070524998269774116}
-  _layerMask:
-    serializedVersion: 2
-    m_Bits: 0
-  _targetCollider: {fileID: 226800903}
   _requiredSeenStreak: 3
   _requiredNotSeenStreak: 5
   _testStateCheck: 0

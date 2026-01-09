@@ -3,7 +3,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(PlayerEventManager))]
-public sealed class PlayerController : ComponentInit<IPlaceholderService, PlayerEventManager>/*ComponentEvents*/, ITargetable
+public sealed class PlayerController : TargetableInit<IPlaceholderService, PlayerEventManager>/*ComponentEvents*///, ITargetable
 {
     [Header("Locomotion Params")]
     [SerializeField] private float _moveSpeed = 4.0f;
@@ -27,34 +27,34 @@ public sealed class PlayerController : ComponentInit<IPlaceholderService, Player
     private GrabHandler _grabHandler;
     public bool InputEnabled { get; private set; } = false;
 
-    [Header("ITargetable Info - Used by NPC's for targeting/ FOV purposes")]
-    [SerializeField] private Collider _targetableCollider;
-    [SerializeField] private LayerMask _selfTargetMask;
+ //   [Header("ITargetable Info - Used by NPC's for targeting/ FOV purposes")]
+ //   [SerializeField] private Collider _targetableCollider;
+   // [SerializeField] private LayerMask _selfTargetMask;
 
 
     #region ITargetable Implementation
 
-    public Vector3 Forward => transform.forward;
+   // public Vector3 Forward => transform.forward;
 
-    [SerializeField] private Transform _rootTransform;
-    public Transform Transform => _rootTransform == null ? transform : _rootTransform;
+  /*  [SerializeField] private Transform _rootTransform;
+    public Transform Transform => _rootTransform == null ? transform : _rootTransform;*/
 
-    public Collider TargetableCollider => _targetableCollider;
+  //  public Collider TargetableCollider => _targetableCollider;
 
     public bool _testMove = true;
-    public bool IsStationary => _testMove;//_locomotion != null ? !_locomotion.CanMoveForward : true;
+   // public bool IsStationary => _testMove;//_locomotion != null ? !_locomotion.CanMoveForward : true;
 
    // public bool IsDead { get; private set; } = false;
 
-    public LayerMask LayerMask => _selfTargetMask;
+   // public LayerMask LayerMask => _selfTargetMask;
 
-    public Vector3 Position()
+   /* public Vector3 Position()
     => _rootTransform == null ? transform.position : _rootTransform.position;
 
     public Quaternion Rotation()
     {
         throw new System.NotImplementedException();
-    }
+    }*/
     #endregion ITargetable Implementation
 
     public /*override*/ void RegisterLocalEvents(EventManager eventManager)
@@ -66,14 +66,14 @@ public sealed class PlayerController : ComponentInit<IPlaceholderService, Player
         if (TryGetComponent<CharacterController>(out CharacterController characterController))
             _controller = characterController;
 
-        if(_targetableCollider == null)
-        {
+     //   if(_targetableCollider == null)
+        //{
             Collider col = GetComponentInChildren<Collider>();
-            if (col != null)
-                _targetableCollider = col;
-            else
-                _targetableCollider = gameObject.AddComponent<BoxCollider>();
-        }
+           // if (col != null)
+             //   _targetableCollider = col;
+          //  else
+            //    _targetableCollider = gameObject.AddComponent<BoxCollider>();
+       // }
 
         _eManager.OnPlayerRotate += HandleRotation;
         _eManager.OnPlayerHeightUpdated += AdjustPlayerHeight;
@@ -94,14 +94,14 @@ public sealed class PlayerController : ComponentInit<IPlaceholderService, Player
         if (TryGetComponent<CharacterController>(out CharacterController characterController))
             _controller = characterController;
 
-        if (_targetableCollider == null)
+       /* if (_targetableCollider == null)
         {
             Collider col = GetComponentInChildren<Collider>();
             if (col != null)
                 _targetableCollider = col;
             else
                 _targetableCollider = gameObject.AddComponent<BoxCollider>();
-        }
+        }*/
 
         _eManager.OnPlayerRotate += HandleRotation;
         _eManager.OnPlayerHeightUpdated += AdjustPlayerHeight;
@@ -137,8 +137,11 @@ public sealed class PlayerController : ComponentInit<IPlaceholderService, Player
         _eManager.OnPlayerHeightUpdated -= AdjustPlayerHeight;
     }
 
-
+    private Vector3 _lastPosition;
+    public float movementThreshold = 0.01f;
     public bool _testTrim = false;
+
+    public bool _printStatStatus = false;
 
     private void Update()
     {
@@ -151,6 +154,33 @@ public sealed class PlayerController : ComponentInit<IPlaceholderService, Player
         if (!InputEnabled) { return; }
 
         _locomotion?.Tick(_controller.isGrounded);
+
+#if UNITY_EDITOR
+        float movedDistance = Vector3.Distance(Position(), _lastPosition);
+
+        IsStationary = movedDistance <= movementThreshold;
+
+        if (_printStatStatus)
+            Debug.LogError("IsStationary is: "+IsStationary);
+       /* if (movedDistance > movementThreshold)
+        {
+            if (!GameManager.Instance.PlayerHasMoved)
+            {
+                GameManager.Instance.PlayerHasMoved = true;  // Replace with actual method
+            }
+        }
+        else
+        {
+            if (GameManager.Instance.PlayerHasMoved)
+            {
+                GameManager.Instance.PlayerHasMoved = false;
+                SceneEventAggregator.Instance.RunClosestPointToPlayerJob();
+                //MoonSceneManager._instance.TestRun();
+            }
+        }*/
+
+        _lastPosition = Position();
+#endif
 
     }
 
@@ -213,8 +243,7 @@ public sealed class PlayerController : ComponentInit<IPlaceholderService, Player
         InputEnabled = true;
     }*/
 
-    
-
+   
     private/*protected*/ /*override*/ void DeathStatusUpdated(bool isDead)
     {
        // base.DeathStatusUpdated(isDead);

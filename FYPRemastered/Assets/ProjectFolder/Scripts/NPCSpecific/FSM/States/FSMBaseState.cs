@@ -8,7 +8,7 @@ public abstract class FSMBaseState : IFSMState
     //protected readonly IAgentData _ownerData;
     protected readonly IFSMStateContext _stateContext;
     protected Coroutine _runningRoutine;
-    //protected bool _hasDestination = false;
+    protected bool _isAtDestination = false;
     protected bool _isInState = false;
     protected DestinationValidationCallbackNew _validationCallback;
 
@@ -63,9 +63,9 @@ public abstract class FSMBaseState : IFSMState
             _runningRoutine = null;
         }
     }
-    public virtual void OnDestinationReached() { }/*=> _hasDestination = false;*/
+    public virtual void OnDestinationReached() => _isAtDestination = true;
 
-    public virtual void OnDestinationSet() { }/*=> _hasDestination = true;*/
+    public virtual void OnDestinationSet() => _isAtDestination = false;
 
     public virtual void Tick(float dt) { }
     

@@ -6,12 +6,13 @@ public class FSMChaseState : FSMBaseState
     private IChaseDeps _deps;
     private float _repathInterval = 0.25f;
     private float _timeSinceLastRepath = 0f;
-  //  private ITargetable _target;
+    private bool _timerRunning = false;
+    //  private ITargetable _target;
 
-   /* public FSMChaseState(ITargetable target, IAgentData data, IPathResolver resolver, IFSMStateContext stateContext)
-        : base(data, resolver, stateContext, StateId.Chase) { _target = target; }*/
-    
-    
+    /* public FSMChaseState(ITargetable target, IAgentData data, IPathResolver resolver, IFSMStateContext stateContext)
+         : base(data, resolver, stateContext, StateId.Chase) { _target = target; }*/
+
+
     public FSMChaseState(IChaseDeps deps, IFSMStateContext stateContext)
         : base(deps, stateContext, StateId.Chase) 
     { 
@@ -32,7 +33,7 @@ public class FSMChaseState : FSMBaseState
     protected override void RetrieveCandidateDestinations()
     {
         
-        if (_candidateDestinations == null || TargetIsNull()) return;
+        if (!_isInState || _candidateDestinations == null || TargetIsNull()) return;
 
         Vector3 chaseTargetPos = _deps.Target.Position();
 
@@ -45,7 +46,7 @@ public class FSMChaseState : FSMBaseState
 
     public override void ValidateCandidateDestinations()
     {
-        if (OwnerDataNull()) return;
+        if (!_isInState || OwnerDataNull()) return;
         Debug.LogError("Sending Chase request to path manager");
         _pathResolver?.ProcessDestinationCandidates(_id, ReasonForDestinationCheck.ValidatePathForDestination,
             _candidateDestinations, _path, _owner.Position(), _validationCallback);
@@ -60,9 +61,8 @@ public class FSMChaseState : FSMBaseState
         base.OnDestinationSet();
         if (!_isInState || TargetIsNull()) return;
 
-        // Target moved - Repath
-        if (!_deps.Target.IsStationary)
-            RetrieveCandidateDestinations();
+        _timeSinceLastRepath = _repathInterval;
+        _timerRunning = true;
     }
 
     private bool TargetIsNull() => _deps == null || _deps.Target == null;
@@ -70,6 +70,7 @@ public class FSMChaseState : FSMBaseState
     public override void OnDestinationReached()
     {
         base.OnDestinationReached();
+        _timerRunning = false;
         // Start job to see if player/ target has moved far enough away
         // Add job callback
 
@@ -79,21 +80,30 @@ public class FSMChaseState : FSMBaseState
 
     public override void LateTick(float dt)
     {
-        return;
-        if (!_isInState /*|| !_hasDestination*/ || OwnerDataNull() || _deps.Target == null/*_ownerData.PrimaryTarget == null*/) return;
+    
+        if (!_isInState || !_timerRunning) return;
         _timeSinceLastRepath -= dt;
 
         if (_timeSinceLastRepath <= 0f)
         {
-            if(!_deps.Target.IsStationary/*!_ownerData.PrimaryTarget.IsStationary*/) // Target is moving, need to repath
+            if(!_deps.Target.IsStationary) // Target is still moving, need to repath
             {
-               // _hasDestination = false;
-                ValidateCandidateDestinations();
+                _timerRunning = false;
+                _timeSinceLastRepath = _repathInterval;
+                if(!_isAtDestination)
+                RetrieveCandidateDestinations();
+                //ValidateCandidateDestinations();
             }
 
             _timeSinceLastRepath = _repathInterval;
         }
     }
 
-    
+    /// Update Late Tick & OnDestinationSet
+    /// Start timer once destination set
+    /// check if target is stationary at each interval
+    /// If not, repath + Stop timer
+    /// Also, in Late Tick, if destination reached, stop timer
+
+
 }

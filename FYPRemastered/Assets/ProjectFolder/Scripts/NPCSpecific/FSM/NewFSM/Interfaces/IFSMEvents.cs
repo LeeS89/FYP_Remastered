@@ -130,7 +130,7 @@ public interface IFlankDeps : IFsmStateDeps, ITargetRef, IFsmDeps
     int MinFlankSteps { get; }
 }
 
-public interface IAgentData : ITargetable
+public interface IAgentData// : ITargetable
 {
   //  ITargetable PrimaryTarget { get; }
     NavMeshAgent Agent { get; }

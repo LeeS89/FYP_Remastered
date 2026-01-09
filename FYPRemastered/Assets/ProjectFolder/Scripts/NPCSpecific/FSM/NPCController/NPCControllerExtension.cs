@@ -76,7 +76,7 @@ public static class NPCControllerExtension
     public static void RotateTowardsTarget(this IAgentData controller, Transform target, bool rotate)
     {
         if (controller == null || target == null ||
-            controller.Agent == null || controller.Transform == null) return;
+            controller.Agent == null /*|| controller.Transform == null*/) return;
 
         if (!rotate)
         {
@@ -85,34 +85,34 @@ public static class NPCControllerExtension
         }
         if (controller.Agent.updateRotation) controller.Agent.updateRotation = false;
 
-        Transform t = controller.Transform;
-        Vector3 toTarget = target.position - t.position;
-        toTarget.y = 0;
+      //   Transform t = controller.Transform;
+      //  Vector3 toTarget = target.position - t.position;
+      //  toTarget.y = 0;
 
-        if (toTarget.sqrMagnitude < 0.0001f) return;
+      //  if (toTarget.sqrMagnitude < 0.0001f) return;
+      
+      //  Vector3 forward = t.forward;
+        //forward.y = 0;
 
-        Vector3 forward = t.forward;
-        forward.y = 0;
-
-        float dot = Vector3.Dot(forward.normalized, toTarget.normalized);
-        float angle = Mathf.Acos(dot) * Mathf.Rad2Deg;
+        //float dot = Vector3.Dot(forward.normalized, toTarget.normalized);
+        //float angle = Mathf.Acos(dot) * Mathf.Rad2Deg;
 
         const float precisionThreshold = 1f;
-        Quaternion targetRotation = Quaternion.LookRotation(toTarget);
+        //Quaternion targetRotation = Quaternion.LookRotation(toTarget);
 
-        if(angle < precisionThreshold)
-        {
-            t.rotation = Quaternion.Slerp(
-                t.rotation,
-                targetRotation,
-                1f);
-            return;
-        }
+        //if(angle < precisionThreshold)
+        //{
+          //  t.rotation = Quaternion.Slerp(
+            //    t.rotation,
+              //  targetRotation,
+               // 1f);
+            //return;
+        //}
 
-        t.rotation = Quaternion.Slerp(
-            t.rotation,
-            targetRotation,
-            Time.deltaTime * 5f);
+        //t.rotation = Quaternion.Slerp(
+          //  t.rotation,
+            //targetRotation,
+            //Time.deltaTime * 5f);
 
     }
 }

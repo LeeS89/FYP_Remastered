@@ -41,7 +41,7 @@ public class FSMManagerObsolete : FSMBaseObsolete
         if (runner == null)
         {
             FOVParameters fovParams = new FOVParameters();
-            fovParams.ownerOrigin = data.Transform;
+           // fovParams.ownerOrigin = data.Transform;
           //  fovParams.FOVTarget = data.PrimaryTarget;
             // Add FOV origin aswell
             _fovHandler = new NPCFieldOfViewHandler(fovParams);
@@ -291,17 +291,17 @@ public class FSMManagerObsolete : FSMBaseObsolete
 
         ValidateDestination request;
 
-        switch (current)
+       /* switch (current)
         {
             case StateId.Patrol:
-                request = ValidateDestination.GetPatrolPoint(_ownerData, _ownerData.Path/*, OnWaypointZoneReceived*/);
+                request = ValidateDestination.GetPatrolPoint(_ownerData, _ownerData.Path*//*, OnWaypointZoneReceived*//*);
                 break;
             case StateId.Chase:
                // request = ValidateDestination.GetTargetPosition(_ownerData.Path, ReasonForDestinationCheck.ValidatePathForDestination, _ownerData, _ownerData.PrimaryTarget);
                 break;
             default:
                 return;
-        }
+        }*/
 
       //  _pathFinder?.TryGetDestination(request);
     }

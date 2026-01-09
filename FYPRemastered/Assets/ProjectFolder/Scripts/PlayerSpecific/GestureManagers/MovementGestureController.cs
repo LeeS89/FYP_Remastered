@@ -163,12 +163,14 @@ public class MovementGestureController : BaseGesture
     {
        // base.DeathStatusUpdated(isDead);
 
-        if (/*OwnerIsDead*/IsDead)
-        {
+      //  if (/*OwnerIsDead*/IsDead)
+       // {
             ResetStates();
-        }  
+      //  }  
     }
-
+    /// Had to remove IsDead variable
+    /// Add new public function to BaseGesture to check if owner is dead
+    /// or include toggle that the owner can activate to indicate death state
 
     protected override void ResetStates()
     {

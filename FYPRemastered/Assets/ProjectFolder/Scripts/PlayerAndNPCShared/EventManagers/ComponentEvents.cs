@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public abstract class ComponentEvents : MonoBehaviour
@@ -44,9 +45,9 @@ public abstract class ComponentInit<TServices, TManager> : MonoBehaviour, IServi
     where TServices : class
     where TManager : EventManagerBase
 {
-  //  public bool OwnerIsDead { get; protected set; } = false;
-    public bool IsDead { get; protected set; } = false;
-    private ISceneService _sceneService;
+
+  //  public bool IsDead { get; protected set; } = false; // Remove
+    public ISceneService SceneService { get; private set; }
 
     public abstract void Init(TServices services, TManager manager);
     
@@ -55,10 +56,11 @@ public abstract class ComponentInit<TServices, TManager> : MonoBehaviour, IServi
         if (provider is not TServices s) return;
         if (manager is not TManager m) return;
         
-        if(provider.TryGetSceneService(out _sceneService))
+        if(provider.TryGetSceneService(out var service))
         {
-            _sceneService.OnSceneBegin += SceneBegin;
-            _sceneService.OnSceneEnd += SceneEnd;
+            SceneService = service;
+            SceneService.OnSceneBegin += SceneBegin;
+            SceneService.OnSceneEnd += SceneEnd;
         }
        
         Init(s, m);
@@ -71,12 +73,12 @@ public abstract class ComponentInit<TServices, TManager> : MonoBehaviour, IServi
     //protected virtual void OnDeath(ITargetable targetable) => _sceneService?.OnTargetableDied(targetable);
   //  protected virtual void OnRespawn(ITargetable targetable) => _sceneService?.OnTargetableRespawned(targetable);
 
-    private void SceneBegin() { _sceneService.OnSceneBegin -= SceneBegin; OnSceneBegin(); }
+    private void SceneBegin() { SceneService.OnSceneBegin -= SceneBegin; OnSceneBegin(); }
     private void SceneEnd() 
     {
-        _sceneService.OnSceneEnd -= SceneEnd; 
+        SceneService.OnSceneEnd -= SceneEnd; 
         OnSceneEnd();
-        _sceneService = null;
+        SceneService = null;
     }
    
 
@@ -85,61 +87,55 @@ public abstract class TargetableInit<TServices, TManager> : ComponentInit<TServi
     where TServices : class
     where TManager : EventManagerBase
 {
-  //  public bool OwnerIsDead { get; protected set; } = false;
+ 
     public bool IsDead { get; protected set; } = false;
 
-    public Vector3 Forward => throw new System.NotImplementedException();
+    public Vector3 Forward => _rootTransform != null ? _rootTransform.forward : transform.forward;
 
-    public Transform Transform => throw new System.NotImplementedException();
+    [Header("The transform of this game object used for targeting purposes")]
+    [SerializeField] protected Transform _rootTransform;
+    public Transform Transform => _rootTransform != null ? _rootTransform : transform; // Possibly obsolete
 
-    public Collider TargetableCollider => throw new System.NotImplementedException();
+    [Header("Trigger area on the game object that other NPC's use as target area for aiming")]
+    [SerializeField] protected Collider _targetCollider;
+    public Collider TargetableCollider { get; private set; }
 
-    public bool IsStationary => throw new System.NotImplementedException();
+    public bool IsStationary { get; protected set; } = true;
 
-    public LayerMask LayerMask => throw new System.NotImplementedException();
+    [Header("Mask of this Gamobeject used for targeting purposes")]
+    [SerializeField] protected LayerMask _selfTargetMask;
+    public LayerMask LayerMask => _selfTargetMask;
 
-    private ISceneService _sceneService;
+  
+    protected virtual void OnDeath(ITargetable targetable) => SceneService?.OnTargetableDied(targetable);
+    protected virtual void OnRespawn(ITargetable targetable) => SceneService?.OnTargetableRespawned(targetable);
 
-   // public abstract void Init(TServices services, TManager manager);
-    
-   /* void IServicable.Init(ISceneServiceProvider provider, EventManagerBase manager)
+    public Vector3 Position() => _rootTransform != null ? _rootTransform.position : transform.position;
+
+
+    [Obsolete]
+    public Quaternion Rotation() => _rootTransform == null ? transform.rotation : _rootTransform.rotation;
+
+
+
+    protected override void OnSceneBegin() => SetTargetableCollider();
+
+
+    private void SetTargetableCollider()
     {
-        if (provider is not TServices s) return;
-        if (manager is not TManager m) return;
-        
-        if(provider.TryGetSceneService(out _sceneService))
+        if (_targetCollider == null)
         {
-            _sceneService.OnSceneBegin += SceneBegin;
-            _sceneService.OnSceneEnd += SceneEnd;
+            if (!TryGetComponent<Collider>(out var coll))
+            {
+                TargetableCollider = gameObject.AddComponent<BoxCollider>();
+            }
+            else
+                TargetableCollider = coll;
         }
-       
-        Init(s, m);
-    }*/
-
-  //  public abstract void Unload();
-    //protected virtual void OnSceneBegin() { }
-    //protected virtual void OnSceneEnd() { }
-
-    protected virtual void OnDeath(ITargetable targetable) => _sceneService?.OnTargetableDied(targetable);
-    protected virtual void OnRespawn(ITargetable targetable) => _sceneService?.OnTargetableRespawned(targetable);
-
-    public Vector3 Position()
-    {
-        throw new System.NotImplementedException();
+        else
+        {
+            TargetableCollider = _targetCollider;
+        }
     }
-
-    public Quaternion Rotation()
-    {
-        throw new System.NotImplementedException();
-    }
-
-    // private void SceneBegin() { _sceneService.OnSceneBegin -= SceneBegin; OnSceneBegin(); }
-    /*private void SceneEnd() 
-    {
-        _sceneService.OnSceneEnd -= SceneEnd; 
-        OnSceneEnd();
-        _sceneService = null;
-    }
-   */
 
 }

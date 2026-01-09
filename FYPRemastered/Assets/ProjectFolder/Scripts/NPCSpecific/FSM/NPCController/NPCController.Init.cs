@@ -28,7 +28,7 @@ public partial class NPCController
     public override void Init(ISceneAIServices services, AgentEventManager manager)
     {
         SetManagerAndServices(services, manager);
-        SetTargetableCollider();
+      //  SetTargetableCollider();
         SetAgentParams();
         _componentNotifications = OnNotify;
 
@@ -57,7 +57,7 @@ public partial class NPCController
         }
     }
 
-    private void SetTargetableCollider()
+  /*  private void SetTargetableCollider()
     {
         if (_targetCollider == null)
         {
@@ -72,7 +72,7 @@ public partial class NPCController
         {
             TargetableCollider = _targetCollider;
         }
-    }
+    }*/
 
     private void SetManagerAndServices(ISceneAIServices services, AgentEventManager manager)
     {

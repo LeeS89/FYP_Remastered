@@ -6,7 +6,7 @@ using UnityEngine.AI;
 [RequireComponent(typeof(AgentEventManager))]
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(NavMeshObstacle))]
-public partial class NPCController : ComponentInit<ISceneAIServices, AgentEventManager>, IAgentData, INPCBrainContext, INotificationListener
+public partial class NPCController : TargetableInit<ISceneAIServices, AgentEventManager>, IAgentData, INPCBrainContext, INotificationListener
 {
     
     //   private bool _isInStateTransition = false;
@@ -32,27 +32,27 @@ public partial class NPCController : ComponentInit<ISceneAIServices, AgentEventM
     public FOVResult CurrentFovState { get; private set; } = FOVResult.None;
     private bool TargetDead() => _primaryTarget?.IsDead ?? true;
     // End Brain data
-
+/*
 
     // ITargetable Data - This Gameobjects information for targeting purposes by other NPC's
     // i.e. its LayerMask, Transform, Aim Trigger, etc.
     [Header("The transform of this game object used for targeting purposes")]
-    [SerializeField] protected Transform _parentTransform;
-    public Transform Transform => _parentTransform != null ? _parentTransform : transform;
-    public Vector3 Forward => _parentTransform != null ? _parentTransform.forward : transform.forward;
+    [SerializeField] protected Transform _rootTransform;
+    public Transform Transform => _rootTransform != null ? _rootTransform : transform;
+    public Vector3 Forward => _rootTransform != null ? _rootTransform.forward : transform.forward;*/
 
-    [Header("Mask of this Gamobeject used for targeting purposes")]
+  /*  [Header("Mask of this Gamobeject used for targeting purposes")]
     [SerializeField] protected LayerMask _layerMask;
-    public LayerMask LayerMask => _layerMask;
-    [Header("Trigger area on the game object that other NPC's use as target area for aiming")]
+    public LayerMask LayerMask => _layerMask;*/
+/*    [Header("Trigger area on the game object that other NPC's use as target area for aiming")]
     [SerializeField] protected Collider _targetCollider;
     public Collider TargetableCollider { get; protected set; }
-    public bool IsStationary { get; private set; } = false;
-
+    public bool IsStationary { get; private set; } = false;*/
+/*
     public Vector3 Position()
-     => _parentTransform == null ? transform.position : _parentTransform.position;
+     => _rootTransform == null ? transform.position : _rootTransform.position;
     public Quaternion Rotation()
-        => _parentTransform == null ? transform.rotation : _parentTransform.rotation;
+        => _rootTransform == null ? transform.rotation : _rootTransform.rotation;*/
     // End ITargetable Data
 
     // Possibly Redundant

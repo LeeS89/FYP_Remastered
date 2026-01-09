@@ -14,20 +14,22 @@ public class AbilityGesture : BaseGesture
     private Dictionary<CuePhase, IPoolManager> _abilityPools = new(2);
 
 
-   
 
-   /* public override void RegisterLocalEvents(EventManager eventManager)
-    {
-        if (eventManager == null) return;
+    
 
-        _pEventManager = eventManager as PlayerEventManager;
-        base.RegisterLocalEvents(_pEventManager);
 
-        if (_poolId == null) return;
-        poolCallback = OnPoolReceived;
-        this.RequestPool(_poolId, poolCallback);
-       
-    }*/
+    /* public override void RegisterLocalEvents(EventManager eventManager)
+     {
+         if (eventManager == null) return;
+
+         _pEventManager = eventManager as PlayerEventManager;
+         base.RegisterLocalEvents(_pEventManager);
+
+         if (_poolId == null) return;
+         poolCallback = OnPoolReceived;
+         this.RequestPool(_poolId, poolCallback);
+
+     }*/
 
     public override void Init(IPlaceholderService services, PlayerEventManager manager)
     {
@@ -38,9 +40,12 @@ public class AbilityGesture : BaseGesture
         this.RequestPool(_poolId, poolCallback);
     }
 
+    /// Had to remove IsDead variable
+    /// Add new public function to BaseGesture to check if owner is dead
+    /// or include toggle that the owner can activate to indicate death state
     public override void OnGestureRecognized()
     {
-        if (IsDead/*OwnerIsDead*/) return;
+        //if (IsDead/*OwnerIsDead*/) return;
         if (_pEventManager == null || _poolManager == null || _abilityPools == null) return;
         // var ability = AbilityResources.SetAbilityPools(_abilityId, now: Time.time, _abilityPools);//AbilityResources.SetImpactPhasePool(_abilityId, now: Time.time, _poolManager);
         _pEventManager.TryUseAbility(_abilityId, _origins);
