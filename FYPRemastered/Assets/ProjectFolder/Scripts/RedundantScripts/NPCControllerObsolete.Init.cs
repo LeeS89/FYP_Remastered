@@ -16,7 +16,7 @@ public partial class NPCControllerObsolete
     private ICandidateProvider _destinationResolver;
     private IFieldOfViewRunner _fovRunner;
     private Dictionary<StateId, ICandidateProvider> _destinationProviders;
-    private IFSMControlNew _fsmManager;
+    private IFSMControl _fsmManager;
     private Dictionary<StateId, IFSMState> _fsmStates = new(5);
     // end FSMManager Composition
     //   protected IIntentState _state;
@@ -163,7 +163,7 @@ public partial class NPCControllerNew
     private ICandidateProvider _destinationResolver;
     private IFieldOfViewRunner _fovRunner;
     private Dictionary<StateId, ICandidateProvider> _destinationProviders;
-    private IFSMControlNew _fsmManager;
+    private IFSMControl _fsmManager;
     private Dictionary<StateId, IFSMState> _fsmStates = new(5);
     // end FSMManager Composition
    

@@ -6,7 +6,7 @@ using UnityEngine;
 public static class NPCDecisionPolicy
 {
 
-    public static void ResolveNextState(IFSMOwner self, NPCNotification n, /*StateId currentState*/IntentStateBase sb)
+    public static void ResolveNextState(IFSMOwner self, NPCNotification n, /*StateId currentState*/IntentStateBaseObsolete sb)
     {
         NotificationKind kind = n.Kind;
         switch (kind)
@@ -179,4 +179,137 @@ public enum RotationOrder
     None,
     RotateTowardsTarget,
     StopRotating
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+public static class NPCDecisionPolicyNew
+{
+
+    public static void Decide(this INPCBrainContext self, in NPCNotification n)
+    {
+        var state = self.CurrentFsmState;
+      
+        switch (state)
+        {
+            case StateId.Patrol or StateId.Search:
+                DecidePatrol(self, n);
+                break;
+            case StateId.Chase:
+                DecideChase(self, n);
+                break;
+                case StateId.Flank:
+                DecideFlank(self, n);
+                break;
+                default:
+                // Undefined State - Log
+                break;
+        }
+    }
+
+    private static void DecidePatrol(INPCBrainContext self, in NPCNotification n)
+    {
+      
+        switch (n.Kind)
+        {
+            case NotificationKind.FOVUpdate:
+
+                if (!FOVStatusChanged(self, n.FOVResult)) return;
+
+                self.UpdateCurrentFovStatus(n.FOVResult);
+                if (TargetSeen(n.FOVResult))
+                {
+                    self.SwitchState(StateId.Chase);
+                    self.TryBroadcastAlert();
+                   
+                    // eventually => Check current health bracket + Targets Health, and possible nextIntent will be Takecover/ flee
+                    return;
+                }
+                break;
+            case NotificationKind.ZoneAlert:
+
+                self.SwitchState(StateId.Chase);
+               
+                // eventually => Check current health bracket + Targets Health, and possible nextIntent will be Takecover/ flee
+                return;
+
+            default:
+                return;// Or Log Unhandled
+        }
+
+    }
+
+    private static bool TargetSeen(FOVResult result) => result == FOVResult.TargetSeen || result == FOVResult.TargetSeenAndWithinMeleeRadius
+                    || result == FOVResult.TargetSeenAndWithinShootingAngles;
+
+    private static void DecideChase(INPCBrainContext self, in NPCNotification n)
+    {
+        switch (n.Kind)
+        {
+            case NotificationKind.FOVUpdate:
+                if (!FOVStatusChanged(self, n.FOVResult)) return;
+                self.RotateToTarget(TargetSeen(n.FOVResult));
+                self.UpdateCombatOrder(DecideNextCombatOrder(self.CurrentComOrder, n.FOVResult));
+               
+                return;
+            default:
+                return;
+        }
+    }
+
+    private static void DecideFlank(INPCBrainContext self, in NPCNotification n)
+    {
+        return;
+    }
+
+    private static bool FOVStatusChanged(INPCBrainContext c, FOVResult r) => c.CurrentFovState != r;
+
+
+    private static CombatOrder DecideNextCombatOrder(CombatOrder currentOrder, FOVResult newFOVStatus)
+    {
+        CombatOrder newOrder;
+        if (newFOVStatus == FOVResult.TargetSeenAndWithinShootingAngles)
+            newOrder = CombatOrder.FireAtWill;
+        else if (newFOVStatus == FOVResult.TargetSeenAndWithinMeleeRadius)
+            newOrder = CombatOrder.MeleeAttack;
+        else newOrder = CombatOrder.FireAtWill;
+
+        if (newOrder == currentOrder) return CombatOrder.None; // Already executing order, do nothing
+
+        return newOrder;
+    }
+    /* extension(IEnumerable<int> source)
+     {
+         public IEnumerable<int> WhereGreaterThan(int threshold)
+         => source.Where(x => x > threshold);
+     }*/
 }

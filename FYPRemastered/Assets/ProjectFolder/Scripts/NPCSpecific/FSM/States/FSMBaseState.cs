@@ -23,6 +23,9 @@ public abstract class FSMBaseState : IFSMState
     public StateId GetId() => _id;
     protected readonly StateId _id = StateId.None;
 
+    private readonly bool _usesRandomStopDistance;
+    public bool UsesRandomAgentStopDistance => _usesRandomStopDistance;
+
     /*public FSMBaseState(IAgentData data, IPathResolver resolver, IFSMStateContext stateContext, StateId id)
     {
         _ownerData = data;
@@ -31,8 +34,9 @@ public abstract class FSMBaseState : IFSMState
         _id = id;
         _validationCallback = OnPathResultReceived;
     }*/
-    public FSMBaseState(IFsmStateDeps deps, IFSMStateContext stateContext, StateId id)
+    public FSMBaseState(IFsmStateDeps deps, IFSMStateContext stateContext, bool useRandomStopDistance, StateId id)
     {
+        _usesRandomStopDistance = useRandomStopDistance;
         _owner = deps.Owner;
         _path = deps.Path();
         _pathResolver = deps.PathResolver;

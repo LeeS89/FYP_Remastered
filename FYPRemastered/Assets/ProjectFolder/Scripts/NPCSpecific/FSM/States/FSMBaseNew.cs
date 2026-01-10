@@ -4,7 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
-public /*partial*/ class FSMBaseNew : IFSMControlNew
+public /*partial*/ class FSMBaseNew : IFSMControl
 {
     // Injected Dependancies
     private IReadOnlyDictionary<StateId, IFSMState> _states;
@@ -36,6 +36,7 @@ public /*partial*/ class FSMBaseNew : IFSMControlNew
     private float _targetSpeed = 0f;
     private bool _usesSpeedByDistance = false;
     private bool _rotateToTarget = false;
+    private bool _rotationSubscribedToTick = false;
     // End internal members
 
 
@@ -114,7 +115,7 @@ public /*partial*/ class FSMBaseNew : IFSMControlNew
         {
             _hasValidDestination = false;
             TryResetAgent();
-            _current?.ValidateCandidateDestinations();
+            _current?.ValidateCandidateDestinations(); // Repath instead
             return;
         }
 
@@ -193,10 +194,10 @@ public /*partial*/ class FSMBaseNew : IFSMControlNew
             CurrentDestinationForward = result.Forward;
             OnMapDestinationToZone?.Invoke(currentDestination);
 
-            NavMeshObstacle o = _deps.Obstacle();//_ownerData?.Obstacle;
+            NavMeshObstacle o = _deps.Obstacle();
             if (o != null && o.enabled && o.carving)
             {
-                _deps.Obstacle().enabled = false;//_ownerData.Obstacle.enabled = false;
+                _deps.Obstacle().enabled = false;
                 _timer.Add(new SetDestinationDelay(Time.deltaTime + Mathf.Epsilon, currentDestination, result.Path, id, SetDestination));
                 return;
             }
@@ -209,11 +210,11 @@ public /*partial*/ class FSMBaseNew : IFSMControlNew
     {
         if (current != CurrentStateId) return;
         ToggleAgent(setActive: true);
-        if (/*_ownerData.Agent*/_deps.Agent().SetPath(path) ||
-            /*_ownerData.Agent*/_deps.Agent().SetDestination(destination))
+        if (_deps.Agent().SetPath(path) ||
+            _deps.Agent().SetDestination(destination))
         {
-           // float stopdist = _ownerData?.OnRequestAgentStoppingDistance?.Invoke(current) ?? 0f; /////////////// FIX HERE
-          //  _ownerData.Agent.stoppingDistance = stopdist;
+
+            _deps.Agent().stoppingDistance = _deps.GetAgentStopDistance(_current.UsesRandomAgentStopDistance);
             _hasValidDestination = true;
             _current?.OnDestinationSet();
         }
@@ -230,8 +231,8 @@ public /*partial*/ class FSMBaseNew : IFSMControlNew
 
     protected void ToggleAgent(bool setActive)
     {
-        if (/*_ownerData.Agent*/_deps.Agent().enabled == setActive) return;
-        /*_ownerData.Agent*/_deps.Agent().enabled = setActive;
+        if (_deps.Agent().enabled == setActive) return;
+        _deps.Agent().enabled = setActive;
     }
     #endregion
 
@@ -301,8 +302,8 @@ public /*partial*/ class FSMBaseNew : IFSMControlNew
         _rotateToTarget = rotate;
         _deps.Agent().updateRotation = !_rotateToTarget;
 
-        if (_rotateToTarget) OnLateTick += RotateTowardsTarget;
-        else OnLateTick -= RotateTowardsTarget;
+        if (_rotateToTarget && !_rotationSubscribedToTick) { OnLateTick += RotateTowardsTarget; _rotationSubscribedToTick = true; }
+        else if (!_rotateToTarget && _rotationSubscribedToTick) { OnLateTick -= RotateTowardsTarget; _rotationSubscribedToTick = false; }
 
     }
 

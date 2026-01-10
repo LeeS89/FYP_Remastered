@@ -118226,8 +118226,7 @@ MonoBehaviour:
     _minTimeAtWaypoint: 0.5
     _maxFlankSteps: 12
     _minFlankSteps: 4
-    _useRandomStopDistance: 1
-    _minStoppingdistance: 4
+    _minStoppingDistance: 4
     _maxStoppingDistance: 12
     _sprintSpeed: 3.6
     _walkSpeed: 0.9
@@ -156431,8 +156430,7 @@ MonoBehaviour:
     _minTimeAtWaypoint: 0.5
     _maxFlankSteps: 12
     _minFlankSteps: 4
-    _useRandomStopDistance: 1
-    _minStoppingdistance: 4
+    _minStoppingDistance: 4
     _maxStoppingDistance: 12
     _sprintSpeed: 3.6
     _walkSpeed: 0.9

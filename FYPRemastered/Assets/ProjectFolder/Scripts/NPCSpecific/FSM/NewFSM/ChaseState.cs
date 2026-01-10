@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 [Obsolete]
-public sealed class ChaseState : IntentStateBase
+public sealed class ChaseState : IntentStateBaseObsolete
 {
     public static readonly ChaseState Instance = new();
     private ChaseState() { Id = StateId.Chase; }

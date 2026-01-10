@@ -1,7 +1,8 @@
 using System;
 using UnityEngine;
 
-public interface IIntentState
+[Obsolete]
+public interface IIntentStateObsolete
 {
     void Enter(IFSMOwner self);
     void Exit(IFSMOwner self);

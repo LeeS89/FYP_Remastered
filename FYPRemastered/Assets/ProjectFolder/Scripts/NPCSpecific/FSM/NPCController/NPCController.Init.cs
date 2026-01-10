@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -15,7 +14,7 @@ public partial class NPCController
     // FSMManager Composition
     //private IPathResolver _pathFinder;
     private IFieldOfViewRunner _fovRunner;
-    private IFSMControlNew _fsmManager;
+    private IFSMControl _fsmManager;
     private Dictionary<StateId, IFSMState> _fsmStates = new(5);
     // end FSMManager Composition
 
@@ -136,7 +135,7 @@ public partial class NPCController
         }
 
         //IFSMState chaseState = new FSMChaseState(PrimaryTarget, data: this, resolver: _pathFinder, stateContext: _fsmManager);
-        IFSMState chaseState = new FSMChaseState(deps: _fsmDeps, stateContext: _fsmManager);
+        IFSMState chaseState = new FSMChaseState(deps: _fsmDeps, stateContext: _fsmManager, useRandomStopDistance: true);
         StateId cid = chaseState.GetId();
         _fsmStates.TryAdd(cid, chaseState);
 

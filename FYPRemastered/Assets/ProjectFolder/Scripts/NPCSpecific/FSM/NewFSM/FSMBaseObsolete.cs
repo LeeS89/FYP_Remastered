@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.AI;
 
 [Obsolete]
-public abstract class FSMBaseObsolete : IFSMControl
+public abstract class FSMBaseObsolete : IFSMControlObsolete
 {
     public Action<StateId> TryRepath { get; protected set; }
     public bool DestinationReached { get; protected set; } = true;
@@ -14,7 +14,7 @@ public abstract class FSMBaseObsolete : IFSMControl
     public Action<float> OnLateTick { get; protected set; }
 
     public ITargetable PrimaryTarget { get; set; }
-    public IFSMControl.OnNotifyOwner Notification { get; set; }
+    public IFSMControlObsolete.OnNotifyOwner Notification { get; set; }
     public Action<AnimationCue> OnAnimationIntent { get; set; }
     public Action<bool, int> OnWaypointZoneReceived { get; set; }
     public Action<Vector3> OnMapDestinationToZone { get; set; }

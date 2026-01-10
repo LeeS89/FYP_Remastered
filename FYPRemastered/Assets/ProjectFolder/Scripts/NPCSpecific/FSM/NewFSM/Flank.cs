@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 [Obsolete]
-public sealed class Flank : IntentStateBase
+public sealed class Flank : IntentStateBaseObsolete
 {
     public static readonly Flank Instance = new();
     private Flank() { }

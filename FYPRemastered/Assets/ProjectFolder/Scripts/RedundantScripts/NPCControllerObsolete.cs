@@ -6,7 +6,7 @@ using UnityEngine.AI;
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(NavMeshObstacle))]
 [Obsolete("", true)]
-public partial class NPCControllerObsolete : ComponentEvents, IAgentData, INPCBrainContext, INotificationListener
+public partial class NPCControllerObsolete : ComponentEvents, IAgentData, /*INPCBrainContext,*/ INotificationListener
 {
     protected EnemyEventManager _eManager;
     //   private bool _isInStateTransition = false;
@@ -115,7 +115,7 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, INPCBr
     {
         if (_fsmManager.IsInStateTransition /*|| n.Id != _fsmManager.CurrentStateId*/) return;
      
-        if (!this.TryDecide(n, out var decision)) return;
+      /*  if (!this.TryDecide(n, out var decision)) return;
        
         if (decision.BroadcastZoneAlert)
             TryBroadcastAlert(decision.NextIntent);
@@ -132,7 +132,7 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, INPCBr
         if (decision.NextIntent != StateId.None)
             _fsmManager.SwitchTo(decision.NextIntent);
 
-
+*/
     }
 
     private void UpdateCombatOrder(CombatOrder order)
@@ -242,7 +242,7 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, INPCBr
 
 
     [Obsolete]
-    public void SwitchTo(IIntentState next)
+    public void SwitchTo(IIntentStateObsolete next)
     {
        /* if (next == null || _state == next || OwnerIsDead) return;
         
@@ -253,7 +253,7 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, INPCBr
         _isInStateTransition = false;*/
     }
 
-    public void LogUnhandled(IntentStateBase state, in NPCNotification notification)
+    public void LogUnhandled(IntentStateBaseObsolete state, in NPCNotification notification)
     {
         var Kind = notification.Kind;
         Debug.LogError("Notification Kind from unhandled: "+ Kind.ToString());
@@ -401,10 +401,10 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, INPCBr
         throw new NotImplementedException();
     }
 
-    void INPCBrainContext.UpdateCombatOrder(CombatOrder newOrder)
+   /* void INPCBrainContext.UpdateCombatOrder(CombatOrder newOrder)
     {
         UpdateCombatOrder(newOrder);
-    }
+    }*/
 
     public void UpdateCurrentFovStatus(FOVResult newStatus)
     {
@@ -422,6 +422,11 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, INPCBr
     }
 
     public void RotateToTarget(bool rotate)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void TriggerDeath()
     {
         throw new NotImplementedException();
     }
@@ -453,7 +458,7 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, INPCBr
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(NavMeshObstacle))]
 [Obsolete("", true)]
-public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEventManager>, IAgentData, INPCBrainContext, INotificationListener
+public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEventManager>, IAgentData, /*INPCBrainContext,*/ INotificationListener
 {
     //protected EnemyEventManager _eManager;
     //   private bool _isInStateTransition = false;
@@ -563,9 +568,9 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
     {
         if (_fsmManager.IsInStateTransition /*|| n.Id != _fsmManager.CurrentStateId*/) return;
      
-        if (!this.TryDecide(n, out var decision)) return;
+       // if (!this.TryDecide(n, out var decision)) return;
        
-        if (decision.BroadcastZoneAlert)
+      /*  if (decision.BroadcastZoneAlert)
             TryBroadcastAlert(decision.NextIntent);
 
         if (decision.RotationOrder != RotationOrder.None)
@@ -578,7 +583,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
             ApplyFOVStatusUpdate(decision.NewFOVStatus);
 
         if (decision.NextIntent != StateId.None)
-            _fsmManager.SwitchTo(decision.NextIntent);
+            _fsmManager.SwitchTo(decision.NextIntent);*/
 
 
     }
@@ -690,7 +695,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
 
 
     [Obsolete]
-    public void SwitchTo(IIntentState next)
+    public void SwitchTo(IIntentStateObsolete next)
     {
        /* if (next == null || _state == next || OwnerIsDead) return;
         
@@ -701,7 +706,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
         _isInStateTransition = false;*/
     }
 
-    public void LogUnhandled(IntentStateBase state, in NPCNotification notification)
+    public void LogUnhandled(IntentStateBaseObsolete state, in NPCNotification notification)
     {
         var Kind = notification.Kind;
         Debug.LogError("Notification Kind from unhandled: "+ Kind.ToString());
@@ -849,10 +854,10 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
         throw new NotImplementedException();
     }
 
-    void INPCBrainContext.UpdateCombatOrder(CombatOrder newOrder)
+   /* void INPCBrainContext.UpdateCombatOrder(CombatOrder newOrder)
     {
         UpdateCombatOrder(newOrder);
-    }
+    }*/
 
     public void UpdateCurrentFovStatus(FOVResult newStatus)
     {

@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 [Obsolete]
-public sealed class TakeCoverObsolete : IntentStateBase
+public sealed class TakeCoverObsolete : IntentStateBaseObsolete
 {
     public static readonly TakeCoverObsolete Instance = new();
     private TakeCoverObsolete() { }

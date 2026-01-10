@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
+[Obsolete]
 public interface IFSMEvents : ITickable, IZoneSink
 {
     void BeginPatrol(StateId id);
@@ -33,8 +34,8 @@ public interface IFSMEvents : ITickable, IZoneSink
    // bool CurrentZone(out uint zone);
 }
 
-// Obsolete
-public interface IFSMControl : /*IFSMState, */ITickable
+[Obsolete]
+public interface IFSMControlObsolete : /*IFSMState, */ITickable
 {
     StateId CurrentStateId { get; }
 
@@ -60,7 +61,7 @@ public interface IFSMControl : /*IFSMState, */ITickable
 
 }
 
-public interface IFSMControlNew : IFSMStateContext, ITickable
+public interface IFSMControl : IFSMStateContext, ITickable
 {
     StateId CurrentStateId { get; }
     bool IsInStateTransition { get; }
@@ -77,9 +78,9 @@ public interface ITargetRef { ITargetable Target { get; } }
 public interface IFSMStateContext : IAnimationCueSource//, ITargetRef
 {
   //  ITargetable Owner { get; }
-    Action<Vector3> OnMapDestinationToZone { get; set; }
+    Action<Vector3> OnMapDestinationToZone { get; set; } // Take out
     Vector3? CurrentDestinationForward { get; } // Obsolete
-    bool IsStationary();
+    bool IsStationary(); // Take out
 
     void OnDestinationResultReceived(in DestinationResultNew result);
 }
@@ -99,6 +100,7 @@ public interface IFsmControllerDeps : IFsmDeps, ITargetRef
 {
     NavMeshAgent Agent();
     NavMeshObstacle Obstacle();
+    float GetAgentStopDistance(bool getRandomDistance);
     float WalkSpeed { get; }
     float SprintSpeed { get; }
 }
@@ -119,8 +121,10 @@ public interface IPatrolDeps : IFsmStateDeps, IFsmDeps
 
 public interface IChaseDeps : IFsmStateDeps, ITargetRef, IFsmDeps
 {
-    float MinStoppingDistance { get; }
-    float MaxStoppingDistance { get; }
+    //float MinStoppingDistance { get; }
+  //  float MaxStoppingDistance { get; }
+
+    // Distance Job Service
 }
 
 public interface IFlankDeps : IFsmStateDeps, ITargetRef, IFsmDeps
@@ -130,6 +134,7 @@ public interface IFlankDeps : IFsmStateDeps, ITargetRef, IFsmDeps
     int MinFlankSteps { get; }
 }
 
+[Obsolete]
 public interface IAgentData// : ITargetable
 {
   //  ITargetable PrimaryTarget { get; }
@@ -149,13 +154,14 @@ public interface IAgentData// : ITargetable
 
 }
 
+[Obsolete]
 public interface IFSMOwner // Maybe Obsolete
 {
    // void TryBroadcastAlert(); // Remove, NPCControllerBase will handle this
-    void LogUnhandled(IntentStateBase state, in NPCNotification notification);
-    void SwitchTo(IIntentState next);
+    void LogUnhandled(IntentStateBaseObsolete state, in NPCNotification notification);
+    void SwitchTo(IIntentStateObsolete next);
     void HandleFOVSweepResult(FOVResult result, bool withinAttackAngles);
-    IFSMControl FSM { get; }
+    IFSMControlObsolete FSM { get; }
 
 }
 
@@ -166,12 +172,6 @@ public interface INotificationListener
   //  void EnterAlertPhase();
 }
 
-
-public interface IFieldOfViewOwner // Obsolete
-{
-    void FieldOfViewSweepResult(FOVResult result, bool withinAttackAngles);
-
-}
 
 public interface IFieldOfViewRunner : ITickable
 {

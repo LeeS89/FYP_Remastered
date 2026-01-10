@@ -12,6 +12,6 @@ public interface IFSMState : ITickable
 
     void ValidateCandidateDestinations();
 
-
+    bool UsesRandomAgentStopDistance { get; }
     StateId GetId();
 }

@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEditor;
 using UnityEngine;
 
-public class TestFov : MonoBehaviour, IFieldOfViewOwner
+public class TestFov : MonoBehaviour//, IFieldOfViewOwnerObsolete
 {
     public FOVParameters _params;
     private NPCFieldOfViewHandler _fovHandler;

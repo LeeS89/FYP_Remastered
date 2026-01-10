@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public sealed class FollowGroup : IntentStateBase
+public sealed class FollowGroup : IntentStateBaseObsolete
 {
     public static readonly FollowGroup Instance = new();
     private FollowGroup() { }

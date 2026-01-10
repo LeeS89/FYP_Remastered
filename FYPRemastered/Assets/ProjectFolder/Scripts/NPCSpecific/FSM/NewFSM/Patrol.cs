@@ -1,6 +1,8 @@
+using System;
 using UnityEngine;
 
-public sealed class Patrol : IntentStateBase
+[Obsolete]
+public sealed class Patrol : IntentStateBaseObsolete
 {
     public static readonly Patrol Instance = new();
     private Patrol() { Id = StateId.Patrol; }

@@ -21,10 +21,9 @@ public class AgentFsmDeps : IFsmControllerDeps, IPatrolDeps, IChaseDeps, IFlankD
     [Min(4)]
     [SerializeField] private int _minFlankSteps;
 
-    [Header("(Used in Chasing State only) - If using Random stop distance - the agent will stop moving to its destination\n" +
-        "once it reaches its randomly generated stop distance between min and max - otherwise uses min")]
-    [SerializeField] private bool _useRandomStopDistance = true;
-    [SerializeField] private float _minStoppingdistance;
+    [Header("If using Random stop distance (Set in states CTR) - the agent will stop moving to its destination\n" +
+        "once it reaches its randomly generated stop distance between min and max - otherwise defaults to 0f")]
+    [SerializeField] private float _minStoppingDistance;
     [SerializeField] private float _maxStoppingDistance;
 
     [Header("Speed Params")]
@@ -38,6 +37,8 @@ public class AgentFsmDeps : IFsmControllerDeps, IPatrolDeps, IChaseDeps, IFlankD
     public IWaypointService _waypointService;
     public IFlankService _flankService;
 
+    public float GetAgentStopDistance(bool useRandomDistance)
+        => useRandomDistance ? Random.Range(_minStoppingDistance, _maxStoppingDistance) : 0f;
 
     public void SetOwner(ITargetable owner) => _owner = owner;
     public void SetPath(NavMeshPath path) => _path = path;
@@ -80,6 +81,8 @@ public class AgentFsmDeps : IFsmControllerDeps, IPatrolDeps, IChaseDeps, IFlankD
         return _path;
     }
 
+    
+
     public IWaypointService WaypointService => _waypointService;
     public float MaxTimeAtPatrolPoint => _maxTimeAtWaypoint;
     public float MinTimeAtPatrolPoint => _minTimeAtWaypoint;
@@ -95,9 +98,9 @@ public class AgentFsmDeps : IFsmControllerDeps, IPatrolDeps, IChaseDeps, IFlankD
 
     public IPathResolver PathResolver => _pathResolver;
 
-    public float MinStoppingDistance => _minStoppingdistance;
+   // public float MinStoppingDistance => _minStoppingDistance;
 
-    public float MaxStoppingDistance => _maxStoppingDistance;
+  //  public float MaxStoppingDistance => _maxStoppingDistance;
 
     public ITargetable Target => _target;
 

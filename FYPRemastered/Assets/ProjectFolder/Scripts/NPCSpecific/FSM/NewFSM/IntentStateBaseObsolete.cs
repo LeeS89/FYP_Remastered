@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 
@@ -13,7 +14,8 @@ public enum StateId
     Flee
 }
 
-public abstract class IntentStateBase : IIntentState
+[Obsolete]
+public abstract class IntentStateBaseObsolete : IIntentStateObsolete
 {
     public StateId Id { get; protected set; } = StateId.None;
 

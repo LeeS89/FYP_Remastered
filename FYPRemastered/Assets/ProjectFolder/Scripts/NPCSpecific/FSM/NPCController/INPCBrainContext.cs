@@ -14,4 +14,5 @@ public interface INPCBrainContext// : ITargetable
     void UpdateFovAlertPhase(AlertPhase newPhase);
     void UpdateRotationOrder(RotationOrder newOrder);
     void RotateToTarget(bool rotate);
+    void TriggerDeath();
 }

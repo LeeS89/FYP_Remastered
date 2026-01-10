@@ -106,9 +106,9 @@ public abstract class TargetableInit<TServices, TManager> : ComponentInit<TServi
     [SerializeField] protected LayerMask _selfTargetMask;
     public LayerMask LayerMask => _selfTargetMask;
 
-  
-    protected virtual void OnDeath(ITargetable targetable) => SceneService?.OnTargetableDied(targetable);
-    protected virtual void OnRespawn(ITargetable targetable) => SceneService?.OnTargetableRespawned(targetable);
+
+    protected virtual void OnDeath() { IsDead = true; SceneService?.OnTargetableDied(this); }
+    protected virtual void OnRespawn() { IsDead = false; SceneService?.OnTargetableRespawned(this); }
 
     public Vector3 Position() => _rootTransform != null ? _rootTransform.position : transform.position;
 

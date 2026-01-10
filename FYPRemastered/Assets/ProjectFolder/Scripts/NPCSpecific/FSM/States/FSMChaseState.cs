@@ -13,8 +13,8 @@ public class FSMChaseState : FSMBaseState
          : base(data, resolver, stateContext, StateId.Chase) { _target = target; }*/
 
 
-    public FSMChaseState(IChaseDeps deps, IFSMStateContext stateContext)
-        : base(deps, stateContext, StateId.Chase) 
+    public FSMChaseState(IChaseDeps deps, IFSMStateContext stateContext, bool useRandomStopDistance = false)
+        : base(deps, stateContext, useRandomStopDistance, StateId.Chase) 
     { 
         _deps = deps;
         _candidateDestinations.EnsureCapacity(1);
@@ -47,7 +47,6 @@ public class FSMChaseState : FSMBaseState
     public override void ValidateCandidateDestinations()
     {
         if (!_isInState || OwnerDataNull()) return;
-        Debug.LogError("Sending Chase request to path manager");
         _pathResolver?.ProcessDestinationCandidates(_id, ReasonForDestinationCheck.ValidatePathForDestination,
             _candidateDestinations, _path, _owner.Position(), _validationCallback);
        // var request = ValidateDestination.GetTargetPosition(/*_ownerData.Path*/_path, ReasonForDestinationCheck.ValidatePathForDestination, /*_ownerData*/_owner, _deps.Target/*_ownerData.PrimaryTarget*/);
@@ -57,7 +56,6 @@ public class FSMChaseState : FSMBaseState
    
     public override void OnDestinationSet()
     {
-        Debug.LogError("Destination Set In Chase State");
         base.OnDestinationSet();
         if (!_isInState || TargetIsNull()) return;
 

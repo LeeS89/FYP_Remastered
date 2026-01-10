@@ -7,7 +7,7 @@ using UnityEngine.AI;
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(NavMeshObstacle))]
 public partial class NPCController : TargetableInit<ISceneAIServices, AgentEventManager>, IAgentData, INPCBrainContext, INotificationListener
-{
+{ // Remove IAgentData
     
     //   private bool _isInStateTransition = false;
     protected Action _onLayerToggleComplete;
@@ -81,7 +81,9 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
 
       //  if (n.Kind == NotificationKind.FOVUpdate) Debug.LogError("FOV Result: "+n.FOVResult.ToString());
 
-        if (!this.TryDecide(n, out var decision)) return;
+        this.Decide(in n);
+
+        /*if (!this.TryDecide(n, out var decision)) return;
 
         if (decision.BroadcastZoneAlert)
             TryBroadcastAlert(decision.NextIntent);
@@ -97,9 +99,26 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
 
         if (decision.NextIntent != StateId.None)
             _fsmManager.SwitchTo(decision.NextIntent);
-
+*/
 
     }
+
+    private void ResetAll()
+    {
+        UpdateCombatOrder(CombatOrder.None);
+        UpdateCurrentFovStatus(FOVResult.None);
+        RotateToTarget(rotate: false);
+    }
+
+    public void TriggerDeath()
+    {
+        if (IsDead) return;
+        ResetAll();
+
+        OnDeath();
+    } 
+
+   
 
     public void UpdateCombatOrder(CombatOrder order)
     {
@@ -218,7 +237,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
 
 
 
-    public void LogUnhandled(IntentStateBase state, in NPCNotification notification)
+    public void LogUnhandled(IntentStateBaseObsolete state, in NPCNotification notification)
     {
         var Kind = notification.Kind;
         Debug.LogError("Notification Kind from unhandled: " + Kind.ToString());
