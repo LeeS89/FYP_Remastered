@@ -116,9 +116,10 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
         ResetAll();
 
         OnDeath();
-    } 
+    }
 
-   
+    public bool IsRotatingToTarget() => _fsmManager?.RotatingToTarget ?? false;
+
 
     public void UpdateCombatOrder(CombatOrder order)
     {
@@ -192,7 +193,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
         }
     }
 
-
+    
     protected void DeathStatusUpdated(bool isDead)
     {
         if (IsDead == isDead) return;
@@ -208,13 +209,16 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
    
     protected void Engage() { }
 
+    public override bool IsMoving() => !_fsmManager?.HasReachedDestination() ?? false;
+
+
     protected virtual void OnDamageTaken(float remainingHealth) { }
 
     protected virtual void Update()
     {
         if (IsDead) return;
         _fsmManager?.Tick(Time.deltaTime);
-        IsStationary = _fsmManager?.IsStationary() ?? true;
+       // IsStationary = _fsmManager?.IsStationary() ?? true;
         _fovRunner?.Tick(Time.deltaTime);
 
         if (_testStateCheck)
@@ -296,7 +300,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
     {
         if (IsDead || _fsmManager == null) return;
         if (_fsmManager.CurrentStateId == StateId.Chase || _fsmManager.CurrentStateId == StateId.Follow)
-            if (IsStationary || CurrentFovState == FOVResult.TargetSeen)
+            if (IsMoving() || CurrentFovState == FOVResult.TargetSeen)
             {
                 this.RotateTowardsTarget(_primaryTarget?.Transform, rotate: true);
                 if (!_aimingAtTarget) { _aimingAtTarget = true; _animationControl?.IkLookAtTarget(look: true); }
@@ -401,7 +405,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
         throw new NotImplementedException();
     }
 
-   
+    
 }
 
 public delegate void Notification(in NPCNotification n);

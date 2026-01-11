@@ -227,7 +227,7 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, /*INPC
     {
         if(OwnerIsDead) return;
         _fsmManager?.Tick(Time.deltaTime);
-        IsStationary = _fsmManager?.IsStationary() ?? true;
+        IsStationary = _fsmManager?.HasReachedDestination() ?? true;
     }
 
     protected virtual void LateUpdate()
@@ -680,7 +680,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
     {
       //  if(IsDead) return;
         _fsmManager?.Tick(Time.deltaTime);
-        IsStationary = _fsmManager?.IsStationary() ?? true;
+        IsStationary = _fsmManager?.HasReachedDestination() ?? true;
     }
 
     protected virtual void LateUpdate()

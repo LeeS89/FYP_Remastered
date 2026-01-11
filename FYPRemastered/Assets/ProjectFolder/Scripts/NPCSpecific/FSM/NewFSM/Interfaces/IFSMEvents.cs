@@ -67,6 +67,7 @@ public interface IFSMControl : IFSMStateContext, ITickable
     bool IsInStateTransition { get; }
     void SwitchTo(StateId state);
 
+    bool RotatingToTarget { get; }
     void RotateToTarget(bool rotate);
     //delegate void OnNotifyOwner(in NPCNotification n);
    // OnNotifyOwner Notification { get; set; }
@@ -80,7 +81,7 @@ public interface IFSMStateContext : IAnimationCueSource//, ITargetRef
   //  ITargetable Owner { get; }
     Action<Vector3> OnMapDestinationToZone { get; set; } // Take out
     Vector3? CurrentDestinationForward { get; } // Obsolete
-    bool IsStationary(); // Take out
+    bool HasReachedDestination(); // Take out
 
     void OnDestinationResultReceived(in DestinationResultNew result);
 }

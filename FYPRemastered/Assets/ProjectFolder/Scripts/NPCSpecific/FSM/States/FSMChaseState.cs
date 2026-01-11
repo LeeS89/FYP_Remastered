@@ -84,7 +84,7 @@ public class FSMChaseState : FSMBaseState
 
         if (_timeSinceLastRepath <= 0f)
         {
-            if(!_deps.Target.IsStationary) // Target is still moving, need to repath
+            if(_deps.Target.IsMoving()) // Target is still moving, need to repath
             {
                 _timerRunning = false;
                 _timeSinceLastRepath = _repathInterval;

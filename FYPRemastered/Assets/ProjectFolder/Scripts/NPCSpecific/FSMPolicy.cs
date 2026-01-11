@@ -112,9 +112,7 @@ public readonly struct NPCNotification
 {
     public readonly NotificationKind Kind { get; }
 
-   // public readonly StateId Id;
-
-    
+  
     public readonly bool HasReachedStaleDestination;
     public readonly Vector3 Destination { get; }
     public readonly FOVResult FOVResult;
@@ -124,6 +122,11 @@ public readonly struct NPCNotification
     private NPCNotification(NotificationKind kind, /*StateId stateId, */bool reachedStaleDestination, Vector3 dest, FOVResult result, bool targetInshootAngles)
         => (Kind,/* Id,*/ HasReachedStaleDestination, Destination, FOVResult, TargetWithinshootingAngles) = (kind, /*stateId,*/ reachedStaleDestination, dest, result, targetInshootAngles);
 
+    public static NPCNotification DestinationReached(/*StateId id,*/ /*bool reachedStaleDestination*/)
+        => new(NotificationKind.DestinationReached, /*id,*/ false, Vector3.zero, FOVResult.None, false);
+
+    public static NPCNotification DestinationSet()
+        => new(NotificationKind.DestinationSet, false, Vector3.zero, FOVResult.None, false);
 
     public static NPCNotification ZoneAlert(/*StateId id*/)
         => new(NotificationKind.ZoneAlert, /*id,*/ false, Vector3.zero, FOVResult.None, false);

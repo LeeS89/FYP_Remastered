@@ -1,11 +1,13 @@
 using UnityEngine;
 
-public interface INPCBrainContext// : ITargetable
+public interface INPCBrainContext : ITargetable
 {
     StateId CurrentFsmState { get; }
     CombatOrder CurrentComOrder { get; }
     RotationOrder CurrentRotOrder { get; }
     FOVResult CurrentFovState { get; }
+
+    bool IsRotatingToTarget();
 
     void TryBroadcastAlert();
     void SwitchState(StateId intentState);

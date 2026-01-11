@@ -35,10 +35,13 @@ public /*partial*/ class FSMBaseNew : IFSMControl
     private float _lerpSpeed = 0f;
     private float _targetSpeed = 0f;
     private bool _usesSpeedByDistance = false;
-    private bool _rotateToTarget = false;
+    public bool RotatingToTarget { get; private set; } = false;
     private bool _rotationSubscribedToTick = false;
+    private bool _reachedDestination = true;
     // End internal members
 
+    private const int MaxDestinationAttempts = 5;
+    private int _destinationAttemptCounter = 0;
 
     private enum SpeedTier
     {
@@ -106,12 +109,14 @@ public /*partial*/ class FSMBaseNew : IFSMControl
 
     public void ClassUpdate(float dt)
     {
-        if (!_hasValidDestination || _deps.Agent() == null /*_ownerData.Agent == null*/) return;
-        NavMeshAgent a = _deps.Agent();//_ownerData.Agent;
+        if (!_hasValidDestination || _deps == null || _deps.Agent() == null) return;
+        NavMeshAgent a = _deps.Agent();
 
         if (a.pathPending) return;
 
-        if (!a.enabled || !a.isOnNavMesh)
+        /// Maybe split into 2 separate checks for better clarity
+        /// Possibly for !a.isOnNavMesh we could teleport the agent to nearest navmesh point? + Special effects?
+        if (!a.enabled || !a.isOnNavMesh) 
         {
             _hasValidDestination = false;
             TryResetAgent();
@@ -119,7 +124,9 @@ public /*partial*/ class FSMBaseNew : IFSMControl
             return;
         }
 
-
+        /// If we enter either above or below block, possibly notify Destination Reached?
+        /// Link both blocks to the counter in the SetDestination method?
+        /// but only increment counter whenever SetDestination fails 
         if (!a.hasPath || a.pathStatus != NavMeshPathStatus.PathComplete)
         {
             _hasValidDestination = false;
@@ -135,13 +142,20 @@ public /*partial*/ class FSMBaseNew : IFSMControl
         float stopThreshold = (a.stoppingDistance + 0.25f);
         if (dist <= stopThreshold)
         {
-            _hasValidDestination = false;
-            TryResetAgent(); // Resets path and Sets speed == 0f
-            Debug.LogError("Reached Destination");
-            _current?.OnDestinationReached();
+            DestinationReached();
             return;
         }
         SetAgentSpeedByDistance(dist);
+    }
+
+    private void DestinationReached()
+    {
+        _reachedDestination = true;
+        _hasValidDestination = false;
+        TryResetAgent(); // Resets path and Sets speed == 0f
+        //Debug.LogError("Reached Destination");
+        _current?.OnDestinationReached();
+        Notification?.Invoke(NPCNotification.DestinationReached());
     }
 
     private void TimerTicks(float dt)
@@ -215,18 +229,35 @@ public /*partial*/ class FSMBaseNew : IFSMControl
         {
 
             _deps.Agent().stoppingDistance = _deps.GetAgentStopDistance(_current.UsesRandomAgentStopDistance);
-            _hasValidDestination = true;
-            _current?.OnDestinationSet();
+            DestinationSet();
         }
         else
         {
 #if UNITY_EDITOR
             Debug.LogError("Failed to Set Path - Attempting to Re-path");
 #endif
-            _hasValidDestination = false;
-            TryResetAgent();
-            _current?.ValidateCandidateDestinations();
+            // Add counter to prevent infinite loop, and notify if failed after x attempts
+            if (++_destinationAttemptCounter <= MaxDestinationAttempts)
+            {
+                _hasValidDestination = false;
+                TryResetAgent();
+                _current?.ValidateCandidateDestinations();
+            }
+            else
+            {
+                Debug.LogError("Failed to Set Destination after multiple attempts");
+                _destinationAttemptCounter = 0;
+                Notification?.Invoke(NPCNotification.NoAvailablePath());
+            }
         }
+    }
+
+    private void DestinationSet()
+    {
+        _reachedDestination = false;
+        _hasValidDestination = true;
+        _current?.OnDestinationSet();
+        Notification?.Invoke(NPCNotification.DestinationSet());
     }
 
     protected void ToggleAgent(bool setActive)
@@ -237,7 +268,7 @@ public /*partial*/ class FSMBaseNew : IFSMControl
     #endregion
 
     #region Speed Region
-    public bool IsStationary() => _speedTier == SpeedTier.Idle;
+    public bool HasReachedDestination() => _reachedDestination || (_deps?.Agent().isStopped ?? true);//_speedTier == SpeedTier.Idle;
     private void SetSpeedTier(SpeedTier tier)
     {
         if (tier == _speedTier) return;
@@ -297,13 +328,13 @@ public /*partial*/ class FSMBaseNew : IFSMControl
 
     public void RotateToTarget(bool rotate)
     {
-        if (NullOwnerOrTarget() || _rotateToTarget == rotate) return;
+        if (RotatingToTarget == rotate || NullOwnerOrTarget()) return;
 
-        _rotateToTarget = rotate;
-        _deps.Agent().updateRotation = !_rotateToTarget;
+        RotatingToTarget = rotate;
+        _deps.Agent().updateRotation = !RotatingToTarget;
 
-        if (_rotateToTarget && !_rotationSubscribedToTick) { OnLateTick += RotateTowardsTarget; _rotationSubscribedToTick = true; }
-        else if (!_rotateToTarget && _rotationSubscribedToTick) { OnLateTick -= RotateTowardsTarget; _rotationSubscribedToTick = false; }
+        if (RotatingToTarget && !_rotationSubscribedToTick) { OnLateTick += RotateTowardsTarget; _rotationSubscribedToTick = true; }
+        else if (!RotatingToTarget && _rotationSubscribedToTick) { OnLateTick -= RotateTowardsTarget; _rotationSubscribedToTick = false; }
 
     }
 
@@ -315,9 +346,10 @@ public /*partial*/ class FSMBaseNew : IFSMControl
         if (_deps.Target == null || _deps.Target.Transform == null || _deps.Owner == null
             || _deps.Owner.Transform == null || _deps.Agent() == null) return;
 
+      //  Debug.LogError("Rotating Towards Target");
         /* if (controller == null || target == null ||
              controller.Agent == null || controller.Transform == null) return;*/
-        NavMeshAgent agent = _deps.Agent();
+        //NavMeshAgent agent = _deps.Agent();
 
       /*  if (!_rotateToTarget)
         {

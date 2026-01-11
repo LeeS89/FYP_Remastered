@@ -144,7 +144,8 @@ public enum NotificationKind
     CoverExposed,
     PathToPrimaryAvailable,
     DestinationFound, // Obsolete
-    DestinationReached // Obsolete
+    DestinationSet,
+    DestinationReached 
 }
 
 public enum PolicyHaltReason

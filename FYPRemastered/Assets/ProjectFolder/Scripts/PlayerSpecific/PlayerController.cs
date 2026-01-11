@@ -158,10 +158,10 @@ public sealed class PlayerController : TargetableInit<IPlaceholderService, Playe
 #if UNITY_EDITOR
         float movedDistance = Vector3.Distance(Position(), _lastPosition);
 
-        IsStationary = movedDistance <= movementThreshold;
+        _isStationary = movedDistance <= movementThreshold;
 
         if (_printStatStatus)
-            Debug.LogError("IsStationary is: "+IsStationary);
+            Debug.LogError("IsStationary is: "+IsMoving());
        /* if (movedDistance > movementThreshold)
         {
             if (!GameManager.Instance.PlayerHasMoved)
@@ -252,21 +252,26 @@ public sealed class PlayerController : TargetableInit<IPlaceholderService, Playe
        
     }
 
-   /* protected override void OnSceneComplete()
-    {
-        base.OnSceneComplete();
-        InputEnabled = false;
-        _locomotion?.OnInstanceDestroyed();
-        _locomotion = null;
-        _rotationHandler?.OnInstanceDestroyed();
-        _rotationHandler = null;
-       
-        _grabHandler.OnInstanceDestroyed();
-        _grabHandler = null;
-        _eManager = null;
-    }*/
+    private bool _isStationary = true;
 
-  
+    public override bool IsMoving() => _isStationary; 
 
-    
+
+    /* protected override void OnSceneComplete()
+     {
+         base.OnSceneComplete();
+         InputEnabled = false;
+         _locomotion?.OnInstanceDestroyed();
+         _locomotion = null;
+         _rotationHandler?.OnInstanceDestroyed();
+         _rotationHandler = null;
+
+         _grabHandler.OnInstanceDestroyed();
+         _grabHandler = null;
+         _eManager = null;
+     }*/
+
+
+
+
 }

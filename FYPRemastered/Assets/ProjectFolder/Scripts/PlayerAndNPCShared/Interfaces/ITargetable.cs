@@ -12,7 +12,8 @@ public interface ITargetable
 
     Collider TargetableCollider { get; }
 
-    bool IsStationary { get; }
+    bool IsMoving();
+
 
     bool IsDead { get; }
 

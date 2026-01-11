@@ -46,7 +46,7 @@ public abstract class FSMBaseState : IFSMState
     }
 
     protected bool OwnerDataNull() => _owner == null || _path == null;
-    protected bool IsStationary() => _stateContext?.IsStationary() ?? true;
+    protected bool IsStationary() => _stateContext?.HasReachedDestination() ?? true;
 
     public virtual void EnterState() { _isInState = true; /*_hasDestination = false;*/ }
     public abstract void ValidateCandidateDestinations();

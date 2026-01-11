@@ -100,7 +100,7 @@ public abstract class TargetableInit<TServices, TManager> : ComponentInit<TServi
     [SerializeField] protected Collider _targetCollider;
     public Collider TargetableCollider { get; private set; }
 
-    public bool IsStationary { get; protected set; } = true;
+    public abstract bool IsMoving();
 
     [Header("Mask of this Gamobeject used for targeting purposes")]
     [SerializeField] protected LayerMask _selfTargetMask;

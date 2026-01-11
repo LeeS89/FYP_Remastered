@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEditor.UI;
 using UnityEngine;
 
 
@@ -217,6 +218,7 @@ public static class NPCDecisionPolicyNew
 
     public static void Decide(this INPCBrainContext self, in NPCNotification n)
     {
+        // If IsDead => return, unless notification is Death related
         var state = self.CurrentFsmState;
       
         switch (state)
@@ -243,9 +245,9 @@ public static class NPCDecisionPolicyNew
         {
             case NotificationKind.FOVUpdate:
 
-                if (!FOVStatusChanged(self, n.FOVResult)) return;
+               // if (!FOVStatusChanged(self, n.FOVResult)) return;
 
-                self.UpdateCurrentFovStatus(n.FOVResult);
+               // self.UpdateCurrentFovStatus(n.FOVResult);
                 if (TargetSeen(n.FOVResult))
                 {
                     self.SwitchState(StateId.Chase);
@@ -273,18 +275,63 @@ public static class NPCDecisionPolicyNew
 
     private static void DecideChase(INPCBrainContext self, in NPCNotification n)
     {
+       
         switch (n.Kind)
         {
             case NotificationKind.FOVUpdate:
                 if (!FOVStatusChanged(self, n.FOVResult)) return;
-                self.RotateToTarget(TargetSeen(n.FOVResult));
+                self.UpdateCurrentFovStatus(n.FOVResult);
+
+                if (self.IsMoving()) TryUpdateRotationToTarget(self, TargetSeen(n.FOVResult));
+                
                 self.UpdateCombatOrder(DecideNextCombatOrder(self.CurrentComOrder, n.FOVResult));
                
-                return;
+                break;
+            case NotificationKind.DestinationReached:
+                TryUpdateRotationToTarget(self, true);
+                break;
+            case NotificationKind.DestinationSet:
+                TryUpdateRotationToTarget(self, TargetSeen(self.CurrentFovState));
+                break;
             default:
-                return;
+                break;
         }
     }
+
+    private static void TryUpdateRotationToTarget(INPCBrainContext self, bool shouldRotate)
+    {
+        if (shouldRotate != self.IsRotatingToTarget()) self.RotateToTarget(shouldRotate);
+    }
+    
+    [Obsolete]
+    private static void DecideRotateToTarget(INPCBrainContext self, in NPCNotification n)
+    {
+        NotificationKind kind = n.Kind;
+        if (kind != NotificationKind.FOVUpdate || kind != NotificationKind.DestinationReached) return;
+
+        StateId currentState = self.CurrentFsmState;
+        if (currentState != StateId.Chase || currentState != StateId.Flank || currentState != StateId.Cover)
+        {
+            if(self.IsRotatingToTarget()) self.RotateToTarget(false);
+            return;
+        }
+        
+        if(currentState == StateId.Chase)
+        {
+            if(kind == NotificationKind.DestinationReached && !self.IsRotatingToTarget()) self.RotateToTarget(true);
+            else if(kind == NotificationKind.DestinationSet)
+            {
+                bool shouldRotate = TargetSeen(self.CurrentFovState);
+                if (shouldRotate != self.IsRotatingToTarget()) self.RotateToTarget(shouldRotate);
+            }
+            else if (kind == NotificationKind.FOVUpdate && self.IsMoving())
+            {
+                bool shouldRotate = TargetSeen(n.FOVResult);
+                if (shouldRotate != self.IsRotatingToTarget()) self.RotateToTarget(shouldRotate);
+            }
+        }
+    }
+    
 
     private static void DecideFlank(INPCBrainContext self, in NPCNotification n)
     {
