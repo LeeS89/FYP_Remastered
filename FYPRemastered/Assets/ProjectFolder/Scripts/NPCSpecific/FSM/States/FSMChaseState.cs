@@ -79,7 +79,7 @@ public class FSMChaseState : FSMBaseState
     public override void LateTick(float dt)
     {
     
-        if (!_isInState || !_timerRunning) return;
+        if (!_isInState || !_timerRunning || _isAtDestination) return;
         _timeSinceLastRepath -= dt;
 
         if (_timeSinceLastRepath <= 0f)
@@ -87,10 +87,7 @@ public class FSMChaseState : FSMBaseState
             if(_deps.Target.IsMoving()) // Target is still moving, need to repath
             {
                 _timerRunning = false;
-                _timeSinceLastRepath = _repathInterval;
-                if(!_isAtDestination)
                 RetrieveCandidateDestinations();
-                //ValidateCandidateDestinations();
             }
 
             _timeSinceLastRepath = _repathInterval;

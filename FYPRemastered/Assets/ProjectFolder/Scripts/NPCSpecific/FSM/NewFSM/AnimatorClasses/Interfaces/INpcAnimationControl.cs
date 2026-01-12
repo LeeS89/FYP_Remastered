@@ -9,4 +9,6 @@ public interface INpcAnimationControl
     void IkLookAtTarget(bool look);
     bool IsAnimationLayerActive(AnimationLayer layer);
     void ToggleAnimationLayer(AnimationLayer layer, bool activate, Action completedCB = null);
+
+    void SetLookAt(bool look, Transform target = null);
 }

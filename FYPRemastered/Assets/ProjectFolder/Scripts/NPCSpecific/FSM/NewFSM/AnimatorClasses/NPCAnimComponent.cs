@@ -311,6 +311,11 @@ public class NPCAnimComponent : ComponentEvents, INpcAnimationControl
         // Send the smoothed values to your blend tree
         UpdateBlendTreeParams(_currentSpeed, _currentDirection);
     }
+
+    public void SetLookAt(bool look, Transform target = null)
+    {
+        throw new NotImplementedException();
+    }
     #endregion
 
 }

@@ -54,6 +54,7 @@ public abstract class FSMBaseState : IFSMState
     protected virtual void OnPathResultReceived(in DestinationResultNew result)
     {
         if (!_isInState) return;
+        Debug.LogError("Sending Dest Result from: "+ _id.ToString());
         _stateContext?.OnDestinationResultReceived(in result);
     }
 

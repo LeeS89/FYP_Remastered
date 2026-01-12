@@ -133,12 +133,36 @@ public class AgentAnimComponent : ComponentInit<ISceneAIServices, AgentEventMana
 
     private void OnAnimatorIK(int layerIndex)
     {
+        if (_anim == null)
+            return;
+
+        if (_currentLookWeight <= Eps)
+        {
+            _anim.SetLookAtWeight(0f);
+           
+            return;
+        }
+
+        _anim.SetLookAtWeight(
+            _currentLookWeight,
+            bodyWeight,
+            headWeight,
+            eyesWeight,
+            clampWeight
+        );
+
+        _anim.SetLookAtPosition(_lookPos);
+
+    }
+/*    private void OnAnimatorIK(int layerIndex)
+    {
         if (_lookTarget == null || _anim == null)
             return;
 
         if (_currentLookWeight <= 0f)
         {
             _anim.SetLookAtWeight(0f);
+           
             return;
         }
 
@@ -152,6 +176,56 @@ public class AgentAnimComponent : ComponentInit<ISceneAIServices, AgentEventMana
 
         _anim.SetLookAtPosition(_lookTarget.position);
 
+    }*/
+
+    public void SetIKLookTarget(Transform target) => _lookTarget = target;
+
+    public void IkLookAtTarget(bool look)
+    {
+        if (_lookTarget == null) return;
+        float newTargetWeight = look ? 1f : 0f;
+        if (Mathf.Approximately(_targetLookWeight, newTargetWeight)) { return; }
+
+        _targetLookWeight = newTargetWeight;
+
+        if (_runningRoutine != null)
+        {
+            StopCoroutine(_runningRoutine);
+        }
+
+        _runningRoutine = StartCoroutine(BlendLookWeight(_targetLookWeight));
+    }
+
+    private bool _cancellingLookAt = false;
+
+    public void SetAndLookAtTarget(bool look, Transform lookTarget)
+    {
+
+        if (!look)
+        {
+            if (_cancellingLookAt) return;
+            _cancellingLookAt = true;
+        }
+        else
+        {
+            if (lookTarget == null || lookTarget == _lookTarget) return;
+            _lookTarget = lookTarget;
+            _cancellingLookAt = false;
+        }
+
+
+        if (_lookTarget == null) return;
+        float newTargetWeight = look ? 1f : 0f;
+        if (Mathf.Approximately(_targetLookWeight, newTargetWeight)) { return; }
+
+        _targetLookWeight = newTargetWeight;
+
+        if (_runningRoutine != null)
+        {
+            StopCoroutine(_runningRoutine);
+        }
+
+        _runningRoutine = StartCoroutine(BlendLookWeight(_targetLookWeight));
     }
 
     private IEnumerator BlendLookWeight(float targetWeight)
@@ -216,23 +290,7 @@ public class AgentAnimComponent : ComponentInit<ISceneAIServices, AgentEventMana
     public void ToggleAnimationLayer(AnimationLayer layer, bool activate, Action completedCB = null)
      => BlendingLayerWeightNew(layer, activate, completedCB);
 
-    public void SetIKLookTarget(Transform target) => _lookTarget = target;
-
-    public void IkLookAtTarget(bool look)
-    {
-        if (_lookTarget == null) return;
-        float newTargetWeight = look ? 1f : 0f;
-        if (Mathf.Approximately(_targetLookWeight, newTargetWeight)) { return; }
-
-        _targetLookWeight = newTargetWeight;
-
-        if (_runningRoutine != null)
-        {
-            StopCoroutine(_runningRoutine);
-        }
-
-        _runningRoutine = StartCoroutine(BlendLookWeight(_targetLookWeight));
-    }
+   
 
     public void PlayClip(AnimationCue cue)
     {
@@ -295,8 +353,63 @@ public class AgentAnimComponent : ComponentInit<ISceneAIServices, AgentEventMana
         UpdateBlendTreeParams(_currentSpeed, _currentDirection);
     }
 
-   
+
     #endregion
 
+    private bool _lookEnabled = false;
+    private Transform _desiredTarget;
+    private Transform _activeTarget;
+    private Vector3 _lookPos;
+    private Vector3 _lookPosVel;
+    private const float Eps = 0.0001f;
+
+    [SerializeField] private float _posSmoothTime = 0.08f;
+
+    [Tooltip("If no target (e.g., fading out), look this far forward.")]
+    [SerializeField] private float _fallbackDistance = 2f;
+
+    public void Update()
+    {
+        if (_anim == null) return;
+
+        if(!_lookEnabled && _desiredTarget == null && _currentLookWeight <= Eps)
+        {
+            _activeTarget = null;
+            return;
+        }
+
+        float desiredWeight = (_lookEnabled && _desiredTarget != null) ? 1f : 0f;
+
+        _currentLookWeight = Mathf.MoveTowards(_currentLookWeight, desiredWeight, Time.deltaTime * _blendSpeed);
+
+        if(_lookEnabled && _desiredTarget != null)
+            _activeTarget = _desiredTarget;
+        else if (_currentLookWeight <= Eps)
+            _activeTarget = null;
+
+        if (_activeTarget == null && _currentLookWeight <= Eps)
+            return;
+
+        Vector3 desiredPos = (_activeTarget != null) ? _activeTarget.position : transform.position + transform.forward * _fallbackDistance;
+
+        if(_posSmoothTime <= 0f)
+            _lookPos = desiredPos;
+        else
+            _lookPos = Vector3.SmoothDamp(_lookPos, desiredPos, ref _lookPosVel, _posSmoothTime);
+    }
+
+    public void SetLookAt(bool look, Transform target = null)
+    {
+        _lookEnabled = look;
+        _desiredTarget = look ? target : null;
+
+        if(look && target != null)
+        {
+            _lookPos = target.position;
+            _lookPosVel = Vector3.zero;
+        }
+    }
+
+  
 }
 

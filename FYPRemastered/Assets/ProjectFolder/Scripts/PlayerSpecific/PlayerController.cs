@@ -161,7 +161,13 @@ public sealed class PlayerController : TargetableInit<IPlaceholderService, Playe
         _isStationary = movedDistance <= movementThreshold;
 
         if (_printStatStatus)
-            Debug.LogError("IsStationary is: "+IsMoving());
+        {
+            if (TargetableCollider == null)
+                Debug.LogError("Collider is null");
+            else
+                Debug.LogError("Collider is Valid");
+        }
+           // Debug.LogError("IsStationary is: "+IsMoving());
        /* if (movedDistance > movementThreshold)
         {
             if (!GameManager.Instance.PlayerHasMoved)
@@ -223,7 +229,10 @@ public sealed class PlayerController : TargetableInit<IPlaceholderService, Playe
     }
 
     protected override void OnSceneBegin()
-        => InputEnabled = true;
+    {
+        base.OnSceneBegin();
+        InputEnabled = true;
+    }
 
     protected override void OnSceneEnd()
     {
@@ -254,7 +263,7 @@ public sealed class PlayerController : TargetableInit<IPlaceholderService, Playe
 
     private bool _isStationary = true;
 
-    public override bool IsMoving() => _isStationary; 
+    public override bool IsMoving() => !_isStationary; 
 
 
     /* protected override void OnSceneComplete()

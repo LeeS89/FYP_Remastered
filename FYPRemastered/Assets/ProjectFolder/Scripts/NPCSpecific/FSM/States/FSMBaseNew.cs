@@ -116,6 +116,9 @@ public /*partial*/ class FSMBaseNew : IFSMControl
 
         /// Maybe split into 2 separate checks for better clarity
         /// Possibly for !a.isOnNavMesh we could teleport the agent to nearest navmesh point? + Special effects?
+        /// if a not enabled, just reset/ repath
+        /// if not on navmesh, Send notification - "Lost NavMesh"?
+        /// But for now, just repath in both cases
         if (!a.enabled || !a.isOnNavMesh) 
         {
             _hasValidDestination = false;
@@ -129,9 +132,10 @@ public /*partial*/ class FSMBaseNew : IFSMControl
         /// but only increment counter whenever SetDestination fails 
         if (!a.hasPath || a.pathStatus != NavMeshPathStatus.PathComplete)
         {
-            _hasValidDestination = false;
+            AttemptRepath();
+            /*_hasValidDestination = false;
             TryResetAgent();
-            _current?.ValidateCandidateDestinations();
+            _current?.ValidateCandidateDestinations();*/
             return;
         }
 
@@ -192,7 +196,7 @@ public /*partial*/ class FSMBaseNew : IFSMControl
 
     public void OnDestinationResultReceived(in DestinationResultNew result)
     {
-        Debug.LogError("Destination Result Received at source");
+       // Debug.LogError("Destination Result Received at source");
         if (StateHasChanged(result.Id) || result.Reason == ReasonForDestinationCheck.Cancelled) return;
         PathResult pathResult = result.PathResult;
         //bool pathFound = result.PathFound;
@@ -232,23 +236,26 @@ public /*partial*/ class FSMBaseNew : IFSMControl
             DestinationSet();
         }
         else
-        {
+            AttemptRepath();
+    }
+
+    private void AttemptRepath()
+    {
 #if UNITY_EDITOR
-            Debug.LogError("Failed to Set Path - Attempting to Re-path");
+        Debug.LogError("Failed to Set Path - Attempting to Re-path");
 #endif
-            // Add counter to prevent infinite loop, and notify if failed after x attempts
-            if (++_destinationAttemptCounter <= MaxDestinationAttempts)
-            {
-                _hasValidDestination = false;
-                TryResetAgent();
-                _current?.ValidateCandidateDestinations();
-            }
-            else
-            {
-                Debug.LogError("Failed to Set Destination after multiple attempts");
-                _destinationAttemptCounter = 0;
-                Notification?.Invoke(NPCNotification.NoAvailablePath());
-            }
+        // Add counter to prevent infinite loop, and notify if failed after x attempts
+        if (++_destinationAttemptCounter <= MaxDestinationAttempts)
+        {
+            _hasValidDestination = false;
+            TryResetAgent();
+            _current?.ValidateCandidateDestinations();
+        }
+        else
+        {
+            Debug.LogError("Failed to Set Destination after multiple attempts");
+            _destinationAttemptCounter = 0;
+            Notification?.Invoke(NPCNotification.NoAvailablePath());
         }
     }
 

@@ -131,9 +131,13 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
         // Apply Order/ Start order
         if (CurrentComOrder == CombatOrder.FireAtWill)
         {
+            Debug.LogError("Aiming at target - Fring at will");
+
             if (!_animationControl?.IsAnimationLayerActive(AnimationLayer.Aim) ?? true)
                 StartCoroutine(WaitForAnimLayerFadeRoutine(AnimationLayer.Aim, true));
-            if (!_aimingAtTarget) { _aimingAtTarget = true; _animationControl?.IkLookAtTarget(look: true); }
+
+            _animationControl?.SetLookAt(true, _primaryTarget?.TargetableCollider.transform);
+            //if (!_aimingAtTarget) { _aimingAtTarget = true; _animationControl?.IkLookAtTarget(look: true); }
         }
         //
     }
