@@ -37,6 +37,9 @@ public class AgentFsmDeps : IFsmControllerDeps, IPatrolDeps, IChaseDeps, IFlankD
     public IWaypointService _waypointService;
     public IFlankService _flankService;
 
+    private IDistanceService _distanceService;
+    public IDistanceService DistanceService => _distanceService;
+
     public float GetAgentStopDistance(bool useRandomDistance)
         => useRandomDistance ? Random.Range(_minStoppingDistance, _maxStoppingDistance) : 0f;
 
@@ -46,6 +49,8 @@ public class AgentFsmDeps : IFsmControllerDeps, IPatrolDeps, IChaseDeps, IFlankD
     public void SetTarget(ITargetable target) => _target = target;
 
     public void SetObstacleRef(NavMeshObstacle obstacle) { if(_obstacle == null) _obstacle = obstacle; }
+
+    public void SetDistanceService(IDistanceService distanceService) => _distanceService = distanceService;
 
     public NavMeshAgent Agent()
     {
@@ -104,5 +109,4 @@ public class AgentFsmDeps : IFsmControllerDeps, IPatrolDeps, IChaseDeps, IFlankD
 
     public ITargetable Target => _target;
 
-    
 }

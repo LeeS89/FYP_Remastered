@@ -120,9 +120,14 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
 
     public bool IsRotatingToTarget() => _fsmManager?.RotatingToTarget ?? false;
 
-
+    public bool _testComOrder = false;
+    
     public void UpdateCombatOrder(CombatOrder order)
     {
+        if (_testComOrder)
+        {
+            Debug.LogError("CurrentOrder is: "+CurrentComOrder.ToString()+", and new Order is: "+order.ToString());
+        }
         if (order == CurrentComOrder) return;
         CancelCurrentCombatOrder();
         CurrentComOrder = order;
@@ -131,7 +136,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
         // Apply Order/ Start order
         if (CurrentComOrder == CombatOrder.FireAtWill)
         {
-            Debug.LogError("Aiming at target - Fring at will");
+          //  Debug.LogError("Aiming at target - Fring at will");
 
             if (!_animationControl?.IsAnimationLayerActive(AnimationLayer.Aim) ?? true)
                 StartCoroutine(WaitForAnimLayerFadeRoutine(AnimationLayer.Aim, true));
@@ -146,7 +151,11 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
 
     private void CancelCurrentCombatOrder()
     {
-
+        if (CurrentComOrder == CombatOrder.FireAtWill)
+        {
+            _animationControl?.SetLookAt(false);
+          //  Debug.LogError("Stop Aiming at target - Hold fire or None order");
+        }
     }
 
     private void ApplyFOVStatusUpdate(FOVResult result) => CurrentFovState = result;
@@ -399,7 +408,16 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
         _fsmManager.SwitchTo(intentState);
     }
 
-    public void UpdateCurrentFovStatus(FOVResult newStatus) => CurrentFovState = newStatus;
+    public bool _testFovResult = false;
+
+    public void UpdateCurrentFovStatus(FOVResult newStatus)
+    {
+        if (_testFovResult)
+        {
+            Debug.LogError("New FOV Status is: " + newStatus.ToString());
+        }
+        CurrentFovState = newStatus;
+    }
     // Sets Sweep Frequency
     public void UpdateFovAlertPhase(AlertPhase newPhase) => _fovRunner?.SetAlertPhase(newPhase);
 

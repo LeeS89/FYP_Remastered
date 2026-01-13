@@ -1,13 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 
-public class DistanceManagerJob : ITickable
+public class DistanceManagerJob : IDistanceService, ITickable
 {
     private NativeList<int> _subscriberIds;
+    private List<ITargetable> _targets = new(25);
+    //private NativeList<Transform> _subscriberIdszz;
     private NativeList<Vector3> _subscriberPositions;
     private NativeList<Vector3> _subscriberTargetPositions;
     //private NativeList<float> _bufferMultipliers;
@@ -49,18 +52,24 @@ public class DistanceManagerJob : ITickable
 
     public void Tick(float dt)
     {
-        
+        if (!_subscriberPositions.IsCreated || _subscriberPositions.Length == 0) return;
+        if (Time.time >= _nextJobTime)
+        {
+            RunDistanceCheckJob();
+            _nextJobTime = Time.time + _jobInterval;
+        }
     }
 
     // Unused interface function
     public void LateTick(float dt) { }
 
-    public int RegisterSubscriber(Vector3 position, Vector3 targetPosiiton, float bufferMultiplier, Action<float, float> callback)
+    public int RegisterSubscriber(Vector3 position, ITargetable target/*Vector3 targetPosiiton*/, float bufferMultiplier, Action<float, float> callback)
     {
         int subscriberId = _nextSubscriberId++;
         int index = _subscriberPositions.Length;
         _subscriberPositions.Add(position);
-        _subscriberTargetPositions.Add(targetPosiiton);
+        _targets.Add(target);
+       // _subscriberTargetPositions.Add(targetPosiiton);
    
         _initialDistances.Add(0f);
         _currentDistances.Add(0f);
@@ -123,8 +132,15 @@ public class DistanceManagerJob : ITickable
 
     private void RunDistanceCheckJob()
     {
+        //Debug.LogError("Running Distance Check Job");
         SafeRemove();
-         if (_subscriberPositions.Length == 0) return; 
+        if (_subscriberPositions.Length == 0 || _targets.Count == 0) return;
+
+        for (int i = 0; i < _subscriberPositions.Length; i++)
+        {
+            _subscriberTargetPositions[i] = _targets[i].Position();
+        }
+
         var distanceJob = new DistanceCheckJob
         {
             SubscriberPositions = _subscriberPositions.AsDeferredJobArray(),
@@ -137,7 +153,7 @@ public class DistanceManagerJob : ITickable
         jobHandle.Complete();
         // Invoke callbacks
 
-        foreach(var kvp in _subscriberIndexMap)
+        foreach (var kvp in _subscriberIndexMap)
         {
             int subscriberId = kvp.Key;
             int index = kvp.Value;

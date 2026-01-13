@@ -288,10 +288,10 @@ public static class NPCDecisionPolicyNew
                
                 break;
             case NotificationKind.DestinationReached:
-                TryUpdateRotationToTarget(self, true);
+                TryUpdateRotationToTarget(self, true); // Always rotate to target on destination reached
                 break;
             case NotificationKind.DestinationSet:
-                TryUpdateRotationToTarget(self, TargetSeen(self.CurrentFovState));
+                TryUpdateRotationToTarget(self, TargetSeen(self.CurrentFovState)); // Rotate if target is seen while moving
                 break;
             default:
                 break;
@@ -348,9 +348,9 @@ public static class NPCDecisionPolicyNew
             newOrder = CombatOrder.FireAtWill;
         else if (newFOVStatus == FOVResult.TargetSeenAndWithinMeleeRadius)
             newOrder = CombatOrder.MeleeAttack;
-        else newOrder = CombatOrder.FireAtWill;
+        else newOrder = CombatOrder.HoldFire;
 
-        if (newOrder == currentOrder) return CombatOrder.None; // Already executing order, do nothing
+        if (newOrder == currentOrder) return currentOrder;//CombatOrder.None; // Already executing order, do nothing
 
         return newOrder;
     }

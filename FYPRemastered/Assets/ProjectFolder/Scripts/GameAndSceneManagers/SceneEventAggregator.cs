@@ -177,6 +177,7 @@ public class SceneServiceBus : ISceneServiceProvider
     private IPoolService _poolService;
     private IPathService _pathService;
     private IGameManager _gameManager;
+    private IDistanceService _distanceService;
     private ISceneService _sceneService;
 
     //private PathRequestManagerNew _pathService;
@@ -284,6 +285,20 @@ public class SceneServiceBus : ISceneServiceProvider
         return _gameManager != null;
     }
 
+    public bool TryGetDistanceService(out IDistanceService distanceService)
+    {
+        if(_distanceService == null)
+        {
+            DistanceManagerJob dj = new DistanceManagerJob();
+
+            if(dj is ITickable t) _tickables.Add(t);
+            _distanceService = dj;
+        }
+        distanceService = _distanceService;
+
+        return _distanceService != null;
+    }
+
     public bool TryGetSceneService(out ISceneService sceneService)
     {
         sceneService = _sceneService;
@@ -381,7 +396,12 @@ public interface IPlayerRefService
     bool TryGetPlayer(out ITargetable player);
 }
 
-public interface ISceneAIServices
+public interface IUtilityServices
+{
+    bool TryGetDistanceService(out IDistanceService distanceService);
+}
+
+public interface ISceneAIServices : IUtilityServices
 {
     bool TryGetPlayerRefService(out IPlayerRefService playerRefService);
 
@@ -431,6 +451,12 @@ public interface IScenePoolServices
 {
     bool TryGetPoolService(out IPoolService poolService);
    // IPoolService PoolService { get; }
+}
+
+public interface IDistanceService 
+{
+    int RegisterSubscriber(Vector3 position, ITargetable target/*Vector3 targetPosiiton*/, float bufferMultiplier, Action<float, float> callback);
+    void UnregisterSubscriber(int subscriberId);
 }
 
 public interface IAgentAlertService

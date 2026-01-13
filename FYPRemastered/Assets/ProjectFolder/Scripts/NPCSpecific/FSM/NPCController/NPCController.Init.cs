@@ -135,9 +135,13 @@ public partial class NPCController
         }
 
         //IFSMState chaseState = new FSMChaseState(PrimaryTarget, data: this, resolver: _pathFinder, stateContext: _fsmManager);
-        IFSMState chaseState = new FSMChaseState(deps: _fsmDeps, stateContext: _fsmManager, useRandomStopDistance: true);
-        StateId cid = chaseState.GetId();
-        _fsmStates.TryAdd(cid, chaseState);
+        if (_aiServices.TryGetDistanceService(out var service))
+        {
+            _fsmDeps.SetDistanceService(service); // Maybe assume it is used by all states instead of just chase
+            IFSMState chaseState = new FSMChaseState(deps: _fsmDeps, stateContext: _fsmManager, useRandomStopDistance: true);
+            StateId cid = chaseState.GetId();
+            _fsmStates.TryAdd(cid, chaseState);
+        }
 
         //_fsmManager.Notification = Notify;
         _fsmManager.OnAnimationIntent = AnimationIntent;

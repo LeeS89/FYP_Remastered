@@ -122,8 +122,9 @@ public interface IPatrolDeps : IFsmStateDeps, IFsmDeps
 
 public interface IChaseDeps : IFsmStateDeps, ITargetRef, IFsmDeps
 {
+    IDistanceService DistanceService { get; }
     //float MinStoppingDistance { get; }
-  //  float MaxStoppingDistance { get; }
+    //  float MaxStoppingDistance { get; }
 
     // Distance Job Service
 }

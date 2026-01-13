@@ -257,6 +257,7 @@ public class AgentZoneRegistryNew : SceneResources, IAgentAlertService
 
     public bool TryAlertAgentsInZone(ZoneId zone, INotificationListener listener)
     {
-        throw new NotImplementedException();
+        return false;
+        //throw new NotImplementedException();
     }
 }
