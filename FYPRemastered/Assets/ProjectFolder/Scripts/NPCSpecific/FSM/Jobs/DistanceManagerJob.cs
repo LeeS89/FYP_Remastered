@@ -14,12 +14,12 @@ public class DistanceManagerJob : IDistanceService, ITickable
     private NativeList<Vector3> _subscriberPositions;
     private NativeList<Vector3> _subscriberTargetPositions;
     //private NativeList<float> _bufferMultipliers;
-    private NativeList<float> _initialDistances;
+    //private NativeList<float> _initialDistances;
     private NativeList<float> _currentDistances;
-    private NativeList<bool> _hasInitialized;
+  //  private NativeList<bool> _hasInitialized;
 
     private Dictionary<int, int> _subscriberIndexMap = new();
-    private Dictionary<int, Action<float, float>> _subscriberCallbacks = new();
+    private Dictionary<int, Action<float/*, float*/>> _subscriberCallbacks = new();
     private int _nextSubscriberId = 0;
 
     private float _jobInterval = 0.2f;
@@ -33,9 +33,9 @@ public class DistanceManagerJob : IDistanceService, ITickable
         _subscriberPositions = new NativeList<Vector3>(preallocate, Allocator.Persistent);
         _subscriberTargetPositions = new NativeList<Vector3>(preallocate, Allocator.Persistent);
       
-        _initialDistances = new NativeList<float>(preallocate, Allocator.Persistent);
+        //_initialDistances = new NativeList<float>(preallocate, Allocator.Persistent);
         _currentDistances = new NativeList<float>(preallocate, Allocator.Persistent);
-        _hasInitialized = new NativeList<bool>(preallocate, Allocator.Persistent);
+       // _hasInitialized = new NativeList<bool>(preallocate, Allocator.Persistent);
 
     }
 
@@ -45,9 +45,9 @@ public class DistanceManagerJob : IDistanceService, ITickable
         if(_subscriberIds.IsCreated) _subscriberIds.Dispose();
         if (_subscriberTargetPositions.IsCreated) _subscriberTargetPositions.Dispose();
     
-        if(_initialDistances.IsCreated) _initialDistances.Dispose();
+       // if(_initialDistances.IsCreated) _initialDistances.Dispose();
         if(_currentDistances.IsCreated) _currentDistances.Dispose();
-        if (_hasInitialized.IsCreated) _hasInitialized.Dispose();
+      //  if (_hasInitialized.IsCreated) _hasInitialized.Dispose();
     }
 
     public void Tick(float dt)
@@ -63,17 +63,18 @@ public class DistanceManagerJob : IDistanceService, ITickable
     // Unused interface function
     public void LateTick(float dt) { }
 
-    public int RegisterSubscriber(Vector3 position, ITargetable target/*Vector3 targetPosiiton*/, float bufferMultiplier, Action<float, float> callback)
+    public int RegisterSubscriber(Vector3 position, ITargetable target/*Vector3 targetPosiiton*/, /*float bufferMultiplier,*/ Action<float/*, float*/> callback)
     {
         int subscriberId = _nextSubscriberId++;
         int index = _subscriberPositions.Length;
         _subscriberPositions.Add(position);
         _targets.Add(target);
-       // _subscriberTargetPositions.Add(targetPosiiton);
-   
-        _initialDistances.Add(0f);
+        _subscriberTargetPositions.Add(target != null ? target.Position() : default);
+        // _subscriberTargetPositions.Add(targetPosiiton);
+
+        // _initialDistances.Add(0f);
         _currentDistances.Add(0f);
-        _hasInitialized.Add(false);
+       // _hasInitialized.Add(false);
         _subscriberIds.Add(subscriberId);
 
         _subscriberIndexMap[subscriberId] = index;
@@ -81,7 +82,19 @@ public class DistanceManagerJob : IDistanceService, ITickable
         return subscriberId;
     }
 
-    public void UnregisterSubscriber(int subscriberId) => _removeQueue.Enqueue(subscriberId);
+    public bool UnregisterSubscriber(int subscriberId)
+    {
+        if (!_subscriberIndexMap.ContainsKey(subscriberId))
+        {
+            Debug.LogError("Failed to Unregister Subscriber ID: " + subscriberId + " - Not Found");
+            return false;
+        }
+
+        Debug.LogError("Enqueuing Remove for Subscriber ID: " + subscriberId);
+        _removeQueue.Enqueue(subscriberId);
+
+        return true;
+    }
 
 
     private void RemoveAtIndex(int index)
@@ -95,10 +108,12 @@ public class DistanceManagerJob : IDistanceService, ITickable
             _subscriberPositions[index] = _subscriberPositions[lastIndex];
             _subscriberTargetPositions[index] = _subscriberTargetPositions[lastIndex];
       
-            _initialDistances[index] = _initialDistances[lastIndex];
+          //  _initialDistances[index] = _initialDistances[lastIndex];
             _currentDistances[index] = _currentDistances[lastIndex];
-            _hasInitialized[index] = _hasInitialized[lastIndex];
+            //_hasInitialized[index] = _hasInitialized[lastIndex];
             _subscriberIds[index] = movedSubscriberId;
+
+            _targets[index] = _targets[lastIndex];
 
             _subscriberIndexMap[movedSubscriberId] = index;
         }
@@ -106,11 +121,27 @@ public class DistanceManagerJob : IDistanceService, ITickable
         _subscriberPositions.RemoveAt(lastIndex);
         _subscriberTargetPositions.RemoveAt(lastIndex);
       
-        _initialDistances.RemoveAt(lastIndex);
+      //  _initialDistances.RemoveAt(lastIndex);
         _currentDistances.RemoveAt(lastIndex);
-        _hasInitialized.RemoveAt(lastIndex);
+       // _hasInitialized.RemoveAt(lastIndex);
         _subscriberIds.RemoveAt(lastIndex);
+        _targets.RemoveAt(lastIndex);
 
+    }
+
+    private void RefreshTargetPositions()
+    {
+        for (int i = 0; i < _subscriberTargetPositions.Length; i++)
+        {
+            var t = _targets[i];
+
+            if(t == null || t is UnityEngine.Object uo && uo == null)
+            {
+                _removeQueue.Enqueue(_subscriberIds[i]);
+                continue;
+            }
+            _subscriberTargetPositions[i] = t.Position();
+        }
     }
 
     private void SafeRemove()
@@ -134,37 +165,43 @@ public class DistanceManagerJob : IDistanceService, ITickable
     {
         //Debug.LogError("Running Distance Check Job");
         SafeRemove();
-        if (_subscriberPositions.Length == 0 || _targets.Count == 0) return;
+        if (_subscriberPositions.Length == 0) return;
 
-        for (int i = 0; i < _subscriberPositions.Length; i++)
-        {
-            _subscriberTargetPositions[i] = _targets[i].Position();
-        }
+        RefreshTargetPositions();
+        SafeRemove();
+        if (_subscriberPositions.Length == 0) return;
 
         var distanceJob = new DistanceCheckJob
         {
             SubscriberPositions = _subscriberPositions.AsDeferredJobArray(),
             SubscriberTargetPositions = _subscriberTargetPositions.AsDeferredJobArray(),
-            InitialDistances = _initialDistances.AsDeferredJobArray(),
+           // InitialDistances = _initialDistances.AsDeferredJobArray(),
             CurrentDistances = _currentDistances.AsDeferredJobArray(),
-            HasInitialized = _hasInitialized.AsDeferredJobArray()
+           // HasInitialized = _hasInitialized.AsDeferredJobArray()
         };
         JobHandle jobHandle = distanceJob.Schedule(_subscriberPositions.Length, 64);
         jobHandle.Complete();
         // Invoke callbacks
 
-        foreach (var kvp in _subscriberIndexMap)
+        for(int i = 0; i < _subscriberIds.Length; i++)
+        {
+            int id = _subscriberIds[i];
+            if(_subscriberCallbacks.TryGetValue(id, out var cb))
+                cb?.Invoke(_currentDistances[i]);
+        }
+
+       /* foreach (var kvp in _subscriberIndexMap)
         {
             int subscriberId = kvp.Key;
             int index = kvp.Value;
 
             if (_subscriberCallbacks.TryGetValue(subscriberId, out var callback))
             {
-                float initialDistance = _initialDistances[index];
+               // float initialDistance = _initialDistances[index];
                 float currentDistance = _currentDistances[index];
-                callback?.Invoke(initialDistance, currentDistance);
+                callback?.Invoke(*//*initialDistance,*//* currentDistance);
             }
-        }
+        }*/
 
         SafeRemove();
     }
@@ -174,19 +211,19 @@ public class DistanceManagerJob : IDistanceService, ITickable
     {
         [ReadOnly] public NativeArray<Vector3> SubscriberPositions;
         [ReadOnly] public NativeArray<Vector3> SubscriberTargetPositions;
-        [WriteOnly] public NativeArray<float> InitialDistances;
+       // [WriteOnly] public NativeArray<float> InitialDistances;
         [WriteOnly] public NativeArray<float> CurrentDistances;
-        public NativeArray<bool> HasInitialized;
+      //  public NativeArray<bool> HasInitialized;
         public void Execute(int index)
         {
             Vector3 subscriberPos = SubscriberPositions[index];
             Vector3 targetPos = SubscriberTargetPositions[index];
             float distance = Vector3.Distance(subscriberPos, targetPos);
-            if (!HasInitialized[index])
+          /*  if (!HasInitialized[index])
             {
                 InitialDistances[index] = distance;
                 HasInitialized[index] = true;
-            }
+            }*/
             CurrentDistances[index] = distance;
         }
     }

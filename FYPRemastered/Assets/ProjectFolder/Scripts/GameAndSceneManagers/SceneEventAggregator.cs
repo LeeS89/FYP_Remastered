@@ -455,8 +455,8 @@ public interface IScenePoolServices
 
 public interface IDistanceService 
 {
-    int RegisterSubscriber(Vector3 position, ITargetable target/*Vector3 targetPosiiton*/, float bufferMultiplier, Action<float, float> callback);
-    void UnregisterSubscriber(int subscriberId);
+    int RegisterSubscriber(Vector3 position, ITargetable target/*Vector3 targetPosiiton*/, /*float bufferMultiplier,*/ Action<float/*, float*/> callback);
+    bool UnregisterSubscriber(int subscriberId);
 }
 
 public interface IAgentAlertService

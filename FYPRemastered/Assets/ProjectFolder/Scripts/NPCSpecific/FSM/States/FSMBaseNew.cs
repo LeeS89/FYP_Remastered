@@ -330,7 +330,7 @@ public /*partial*/ class FSMBaseNew : IFSMControl
         /*_ownerData.Agent*/_deps.Agent().ResetPath();
         if (CurrentStateId == StateId.Patrol) return;
         ToggleAgent(false);
-        /*_ownerData.Obstacle*/_deps.Agent().enabled = true;
+        /*_ownerData.Obstacle*/_deps.Obstacle().enabled = true;
     }
 
     public void RotateToTarget(bool rotate)

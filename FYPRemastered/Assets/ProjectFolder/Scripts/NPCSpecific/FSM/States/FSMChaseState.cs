@@ -8,8 +8,9 @@ public class FSMChaseState : FSMBaseState
     private float _repathInterval = 0.25f;
     private float _timeSinceLastRepath = 0f;
     private bool _timerRunning = false;
-    private Action<float, float> _distanceCheckCB;
+    private Action<float/*, float*/> _distanceCheckCB;
     private int _distanceCheckSubscriberId = -1;
+    float? _initialDistance = null;
     //  private ITargetable _target;
 
     /* public FSMChaseState(ITargetable target, IAgentData data, IPathResolver resolver, IFSMStateContext stateContext)
@@ -33,6 +34,14 @@ public class FSMChaseState : FSMBaseState
         RetrieveCandidateDestinations();
         //ValidateCandidateDestinations();
     }
+
+    public override void ExitState()
+    {
+        base.ExitState();
+        _timerRunning = false;
+        UnregisterDistanceCheck();
+    }
+    
 
     protected override void RetrieveCandidateDestinations()
     {
@@ -59,6 +68,8 @@ public class FSMChaseState : FSMBaseState
     public override void OnDestinationSet()
     {
         base.OnDestinationSet();
+        //Debug.LogError("Setting Chase Dest");
+        UnregisterDistanceCheck();
         if (!_isInState || TargetIsNull()) return;
 
         _timeSinceLastRepath = _repathInterval;
@@ -70,18 +81,39 @@ public class FSMChaseState : FSMBaseState
     public override void OnDestinationReached()
     {
         base.OnDestinationReached();
+        Debug.LogError("Destination Reached in Chase");
         _timerRunning = false;
-        _distanceCheckSubscriberId = _deps.DistanceService.RegisterSubscriber(
-            _owner.Position(),
-            _deps.Target/*.Position()*/,
-            1.0f,
-            _distanceCheckCB
-        );
+        RegisterDistanceCheck();
         // Start job to see if player/ target has moved far enough away
         // Add job callback
 
         // Also, need coroutine for while we havent reached destination
         // Or maybe instead add Virtual State Tick and use that for while destination not reached
+    }
+
+    private void RegisterDistanceCheck()
+    {
+        _distanceCheckSubscriberId = _deps.DistanceService.RegisterSubscriber(
+           _owner.Position(),
+           _deps.Target/*.Position()*/,
+           // 1.0f,
+           _distanceCheckCB
+       );
+    }
+
+    private void UnregisterDistanceCheck()
+    {
+        if(_distanceCheckSubscriberId >= 0)
+        {
+            if (!_deps.DistanceService.UnregisterSubscriber(_distanceCheckSubscriberId))
+            {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                Debug.LogError("Failed to unregister distance check subscriber with id: " + _distanceCheckSubscriberId);
+#endif
+            }
+            _distanceCheckSubscriberId = -1;
+            _initialDistance = null;
+        }
     }
 
     public override void LateTick(float dt)
@@ -94,6 +126,7 @@ public class FSMChaseState : FSMBaseState
         {
             if(_deps.Target.IsMoving()) // Target is still moving, need to repath
             {
+                Debug.LogError("Chasing Repath because player is moving");
                 _timerRunning = false;
                 RetrieveCandidateDestinations();
             }
@@ -108,14 +141,17 @@ public class FSMChaseState : FSMBaseState
     /// If not, repath + Stop timer
     /// Also, in Late Tick, if destination reached, stop timer
 
-    private void DistanceCheckCallback(float initialDistance, float currentDistance)
+    private void DistanceCheckCallback(/*float initialDistance, */float currentDistance)
     {
         if (!_isInState) return;
         
-        Debug.LogError($"Distance Check Callback: Initial Distance: {initialDistance}, Current Distance: {currentDistance}");
-        if (currentDistance > (2* initialDistance))
+        _initialDistance ??= currentDistance;
+
+       // Debug.LogError($"Distance Check Callback: Initial Distance: {_initialDistance}, Current Distance: {currentDistance}");
+        if (currentDistance > (2* _initialDistance))
         {
-            _deps.DistanceService.UnregisterSubscriber(_distanceCheckSubscriberId);
+            //_deps.DistanceService.UnregisterSubscriber(_distanceCheckSubscriberId);
+            UnregisterDistanceCheck();
             RetrieveCandidateDestinations();
             return;
         }
