@@ -18693,6 +18693,8 @@ MonoBehaviour:
   headWeight: 0.7
   eyesWeight: 0
   clampWeight: 0.5
+  _posSmoothTime: 0.08
+  _fallbackDistance: 2
 --- !u!1001 &269935695
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -118218,7 +118220,9 @@ MonoBehaviour:
   TestWalk: 0
   _requiredSeenStreak: 3
   _requiredNotSeenStreak: 5
+  _testComOrder: 0
   _testStateCheck: 0
+  _testFovResult: 0
   _fsmDeps:
     _agent: {fileID: 1863641518}
     _obstacle: {fileID: 1863641515}
@@ -118230,6 +118234,8 @@ MonoBehaviour:
     _maxStoppingDistance: 12
     _sprintSpeed: 3.6
     _walkSpeed: 0.9
+    _sprintEnterDistance: 15
+    _sprintExitDistance: 12
   _fovParams:
     fovOrigin: {fileID: 1599725691}
     maxFovTargets: 10
@@ -154170,6 +154176,8 @@ MonoBehaviour:
   headWeight: 0.7
   eyesWeight: 0
   clampWeight: 0.5
+  _posSmoothTime: 0.08
+  _fallbackDistance: 2
 --- !u!4 &4706742974172259201
 Transform:
   m_ObjectHideFlags: 0
@@ -156422,7 +156430,9 @@ MonoBehaviour:
   TestWalk: 0
   _requiredSeenStreak: 3
   _requiredNotSeenStreak: 5
+  _testComOrder: 0
   _testStateCheck: 0
+  _testFovResult: 0
   _fsmDeps:
     _agent: {fileID: 5247023209646184639}
     _obstacle: {fileID: 4565709518911953609}
@@ -156434,6 +156444,8 @@ MonoBehaviour:
     _maxStoppingDistance: 12
     _sprintSpeed: 3.6
     _walkSpeed: 0.9
+    _sprintEnterDistance: 15
+    _sprintExitDistance: 12
   _fovParams:
     fovOrigin: {fileID: 6998231476891555256}
     maxFovTargets: 10

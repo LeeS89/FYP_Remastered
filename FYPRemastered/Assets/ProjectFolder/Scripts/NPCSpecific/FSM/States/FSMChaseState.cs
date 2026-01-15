@@ -17,8 +17,8 @@ public class FSMChaseState : FSMBaseState
          : base(data, resolver, stateContext, StateId.Chase) { _target = target; }*/
 
 
-    public FSMChaseState(IChaseDeps deps, IFSMStateContext stateContext, bool useRandomStopDistance = false)
-        : base(deps, stateContext, useRandomStopDistance, StateId.Chase) 
+    public FSMChaseState(IChaseDeps deps, IFSMStateContext stateContext, bool useRandomStopDistance = false, bool usesSpeedBydistance = false)
+        : base(deps, stateContext, useRandomStopDistance, usesSpeedBydistance, StateId.Chase) 
     { 
         _deps = deps;
         _distanceCheckCB = DistanceCheckCallback;
@@ -57,7 +57,7 @@ public class FSMChaseState : FSMBaseState
     }
 
 
-    public override void ValidateCandidateDestinations()
+    protected override void ValidateCandidateDestinations()
     {
         if (!_isInState || OwnerDataNull()) return;
         _pathResolver?.ProcessDestinationCandidates(_id, ReasonForDestinationCheck.ValidatePathForDestination,

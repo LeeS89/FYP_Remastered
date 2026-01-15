@@ -26,6 +26,10 @@ public abstract class FSMBaseState : IFSMState
     private readonly bool _usesRandomStopDistance;
     public bool UsesRandomAgentStopDistance => _usesRandomStopDistance;
 
+    protected readonly bool _usesSpeedByDistance;
+
+    public bool UsesSpeedByDistance => _usesSpeedByDistance;
+
     /*public FSMBaseState(IAgentData data, IPathResolver resolver, IFSMStateContext stateContext, StateId id)
     {
         _ownerData = data;
@@ -34,13 +38,14 @@ public abstract class FSMBaseState : IFSMState
         _id = id;
         _validationCallback = OnPathResultReceived;
     }*/
-    public FSMBaseState(IFsmStateDeps deps, IFSMStateContext stateContext, bool useRandomStopDistance, StateId id)
+    public FSMBaseState(IFsmStateDeps deps, IFSMStateContext stateContext, bool useRandomStopDistance, bool usesSpeedByDistance, StateId id)
     {
         _usesRandomStopDistance = useRandomStopDistance;
         _owner = deps.Owner;
         _path = deps.Path();
         _pathResolver = deps.PathResolver;
         _stateContext = stateContext;
+        _usesSpeedByDistance = usesSpeedByDistance;
         _id = id;
         _validationCallback = OnPathResultReceived;
     }
@@ -49,8 +54,14 @@ public abstract class FSMBaseState : IFSMState
     protected bool IsStationary() => _stateContext?.HasReachedDestination() ?? true;
 
     public virtual void EnterState() { _isInState = true; /*_hasDestination = false;*/ }
-    public abstract void ValidateCandidateDestinations();
-    protected virtual void RetrieveCandidateDestinations() { }
+    protected abstract void ValidateCandidateDestinations();
+    protected abstract void RetrieveCandidateDestinations();
+    public void TryRepath()
+    {
+        if (!_isInState) return;
+        RetrieveCandidateDestinations();
+    }
+
     protected virtual void OnPathResultReceived(in DestinationResultNew result)
     {
         if (!_isInState) return;

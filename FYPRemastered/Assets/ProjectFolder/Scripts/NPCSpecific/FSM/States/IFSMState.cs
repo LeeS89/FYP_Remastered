@@ -10,8 +10,13 @@ public interface IFSMState : ITickable
 
     void OnDestinationSet();
 
-    void ValidateCandidateDestinations();
+    // void ValidateCandidateDestinations();
+
+    void TryRepath();
+
+    //void RetrieveCandidateDestinations();
 
     bool UsesRandomAgentStopDistance { get; }
+    bool UsesSpeedByDistance { get; }
     StateId GetId();
 }

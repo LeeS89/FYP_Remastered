@@ -43,13 +43,8 @@ public /*partial*/ class FSMBaseNew : IFSMControl
     private const int MaxDestinationAttempts = 5;
     private int _destinationAttemptCounter = 0;
 
-    private enum SpeedTier
-    {
-        Idle,
-        Walk,
-        Sprint
-    }
-    private SpeedTier _speedTier = SpeedTier.Idle;
+    
+    private SpeedTier _currentSpeedTier = SpeedTier.Idle;
 
 
     public FSMBaseNew(IFsmControllerDeps deps, IReadOnlyDictionary<StateId, IFSMState> states, Notification fsmNotifications)
@@ -123,7 +118,7 @@ public /*partial*/ class FSMBaseNew : IFSMControl
         {
             _hasValidDestination = false;
             TryResetAgent();
-            _current?.ValidateCandidateDestinations(); // Repath instead
+            _current?.TryRepath(); // Repath instead
             return;
         }
 
@@ -149,7 +144,7 @@ public /*partial*/ class FSMBaseNew : IFSMControl
             DestinationReached();
             return;
         }
-        SetAgentSpeedByDistance(dist);
+        UpdateSpeedtier(dist);
     }
 
     private void DestinationReached()
@@ -249,7 +244,7 @@ public /*partial*/ class FSMBaseNew : IFSMControl
         {
             _hasValidDestination = false;
             TryResetAgent();
-            _current?.ValidateCandidateDestinations();
+            _current?.TryRepath();
         }
         else
         {
@@ -276,20 +271,7 @@ public /*partial*/ class FSMBaseNew : IFSMControl
 
     #region Speed Region
     public bool HasReachedDestination() => _reachedDestination || (_deps?.Agent().isStopped ?? true);//_speedTier == SpeedTier.Idle;
-    private void SetSpeedTier(SpeedTier tier)
-    {
-        if (tier == _speedTier) return;
-        _speedTier = tier;
-        var (speed, lerp) = tier switch
-        {
-            SpeedTier.Idle => (0f, 10f),
-            SpeedTier.Walk => (/*_ownerData*/_deps.WalkSpeed, 2f),
-            SpeedTier.Sprint => (/*_ownerData*/_deps.SprintSpeed, 2f),
-            _ => (0f, 10f)
-        };
-
-        (_targetSpeed, _lerpSpeed) = (speed, lerp);
-    }
+    
 
     private void UpdateAgentSpeed()
     {
@@ -298,39 +280,60 @@ public /*partial*/ class FSMBaseNew : IFSMControl
         float rate = (0.5f > 0f) ? Mathf.Max(0.01f, delta / 0.5f) : float.PositiveInfinity;
         a.speed = Mathf.MoveTowards(a.speed, _targetSpeed, rate * Time.deltaTime);*/
 
-        if (/*_ownerData.Agent*/_deps.Agent() == null) return;
-        float smoothedSpeed = Mathf.Lerp(/*_ownerData.Agent*/_deps.Agent().speed, _targetSpeed, _lerpSpeed * Time.deltaTime);
-        /*_ownerData.Agent*/_deps.Agent().speed = smoothedSpeed;
+        if (_deps.Agent() == null) return;
+        float smoothedSpeed = Mathf.Lerp(_deps.Agent().speed, _targetSpeed, _lerpSpeed * Time.deltaTime);
+        _deps.Agent().speed = smoothedSpeed;
 
-        float _currentSpeed = /*_ownerData.Agent*/_deps.Agent().speed;
+        float _currentSpeed = _deps.Agent().speed;
 
-        if (Mathf.Approximately(/*_ownerData.Agent*/_deps.Agent().speed, _targetSpeed)) /*_ownerData.Agent*/_deps.Agent().speed = _targetSpeed;
+        if (Mathf.Approximately(_deps.Agent().speed, _targetSpeed)) _deps.Agent().speed = _targetSpeed;
     }
 
     
-    private void SetAgentSpeedByDistance(float remainingDistance)
+    private void UpdateSpeedtier(float remainingDistance)
     {
-        if (/*_ownerData.Agent*/_deps.Agent() == null || /*_ownerData.Agent*/_deps.Agent().isStopped) return;
+        if (_deps == null || _deps.Agent() == null || _deps.Agent().isStopped) return;
 
-        if (_usesSpeedByDistance)
-        {
-            //////////////////// FIX HERE //////////////////////////////
-            /*if (remainingDistance > _ownerData.SprintEnterDist) { SetSpeedTier(SpeedTier.Sprint); }
-            else if (remainingDistance < _ownerData.SprintExitDist) { SetSpeedTier(SpeedTier.Walk); }*/
-        }
-        else SetSpeedTier(SpeedTier.Walk);
+        float speed;
+        float lerp;
+        SpeedTier tier;
+        bool useSpeedByDistance = _current?.UsesSpeedByDistance ?? false;
+
+        tier = _deps.TryUpdateAgentTargetSpeed(_currentSpeedTier, useSpeedByDistance, remainingDistance, out speed, out lerp);
+
+        if (tier == _currentSpeedTier) return;
+
+        _currentSpeedTier = tier;
+        (_targetSpeed, _lerpSpeed) = (speed, lerp);
+
     }
+/*
+    private void SetSpeedTier(SpeedTier tier)
+    {
+        if (tier == _currentSpeedTier) return;
+        _currentSpeedTier = tier;
+        var (speed, lerp) = tier switch
+        {
+            SpeedTier.Idle => (0f, 10f),
+            SpeedTier.Walk => (_deps.WalkSpeed, 2f),
+            SpeedTier.Sprint => (_deps.SprintSpeed, 2f),
+            _ => (0f, 10f)
+        };
+
+        (_targetSpeed, _lerpSpeed) = (speed, lerp);
+    }*/
     #endregion
 
 
     private void TryResetAgent()
     {
         _hasValidDestination = false;
-        SetSpeedTier(SpeedTier.Idle);
-        /*_ownerData.Agent*/_deps.Agent().ResetPath();
+        UpdateSpeedtier(0f);
+       // SetSpeedTier(SpeedTier.Idle);
+        _deps.Agent().ResetPath();
         if (CurrentStateId == StateId.Patrol) return;
         ToggleAgent(false);
-        /*_ownerData.Obstacle*/_deps.Obstacle().enabled = true;
+        _deps.Obstacle().enabled = true;
     }
 
     public void RotateToTarget(bool rotate)
@@ -422,5 +425,11 @@ public /*partial*/ class FSMBaseNew : IFSMControl
             OnDone = cb;
         }
     }
+
+
+    /// Brain Component will be allowed to tell the FSM to override the Speedtiers
+    /// For instance an enum like "ForcedIdle", "ForcedWalk", "ForcedSprint", "Normal"
+    /// if Normal, then FSM controls speedtiers as normal
+    
 
 }

@@ -29,6 +29,8 @@ public class AgentFsmDeps : IFsmControllerDeps, IPatrolDeps, IChaseDeps, IFlankD
     [Header("Speed Params")]
     [SerializeField] private float _sprintSpeed;
     [SerializeField] private float _walkSpeed;
+    [SerializeField] private float _sprintEnterDistance;
+    [SerializeField] private float _sprintExitDistance;
 
     // FSM Deps
     public IPathResolver _pathResolver;
@@ -109,4 +111,57 @@ public class AgentFsmDeps : IFsmControllerDeps, IPatrolDeps, IChaseDeps, IFlankD
 
     public ITargetable Target => _target;
 
+    public SpeedTier TryUpdateAgentTargetSpeed(SpeedTier currentTier, bool usesSpeedByDistance, float distanceToDestination, out float newSpeed, out float lerp)
+    {
+   
+        if (distanceToDestination <= 0.25f)
+        {
+            newSpeed = 0f;
+            lerp = 10f;
+            return SpeedTier.Idle;
+        }
+
+        if (!usesSpeedByDistance)
+        {
+            newSpeed = WalkSpeed;
+            lerp = 2f;
+            return SpeedTier.Walk;
+        }
+
+        if(distanceToDestination > _sprintEnterDistance)
+        {
+            newSpeed = _sprintSpeed;
+            lerp = 2f;
+            return SpeedTier.Sprint;
+        }
+        else if (distanceToDestination < _sprintExitDistance)
+        {
+            newSpeed = WalkSpeed;
+            lerp = 2f;
+            return SpeedTier.Walk;
+        }
+        else
+        {
+            if(currentTier == SpeedTier.Idle)
+            {
+                newSpeed = WalkSpeed;
+                lerp = 2f;
+                return SpeedTier.Walk;
+            }
+            newSpeed = _sprintSpeed;
+            lerp = 2f;
+            return currentTier;
+        }
+
+          
+    }
+
+}
+
+
+public enum SpeedTier
+{
+    Idle,
+    Walk,
+    Sprint
 }

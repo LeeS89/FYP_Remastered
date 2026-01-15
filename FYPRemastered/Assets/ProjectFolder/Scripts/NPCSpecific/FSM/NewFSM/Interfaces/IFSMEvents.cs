@@ -104,6 +104,7 @@ public interface IFsmControllerDeps : IFsmDeps, ITargetRef
     float GetAgentStopDistance(bool getRandomDistance);
     float WalkSpeed { get; }
     float SprintSpeed { get; }
+    SpeedTier TryUpdateAgentTargetSpeed(SpeedTier currentTier, bool usesSpeedByDistance, float distanceToDestination, out float newSpeed, out float lerp);
 }
 
 public interface IFsmStateDeps : IFsmDeps
