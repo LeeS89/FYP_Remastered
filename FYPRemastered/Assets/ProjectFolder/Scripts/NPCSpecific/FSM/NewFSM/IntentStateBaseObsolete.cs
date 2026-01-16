@@ -25,7 +25,7 @@ public abstract class IntentStateBaseObsolete : IIntentStateObsolete
     public virtual void Exit(IFSMOwner self) { }/* => self?.FSM?.ExitState(*//*Id*//*);*/
    
 
-    public virtual void Handle(IFSMOwner self, NPCNotification n)
+    public virtual void Handle(IFSMOwner self, NpcNotification n)
     {
         if(n.Kind == NotificationKind.FOVUpdate) self.HandleFOVSweepResult(n.FOVResult, n.TargetWithinshootingAngles);
         else self.LogUnhandled(this, n);

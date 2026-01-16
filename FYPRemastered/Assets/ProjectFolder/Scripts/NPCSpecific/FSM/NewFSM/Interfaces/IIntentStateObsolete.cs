@@ -6,7 +6,7 @@ public interface IIntentStateObsolete
 {
     void Enter(IFSMOwner self);
     void Exit(IFSMOwner self);
-    void Handle(IFSMOwner self, NPCNotification notification);
+    void Handle(IFSMOwner self, NpcNotification notification);
 
     StateId Id { get; }
 

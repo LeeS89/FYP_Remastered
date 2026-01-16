@@ -138,7 +138,7 @@ public partial class NPCController
         if (_aiServices.TryGetDistanceService(out var service))
         {
             _fsmDeps.SetDistanceService(service); // Maybe assume it is used by all states instead of just chase
-            IFSMState chaseState = new FSMChaseState(deps: _fsmDeps, stateContext: _fsmManager, useRandomStopDistance: true, usesSpeedBydistance: true);
+            IFSMState chaseState = new FSMChaseState(deps: _fsmDeps, stateContext: _fsmManager, useRandomStopDistance: true);
             StateId cid = chaseState.GetId();
             _fsmStates.TryAdd(cid, chaseState);
         }
@@ -171,8 +171,9 @@ public partial class NPCController
 
     protected override void OnSceneBegin()
     {
-        _animationControl?.SetIKLookTarget(_primaryTarget?.Transform);
-        _fsmManager?.SwitchTo(StateId.Patrol);
+        //_animationControl?.SetIKLookTarget(_primaryTarget?.Transform);
+       // _fsmManager?.SwitchTo(StateId.Patrol);
+        OnNotify(NpcNotification.SceneBegin());
     }
 
     public override void Unload()

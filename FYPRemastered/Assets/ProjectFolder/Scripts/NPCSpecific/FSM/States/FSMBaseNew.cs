@@ -36,6 +36,8 @@ public /*partial*/ class FSMBaseNew : IFSMControl
     private float _targetSpeed = 0f;
     private bool _usesSpeedByDistance = false;
     public bool RotatingToTarget { get; private set; } = false;
+    public bool TestPrint { get; set; } = false;
+
     private bool _rotationSubscribedToTick = false;
     private bool _reachedDestination = true;
     // End internal members
@@ -45,6 +47,7 @@ public /*partial*/ class FSMBaseNew : IFSMControl
 
     
     private SpeedTier _currentSpeedTier = SpeedTier.Idle;
+    private SpeedOverride _currentSpeedOverride = SpeedOverride.None;
 
 
     public FSMBaseNew(IFsmControllerDeps deps, IReadOnlyDictionary<StateId, IFSMState> states, Notification fsmNotifications)
@@ -101,6 +104,26 @@ public /*partial*/ class FSMBaseNew : IFSMControl
         _current?.LateTick(dt);
     }
 
+    private Vector3[] _corners = new Vector3[64];
+
+    private float GetPathDistance(float cap = float.PositiveInfinity)
+    {
+        int n = _deps.Agent().path.GetCornersNonAlloc(_corners);
+        if (n <= 1) return 0f;
+
+        Vector3 pos = _deps.Agent().nextPosition;
+
+        float sum = Vector3.Distance(pos, _corners[1]);
+        if(sum >= cap) return cap;
+
+        for(int i = 1; i < n -1; i++)
+        {
+            sum += Vector3.Distance(_corners[i], _corners[i + 1]);
+            if (sum >= cap) return cap;
+        }
+        return sum;
+    }
+
 
     public void ClassUpdate(float dt)
     {
@@ -134,8 +157,14 @@ public /*partial*/ class FSMBaseNew : IFSMControl
             return;
         }
 
-        var dist = a.remainingDistance;
-
+        //var dist = a.remainingDistance;
+        var dist = GetPathDistance();
+        var rDist = a.remainingDistance;
+        if (TestPrint)
+        {
+            Debug.LogError($"Path Distance: {dist} | Remaining Distance: {rDist}");
+        }
+        
         if (float.IsNaN(dist)) return;
 
         float stopThreshold = (a.stoppingDistance + 0.25f);
@@ -154,7 +183,7 @@ public /*partial*/ class FSMBaseNew : IFSMControl
         TryResetAgent(); // Resets path and Sets speed == 0f
         //Debug.LogError("Reached Destination");
         _current?.OnDestinationReached();
-        Notification?.Invoke(NPCNotification.DestinationReached());
+        Notification?.Invoke(NpcNotification.DestinationReached());
     }
 
     private void TimerTicks(float dt)
@@ -198,9 +227,9 @@ public /*partial*/ class FSMBaseNew : IFSMControl
         StateId id = result.Id;
 
         if (result.Reason == ReasonForDestinationCheck.ProbePath && pathResult == PathResult.Success)
-        { Notification?.Invoke(NPCNotification.PathToPrimaryAvailable(/*result.Id*/)); return; }
+        { Notification?.Invoke(NpcNotification.PathToPrimaryAvailable(/*result.Id*/)); return; }
 
-        if (/*!result.PathFound*/pathResult == PathResult.Failed) { Notification?.Invoke(NPCNotification.NoAvailablePath(/*CurrentStateId*/)); Debug.LogError("NO Path Found!!"); return; }
+        if (/*!result.PathFound*/pathResult == PathResult.Failed) { Notification?.Invoke(NpcNotification.NoAvailablePath(/*CurrentStateId*/)); Debug.LogError("NO Path Found!!"); return; }
         else if(pathResult == PathResult.Success)
         {
             Vector3 currentDestination = result.Destination;
@@ -250,7 +279,7 @@ public /*partial*/ class FSMBaseNew : IFSMControl
         {
             Debug.LogError("Failed to Set Destination after multiple attempts");
             _destinationAttemptCounter = 0;
-            Notification?.Invoke(NPCNotification.NoAvailablePath());
+            Notification?.Invoke(NpcNotification.NoAvailablePath());
         }
     }
 
@@ -259,7 +288,7 @@ public /*partial*/ class FSMBaseNew : IFSMControl
         _reachedDestination = false;
         _hasValidDestination = true;
         _current?.OnDestinationSet();
-        Notification?.Invoke(NPCNotification.DestinationSet());
+        Notification?.Invoke(NpcNotification.DestinationSet());
     }
 
     protected void ToggleAgent(bool setActive)
@@ -289,7 +318,10 @@ public /*partial*/ class FSMBaseNew : IFSMControl
         if (Mathf.Approximately(_deps.Agent().speed, _targetSpeed)) _deps.Agent().speed = _targetSpeed;
     }
 
-    
+    public void OverrideSpeed(SpeedOverride overrideTier)
+     => _currentSpeedOverride = overrideTier;
+
+
     private void UpdateSpeedtier(float remainingDistance)
     {
         if (_deps == null || _deps.Agent() == null || _deps.Agent().isStopped) return;
@@ -297,9 +329,8 @@ public /*partial*/ class FSMBaseNew : IFSMControl
         float speed;
         float lerp;
         SpeedTier tier;
-        bool useSpeedByDistance = _current?.UsesSpeedByDistance ?? false;
 
-        tier = _deps.TryUpdateAgentTargetSpeed(_currentSpeedTier, useSpeedByDistance, remainingDistance, out speed, out lerp);
+        tier = _deps.TryUpdateAgentTargetSpeed(_currentSpeedTier, _currentSpeedOverride, remainingDistance, out speed, out lerp);
 
         if (tier == _currentSpeedTier) return;
 
@@ -430,6 +461,7 @@ public /*partial*/ class FSMBaseNew : IFSMControl
     /// Brain Component will be allowed to tell the FSM to override the Speedtiers
     /// For instance an enum like "ForcedIdle", "ForcedWalk", "ForcedSprint", "Normal"
     /// if Normal, then FSM controls speedtiers as normal
+    
     
 
 }

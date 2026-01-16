@@ -95,7 +95,7 @@ public class FSMManagerObsolete : FSMBaseObsolete
             Notification?.Invoke(NotifyOwnerNPC.TargetFound(_currentStateId));
             return;
         }*/
-        Notification?.Invoke(NPCNotification.FOVUpdate(/*_currentStateId, */result, withinAttackAngles));
+        Notification?.Invoke(NpcNotification.FOVUpdate(/*_currentStateId, */result, withinAttackAngles));
     }
 
    
@@ -134,9 +134,9 @@ public class FSMManagerObsolete : FSMBaseObsolete
         StateId id = result.Id;
 
         if (result.Reason == ReasonForDestinationCheck.ProbePath && pathFound)
-        { Notification?.Invoke(NPCNotification.PathToPrimaryAvailable(/*result.Id*/)); return; }
+        { Notification?.Invoke(NpcNotification.PathToPrimaryAvailable(/*result.Id*/)); return; }
     
-        if (!result.PathFound) { Notification?.Invoke(NPCNotification.NoAvailablePath(/*_currentStateId*/)); Debug.LogError("NO Path Found!!"); return; }
+        if (!result.PathFound) { Notification?.Invoke(NpcNotification.NoAvailablePath(/*_currentStateId*/)); Debug.LogError("NO Path Found!!"); return; }
         else
         {
             _currentDestination = result.Destination;

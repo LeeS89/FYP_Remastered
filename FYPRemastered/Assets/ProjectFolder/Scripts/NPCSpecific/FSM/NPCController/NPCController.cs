@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -75,7 +76,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
 
 
     // IFSMNotifications - For notifications received by the FSMManager, i.e. No valid destination, target lost, Target within melee/ shot range, etc.
-    public void OnNotify(in NPCNotification n)
+    public void OnNotify(in NpcNotification n)
     {
         if (_fsmManager.IsInStateTransition /*|| n.Id != _fsmManager.CurrentStateId*/) return;
 
@@ -117,6 +118,9 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
 
         OnDeath();
     }
+
+    public void OverrideSpeed(SpeedOverride speedOverride) => _fsmManager?.OverrideSpeed(speedOverride); 
+
 
     public bool IsRotatingToTarget() => _fsmManager?.RotatingToTarget ?? false;
 
@@ -227,8 +231,18 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
 
     protected virtual void OnDamageTaken(float remainingHealth) { }
 
+    public bool _showDistance = false;
+
     protected virtual void Update()
     {
+        if(_fsmManager != null)
+        _fsmManager.TestPrint = _showDistance;
+       /* if (_showDistance)
+        {
+            float distance = Vector3.Distance(transform.position, _primaryTarget.Position());
+            Debug.LogError("Distance to target: " + distance.ToString("F2"));
+        }*/
+
         if (IsDead) return;
         _fsmManager?.Tick(Time.deltaTime);
        // IsStationary = _fsmManager?.IsStationary() ?? true;
@@ -254,7 +268,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
 
 
 
-    public void LogUnhandled(IntentStateBaseObsolete state, in NPCNotification notification)
+    public void LogUnhandled(IntentStateBaseObsolete state, in NpcNotification notification)
     {
         var Kind = notification.Kind;
         Debug.LogError("Notification Kind from unhandled: " + Kind.ToString());
@@ -281,7 +295,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
         if (IsDead) return;
         Debug.LogError("Stable FOVResult: " + result.ToString());
         ApplyFOVStatusUpdate(result);
-        var n = NPCNotification.FOVUpdate(/*_fsmManager.CurrentStateId,*/ CurrentFovState, false);
+        var n = NpcNotification.FOVUpdate(/*_fsmManager.CurrentStateId,*/ CurrentFovState, false);
         OnNotify(n);
     }
 
@@ -291,7 +305,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
         Debug.LogError("FOVResult: Target Seen");
         ApplyFOVStatusUpdate(FOVResult.TargetSeen);
         //  _eManager.AimTowardsTarget(aim: true);
-        var n = NPCNotification.FOVUpdate(/*_fsmManager.CurrentStateId, */CurrentFovState, false);
+        var n = NpcNotification.FOVUpdate(/*_fsmManager.CurrentStateId, */CurrentFovState, false);
         OnNotify(n);
 
         /* if (_fsmManager.CurrentStateId == StateId.Patrol)
@@ -427,7 +441,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
         throw new NotImplementedException();
     }
 
-    
+   
 }
 
-public delegate void Notification(in NPCNotification n);
+public delegate void Notification(in NpcNotification n);

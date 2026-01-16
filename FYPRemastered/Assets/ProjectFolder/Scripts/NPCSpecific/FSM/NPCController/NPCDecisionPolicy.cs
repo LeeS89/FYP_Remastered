@@ -7,7 +7,7 @@ using UnityEngine;
 public static class NPCDecisionPolicy
 {
 
-    public static void ResolveNextState(IFSMOwner self, NPCNotification n, /*StateId currentState*/IntentStateBaseObsolete sb)
+    public static void ResolveNextState(IFSMOwner self, NpcNotification n, /*StateId currentState*/IntentStateBaseObsolete sb)
     {
         NotificationKind kind = n.Kind;
         switch (kind)
@@ -23,7 +23,7 @@ public static class NPCDecisionPolicy
     }
 
 
-    public static bool TryDecide(this INPCBrainContext self, in NPCNotification n, out BrainDecision decision)
+    public static bool TryDecide(this INPCBrainContext self, in NpcNotification n, out BrainDecision decision)
     {
         var state = self.CurrentFsmState;
         decision = default;
@@ -37,7 +37,7 @@ public static class NPCDecisionPolicy
         };
     }
 
-    private static bool DecidePatrol(INPCBrainContext self, in NPCNotification n, out BrainDecision d)
+    private static bool DecidePatrol(INPCBrainContext self, in NpcNotification n, out BrainDecision d)
     {
         d = default;
 
@@ -76,7 +76,7 @@ public static class NPCDecisionPolicy
     private static bool TargetSeen(FOVResult result) => result == FOVResult.TargetSeen || result == FOVResult.TargetSeenAndWithinMeleeRadius
                     || result == FOVResult.TargetSeenAndWithinShootingAngles;
 
-    private static bool DecideChase(INPCBrainContext self, in NPCNotification n, out BrainDecision d)
+    private static bool DecideChase(INPCBrainContext self, in NpcNotification n, out BrainDecision d)
     {
         d = default;
         switch (n.Kind)
@@ -100,7 +100,7 @@ public static class NPCDecisionPolicy
        
     }
 
-    private static bool DecideFlank(INPCBrainContext self, in NPCNotification n, out BrainDecision d)
+    private static bool DecideFlank(INPCBrainContext self, in NpcNotification n, out BrainDecision d)
     {
         d = default;
         return false;
@@ -216,8 +216,15 @@ public enum RotationOrder
 public static class NPCDecisionPolicyNew
 {
 
-    public static void Decide(this INPCBrainContext self, in NPCNotification n)
+    public static void Decide(this INPCBrainContext self, in NpcNotification n)
     {
+        if(n.Kind == NotificationKind.NoCurrentState)
+        {
+            self.OverrideSpeed(SpeedOverride.ForceWalk);
+            self.SwitchState(StateId.Patrol);
+            return;
+        }
+
         // If IsDead => return, unless notification is Death related
         var state = self.CurrentFsmState;
       
@@ -238,7 +245,7 @@ public static class NPCDecisionPolicyNew
         }
     }
 
-    private static void DecidePatrol(INPCBrainContext self, in NPCNotification n)
+    private static void DecidePatrol(INPCBrainContext self, in NpcNotification n)
     {
       
         switch (n.Kind)
@@ -251,6 +258,7 @@ public static class NPCDecisionPolicyNew
                 if (TargetSeen(n.FOVResult))
                 {
                     self.SwitchState(StateId.Chase);
+                    self.OverrideSpeed(SpeedOverride.None);
                     self.TryBroadcastAlert();
                    
                     // eventually => Check current health bracket + Targets Health, and possible nextIntent will be Takecover/ flee
@@ -273,7 +281,7 @@ public static class NPCDecisionPolicyNew
     private static bool TargetSeen(FOVResult result) => result == FOVResult.TargetSeen || result == FOVResult.TargetSeenAndWithinMeleeRadius
                     || result == FOVResult.TargetSeenAndWithinShootingAngles;
 
-    private static void DecideChase(INPCBrainContext self, in NPCNotification n)
+    private static void DecideChase(INPCBrainContext self, in NpcNotification n)
     {
        
         switch (n.Kind)
@@ -304,7 +312,7 @@ public static class NPCDecisionPolicyNew
     }
     
     [Obsolete]
-    private static void DecideRotateToTarget(INPCBrainContext self, in NPCNotification n)
+    private static void DecideRotateToTarget(INPCBrainContext self, in NpcNotification n)
     {
         NotificationKind kind = n.Kind;
         if (kind != NotificationKind.FOVUpdate || kind != NotificationKind.DestinationReached) return;
@@ -333,7 +341,7 @@ public static class NPCDecisionPolicyNew
     }
     
 
-    private static void DecideFlank(INPCBrainContext self, in NPCNotification n)
+    private static void DecideFlank(INPCBrainContext self, in NpcNotification n)
     {
         return;
     }

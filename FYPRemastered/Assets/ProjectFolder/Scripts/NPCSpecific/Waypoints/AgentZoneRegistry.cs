@@ -225,7 +225,7 @@ public class AgentZoneRegistryNew : SceneResources, IAgentAlertService
         {
             if (agent != source)
             {
-                var n = NPCNotification.ZoneAlert();
+                var n = NpcNotification.ZoneAlert();
                 agent.OnNotify(n);
             }
         }

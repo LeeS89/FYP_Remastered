@@ -111,7 +111,7 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, /*INPC
 
 
     // IFSMNotifications - For notifications received by the FSMManager, i.e. No valid destination, target lost, Target within melee/ shot range, etc.
-    public void OnNotify(in NPCNotification n)
+    public void OnNotify(in NpcNotification n)
     {
         if (_fsmManager.IsInStateTransition /*|| n.Id != _fsmManager.CurrentStateId*/) return;
      
@@ -253,7 +253,7 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, /*INPC
         _isInStateTransition = false;*/
     }
 
-    public void LogUnhandled(IntentStateBaseObsolete state, in NPCNotification notification)
+    public void LogUnhandled(IntentStateBaseObsolete state, in NpcNotification notification)
     {
         var Kind = notification.Kind;
         Debug.LogError("Notification Kind from unhandled: "+ Kind.ToString());
@@ -280,7 +280,7 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, /*INPC
         if (OwnerIsDead) return;
         Debug.LogError("Stable FOVResult: "+result.ToString());
         ApplyFOVStatusUpdate(result);
-        var n = NPCNotification.FOVUpdate(/*_fsmManager.CurrentStateId,*/ CurrentFovState, false);
+        var n = NpcNotification.FOVUpdate(/*_fsmManager.CurrentStateId,*/ CurrentFovState, false);
         OnNotify(n);
     }
 
@@ -290,7 +290,7 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, /*INPC
         Debug.LogError("FOVResult: Target Seen");
         ApplyFOVStatusUpdate(FOVResult.TargetSeen);
         //  _eManager.AimTowardsTarget(aim: true);
-        var n = NPCNotification.FOVUpdate(/*_fsmManager.CurrentStateId, */CurrentFovState, false);
+        var n = NpcNotification.FOVUpdate(/*_fsmManager.CurrentStateId, */CurrentFovState, false);
         OnNotify(n);
 
        /* if (_fsmManager.CurrentStateId == StateId.Patrol)
@@ -564,7 +564,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
 
 
     // IFSMNotifications - For notifications received by the FSMManager, i.e. No valid destination, target lost, Target within melee/ shot range, etc.
-    public void OnNotify(in NPCNotification n)
+    public void OnNotify(in NpcNotification n)
     {
         if (_fsmManager.IsInStateTransition /*|| n.Id != _fsmManager.CurrentStateId*/) return;
      
@@ -706,7 +706,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
         _isInStateTransition = false;*/
     }
 
-    public void LogUnhandled(IntentStateBaseObsolete state, in NPCNotification notification)
+    public void LogUnhandled(IntentStateBaseObsolete state, in NpcNotification notification)
     {
         var Kind = notification.Kind;
         Debug.LogError("Notification Kind from unhandled: "+ Kind.ToString());
@@ -733,7 +733,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
      //   if (IsDead) return;
         Debug.LogError("Stable FOVResult: "+result.ToString());
         ApplyFOVStatusUpdate(result);
-        var n = NPCNotification.FOVUpdate(/*_fsmManager.CurrentStateId,*/ CurrentFovState, false);
+        var n = NpcNotification.FOVUpdate(/*_fsmManager.CurrentStateId,*/ CurrentFovState, false);
         OnNotify(n);
     }
 
@@ -743,7 +743,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
         Debug.LogError("FOVResult: Target Seen");
         ApplyFOVStatusUpdate(FOVResult.TargetSeen);
         //  _eManager.AimTowardsTarget(aim: true);
-        var n = NPCNotification.FOVUpdate(/*_fsmManager.CurrentStateId, */CurrentFovState, false);
+        var n = NpcNotification.FOVUpdate(/*_fsmManager.CurrentStateId, */CurrentFovState, false);
         OnNotify(n);
 
        /* if (_fsmManager.CurrentStateId == StateId.Patrol)

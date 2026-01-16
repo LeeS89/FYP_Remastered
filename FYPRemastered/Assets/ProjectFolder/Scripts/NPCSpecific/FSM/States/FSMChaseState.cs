@@ -17,8 +17,8 @@ public class FSMChaseState : FSMBaseState
          : base(data, resolver, stateContext, StateId.Chase) { _target = target; }*/
 
 
-    public FSMChaseState(IChaseDeps deps, IFSMStateContext stateContext, bool useRandomStopDistance = false, bool usesSpeedBydistance = false)
-        : base(deps, stateContext, useRandomStopDistance, usesSpeedBydistance, StateId.Chase) 
+    public FSMChaseState(IChaseDeps deps, IFSMStateContext stateContext, bool useRandomStopDistance = false)
+        : base(deps, stateContext, useRandomStopDistance, StateId.Chase) 
     { 
         _deps = deps;
         _distanceCheckCB = DistanceCheckCallback;

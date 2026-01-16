@@ -17,6 +17,5 @@ public interface IFSMState : ITickable
     //void RetrieveCandidateDestinations();
 
     bool UsesRandomAgentStopDistance { get; }
-    bool UsesSpeedByDistance { get; }
     StateId GetId();
 }

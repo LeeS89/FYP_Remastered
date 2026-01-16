@@ -111,9 +111,58 @@ public class AgentFsmDeps : IFsmControllerDeps, IPatrolDeps, IChaseDeps, IFlankD
 
     public ITargetable Target => _target;
 
-    public SpeedTier TryUpdateAgentTargetSpeed(SpeedTier currentTier, bool usesSpeedByDistance, float distanceToDestination, out float newSpeed, out float lerp)
+    public static bool TryGetEndpoint(string env, out string host, out int port)
     {
-   
+        bool ok;
+        (ok, host, port) = env switch
+        {
+            "dev" => (true, "localhost", 8080),
+            "prod" => (true, "api.myapp.com", 443),
+            _ => (false, default!, 0)
+        };
+
+        return ok;
+    }
+    private SpeedTier OverrideSpeed(SpeedOverride speedOverride, out float newSpeed, out float lerp)
+    {
+        SpeedTier newTier;
+
+        (newTier, newSpeed, lerp) = speedOverride switch
+        {
+            SpeedOverride.ForceWalk => 
+            (
+                SpeedTier.Walk,
+                newSpeed = WalkSpeed,
+                lerp = 2f
+            ),
+            SpeedOverride.ForceSprint => 
+            (
+                SpeedTier.Sprint,
+                newSpeed = _sprintSpeed,
+                lerp = 2f
+            ),
+            SpeedOverride.ForceIdle => 
+            (
+                SpeedTier.Idle,
+                newSpeed = 0f,
+                lerp = 10f
+            ),
+            _ => 
+            (
+                SpeedTier.Walk,
+                newSpeed = WalkSpeed,
+                lerp = 2f
+            )
+
+        };
+        return newTier;
+
+        
+    }
+    
+
+    public SpeedTier TryUpdateAgentTargetSpeed(SpeedTier currentTier, SpeedOverride speedOverride, float distanceToDestination, out float newSpeed, out float lerp)
+    {
         if (distanceToDestination <= 0.25f)
         {
             newSpeed = 0f;
@@ -121,14 +170,19 @@ public class AgentFsmDeps : IFsmControllerDeps, IPatrolDeps, IChaseDeps, IFlankD
             return SpeedTier.Idle;
         }
 
-        if (!usesSpeedByDistance)
-        {
-            newSpeed = WalkSpeed;
-            lerp = 2f;
-            return SpeedTier.Walk;
-        }
+        if (speedOverride != SpeedOverride.None)
+            return OverrideSpeed(speedOverride, out newSpeed, out lerp);
 
-        if(distanceToDestination > _sprintEnterDistance)
+        /*  
+
+          if (!usesSpeedByDistance)
+          {
+              newSpeed = WalkSpeed;
+              lerp = 2f;
+              return SpeedTier.Walk;
+          }*/
+
+        if (distanceToDestination > _sprintEnterDistance)
         {
             newSpeed = _sprintSpeed;
             lerp = 2f;
@@ -164,4 +218,12 @@ public enum SpeedTier
     Idle,
     Walk,
     Sprint
+}
+
+public enum SpeedOverride
+{
+    None,
+    ForceIdle,
+    ForceWalk,
+    ForceSprint
 }

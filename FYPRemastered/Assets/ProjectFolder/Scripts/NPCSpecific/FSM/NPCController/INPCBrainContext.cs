@@ -17,4 +17,5 @@ public interface INPCBrainContext : ITargetable
     void UpdateRotationOrder(RotationOrder newOrder);
     void RotateToTarget(bool rotate);
     void TriggerDeath();
+    void OverrideSpeed(SpeedOverride speedOverride);
 }

@@ -52,7 +52,7 @@ public interface IFSMControlObsolete : /*IFSMState, */ITickable
 
     int? TryGetPatrolZone();
 
-    delegate void OnNotifyOwner(in NPCNotification n);
+    delegate void OnNotifyOwner(in NpcNotification n);
     OnNotifyOwner Notification { get; set; }
     Action<AnimationCue> OnAnimationIntent { get; set; }
 
@@ -63,10 +63,11 @@ public interface IFSMControlObsolete : /*IFSMState, */ITickable
 
 public interface IFSMControl : IFSMStateContext, ITickable
 {
+    bool TestPrint { get; set; }
     StateId CurrentStateId { get; }
     bool IsInStateTransition { get; }
     void SwitchTo(StateId state);
-
+    void OverrideSpeed(SpeedOverride overrideTier);
     bool RotatingToTarget { get; }
     void RotateToTarget(bool rotate);
     //delegate void OnNotifyOwner(in NPCNotification n);
@@ -104,7 +105,7 @@ public interface IFsmControllerDeps : IFsmDeps, ITargetRef
     float GetAgentStopDistance(bool getRandomDistance);
     float WalkSpeed { get; }
     float SprintSpeed { get; }
-    SpeedTier TryUpdateAgentTargetSpeed(SpeedTier currentTier, bool usesSpeedByDistance, float distanceToDestination, out float newSpeed, out float lerp);
+    SpeedTier TryUpdateAgentTargetSpeed(SpeedTier currentTier, SpeedOverride speedOverride, float distanceToDestination, out float newSpeed, out float lerp);
 }
 
 public interface IFsmStateDeps : IFsmDeps
@@ -161,7 +162,7 @@ public interface IAgentData// : ITargetable
 public interface IFSMOwner // Maybe Obsolete
 {
    // void TryBroadcastAlert(); // Remove, NPCControllerBase will handle this
-    void LogUnhandled(IntentStateBaseObsolete state, in NPCNotification notification);
+    void LogUnhandled(IntentStateBaseObsolete state, in NpcNotification notification);
     void SwitchTo(IIntentStateObsolete next);
     void HandleFOVSweepResult(FOVResult result, bool withinAttackAngles);
     IFSMControlObsolete FSM { get; }
@@ -171,7 +172,7 @@ public interface IFSMOwner // Maybe Obsolete
 
 public interface INotificationListener
 {
-    void OnNotify(in NPCNotification n);
+    void OnNotify(in NpcNotification n);
   //  void EnterAlertPhase();
 }
 

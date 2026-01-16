@@ -108,7 +108,7 @@ public readonly struct StateNotification
 
 
 
-public readonly struct NPCNotification
+public readonly struct NpcNotification
 {
     public readonly NotificationKind Kind { get; }
 
@@ -119,28 +119,31 @@ public readonly struct NPCNotification
     public readonly bool TargetWithinshootingAngles;
   
 
-    private NPCNotification(NotificationKind kind, /*StateId stateId, */bool reachedStaleDestination, Vector3 dest, FOVResult result, bool targetInshootAngles)
+    private NpcNotification(NotificationKind kind, /*StateId stateId, */bool reachedStaleDestination, Vector3 dest, FOVResult result, bool targetInshootAngles)
         => (Kind,/* Id,*/ HasReachedStaleDestination, Destination, FOVResult, TargetWithinshootingAngles) = (kind, /*stateId,*/ reachedStaleDestination, dest, result, targetInshootAngles);
 
-    public static NPCNotification DestinationReached(/*StateId id,*/ /*bool reachedStaleDestination*/)
+    public static NpcNotification SceneBegin()
+        => new(NotificationKind.NoCurrentState, false, Vector3.zero, FOVResult.None, false);
+
+    public static NpcNotification DestinationReached(/*StateId id,*/ /*bool reachedStaleDestination*/)
         => new(NotificationKind.DestinationReached, /*id,*/ false, Vector3.zero, FOVResult.None, false);
 
-    public static NPCNotification DestinationSet()
+    public static NpcNotification DestinationSet()
         => new(NotificationKind.DestinationSet, false, Vector3.zero, FOVResult.None, false);
 
-    public static NPCNotification ZoneAlert(/*StateId id*/)
+    public static NpcNotification ZoneAlert(/*StateId id*/)
         => new(NotificationKind.ZoneAlert, /*id,*/ false, Vector3.zero, FOVResult.None, false);
 
    /* public static OwnerNPCNotification TargetMoved(StateId id)
         => new(NotificationKind.TargetMoved, id, false, Vector3.zero, null, FOVResult.None, false);*/
 
-    public static NPCNotification TargetLeftArea(/*StateId id,*/ Vector3 dest)
+    public static NpcNotification TargetLeftArea(/*StateId id,*/ Vector3 dest)
         => new(NotificationKind.TargetLeftArea, /*id,*/ false, dest, FOVResult.None, false);
 
-    public static NPCNotification PathBlocked(/*StateId id*/)
+    public static NpcNotification PathBlocked(/*StateId id*/)
         => new(NotificationKind.PathBlocked, /*id, */false, Vector3.zero, FOVResult.None, false);
 
-    public static NPCNotification FOVUpdate(/*StateId id,*/ FOVResult result, bool targetInShootingAngles)
+    public static NpcNotification FOVUpdate(/*StateId id,*/ FOVResult result, bool targetInShootingAngles)
         => new(NotificationKind.FOVUpdate, /*id,*/ targetInShootingAngles, Vector3.zero, result, targetInShootingAngles);
 
  /*   public static OwnerNPCNotification TargetFound(StateId id)
@@ -152,13 +155,13 @@ public readonly struct NPCNotification
     public static NotifyOwnerNPC TargetLOSConfirmed(StateId id)
         => new(NotificationKind.TargetLOSConfirmed, id, false, Vector3.zero, null);*/
 
-    public static NPCNotification NoAvailablePath(/*StateId id*/)
+    public static NpcNotification NoAvailablePath(/*StateId id*/)
         => new(NotificationKind.NoAvailablePath, /*id, */false, Vector3.zero, FOVResult.None, false);
 
-    public static NPCNotification CoverExposed(/*StateId id*/)
+    public static NpcNotification CoverExposed(/*StateId id*/)
         => new(NotificationKind.CoverExposed, /*id, */false, Vector3.zero, FOVResult.None, false);
 
-    public static NPCNotification PathToPrimaryAvailable(/*StateId id*/)
+    public static NpcNotification PathToPrimaryAvailable(/*StateId id*/)
         => new(NotificationKind.PathToPrimaryAvailable, /*id, */false, Vector3.zero, FOVResult.None, false);
 
 }

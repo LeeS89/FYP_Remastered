@@ -14,8 +14,8 @@ public sealed class FSMPatrolState : FSMBaseState
         _waypointService = waypointService;
         _candidateDestinations.EnsureCapacity(10);
     }*/
-    public FSMPatrolState(IPatrolDeps deps, IFSMStateContext stateContext, bool useRandomStopDistance = false, bool usesSpeedBydistance = false) 
-        : base(deps, stateContext, useRandomStopDistance, usesSpeedBydistance, StateId.Patrol)
+    public FSMPatrolState(IPatrolDeps deps, IFSMStateContext stateContext, bool useRandomStopDistance = false) 
+        : base(deps, stateContext, useRandomStopDistance, StateId.Patrol)
     {
         _patrolDeps = deps;
         _waypointService = _patrolDeps.WaypointService;

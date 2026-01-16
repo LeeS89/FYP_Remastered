@@ -3,7 +3,8 @@ using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(Animator))]
-public class NPCAnimComponent : ComponentEvents, INpcAnimationControl
+[Obsolete("", true)]
+public class NPCAnimComponentObsolete : ComponentEvents//, INpcAnimationControl
 {
     private EnemyEventManager _em;
     private Animator _anim;

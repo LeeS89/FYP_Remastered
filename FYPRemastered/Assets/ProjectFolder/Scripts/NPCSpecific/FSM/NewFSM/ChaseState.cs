@@ -23,7 +23,7 @@ public sealed class ChaseState : IntentStateBaseObsolete
         // Public void CancelCurrent(token);
     }*/
 
-    public override void Handle(IFSMOwner self, NPCNotification n)
+    public override void Handle(IFSMOwner self, NpcNotification n)
     {
         switch (n.Kind)
         {
