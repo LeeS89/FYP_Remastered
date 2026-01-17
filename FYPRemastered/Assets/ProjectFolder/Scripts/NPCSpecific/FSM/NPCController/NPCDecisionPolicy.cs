@@ -306,6 +306,7 @@ public static class NPCDecisionPolicyNew
         }
     }
 
+    /// Update function to implement new enum RotationOverride
     private static void TryUpdateRotationToTarget(INPCBrainContext self, bool shouldRotate)
     {
         if (shouldRotate != self.IsRotatingToTarget()) self.RotateToTarget(shouldRotate);

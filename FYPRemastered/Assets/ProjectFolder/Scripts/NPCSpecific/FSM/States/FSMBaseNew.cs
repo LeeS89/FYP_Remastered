@@ -8,15 +8,11 @@ public /*partial*/ class FSMBaseNew : IFSMControl
 {
     // Injected Dependancies
     private IReadOnlyDictionary<StateId, IFSMState> _states;
-   // private IAgentData _ownerData;
     private IFsmControllerDeps _deps;
-   // private IPathResolver _pathFinder;
-  //  private IFieldOfViewRunner _fovHandler;
     // End Injected Dependancies
     public Notification Notification { get; set; }
     // Used by owning Monobehaviour via interface
     public StateId CurrentStateId => _current?.GetId() ?? StateId.None;
-    //public IFSMControlNew.OnNotifyOwner Notification { get; set; }
     // End used by owning Monobehaviour
     
     // Actions Invoked from individual states
@@ -34,7 +30,7 @@ public /*partial*/ class FSMBaseNew : IFSMControl
     private bool _hasValidDestination = false;
     private float _lerpSpeed = 0f;
     private float _targetSpeed = 0f;
-    private bool _usesSpeedByDistance = false;
+
     public bool RotatingToTarget { get; private set; } = false;
     public bool TestPrint { get; set; } = false;
 
@@ -48,6 +44,7 @@ public /*partial*/ class FSMBaseNew : IFSMControl
     
     private SpeedTier _currentSpeedTier = SpeedTier.Idle;
     private SpeedOverride _currentSpeedOverride = SpeedOverride.None;
+    private RotationOverride _currentRotationOverride = RotationOverride.None;
 
 
     public FSMBaseNew(IFsmControllerDeps deps, IReadOnlyDictionary<StateId, IFSMState> states, Notification fsmNotifications)
@@ -99,32 +96,23 @@ public /*partial*/ class FSMBaseNew : IFSMControl
     public void Tick(float dt) => OnTick?.Invoke(dt);
     public void LateTick(float dt)
     {
-        OnLateTick?.Invoke(dt);
+       // OnLateTick?.Invoke(dt);
+        UpdateRotation();
         UpdateAgentSpeed();
         _current?.LateTick(dt);
     }
 
-    private Vector3[] _corners = new Vector3[64];
-
-    private float GetPathDistance(float cap = float.PositiveInfinity)
+    private void UpdateRotation()
     {
-        int n = _deps.Agent().path.GetCornersNonAlloc(_corners);
-        if (n <= 1) return 0f;
+        if (_currentRotationOverride == RotationOverride.None
+            || NullOwnerOrTarget()) return;
 
-        Vector3 pos = _deps.Agent().nextPosition;
-
-        float sum = Vector3.Distance(pos, _corners[1]);
-        if(sum >= cap) return cap;
-
-        for(int i = 1; i < n -1; i++)
-        {
-            sum += Vector3.Distance(_corners[i], _corners[i + 1]);
-            if (sum >= cap) return cap;
-        }
-        return sum;
+        _deps.Owner.RotateTowards(_deps.Target);
     }
 
+    private Vector3[] _corners = new Vector3[64];
 
+  
     public void ClassUpdate(float dt)
     {
         if (!_hasValidDestination || _deps == null || _deps.Agent() == null) return;
@@ -158,7 +146,7 @@ public /*partial*/ class FSMBaseNew : IFSMControl
         }
 
         //var dist = a.remainingDistance;
-        var dist = GetPathDistance();
+        var dist = a.GetPathDistance(_corners);
         var rDist = a.remainingDistance;
         if (TestPrint)
         {
@@ -377,6 +365,14 @@ public /*partial*/ class FSMBaseNew : IFSMControl
         if (RotatingToTarget && !_rotationSubscribedToTick) { OnLateTick += RotateTowardsTarget; _rotationSubscribedToTick = true; }
         else if (!RotatingToTarget && _rotationSubscribedToTick) { OnLateTick -= RotateTowardsTarget; _rotationSubscribedToTick = false; }
 
+    }
+
+    public void OverrideRotation(RotationOverride rotOverride)
+    {
+        if (_currentRotationOverride == rotOverride) return;
+        _deps.Agent().updateRotation = rotOverride == RotationOverride.None;
+
+        _currentRotationOverride = rotOverride;
     }
 
     private bool NullOwnerOrTarget() => _deps.Target == null || _deps.Target.Transform == null || _deps.Owner == null

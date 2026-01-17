@@ -70,8 +70,9 @@ public interface IFSMControl : IFSMStateContext, ITickable
     void OverrideSpeed(SpeedOverride overrideTier);
     bool RotatingToTarget { get; }
     void RotateToTarget(bool rotate);
+    void OverrideRotation(RotationOverride rotOverride);
     //delegate void OnNotifyOwner(in NPCNotification n);
-   // OnNotifyOwner Notification { get; set; }
+    // OnNotifyOwner Notification { get; set; }
     Notification Notification { get; set; }
 }
 

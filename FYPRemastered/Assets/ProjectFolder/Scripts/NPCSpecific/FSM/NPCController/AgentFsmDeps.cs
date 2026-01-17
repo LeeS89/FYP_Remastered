@@ -227,3 +227,9 @@ public enum SpeedOverride
     ForceWalk,
     ForceSprint
 }
+
+public enum RotationOverride
+{
+    None,
+    ForceLookAtTarget
+}
