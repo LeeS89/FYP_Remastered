@@ -14,6 +14,7 @@ public interface IFSMState : ITickable
 
     void TryRepath();
 
+    bool NeedsNewPath();
     //void RetrieveCandidateDestinations();
 
     bool UsesRandomAgentStopDistance { get; }

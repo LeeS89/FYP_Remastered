@@ -91,6 +91,12 @@ public class FSMChaseState : FSMBaseState
         // Or maybe instead add Virtual State Tick and use that for while destination not reached
     }
 
+    public override bool NeedsNewPath()
+    {
+        if (!_isInState) return false;
+        return !_isAtDestination && !TargetIsNull() && _deps.Target.IsMoving();
+    }
+
     private void RegisterDistanceCheck()
     {
         _distanceCheckSubscriberId = _deps.DistanceService.RegisterSubscriber(
@@ -118,7 +124,7 @@ public class FSMChaseState : FSMBaseState
 
     public override void LateTick(float dt)
     {
-    
+        return;
         if (!_isInState || !_timerRunning || _isAtDestination) return;
         _timeSinceLastRepath -= dt;
 

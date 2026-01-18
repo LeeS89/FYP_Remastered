@@ -108,7 +108,8 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
     {
         UpdateCombatOrder(CombatOrder.None);
         UpdateCurrentFovStatus(FOVResult.None);
-        RotateToTarget(rotate: false);
+        OverrideRotation(RotationOverride.None);
+        // RotateToTarget(rotate: false);
     }
 
     public void TriggerDeath()
@@ -119,7 +120,8 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
         OnDeath();
     }
 
-    public void OverrideSpeed(SpeedOverride speedOverride) => _fsmManager?.OverrideSpeed(speedOverride); 
+    public void OverrideSpeed(SpeedOverride speedOverride) => _fsmManager?.OverrideSpeed(speedOverride);
+    public void OverrideRotation(RotationOverride rotOverride) => _fsmManager?.OverrideRotation(rotOverride);
 
 
     public bool IsRotatingToTarget() => _fsmManager?.RotatingToTarget ?? false;
@@ -166,7 +168,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
 
     public void AnimationIntent(AnimationCue cue) => _animationControl?.PlayClip(cue);
 
-    public void RotateToTarget(bool rotate) => _fsmManager?.RotateToTarget(rotate);
+   // public void RotateToTarget(bool rotate) => _fsmManager?.RotateToTarget(rotate);
    
 
     // End IFSMNotificationss
@@ -441,7 +443,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
         throw new NotImplementedException();
     }
 
-   
+    
 }
 
 public delegate void Notification(in NpcNotification n);

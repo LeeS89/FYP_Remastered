@@ -30,6 +30,7 @@ public /*partial*/ class FSMBaseNew : IFSMControl
     private bool _hasValidDestination = false;
     private float _lerpSpeed = 0f;
     private float _targetSpeed = 0f;
+    private float _pathCheckTimer;
 
     public bool RotatingToTarget { get; private set; } = false;
     public bool TestPrint { get; set; } = false;
@@ -52,9 +53,9 @@ public /*partial*/ class FSMBaseNew : IFSMControl
         _deps = deps;
         Notification = fsmNotifications;
         _states = states;
-
-        OnTick += TimerTicks;
-        OnTick += ClassUpdate;
+        _pathCheckTimer = _deps.PathStatusInterval;
+        //OnTick += TimerTicks;
+        //OnTick += EvaluatePath;
        // OnLateTick += RotateTowardsTarget;
     }
 
@@ -93,7 +94,19 @@ public /*partial*/ class FSMBaseNew : IFSMControl
 
     #region Tick Region
 
-    public void Tick(float dt) => OnTick?.Invoke(dt);
+    public void Tick(float dt)
+    {
+        //OnTick?.Invoke(dt);
+        TimerTicks(dt);
+        if (!_hasValidDestination) return;
+        _pathCheckTimer -= dt;
+
+        if (_pathCheckTimer <= 0f)
+        {
+            _pathCheckTimer = _deps.PathStatusInterval;
+            EvaluatePath(dt);
+        }
+    }
     public void LateTick(float dt)
     {
        // OnLateTick?.Invoke(dt);
@@ -113,12 +126,16 @@ public /*partial*/ class FSMBaseNew : IFSMControl
     private Vector3[] _corners = new Vector3[64];
 
   
-    public void ClassUpdate(float dt)
+    public void EvaluatePath(float dt)
     {
         if (!_hasValidDestination || _deps == null || _deps.Agent() == null) return;
         NavMeshAgent a = _deps.Agent();
 
         if (a.pathPending) return;
+        if (TestPrint)
+        {
+            Debug.LogError("Running Path Evaluation");
+        }
 
         /// Maybe split into 2 separate checks for better clarity
         /// Possibly for !a.isOnNavMesh we could teleport the agent to nearest navmesh point? + Special effects?
@@ -139,18 +156,23 @@ public /*partial*/ class FSMBaseNew : IFSMControl
         if (!a.hasPath || a.pathStatus != NavMeshPathStatus.PathComplete)
         {
             AttemptRepath();
-            /*_hasValidDestination = false;
-            TryResetAgent();
-            _current?.ValidateCandidateDestinations();*/
+            return;
+        }
+
+        // Check if current state needs a new path ( target destination moved, etc)
+        if (_current?.NeedsNewPath() ?? false)
+        {
+            _hasValidDestination = false;
+            _current?.TryRepath();
             return;
         }
 
         //var dist = a.remainingDistance;
-        var dist = a.GetPathDistance(_corners);
+        var dist = a.GetPathDistance(CurrentStateId, _corners);
         var rDist = a.remainingDistance;
         if (TestPrint)
         {
-            Debug.LogError($"Path Distance: {dist} | Remaining Distance: {rDist}");
+            //Debug.LogError($"Path Distance: {dist} | Remaining Distance: {rDist}");
         }
         
         if (float.IsNaN(dist)) return;
@@ -176,13 +198,7 @@ public /*partial*/ class FSMBaseNew : IFSMControl
 
     private void TimerTicks(float dt)
     {
-       /* if (_ownerData is NPCControllerObsolete c) // Delete later
-        {
-            if (c.TestSprint)
-                (_lerpSpeed, _targetSpeed) = (_ownerData.SprintSpeed, 2f);
-            else if (c.TestWalk)
-                (_lerpSpeed, _targetSpeed) = (_ownerData.WalkSpeed, 2f);
-        }*/
+        if (_timer == null || _timer.Count == 0) return;
 
         for (int i = 0; i < _timer.Count; i++)
         {
@@ -273,8 +289,10 @@ public /*partial*/ class FSMBaseNew : IFSMControl
 
     private void DestinationSet()
     {
+        _pathCheckTimer = _deps.PathStatusInterval;
         _reachedDestination = false;
         _hasValidDestination = true;
+        //EvaluatePath(0f);
         _current?.OnDestinationSet();
         Notification?.Invoke(NpcNotification.DestinationSet());
     }
@@ -326,21 +344,7 @@ public /*partial*/ class FSMBaseNew : IFSMControl
         (_targetSpeed, _lerpSpeed) = (speed, lerp);
 
     }
-/*
-    private void SetSpeedTier(SpeedTier tier)
-    {
-        if (tier == _currentSpeedTier) return;
-        _currentSpeedTier = tier;
-        var (speed, lerp) = tier switch
-        {
-            SpeedTier.Idle => (0f, 10f),
-            SpeedTier.Walk => (_deps.WalkSpeed, 2f),
-            SpeedTier.Sprint => (_deps.SprintSpeed, 2f),
-            _ => (0f, 10f)
-        };
 
-        (_targetSpeed, _lerpSpeed) = (speed, lerp);
-    }*/
     #endregion
 
 
@@ -355,7 +359,7 @@ public /*partial*/ class FSMBaseNew : IFSMControl
         _deps.Obstacle().enabled = true;
     }
 
-    public void RotateToTarget(bool rotate)
+   /* public void RotateToTarget(bool rotate)
     {
         if (RotatingToTarget == rotate || NullOwnerOrTarget()) return;
 
@@ -365,35 +369,36 @@ public /*partial*/ class FSMBaseNew : IFSMControl
         if (RotatingToTarget && !_rotationSubscribedToTick) { OnLateTick += RotateTowardsTarget; _rotationSubscribedToTick = true; }
         else if (!RotatingToTarget && _rotationSubscribedToTick) { OnLateTick -= RotateTowardsTarget; _rotationSubscribedToTick = false; }
 
-    }
+    }*/
 
     public void OverrideRotation(RotationOverride rotOverride)
     {
         if (_currentRotationOverride == rotOverride) return;
         _deps.Agent().updateRotation = rotOverride == RotationOverride.None;
 
+        if(TestPrint) Debug.LogError($"Setting Rotation Override to {rotOverride}");
         _currentRotationOverride = rotOverride;
     }
 
     private bool NullOwnerOrTarget() => _deps.Target == null || _deps.Target.Transform == null || _deps.Owner == null
             || _deps.Owner.Transform == null || _deps.Agent() == null;
 
-    private void RotateTowardsTarget(float _/*IAgentData controller, *//*Transform target,*//* bool rotate*/)
+  /*  private void RotateTowardsTarget(float _*//*IAgentData controller, *//*Transform target,*//* bool rotate*//*)
     {
         if (_deps.Target == null || _deps.Target.Transform == null || _deps.Owner == null
             || _deps.Owner.Transform == null || _deps.Agent() == null) return;
 
       //  Debug.LogError("Rotating Towards Target");
-        /* if (controller == null || target == null ||
-             controller.Agent == null || controller.Transform == null) return;*/
+        *//* if (controller == null || target == null ||
+             controller.Agent == null || controller.Transform == null) return;*//*
         //NavMeshAgent agent = _deps.Agent();
 
-      /*  if (!_rotateToTarget)
+      *//*  if (!_rotateToTarget)
         {
             if (!agent.updateRotation) agent.updateRotation = true;
             return;
         }
-        if (agent.updateRotation) agent.updateRotation = false;*/
+        if (agent.updateRotation) agent.updateRotation = false;*//*
       
 
         Transform t = _deps.Owner.Transform;//controller.Transform;
@@ -428,7 +433,7 @@ public /*partial*/ class FSMBaseNew : IFSMControl
 
     }
 
-    
+    */
 
 
     // Used when the Agent is currently carving

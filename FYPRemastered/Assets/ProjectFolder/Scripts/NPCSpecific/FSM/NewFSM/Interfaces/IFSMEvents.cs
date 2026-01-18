@@ -69,7 +69,7 @@ public interface IFSMControl : IFSMStateContext, ITickable
     void SwitchTo(StateId state);
     void OverrideSpeed(SpeedOverride overrideTier);
     bool RotatingToTarget { get; }
-    void RotateToTarget(bool rotate);
+   // void RotateToTarget(bool rotate);
     void OverrideRotation(RotationOverride rotOverride);
     //delegate void OnNotifyOwner(in NPCNotification n);
     // OnNotifyOwner Notification { get; set; }
@@ -106,6 +106,7 @@ public interface IFsmControllerDeps : IFsmDeps, ITargetRef
     float GetAgentStopDistance(bool getRandomDistance);
     float WalkSpeed { get; }
     float SprintSpeed { get; }
+    float PathStatusInterval { get; }
     SpeedTier TryUpdateAgentTargetSpeed(SpeedTier currentTier, SpeedOverride speedOverride, float distanceToDestination, out float newSpeed, out float lerp);
 }
 

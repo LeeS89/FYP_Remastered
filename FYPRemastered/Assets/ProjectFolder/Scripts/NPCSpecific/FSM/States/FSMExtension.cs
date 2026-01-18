@@ -3,10 +3,13 @@ using UnityEngine.AI;
 
 public static class FSMExtension
 {
-    public static float GetPathDistance(this NavMeshAgent agent, Vector3[] cornerBuf, float cap = float.PositiveInfinity)
+    public static float GetPathDistance(this NavMeshAgent agent, StateId currentstate, Vector3[] cornerBuf, float cap = float.PositiveInfinity)
     {
         if (!agent || !agent.isOnNavMesh || agent.pathPending || !agent.hasPath)
             return float.PositiveInfinity;
+
+        if (currentstate == StateId.Patrol)
+            return agent.remainingDistance;
 
         int n = agent.path.GetCornersNonAlloc(cornerBuf);
         if (n <= 1) return 0f;

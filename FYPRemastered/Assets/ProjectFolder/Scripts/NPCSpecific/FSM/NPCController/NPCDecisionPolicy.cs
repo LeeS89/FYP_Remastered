@@ -309,10 +309,12 @@ public static class NPCDecisionPolicyNew
     /// Update function to implement new enum RotationOverride
     private static void TryUpdateRotationToTarget(INPCBrainContext self, bool shouldRotate)
     {
-        if (shouldRotate != self.IsRotatingToTarget()) self.RotateToTarget(shouldRotate);
+        RotationOverride rotationOverride = shouldRotate ? RotationOverride.ForceLookAtTarget : RotationOverride.None;
+        self.OverrideRotation(rotationOverride);
+        //if (shouldRotate != self.IsRotatingToTarget()) self.RotateToTarget(shouldRotate);
     }
     
-    [Obsolete]
+  /*  [Obsolete]
     private static void DecideRotateToTarget(INPCBrainContext self, in NpcNotification n)
     {
         NotificationKind kind = n.Kind;
@@ -339,7 +341,7 @@ public static class NPCDecisionPolicyNew
                 if (shouldRotate != self.IsRotatingToTarget()) self.RotateToTarget(shouldRotate);
             }
         }
-    }
+    }*/
     
 
     private static void DecideFlank(INPCBrainContext self, in NpcNotification n)

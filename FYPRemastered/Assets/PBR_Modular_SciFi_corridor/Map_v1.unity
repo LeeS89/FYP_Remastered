@@ -118221,11 +118221,13 @@ MonoBehaviour:
   _requiredSeenStreak: 3
   _requiredNotSeenStreak: 5
   _testComOrder: 0
+  _showDistance: 0
   _testStateCheck: 0
   _testFovResult: 0
   _fsmDeps:
     _agent: {fileID: 1863641518}
     _obstacle: {fileID: 1863641515}
+    _pathStatusInterval: 0.25
     _maxTimeAtWaypoint: 7
     _minTimeAtWaypoint: 0.5
     _maxFlankSteps: 12
@@ -156431,11 +156433,13 @@ MonoBehaviour:
   _requiredSeenStreak: 3
   _requiredNotSeenStreak: 5
   _testComOrder: 0
+  _showDistance: 0
   _testStateCheck: 0
   _testFovResult: 0
   _fsmDeps:
     _agent: {fileID: 5247023209646184639}
     _obstacle: {fileID: 4565709518911953609}
+    _pathStatusInterval: 0.25
     _maxTimeAtWaypoint: 7
     _minTimeAtWaypoint: 0.5
     _maxFlankSteps: 12

@@ -46,6 +46,9 @@ public abstract class FSMBaseState : IFSMState
         _validationCallback = OnPathResultReceived;
     }
 
+
+    public virtual bool NeedsNewPath() => false;
+    
     protected bool OwnerDataNull() => _owner == null || _path == null;
     protected bool IsStationary() => _stateContext?.HasReachedDestination() ?? true;
 
@@ -93,5 +96,4 @@ public abstract class FSMBaseState : IFSMState
     }
 
     
-   
 }

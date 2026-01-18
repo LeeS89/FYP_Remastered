@@ -8,6 +8,7 @@ public class AgentFsmDeps : IFsmControllerDeps, IPatrolDeps, IChaseDeps, IFlankD
     [SerializeField] private NavMeshAgent _agent;
     [SerializeField] private NavMeshObstacle _obstacle;
     private NavMeshPath _path;
+    [SerializeField] private float _pathStatusInterval;
 
     [Header("Patrol State Params")]
     [Range(0.5f, 15f)]
@@ -110,6 +111,8 @@ public class AgentFsmDeps : IFsmControllerDeps, IPatrolDeps, IChaseDeps, IFlankD
   //  public float MaxStoppingDistance => _maxStoppingDistance;
 
     public ITargetable Target => _target;
+
+    public float PathStatusInterval => _pathStatusInterval;
 
     public static bool TryGetEndpoint(string env, out string host, out int port)
     {
