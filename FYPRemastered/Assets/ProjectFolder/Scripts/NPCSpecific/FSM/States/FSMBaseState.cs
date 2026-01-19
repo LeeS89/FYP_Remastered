@@ -5,7 +5,6 @@ using UnityEngine.AI;
 public abstract class FSMBaseState : IFSMState
 {
     protected readonly IPathResolver _pathResolver;
-    //protected readonly IAgentData _ownerData;
     protected readonly IFSMStateContext _stateContext;
     protected Coroutine _runningRoutine;
     protected bool _isAtDestination = false;
@@ -27,14 +26,6 @@ public abstract class FSMBaseState : IFSMState
     public bool UsesRandomAgentStopDistance => _usesRandomStopDistance;
 
 
-    /*public FSMBaseState(IAgentData data, IPathResolver resolver, IFSMStateContext stateContext, StateId id)
-    {
-        _ownerData = data;
-        _pathResolver = resolver;
-        _stateContext = stateContext;
-        _id = id;
-        _validationCallback = OnPathResultReceived;
-    }*/
     public FSMBaseState(IFsmStateDeps deps, IFSMStateContext stateContext, bool useRandomStopDistance, StateId id)
     {
         _usesRandomStopDistance = useRandomStopDistance;
@@ -52,7 +43,7 @@ public abstract class FSMBaseState : IFSMState
     protected bool OwnerDataNull() => _owner == null || _path == null;
     protected bool IsStationary() => _stateContext?.HasReachedDestination() ?? true;
 
-    public virtual void EnterState() { _isInState = true; /*_hasDestination = false;*/ }
+    public virtual void EnterState() { _isInState = true; RetrieveCandidateDestinations(); }
     protected abstract void ValidateCandidateDestinations();
     protected abstract void RetrieveCandidateDestinations();
     public void TryRepath()

@@ -218,12 +218,8 @@ public class DistanceManagerJob : IDistanceService, ITickable
         {
             Vector3 subscriberPos = SubscriberPositions[index];
             Vector3 targetPos = SubscriberTargetPositions[index];
-            float distance = Vector3.Distance(subscriberPos, targetPos);
-          /*  if (!HasInitialized[index])
-            {
-                InitialDistances[index] = distance;
-                HasInitialized[index] = true;
-            }*/
+            float distance = targetPos.SqrDistanceTo(subscriberPos);//Vector3.Distance(subscriberPos, targetPos);
+          
             CurrentDistances[index] = distance;
         }
     }

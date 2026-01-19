@@ -23,17 +23,13 @@ public sealed class FSMPatrolState : FSMBaseState
     }
 
 
-
-    public override void EnterState() { base.EnterState(); RetrieveCandidateDestinations(); }
-
-
     public override void OnDestinationReached()
     {
-        if (!_isInState || _owner/*_ownerData*/ == null) return;
+        if (!_isInState || _owner == null) return;
 
         if (_runningRoutine == null)
             _runningRoutine = CoroutineRunner.Instance.StartCoroutine(PatrolWaitRoutine(
-                _owner.Transform/*_ownerData.Transform*/, _patrolDeps.MinTimeAtPatrolPoint/*_ownerData.MinPatrolPointWaitTime*/, _patrolDeps.MaxTimeAtPatrolPoint/*_ownerData.MaxPatrolPointWaitTime*/, 
+                _owner.Transform, _patrolDeps.MinTimeAtPatrolPoint, _patrolDeps.MaxTimeAtPatrolPoint, 
                 _stateContext.CurrentDestinationForward));
     }
 
@@ -46,7 +42,7 @@ public sealed class FSMPatrolState : FSMBaseState
                 DestinationResultNew failedResult = new DestinationResultNew
                 (
                     ReasonForDestinationCheck.ValidatePathForDestination,
-                    _path/*_ownerData.Path*/,
+                    _path,
                     PathResult.CandidatesNullOrEmpty,
                     Vector3.zero,
                     _id
@@ -71,7 +67,7 @@ public sealed class FSMPatrolState : FSMBaseState
         }
         //ContinueRoutine = true;
         _pathResolver?.ProcessDestinationCandidates(_id, ReasonForDestinationCheck.ValidatePathForDestination,
-            _candidateDestinations, _path/*_ownerData.Path*/, _owner.Position()/*_ownerData.Position()*/, _validationCallback);
+            _candidateDestinations, _path, _owner.Position(), _validationCallback);
 
         /*var request = ValidateDestination.GetPatrolPoint(_ownerData, _ownerData.Path);
         _pathFinder?.TryGetDestination(request);*/

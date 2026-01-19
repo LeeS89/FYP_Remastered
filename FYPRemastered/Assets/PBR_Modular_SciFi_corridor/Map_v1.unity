@@ -185,6 +185,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 9146282886440260088, guid: b008e9ee0f83a174eabe8cff8c34b9f2, type: 3}
   m_PrefabInstance: {fileID: 1376723}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1957251 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7300394724241211646, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
+  m_PrefabInstance: {fileID: 3718215761319188343}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2219811
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -118220,6 +118225,8 @@ MonoBehaviour:
   TestWalk: 0
   _requiredSeenStreak: 3
   _requiredNotSeenStreak: 5
+  _testOverrideRot: 0
+  currentRotOverride: 0
   _testComOrder: 0
   _showDistance: 0
   _testStateCheck: 0
@@ -118227,7 +118234,7 @@ MonoBehaviour:
   _fsmDeps:
     _agent: {fileID: 1863641518}
     _obstacle: {fileID: 1863641515}
-    _pathStatusInterval: 0.25
+    _pathStatusInterval: 0.1
     _maxTimeAtWaypoint: 7
     _minTimeAtWaypoint: 0.5
     _maxFlankSteps: 12
@@ -153778,6 +153785,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7447672074397387331, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
+      propertyPath: _overrideMove
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7447672074397387331, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
       propertyPath: _rootTransform
       value: 
       objectReference: {fileID: 5567585102503042835}
@@ -153851,7 +153862,10 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4511130931059676277, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
       insertIndex: 0
       addedObject: {fileID: 806061757}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7300394724241211646, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5895332771718422202}
   m_SourcePrefab: {fileID: 100100000, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
 --- !u!65 &3718215761319188344 stripped
 BoxCollider:
@@ -154736,12 +154750,27 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 974144915072540252, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
   m_PrefabInstance: {fileID: 3718215761319188343}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 1957251}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4ca6b8022500fe84c8c5739780e553e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &5895332771718422202
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1957251}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c9aed3ea135a5a469362af690d01154, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TestingMovement
+  moveSpeed: 5
+  useWorldSpace: 1
+  moving: 0
 --- !u!4 &5909642983039115874
 Transform:
   m_ObjectHideFlags: 0
@@ -156432,6 +156461,8 @@ MonoBehaviour:
   TestWalk: 0
   _requiredSeenStreak: 3
   _requiredNotSeenStreak: 5
+  _testOverrideRot: 0
+  currentRotOverride: 0
   _testComOrder: 0
   _showDistance: 0
   _testStateCheck: 0
@@ -156439,7 +156470,7 @@ MonoBehaviour:
   _fsmDeps:
     _agent: {fileID: 5247023209646184639}
     _obstacle: {fileID: 4565709518911953609}
-    _pathStatusInterval: 0.25
+    _pathStatusInterval: 0.1
     _maxTimeAtWaypoint: 7
     _minTimeAtWaypoint: 0.5
     _maxFlankSteps: 12

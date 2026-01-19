@@ -121,8 +121,15 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
     }
 
     public void OverrideSpeed(SpeedOverride speedOverride) => _fsmManager?.OverrideSpeed(speedOverride);
-    public void OverrideRotation(RotationOverride rotOverride) => _fsmManager?.OverrideRotation(rotOverride);
 
+    public bool _testOverrideRot = false;
+    public void OverrideRotation(RotationOverride rotOverride)
+    {
+        currentRotOverride = rotOverride;
+        _fsmManager?.OverrideRotation(rotOverride);
+    }
+
+    public RotationOverride currentRotOverride = RotationOverride.None;
 
     public bool IsRotatingToTarget() => _fsmManager?.RotatingToTarget ?? false;
 
@@ -237,6 +244,12 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
 
     protected virtual void Update()
     {
+        if (_testOverrideRot)
+        {
+            OnNotify(NpcNotification.DestinationReached());
+            _testOverrideRot = false;
+        }
+
         if(_fsmManager != null)
         _fsmManager.TestPrint = _showDistance;
        /* if (_showDistance)

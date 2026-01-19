@@ -5,18 +5,10 @@ using UnityEngine;
 public class FSMChaseState : FSMBaseState
 {
     private readonly IChaseDeps _deps;
-    private float _repathInterval = 0.25f;
-    private float _timeSinceLastRepath = 0f;
-    private bool _timerRunning = false;
     private Action<float/*, float*/> _distanceCheckCB;
     private int _distanceCheckSubscriberId = -1;
     float? _initialDistance = null;
-    //  private ITargetable _target;
-
-    /* public FSMChaseState(ITargetable target, IAgentData data, IPathResolver resolver, IFSMStateContext stateContext)
-         : base(data, resolver, stateContext, StateId.Chase) { _target = target; }*/
-
-
+  
     public FSMChaseState(IChaseDeps deps, IFSMStateContext stateContext, bool useRandomStopDistance = false)
         : base(deps, stateContext, useRandomStopDistance, StateId.Chase) 
     { 
@@ -25,20 +17,10 @@ public class FSMChaseState : FSMBaseState
         _candidateDestinations.EnsureCapacity(1);
     }
 
-    
-    
-    public override void EnterState()
-    {
-        base.EnterState();
-        //_timeSinceLastRepath = _repathInterval;
-        RetrieveCandidateDestinations();
-        //ValidateCandidateDestinations();
-    }
 
     public override void ExitState()
     {
         base.ExitState();
-        _timerRunning = false;
         UnregisterDistanceCheck();
     }
     
@@ -69,11 +51,8 @@ public class FSMChaseState : FSMBaseState
     {
         base.OnDestinationSet();
         //Debug.LogError("Setting Chase Dest");
-        UnregisterDistanceCheck();
-        if (!_isInState || TargetIsNull()) return;
-
-        _timeSinceLastRepath = _repathInterval;
-        _timerRunning = true;
+        //UnregisterDistanceCheck();
+    
     }
 
     private bool TargetIsNull() => _deps == null || _deps.Target == null;
@@ -82,7 +61,9 @@ public class FSMChaseState : FSMBaseState
     {
         base.OnDestinationReached();
         Debug.LogError("Destination Reached in Chase");
-        _timerRunning = false;
+      
+        if (TargetIsNull()) return;
+        _initialDistance = _deps.Target.Position().SqrDistanceTo(_owner.Position());
         RegisterDistanceCheck();
         // Start job to see if player/ target has moved far enough away
         // Add job callback
@@ -101,8 +82,7 @@ public class FSMChaseState : FSMBaseState
     {
         _distanceCheckSubscriberId = _deps.DistanceService.RegisterSubscriber(
            _owner.Position(),
-           _deps.Target/*.Position()*/,
-           // 1.0f,
+           _deps.Target,
            _distanceCheckCB
        );
     }
@@ -122,24 +102,7 @@ public class FSMChaseState : FSMBaseState
         }
     }
 
-    public override void LateTick(float dt)
-    {
-        return;
-        if (!_isInState || !_timerRunning || _isAtDestination) return;
-        _timeSinceLastRepath -= dt;
-
-        if (_timeSinceLastRepath <= 0f)
-        {
-            if(_deps.Target.IsMoving()) // Target is still moving, need to repath
-            {
-                Debug.LogError("Chasing Repath because player is moving");
-                _timerRunning = false;
-                RetrieveCandidateDestinations();
-            }
-
-            _timeSinceLastRepath = _repathInterval;
-        }
-    }
+   
 
     /// Update Late Tick & OnDestinationSet
     /// Start timer once destination set
@@ -147,35 +110,18 @@ public class FSMChaseState : FSMBaseState
     /// If not, repath + Stop timer
     /// Also, in Late Tick, if destination reached, stop timer
 
-    private void DistanceCheckCallback(/*float initialDistance, */float currentDistance)
+    private void DistanceCheckCallback(float currentDistance)
     {
         if (!_isInState) return;
-        
-        _initialDistance ??= currentDistance;
-
+     
        // Debug.LogError($"Distance Check Callback: Initial Distance: {_initialDistance}, Current Distance: {currentDistance}");
-        if (currentDistance > (2* _initialDistance))
+        if (_initialDistance.HasValue && currentDistance.IsSqrDistanceGreaterThan(_initialDistance.Value, 2f))
         {
-            //_deps.DistanceService.UnregisterSubscriber(_distanceCheckSubscriberId);
             UnregisterDistanceCheck();
             RetrieveCandidateDestinations();
             return;
         }
 
-        /* if (!_isInState) return;
-         float distanceDelta = Mathf.Abs(currentDistance - initialDistance);
-         float threshold = 1.5f; // Could be param
-         if (distanceDelta >= threshold)
-         {
-             // Target has moved enough, repath
-             _timerRunning = false;
-             RetrieveCandidateDestinations();
-         }
-         else
-         {
-             // Restart distance check
-             StartDistanceCheck();
-         }*/
     }
 
 }

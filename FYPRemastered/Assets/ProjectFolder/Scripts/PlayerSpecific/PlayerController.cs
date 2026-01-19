@@ -217,11 +217,12 @@ public sealed class PlayerController : TargetableInit<IPlaceholderService, Playe
 
     }
 
-   
 
+    public bool _overrideMove = false;
 
     private void ApplyPlayerMovement(Vector3 velocity)
     {
+        if (_overrideMove) return;
         if (_controller == null || IsDead/*OwnerIsDead*/) { return; }
 
         _controller.Move(velocity * Time.deltaTime);

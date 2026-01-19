@@ -22,8 +22,6 @@ public /*partial*/ class FSMBaseNew : IFSMControl
     // End Actions Invoked from individual states
 
     // Internal Members
-    private event Action<float> OnTick;
-    private event Action<float> OnLateTick;
     private List<SetDestinationDelay> _timer = new(2);
     private IFSMState _current;
     public bool IsInStateTransition { get; private set; } = false;
@@ -35,8 +33,6 @@ public /*partial*/ class FSMBaseNew : IFSMControl
     public bool RotatingToTarget { get; private set; } = false;
     public bool TestPrint { get; set; } = false;
 
-    private bool _rotationSubscribedToTick = false;
-    private bool _reachedDestination = true;
     // End internal members
 
     private const int MaxDestinationAttempts = 5;
@@ -54,9 +50,6 @@ public /*partial*/ class FSMBaseNew : IFSMControl
         Notification = fsmNotifications;
         _states = states;
         _pathCheckTimer = _deps.PathStatusInterval;
-        //OnTick += TimerTicks;
-        //OnTick += EvaluatePath;
-       // OnLateTick += RotateTowardsTarget;
     }
 
     #region State Transition & FOV Frequency Updates
@@ -96,7 +89,6 @@ public /*partial*/ class FSMBaseNew : IFSMControl
 
     public void Tick(float dt)
     {
-        //OnTick?.Invoke(dt);
         TimerTicks(dt);
         if (!_hasValidDestination) return;
         _pathCheckTimer -= dt;
@@ -104,12 +96,11 @@ public /*partial*/ class FSMBaseNew : IFSMControl
         if (_pathCheckTimer <= 0f)
         {
             _pathCheckTimer = _deps.PathStatusInterval;
-            EvaluatePath(dt);
+            EvaluatePath();
         }
     }
     public void LateTick(float dt)
     {
-       // OnLateTick?.Invoke(dt);
         UpdateRotation();
         UpdateAgentSpeed();
         _current?.LateTick(dt);
@@ -126,7 +117,7 @@ public /*partial*/ class FSMBaseNew : IFSMControl
     private Vector3[] _corners = new Vector3[64];
 
   
-    public void EvaluatePath(float dt)
+    public void EvaluatePath()
     {
         if (!_hasValidDestination || _deps == null || _deps.Agent() == null) return;
         NavMeshAgent a = _deps.Agent();
@@ -175,8 +166,7 @@ public /*partial*/ class FSMBaseNew : IFSMControl
             //Debug.LogError($"Path Distance: {dist} | Remaining Distance: {rDist}");
         }
         
-        if (float.IsNaN(dist)) return;
-
+       
         float stopThreshold = (a.stoppingDistance + 0.25f);
         if (dist <= stopThreshold)
         {
@@ -188,7 +178,6 @@ public /*partial*/ class FSMBaseNew : IFSMControl
 
     private void DestinationReached()
     {
-        _reachedDestination = true;
         _hasValidDestination = false;
         TryResetAgent(); // Resets path and Sets speed == 0f
         //Debug.LogError("Reached Destination");
@@ -290,9 +279,8 @@ public /*partial*/ class FSMBaseNew : IFSMControl
     private void DestinationSet()
     {
         _pathCheckTimer = _deps.PathStatusInterval;
-        _reachedDestination = false;
         _hasValidDestination = true;
-        //EvaluatePath(0f);
+        EvaluatePath();
         _current?.OnDestinationSet();
         Notification?.Invoke(NpcNotification.DestinationSet());
     }
@@ -305,7 +293,7 @@ public /*partial*/ class FSMBaseNew : IFSMControl
     #endregion
 
     #region Speed Region
-    public bool HasReachedDestination() => _reachedDestination || (_deps?.Agent().isStopped ?? true);//_speedTier == SpeedTier.Idle;
+    public bool HasReachedDestination() => !_hasValidDestination || (_deps?.Agent().isStopped ?? true);//_speedTier == SpeedTier.Idle;
     
 
     private void UpdateAgentSpeed()
@@ -352,25 +340,13 @@ public /*partial*/ class FSMBaseNew : IFSMControl
     {
         _hasValidDestination = false;
         UpdateSpeedtier(0f);
-       // SetSpeedTier(SpeedTier.Idle);
         _deps.Agent().ResetPath();
         if (CurrentStateId == StateId.Patrol) return;
         ToggleAgent(false);
         _deps.Obstacle().enabled = true;
     }
 
-   /* public void RotateToTarget(bool rotate)
-    {
-        if (RotatingToTarget == rotate || NullOwnerOrTarget()) return;
-
-        RotatingToTarget = rotate;
-        _deps.Agent().updateRotation = !RotatingToTarget;
-
-        if (RotatingToTarget && !_rotationSubscribedToTick) { OnLateTick += RotateTowardsTarget; _rotationSubscribedToTick = true; }
-        else if (!RotatingToTarget && _rotationSubscribedToTick) { OnLateTick -= RotateTowardsTarget; _rotationSubscribedToTick = false; }
-
-    }*/
-
+ 
     public void OverrideRotation(RotationOverride rotOverride)
     {
         if (_currentRotationOverride == rotOverride) return;
@@ -383,57 +359,7 @@ public /*partial*/ class FSMBaseNew : IFSMControl
     private bool NullOwnerOrTarget() => _deps.Target == null || _deps.Target.Transform == null || _deps.Owner == null
             || _deps.Owner.Transform == null || _deps.Agent() == null;
 
-  /*  private void RotateTowardsTarget(float _*//*IAgentData controller, *//*Transform target,*//* bool rotate*//*)
-    {
-        if (_deps.Target == null || _deps.Target.Transform == null || _deps.Owner == null
-            || _deps.Owner.Transform == null || _deps.Agent() == null) return;
-
-      //  Debug.LogError("Rotating Towards Target");
-        *//* if (controller == null || target == null ||
-             controller.Agent == null || controller.Transform == null) return;*//*
-        //NavMeshAgent agent = _deps.Agent();
-
-      *//*  if (!_rotateToTarget)
-        {
-            if (!agent.updateRotation) agent.updateRotation = true;
-            return;
-        }
-        if (agent.updateRotation) agent.updateRotation = false;*//*
-      
-
-        Transform t = _deps.Owner.Transform;//controller.Transform;
-        Transform target = _deps.Target.Transform;
-        Vector3 toTarget = target.position - t.position;
-        toTarget.y = 0;
-
-        if (toTarget.sqrMagnitude < 0.0001f) return;
-
-        Vector3 forward = t.forward;
-        forward.y = 0;
-
-        float dot = Vector3.Dot(forward.normalized, toTarget.normalized);
-        float angle = Mathf.Acos(dot) * Mathf.Rad2Deg;
-
-        const float precisionThreshold = 1f;
-        Quaternion targetRotation = Quaternion.LookRotation(toTarget);
-
-        if (angle < precisionThreshold)
-        {
-            t.rotation = Quaternion.Slerp(
-                t.rotation,
-                targetRotation,
-                1f);
-            return;
-        }
-
-        t.rotation = Quaternion.Slerp(
-            t.rotation,
-            targetRotation,
-            Time.deltaTime * 5f);
-
-    }
-
-    */
+ 
 
 
     // Used when the Agent is currently carving
@@ -457,12 +383,5 @@ public /*partial*/ class FSMBaseNew : IFSMControl
             OnDone = cb;
         }
     }
-
-
-    /// Brain Component will be allowed to tell the FSM to override the Speedtiers
-    /// For instance an enum like "ForcedIdle", "ForcedWalk", "ForcedSprint", "Normal"
-    /// if Normal, then FSM controls speedtiers as normal
-    
-    
 
 }

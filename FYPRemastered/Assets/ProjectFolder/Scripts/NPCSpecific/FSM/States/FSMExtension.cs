@@ -5,12 +5,14 @@ public static class FSMExtension
 {
     public static float GetPathDistance(this NavMeshAgent agent, StateId currentstate, Vector3[] cornerBuf, float cap = float.PositiveInfinity)
     {
-        if (!agent || !agent.isOnNavMesh || agent.pathPending || !agent.hasPath)
-            return float.PositiveInfinity;
+        /*if (!agent || !agent.isOnNavMesh || agent.pathPending || !agent.hasPath)
+            return float.PositiveInfinity;*/
 
-        if (currentstate == StateId.Patrol)
-            return agent.remainingDistance;
+        float rd = agent.remainingDistance;
+        if (IsValidRemainingDistance(rd))
+            return rd;
 
+      
         int n = agent.path.GetCornersNonAlloc(cornerBuf);
         if (n <= 1) return 0f;
 
@@ -23,9 +25,12 @@ public static class FSMExtension
             sum += Vector3.Distance(cornerBuf[i], cornerBuf[i + 1]);
             if (sum >= cap) return cap;
         }
-
+        
         return sum;
     }
+
+    private static bool IsValidRemainingDistance(float d)
+        => !(float.IsInfinity(d) || float.IsNaN(d)) && d >= 0f;
 
     public static void RotateTowards(this ITargetable owner, ITargetable rotateTowards)
     {
@@ -61,5 +66,20 @@ public static class FSMExtension
             t.rotation,
             targetRotation,
             Time.deltaTime * 5f);
+    }
+
+
+
+
+    public static float SqrDistanceTo(this Vector3 a, Vector3 b)
+    {
+        Vector3 d = a - b;
+        return d.sqrMagnitude;
+    }
+
+    public static bool IsSqrDistanceGreaterThan(this float currentDistSq, float initialDistSq, float multiplier = 1f)
+    {
+        float m2 = multiplier * multiplier;
+        return currentDistSq > initialDistSq * m2;
     }
 }

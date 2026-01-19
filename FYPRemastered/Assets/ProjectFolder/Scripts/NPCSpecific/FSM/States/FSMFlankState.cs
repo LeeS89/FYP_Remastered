@@ -31,8 +31,8 @@ public class FSMFlankState : FSMBaseState
 
     public override void EnterState()
     {
-        base.EnterState();
         SortStepsToTry();
+        base.EnterState();
     }
 
     protected override void RetrieveCandidateDestinations()
