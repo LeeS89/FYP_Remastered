@@ -136,7 +136,7 @@ public /*partial*/ class FSMBaseNew : IFSMControl
         if (!a.enabled || !a.isOnNavMesh) 
         {
             _hasValidDestination = false;
-            TryResetAgent();
+            TryResetAgent("Reset Called From Not enabled or on navmesh");
             _current?.TryRepath(); // Repath instead
             return;
         }
@@ -146,17 +146,17 @@ public /*partial*/ class FSMBaseNew : IFSMControl
         /// but only increment counter whenever SetDestination fails 
         if (!a.hasPath || a.pathStatus != NavMeshPathStatus.PathComplete)
         {
-            AttemptRepath();
+            AttemptRepath("Attempt repath called from No path or path not complete");
             return;
         }
 
-        // Check if current state needs a new path ( target destination moved, etc)
+       /* // Check if current state needs a new path ( target destination moved, etc)
         if (_current?.NeedsNewPath() ?? false)
         {
             _hasValidDestination = false;
             _current?.TryRepath();
             return;
-        }
+        }*/
 
         //var dist = a.remainingDistance;
         var dist = a.GetPathDistance(CurrentStateId, _corners);
@@ -173,13 +173,22 @@ public /*partial*/ class FSMBaseNew : IFSMControl
             DestinationReached();
             return;
         }
+
+        // Check if current state needs a new path ( target destination moved, etc)
+        if (_current?.NeedsNewPath() ?? false)
+        {
+            _hasValidDestination = false;
+            _current?.TryRepath();
+            return;
+        }
+
         UpdateSpeedtier(dist);
     }
 
     private void DestinationReached()
     {
         _hasValidDestination = false;
-        TryResetAgent(); // Resets path and Sets speed == 0f
+        TryResetAgent("Reset Called From Destination Reached"); // Resets path and Sets speed == 0f
         //Debug.LogError("Reached Destination");
         _current?.OnDestinationReached();
         Notification?.Invoke(NpcNotification.DestinationReached());
@@ -253,19 +262,20 @@ public /*partial*/ class FSMBaseNew : IFSMControl
             DestinationSet();
         }
         else
-            AttemptRepath();
+            AttemptRepath("Attempt repath called from failing to set path or dest");
     }
 
-    private void AttemptRepath()
+    private void AttemptRepath(string msg)
     {
 #if UNITY_EDITOR
         Debug.LogError("Failed to Set Path - Attempting to Re-path");
+        Debug.LogError(msg);
 #endif
         // Add counter to prevent infinite loop, and notify if failed after x attempts
         if (++_destinationAttemptCounter <= MaxDestinationAttempts)
         {
             _hasValidDestination = false;
-            TryResetAgent();
+            TryResetAgent("Reset Called From Attempt Repath");
             _current?.TryRepath();
         }
         else
@@ -336,11 +346,15 @@ public /*partial*/ class FSMBaseNew : IFSMControl
     #endregion
 
 
-    private void TryResetAgent()
+    private void TryResetAgent(string msg)
     {
+        if (msg != null/* && TestPrint*/)
+        {
+            Debug.LogError(msg);
+        }
         _hasValidDestination = false;
         UpdateSpeedtier(0f);
-        _deps.Agent().ResetPath();
+        _deps?.Agent().ResetPath();
         if (CurrentStateId == StateId.Patrol) return;
         ToggleAgent(false);
         _deps.Obstacle().enabled = true;

@@ -100,7 +100,13 @@ public readonly struct StateNotification
 
 
 
-
+public enum NotifyPriority : byte
+{
+    Critical = 0,
+    High = 1,
+    Normal = 2,
+    Low = 3
+}
 
 
 
@@ -117,34 +123,35 @@ public readonly struct NpcNotification
     public readonly Vector3 Destination { get; }
     public readonly FOVResult FOVResult;
     public readonly bool TargetWithinshootingAngles;
+    public readonly NotifyPriority Priority;
   
 
-    private NpcNotification(NotificationKind kind, /*StateId stateId, */bool reachedStaleDestination, Vector3 dest, FOVResult result, bool targetInshootAngles)
-        => (Kind,/* Id,*/ HasReachedStaleDestination, Destination, FOVResult, TargetWithinshootingAngles) = (kind, /*stateId,*/ reachedStaleDestination, dest, result, targetInshootAngles);
+    private NpcNotification(NotificationKind kind, NotifyPriority priority, bool reachedStaleDestination, Vector3 dest, FOVResult result, bool targetInshootAngles)
+        => (Kind, Priority, HasReachedStaleDestination, Destination, FOVResult, TargetWithinshootingAngles) = (kind, priority, reachedStaleDestination, dest, result, targetInshootAngles);
 
     public static NpcNotification SceneBegin()
-        => new(NotificationKind.NoCurrentState, false, Vector3.zero, FOVResult.None, false);
+        => new(NotificationKind.NoCurrentState, NotifyPriority.Critical, false, Vector3.zero, FOVResult.None, false);
 
     public static NpcNotification DestinationReached(/*StateId id,*/ /*bool reachedStaleDestination*/)
-        => new(NotificationKind.DestinationReached, /*id,*/ false, Vector3.zero, FOVResult.None, false);
+        => new(NotificationKind.DestinationReached, NotifyPriority.High, false, Vector3.zero, FOVResult.None, false);
 
     public static NpcNotification DestinationSet()
-        => new(NotificationKind.DestinationSet, false, Vector3.zero, FOVResult.None, false);
+        => new(NotificationKind.DestinationSet, NotifyPriority.High, false, Vector3.zero, FOVResult.None, false);
 
     public static NpcNotification ZoneAlert(/*StateId id*/)
-        => new(NotificationKind.ZoneAlert, /*id,*/ false, Vector3.zero, FOVResult.None, false);
+        => new(NotificationKind.ZoneAlert, NotifyPriority.Low, false, Vector3.zero, FOVResult.None, false);
 
    /* public static OwnerNPCNotification TargetMoved(StateId id)
         => new(NotificationKind.TargetMoved, id, false, Vector3.zero, null, FOVResult.None, false);*/
 
     public static NpcNotification TargetLeftArea(/*StateId id,*/ Vector3 dest)
-        => new(NotificationKind.TargetLeftArea, /*id,*/ false, dest, FOVResult.None, false);
+        => new(NotificationKind.TargetLeftArea, NotifyPriority.High, false, dest, FOVResult.None, false);
 
     public static NpcNotification PathBlocked(/*StateId id*/)
-        => new(NotificationKind.PathBlocked, /*id, */false, Vector3.zero, FOVResult.None, false);
+        => new(NotificationKind.PathBlocked, NotifyPriority.High, false, Vector3.zero, FOVResult.None, false);
 
     public static NpcNotification FOVUpdate(/*StateId id,*/ FOVResult result, bool targetInShootingAngles)
-        => new(NotificationKind.FOVUpdate, /*id,*/ targetInShootingAngles, Vector3.zero, result, targetInShootingAngles);
+        => new(NotificationKind.FOVUpdate, NotifyPriority.Normal, targetInShootingAngles, Vector3.zero, result, targetInShootingAngles);
 
  /*   public static OwnerNPCNotification TargetFound(StateId id)
         => new(NotificationKind.TargetFound, id, false, Vector3.zero, null, FOVResult.None, false);*/
@@ -156,12 +163,12 @@ public readonly struct NpcNotification
         => new(NotificationKind.TargetLOSConfirmed, id, false, Vector3.zero, null);*/
 
     public static NpcNotification NoAvailablePath(/*StateId id*/)
-        => new(NotificationKind.NoAvailablePath, /*id, */false, Vector3.zero, FOVResult.None, false);
+        => new(NotificationKind.NoAvailablePath, NotifyPriority.High, false, Vector3.zero, FOVResult.None, false);
 
     public static NpcNotification CoverExposed(/*StateId id*/)
-        => new(NotificationKind.CoverExposed, /*id, */false, Vector3.zero, FOVResult.None, false);
+        => new(NotificationKind.CoverExposed, NotifyPriority.High, false, Vector3.zero, FOVResult.None, false);
 
     public static NpcNotification PathToPrimaryAvailable(/*StateId id*/)
-        => new(NotificationKind.PathToPrimaryAvailable, /*id, */false, Vector3.zero, FOVResult.None, false);
+        => new(NotificationKind.PathToPrimaryAvailable, NotifyPriority.Normal, false, Vector3.zero, FOVResult.None, false);
 
 }

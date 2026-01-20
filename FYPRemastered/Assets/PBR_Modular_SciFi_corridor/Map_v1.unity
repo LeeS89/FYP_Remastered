@@ -8545,9 +8545,9 @@ BoxCollider:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 2039
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -16601,9 +16601,9 @@ BoxCollider:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 2039
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -118157,7 +118157,7 @@ Rigidbody:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 959
+    m_Bits: 951
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 1
@@ -153634,7 +153634,7 @@ Rigidbody:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 959
+    m_Bits: 951
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 1
@@ -153768,6 +153768,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1156439162831152789, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
+      propertyPath: m_ExcludeLayers.m_Bits
+      value: 448
+      objectReference: {fileID: 0}
     - target: {fileID: 4886263204720703655, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -153814,7 +153818,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8025562586149453778, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 16.6
+      value: 17.328
       objectReference: {fileID: 0}
     - target: {fileID: 8025562586149453778, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
       propertyPath: m_LocalRotation.w
@@ -154769,8 +154773,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TestingMovement
   moveSpeed: 5
-  useWorldSpace: 1
-  moving: 0
+  sprintMultiplier: 1.6
+  gravity: -19.62
+  groundedStick: -2
+  moveRelativeTo: {fileID: 0}
 --- !u!4 &5909642983039115874
 Transform:
   m_ObjectHideFlags: 0

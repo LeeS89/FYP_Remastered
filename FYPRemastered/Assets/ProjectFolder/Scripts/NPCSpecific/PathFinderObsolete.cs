@@ -533,7 +533,7 @@ public class PathFinderNew : IPathResolver
                 if (_lastResult == PathResult.Failed) continue;
 
                 // if (!_isValid) continue;
-                Debug.LogError("Sending successful Callback");
+               // Debug.LogError("Sending successful Callback");
                 DestinationResultNew success = new DestinationResultNew(request.Reason, request.Path, PathResult.Success, to, request.StateId);
                 request.Callback?.Invoke(success);
 

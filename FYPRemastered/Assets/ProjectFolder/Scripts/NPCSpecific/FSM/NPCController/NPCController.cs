@@ -75,6 +75,9 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
     private bool _aimingAtTarget = false;
 
 
+    //private readonly BufferedInbox _inbox = new();
+
+
     // IFSMNotifications - For notifications received by the FSMManager, i.e. No valid destination, target lost, Target within melee/ shot range, etc.
     public void OnNotify(in NpcNotification n)
     {
@@ -82,6 +85,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
 
       //  if (n.Kind == NotificationKind.FOVUpdate) Debug.LogError("FOV Result: "+n.FOVResult.ToString());
 
+       // _inbox.Enqueue(n);
         this.Decide(in n);
 
         /*if (!this.TryDecide(n, out var decision)) return;
@@ -259,10 +263,9 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
         }*/
 
         if (IsDead) return;
-        _fsmManager?.Tick(Time.deltaTime);
-       // IsStationary = _fsmManager?.IsStationary() ?? true;
         _fovRunner?.Tick(Time.deltaTime);
-
+        _fsmManager?.Tick(Time.deltaTime);
+      
         if (_testStateCheck)
             Debug.LogError("Currentstate: "+_fsmManager?.CurrentStateId.ToString());
     }
@@ -272,11 +275,11 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
     protected virtual void LateUpdate()
     {
         if (IsDead) return;
-        TryRotateAndAimAtTargetNew();
-        //this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: CanRotateTowardsTarget());
-        _fsmManager?.LateTick(Time.deltaTime);
-        if (_eManager == null) return;
 
+        //_inbox.Flush(this.Decide);
+       
+        _fsmManager?.LateTick(Time.deltaTime);
+        
         if (Agent == null) return;
         _animationControl?.Tick(Agent.velocity, Agent.transform.forward);
     }
@@ -338,6 +341,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
         //   _eManager.AimTowardsTarget(aim: false);
     }
 
+    [Obsolete]
     private void TryRotateAndAimAtTarget()
     {
         if (IsDead || _fsmManager == null) return;
@@ -353,6 +357,8 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
                 if (_aimingAtTarget) { _aimingAtTarget = false; _animationControl?.IkLookAtTarget(look: false); }
             }
     }
+
+    [Obsolete]
     private void TryRotateAndAimAtTargetNew()
     {
         if (IsDead || TargetDead()) return;

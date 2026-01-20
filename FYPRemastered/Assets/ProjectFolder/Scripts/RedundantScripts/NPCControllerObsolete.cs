@@ -430,6 +430,11 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, /*INPC
     {
         throw new NotImplementedException();
     }
+
+    public void OnNotify(NpcNotification n)
+    {
+        throw new NotImplementedException();
+    }
 }
 
 
@@ -875,6 +880,11 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
     }
 
     public void RotateToTarget(bool rotate)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void OnNotify(NpcNotification n)
     {
         throw new NotImplementedException();
     }

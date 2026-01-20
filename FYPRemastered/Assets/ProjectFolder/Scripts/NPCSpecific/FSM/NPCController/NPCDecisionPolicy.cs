@@ -290,16 +290,16 @@ public static class NPCDecisionPolicyNew
                 if (!FOVStatusChanged(self, n.FOVResult)) return;
                 self.UpdateCurrentFovStatus(n.FOVResult);
 
-                if (self.IsMoving()) TryUpdateRotationToTarget(self, TargetSeen(n.FOVResult));
+                /*if (self.IsMoving())*/ TryUpdateRotationToTarget(self, TargetSeen(n.FOVResult));
                 
                 self.UpdateCombatOrder(DecideNextCombatOrder(self.CurrentComOrder, n.FOVResult));
                
                 break;
             case NotificationKind.DestinationReached:
-                TryUpdateRotationToTarget(self, true); // Always rotate to target on destination reached
+                //TryUpdateRotationToTarget(self, true); // Always rotate to target on destination reached
                 break;
             case NotificationKind.DestinationSet:
-                TryUpdateRotationToTarget(self, TargetSeen(self.CurrentFovState)); // Rotate if target is seen while moving
+              //  TryUpdateRotationToTarget(self, TargetSeen(self.CurrentFovState)); // Rotate if target is seen while moving
                 break;
             default:
                 break;
