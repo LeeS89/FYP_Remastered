@@ -127,7 +127,7 @@ public /*partial*/ class FSMBaseNew : IFSMControl
         {
             Debug.LogError("Running Path Evaluation");
         }
-
+        
         /// Maybe split into 2 separate checks for better clarity
         /// Possibly for !a.isOnNavMesh we could teleport the agent to nearest navmesh point? + Special effects?
         /// if a not enabled, just reset/ repath
