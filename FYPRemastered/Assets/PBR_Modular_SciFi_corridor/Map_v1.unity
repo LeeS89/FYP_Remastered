@@ -118274,6 +118274,12 @@ MonoBehaviour:
     blockingMask:
       serializedVersion: 2
       m_Bits: 17
+    testMask:
+      serializedVersion: 2
+      m_Bits: 0
+    test2Mask:
+      serializedVersion: 2
+      m_Bits: 0
     fovRadius: 25
     ownerOrigin: {fileID: 1863641519}
     waistHeightOffset: 1
@@ -156516,6 +156522,12 @@ MonoBehaviour:
     blockingMask:
       serializedVersion: 2
       m_Bits: 17
+    testMask:
+      serializedVersion: 2
+      m_Bits: 1
+    test2Mask:
+      serializedVersion: 2
+      m_Bits: 38
     fovRadius: 25
     ownerOrigin: {fileID: 8070524998269774116}
     waistHeightOffset: 1

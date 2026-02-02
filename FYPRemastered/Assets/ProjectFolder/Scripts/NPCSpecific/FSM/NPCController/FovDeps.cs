@@ -8,7 +8,11 @@ public class FovDeps
        "Also the origin for initial Detection phase, uses OverlapSphere from this origin")]
     public Transform fovOrigin;
     public int maxFovTargets = 5;
-    public LayerMask blockingMask;
+    public LayerMask blockingMask; // Make protected and use methods to modify?
+    // Plus, modify dynamically depending on FOV phase
+
+    public LayerMask worldMask;
+
     public ITargetable Target { get; private set; }
 
     public void SetTarget(ITargetable target)
@@ -20,9 +24,10 @@ public class FovDeps
 #endif
             return;
         }
+        
         if (target == Target) return;
         if(Target != null)
-            blockingMask &= ~Target.LayerMask;
+            blockingMask &= ~Target.LayerMask; // Remove previous target layer from blocking mask
 
         Target = target;
         blockingMask |= Target.LayerMask;
