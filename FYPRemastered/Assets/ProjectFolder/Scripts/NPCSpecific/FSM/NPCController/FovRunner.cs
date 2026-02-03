@@ -71,7 +71,7 @@ public class FovRunner : IFieldOfViewRunner
 
     }
 
-    public void RunFOVSweep()
+/*    public void RunFOVSweep()
     {
         if (TargetIsNull()) return;
 
@@ -109,34 +109,251 @@ public class FovRunner : IFieldOfViewRunner
 
         }
         SendResult(FOVResult.TargetNotSeen);
+    }*/
+    public void RunFOVSweep()
+    {
+        if (TargetIsNull()) return;
+
+        FOVResult result = FOVResult.TargetOutsideSweepRadius;
+        bool inShootAngle = false;
+        LayerMask targetMask = _deps.Target.LayerMask;//_params?.TargetMask() ?? default;
+
+        int detectedCount = RunDetectionPhase(_deps.fovOrigin, _proximityDetectionResults, _deps.fovRadius, targetMask);
+
+        if (detectedCount == 0)
+        {
+            SendResult(FOVResult.TargetNotSeen);
+            TryChangeFOVFrequency(AlertPhase.Idle);
+            return;
+        }
+
+        TryChangeFOVFrequency(AlertPhase.Heightened);
+
+        for (int i = 0; i < detectedCount; i++)
+        {
+            int hitCount;
+            RunEvaluationPhaseNew(_proximityDetectionResults[i], out hitCount, _deps.addTargetFallbackPoints, targetMask);
+
+            //if (hitCount == 0) continue;
+           // result = RunTargetingPhase(hitCount, _deps.blockingMask, targetMask);
+
+            /*if (result != FOVResult.TargetSeen)*/ continue;
+
+            inShootAngle = !_deps.useShootingAngleRestriction ? true :
+                TargetWithinAimThreshold(_deps.fovOrigin, _proximityDetectionResults[i].ClosestPointOnBounds(_deps.fovOrigin.position), _deps.halfHorizontalShootAngle);
+
+            result = inShootAngle == true ? FOVResult.TargetSeenAndWithinShootingAngles : FOVResult.TargetSeen;
+            SendResult(result);
+            return;
+
+        }
+        SendResult(FOVResult.TargetNotSeen);
+    }
+
+    static Vector3 GetCenterWorld(Collider col)
+    {
+        Transform t = col.transform;
+
+        if (col is BoxCollider b) return t.TransformPoint(b.center);
+        if (col is SphereCollider s) return t.TransformPoint(s.center);
+        if (col is CapsuleCollider c) return t.TransformPoint(c.center);
+        return col.bounds.center;
+    }
+
+    static Vector3 GetHalfExtentsWorld_Primitive(Collider col)
+    {
+        Vector3 absScale = Abs(col.transform.lossyScale);
+
+        if (col is BoxCollider b)
+        {
+            Vector3 halfLocal = b.size * 0.5f;
+            return Vector3.Scale(halfLocal, absScale);
+        }
+
+        if (col is SphereCollider s)
+        {
+            float r = s.radius * Mathf.Max(absScale.x, absScale.y, absScale.z);
+            return new Vector3(r, r, r);
+        }
+
+        if (col is CapsuleCollider c)
+        {
+            // Capsule direction: 0=X, 1=Y, 2=Z in local space.
+            if (c.direction == 0) // X
+            {
+                float r = c.radius * Mathf.Max(absScale.y, absScale.z);
+                float halfH = (c.height * absScale.x) * 0.5f;
+                return new Vector3(halfH, r, r);
+            }
+            if (c.direction == 1) // Y
+            {
+                float r = c.radius * Mathf.Max(absScale.x, absScale.z);
+                float halfH = (c.height * absScale.y) * 0.5f;
+                return new Vector3(r, halfH, r);
+            }
+            else // Z
+            {
+                float r = c.radius * Mathf.Max(absScale.x, absScale.y);
+                float halfH = (c.height * absScale.z) * 0.5f;
+                return new Vector3(r, r, halfH);
+            }
+        }
+
+        // If you truly only use primitives, you can throw here instead.
+        return col.bounds.extents;
+    }
+    static Vector3 Abs(Vector3 v) => new Vector3(Mathf.Abs(v.x), Mathf.Abs(v.y), Mathf.Abs(v.z));
+
+    private void RunEvaluationPhaseNew(Collider targetCollider, out int hitCount, bool addFallbackPoints, LayerMask targetMask)
+    {
+        
+        Transform t = targetCollider.transform;
+
+        Vector3 closest = targetCollider.ClosestPoint(_deps.fovOrigin.position);
+        Vector3 colCenter = GetCenterWorld(targetCollider);//targetCollider.bounds.center;
+        Vector3 ext = GetHalfExtentsWorld_Primitive(targetCollider);
+
+
+        _samplePoints.Add(targetCollider.ClosestPoint(colCenter));
+        _samplePoints.Add(closest);
+
+        _samplePoints.Add(targetCollider.ClosestPoint(colCenter + t.up * ext.y));
+        _samplePoints.Add(targetCollider.ClosestPoint(colCenter - t.right * ext.x));
+        _samplePoints.Add(targetCollider.ClosestPoint(colCenter + t.right * ext.x));
+
+       /* _samplePoints.Add(targetCollider.bounds.center + Vector3.up * targetCollider.bounds.extents.y);
+        _samplePoints.Add(targetCollider.bounds.center - Vector3.right * targetCollider.bounds.extents.x);
+        _samplePoints.Add(targetCollider.bounds.center + Vector3.right * targetCollider.bounds.extents.x);*/
+        int angleCount = 0;
+        foreach (var p in _samplePoints)
+        {
+            if (this.IsWithinAngle(_deps.fovOrigin, p, _deps.fovHalfAngle/*, _params.useSeparateVerticleAngle, _params.verticalFovHalfAngle*/))
+            {
+                //angleCount++;
+                bool isWorldBlocked = IsTargetObstructed(_deps.fovOrigin, p, _deps.worldLayers, _deps.Target.LayerMask);
+                //break;
+            }
+        }
+        _samplePoints.Clear();
+        hitCount = 0;
+    /*    if (angleCount == 0)
+        {
+            hitCount = 0;
+            return;
+        }
+
+*/
+
+       /* Vector3 waistPos = _deps.ownerOrigin.TransformPoint(0f, _deps.waistHeightOffset, 0f);
+        Vector3 eyePos = _deps.ownerOrigin.TransformPoint(0f, _deps.eyeHeightOffset, 0f);
+        Vector3 centerPos = (waistPos + eyePos) * 0.5f;
+        Vector3 direction = TargetingUtility.GetDirectionToTarget(closest, centerPos);
+
+        hitCount = this.EvaluateViewCone(
+        waistPos,
+        eyePos,
+        _deps.evaluationCapsuleRadius,
+        direction,
+        _deps.fovRadius,
+        targetMask,
+        _evaluationHitPoints,
+        _hitBuffer
+        );*/
+
+
+      //  if (hitCount > 0 && addFallbackPoints)
+        //    AddFallbackPoints(targetCollider, _evaluationHitPoints, ref hitCount);
+    }
+    private void RunEvaluationPhase(Collider targetCollider, out int hitCount, bool addFallbackPoints, LayerMask targetMask)
+    {
+        Vector3 closest = targetCollider.ClosestPointOnBounds(_deps.fovOrigin.position);
+        Vector3 colCenter = targetCollider.bounds.center;
+        _samplePoints.Add(colCenter);
+        _samplePoints.Add(closest);
+        _samplePoints.Add(targetCollider.bounds.center + Vector3.up * targetCollider.bounds.extents.y);
+        _samplePoints.Add(targetCollider.bounds.center - Vector3.right * targetCollider.bounds.extents.x);
+        _samplePoints.Add(targetCollider.bounds.center + Vector3.right * targetCollider.bounds.extents.x);
+        int angleCount = 0;
+        foreach (var p in _samplePoints)
+        {
+            if (this.IsWithinAngle(_deps.fovOrigin, p, _deps.fovHalfAngle/*, _params.useSeparateVerticleAngle, _params.verticalFovHalfAngle*/))
+            {
+                angleCount++;
+                break;
+            }
+        }
+        _samplePoints.Clear();
+
+        if (angleCount == 0)
+        {
+            hitCount = 0;
+            return;
+        }
+
+
+
+        Vector3 waistPos = _deps.ownerOrigin.TransformPoint(0f, _deps.waistHeightOffset, 0f);
+        Vector3 eyePos = _deps.ownerOrigin.TransformPoint(0f, _deps.eyeHeightOffset, 0f);
+        Vector3 centerPos = (waistPos + eyePos) * 0.5f;
+        Vector3 direction = TargetingUtility.GetDirectionToTarget(closest, centerPos);
+
+        hitCount = this.EvaluateViewCone(
+        waistPos,
+        eyePos,
+        _deps.evaluationCapsuleRadius,
+        direction,
+        _deps.fovRadius,
+        targetMask,
+        _evaluationHitPoints,
+        _hitBuffer
+        );
+
+
+        if (hitCount > 0 && addFallbackPoints)
+            AddFallbackPoints(targetCollider, _evaluationHitPoints, ref hitCount);
     }
 
 
-    public bool IsWorldBlocked(
+    public bool IsTargetObstructed(
       Transform from,
-      Vector3 target,
+      Vector3? target,
       LayerMask blockingMask,
       LayerMask targetMask,
-      //Transform targetTransform,
       bool debug = false
       )
     {
-        if (from == null/* || targetTransform == null*/) return false;
+        if (from == null || target == null || target == Vector3.zero) return false;
+
+        LayerMask losMask = blockingMask | targetMask;
 
         RaycastHit hitInfo;
-        if (Physics.Linecast(from.position, target, out hitInfo, blockingMask))
-        {
+        Vector3 direction = (target.Value - from.position);
+        float dist = direction.magnitude;
+        direction /= dist;
 
-            var t = hitInfo.transform;
+        if(Physics.Raycast(from.position, direction, out hitInfo, dist, losMask/*, QueryTriggerInteraction.Collide*/))
+        {
+             var t = hitInfo.transform;
             if (((1 << hitInfo.collider.gameObject.layer) & targetMask) != 0)
-                /*&& (t == targetTransform) || t.IsChildOf(targetTransform))*/
             {
-                /*if (debug)*/ Debug.DrawLine(from.position, target, Color.green, 0.1f);
+                /*if (debug)*/ Debug.DrawLine(from.position, target.Value, Color.green, 0.1f);
                 return true;
             }
         }
 
-        /*if(debug)*/ Debug.DrawLine(from.position, target, Color.red, 0.1f);
+
+       /* if (Physics.Linecast(from.position, target.Value, out hitInfo, losMask))
+        {
+
+            var t = hitInfo.transform;
+            if (((1 << hitInfo.collider.gameObject.layer) & targetMask) != 0)
+            {
+                *//*if (debug)*//* Debug.DrawLine(from.position, target.Value, Color.green, 0.1f);
+                return true;
+            }
+        }*/
+
+        /*if(debug)*/ Debug.DrawLine(from.position, target.Value, Color.red, 0.1f);
         return false;
     }
 
@@ -197,54 +414,7 @@ public class FovRunner : IFieldOfViewRunner
     }
 
 
-    private void RunEvaluationPhase(Collider targetCollider, out int hitCount, bool addFallbackPoints, LayerMask targetMask)
-    {
-        Vector3 closest = targetCollider.ClosestPointOnBounds(_deps.fovOrigin.position);
-        Vector3 colCenter = targetCollider.bounds.center;
-        _samplePoints.Add(colCenter);
-        _samplePoints.Add(closest);
-        _samplePoints.Add(targetCollider.bounds.center + Vector3.up * targetCollider.bounds.extents.y);
-        _samplePoints.Add(targetCollider.bounds.center - Vector3.right * targetCollider.bounds.extents.x);
-        _samplePoints.Add(targetCollider.bounds.center + Vector3.right * targetCollider.bounds.extents.x);
-        int angleCount = 0;
-        foreach (var p in _samplePoints)
-        {
-            if (this.IsWithinAngle(_deps.fovOrigin, p, _deps.fovHalfAngle/*, _params.useSeparateVerticleAngle, _params.verticalFovHalfAngle*/))
-            {
-                angleCount++;
-                break;
-            }
-        }
-        _samplePoints.Clear();
-
-        if (angleCount == 0)
-        {
-            hitCount = 0;
-            return;
-        }
-
-
-
-        Vector3 waistPos = _deps.ownerOrigin.TransformPoint(0f, _deps.waistHeightOffset, 0f);
-        Vector3 eyePos = _deps.ownerOrigin.TransformPoint(0f, _deps.eyeHeightOffset, 0f);
-        Vector3 centerPos = (waistPos + eyePos) * 0.5f;
-        Vector3 direction = TargetingUtility.GetDirectionToTarget(closest, centerPos);
-
-        hitCount = this.EvaluateViewCone(
-        waistPos,
-        eyePos,
-        _deps.evaluationCapsuleRadius,
-        direction,
-        _deps.fovRadius,
-        targetMask,
-        _evaluationHitPoints,
-        _hitBuffer
-        );
-
-
-        if (hitCount > 0 && addFallbackPoints)
-            AddFallbackPoints(targetCollider, _evaluationHitPoints, ref hitCount);
-    }
+ 
 
     private void GetSamplePoints(Collider target, List<Vector3> points)
     {

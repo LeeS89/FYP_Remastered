@@ -92,7 +92,8 @@ public partial class NPCController
     private void ConstructFovRunner()
     {
         _fovDeps.SetTarget(_primaryTarget); // TESTING NOW
-        _fovRunner = new NPCFieldOfViewHandlerNew(_fovDeps, onSweepComplete: _componentNotifications);
+        //_fovRunner = new NPCFieldOfViewHandlerNew(_fovDeps, onSweepComplete: _componentNotifications);
+        _fovRunner = new FovRunner(_fovDeps, onSweepComplete: _componentNotifications);
     }
 
     private void ConstructFSM()

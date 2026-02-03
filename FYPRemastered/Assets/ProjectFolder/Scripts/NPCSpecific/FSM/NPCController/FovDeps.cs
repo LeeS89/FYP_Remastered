@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Text;
 using UnityEngine;
 
 [System.Serializable]
@@ -8,11 +10,13 @@ public class FovDeps
        "Also the origin for initial Detection phase, uses OverlapSphere from this origin")]
     public Transform fovOrigin;
     public int maxFovTargets = 5;
-    public LayerMask blockingMask; // Make protected and use methods to modify?
+    public LayerMask blockingMask; // Make protected and use methods to modify? => Obsolete
     // Plus, modify dynamically depending on FOV phase
 
-    public LayerMask worldMask;
+    //public LayerMask NpcLayer;
+    public LayerMask worldLayers;
 
+  
     public ITargetable Target { get; private set; }
 
     public void SetTarget(ITargetable target)
@@ -29,8 +33,44 @@ public class FovDeps
         if(Target != null)
             blockingMask &= ~Target.LayerMask; // Remove previous target layer from blocking mask
 
+      //  CoroutineRunner.Instance.StartCoroutine(TestPruint());
+       
         Target = target;
         blockingMask |= Target.LayerMask;
+    }
+
+
+   /* IEnumerator TestPruint()
+    {
+        yield return new WaitForSeconds(5f);
+        int losMask = worldLayers.value | NpcLayer.value;
+      //  LayerMask newMask = worldLayers |= NpcLayer;
+        Debug.LogError(DescribeLayers(losMask));
+    }*/
+
+    public string DescribeLayers(LayerMask mask)
+    {
+        int bits = mask.value;
+        var sb = new StringBuilder();
+
+        sb.Append("LayerMask (value=").Append(bits).Append(") contains: ");
+
+        bool any = false;
+        for (int layer = 0; layer < 32; layer++)
+        {
+            if ((bits & (1 << layer)) != 0)
+            {
+                string name = LayerMask.LayerToName(layer);
+                if (string.IsNullOrEmpty(name)) name = $"<unnamed:{layer}>";
+
+                if (any) sb.Append(", ");
+                sb.Append(name);
+                any = true;
+            }
+        }
+
+        if (!any) sb.Append("<none>");
+        return sb.ToString();
     }
 
     public LayerMask TargetMask() => Target == null ? default : Target.LayerMask;
