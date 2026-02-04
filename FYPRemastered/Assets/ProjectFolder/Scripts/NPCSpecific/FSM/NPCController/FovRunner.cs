@@ -204,26 +204,43 @@ public class FovRunner : IFieldOfViewRunner
     }
     static Vector3 Abs(Vector3 v) => new Vector3(Mathf.Abs(v.x), Mathf.Abs(v.y), Mathf.Abs(v.z));
 
+    public bool _testDistancePrint = false;
+
     private void RunEvaluationPhaseNew(Collider targetCollider, out int hitCount, bool addFallbackPoints, LayerMask targetMask)
     {
-        
+        _samplePoints.Clear();
         Transform t = targetCollider.transform;
 
-        Vector3 closest = targetCollider.ClosestPoint(_deps.fovOrigin.position);
-        Vector3 colCenter = GetCenterWorld(targetCollider);//targetCollider.bounds.center;
-        Vector3 ext = GetHalfExtentsWorld_Primitive(targetCollider);
+        //Vector3 closest = targetCollider.ClosestPoint(_deps.fovOrigin.position);
+        Vector3 colCenter = /*GetCenterWorld(targetCollider);*/targetCollider.ClosestPoint(targetCollider.bounds.center);
+        Vector3 top = targetCollider.ClosestPoint(colCenter + t.up * targetCollider.bounds.extents.y);
+        Vector3 right = targetCollider.ClosestPoint(colCenter + t.right * targetCollider.bounds.extents.x);
+        Vector3 left = targetCollider.ClosestPoint(colCenter - t.right * targetCollider.bounds.extents.x);
+        //Vector3 ext = GetHalfExtentsWorld_Primitive(targetCollider);
+        if (_testDistancePrint)
+        {
+           // float d = (_deps.fovOrigin.position - closest).magnitude;
+            //Debug.LogError($"ClosestPoint distance = {d}");
+           /* float c = (_deps.fovOrigin.position - colCenter).magnitude;
+            Debug.LogError($"Center distance = {c}");
+            float tp = (_deps.fovOrigin.position - top).magnitude;
+            Debug.LogError($"Top distance = {tp}");
+            float l = (_deps.fovOrigin.position - left).magnitude;
+            Debug.LogError($"ClosestPoint distance = {l}");
+            float r = (_deps.fovOrigin.position - right).magnitude;
+            Debug.LogError($"ClosestPoint distance = {r}");*/
+        }
 
+        _samplePoints.Add(colCenter);
+        //_samplePoints.Add(closest);
 
-        _samplePoints.Add(targetCollider.ClosestPoint(colCenter));
-        _samplePoints.Add(closest);
-
-        _samplePoints.Add(targetCollider.ClosestPoint(colCenter + t.up * ext.y));
+        /*_samplePoints.Add(targetCollider.ClosestPoint(colCenter + t.up * ext.y));
         _samplePoints.Add(targetCollider.ClosestPoint(colCenter - t.right * ext.x));
-        _samplePoints.Add(targetCollider.ClosestPoint(colCenter + t.right * ext.x));
+        _samplePoints.Add(targetCollider.ClosestPoint(colCenter + t.right * ext.x));*/
 
-       /* _samplePoints.Add(targetCollider.bounds.center + Vector3.up * targetCollider.bounds.extents.y);
-        _samplePoints.Add(targetCollider.bounds.center - Vector3.right * targetCollider.bounds.extents.x);
-        _samplePoints.Add(targetCollider.bounds.center + Vector3.right * targetCollider.bounds.extents.x);*/
+        _samplePoints.Add(top);
+        _samplePoints.Add(right);
+        _samplePoints.Add(left);
         int angleCount = 0;
         foreach (var p in _samplePoints)
         {
@@ -234,7 +251,7 @@ public class FovRunner : IFieldOfViewRunner
                 //break;
             }
         }
-        _samplePoints.Clear();
+        
         hitCount = 0;
     /*    if (angleCount == 0)
         {
@@ -330,30 +347,31 @@ public class FovRunner : IFieldOfViewRunner
         Vector3 direction = (target.Value - from.position);
         float dist = direction.magnitude;
         direction /= dist;
+        /*
+                if(Physics.Raycast(from.position, direction, out hitInfo, dist, losMask*//*, QueryTriggerInteraction.Collide*//*))
+                {
+                     var t = hitInfo.transform;
+                    if (((1 << hitInfo.collider.gameObject.layer) & targetMask) != 0)
+                    {
+                        *//*if (debug)*//* Debug.DrawLine(from.position, target.Value, Color.green, 0.1f);
+                        return true;
+                    }
+                }*/
 
-        if(Physics.Raycast(from.position, direction, out hitInfo, dist, losMask/*, QueryTriggerInteraction.Collide*/))
-        {
-             var t = hitInfo.transform;
-            if (((1 << hitInfo.collider.gameObject.layer) & targetMask) != 0)
-            {
-                /*if (debug)*/ Debug.DrawLine(from.position, target.Value, Color.green, 0.1f);
-                return true;
-            }
-        }
 
-
-       /* if (Physics.Linecast(from.position, target.Value, out hitInfo, losMask))
+        if (Physics.Linecast(from.position, target.Value, out hitInfo, losMask))
         {
 
             var t = hitInfo.transform;
             if (((1 << hitInfo.collider.gameObject.layer) & targetMask) != 0)
             {
-                *//*if (debug)*//* Debug.DrawLine(from.position, target.Value, Color.green, 0.1f);
+                /*if (debug)*/ Debug.DrawLine(from.position, hitInfo.point, Color.green, 0.1f);
                 return true;
             }
-        }*/
+        }
 
-        /*if(debug)*/ Debug.DrawLine(from.position, target.Value, Color.red, 0.1f);
+        /*if(debug)*/
+        Debug.DrawLine(from.position, hitInfo.point, Color.red, 0.1f);
         return false;
     }
 

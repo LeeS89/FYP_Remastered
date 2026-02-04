@@ -245,6 +245,8 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
     protected virtual void OnDamageTaken(float remainingHealth) { }
 
     public bool _showDistance = false;
+    public bool _testAgentStop = false;
+    public bool _testAgentStop2 = false;
 
     protected virtual void Update()
     {
@@ -252,6 +254,17 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
         {
             OnNotify(NpcNotification.DestinationReached());
             _testOverrideRot = false;
+        }
+
+        if (_testAgentStop)
+        {
+            _testAgentStop2 = true;
+
+            FovRunner r = _fovRunner as FovRunner;
+            r._testDistancePrint = true;
+            Agent.ResetPath();
+            Agent.enabled = false;
+            _testAgentStop = false;
         }
 
         if(_fsmManager != null)
@@ -264,6 +277,8 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
 
         if (IsDead) return;
         _fovRunner?.Tick(Time.deltaTime);
+
+        if (_testAgentStop2) return;
         _fsmManager?.Tick(Time.deltaTime);
       
         if (_testStateCheck)
@@ -278,6 +293,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
 
         //_inbox.Flush(this.Decide);
        
+        if(!_testAgentStop2)
         _fsmManager?.LateTick(Time.deltaTime);
         
         if (Agent == null) return;
