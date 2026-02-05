@@ -209,13 +209,15 @@ public class FovRunner : IFieldOfViewRunner
     private void RunEvaluationPhaseNew(Collider targetCollider, out int hitCount, bool addFallbackPoints, LayerMask targetMask)
     {
         _samplePoints.Clear();
-        Transform t = targetCollider.transform;
+
+        targetCollider.GetSamplePoints(_samplePoints);
+     //   Transform t = targetCollider.transform;
 
         //Vector3 closest = targetCollider.ClosestPoint(_deps.fovOrigin.position);
-        Vector3 colCenter = /*GetCenterWorld(targetCollider);*/targetCollider.ClosestPoint(targetCollider.bounds.center);
-        Vector3 top = targetCollider.ClosestPoint(colCenter + t.up * targetCollider.bounds.extents.y);
-        Vector3 right = targetCollider.ClosestPoint(colCenter + t.right * targetCollider.bounds.extents.x);
-        Vector3 left = targetCollider.ClosestPoint(colCenter - t.right * targetCollider.bounds.extents.x);
+      //  Vector3 colCenter = /*GetCenterWorld(targetCollider);*/targetCollider.ClosestPoint(targetCollider.bounds.center);
+      //  Vector3 top = targetCollider.ClosestPoint(colCenter + t.up * targetCollider.bounds.extents.y);
+       // Vector3 right = targetCollider.ClosestPoint(colCenter + t.right * targetCollider.bounds.extents.x);
+      //  Vector3 left = targetCollider.ClosestPoint(colCenter - t.right * targetCollider.bounds.extents.x);
         //Vector3 ext = GetHalfExtentsWorld_Primitive(targetCollider);
         if (_testDistancePrint)
         {
@@ -231,16 +233,16 @@ public class FovRunner : IFieldOfViewRunner
             Debug.LogError($"ClosestPoint distance = {r}");*/
         }
 
-        _samplePoints.Add(colCenter);
+       // _samplePoints.Add(colCenter);
         //_samplePoints.Add(closest);
 
         /*_samplePoints.Add(targetCollider.ClosestPoint(colCenter + t.up * ext.y));
         _samplePoints.Add(targetCollider.ClosestPoint(colCenter - t.right * ext.x));
         _samplePoints.Add(targetCollider.ClosestPoint(colCenter + t.right * ext.x));*/
 
-        _samplePoints.Add(top);
+      /*  _samplePoints.Add(top);
         _samplePoints.Add(right);
-        _samplePoints.Add(left);
+        _samplePoints.Add(left);*/
         int angleCount = 0;
         foreach (var p in _samplePoints)
         {
@@ -739,6 +741,69 @@ internal static class FovRunnerExtension
 
         else
             hitTarget = false;
+    }
+
+
+
+
+    public static void GetSamplePoints(this Collider col, List<Vector3> points, float inset = 0.9f)
+    {
+        if (col == null || points == null) return;
+
+        points.Clear();
+        var t = col.transform;
+
+        if(col is BoxCollider box)
+        {
+            Vector3 center = t.TransformPoint(box.center);
+            Vector3 half = (box.size * 0.5f) * inset;
+
+            Vector3 right = t.right * half.x;
+            Vector3 up = t.up * half.y;
+
+            points.Add(center);
+            points.Add(center + up);
+            points.Add(center + right);
+            points.Add(center - right);
+
+        }else if(col is CapsuleCollider cap)
+        {
+            Vector3 center = t.TransformPoint(cap.center);
+
+            float radius = cap.radius * inset;
+            float halfHeight = Mathf.Max(cap.height * 0.5f - cap.radius, 0f);
+
+            Vector3 axis = cap.direction == 0 ? t.right
+                : cap.direction == 1 ? t.up : t.forward;
+
+            Vector3 topSphere = center + axis * halfHeight;
+            Vector3 bottomSphere = center - axis * halfHeight;
+
+            points.Add(center);
+            points.Add(topSphere + axis * radius);
+            points.Add(center + t.right * radius);
+            points.Add(center - t.right * radius);
+        }
+       /* if (col is CharacterController cc)
+        {
+            Vector3 center = t.TransformPoint(cc.center);
+
+            float radius = cc.radius * inset;
+            float halfHeight = Mathf.Max(cc.height * 0.5f - cc.radius, 0f);
+
+            // Capsule axis is always Y for CharacterController
+            Vector3 axis = t.up;
+
+            Vector3 topSphere = center + axis * halfHeight;
+            Vector3 bottomSphere = center - axis * halfHeight;
+
+            points.Add(center);
+            points.Add(topSphere + axis * radius);
+            points.Add(bottomSphere - axis * radius);
+            points.Add(center + t.right * radius);
+            points.Add(center - t.right * radius);
+        }*/
+
     }
 
 }

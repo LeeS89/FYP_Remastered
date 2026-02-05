@@ -118229,6 +118229,8 @@ MonoBehaviour:
   currentRotOverride: 0
   _testComOrder: 0
   _showDistance: 0
+  _testAgentStop: 0
+  _testAgentStop2: 0
   _testStateCheck: 0
   _testFovResult: 0
   _fsmDeps:
@@ -118274,9 +118276,6 @@ MonoBehaviour:
     blockingMask:
       serializedVersion: 2
       m_Bits: 17
-    NpcLayer:
-      serializedVersion: 2
-      m_Bits: 0
     worldLayers:
       serializedVersion: 2
       m_Bits: 0
@@ -153876,6 +153875,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7300394724241211646, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5895332771718422202}
+    - targetCorrespondingSourceObject: {fileID: 7300394724241211646, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5895332771718422211}
   m_SourcePrefab: {fileID: 100100000, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
 --- !u!65 &3718215761319188344 stripped
 BoxCollider:
@@ -154783,6 +154785,29 @@ MonoBehaviour:
   gravity: -19.62
   groundedStick: -2
   moveRelativeTo: {fileID: 0}
+--- !u!136 &5895332771718422211
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1957251}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.2
+  m_Height: 0.5
+  m_Direction: 1
+  m_Center: {x: 0, y: 0.25, z: 0}
 --- !u!4 &5909642983039115874
 Transform:
   m_ObjectHideFlags: 0
@@ -156477,6 +156502,8 @@ MonoBehaviour:
   currentRotOverride: 0
   _testComOrder: 0
   _showDistance: 0
+  _testAgentStop: 0
+  _testAgentStop2: 0
   _testStateCheck: 0
   _testFovResult: 0
   _fsmDeps:
@@ -156522,9 +156549,6 @@ MonoBehaviour:
     blockingMask:
       serializedVersion: 2
       m_Bits: 17
-    NpcLayer:
-      serializedVersion: 2
-      m_Bits: 6
     worldLayers:
       serializedVersion: 2
       m_Bits: 0
