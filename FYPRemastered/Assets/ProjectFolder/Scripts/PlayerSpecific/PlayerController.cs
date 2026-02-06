@@ -206,14 +206,14 @@ public sealed class PlayerController : TargetableInit<IPlaceholderService, Playe
     private void AdjustPlayerHeight(Vector3 _cameraLocalPos)
     {
         if (_controller == null) { return; }
-        Vector3 newControllerCenter;
+        Vector3 newCapsuleCenter;
 
         _controller.height = Mathf.Clamp(_cameraLocalPos.y, _bodyHeightMin, _bodyHeightMax);
-        newControllerCenter.x = _cameraLocalPos.x;
-        newControllerCenter.y = _controller.height / 2;
-        newControllerCenter.z = _cameraLocalPos.z;
+        newCapsuleCenter.x = _cameraLocalPos.x;
+        newCapsuleCenter.y = _controller.height / 2;
+        newCapsuleCenter.z = _cameraLocalPos.z;
 
-        _controller.center = newControllerCenter;
+        _controller.center = newCapsuleCenter;
 
     }
 

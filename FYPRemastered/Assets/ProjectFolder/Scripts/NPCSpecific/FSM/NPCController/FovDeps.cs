@@ -14,7 +14,7 @@ public class FovDeps
     // Plus, modify dynamically depending on FOV phase
 
     //public LayerMask NpcLayer;
-    public LayerMask worldLayers;
+    public LayerMask worldMask;
 
   
     public ITargetable Target { get; private set; }

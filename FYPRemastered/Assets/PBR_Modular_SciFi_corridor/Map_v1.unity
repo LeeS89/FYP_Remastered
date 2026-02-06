@@ -99363,6 +99363,61 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4544342159451698138, guid: f064ed78b4d80b5488bec8d84779d625, type: 3}
   m_PrefabInstance: {fileID: 1565322800}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1567950300
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1567950301}
+  - component: {fileID: 1567950302}
+  m_Layer: 3
+  m_Name: LosCollider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1567950301
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1567950300}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5567585102503042835}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!136 &1567950302
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1567950300}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.2
+  m_Height: 0.5
+  m_Direction: 1
+  m_Center: {x: 0, y: 0.25, z: 0}
 --- !u!1001 &1569009569
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -153790,6 +153845,10 @@ PrefabInstance:
       value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 7300394724241211646, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7300394724241211646, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
@@ -153868,6 +153927,9 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 8025562586149453778, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1567950301}
     - targetCorrespondingSourceObject: {fileID: 4511130931059676277, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
       insertIndex: 0
       addedObject: {fileID: 806061757}
@@ -153875,9 +153937,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7300394724241211646, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5895332771718422202}
-    - targetCorrespondingSourceObject: {fileID: 7300394724241211646, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 5895332771718422211}
   m_SourcePrefab: {fileID: 100100000, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
 --- !u!65 &3718215761319188344 stripped
 BoxCollider:
@@ -154785,29 +154844,6 @@ MonoBehaviour:
   gravity: -19.62
   groundedStick: -2
   moveRelativeTo: {fileID: 0}
---- !u!136 &5895332771718422211
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1957251}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.2
-  m_Height: 0.5
-  m_Direction: 1
-  m_Center: {x: 0, y: 0.25, z: 0}
 --- !u!4 &5909642983039115874
 Transform:
   m_ObjectHideFlags: 0
