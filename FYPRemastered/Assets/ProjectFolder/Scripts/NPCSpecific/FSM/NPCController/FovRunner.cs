@@ -205,6 +205,7 @@ public class FovRunner : IFieldOfViewRunner
     static Vector3 Abs(Vector3 v) => new Vector3(Mathf.Abs(v.x), Mathf.Abs(v.y), Mathf.Abs(v.z));
 
     public bool _testDistancePrint = false;
+    private RaycastHit[] _hits = new RaycastHit[5];
 
     private void RunEvaluationPhaseNew(Collider targetCollider, out int hitCount, bool addFallbackPoints, LayerMask targetMask)
     {
@@ -220,7 +221,10 @@ public class FovRunner : IFieldOfViewRunner
                 bool isWorldBlocked = !TargetHit(_deps.fovOrigin, p, _deps.worldMask, _deps.Target.LayerMask);
                 if (isWorldBlocked) continue;
                 int hits;
-                TargetHitTest(_deps.fovOrigin, p, _deps.blockingMask, new RaycastHit[5], out hits);
+                if (!TargetHitTest(_deps.fovOrigin, p, _deps.blockingMask, _hits, out hits)) continue;
+
+                result = HasClearFov(hits, _hits, _deps.ownerOrigin) ? FOVResult.TargetSeenAndWithinShootingAngles : FOVResult.TargetNotSeen;
+                /// Send Result
                 if (hits == 0)
                 {
                     result = FOVResult.TargetSeen; hitCount = 0;
@@ -238,7 +242,21 @@ public class FovRunner : IFieldOfViewRunner
  
     }
 
-    public void TargetHitTest(
+    private bool HasClearFov(int numHits, RaycastHit[] hits, Transform ownerOrigin)
+    {
+        if (numHits == 0 || hits == null) return true;
+
+        for(int i = 0; i < numHits; i++)
+        {
+            var hit = hits[i];
+            if (hit.transform.IsChildOf(ownerOrigin)) continue;
+            else
+                return false;
+        }
+        return true;
+    }
+
+    public bool TargetHitTest(
       Transform from,
       Vector3 target,
       LayerMask blockingMask,
@@ -247,26 +265,15 @@ public class FovRunner : IFieldOfViewRunner
       bool debug = false
       )
     {
-        if (from == null || hitBuffer == null) { hitCount = 0; return; }
+        if (from == null || hitBuffer == null) { hitCount = 0; return false; }
 
-
-       // RaycastHit hitInfo;
         Vector3 direction = (target - from.position);
         float dist = direction.magnitude;
         direction /= dist;
 
         hitCount = Physics.RaycastNonAlloc(from.position, direction, hitBuffer, dist, blockingMask);
-
-        /*if (Physics.Raycast(from.position, direction, out hitInfo, dist, losMask, QueryTriggerInteraction.Collide))
-        {
-            var t = hitInfo.transform;
-            if (((1 << hitInfo.collider.gameObject.layer) & targetMask) != 0)
-            {
-                if (debug) Debug.DrawLine(from.position, target.Value, Color.green, 0.1f);
-                return true;
-            }
-        }*/
-
+        return true;
+      
     }
 
 
