@@ -245,11 +245,16 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
     protected virtual void OnDamageTaken(float remainingHealth) { }
 
     public bool _showDistance = false;
+    public bool ShowFOV = false;
     public bool _testAgentStop = false;
     public bool _testAgentStop2 = false;
 
     protected virtual void Update()
     {
+        if (ShowFOV)
+        {
+            Debug.LogError("Current FOV: " + CurrentFovState.ToString());
+        }
         if (_testOverrideRot)
         {
             OnNotify(NpcNotification.DestinationReached());
@@ -278,7 +283,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
         if (IsDead) return;
         _fovRunner?.Tick(Time.deltaTime);
 
-        if (_testAgentStop2) return;
+        if (_testAgentStop2) { return; }
         _fsmManager?.Tick(Time.deltaTime);
       
         if (_testStateCheck)
@@ -337,7 +342,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
     {
         if (IsDead) return;
         Debug.LogError("FOVResult: Target Seen");
-        ApplyFOVStatusUpdate(FOVResult.TargetSeen);
+        ApplyFOVStatusUpdate(FOVResult.ClearFov);
         //  _eManager.AimTowardsTarget(aim: true);
         var n = NpcNotification.FOVUpdate(/*_fsmManager.CurrentStateId, */CurrentFovState, false);
         OnNotify(n);
@@ -362,7 +367,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
     {
         if (IsDead || _fsmManager == null) return;
         if (_fsmManager.CurrentStateId == StateId.Chase || _fsmManager.CurrentStateId == StateId.Follow)
-            if (IsMoving() || CurrentFovState == FOVResult.TargetSeen)
+            if (IsMoving() || CurrentFovState == FOVResult.ClearFov)
             {
                 this.RotateTowardsTarget(_primaryTarget?.Transform, rotate: true);
                 if (!_aimingAtTarget) { _aimingAtTarget = true; _animationControl?.IkLookAtTarget(look: true); }

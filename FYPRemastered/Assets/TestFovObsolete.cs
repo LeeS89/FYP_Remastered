@@ -87,7 +87,7 @@ public class TestFovObsolete : MonoBehaviour//, IFieldOfViewOwnerObsolete
         Vector3 rightBound = Quaternion.AngleAxis(hAng, up) * forward;
         Vector3 leftBound = Quaternion.AngleAxis(-hAng, up) * forward;
 
-        if (_result == FOVResult.TargetSeen)
+        if (_result == FOVResult.ClearFov)
         {
             Gizmos.color = Color.green;
         }

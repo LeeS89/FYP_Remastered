@@ -118284,6 +118284,7 @@ MonoBehaviour:
   currentRotOverride: 0
   _testComOrder: 0
   _showDistance: 0
+  ShowFOV: 0
   _testAgentStop: 0
   _testAgentStop2: 0
   _testStateCheck: 0
@@ -118330,10 +118331,10 @@ MonoBehaviour:
     maxFovTargets: 10
     blockingMask:
       serializedVersion: 2
-      m_Bits: 17
-    worldLayers:
+      m_Bits: 16
+    worldMask:
       serializedVersion: 2
-      m_Bits: 0
+      m_Bits: 1
     fovRadius: 25
     ownerOrigin: {fileID: 1863641519}
     waistHeightOffset: 1
@@ -156538,6 +156539,7 @@ MonoBehaviour:
   currentRotOverride: 0
   _testComOrder: 0
   _showDistance: 0
+  ShowFOV: 0
   _testAgentStop: 0
   _testAgentStop2: 0
   _testStateCheck: 0
@@ -156584,10 +156586,10 @@ MonoBehaviour:
     maxFovTargets: 10
     blockingMask:
       serializedVersion: 2
-      m_Bits: 17
-    worldLayers:
+      m_Bits: 16
+    worldMask:
       serializedVersion: 2
-      m_Bits: 0
+      m_Bits: 1
     fovRadius: 25
     ownerOrigin: {fileID: 8070524998269774116}
     waistHeightOffset: 1

@@ -90,7 +90,7 @@ public class NPCFieldOfViewHandler : IFieldOfViewRunner
 
     public void RunFOVSweep()
     {
-        FOVResult result = FOVResult.TargetOutsideSweepRadius;
+        FOVResult result = FOVResult.None;
         bool inShootAngle = false;
         LayerMask targetMask = _params?.TargetMask() ?? default;
 
@@ -114,12 +114,12 @@ public class NPCFieldOfViewHandler : IFieldOfViewRunner
             if (hitCount == 0) continue;
             result = RunTargetingPhase(hitCount, _params.blockingMask, targetMask);
 
-            if (result != FOVResult.TargetSeen) continue;
+            if (result != FOVResult.ClearFov) continue;
 
             inShootAngle = !_params.useShootingAngleRestriction ? true :
                 TargetWithinAimThreshold(_params.fovOrigin, _proximityDetectionResults[i].ClosestPointOnBounds(_params.fovOrigin.position), _params.halfHorizontalShootAngle);
 
-            result = inShootAngle == true ? FOVResult.TargetSeenAndWithinShootingAngles : FOVResult.TargetSeen;
+            result = inShootAngle == true ? FOVResult.TargetSeenAndWithinShootingAngles : FOVResult.ClearFov;
             SendResult(result);
             //OnFOVSweepComplete?.Invoke(result, inShootAngle);
             return;
@@ -156,7 +156,7 @@ public class NPCFieldOfViewHandler : IFieldOfViewRunner
             {
                 continue;
             }
-            return FOVResult.TargetSeen;
+            return FOVResult.ClearFov;
         }
 
         return FOVResult.TargetNotSeen;
@@ -349,7 +349,7 @@ public class NPCFieldOfViewHandlerNew : IFieldOfViewRunner
     {
         if (TargetIsNull()) return;
 
-        FOVResult result = FOVResult.TargetOutsideSweepRadius;
+        FOVResult result = FOVResult.None;
         bool inShootAngle = false;
         LayerMask targetMask = _deps.Target.LayerMask;//_params?.TargetMask() ?? default;
 
@@ -372,12 +372,12 @@ public class NPCFieldOfViewHandlerNew : IFieldOfViewRunner
             if (hitCount == 0) continue;
             result = RunTargetingPhase(hitCount, _deps.blockingMask, targetMask);
 
-            if (result != FOVResult.TargetSeen) continue;
+            if (result != FOVResult.ClearFov) continue;
 
             inShootAngle = !_deps.useShootingAngleRestriction ? true :
                 TargetWithinAimThreshold(_deps.fovOrigin, _proximityDetectionResults[i].ClosestPointOnBounds(_deps.fovOrigin.position), _deps.halfHorizontalShootAngle);
 
-            result = inShootAngle == true ? FOVResult.TargetSeenAndWithinShootingAngles : FOVResult.TargetSeen;
+            result = inShootAngle == true ? FOVResult.TargetSeenAndWithinShootingAngles : FOVResult.ClearFov;
             SendResult(result);
             return;
 
@@ -412,7 +412,7 @@ public class NPCFieldOfViewHandlerNew : IFieldOfViewRunner
             {
                 continue;
             }
-            return FOVResult.TargetSeen;
+            return FOVResult.ClearFov;
         }
 
         return FOVResult.TargetNotSeen;
@@ -539,13 +539,13 @@ public class NPCFieldOfViewHandlerNew : IFieldOfViewRunner
 
 public enum FOVResult
 {
-    None,
-    TargetOutsideSweepRadius,
-    TargetInsideSweepRadius,
-    TargetSeen, // Seen but outside of meelee and shooting range
-    TargetSeenAndWithinMeleeRadius,
-    TargetSeenAndWithinShootingAngles,
-    TargetNotSeen
+    None = 0,
+    TargetNotSeen = 1,
+    PartialFov = 2,
+    ClearFov = 3, // Seen but outside of meelee and shooting range
+    TargetSeenAndWithinShootingAngles = 4,
+    TargetSeenAndWithinMeleeRadius = 5
+
 }
 
 

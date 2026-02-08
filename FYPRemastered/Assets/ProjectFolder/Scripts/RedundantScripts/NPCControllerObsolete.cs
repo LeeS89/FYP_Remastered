@@ -288,7 +288,7 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, /*INPC
     {
         if (OwnerIsDead) return;
         Debug.LogError("FOVResult: Target Seen");
-        ApplyFOVStatusUpdate(FOVResult.TargetSeen);
+        ApplyFOVStatusUpdate(FOVResult.ClearFov);
         //  _eManager.AimTowardsTarget(aim: true);
         var n = NpcNotification.FOVUpdate(/*_fsmManager.CurrentStateId, */CurrentFovState, false);
         OnNotify(n);
@@ -312,7 +312,7 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, /*INPC
     {
         if (OwnerIsDead || _fsmManager == null) return;
         if (_fsmManager.CurrentStateId == StateId.Chase || _fsmManager.CurrentStateId == StateId.Follow)
-            if (IsStationary || CurrentFovState == FOVResult.TargetSeen)
+            if (IsStationary || CurrentFovState == FOVResult.ClearFov)
             {
                 this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: true);
                 if (!_aimingAtTarget) { _aimingAtTarget = true; _animationControl?.IkLookAtTarget(look: true); }
@@ -746,7 +746,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
     {
      //   if (IsDead) return;
         Debug.LogError("FOVResult: Target Seen");
-        ApplyFOVStatusUpdate(FOVResult.TargetSeen);
+        ApplyFOVStatusUpdate(FOVResult.ClearFov);
         //  _eManager.AimTowardsTarget(aim: true);
         var n = NpcNotification.FOVUpdate(/*_fsmManager.CurrentStateId, */CurrentFovState, false);
         OnNotify(n);
@@ -770,7 +770,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
     {
         //if (IsDead || _fsmManager == null) return;
         if (_fsmManager.CurrentStateId == StateId.Chase || _fsmManager.CurrentStateId == StateId.Follow)
-            if (IsStationary || CurrentFovState == FOVResult.TargetSeen)
+            if (IsStationary || CurrentFovState == FOVResult.ClearFov)
             {
                 this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: true);
                 if (!_aimingAtTarget) { _aimingAtTarget = true; _animationControl?.IkLookAtTarget(look: true); }

@@ -13,7 +13,7 @@ public static class NPCControllerExtension
         Action onSeenStable,
         Action onNotSeenStable)
     {
-        bool seenNow = result == FOVResult.TargetSeen;
+        bool seenNow = result == FOVResult.ClearFov;
 
         if (seenNow)
         {
@@ -46,7 +46,7 @@ public static class NPCControllerExtension
         uint requiredNotSeenStreak,
         Action<FOVResult> onResultStable)
     {
-        bool seenNow = result == FOVResult.TargetSeen;
+        bool seenNow = result == FOVResult.ClearFov;
 
         if (seenNow)
         {

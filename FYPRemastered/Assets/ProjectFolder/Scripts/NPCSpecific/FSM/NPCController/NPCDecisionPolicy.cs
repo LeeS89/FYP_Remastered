@@ -73,7 +73,7 @@ public static class NPCDecisionPolicy
         return false;
     }
 
-    private static bool TargetSeen(FOVResult result) => result == FOVResult.TargetSeen || result == FOVResult.TargetSeenAndWithinMeleeRadius
+    private static bool TargetSeen(FOVResult result) => result == FOVResult.ClearFov || result == FOVResult.TargetSeenAndWithinMeleeRadius
                     || result == FOVResult.TargetSeenAndWithinShootingAngles;
 
     private static bool DecideChase(INPCBrainContext self, in NpcNotification n, out BrainDecision d)
@@ -112,7 +112,7 @@ public static class NPCDecisionPolicy
     {
         RotationOrder newOrder;
 
-        if (newFOVStatus == FOVResult.TargetSeen || newFOVStatus == FOVResult.TargetSeenAndWithinShootingAngles
+        if (newFOVStatus == FOVResult.ClearFov || newFOVStatus == FOVResult.TargetSeenAndWithinShootingAngles
             || newFOVStatus == FOVResult.TargetSeenAndWithinMeleeRadius) { newOrder = RotationOrder.RotateTowardsTarget; }
         else newOrder = RotationOrder.StopRotating;
 
@@ -251,7 +251,7 @@ public static class NPCDecisionPolicyNew
         switch (n.Kind)
         {
             case NotificationKind.FOVUpdate:
-
+                //Debug.LogError("Receiving FOV update of: "+n.FOVResult.ToString());
                // if (!FOVStatusChanged(self, n.FOVResult)) return;
 
                // self.UpdateCurrentFovStatus(n.FOVResult);
@@ -278,7 +278,7 @@ public static class NPCDecisionPolicyNew
 
     }
 
-    private static bool TargetSeen(FOVResult result) => result == FOVResult.TargetSeen || result == FOVResult.TargetSeenAndWithinMeleeRadius
+    private static bool TargetSeen(FOVResult result) => result == FOVResult.ClearFov || result == FOVResult.PartialFov || result == FOVResult.TargetSeenAndWithinMeleeRadius
                     || result == FOVResult.TargetSeenAndWithinShootingAngles;
 
     private static void DecideChase(INPCBrainContext self, in NpcNotification n)

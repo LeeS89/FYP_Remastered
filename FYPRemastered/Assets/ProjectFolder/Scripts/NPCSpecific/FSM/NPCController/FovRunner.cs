@@ -114,7 +114,7 @@ public class FovRunner : IFieldOfViewRunner
     {
         if (TargetIsNull()) return;
 
-        FOVResult result = FOVResult.TargetOutsideSweepRadius;
+        FOVResult currentResult = FOVResult.TargetNotSeen;
         bool inShootAngle = false;
         LayerMask targetMask = _deps.Target.LayerMask;//_params?.TargetMask() ?? default;
 
@@ -131,83 +131,34 @@ public class FovRunner : IFieldOfViewRunner
 
         for (int i = 0; i < detectedCount; i++)
         {
-            int hitCount;
-            RunEvaluationPhaseNew(_proximityDetectionResults[i], out hitCount, _deps.addTargetFallbackPoints, targetMask);
+            //int hitCount;
+            FOVResult newResult = RunEvaluationPhaseNew(_proximityDetectionResults[i], /*out hitCount,*/ _deps.addTargetFallbackPoints, targetMask);
 
-            //if (hitCount == 0) continue;
-           // result = RunTargetingPhase(hitCount, _deps.blockingMask, targetMask);
+            if (newResult < currentResult || newResult < FOVResult.PartialFov) continue;
+            currentResult = newResult;
 
-            /*if (result != FOVResult.TargetSeen)*/ continue;
+            if (currentResult < FOVResult.ClearFov) continue;
+            
+            // DO Melee Sweep here => If hit, return early, else perform shooting angle check
+
 
             inShootAngle = !_deps.useShootingAngleRestriction ? true :
                 TargetWithinAimThreshold(_deps.fovOrigin, _proximityDetectionResults[i].ClosestPointOnBounds(_deps.fovOrigin.position), _deps.halfHorizontalShootAngle);
 
-            result = inShootAngle == true ? FOVResult.TargetSeenAndWithinShootingAngles : FOVResult.TargetSeen;
-            SendResult(result);
+            currentResult = inShootAngle == true ? FOVResult.TargetSeenAndWithinShootingAngles : FOVResult.ClearFov;
+            SendResult(currentResult);
             return;
 
         }
-        SendResult(FOVResult.TargetNotSeen);
+        SendResult(currentResult);
     }
 
-    static Vector3 GetCenterWorld(Collider col)
-    {
-        Transform t = col.transform;
-
-        if (col is BoxCollider b) return t.TransformPoint(b.center);
-        if (col is SphereCollider s) return t.TransformPoint(s.center);
-        if (col is CapsuleCollider c) return t.TransformPoint(c.center);
-        return col.bounds.center;
-    }
-
-    static Vector3 GetHalfExtentsWorld_Primitive(Collider col)
-    {
-        Vector3 absScale = Abs(col.transform.lossyScale);
-
-        if (col is BoxCollider b)
-        {
-            Vector3 halfLocal = b.size * 0.5f;
-            return Vector3.Scale(halfLocal, absScale);
-        }
-
-        if (col is SphereCollider s)
-        {
-            float r = s.radius * Mathf.Max(absScale.x, absScale.y, absScale.z);
-            return new Vector3(r, r, r);
-        }
-
-        if (col is CapsuleCollider c)
-        {
-            // Capsule direction: 0=X, 1=Y, 2=Z in local space.
-            if (c.direction == 0) // X
-            {
-                float r = c.radius * Mathf.Max(absScale.y, absScale.z);
-                float halfH = (c.height * absScale.x) * 0.5f;
-                return new Vector3(halfH, r, r);
-            }
-            if (c.direction == 1) // Y
-            {
-                float r = c.radius * Mathf.Max(absScale.x, absScale.z);
-                float halfH = (c.height * absScale.y) * 0.5f;
-                return new Vector3(r, halfH, r);
-            }
-            else // Z
-            {
-                float r = c.radius * Mathf.Max(absScale.x, absScale.y);
-                float halfH = (c.height * absScale.z) * 0.5f;
-                return new Vector3(r, r, halfH);
-            }
-        }
-
-        // If you truly only use primitives, you can throw here instead.
-        return col.bounds.extents;
-    }
-    static Vector3 Abs(Vector3 v) => new Vector3(Mathf.Abs(v.x), Mathf.Abs(v.y), Mathf.Abs(v.z));
+   
 
     public bool _testDistancePrint = false;
     private RaycastHit[] _hits = new RaycastHit[5];
 
-    private void RunEvaluationPhaseNew(Collider targetCollider, out int hitCount, bool addFallbackPoints, LayerMask targetMask)
+    private FOVResult RunEvaluationPhaseNew(Collider targetCollider, /*out int hitCount, */bool addFallbackPoints, LayerMask targetMask)
     {
         _samplePoints.Clear();
         FOVResult result = FOVResult.TargetNotSeen;
@@ -220,26 +171,39 @@ public class FovRunner : IFieldOfViewRunner
             {
                 bool isWorldBlocked = !TargetHit(_deps.fovOrigin, p, _deps.worldMask, _deps.Target.LayerMask);
                 if (isWorldBlocked) continue;
+
+                FOVResult r;
+                if (!HasValidFov(_deps.fovOrigin, p, _deps.blockingMask, _deps.ownerOrigin, out r, _hits)) continue;
+
+                if (r == FOVResult.ClearFov) return r;
+                else if (r > result) result = r;
+
+                /*//old
                 int hits;
                 if (!TargetHitTest(_deps.fovOrigin, p, _deps.blockingMask, _hits, out hits)) continue;
 
-                result = HasClearFov(hits, _hits, _deps.ownerOrigin) ? FOVResult.TargetSeenAndWithinShootingAngles : FOVResult.TargetNotSeen;
+                result = HasClearFov(hits, _hits, _deps.ownerOrigin) ? FOVResult.ClearFov : FOVResult.PartialFov;
+
+
+
+                //old
                 /// Send Result
                 if (hits == 0)
                 {
-                    result = FOVResult.TargetSeen; hitCount = 0;
-                    SendResult(result);
-                    return;
+                    result = FOVResult.ClearFov; //hitCount = 0;
+                   // SendResult(result);
+                    return result;
                 }
                 else
-                    result = FOVResult.TargetSeenAndWithinShootingAngles;
+                    result = FOVResult.TargetSeenAndWithinShootingAngles;*/
 
             }
         }
-        SendResult(result);
+      //  SendResult(result);
         
-        hitCount = 0;
- 
+        //hitCount = 0;
+        return result;
+
     }
 
     private bool HasClearFov(int numHits, RaycastHit[] hits, Transform ownerOrigin)
@@ -255,7 +219,42 @@ public class FovRunner : IFieldOfViewRunner
         }
         return true;
     }
+    private bool HasValidFov(Transform from, Vector3 target, LayerMask blockingMask, Transform ownerOrigin, out FOVResult result, RaycastHit[] buffer)
+    {
+        if (from == null || buffer == null) { result = FOVResult.TargetNotSeen; return false; }
+       
+        int hits = TargetHitTestNew(from, target, blockingMask, buffer);
 
+        for (int i = 0; i < hits; i++)
+        {
+            var hit = buffer[i];
+            if (hit.transform.IsChildOf(ownerOrigin)) continue;
+            else
+            {
+                result = FOVResult.PartialFov;
+                return true;
+            }
+                
+        }
+        result = FOVResult.ClearFov;
+        return true;
+    }
+
+    public int TargetHitTestNew(
+      Transform from,
+      Vector3 target,
+      LayerMask blockingMask,
+      RaycastHit[] hitBuffer,
+      bool debug = false
+      )
+    {
+        Vector3 direction = (target - from.position);
+        float dist = direction.magnitude;
+        direction /= dist;
+
+        return Physics.RaycastNonAlloc(from.position, direction, hitBuffer, dist, blockingMask);
+      
+    }
     public bool TargetHitTest(
       Transform from,
       Vector3 target,
@@ -401,7 +400,7 @@ public class FovRunner : IFieldOfViewRunner
             {
                 continue;
             }
-            return FOVResult.TargetSeen;
+            return FOVResult.ClearFov;
         }
 
         return FOVResult.TargetNotSeen;
@@ -464,14 +463,84 @@ public class FovRunner : IFieldOfViewRunner
             origin,
             results,
             radius,
-            targetMask
+            targetMask,
+            true
             );
 
         return count;
     }
 
     public void LateTick(float dt) { }
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    static Vector3 GetCenterWorld(Collider col)
+    {
+        Transform t = col.transform;
+
+        if (col is BoxCollider b) return t.TransformPoint(b.center);
+        if (col is SphereCollider s) return t.TransformPoint(s.center);
+        if (col is CapsuleCollider c) return t.TransformPoint(c.center);
+        return col.bounds.center;
+    }
+
+    static Vector3 GetHalfExtentsWorld_Primitive(Collider col)
+    {
+        Vector3 absScale = Abs(col.transform.lossyScale);
+
+        if (col is BoxCollider b)
+        {
+            Vector3 halfLocal = b.size * 0.5f;
+            return Vector3.Scale(halfLocal, absScale);
+        }
+
+        if (col is SphereCollider s)
+        {
+            float r = s.radius * Mathf.Max(absScale.x, absScale.y, absScale.z);
+            return new Vector3(r, r, r);
+        }
+
+        if (col is CapsuleCollider c)
+        {
+            // Capsule direction: 0=X, 1=Y, 2=Z in local space.
+            if (c.direction == 0) // X
+            {
+                float r = c.radius * Mathf.Max(absScale.y, absScale.z);
+                float halfH = (c.height * absScale.x) * 0.5f;
+                return new Vector3(halfH, r, r);
+            }
+            if (c.direction == 1) // Y
+            {
+                float r = c.radius * Mathf.Max(absScale.x, absScale.z);
+                float halfH = (c.height * absScale.y) * 0.5f;
+                return new Vector3(r, halfH, r);
+            }
+            else // Z
+            {
+                float r = c.radius * Mathf.Max(absScale.x, absScale.y);
+                float halfH = (c.height * absScale.z) * 0.5f;
+                return new Vector3(r, r, halfH);
+            }
+        }
+
+        // If you truly only use primitives, you can throw here instead.
+        return col.bounds.extents;
+    }
+    static Vector3 Abs(Vector3 v) => new Vector3(Mathf.Abs(v.x), Mathf.Abs(v.y), Mathf.Abs(v.z));
+
 }
 
 
