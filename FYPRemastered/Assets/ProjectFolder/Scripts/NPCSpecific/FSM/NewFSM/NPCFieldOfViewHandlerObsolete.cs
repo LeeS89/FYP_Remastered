@@ -2,7 +2,8 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NPCFieldOfViewHandler : IFieldOfViewRunner
+[Obsolete]
+public class NPCFieldOfViewHandlerObsolete : IFieldOfViewRunnerObsolete
 {
     private FOVParameters _params;
     private AlertPhase _currentAlertPhase = AlertPhase.Idle;
@@ -17,7 +18,7 @@ public class NPCFieldOfViewHandler : IFieldOfViewRunner
    // public Action<NPCNotification> OnFOVSweepCompleted { get; set; }
     public Notification OnFOVSweepComplete { get; set; }
 
-    public NPCFieldOfViewHandler(FOVParameters fovParams)
+    public NPCFieldOfViewHandlerObsolete(FOVParameters fovParams)
     {
         if(fovParams == null)
         {
@@ -34,7 +35,7 @@ public class NPCFieldOfViewHandler : IFieldOfViewRunner
         _nextCheckTime = Time.time + GetCheckFrequency(_currentAlertPhase);
         _fovSweepFrequency = GetCheckFrequency(_currentAlertPhase);
     }
-    public NPCFieldOfViewHandler(FOVParameters fovParams, ITargetRef fovTarget, Notification onSweepComplete)
+    public NPCFieldOfViewHandlerObsolete(FOVParameters fovParams, ITargetRef fovTarget, Notification onSweepComplete)
     {
         if (fovParams == null)
         {
@@ -276,7 +277,7 @@ public class NPCFieldOfViewHandler : IFieldOfViewRunner
         throw new NotImplementedException();
     }
 }
-public class NPCFieldOfViewHandlerNew : IFieldOfViewRunner
+public class NPCFieldOfViewHandlerNew : IFieldOfViewRunnerObsolete
 {
    // private FOVParameters _params;
     private FovDeps _deps;
@@ -323,7 +324,7 @@ public class NPCFieldOfViewHandlerNew : IFieldOfViewRunner
         return phase switch
         {
             AlertPhase.Idle => _deps.idleFOVCheckFrequency,
-            AlertPhase.Heightened => _deps.heightenedFOVCheckFrequency,
+            //AlertPhase.Heightened => _deps.heightenedFOVCheckFrequency,
             AlertPhase.Suspicious => _deps.suspiciousFOVCheckFrequency,
             AlertPhase.Alerted => _deps.alertedFOVCheckFrequency,
             _ => _deps.idleFOVCheckFrequency,
@@ -375,7 +376,7 @@ public class NPCFieldOfViewHandlerNew : IFieldOfViewRunner
             if (result != FOVResult.ClearFov) continue;
 
             inShootAngle = !_deps.useShootingAngleRestriction ? true :
-                TargetWithinAimThreshold(_deps.fovOrigin, _proximityDetectionResults[i].ClosestPointOnBounds(_deps.fovOrigin.position), _deps.halfHorizontalShootAngle);
+                TargetWithinAimThreshold(_deps.fovOrigin, _proximityDetectionResults[i].ClosestPointOnBounds(_deps.fovOrigin.position), _deps.halfShootAngle);
 
             result = inShootAngle == true ? FOVResult.TargetSeenAndWithinShootingAngles : FOVResult.ClearFov;
             SendResult(result);
@@ -532,6 +533,60 @@ public class NPCFieldOfViewHandlerNew : IFieldOfViewRunner
     {
         throw new NotImplementedException();
     }
+
+    static Vector3 GetCenterWorld(Collider col)
+    {
+        Transform t = col.transform;
+
+        if (col is BoxCollider b) return t.TransformPoint(b.center);
+        if (col is SphereCollider s) return t.TransformPoint(s.center);
+        if (col is CapsuleCollider c) return t.TransformPoint(c.center);
+        return col.bounds.center;
+    }
+
+    static Vector3 GetHalfExtentsWorld_Primitive(Collider col)
+    {
+        Vector3 absScale = Abs(col.transform.lossyScale);
+
+        if (col is BoxCollider b)
+        {
+            Vector3 halfLocal = b.size * 0.5f;
+            return Vector3.Scale(halfLocal, absScale);
+        }
+
+        if (col is SphereCollider s)
+        {
+            float r = s.radius * Mathf.Max(absScale.x, absScale.y, absScale.z);
+            return new Vector3(r, r, r);
+        }
+
+        if (col is CapsuleCollider c)
+        {
+            // Capsule direction: 0=X, 1=Y, 2=Z in local space.
+            if (c.direction == 0) // X
+            {
+                float r = c.radius * Mathf.Max(absScale.y, absScale.z);
+                float halfH = (c.height * absScale.x) * 0.5f;
+                return new Vector3(halfH, r, r);
+            }
+            if (c.direction == 1) // Y
+            {
+                float r = c.radius * Mathf.Max(absScale.x, absScale.z);
+                float halfH = (c.height * absScale.y) * 0.5f;
+                return new Vector3(r, halfH, r);
+            }
+            else // Z
+            {
+                float r = c.radius * Mathf.Max(absScale.x, absScale.y);
+                float halfH = (c.height * absScale.z) * 0.5f;
+                return new Vector3(r, r, halfH);
+            }
+        }
+
+        // If you truly only use primitives, you can throw here instead.
+        return col.bounds.extents;
+    }
+    static Vector3 Abs(Vector3 v) => new Vector3(Mathf.Abs(v.x), Mathf.Abs(v.y), Mathf.Abs(v.z));
 }
 
 
@@ -566,7 +621,7 @@ internal static class FOVHandlerExtension
     //public static FOVHandlerExtension Instance = new();
     //private FOVHandlerExtension() { }
 
-    public static int CheckTargetWithinCombatRange(this NPCFieldOfViewHandler handler, Vector3 traceLocation, Collider[] hitResults, float sphereRadius = 0.2f, LayerMask traceLayer = default)
+    public static int CheckTargetWithinCombatRange(this NPCFieldOfViewHandlerObsolete handler, Vector3 traceLocation, Collider[] hitResults, float sphereRadius = 0.2f, LayerMask traceLayer = default)
     {
 
         //Vector3 start = location.position - location.forward * (capsuleHeight / 2f);  // Bottom of capsule
@@ -587,7 +642,7 @@ internal static class FOVHandlerExtension
 
     }
 
-    public static bool IsTargetWithinRange(this NPCFieldOfViewHandler handler, Vector3 position, float radius, int layerMask, bool debug = false, float debugDuration = 0f)
+    public static bool IsTargetWithinRange(this NPCFieldOfViewHandlerObsolete handler, Vector3 position, float radius, int layerMask, bool debug = false, float debugDuration = 0f)
     {
         if (debug)
             DebugExtension.DebugWireSphere(position, Color.blue, radius, debugDuration);
@@ -595,7 +650,7 @@ internal static class FOVHandlerExtension
         return Physics.CheckSphere(position, radius, layerMask);
     }
 
-    public static int CheckTargetProximity(this NPCFieldOfViewHandler handler, Transform traceLocation, Collider[] hitResults, float sphereRadius = 0.2f, LayerMask traceLayer = default, bool debug = false)
+    public static int CheckTargetProximity(this NPCFieldOfViewHandlerObsolete handler, Transform traceLocation, Collider[] hitResults, float sphereRadius = 0.2f, LayerMask traceLayer = default, bool debug = false)
     {
 
         //bool foundObject = IsTargetWithinRange(traceLocation.position, sphereRadius, traceLayer);
@@ -618,7 +673,7 @@ internal static class FOVHandlerExtension
     }
 
 
-    public static bool IsWithinView(this NPCFieldOfViewHandler handler, Transform from, Vector3 targetPosition, float horizontalThreshold, float verticalThreshold)
+    public static bool IsWithinView(this NPCFieldOfViewHandlerObsolete handler, Transform from, Vector3 targetPosition, float horizontalThreshold, float verticalThreshold)
     {
 
         Vector3 to = targetPosition - from.position;
@@ -639,7 +694,7 @@ internal static class FOVHandlerExtension
 
     }
 
-    public static bool IsWithinAngle(this NPCFieldOfViewHandler handler, Transform from, Vector3 to, float halfAngle)
+    public static bool IsWithinAngle(this NPCFieldOfViewHandlerObsolete handler, Transform from, Vector3 to, float halfAngle)
     {
         Vector3 toVec = to - from.position;
         if (toVec.sqrMagnitude < 1e-8f) return true;
@@ -648,7 +703,7 @@ internal static class FOVHandlerExtension
         return Vector3.Dot(from.forward, toVec.normalized) >= cosHalf;
     }
 
-    public static bool IsWithinAngle(this NPCFieldOfViewHandler handler, Transform from, Vector3 to, float halfangle, bool separateVertical = false, float halfVertical = 0f)
+    public static bool IsWithinAngle(this NPCFieldOfViewHandlerObsolete handler, Transform from, Vector3 to, float halfangle, bool separateVertical = false, float halfVertical = 0f)
     {
         var toTarget = (to - from.position).normalized;
         if (Vector3.Angle(from.forward, toTarget) <= (halfangle))
@@ -692,7 +747,7 @@ internal static class FOVHandlerExtension
 
     }
 
-    public static bool IsWithinYaw(this NPCFieldOfViewHandler handler, Transform from, Vector3 target, float halfYawDeg, bool useLocalUp = true)
+    public static bool IsWithinYaw(this NPCFieldOfViewHandlerObsolete handler, Transform from, Vector3 target, float halfYawDeg, bool useLocalUp = true)
     {
         Vector3 up = useLocalUp ? from.up : Vector3.up;
 
@@ -712,7 +767,7 @@ internal static class FOVHandlerExtension
 
 
 
-    public static int EvaluateViewCone(this NPCFieldOfViewHandler handler, Vector3 start, Vector3 end, float radius, Vector3 direction, float maxDistance, LayerMask targetMask, Vector3[] hitPoints, RaycastHit[] _hitBuffer)
+    public static int EvaluateViewCone(this NPCFieldOfViewHandlerObsolete handler, Vector3 start, Vector3 end, float radius, Vector3 direction, float maxDistance, LayerMask targetMask, Vector3[] hitPoints, RaycastHit[] _hitBuffer)
     {
 
         int hitCount = Physics.CapsuleCastNonAlloc(start, end, radius, direction, _hitBuffer, maxDistance, targetMask);
@@ -738,7 +793,7 @@ internal static class FOVHandlerExtension
     /// <param name="debug"></param>
     /// <returns></returns>
     public static bool HasLineOfSight(
-       this NPCFieldOfViewHandler handler,
+       this NPCFieldOfViewHandlerObsolete handler,
        Transform from,
        Vector3 target,
        LayerMask blockingMask,

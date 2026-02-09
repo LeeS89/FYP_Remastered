@@ -14,7 +14,7 @@ public partial class NPCControllerObsolete
     // FSMManager Composition
     private IPathResolver _pathFinder;
     private ICandidateProvider _destinationResolver;
-    private IFieldOfViewRunner _fovRunner;
+    private IFieldOfViewRunnerObsolete _fovRunner;
     private Dictionary<StateId, ICandidateProvider> _destinationProviders;
     private IFSMControl _fsmManager;
     private Dictionary<StateId, IFSMState> _fsmStates = new(5);
@@ -69,7 +69,7 @@ public partial class NPCControllerObsolete
         _destinationResolver = new DestinationResolver(_destinationProviders);
         _fovParams.FOVTarget = PrimaryTarget;
         _pathFinder = new PathFinderObsolete(_destinationResolver);
-        _fovRunner = new NPCFieldOfViewHandler(_fovParams);
+        _fovRunner = new NPCFieldOfViewHandlerObsolete(_fovParams);
 
     //    _fsmManager = new FSMBaseNew(data: this, resolver: _pathFinder, runner: _fovRunner, _fsmStates);
        // _fsmStates.TryAdd(StateId.Patrol, new FSMPatrolState(data: this, resolver: _pathFinder, stateContext: _fsmManager));
@@ -161,7 +161,7 @@ public partial class NPCControllerNew
     // FSMManager Composition
     private IPathResolver _pathFinder;
     private ICandidateProvider _destinationResolver;
-    private IFieldOfViewRunner _fovRunner;
+    private IFieldOfViewRunnerObsolete _fovRunner;
     private Dictionary<StateId, ICandidateProvider> _destinationProviders;
     private IFSMControl _fsmManager;
     private Dictionary<StateId, IFSMState> _fsmStates = new(5);
@@ -244,7 +244,7 @@ public partial class NPCControllerNew
         _fovParams.FOVTarget = PrimaryTarget;
         if(_services.TryGetPathService(out var pathService)) _pathFinder = new PathFinderNew(pathService);
 
-        _fovRunner = new NPCFieldOfViewHandler(_fovParams);
+        _fovRunner = new NPCFieldOfViewHandlerObsolete(_fovParams);
 
        // _fsmManager = new FSMBaseNew(data: this, resolver: _pathFinder, runner: _fovRunner, _fsmStates);
 

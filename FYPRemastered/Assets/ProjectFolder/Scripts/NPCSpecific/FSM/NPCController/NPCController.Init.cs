@@ -13,7 +13,7 @@ public partial class NPCController
     protected AgentEventManager _eManager;
     // FSMManager Composition
     //private IPathResolver _pathFinder;
-    private IFieldOfViewRunner _fovRunner;
+    private FovRunner _fovRunner;
     private IFSMControl _fsmManager;
     private Dictionary<StateId, IFSMState> _fsmStates = new(5);
     // end FSMManager Composition
@@ -92,7 +92,7 @@ public partial class NPCController
     private void ConstructFovRunner()
     {
         _fovDeps.SetTarget(_primaryTarget); // TESTING NOW
-        //_fovRunner = new NPCFieldOfViewHandlerNew(_fovDeps, onSweepComplete: _componentNotifications);
+     //   _fovRunner = new NPCFieldOfViewHandlerNew(_fovDeps, onSweepComplete: _componentNotifications);
         _fovRunner = new FovRunner(_fovDeps, onSweepComplete: _componentNotifications);
     }
 

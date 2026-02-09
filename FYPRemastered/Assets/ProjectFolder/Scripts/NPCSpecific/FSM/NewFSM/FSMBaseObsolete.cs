@@ -21,7 +21,7 @@ public abstract class FSMBaseObsolete : IFSMControlObsolete
 
     public StateId CurrentStateId => throw new NotImplementedException();
 
-    protected IFieldOfViewRunner _fovHandler;
+    protected IFieldOfViewRunnerObsolete _fovHandler;
 
     protected StateId _currentStateId = StateId.None;
 

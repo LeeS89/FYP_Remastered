@@ -6,7 +6,7 @@ using UnityEngine;
 public class TestFovObsolete : MonoBehaviour//, IFieldOfViewOwnerObsolete
 {
     public FOVParameters _params;
-    private NPCFieldOfViewHandler _fovHandler;
+    private NPCFieldOfViewHandlerObsolete _fovHandler;
     private ITargetable _player;
     public FOVResult _result = FOVResult.TargetNotSeen;
     
@@ -14,7 +14,7 @@ public class TestFovObsolete : MonoBehaviour//, IFieldOfViewOwnerObsolete
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        _fovHandler = new NPCFieldOfViewHandler(_params);
+        _fovHandler = new NPCFieldOfViewHandlerObsolete(_params);
        
         StartCoroutine(GetPlayerDelay());
     }

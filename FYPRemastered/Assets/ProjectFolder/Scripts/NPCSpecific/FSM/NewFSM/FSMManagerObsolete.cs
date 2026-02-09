@@ -15,7 +15,7 @@ public class FSMManagerObsolete : FSMBaseObsolete
     private Action OnChaseReached;
     
 
-    public FSMManagerObsolete(IAgentData data, IPathResolver resolver, IFieldOfViewRunner runner)
+    public FSMManagerObsolete(IAgentData data, IPathResolver resolver, IFieldOfViewRunnerObsolete runner)
     {
         if (data == null)
         {
@@ -44,7 +44,7 @@ public class FSMManagerObsolete : FSMBaseObsolete
            // fovParams.ownerOrigin = data.Transform;
           //  fovParams.FOVTarget = data.PrimaryTarget;
             // Add FOV origin aswell
-            _fovHandler = new NPCFieldOfViewHandler(fovParams);
+            _fovHandler = new NPCFieldOfViewHandlerObsolete(fovParams);
         }
         else _fovHandler = runner;
         AssignActions();

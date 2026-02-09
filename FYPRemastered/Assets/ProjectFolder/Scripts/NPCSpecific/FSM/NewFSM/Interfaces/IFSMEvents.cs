@@ -178,11 +178,11 @@ public interface INotificationListener
   //  void EnterAlertPhase();
 }
 
-
-public interface IFieldOfViewRunner : ITickable
+[Obsolete]
+public interface IFieldOfViewRunnerObsolete : ITickable
 {
     void SetAlertPhase(AlertPhase phase);
     //Action<FOVResult, bool> OnFOVSweepComplete { get; set; }
     // Action<NPCNotification> OnFOVSweepCompleted { get; set; }
-    Notification OnFOVSweepComplete { get; set; }
+    //Notification OnFOVSweepComplete { get; set; }
 }

@@ -4,7 +4,7 @@ using System.Text;
 using UnityEngine;
 
 [System.Serializable]
-public class FovDeps
+public class FovDeps : IFovDeps
 {
     [Header("Targeting phase origin - Final phase of FOV check, Linecast from eyes.\n" +
        "Also the origin for initial Detection phase, uses OverlapSphere from this origin")]
@@ -16,8 +16,9 @@ public class FovDeps
     //public LayerMask NpcLayer;
     public LayerMask worldMask;
 
-  
+    private bool _targetInRadius = false;
     public ITargetable Target { get; private set; }
+    private AlertPhase _currentPhase = AlertPhase.Idle;
 
     public void SetTarget(ITargetable target)
     {
@@ -30,23 +31,14 @@ public class FovDeps
         }
         
         if (target == Target) return;
-        if(Target != null)
-            blockingMask &= ~Target.LayerMask; // Remove previous target layer from blocking mask
+        /*if(Target != null)
+            blockingMask &= ~Target.LayerMask;*/ // Remove previous target layer from blocking mask
 
       //  CoroutineRunner.Instance.StartCoroutine(TestPruint());
        
         Target = target;
-        blockingMask |= Target.LayerMask;
+       // blockingMask |= Target.LayerMask;
     }
-
-
-   /* IEnumerator TestPruint()
-    {
-        yield return new WaitForSeconds(5f);
-        int losMask = worldLayers.value | NpcLayer.value;
-      //  LayerMask newMask = worldLayers |= NpcLayer;
-        Debug.LogError(DescribeLayers(losMask));
-    }*/
 
     public string DescribeLayers(LayerMask mask)
     {
@@ -80,35 +72,35 @@ public class FovDeps
     [Header("Evaluation Phase params - Uses capsule cast from owner origin + waist and eye height offsets\n" +
         "Gathers targets for the final targeting phase")]
     public Transform ownerOrigin;
-    public float waistHeightOffset = 1.0f;
-    public float eyeHeightOffset = 1.8f;
-    public float evaluationCapsuleRadius = 0.4f;
+    public float waistHeightOffset = 1.0f; // Obsolete
+    public float eyeHeightOffset = 1.8f; // Obsolete
+    public float evaluationCapsuleRadius = 0.4f; // Obsolete
 
     [Header("When true, adds extra points on detected target colliders\n" +
         "from the evaluation phase to use in the targeting phase\n" +
         "increasing robustness of FOV check - may impact performance")]
-    public bool addTargetFallbackPoints = false;
+    public bool addTargetFallbackPoints = false; // Obsolete??
 
     [Header("The angle from fovOrigin.forward which target mucst be within\n" +
         "for a successful LOS hit")]
     public float fovHalfAngle = 50.0f;
 
-    [Header("If false, uses fovHalfAngle for both H and V angle\n" +
+/*    [Header("If false, uses fovHalfAngle for both H and V angle\n" +
         "If true, uses fovHalfAngle for Horizontal check")]
     public bool useSeparateVerticleAngle = false;
     public float verticalFovHalfAngle = 25f;
-
+*/
     [Header("Optional - Ensures ranged weapons can only be used once fully aiming in the targets direction\n" +
         "within halfHorizontalShootAngle threshold")]
     public bool useShootingAngleRestriction = true;
-    public float halfHorizontalShootAngle = 15.0f;
+    public float halfShootAngle = 15.0f;
 
-    [Header("Frequency of FOV checks when target is outide of fovRadius")]
-    public float idleFOVCheckFrequency = 1f;
+    [Header("Frequency of FOV checks when target is outside of fovRadius")]
+    public float idleFOVCheckFrequency = 0.5f;
 
-    [Header("Frequency of FOV checks when target is inside of fovRadius\n" +
+   /* [Header("Frequency of FOV checks when target is inside of fovRadius\n" +
         "but without any alerted or suspicious cues")]
-    public float heightenedFOVCheckFrequency = 0.5f;
+    public float heightenedFOVCheckFrequency = 0.5f;*/
 
     [Header("Frequency of FOV checks upon either losing LOS to target after some time\n" +
         "or some other cue such as hearing a noise")]
@@ -117,10 +109,54 @@ public class FovDeps
     [Header("Frequency of FOV checks when alerted to target")]
     public float alertedFOVCheckFrequency = 0.1f;
 
-    [Header("How long to wait after LOS has been lost to downgrade alert status")]
-    public float alertToSuspiciousDelaySeconds = 3f;
-    public float suspiciousToIdleDelaySeconds = 5f;
+  
+    public float GetSweepFrequency()
+    {
+        return _currentPhase switch
+        {
+            AlertPhase.Idle => _targetInRadius ? idleFOVCheckFrequency : (idleFOVCheckFrequency * 2f),
+            //AlertPhase.Heightened => heightenedFOVCheckFrequency,
+            AlertPhase.Suspicious => _targetInRadius ? suspiciousFOVCheckFrequency : (suspiciousFOVCheckFrequency * 2f),
+            AlertPhase.Alerted => _targetInRadius ? alertedFOVCheckFrequency : (alertedFOVCheckFrequency * 2f),
+            _ => idleFOVCheckFrequency
+        };
+    }
 
-    [Header("Callbacks")]
-    public Action<bool, bool> OnFOVSweepResult;
+    public void SetAlertPhase(AlertPhase phase) => _currentPhase = phase;
+
+    public LayerMask WorldMask() => worldMask;
+    public LayerMask BlockingMask() => blockingMask;
+    public Transform OwnerOrigin() => ownerOrigin;
+    public Transform SweepOrigin() => fovOrigin;
+    public float FovRadius() => fovRadius;
+    public float FovHalfAngle() => fovHalfAngle;
+    public int MaxTargets() => maxFovTargets;
+    public bool UseShootingAngleRestriction() => useShootingAngleRestriction;
+    public float HalfShootAngle() => halfShootAngle;
+
+    public void SetTargetProximityStatus(bool targetInsideRadius) => _targetInRadius = targetInsideRadius;
+
+    public void DebugFrequency()
+    {
+        Debug.LogError("Current AlertPhase is: "+_currentPhase.ToString() + ": and time is: "+GetSweepFrequency());
+    }
+}
+
+public interface IFovDeps
+{
+    public void DebugFrequency();
+
+    public LayerMask WorldMask();
+    public LayerMask BlockingMask();
+    public Transform OwnerOrigin();
+    public Transform SweepOrigin();
+    public float FovRadius();
+    public float FovHalfAngle();
+    public float HalfShootAngle();
+    public float GetSweepFrequency();
+    public int MaxTargets();
+    public bool UseShootingAngleRestriction();
+    public void SetTargetProximityStatus(bool targetInsideRadius);
+    public ITargetable Target { get; }
+    
 }

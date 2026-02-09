@@ -266,7 +266,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
             _testAgentStop2 = true;
 
             FovRunner r = _fovRunner as FovRunner;
-            r._testDistancePrint = true;
+            //r._testDistancePrint = true;
             Agent.ResetPath();
             Agent.enabled = false;
             _testAgentStop = false;
@@ -475,7 +475,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
         CurrentFovState = newStatus;
     }
     // Sets Sweep Frequency
-    public void UpdateFovAlertPhase(AlertPhase newPhase) => _fovRunner?.SetAlertPhase(newPhase);
+    public void UpdateFovAlertPhase(AlertPhase newPhase) => _fovDeps?.SetAlertPhase(newPhase);
 
 
     public void UpdateRotationOrder(RotationOrder newOrder)

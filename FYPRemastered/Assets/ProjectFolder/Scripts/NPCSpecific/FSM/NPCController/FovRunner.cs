@@ -2,23 +2,21 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FovRunner : IFieldOfViewRunner
+public class FovRunner : ITickable//IFieldOfViewRunner
 {
-    // private FOVParameters _params;
-    private FovDeps _deps;
+    private IFovDeps _deps;
 
-    private AlertPhase _currentAlertPhase = AlertPhase.Idle;
-    private float _sweepFrequency;
+    //private AlertPhase _currentAlertPhase = AlertPhase.Idle;
+    //private float _sweepFrequency;
     private float _nextSweepTime = 0f;
-    private Vector3[] _evaluationHitPoints;
+  
     private Collider[] _proximityDetectionResults;
-    private RaycastHit[] _hitBuffer = new RaycastHit[10];
-    //private ITargetRef _fovTarget;
+    private RaycastHit[] _hitBuffer = new RaycastHit[5];
+   
+    public Notification OnFOVSweepComplete { get; private set; }
 
-    public Notification OnFOVSweepComplete { get; set; }
 
-
-    public FovRunner(FovDeps deps, Notification onSweepComplete)
+    public FovRunner(IFovDeps deps, Notification onSweepComplete)
     {
         if (deps == null)
         {
@@ -28,12 +26,12 @@ public class FovRunner : IFieldOfViewRunner
             deps = new FovDeps();
         }
 
-        // _fovTarget = fovTarget;
         _deps = deps;
-        _evaluationHitPoints = new Vector3[_deps.maxFovTargets];
-        _proximityDetectionResults = new Collider[_deps.maxFovTargets];
-        _nextSweepTime = Time.time + GetCheckFrequency(_currentAlertPhase);
-        _sweepFrequency = GetCheckFrequency(_currentAlertPhase);
+       // _deps.SetAlertPhase(_currentAlertPhase);
+        _proximityDetectionResults = new Collider[_deps.MaxTargets()];
+        float sweepTime = _deps.GetSweepFrequency();
+        _nextSweepTime = Time.time + sweepTime;
+       // _sweepFrequency = sweepTime;
         OnFOVSweepComplete = onSweepComplete;
     }
 
@@ -44,7 +42,7 @@ public class FovRunner : IFieldOfViewRunner
     }
 
 
-    private float GetCheckFrequency(AlertPhase phase)
+    /*private float GetCheckFrequency(AlertPhase phase)
     {
         return phase switch
         {
@@ -54,63 +52,25 @@ public class FovRunner : IFieldOfViewRunner
             AlertPhase.Alerted => _deps.alertedFOVCheckFrequency,
             _ => _deps.idleFOVCheckFrequency,
         };
-    }
-
+    }*/
+/*
     public void SetAlertPhase(AlertPhase phase)
     {
         if (_currentAlertPhase == phase) return;
         _currentAlertPhase = phase;
-        _sweepFrequency = GetCheckFrequency(_currentAlertPhase);
-    }
+        _sweepFrequency = _deps.GetSweepFrequency();
+    }*/
 
-    private void TryChangeFOVFrequency(AlertPhase phase)
+    /*private void TryChangeFOVFrequency(AlertPhase phase)
     {
         if (phase <= _currentAlertPhase) return;
         _currentAlertPhase = phase;
-        _sweepFrequency = GetCheckFrequency(_currentAlertPhase);
+        _sweepFrequency = _deps.GetSweepFrequency();
 
-    }
-
-/*    public void RunFOVSweep()
-    {
-        if (TargetIsNull()) return;
-
-        FOVResult result = FOVResult.TargetOutsideSweepRadius;
-        bool inShootAngle = false;
-        LayerMask targetMask = _deps.Target.LayerMask;//_params?.TargetMask() ?? default;
-
-        int detectedCount = RunDetectionPhase(_deps.fovOrigin, _proximityDetectionResults, _deps.fovRadius, targetMask);
-
-        if (detectedCount == 0)
-        {
-            SendResult(FOVResult.TargetNotSeen);
-            TryChangeFOVFrequency(AlertPhase.Idle);
-            return;
-        }
-
-        TryChangeFOVFrequency(AlertPhase.Heightened);
-
-        for (int i = 0; i < detectedCount; i++)
-        {
-            int hitCount;
-            RunEvaluationPhase(_proximityDetectionResults[i], out hitCount, _deps.addTargetFallbackPoints, targetMask);
-
-            if (hitCount == 0) continue;
-            result = RunTargetingPhase(hitCount, _deps.blockingMask, targetMask);
-
-            if (result != FOVResult.TargetSeen) continue;
-
-            inShootAngle = !_deps.useShootingAngleRestriction ? true :
-                TargetWithinAimThreshold(_deps.fovOrigin, _proximityDetectionResults[i].ClosestPointOnBounds(_deps.fovOrigin.position), _deps.halfHorizontalShootAngle);
-
-            result = inShootAngle == true ? FOVResult.TargetSeenAndWithinShootingAngles : FOVResult.TargetSeen;
-            SendResult(result);
-            return;
-
-        }
-        SendResult(FOVResult.TargetNotSeen);
     }*/
-    public void RunFOVSweep()
+
+
+    private void RunFOVSweep()
     {
         if (TargetIsNull()) return;
 
@@ -118,32 +78,35 @@ public class FovRunner : IFieldOfViewRunner
         bool inShootAngle = false;
         LayerMask targetMask = _deps.Target.LayerMask;//_params?.TargetMask() ?? default;
 
-        int detectedCount = RunDetectionPhase(_deps.fovOrigin, _proximityDetectionResults, _deps.fovRadius, targetMask);
+        int detectedCount = RunDetectionPhase(_deps.SweepOrigin(), _proximityDetectionResults, _deps.FovRadius(), targetMask);
 
         if (detectedCount == 0)
         {
             SendResult(FOVResult.TargetNotSeen);
-            TryChangeFOVFrequency(AlertPhase.Idle);
+            _deps.SetTargetProximityStatus(targetInsideRadius: false);
+            //TryChangeFOVFrequency(AlertPhase.Idle);
             return;
         }
 
-        TryChangeFOVFrequency(AlertPhase.Heightened);
+        _deps.SetTargetProximityStatus(targetInsideRadius: true);
+        //TryChangeFOVFrequency(AlertPhase.Heightened);
 
         for (int i = 0; i < detectedCount; i++)
         {
-            //int hitCount;
-            FOVResult newResult = RunEvaluationPhaseNew(_proximityDetectionResults[i], /*out hitCount,*/ _deps.addTargetFallbackPoints, targetMask);
+            FOVResult newResult = RunEvaluationPhaseNew(_proximityDetectionResults[i], targetMask);
 
-            if (newResult < currentResult || newResult < FOVResult.PartialFov) continue;
+            // Only proceed if the new result has higher priority than the current result. This allows us to skip expensive checks if we've already determined a high-priority result (like TargetSeenAndWithinShootingAngles)
+            if (!HasHigherPriorityResult(newResult, currentResult)) continue;
             currentResult = newResult;
 
+            // Only process actionable results once a clear LOS is established, since results like TargetSeenAndWithinShootingAngles are not meaningful if the target is not actually visible
             if (currentResult < FOVResult.ClearFov) continue;
             
             // DO Melee Sweep here => If hit, return early, else perform shooting angle check
 
 
-            inShootAngle = !_deps.useShootingAngleRestriction ? true :
-                TargetWithinAimThreshold(_deps.fovOrigin, _proximityDetectionResults[i].ClosestPointOnBounds(_deps.fovOrigin.position), _deps.halfHorizontalShootAngle);
+            inShootAngle = !_deps.UseShootingAngleRestriction() ? true :
+                TargetWithinAimThreshold(_deps.SweepOrigin(), _proximityDetectionResults[i].ClosestPointOnBounds(_deps.SweepOrigin().position), _deps.HalfShootAngle());
 
             currentResult = inShootAngle == true ? FOVResult.TargetSeenAndWithinShootingAngles : FOVResult.ClearFov;
             SendResult(currentResult);
@@ -153,12 +116,10 @@ public class FovRunner : IFieldOfViewRunner
         SendResult(currentResult);
     }
 
-   
+    private bool HasHigherPriorityResult(FOVResult newResult, FOVResult currentResult) => newResult > currentResult;
 
-    public bool _testDistancePrint = false;
-    private RaycastHit[] _hits = new RaycastHit[5];
 
-    private FOVResult RunEvaluationPhaseNew(Collider targetCollider, /*out int hitCount, */bool addFallbackPoints, LayerMask targetMask)
+    private FOVResult RunEvaluationPhaseNew(Collider targetCollider, LayerMask targetMask)
     {
         _samplePoints.Clear();
         FOVResult result = FOVResult.TargetNotSeen;
@@ -167,58 +128,25 @@ public class FovRunner : IFieldOfViewRunner
      
         foreach (var p in _samplePoints)
         {
-            if (this.IsWithinAngle(_deps.fovOrigin, p, _deps.fovHalfAngle))
+            if (this.IsWithinAngle(_deps.SweepOrigin(), p, _deps.FovHalfAngle()))
             {
-                bool isWorldBlocked = !TargetHit(_deps.fovOrigin, p, _deps.worldMask, _deps.Target.LayerMask);
+                bool isWorldBlocked = !TargetHit(_deps.SweepOrigin(), p, _deps.WorldMask(), _deps.Target.LayerMask);
                 if (isWorldBlocked) continue;
 
                 FOVResult r;
-                if (!HasValidFov(_deps.fovOrigin, p, _deps.blockingMask, _deps.ownerOrigin, out r, _hits)) continue;
+                if (!HasValidFov(_deps.SweepOrigin(), p, _deps.BlockingMask(), _deps.OwnerOrigin(), out r, _hitBuffer)) continue;
 
                 if (r == FOVResult.ClearFov) return r;
                 else if (r > result) result = r;
 
-                /*//old
-                int hits;
-                if (!TargetHitTest(_deps.fovOrigin, p, _deps.blockingMask, _hits, out hits)) continue;
-
-                result = HasClearFov(hits, _hits, _deps.ownerOrigin) ? FOVResult.ClearFov : FOVResult.PartialFov;
-
-
-
-                //old
-                /// Send Result
-                if (hits == 0)
-                {
-                    result = FOVResult.ClearFov; //hitCount = 0;
-                   // SendResult(result);
-                    return result;
-                }
-                else
-                    result = FOVResult.TargetSeenAndWithinShootingAngles;*/
 
             }
         }
-      //  SendResult(result);
-        
-        //hitCount = 0;
+   
         return result;
 
     }
 
-    private bool HasClearFov(int numHits, RaycastHit[] hits, Transform ownerOrigin)
-    {
-        if (numHits == 0 || hits == null) return true;
-
-        for(int i = 0; i < numHits; i++)
-        {
-            var hit = hits[i];
-            if (hit.transform.IsChildOf(ownerOrigin)) continue;
-            else
-                return false;
-        }
-        return true;
-    }
     private bool HasValidFov(Transform from, Vector3 target, LayerMask blockingMask, Transform ownerOrigin, out FOVResult result, RaycastHit[] buffer)
     {
         if (from == null || buffer == null) { result = FOVResult.TargetNotSeen; return false; }
@@ -277,55 +205,6 @@ public class FovRunner : IFieldOfViewRunner
 
 
 
-    private void RunEvaluationPhase(Collider targetCollider, out int hitCount, bool addFallbackPoints, LayerMask targetMask)
-    {
-        Vector3 closest = targetCollider.ClosestPointOnBounds(_deps.fovOrigin.position);
-        Vector3 colCenter = targetCollider.bounds.center;
-        _samplePoints.Add(colCenter);
-        _samplePoints.Add(closest);
-        _samplePoints.Add(targetCollider.bounds.center + Vector3.up * targetCollider.bounds.extents.y);
-        _samplePoints.Add(targetCollider.bounds.center - Vector3.right * targetCollider.bounds.extents.x);
-        _samplePoints.Add(targetCollider.bounds.center + Vector3.right * targetCollider.bounds.extents.x);
-        int angleCount = 0;
-        foreach (var p in _samplePoints)
-        {
-            if (this.IsWithinAngle(_deps.fovOrigin, p, _deps.fovHalfAngle/*, _params.useSeparateVerticleAngle, _params.verticalFovHalfAngle*/))
-            {
-                angleCount++;
-                break;
-            }
-        }
-        _samplePoints.Clear();
-
-        if (angleCount == 0)
-        {
-            hitCount = 0;
-            return;
-        }
-
-
-
-        Vector3 waistPos = _deps.ownerOrigin.TransformPoint(0f, _deps.waistHeightOffset, 0f);
-        Vector3 eyePos = _deps.ownerOrigin.TransformPoint(0f, _deps.eyeHeightOffset, 0f);
-        Vector3 centerPos = (waistPos + eyePos) * 0.5f;
-        Vector3 direction = TargetingUtility.GetDirectionToTarget(closest, centerPos);
-
-        hitCount = this.EvaluateViewCone(
-        waistPos,
-        eyePos,
-        _deps.evaluationCapsuleRadius,
-        direction,
-        _deps.fovRadius,
-        targetMask,
-        _evaluationHitPoints,
-        _hitBuffer
-        );
-
-
-        if (hitCount > 0 && addFallbackPoints)
-            AddFallbackPoints(targetCollider, _evaluationHitPoints, ref hitCount);
-    }
-
 
     public bool TargetHit(
       Transform from,
@@ -343,18 +222,7 @@ public class FovRunner : IFieldOfViewRunner
         Vector3 direction = (target.Value - from.position);
         float dist = direction.magnitude;
         direction /= dist;
-        /*
-                if(Physics.Raycast(from.position, direction, out hitInfo, dist, losMask*//*, QueryTriggerInteraction.Collide*//*))
-                {
-                     var t = hitInfo.transform;
-                    if (((1 << hitInfo.collider.gameObject.layer) & targetMask) != 0)
-                    {
-                        *//*if (debug)*//* Debug.DrawLine(from.position, target.Value, Color.green, 0.1f);
-                        return true;
-                    }
-                }*/
-
-
+       
         if (Physics.Linecast(from.position, target.Value, out hitInfo, losMask))
         {
 
@@ -384,27 +252,7 @@ public class FovRunner : IFieldOfViewRunner
             );
     }
 
-    private FOVResult RunTargetingPhase(int targetCount, LayerMask blockingMask, LayerMask targetMask)
-    {
-        for (int i = 0; i < targetCount; i++)
-        {
-            if (!this.HasLineOfSight(
-                _deps.fovOrigin,
-                _evaluationHitPoints[i],
-                blockingMask,
-                targetMask,
-                _deps.Target.Transform,
-                _deps.ownerOrigin
-                // _fallbackFOVOrigin // Remove this later
-                ))
-            {
-                continue;
-            }
-            return FOVResult.ClearFov;
-        }
 
-        return FOVResult.TargetNotSeen;
-    }
     private List<Vector3> _samplePoints = new(5);
 
     public Action<float> OnLateTick { get; private set; } // Not used in class
@@ -413,46 +261,19 @@ public class FovRunner : IFieldOfViewRunner
 
     public void Tick(float dt)
     {
-        if (TargetIsNull()/*_params.FOVTarget*//* == null*/)
+        if (TargetIsNull())
         {
 #if UNITY_EDITOR
-            // Debug.LogError("Must Provide a Target for the FOV Sweep");
+             Debug.LogError("Must Provide a Target for the FOV Sweep");
 #endif
             return;
         }
         if (Time.time >= _nextSweepTime)
         {
-            _nextSweepTime = Time.time + _sweepFrequency;
+            _deps.DebugFrequency(); // Obsolete, just for testing
+            _nextSweepTime = Time.time + _deps.GetSweepFrequency();
             RunFOVSweep();
         }
-    }
-
-
- 
-
-    private void GetSamplePoints(Collider target, List<Vector3> points)
-    {
-        if (target == null || points == null) { return; }
-        points.Add(target.ClosestPointOnBounds(_deps.fovOrigin.position));
-        points.Add(target.bounds.center);
-        points.Add(target.bounds.center + Vector3.up * target.bounds.extents.y);
-        points.Add(target.bounds.center - Vector3.right * target.bounds.extents.x);
-        points.Add(target.bounds.center + Vector3.right * target.bounds.extents.x);
-    }
-
-    private void AddExtraSamplePoints()
-    {
-
-    }
-
-    private void AddFallbackPoints(Collider target, Vector3[] hitPoints, ref int startIndex)
-    {
-        if (target == null) { return; }
-        hitPoints[startIndex++] = target.ClosestPointOnBounds(_deps.fovOrigin.position);
-        hitPoints[startIndex++] = target.bounds.center;
-        hitPoints[startIndex++] = target.bounds.center + Vector3.up * target.bounds.extents.y;
-        hitPoints[startIndex++] = target.bounds.center - Vector3.right * target.bounds.extents.x;
-        hitPoints[startIndex++] = target.bounds.center + Vector3.right * target.bounds.extents.x;
     }
 
     public int RunDetectionPhase(Transform origin = null, Collider[] results = null, float radius = 0.5f, LayerMask targetMask = default)
@@ -472,74 +293,6 @@ public class FovRunner : IFieldOfViewRunner
 
     public void LateTick(float dt) { }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    static Vector3 GetCenterWorld(Collider col)
-    {
-        Transform t = col.transform;
-
-        if (col is BoxCollider b) return t.TransformPoint(b.center);
-        if (col is SphereCollider s) return t.TransformPoint(s.center);
-        if (col is CapsuleCollider c) return t.TransformPoint(c.center);
-        return col.bounds.center;
-    }
-
-    static Vector3 GetHalfExtentsWorld_Primitive(Collider col)
-    {
-        Vector3 absScale = Abs(col.transform.lossyScale);
-
-        if (col is BoxCollider b)
-        {
-            Vector3 halfLocal = b.size * 0.5f;
-            return Vector3.Scale(halfLocal, absScale);
-        }
-
-        if (col is SphereCollider s)
-        {
-            float r = s.radius * Mathf.Max(absScale.x, absScale.y, absScale.z);
-            return new Vector3(r, r, r);
-        }
-
-        if (col is CapsuleCollider c)
-        {
-            // Capsule direction: 0=X, 1=Y, 2=Z in local space.
-            if (c.direction == 0) // X
-            {
-                float r = c.radius * Mathf.Max(absScale.y, absScale.z);
-                float halfH = (c.height * absScale.x) * 0.5f;
-                return new Vector3(halfH, r, r);
-            }
-            if (c.direction == 1) // Y
-            {
-                float r = c.radius * Mathf.Max(absScale.x, absScale.z);
-                float halfH = (c.height * absScale.y) * 0.5f;
-                return new Vector3(r, halfH, r);
-            }
-            else // Z
-            {
-                float r = c.radius * Mathf.Max(absScale.x, absScale.y);
-                float halfH = (c.height * absScale.z) * 0.5f;
-                return new Vector3(r, r, halfH);
-            }
-        }
-
-        // If you truly only use primitives, you can throw here instead.
-        return col.bounds.extents;
-    }
-    static Vector3 Abs(Vector3 v) => new Vector3(Mathf.Abs(v.x), Mathf.Abs(v.y), Mathf.Abs(v.z));
 
 }
 

@@ -8547,7 +8547,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 2039
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -16603,7 +16603,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 2039
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -118342,11 +118342,9 @@ MonoBehaviour:
     evaluationCapsuleRadius: 0.4
     addTargetFallbackPoints: 0
     fovHalfAngle: 50
-    useSeparateVerticleAngle: 0
-    verticalFovHalfAngle: 25
     useShootingAngleRestriction: 1
-    halfHorizontalShootAngle: 15
-    idleFOVCheckFrequency: 1
+    halfShootAngle: 15
+    idleFOVCheckFrequency: 0.5
     heightenedFOVCheckFrequency: 0.5
     suspiciousFOVCheckFrequency: 0.25
     alertedFOVCheckFrequency: 0.1
@@ -156597,11 +156595,9 @@ MonoBehaviour:
     evaluationCapsuleRadius: 0.4
     addTargetFallbackPoints: 0
     fovHalfAngle: 50
-    useSeparateVerticleAngle: 0
-    verticalFovHalfAngle: 25
     useShootingAngleRestriction: 1
-    halfHorizontalShootAngle: 15
-    idleFOVCheckFrequency: 1
+    halfShootAngle: 15
+    idleFOVCheckFrequency: 0.5
     heightenedFOVCheckFrequency: 0.5
     suspiciousFOVCheckFrequency: 0.25
     alertedFOVCheckFrequency: 0.1
