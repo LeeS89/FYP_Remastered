@@ -475,7 +475,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
         CurrentFovState = newStatus;
     }
     // Sets Sweep Frequency
-    public void UpdateFovAlertPhase(AlertPhase newPhase) => _fovDeps?.SetAlertPhase(newPhase);
+    public void UpdateAlertPhase(AlertPhase newPhase) => _fovDeps?.SetAlertPhase(newPhase);
 
 
     public void UpdateRotationOrder(RotationOrder newOrder)

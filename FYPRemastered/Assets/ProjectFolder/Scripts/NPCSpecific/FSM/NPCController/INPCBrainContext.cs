@@ -13,7 +13,7 @@ public interface INPCBrainContext : ITargetable
     void SwitchState(StateId intentState);
     void UpdateCombatOrder(CombatOrder newOrder);
     void UpdateCurrentFovStatus(FOVResult newStatus);
-    void UpdateFovAlertPhase(AlertPhase newPhase);
+    void UpdateAlertPhase(AlertPhase newPhase);
     void UpdateRotationOrder(RotationOrder newOrder);
    // void RotateToTarget(bool rotate);
     void TriggerDeath();

@@ -258,6 +258,7 @@ public static class NPCDecisionPolicyNew
                 if (TargetSeen(n.FOVResult))
                 {
                     self.SwitchState(StateId.Chase);
+                    self.UpdateAlertPhase(AlertPhase.Alerted);
                     self.OverrideSpeed(SpeedOverride.None);
                     self.TryBroadcastAlert();
                    
