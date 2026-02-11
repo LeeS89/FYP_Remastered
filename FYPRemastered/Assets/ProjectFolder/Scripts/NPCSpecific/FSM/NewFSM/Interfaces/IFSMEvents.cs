@@ -1,9 +1,8 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-[Obsolete]
+/*[Obsolete]
 public interface IFSMEvents : ITickable, IZoneSink
 {
     void BeginPatrol(StateId id);
@@ -33,33 +32,8 @@ public interface IFSMEvents : ITickable, IZoneSink
     void OnInstanceDestroyed();
    // bool CurrentZone(out uint zone);
 }
+*/
 
-[Obsolete]
-public interface IFSMControlObsolete : /*IFSMState, */ITickable
-{
-    StateId CurrentStateId { get; }
-
-    void SwitchTo(StateId state);
-
-    void BeginPatrol(StateId id);
-    void BeginChase(StateId id);
-    void BeginFlank(StateId id);
-    void TakeCover(StateId id);
-    void FollowGroup(StateId id);
-    // void ExitState();
-    bool IsMoving();
-    //  bool TryGetPatrolZone(out int zone);
-
-    int? TryGetPatrolZone();
-
-    delegate void OnNotifyOwner(in NpcNotification n);
-    OnNotifyOwner Notification { get; set; }
-    Action<AnimationCue> OnAnimationIntent { get; set; }
-
-
-    Action<Vector3> OnMapDestinationToZone { get; set; }
-
-}
 
 public interface IFSMControl : IFSMStateContext, ITickable
 {
@@ -68,7 +42,7 @@ public interface IFSMControl : IFSMStateContext, ITickable
     bool IsInStateTransition { get; }
     void SwitchTo(StateId state);
     void OverrideSpeed(SpeedOverride overrideTier);
-    bool RotatingToTarget { get; }
+   // bool RotatingToTarget { get; }
    // void RotateToTarget(bool rotate);
     void OverrideRotation(RotationOverride rotOverride);
     //delegate void OnNotifyOwner(in NPCNotification n);
@@ -140,36 +114,9 @@ public interface IFlankDeps : IFsmStateDeps, ITargetRef, IFsmDeps
     int MinFlankSteps { get; }
 }
 
-[Obsolete]
-public interface IAgentData// : ITargetable
-{
-  //  ITargetable PrimaryTarget { get; }
-    NavMeshAgent Agent { get; }
-    NavMeshObstacle Obstacle { get; }
-    NavMeshPath Path { get; }
- //   float MaxPatrolPointWaitTime { get; }
-  //  float MinPatrolPointWaitTime { get; }
-   // int MaxFlankSteps { get; }
-  //  int MinFlankSteps { get; }
- //   float WalkSpeed { get; }
- //   float SprintSpeed { get; }
-    float SprintEnterDist { get; }
-    float SprintExitDist { get; }
-    //Func<StateId, float> OnRequestAgentStoppingDistance { get; }
-    //float GetAgentStoppingDistance(StateId currentState);
 
-}
 
-[Obsolete]
-public interface IFSMOwner // Maybe Obsolete
-{
-   // void TryBroadcastAlert(); // Remove, NPCControllerBase will handle this
-    void LogUnhandled(IntentStateBaseObsolete state, in NpcNotification notification);
-    void SwitchTo(IIntentStateObsolete next);
-    void HandleFOVSweepResult(FOVResult result, bool withinAttackAngles);
-    IFSMControlObsolete FSM { get; }
 
-}
 
 
 public interface INotificationListener
@@ -178,11 +125,4 @@ public interface INotificationListener
   //  void EnterAlertPhase();
 }
 
-[Obsolete]
-public interface IFieldOfViewRunnerObsolete : ITickable
-{
-    void SetAlertPhase(AlertPhase phase);
-    //Action<FOVResult, bool> OnFOVSweepComplete { get; set; }
-    // Action<NPCNotification> OnFOVSweepCompleted { get; set; }
-    //Notification OnFOVSweepComplete { get; set; }
-}
+

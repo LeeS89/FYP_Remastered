@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.ResourceManagement.ResourceLocations;
 
-
+[Obsolete("Use Scene Services instead")]
 public class SceneEventAggregator : MonoBehaviour
 {
     public static SceneEventAggregator Instance { get; private set; }

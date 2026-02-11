@@ -14,7 +14,7 @@ public class SceneManagement : SceneManagementBase, ISceneService
     // public Dictionary<GameObject, float> stats = new Dictionary<GameObject, float>();
 
     // Test Variables
-    public EnemyFSMController _enemy;
+   // public EnemyFSMController _enemy;
     public bool _testspawn = false;
 
     public event Action OnSceneBegin;
@@ -34,7 +34,7 @@ public class SceneManagement : SceneManagementBase, ISceneService
 
         if (_testspawn)
         {
-            _enemy.ResetFSM();
+        //    _enemy.ResetFSM();
             _testspawn = false;
         }
 

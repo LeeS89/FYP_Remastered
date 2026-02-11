@@ -86,5 +86,8 @@ public abstract class FSMBaseState : IFSMState
         }
     }
 
-    
+    public void Dispose()
+    {
+        throw new System.NotImplementedException();
+    }
 }

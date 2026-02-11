@@ -18,7 +18,7 @@ public class MoonSceneManager : BaseSceneManager
     // public Dictionary<GameObject, float> stats = new Dictionary<GameObject, float>();
 
     // Test Variables
-    public EnemyFSMController _enemy;
+    //public EnemyFSMController _enemy;
     public bool _testspawn = false;
    
     /// End Test
@@ -35,7 +35,7 @@ public class MoonSceneManager : BaseSceneManager
 
         if (_testspawn)
         {
-            _enemy.ResetFSM();
+         //   _enemy.ResetFSM();
             _testspawn = false;
         }
 
@@ -177,7 +177,7 @@ public class MoonSceneManagerNew : BaseSceneManager
     // public Dictionary<GameObject, float> stats = new Dictionary<GameObject, float>();
 
     // Test Variables
-    public EnemyFSMController _enemy;
+   // public EnemyFSMController _enemy;
     public bool _testspawn = false;
    
     /// End Test
@@ -195,7 +195,7 @@ public class MoonSceneManagerNew : BaseSceneManager
 
         if (_testspawn)
         {
-            _enemy.ResetFSM();
+           // _enemy.ResetFSM();
             _testspawn = false;
         }
 

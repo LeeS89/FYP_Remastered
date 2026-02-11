@@ -39,7 +39,7 @@ public interface IZoneSink
     int? TryGetCurrentZone();
     bool TrySwitchPatrolZone();
 }
-
+[Obsolete("", true)]
 public interface IWaypointRepository
 {
     void GetWaypointBlock(Action<BlockData> requestCallback);

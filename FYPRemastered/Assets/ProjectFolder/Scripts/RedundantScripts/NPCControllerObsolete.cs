@@ -6,7 +6,7 @@ using UnityEngine.AI;
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(NavMeshObstacle))]
 [Obsolete("", true)]
-public partial class NPCControllerObsolete : ComponentEvents, IAgentData, /*INPCBrainContext,*/ INotificationListener
+public partial class NPCControllerObsolete : ComponentEvents,/* IAgentData,*/ /*INPCBrainContext,*/ INotificationListener
 {
     protected EnemyEventManager _eManager;
     //   private bool _isInStateTransition = false;
@@ -41,7 +41,7 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, /*INPC
     public bool TestWalk;
 
     [Header("Data used by the Brain component")]
-    public StateId CurrentFsmState => _fsmManager?.CurrentStateId ?? StateId.None;
+    public StateId CurrentFsmState => /*_fsmManager?.CurrentStateId ?? */StateId.None;
     public CombatOrder CurrentComOrder { get; private set; } = CombatOrder.None;
     public RotationOrder CurrentRotOrder { get; private set; } = RotationOrder.None;
     public FOVResult CurrentFovState { get; private set; } = FOVResult.None;
@@ -104,7 +104,7 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, /*INPC
     [SerializeField] protected float _maxStopdistance = 12f;
     public float GetAgentStoppingDistance(StateId currentState)
     {
-        if (currentState != _fsmManager.CurrentStateId) return 0f;
+      //  if (currentState != _fsmManager.CurrentStateId) return 0f;
         return currentState == StateId.Chase ? UnityEngine.Random.Range(_minStopdistance, _maxStopdistance) : 0f;
     }
 
@@ -113,7 +113,7 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, /*INPC
     // IFSMNotifications - For notifications received by the FSMManager, i.e. No valid destination, target lost, Target within melee/ shot range, etc.
     public void OnNotify(in NpcNotification n)
     {
-        if (_fsmManager.IsInStateTransition /*|| n.Id != _fsmManager.CurrentStateId*/) return;
+     //   if (_fsmManager.IsInStateTransition /*|| n.Id != _fsmManager.CurrentStateId*/) return;
      
       /*  if (!this.TryDecide(n, out var decision)) return;
        
@@ -188,7 +188,7 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, /*INPC
                 _zoneId = id;
                 SceneEventAggregator.Instance.RegisterAgentAndZone(this, _zoneId);
                 Debug.LogError("Zone ID on start: " + _zoneId.ToString());
-                _fsmManager.OnMapDestinationToZone = null;
+              //  _fsmManager.OnMapDestinationToZone = null;
             }
         }
         else
@@ -199,7 +199,7 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, /*INPC
             SceneEventAggregator.Instance.UnregisterAgentAndZone(this, _zoneId);
             _zoneId = ZoneId.ZoneA;
             SceneEventAggregator.Instance.RegisterAgentAndZone(this, _zoneId);
-            _fsmManager.OnMapDestinationToZone = null;
+           // _fsmManager.OnMapDestinationToZone = null;
         }
     }
 
@@ -226,8 +226,8 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, /*INPC
     protected virtual void Update()
     {
         if(OwnerIsDead) return;
-        _fsmManager?.Tick(Time.deltaTime);
-        IsStationary = _fsmManager?.HasReachedDestination() ?? true;
+       // _fsmManager?.Tick(Time.deltaTime);
+       // IsStationary = _fsmManager?.HasReachedDestination() ?? true;
     }
 
     protected virtual void LateUpdate()
@@ -235,7 +235,7 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, /*INPC
         if (OwnerIsDead) return;
         TryRotateAndAimAtTargetNew();
         //this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: CanRotateTowardsTarget());
-        _fsmManager?.LateTick(Time.deltaTime);
+        //_fsmManager?.LateTick(Time.deltaTime);
         if (_eManager == null) return;
         _animationControl?.Tick(Agent.velocity, Agent.transform.forward);
     }
@@ -310,16 +310,16 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, /*INPC
 
     private void TryRotateAndAimAtTarget()
     {
-        if (OwnerIsDead || _fsmManager == null) return;
-        if (_fsmManager.CurrentStateId == StateId.Chase || _fsmManager.CurrentStateId == StateId.Follow)
+      //  if (OwnerIsDead || _fsmManager == null) return;
+      //  if (_fsmManager.CurrentStateId == StateId.Chase || _fsmManager.CurrentStateId == StateId.Follow)
             if (IsStationary || CurrentFovState == FOVResult.ClearFov)
             {
-                this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: true);
+               // this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: true);
                 if (!_aimingAtTarget) { _aimingAtTarget = true; _animationControl?.IkLookAtTarget(look: true); }
             }
             else
             {
-                this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: false);
+              //  this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: false);
                 if (_aimingAtTarget) { _aimingAtTarget = false; _animationControl?.IkLookAtTarget(look: false); }
             }
     }
@@ -328,7 +328,7 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, /*INPC
         if (OwnerIsDead || TargetDead()) return;
   
         bool rotate = CurrentRotOrder == RotationOrder.RotateTowardsTarget;
-        this.RotateTowardsTarget(PrimaryTarget.Transform, rotate);
+       // this.RotateTowardsTarget(PrimaryTarget.Transform, rotate);
 
        /* if (_combatOrder != CombatOrder.None)
         {
@@ -380,7 +380,7 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, /*INPC
         }
         if (OwnerIsDead) yield break;
         Debug.LogError("Moving to Chase state");
-        _fsmManager?.SwitchTo(nextIntent);
+       // _fsmManager?.SwitchTo(nextIntent);
     }
 
 
@@ -463,7 +463,7 @@ public partial class NPCControllerObsolete : ComponentEvents, IAgentData, /*INPC
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(NavMeshObstacle))]
 [Obsolete("", true)]
-public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEventManager>, IAgentData, /*INPCBrainContext,*/ INotificationListener
+public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEventManager>, /*IAgentData,*/ /*INPCBrainContext,*/ INotificationListener
 {
     //protected EnemyEventManager _eManager;
     //   private bool _isInStateTransition = false;
@@ -499,7 +499,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
     public bool TestWalk;
 
     [Header("Data used by the Brain component")]
-    public StateId CurrentFsmState => _fsmManager?.CurrentStateId ?? StateId.None;
+    public StateId CurrentFsmState => /*_fsmManager?.CurrentStateId ??*/ StateId.None;
     public CombatOrder CurrentComOrder { get; private set; } = CombatOrder.None;
     public RotationOrder CurrentRotOrder { get; private set; } = RotationOrder.None;
     public FOVResult CurrentFovState { get; private set; } = FOVResult.None;
@@ -562,7 +562,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
     [SerializeField] protected float _maxStopdistance = 12f;
     public float GetAgentStoppingDistance(StateId currentState)
     {
-        if (currentState != _fsmManager.CurrentStateId) return 0f;
+        //if (currentState != _fsmManager.CurrentStateId) return 0f;
         return currentState == StateId.Chase ? UnityEngine.Random.Range(_minStopdistance, _maxStopdistance) : 0f;
     }
 
@@ -571,7 +571,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
     // IFSMNotifications - For notifications received by the FSMManager, i.e. No valid destination, target lost, Target within melee/ shot range, etc.
     public void OnNotify(in NpcNotification n)
     {
-        if (_fsmManager.IsInStateTransition /*|| n.Id != _fsmManager.CurrentStateId*/) return;
+      //  if (_fsmManager.IsInStateTransition /*|| n.Id != _fsmManager.CurrentStateId*/) return;
      
        // if (!this.TryDecide(n, out var decision)) return;
        
@@ -646,7 +646,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
                 _zoneId = id;
                 SceneEventAggregator.Instance.RegisterAgentAndZone(this, _zoneId);
                 Debug.LogError("Zone ID on start: " + _zoneId.ToString());
-                _fsmManager.OnMapDestinationToZone = null;
+               // _fsmManager.OnMapDestinationToZone = null;
             }
         }
         else
@@ -657,7 +657,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
             SceneEventAggregator.Instance.UnregisterAgentAndZone(this, _zoneId);
             _zoneId = ZoneId.ZoneA;
             SceneEventAggregator.Instance.RegisterAgentAndZone(this, _zoneId);
-            _fsmManager.OnMapDestinationToZone = null;
+          //  _fsmManager.OnMapDestinationToZone = null;
         }
     }
 
@@ -684,8 +684,8 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
     protected virtual void Update()
     {
       //  if(IsDead) return;
-        _fsmManager?.Tick(Time.deltaTime);
-        IsStationary = _fsmManager?.HasReachedDestination() ?? true;
+      //  _fsmManager?.Tick(Time.deltaTime);
+      //  IsStationary = _fsmManager?.HasReachedDestination() ?? true;
     }
 
     protected virtual void LateUpdate()
@@ -693,7 +693,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
      //   if (IsDead) return;
         TryRotateAndAimAtTargetNew();
         //this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: CanRotateTowardsTarget());
-        _fsmManager?.LateTick(Time.deltaTime);
+      //  _fsmManager?.LateTick(Time.deltaTime);
         if (_eManager == null) return;
         _animationControl?.Tick(Agent.velocity, Agent.transform.forward);
     }
@@ -769,15 +769,15 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
     private void TryRotateAndAimAtTarget()
     {
         //if (IsDead || _fsmManager == null) return;
-        if (_fsmManager.CurrentStateId == StateId.Chase || _fsmManager.CurrentStateId == StateId.Follow)
+       // if (_fsmManager.CurrentStateId == StateId.Chase || _fsmManager.CurrentStateId == StateId.Follow)
             if (IsStationary || CurrentFovState == FOVResult.ClearFov)
             {
-                this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: true);
+               // this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: true);
                 if (!_aimingAtTarget) { _aimingAtTarget = true; _animationControl?.IkLookAtTarget(look: true); }
             }
             else
             {
-                this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: false);
+               // this.RotateTowardsTarget(PrimaryTarget?.Transform, rotate: false);
                 if (_aimingAtTarget) { _aimingAtTarget = false; _animationControl?.IkLookAtTarget(look: false); }
             }
     }
@@ -786,7 +786,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
         //if (IsDead || TargetDead()) return;
   
         bool rotate = CurrentRotOrder == RotationOrder.RotateTowardsTarget;
-        this.RotateTowardsTarget(PrimaryTarget.Transform, rotate);
+       // this.RotateTowardsTarget(PrimaryTarget.Transform, rotate);
 
        /* if (_combatOrder != CombatOrder.None)
         {
@@ -838,7 +838,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
         }
        // if (IsDead) yield break;
         Debug.LogError("Moving to Chase state");
-        _fsmManager?.SwitchTo(nextIntent);
+       // _fsmManager?.SwitchTo(nextIntent);
     }
 
 

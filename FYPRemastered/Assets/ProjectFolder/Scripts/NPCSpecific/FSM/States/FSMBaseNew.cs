@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -30,7 +29,7 @@ public /*partial*/ class FSMBaseNew : IFSMControl
     private float _targetSpeed = 0f;
     private float _pathCheckTimer;
 
-    public bool RotatingToTarget { get; private set; } = false;
+  //  public bool RotatingToTarget { get; private set; } = false;
     public bool TestPrint { get; set; } = false;
 
     // End internal members
@@ -373,7 +372,12 @@ public /*partial*/ class FSMBaseNew : IFSMControl
     private bool NullOwnerOrTarget() => _deps.Target == null || _deps.Target.Transform == null || _deps.Owner == null
             || _deps.Owner.Transform == null || _deps.Agent() == null;
 
- 
+    public void Dispose()
+    {
+        throw new NotImplementedException();
+    }
+
+
 
 
     // Used when the Agent is currently carving

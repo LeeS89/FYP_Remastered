@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 
+[Obsolete]
 public abstract class ComponentEvents : MonoBehaviour
 {
     protected EventManager _eventManager;

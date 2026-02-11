@@ -2,7 +2,7 @@
 
 using System;
 
-public interface ITickable
+public interface ITickable : ILifecycle
 {
     //event Action<float> OnTick;
     //void Pause();
@@ -14,8 +14,8 @@ public interface ITickable
     //Action<float> OnLateTick { get; }
 }
 
-public interface ILifecycle : ITickable
+public interface ILifecycle// : ITickable
 {
-    void Reset();
+   // void Reset();
     void Dispose();
 }

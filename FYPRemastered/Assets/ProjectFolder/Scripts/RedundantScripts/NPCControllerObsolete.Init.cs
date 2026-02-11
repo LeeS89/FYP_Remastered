@@ -16,7 +16,7 @@ public partial class NPCControllerObsolete
     private ICandidateProvider _destinationResolver;
     private IFieldOfViewRunnerObsolete _fovRunner;
     private Dictionary<StateId, ICandidateProvider> _destinationProviders;
-    private IFSMControl _fsmManager;
+    //private IFSMControl _fsmManager;
     private Dictionary<StateId, IFSMState> _fsmStates = new(5);
     // end FSMManager Composition
     //   protected IIntentState _state;
@@ -69,14 +69,14 @@ public partial class NPCControllerObsolete
         _destinationResolver = new DestinationResolver(_destinationProviders);
         _fovParams.FOVTarget = PrimaryTarget;
         _pathFinder = new PathFinderObsolete(_destinationResolver);
-        _fovRunner = new NPCFieldOfViewHandlerObsolete(_fovParams);
+       // _fovRunner = new NPCFieldOfViewHandlerObsolete(_fovParams);
 
     //    _fsmManager = new FSMBaseNew(data: this, resolver: _pathFinder, runner: _fovRunner, _fsmStates);
        // _fsmStates.TryAdd(StateId.Patrol, new FSMPatrolState(data: this, resolver: _pathFinder, stateContext: _fsmManager));
        // _fsmStates.TryAdd(StateId.Chase, new FSMChaseState(data: this, resolver: _pathFinder, stateContext: _fsmManager));
-        _fsmManager.Notification = OnNotify;
-        _fsmManager.OnAnimationIntent = AnimationIntent;
-        _fsmManager.OnMapDestinationToZone = MapDestinationToZone;///// maybe when entering patrol
+       // _fsmManager.Notification = OnNotify;
+        //_fsmManager.OnAnimationIntent = AnimationIntent;
+        //_fsmManager.OnMapDestinationToZone = MapDestinationToZone;///// maybe when entering patrol
     }
 
     private void SetNavMeshAgentParams()
@@ -98,9 +98,9 @@ public partial class NPCControllerObsolete
     protected override void OnSceneComplete()
     {
         base.OnSceneComplete();
-        _fsmManager.Notification = null;
+       /* _fsmManager.Notification = null;
         _fsmManager.OnAnimationIntent = null;
-        _fsmManager.OnMapDestinationToZone = null;
+        _fsmManager.OnMapDestinationToZone = null;*/
         OnRequestAgentStoppingDistance = null;
        // OnTargetSeen = null;
        // OnTargetLost = null;
@@ -110,7 +110,7 @@ public partial class NPCControllerObsolete
     {
         base.OnSceneStarted();
         _animationControl?.SetIKLookTarget(PrimaryTarget?.Transform);
-        _fsmManager?.SwitchTo(StateId.Patrol);
+       // _fsmManager?.SwitchTo(StateId.Patrol);
     }
 
 
@@ -163,7 +163,7 @@ public partial class NPCControllerNew
     private ICandidateProvider _destinationResolver;
     private IFieldOfViewRunnerObsolete _fovRunner;
     private Dictionary<StateId, ICandidateProvider> _destinationProviders;
-    private IFSMControl _fsmManager;
+  //  private IFSMControl _fsmManager;
     private Dictionary<StateId, IFSMState> _fsmStates = new(5);
     // end FSMManager Composition
    
@@ -242,9 +242,9 @@ public partial class NPCControllerNew
 
         _destinationResolver = new DestinationResolver(_destinationProviders);*/
         _fovParams.FOVTarget = PrimaryTarget;
-        if(_services.TryGetPathService(out var pathService)) _pathFinder = new PathFinderNew(pathService);
+        if(_services.TryGetPathService(out var pathService)) _pathFinder = new PathFinder(pathService);
 
-        _fovRunner = new NPCFieldOfViewHandlerObsolete(_fovParams);
+       // _fovRunner = new NPCFieldOfViewHandlerObsolete(_fovParams);
 
        // _fsmManager = new FSMBaseNew(data: this, resolver: _pathFinder, runner: _fovRunner, _fsmStates);
 
@@ -266,9 +266,9 @@ public partial class NPCControllerNew
         StateId cid = chaseState.GetId();
         _fsmStates.TryAdd(cid, chaseState);*/
        
-        _fsmManager.Notification = OnNotify;
+       /* _fsmManager.Notification = OnNotify;
         _fsmManager.OnAnimationIntent = AnimationIntent;
-        _fsmManager.OnMapDestinationToZone = MapDestinationToZone;///// maybe when entering patrol
+        _fsmManager.OnMapDestinationToZone = MapDestinationToZone;/*///// maybe when entering patrol
     }
 
     private void SetAgentParams()
@@ -290,9 +290,9 @@ public partial class NPCControllerNew
     protected void OnSceneComplete()
     {
        // base.OnSceneComplete();
-        _fsmManager.Notification = null;
+       /* _fsmManager.Notification = null;
         _fsmManager.OnAnimationIntent = null;
-        _fsmManager.OnMapDestinationToZone = null;
+        _fsmManager.OnMapDestinationToZone = null;*/
         OnRequestAgentStoppingDistance = null;
        // OnTargetSeen = null;
        // OnTargetLost = null;
@@ -302,7 +302,7 @@ public partial class NPCControllerNew
     {
        // base.OnSceneStarted();
         _animationControl?.SetIKLookTarget(PrimaryTarget?.Transform);
-        _fsmManager?.SwitchTo(StateId.Patrol);
+       // _fsmManager?.SwitchTo(StateId.Patrol);
     }
 
     public override void Unload()

@@ -144,7 +144,10 @@ public class PathRequestManagerNew : SceneResources, IPathService, ITickable // 
 
     public void LateTick(float dt) { }
 
-    
+    public void Dispose()
+    {
+        throw new NotImplementedException();
+    }
 
     private readonly struct PathRequest
     {

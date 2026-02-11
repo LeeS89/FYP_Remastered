@@ -655,7 +655,11 @@ public class PoolLoaderNew : SceneResources, IPoolService, ITickable
     }
 
     public void LateTick(float dt) { }
-   
+
+    public void Dispose()
+    {
+        throw new NotImplementedException();
+    }
 }
 
 

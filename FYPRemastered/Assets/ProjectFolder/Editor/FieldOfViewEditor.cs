@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(EnemyFSMController))]
+//[CustomEditor(typeof(EnemyFSMController))]
 public class FieldOfViewEditor : Editor
 {
     private void OnSceneGUI()

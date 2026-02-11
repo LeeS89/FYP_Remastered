@@ -106,7 +106,7 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
     protected abstract Task LoadSceneResources();
     //protected virtual void LoadWaypoints() { }
     // public virtual void RegisterAgentAndZone(EnemyFSMController agent, int zone) { }
-    public virtual void UnregisterAgentAndZone(EnemyFSMController agent, int zone) { }
+   // public virtual void UnregisterAgentAndZone(EnemyFSMController agent, int zone) { }
     //public virtual void AlertZoneAgents(int zone, EnemyFSMController source) { }
 
     // public virtual void EnqueuePathRequest(DestinationRequestData request) { }

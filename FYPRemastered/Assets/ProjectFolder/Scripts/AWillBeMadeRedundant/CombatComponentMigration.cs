@@ -44,7 +44,7 @@ public class CombatComponentMigration : BaseAbilitiesMigration
     private WaitForSeconds _meleeCheckWait;
     private bool _evaluatingMeleeCheck = false;
 
-    public FieldOfViewParams _fovParams;
+    public FieldOfViewParamsObsolete _fovParams;
 
     [Range(0, 360)] public float _shootAngleThreshold;
 
@@ -58,7 +58,7 @@ public class CombatComponentMigration : BaseAbilitiesMigration
 
 
     public NPCWeaponManager _weaponManager;
-    private FieldOfViewManager _fovhandler;
+    private FieldOfViewManagerObsolete _fovhandler;
 
     [SerializeField] private List<EquippableBase> _availableWeapons;
     private Dictionary<WeaponType, IEquippable> _weaponStore = new(5);
@@ -129,7 +129,7 @@ public class CombatComponentMigration : BaseAbilitiesMigration
         _fovCallback = OnFieldOfViewComplete;
 
         InitializeFOVParams();
-        _fovhandler = new FieldOfViewManager(_enemyEventManager, _fovParams, _aiTraceComponent);
+        _fovhandler = new FieldOfViewManagerObsolete(_enemyEventManager, _fovParams, _aiTraceComponent);
 
         _enemyEventManager.OnFieldOfViewCallback += OnFieldOfViewComplete;
 
