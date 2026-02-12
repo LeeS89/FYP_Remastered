@@ -24,10 +24,10 @@ public sealed class PatrolObsolete : IntentStateBaseObsolete
     {
         switch (n.Kind)
         {
-            case NotificationKind.PathBlocked:
+            case NotificationType.PathBlocked:
                 // Try- Repath
                 break;
-            case NotificationKind.NoAvailablePath://.NoPatrolPointAvailable:
+            case NotificationType.NoAvailablePath://.NoPatrolPointAvailable:
                 // Error - Hold
                 break;
            /* case NotificationKind.TargetFound:

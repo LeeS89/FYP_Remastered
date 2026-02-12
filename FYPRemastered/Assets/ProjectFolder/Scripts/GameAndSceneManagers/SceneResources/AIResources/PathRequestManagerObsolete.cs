@@ -93,7 +93,7 @@ public class PathRequestManagerNew : SceneResources, IPathService, ITickable // 
             var request = _pathRequestQueue.Dequeue();
           
             //bool success = HasClearPathToTarget(request.From, request.To, request.Path);
-            PathResult result = HasClearPathToTarget(request.From, request.To, request.Path) ? PathResult.Success : PathResult.Failed;
+            DestinationResult result = HasClearPathToTarget(request.From, request.To, request.Path) ? DestinationResult.Success : DestinationResult.Failed;
 
             //Debug.LogError($"Path request from {request.start} to {request.end} success: {success}, please");
             //request.externalCallback?.Invoke(success);
@@ -113,11 +113,11 @@ public class PathRequestManagerNew : SceneResources, IPathService, ITickable // 
 
   
 
-    public void RequestPath(Vector3 from, Vector3 to, NavMeshPath path, Action<PathResult> onRequestComplete)
+    public void RequestPath(Vector3 from, Vector3 to, NavMeshPath path, Action<DestinationResult> onRequestComplete)
     {
         if (path == null)
         {
-            onRequestComplete?.Invoke(PathResult.NullPathParameter);
+            onRequestComplete?.Invoke(DestinationResult.NullPathParameter);
             return;
         }
         PathRequest req = new PathRequest
@@ -154,20 +154,12 @@ public class PathRequestManagerNew : SceneResources, IPathService, ITickable // 
         public readonly Vector3 From;
         public readonly Vector3 To;
         public readonly NavMeshPath Path;
-        public readonly Action<PathResult> OnRequestComplete;
+        public readonly Action<DestinationResult> OnRequestComplete;
 
-        public PathRequest(Vector3 from, Vector3 to, NavMeshPath path, Action<PathResult> onRequestComplete)
+        public PathRequest(Vector3 from, Vector3 to, NavMeshPath path, Action<DestinationResult> onRequestComplete)
             => (From, To, Path, OnRequestComplete) = (from, to, path, onRequestComplete);
            
     }
 }
 
-public enum PathResult
-{
-    None,
-    Success,
-    Failed,
-    NullPathParameter,
-    CandidatesNullOrEmpty,
-    RequestCancelled
-}
+

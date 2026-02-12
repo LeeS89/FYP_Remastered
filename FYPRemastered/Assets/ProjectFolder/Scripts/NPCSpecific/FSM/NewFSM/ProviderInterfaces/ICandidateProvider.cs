@@ -4,6 +4,7 @@ using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.AI;
 
+[Obsolete("", true)]
 public interface ICandidateProvider : IZoneSink
 {
     List<(Vector3 position, Vector3? forward)> TryGet(in ValidateDestination req);
@@ -13,26 +14,9 @@ public interface ICandidateProvider : IZoneSink
 
 
 
-public interface IPathResolver// : IZoneSink
-{
-    /*bool TryGetWaypointZone(out uint zone);
 
-    bool TrySwitchWaypoints();*/
-   /* [Obsolete]
-    DestinationValidationCallback Callback { get; set; }*/
 
-    void CancelAll();
-
-   /* [Obsolete]
-    void ProcessDestinationCandidates(StateId id, PathCheckReason reason, List<Vector3> candidates, NavMeshPath path, Vector3 fromPos);*/
-    void ProcessDestinationCandidates(StateId id, ReasonForDestinationCheck reason, List<Vector3> candidates, NavMeshPath path, Vector3 fromPos, DestinationValidationCallbackNew callBack);
-
-    [Obsolete]
-    void TryGetDestination(in ValidateDestination req);
-   // List<(Vector3 position, Vector3? forward)> TryGet(in ValidateDestination request);
-}
-
-[Obsolete]
+[Obsolete("", true)]
 public interface IZoneSink
 {
 //    bool TryGetCurrentZone(out int zone);
@@ -46,11 +30,12 @@ public interface IWaypointRepository
     void SwitchWaypointBlock(BlockData oldBlock, Action<BlockData> requestCallback);
 }
 
+[Obsolete("", true)]
 public interface IFlankPointSampler
 {
     List<FlankPointData> GetFlankPoints();
 }
-[Obsolete]
+[Obsolete("", true)]
 public class DestinationResolver : ICandidateProvider
 {
     private IReadOnlyDictionary<StateId, ICandidateProvider> _providers;
@@ -95,7 +80,7 @@ public class DestinationResolver : ICandidateProvider
     }
 }
 
-[Obsolete]
+[Obsolete("", true)]
 public abstract class DestinationProvider : ICandidateProvider
 {
     public List<(Vector3, Vector3?)> Candidates { get; set; } = new();
@@ -119,7 +104,7 @@ public abstract class DestinationProvider : ICandidateProvider
     
 }
 
-[Obsolete]
+[Obsolete("", true)]
 public sealed class TargetPointProvider : DestinationProvider
 {
     private ITargetable _target;
@@ -285,7 +270,7 @@ public readonly struct ValidateDestination
 
 
 
-
+[Obsolete("", true)]
 public interface ICandidateProviderNew : IZoneSink
 {
     List<(Vector3 position, Vector3? forward)> TryGet(in ValidateDestination req);
@@ -295,7 +280,7 @@ public interface ICandidateProviderNew : IZoneSink
 
 
 
-
+[Obsolete("", true)]
 public abstract class DestinationProviderNew : ICandidateProviderNew
 {
     public List<(Vector3, Vector3?)> Candidates { get; set; } = new();
@@ -319,6 +304,7 @@ public abstract class DestinationProviderNew : ICandidateProviderNew
 
 }
 
+[Obsolete("", true)]
 public sealed class WaypointProviderNew : DestinationProviderNew
 {
     private IWaypointService _service;

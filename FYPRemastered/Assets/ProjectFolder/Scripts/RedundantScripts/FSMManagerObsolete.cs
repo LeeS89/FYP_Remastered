@@ -34,7 +34,7 @@ public class FSMManagerObsolete : FSMBaseObsolete
                 { StateId.Patrol, new WaypointProvider(WaypointRepo.Instance) }
             };
             ICandidateProvider destResolver = new DestinationResolver(providers);
-            _pathFinder = new PathFinderObsolete(destResolver);
+           // _pathFinder = new PathFinderObsolete(destResolver);
         }
         else _pathFinder = resolver;
 
@@ -126,7 +126,7 @@ public class FSMManagerObsolete : FSMBaseObsolete
 
 
     #region Path Received & Validation
-    public override void OnPathRequestComplete(in DestinationResult result)
+    public override void OnPathRequestComplete(in DestinationResultObsolete result)
     {
 
         if (StateHasChanged(result.Id) || result.Reason == ReasonForDestinationCheck.Cancelled) return;

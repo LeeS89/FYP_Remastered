@@ -1,4 +1,4 @@
-using UnityEngine;
+/*using UnityEngine;
 using UnityEngine.AI;
 
 public class Throwaway : MonoBehaviour
@@ -20,7 +20,7 @@ public class Throwaway : MonoBehaviour
         _anim.ResetTrigger("look");
     }
     // Update is called once per frame
-    /*void Update()
+    *//*void Update()
     {
 
         *//*_speed = _agent.velocity.magnitude;
@@ -30,7 +30,7 @@ public class Throwaway : MonoBehaviour
             EnemyDied();
             testDead = false;
         }*//*
-    }*/
+    }*//*
     public void EnemyDied()
     {
         _anim.SetTrigger("dead");
@@ -41,3 +41,4 @@ public class Throwaway : MonoBehaviour
         //_anim.SetLayerWeight(1, 0);
     }
 }
+*/

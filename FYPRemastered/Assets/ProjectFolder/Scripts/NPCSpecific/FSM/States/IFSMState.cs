@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public interface IFSMState : ITickable
+public interface IFsmState : ITickable
 {
     void EnterState();
 

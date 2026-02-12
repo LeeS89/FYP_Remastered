@@ -144,7 +144,7 @@ public class TestFovObsolete : MonoBehaviour//, IFieldOfViewOwnerObsolete
         throw new NotImplementedException();
     }
 
-    public void OnPathRequestComplete(in DestinationResult result)
+    public void OnPathRequestComplete(in DestinationResultObsolete result)
     {
         throw new NotImplementedException();
     }

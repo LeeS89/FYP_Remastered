@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 [Obsolete("", true)]
 public class AgentZoneRegistryObsolete : SceneResources
 {
-    private Dictionary<int, List<FSMControllerBase>> _zoneAgents = new();
+    private Dictionary<int, List<FSMControllerBaseObsolete>> _zoneAgents = new();
 
     public override async Task LoadResources()
     {
@@ -26,10 +26,10 @@ public class AgentZoneRegistryObsolete : SceneResources
         await Task.CompletedTask;
     }
 
-    private void Register(FSMControllerBase agent, int zone)
+    private void Register(FSMControllerBaseObsolete agent, int zone)
     {
         if (!_zoneAgents.ContainsKey(zone))
-            _zoneAgents[zone] = new List<FSMControllerBase>();
+            _zoneAgents[zone] = new List<FSMControllerBaseObsolete>();
 
         if (!_zoneAgents[zone].Contains(agent))
         {
@@ -39,13 +39,13 @@ public class AgentZoneRegistryObsolete : SceneResources
             
     }
 
-    public void Unregister(FSMControllerBase agent, int zone)
+    public void Unregister(FSMControllerBaseObsolete agent, int zone)
     {
         if (_zoneAgents.TryGetValue(zone, out var list))
             list.Remove(agent);
     }
 
-    private void AlertZone(int zone, FSMControllerBase source)
+    private void AlertZone(int zone, FSMControllerBaseObsolete source)
     {
         if (!_zoneAgents.TryGetValue(zone, out var agents)) return;
 
@@ -58,12 +58,12 @@ public class AgentZoneRegistryObsolete : SceneResources
         }
     }
 
-    public IReadOnlyList<FSMControllerBase> GetAgentsInZone(int zone)
+    public IReadOnlyList<FSMControllerBaseObsolete> GetAgentsInZone(int zone)
     {
         if (_zoneAgents.TryGetValue(zone, out var agents))
             return agents;
 
-        return Array.Empty<FSMControllerBase>();
+        return Array.Empty<FSMControllerBaseObsolete>();
     }
 
     public void ClearAll()

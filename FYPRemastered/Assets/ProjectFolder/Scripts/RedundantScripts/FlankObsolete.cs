@@ -21,13 +21,13 @@ public sealed class FlankObsolete : IntentStateBaseObsolete
     {
         switch (n.Kind)
         {
-            case NotificationKind.PathBlocked:
+            case NotificationType.PathBlocked:
                 // Try Re path
                 break;
-            case NotificationKind.TargetMoved or NotificationKind.TargetLeftArea:
+            case NotificationType.TargetMoved or NotificationType.TargetLeftArea:
                 //self.SwitchTo(ChaseStateObsolete.Instance);
                 break;
-            case NotificationKind.NoAvailablePath://.NoFlankAvailable:
+            case NotificationType.NoAvailablePath://.NoFlankAvailable:
               //  self.SwitchTo(TakeCoverObsolete.Instance);
                 break;
             default:

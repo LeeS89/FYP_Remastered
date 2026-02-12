@@ -2,7 +2,7 @@ using System;
 using Unity.XR.CoreUtils;
 using UnityEngine;
 
-public class FSMChaseState : FSMBaseState
+public class FSMChaseState : FsmBaseState
 {
     private readonly IChaseDeps _deps;
     private Action<float/*, float*/> _distanceCheckCB;
@@ -42,8 +42,14 @@ public class FSMChaseState : FSMBaseState
     protected override void ValidateCandidateDestinations()
     {
         if (!_isInState || OwnerDataNull()) return;
-        _pathResolver?.ProcessDestinationCandidates(_id, ReasonForDestinationCheck.ValidatePathForDestination,
-            _candidateDestinations, _path, _owner.Position(), _validationCallback);
+
+        DestinationRequest req = new DestinationRequest(_id, _owner.Position(), _candidateDestinations, _path,
+            ReasonForDestinationCheck.ValidatePathForDestination, _validationCallback);
+
+        _pathResolver?.ProcessDestinationCandidates(in req);
+
+        /* _pathResolver?.ProcessDestinationCandidates(_id, ReasonForDestinationCheck.ValidatePathForDestination,
+             _candidateDestinations, _path, _owner.Position(), _validationCallback);*/
     }
 
    

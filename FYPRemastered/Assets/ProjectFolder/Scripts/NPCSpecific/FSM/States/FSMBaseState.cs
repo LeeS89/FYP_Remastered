@@ -2,14 +2,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public abstract class FSMBaseState : IFSMState
+public abstract class FsmBaseState : IFsmState
 {
     protected readonly IPathResolver _pathResolver;
     protected readonly IFSMStateContext _stateContext;
     protected Coroutine _runningRoutine;
     protected bool _isAtDestination = false;
     protected bool _isInState = false;
-    protected DestinationValidationCallbackNew _validationCallback;
+    protected DestinationResultCallback _validationCallback;
 
 
     protected List<Vector3> _candidateDestinations = new();
@@ -26,7 +26,7 @@ public abstract class FSMBaseState : IFSMState
     public bool UsesRandomAgentStopDistance => _usesRandomStopDistance;
 
 
-    public FSMBaseState(IFsmStateDeps deps, IFSMStateContext stateContext, bool useRandomStopDistance, StateId id)
+    public FsmBaseState(IFsmStateDeps deps, IFSMStateContext stateContext, bool useRandomStopDistance, StateId id)
     {
         _usesRandomStopDistance = useRandomStopDistance;
         _owner = deps.Owner;
@@ -52,7 +52,7 @@ public abstract class FSMBaseState : IFSMState
         RetrieveCandidateDestinations();
     }
 
-    protected virtual void OnPathResultReceived(in DestinationResultNew result)
+    protected virtual void OnPathResultReceived(in DestinationResultInfo result)
     {
         if (!_isInState) return;
        // Debug.LogError("Sending Dest Result from: "+ _id.ToString());

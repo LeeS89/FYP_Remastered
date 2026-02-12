@@ -121,22 +121,22 @@ public class SceneEventAggregator : MonoBehaviour
     #endregion Scene Events
 
     #region Agent Zone Registry Events
-    public event Action<FSMControllerBase, int> OnAgentZoneRegistered;
+    public event Action<FSMControllerBaseObsolete, int> OnAgentZoneRegistered;
     
-    public event Action<FSMControllerBase, int> OnAgentZoneUnRegistered;
-    public event Action<int, FSMControllerBase> OnAlertZoneAgents;
+    public event Action<FSMControllerBaseObsolete, int> OnAgentZoneUnRegistered;
+    public event Action<int, FSMControllerBaseObsolete> OnAlertZoneAgents;
 
-    public void RegisterAgentAndZone(FSMControllerBase agent, int zone)
+    public void RegisterAgentAndZone(FSMControllerBaseObsolete agent, int zone)
     {
         OnAgentZoneRegistered?.Invoke(agent, zone);
     }
 
-    public void UnRegisterAgentAndZone(FSMControllerBase agent, int zone)
+    public void UnRegisterAgentAndZone(FSMControllerBaseObsolete agent, int zone)
     {
         OnAgentZoneUnRegistered?.Invoke(agent, zone);
     }
 
-    public void AlertZoneAgents(int zone, FSMControllerBase source)
+    public void AlertZoneAgents(int zone, FSMControllerBaseObsolete source)
     {
         OnAlertZoneAgents?.Invoke(zone, source);
     }
@@ -422,7 +422,7 @@ public interface IPlaceholderService { }
 
 public interface IPathService
 {
-    void RequestPath(Vector3 from, Vector3 to, NavMeshPath path, Action<PathResult> onRequestComplete);
+    void RequestPath(Vector3 from, Vector3 to, NavMeshPath path, Action<DestinationResult> onRequestComplete);
 }
 
 public interface IAddressableService

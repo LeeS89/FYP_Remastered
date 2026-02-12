@@ -3,7 +3,7 @@ using Unity.XR.CoreUtils;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public sealed class FSMPatrolState : FSMBaseState
+public sealed class FSMPatrolState : FsmBaseState
 {
     private readonly IWaypointService _waypointService;
     private readonly IPatrolDeps _patrolDeps;
@@ -39,11 +39,11 @@ public sealed class FSMPatrolState : FSMBaseState
         {
             if (_waypointService == null || !_waypointService.TryGetWaypoints(this, _candidateDestinations))
             {
-                DestinationResultNew failedResult = new DestinationResultNew
+                DestinationResultInfo failedResult = new DestinationResultInfo
                 (
                     ReasonForDestinationCheck.ValidatePathForDestination,
                     _path,
-                    PathResult.CandidatesNullOrEmpty,
+                    DestinationResult.CandidatesNullOrEmpty,
                     Vector3.zero,
                     _id
                 );
@@ -66,11 +66,14 @@ public sealed class FSMPatrolState : FSMBaseState
             _candidateDestinations.Add(temp);
         }
         //ContinueRoutine = true;
-        _pathResolver?.ProcessDestinationCandidates(_id, ReasonForDestinationCheck.ValidatePathForDestination,
-            _candidateDestinations, _path, _owner.Position(), _validationCallback);
+        DestinationRequest req = new DestinationRequest(_id, _owner.Position(), _candidateDestinations, _path, 
+            ReasonForDestinationCheck.ValidatePathForDestination, _validationCallback);
+        _pathResolver?.ProcessDestinationCandidates(in req);
 
-        /*var request = ValidateDestination.GetPatrolPoint(_ownerData, _ownerData.Path);
-        _pathFinder?.TryGetDestination(request);*/
+
+       /* _pathResolver?.ProcessDestinationCandidates(_id, ReasonForDestinationCheck.ValidatePathForDestination,
+            _candidateDestinations, _path, _owner.Position(), _validationCallback);*/
+
     }
 
   

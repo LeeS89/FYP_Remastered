@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public /*partial*/ class FSMBaseNew : IFSMControl
+public class FsmManager : IFsmControl
 {
     // Injected Dependancies
-    private IReadOnlyDictionary<StateId, IFSMState> _states;
+    private IReadOnlyDictionary<StateId, IFsmState> _states;
     private IFsmControllerDeps _deps;
     // End Injected Dependancies
     public Notification Notification { get; set; }
@@ -22,7 +22,7 @@ public /*partial*/ class FSMBaseNew : IFSMControl
 
     // Internal Members
     private List<SetDestinationDelay> _timer = new(2);
-    private IFSMState _current;
+    private IFsmState _current;
     public bool IsInStateTransition { get; private set; } = false;
     private bool _hasValidDestination = false;
     private float _lerpSpeed = 0f;
@@ -43,7 +43,7 @@ public /*partial*/ class FSMBaseNew : IFSMControl
     private RotationOverride _currentRotationOverride = RotationOverride.None;
 
 
-    public FSMBaseNew(IFsmControllerDeps deps, IReadOnlyDictionary<StateId, IFSMState> states, Notification fsmNotifications)
+    public FsmManager(IFsmControllerDeps deps, IReadOnlyDictionary<StateId, IFsmState> states, Notification fsmNotifications)
     {
         _deps = deps;
         Notification = fsmNotifications;
@@ -219,19 +219,19 @@ public /*partial*/ class FSMBaseNew : IFSMControl
     #region Destination result & Setting region
     private bool StateHasChanged(StateId id) => id != CurrentStateId;
 
-    public void OnDestinationResultReceived(in DestinationResultNew result)
+    public void OnDestinationResultReceived(in DestinationResultInfo result)
     {
        // Debug.LogError("Destination Result Received at source");
-        if (StateHasChanged(result.Id) || result.Reason == ReasonForDestinationCheck.Cancelled) return;
-        PathResult pathResult = result.PathResult;
+        if (StateHasChanged(result.Id) || result.RequestReason == ReasonForDestinationCheck.Cancelled) return;
+        DestinationResult pathResult = result.Result;
         //bool pathFound = result.PathFound;
         StateId id = result.Id;
 
-        if (result.Reason == ReasonForDestinationCheck.ProbePath && pathResult == PathResult.Success)
+        if (result.RequestReason == ReasonForDestinationCheck.ProbePath && pathResult == DestinationResult.Success)
         { Notification?.Invoke(NpcNotification.PathToPrimaryAvailable(/*result.Id*/)); return; }
 
-        if (/*!result.PathFound*/pathResult == PathResult.Failed) { Notification?.Invoke(NpcNotification.NoAvailablePath(/*CurrentStateId*/)); Debug.LogError("NO Path Found!!"); return; }
-        else if(pathResult == PathResult.Success)
+        if (/*!result.PathFound*/pathResult == DestinationResult.Failed) { Notification?.Invoke(NpcNotification.NoAvailablePath(/*CurrentStateId*/)); Debug.LogError("NO Path Found!!"); return; }
+        else if(pathResult == DestinationResult.Success)
         {
             Vector3 currentDestination = result.Destination;
             CurrentDestinationForward = result.Forward;

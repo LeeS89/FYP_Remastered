@@ -31,10 +31,10 @@ public sealed class ChaseStateObsolete : IntentStateBaseObsolete
                 /*if (n.IsCurrentlyMoving)*/  /*Come back to this, need to know if moving */ //self.SwitchTo(Flank.Instance); // Ensure to wait a few seconds after losing LOS, then check again before sending Notification
                 // Plus Notify Zone handler of lost LOS => If all lost LOS switch to Search last known
              //   break;
-            case NotificationKind.PathBlocked or NotificationKind.NoAvailablePath:
+            case NotificationType.PathBlocked or NotificationType.NoAvailablePath:
                // self.SwitchTo(FollowGroup.Instance);
                 break;
-            case NotificationKind.TargetMoved:
+            case NotificationType.TargetMoved:
                 break;
             default:
               //  base.Handle(self, n);

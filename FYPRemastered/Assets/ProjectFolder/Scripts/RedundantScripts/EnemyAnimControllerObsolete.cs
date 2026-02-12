@@ -2,8 +2,8 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-[Obsolete]
-public class EnemyAnimController
+[Obsolete("", true)]
+public class EnemyAnimControllerObsolete
 {
     private Animator _anim;
     private EnemyEventManager _eventManager;
@@ -11,7 +11,7 @@ public class EnemyAnimController
     private float _lastSpeed = float.MinValue;
     private const float Threshold = 0.01f; // Threshold to avoid unnecessary updates
 
-    public EnemyAnimController(Animator anim, EnemyEventManager eventManager)
+    public EnemyAnimControllerObsolete(Animator anim, EnemyEventManager eventManager)
     {
         _anim = anim;
         _eventManager = eventManager;

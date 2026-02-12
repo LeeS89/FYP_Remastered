@@ -4,7 +4,7 @@ public static class NpcDecisionPolicy
 {
     public static void Decide(this INPCBrainContext self, in NpcNotification n)
     {
-        if (n.Kind == NotificationKind.NoCurrentState)
+        if (n.Kind == NotificationType.NoCurrentState)
         {
             self.OverrideSpeed(SpeedOverride.ForceWalk);
             self.SwitchState(StateId.Patrol);
@@ -36,7 +36,7 @@ public static class NpcDecisionPolicy
 
         switch (n.Kind)
         {
-            case NotificationKind.FOVUpdate:
+            case NotificationType.FOVUpdate:
                 //Debug.LogError("Receiving FOV update of: "+n.FOVResult.ToString());
                 // if (!FOVStatusChanged(self, n.FOVResult)) return;
 
@@ -52,7 +52,7 @@ public static class NpcDecisionPolicy
                     return;
                 }
                 break;
-            case NotificationKind.ZoneAlert:
+            case NotificationType.ZoneAlert:
 
                 self.SwitchState(StateId.Chase);
 
@@ -73,7 +73,7 @@ public static class NpcDecisionPolicy
 
         switch (n.Kind)
         {
-            case NotificationKind.FOVUpdate:
+            case NotificationType.FOVUpdate:
                 if (!FOVStatusChanged(self, n.FOVResult)) return;
                 self.UpdateCurrentFovStatus(n.FOVResult);
 
@@ -86,7 +86,7 @@ public static class NpcDecisionPolicy
             /* case NotificationKind.DestinationReached:
                  //TryUpdateRotationToTarget(self, true); // Always rotate to target on destination reached
                  break;*/
-            case NotificationKind.DestinationSet:
+            case NotificationType.DestinationSet:
                 //  TryUpdateRotationToTarget(self, TargetSeen(self.CurrentFovState)); // Rotate if target is seen while moving
                 break;
             default:

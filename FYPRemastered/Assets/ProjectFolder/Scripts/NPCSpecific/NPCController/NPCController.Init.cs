@@ -13,8 +13,8 @@ public partial class NPCController
     // FSMManager Composition
     //private IPathResolver _pathFinder;
     private FovRunner _fovRunner;
-    private IFSMControl _fsmManager;
-    private Dictionary<StateId, IFSMState> _fsmStates = new(5);
+    private IFsmControl _fsmManager;
+    private Dictionary<StateId, IFsmState> _fsmStates = new(5);
     // end FSMManager Composition
 
     private INpcAnimationControl _animationControl;
@@ -110,7 +110,7 @@ public partial class NPCController
         //_fovRunner = new NPCFieldOfViewHandler(_fovParams, _fsmDeps, onSweepComplete: _componentNotifications);
 
        // _fsmManager = new FSMBaseNew(data: this, resolver: _pathFinder, runner: _fovRunner, _fsmStates);
-        _fsmManager = new FSMBaseNew(deps: _fsmDeps, _fsmStates, fsmNotifications: _componentNotifications);
+        _fsmManager = new FsmManager(deps: _fsmDeps, _fsmStates, fsmNotifications: _componentNotifications);
 
         if (_aiServices.TryGetWaypointService(out _fsmDeps._waypointService))
         {
@@ -121,14 +121,14 @@ public partial class NPCController
 #endif
             }
             //IFSMState patrolState = new FSMPatrolState(wpService, data: this, resolver: _pathFinder, stateContext: _fsmManager);
-            IFSMState patrolState = new FSMPatrolState(deps: _fsmDeps, /*data: this, resolver: _pathFinder,*/ stateContext: _fsmManager);
+            IFsmState patrolState = new FSMPatrolState(deps: _fsmDeps, /*data: this, resolver: _pathFinder,*/ stateContext: _fsmManager);
             StateId pid = patrolState.GetId();
             _fsmStates.TryAdd(pid, patrolState);
         }
 
         if (_aiServices.TryGetFlankService(out _fsmDeps._flankService))
         {
-            IFSMState flankState = new FSMFlankState(deps: _fsmDeps, /*data: this, _pathFinder,*/ _fsmManager);
+            IFsmState flankState = new FSMFlankState(deps: _fsmDeps, /*data: this, _pathFinder,*/ _fsmManager);
             //IFSMState flankState = new FSMFlankState(flankService, data: this, _pathFinder, _fsmManager);
             StateId fid = flankState.GetId();
             _fsmStates.TryAdd(fid, flankState);
@@ -138,7 +138,7 @@ public partial class NPCController
         if (_aiServices.TryGetDistanceService(out var service))
         {
             _fsmDeps.SetDistanceService(service); // Maybe assume it is used by all states instead of just chase
-            IFSMState chaseState = new FSMChaseState(deps: _fsmDeps, stateContext: _fsmManager, useRandomStopDistance: true);
+            IFsmState chaseState = new FSMChaseState(deps: _fsmDeps, stateContext: _fsmManager, useRandomStopDistance: true);
             StateId cid = chaseState.GetId();
             _fsmStates.TryAdd(cid, chaseState);
         }
@@ -160,7 +160,7 @@ public partial class NPCController
   
     protected override void OnSceneEnd()
     {
-        _fsmManager.Notification = null;
+        //_fsmManager.Notification = null;
         _fsmManager.OnAnimationIntent = null;
         _fsmManager.OnMapDestinationToZone = null;
       

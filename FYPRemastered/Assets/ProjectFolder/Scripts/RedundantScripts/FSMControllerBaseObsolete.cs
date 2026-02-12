@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.AI;
 
 [Obsolete("", true)]
-public abstract class FSMControllerBase : ComponentEvents
+public abstract class FSMControllerBaseObsolete : ComponentEvents
 {
     [Header("AI Components")]
     [SerializeField] protected NavMeshAgent _agent;

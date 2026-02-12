@@ -2,53 +2,9 @@ using System;
 using UnityEngine;
 using UnityEngine.AI;
 
-/*[Obsolete]
-public interface IFSMEvents : ITickable, IZoneSink
-{
-    void BeginPatrol(StateId id);
-    void BeginChase(StateId id);
-    void BeginFlank(StateId id);
-    void TakeCover(StateId id);
-    void FollowGroup(StateId id);
-
-    bool IsMoving();
-  
-    Action<StateId> TryRepath { get; }
-
-    //void BeginSearch();
-    void ExitState();
-
-    bool DestinationReached { get; }
-
-   // void OnPathRequestComplete(in PathResult result);
-
-    bool HasLOS { get; }
-
- 
-    void LookAroundAndContinue();
-  
-   // StateNotificationProvider Notification { get; set; }
-
-    void OnInstanceDestroyed();
-   // bool CurrentZone(out uint zone);
-}
-*/
 
 
-public interface IFSMControl : IFSMStateContext, ITickable
-{
-    bool TestPrint { get; set; }
-    StateId CurrentStateId { get; }
-    bool IsInStateTransition { get; }
-    void SwitchTo(StateId state);
-    void OverrideSpeed(SpeedOverride overrideTier);
-   // bool RotatingToTarget { get; }
-   // void RotateToTarget(bool rotate);
-    void OverrideRotation(RotationOverride rotOverride);
-    //delegate void OnNotifyOwner(in NPCNotification n);
-    // OnNotifyOwner Notification { get; set; }
-    Notification Notification { get; set; }
-}
+
 
 public interface ITargetRef { ITargetable Target { get; } }
 
@@ -59,7 +15,7 @@ public interface IFSMStateContext : IAnimationCueSource//, ITargetRef
     Vector3? CurrentDestinationForward { get; } // Obsolete
     bool HasReachedDestination(); // Take out
 
-    void OnDestinationResultReceived(in DestinationResultNew result);
+    void OnDestinationResultReceived(in DestinationResultInfo result);
 }
 
 

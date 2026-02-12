@@ -5,11 +5,11 @@ using UnityEngine.AI;
 using Random = UnityEngine.Random;
 
 [Obsolete("Use NPCController instead", true)]
-public sealed class EnemyFSMControllerObsolete : FSMControllerBase
+public sealed class EnemyFSMControllerObsolete : FSMControllerBaseObsolete
 {
     [Header("Animation Components")]
     [SerializeField] private Animator _anim;
-    private EnemyAnimController _animController;
+    private EnemyAnimControllerObsolete _animController;
 
     // Depending on wether _currentState is == _startionary or a moving state,
     // this action will either stop the agent immediately or measure the path to the destination
@@ -34,7 +34,7 @@ public sealed class EnemyFSMControllerObsolete : FSMControllerBase
     protected override void SetupFSM()
     {
         base.SetupFSM();
-        _animController = new EnemyAnimController(_anim, _agentEventManager);
+        _animController = new EnemyAnimControllerObsolete(_anim, _agentEventManager);
 
     }
 

@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.AI;
 
 [Obsolete("", true)]
-public abstract class FSMControllerBaseNew : ComponentEvents
+public abstract class FSMControllerBaseNewObsolete : ComponentEvents
 {
 
     // New Functions Needed

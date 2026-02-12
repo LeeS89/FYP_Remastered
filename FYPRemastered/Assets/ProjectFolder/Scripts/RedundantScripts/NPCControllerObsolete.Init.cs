@@ -17,7 +17,7 @@ public partial class NPCControllerObsolete
     private IFieldOfViewRunnerObsolete _fovRunner;
     private Dictionary<StateId, ICandidateProvider> _destinationProviders;
     //private IFSMControl _fsmManager;
-    private Dictionary<StateId, IFSMState> _fsmStates = new(5);
+    private Dictionary<StateId, IFsmState> _fsmStates = new(5);
     // end FSMManager Composition
     //   protected IIntentState _state;
    
@@ -68,7 +68,7 @@ public partial class NPCControllerObsolete
 
         _destinationResolver = new DestinationResolver(_destinationProviders);
         _fovParams.FOVTarget = PrimaryTarget;
-        _pathFinder = new PathFinderObsolete(_destinationResolver);
+       // _pathFinder = new PathFinderObsolete(_destinationResolver);
        // _fovRunner = new NPCFieldOfViewHandlerObsolete(_fovParams);
 
     //    _fsmManager = new FSMBaseNew(data: this, resolver: _pathFinder, runner: _fovRunner, _fsmStates);
@@ -164,7 +164,7 @@ public partial class NPCControllerNew
     private IFieldOfViewRunnerObsolete _fovRunner;
     private Dictionary<StateId, ICandidateProvider> _destinationProviders;
   //  private IFSMControl _fsmManager;
-    private Dictionary<StateId, IFSMState> _fsmStates = new(5);
+    private Dictionary<StateId, IFsmState> _fsmStates = new(5);
     // end FSMManager Composition
    
     private INpcAnimationControl _animationControl;

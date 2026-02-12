@@ -4,7 +4,7 @@ using Unity.XR.CoreUtils;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class FSMFlankState : FSMBaseState
+public class FSMFlankState : FsmBaseState
 {
     private IFlankDeps _deps;
     private IFlankService _flankService;
@@ -39,11 +39,11 @@ public class FSMFlankState : FSMBaseState
     {
         if (_flankStepsToTry.Count == 0) // Add in arbitrary steps, 5 to 8 etc.
         {
-            DestinationResultNew noPathResult = new DestinationResultNew
+            DestinationResultInfo noPathResult = new DestinationResultInfo
             (
                 ReasonForDestinationCheck.ValidatePathForDestination,
                 null,
-                PathResult.CandidatesNullOrEmpty,
+                DestinationResult.CandidatesNullOrEmpty,
                 Vector3.zero,
                 StateId.Flank
             );
@@ -61,7 +61,7 @@ public class FSMFlankState : FSMBaseState
         
     }
 
-    protected override void OnPathResultReceived(in DestinationResultNew result)
+    protected override void OnPathResultReceived(in DestinationResultInfo result)
     {
         throw new System.NotImplementedException();
     }

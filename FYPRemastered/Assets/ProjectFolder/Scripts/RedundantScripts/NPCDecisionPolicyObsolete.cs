@@ -41,7 +41,7 @@ public static class NPCDecisionPolicyObsolete
 
         switch (n.Kind)
         {
-            case NotificationKind.FOVUpdate:
+            case NotificationType.FOVUpdate:
 
                 if (!FOVStatusChanged(self, n.FOVResult)) return false;
                 if (TargetSeen(n.FOVResult))
@@ -55,7 +55,7 @@ public static class NPCDecisionPolicyObsolete
                     return true;
                 }
                 break;
-            case NotificationKind.ZoneAlert:
+            case NotificationType.ZoneAlert:
 
                 d = new BrainDecision
                     (
@@ -79,7 +79,7 @@ public static class NPCDecisionPolicyObsolete
         d = default;
         switch (n.Kind)
         {
-            case NotificationKind.FOVUpdate:
+            case NotificationType.FOVUpdate:
                 if (!FOVStatusChanged(self, n.FOVResult)) return false;
                 CombatOrder newCombatOrder = DecideNextCombatOrder(self.CurrentComOrder, n.FOVResult);
                // RotationOrder newRotOrder = DecideNextRotationOrder(self.CurrentRotOrder, n.FOVResult);

@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-[Obsolete]
-public class PathFinderObsolete : IPathResolver
+[Obsolete("", true)]
+public class PathFinderObsolete// : IPathResolver
 {
    /* private ITargetable _primaryTarget;
     private ITargetable _secondaryTarget;
@@ -94,7 +94,7 @@ public class PathFinderObsolete : IPathResolver
         while(_pathQueue.Count > 0)
         {
             var (_, req) = _pathQueue.Dequeue();
-            DestinationResult cancelled = new DestinationResult(ReasonForDestinationCheck.Cancelled, req.Path, false, Vector3.zero, req.StateId);
+            DestinationResultObsolete cancelled = new DestinationResultObsolete(ReasonForDestinationCheck.Cancelled, req.Path, false, Vector3.zero, req.StateId);
         }
     }
 
@@ -105,7 +105,7 @@ public class PathFinderObsolete : IPathResolver
         destinations = TryGet(req);
         if (destinations == null || destinations.Count == 0)
         {
-            DestinationResult failResult = new DestinationResult(req.Reason, req.Path, false, Vector3.zero, req.StateId, null);
+            DestinationResultObsolete failResult = new DestinationResultObsolete(req.Reason, req.Path, false, Vector3.zero, req.StateId, null);
             Callback?.Invoke(failResult);
             //Owner.OnPathRequestComplete(failResult);
             return;
@@ -140,7 +140,7 @@ public class PathFinderObsolete : IPathResolver
                 if (_activeGen != Gen) break;
                 if (!_isValid) continue;
                 
-                DestinationResult success = new DestinationResult(reqInfo.Reason, reqInfo.Path, true, pos, reqInfo.StateId, fwd);
+                DestinationResultObsolete success = new DestinationResultObsolete(reqInfo.Reason, reqInfo.Path, true, pos, reqInfo.StateId, fwd);
                 Callback?.Invoke(success);
                // Owner.OnPathRequestComplete(success);
                 found = true;
@@ -150,7 +150,7 @@ public class PathFinderObsolete : IPathResolver
             if (_activeGen != Gen) break;
             if (!found)
             {
-                DestinationResult failed = new DestinationResult(reqInfo.Reason, reqInfo.Path, false, Vector3.zero, reqInfo.StateId, null);
+                DestinationResultObsolete failed = new DestinationResultObsolete(reqInfo.Reason, reqInfo.Path, false, Vector3.zero, reqInfo.StateId, null);
                 Callback?.Invoke(failed);
                 //Owner.OnPathRequestComplete(failed);
             }
@@ -160,7 +160,7 @@ public class PathFinderObsolete : IPathResolver
        
     }
 
-    public DestinationValidationCallback Callback { get; set; }
+    public DestinationValidationCallbackObsolete Callback { get; set; }
 
     private void OnPathRequestcallback(bool pathFound/*in PathResult result*/)
     {
@@ -246,7 +246,7 @@ public class PathFinderObsolete : IPathResolver
     public Vector3 LastKnownTargetPos { get; private set; }
    
 
-    public Collider GetAttackTarget(AttackTarget target)
+    public Collider GetAttackTarget(AttackTargetObsolete target)
     {
         /* if (target == AttackTarget.Primary) return _primaryTarget?.GetTargetableCollider();
          else return _secondaryTarget?.GetTargetableCollider();*/
@@ -258,15 +258,15 @@ public class PathFinderObsolete : IPathResolver
         throw new NotImplementedException();
     }
 
-    public void ProcessDestinationCandidates(StateId id, ReasonForDestinationCheck reason, List<Vector3> candidates, NavMeshPath path, Vector3 fromPos, DestinationValidationCallback callBack)
+    public void ProcessDestinationCandidates(StateId id, ReasonForDestinationCheck reason, List<Vector3> candidates, NavMeshPath path, Vector3 fromPos, DestinationValidationCallbackObsolete callBack)
     {
         throw new NotImplementedException();
     }
 
-    public void ProcessDestinationCandidates(StateId id, ReasonForDestinationCheck reason, List<Vector3> candidates, NavMeshPath path, Vector3 fromPos, DestinationValidationCallbackNew callBack)
+  /*  public void ProcessDestinationCandidates(StateId id, ReasonForDestinationCheck reason, List<Vector3> candidates, NavMeshPath path, Vector3 fromPos*//*, DestinationValidationCallback callBack*//*)
     {
         throw new NotImplementedException();
-    }
+    }*/
 
 
 
@@ -312,8 +312,8 @@ public class PathFinderObsolete : IPathResolver
     #endregion
 }
 
-[Obsolete]
-public readonly struct PathRequestInfo
+[Obsolete("", true)]
+public readonly struct PathRequestInfoObsolete
 {
     public readonly List<(Vector3, Vector3?)> Points;
     public readonly Vector3 StartPos;
@@ -321,7 +321,7 @@ public readonly struct PathRequestInfo
     public readonly NavMeshPath Path;
     public readonly uint Id;
 
-    public PathRequestInfo(List<(Vector3, Vector3?)> pts, Vector3 startPos, ReasonForDestinationCheck reason, NavMeshPath path, uint id)
+    public PathRequestInfoObsolete(List<(Vector3, Vector3?)> pts, Vector3 startPos, ReasonForDestinationCheck reason, NavMeshPath path, uint id)
     {
         Points = pts;
         StartPos = startPos;
@@ -334,8 +334,8 @@ public readonly struct PathRequestInfo
 }
 
 
-[Obsolete]
-public readonly struct DestinationResult
+[Obsolete("", true)]
+public readonly struct DestinationResultObsolete
 {
 
     public readonly ReasonForDestinationCheck Reason;
@@ -345,7 +345,7 @@ public readonly struct DestinationResult
     public readonly Vector3? Forward;
     public readonly StateId Id;
 
-    public DestinationResult(ReasonForDestinationCheck reason, NavMeshPath path, bool found, Vector3 dest, StateId id, Vector3? fwd = null)
+    public DestinationResultObsolete(ReasonForDestinationCheck reason, NavMeshPath path, bool found, Vector3 dest, StateId id, Vector3? fwd = null)
     {
         Reason = reason;
         Path = path;
@@ -358,65 +358,8 @@ public readonly struct DestinationResult
 }
 
 
-[Obsolete]
-public delegate void DestinationValidationCallback(in DestinationResult result);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-public delegate void DestinationValidationCallbackNew(in DestinationResultNew result);
-
-
-
-
-
-
-public readonly struct DestinationResultNew
-{
-
-    public readonly ReasonForDestinationCheck Reason;
-    public readonly NavMeshPath Path;
-    public readonly PathResult PathResult;
-    public readonly Vector3 Destination;
-    public readonly Vector3? Forward;
-    public readonly StateId Id;
-
-    public DestinationResultNew(ReasonForDestinationCheck reason, NavMeshPath path, PathResult result, Vector3 dest, StateId id, Vector3? fwd = null)
-    {
-        Reason = reason;
-        Path = path;
-        Id = id;
-        PathResult = result;
-        //PathFound = found;
-        Destination = dest;
-        Forward = fwd;
-    }
-
-}
-
-
+[Obsolete("", true)]
+public delegate void DestinationValidationCallbackObsolete(in DestinationResultObsolete result);
 
 
 
