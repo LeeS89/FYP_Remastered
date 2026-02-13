@@ -44,7 +44,7 @@ public class FovRunner : ITickable
     private void SendResult(FOVResult result)
     {
         //if (!_running) return;
-        var n = NpcNotification.FOVUpdate(result, false);
+        var n = NpcNotification.FovNotifications.FOVUpdate(result);
         OnFOVSweepComplete?.Invoke(n);
     }
 

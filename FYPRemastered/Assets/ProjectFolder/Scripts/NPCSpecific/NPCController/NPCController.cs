@@ -163,7 +163,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
                 _zoneId = id;
                 SceneEventAggregator.Instance.RegisterAgentAndZone(this, _zoneId);
                 Debug.LogError("Zone ID on start: " + _zoneId.ToString());
-                _fsmManager.OnMapDestinationToZone = null;
+               // _fsmManager.OnMapDestinationToZone = null;
             }
         }
         else
@@ -174,7 +174,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
             SceneEventAggregator.Instance.UnregisterAgentAndZone(this, _zoneId);
             _zoneId = ZoneId.ZoneA;
             SceneEventAggregator.Instance.RegisterAgentAndZone(this, _zoneId);
-            _fsmManager.OnMapDestinationToZone = null;
+            //_fsmManager.OnMapDestinationToZone = null;
         }
     }
 
@@ -209,7 +209,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
         }
         if (_testOverrideRot)
         {
-            OnNotify(NpcNotification.DestinationReached());
+            OnNotify(NpcNotification.PathNotifications.DestinationReached());
             _testOverrideRot = false;
         }
 
@@ -286,7 +286,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
         if (IsDead) return;
         Debug.LogError("Stable FOVResult: " + result.ToString());
         ApplyFOVStatusUpdate(result);
-        var n = NpcNotification.FOVUpdate(/*_fsmManager.CurrentStateId,*/ CurrentFovState, false);
+        var n = NpcNotification.FovNotifications.FOVUpdate(CurrentFovState);
         OnNotify(n);
     }
 

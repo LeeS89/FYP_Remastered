@@ -29,8 +29,7 @@ public sealed class FSMPatrolState : FsmBaseState
 
         if (_runningRoutine == null)
             _runningRoutine = CoroutineRunner.Instance.StartCoroutine(PatrolWaitRoutine(
-                _owner.Transform, _patrolDeps.MinTimeAtPatrolPoint, _patrolDeps.MaxTimeAtPatrolPoint, 
-                _stateContext.CurrentDestinationForward));
+                _owner.Transform, _patrolDeps.MinTimeAtPatrolPoint, _patrolDeps.MaxTimeAtPatrolPoint));
     }
 
     protected override void RetrieveCandidateDestinations()
@@ -78,7 +77,7 @@ public sealed class FSMPatrolState : FsmBaseState
 
   
 
-    private IEnumerator PatrolWaitRoutine(Transform t, float minWait, float maxWait, Vector3? forward)
+    private IEnumerator PatrolWaitRoutine(Transform t, float minWait, float maxWait)
     {
         Debug.LogError("Patrol wait routine called");
        // if (forward != null)

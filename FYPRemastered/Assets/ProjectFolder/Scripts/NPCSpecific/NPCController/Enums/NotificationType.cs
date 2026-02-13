@@ -16,5 +16,6 @@ public enum NotificationType
     PathToPrimaryAvailable,
     DestinationFound, // Obsolete
     DestinationSet,
-    DestinationReached
+    DestinationReached,
+    AnimationRequest
 }

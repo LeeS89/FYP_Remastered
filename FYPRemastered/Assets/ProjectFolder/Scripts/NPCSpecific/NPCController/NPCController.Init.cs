@@ -145,7 +145,7 @@ public partial class NPCController
 
         //_fsmManager.Notification = Notify;
         _fsmManager.OnAnimationIntent = AnimationIntent;
-        _fsmManager.OnMapDestinationToZone = MapDestinationToZone;///// maybe when entering patrol
+       // _fsmManager.OnMapDestinationToZone = MapDestinationToZone;///// maybe when entering patrol
     }
 
     private void SetAgentParams()
@@ -162,7 +162,7 @@ public partial class NPCController
     {
         //_fsmManager.Notification = null;
         _fsmManager.OnAnimationIntent = null;
-        _fsmManager.OnMapDestinationToZone = null;
+      //  _fsmManager.OnMapDestinationToZone = null;
       
         _eManager = null;
         // OnTargetSeen = null;

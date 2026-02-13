@@ -10,12 +10,22 @@ public interface ITargetRef { ITargetable Target { get; } }
 
 public interface IFSMStateContext : IAnimationCueSource//, ITargetRef
 {
-  //  ITargetable Owner { get; }
-    Action<Vector3> OnMapDestinationToZone { get; set; } // Take out
-    Vector3? CurrentDestinationForward { get; } // Obsolete
-    bool HasReachedDestination(); // Take out
+    //Action<Vector3> OnMapDestinationToZone { get; set; } // Take out
+
+    bool HasReachedDestination(); // Take out, replacing with destination reached notification
 
     void OnDestinationResultReceived(in DestinationResultInfo result);
+}
+
+public interface IPathNotificationSource
+{
+    void NoAvailablePath();
+    void PathToTargetAvailable();
+}
+
+public interface IAnimationRequestNotificationSource
+{
+    void RequestAnimation(AnimationCue cue);
 }
 
 

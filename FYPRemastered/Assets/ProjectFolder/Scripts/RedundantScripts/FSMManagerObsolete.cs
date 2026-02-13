@@ -95,7 +95,7 @@ public class FSMManagerObsolete : FSMBaseObsolete
             Notification?.Invoke(NotifyOwnerNPC.TargetFound(_currentStateId));
             return;
         }*/
-        Notification?.Invoke(NpcNotification.FOVUpdate(/*_currentStateId, */result, withinAttackAngles));
+        Notification?.Invoke(NpcNotification.FovNotifications.FOVUpdate(/*_currentStateId, */result));
     }
 
    
@@ -134,24 +134,24 @@ public class FSMManagerObsolete : FSMBaseObsolete
         StateId id = result.Id;
 
         if (result.Reason == ReasonForDestinationCheck.ProbePath && pathFound)
-        { Notification?.Invoke(NpcNotification.PathToPrimaryAvailable(/*result.Id*/)); return; }
-    
-        if (!result.PathFound) { Notification?.Invoke(NpcNotification.NoAvailablePath(/*_currentStateId*/)); Debug.LogError("NO Path Found!!"); return; }
+        { /*Notification?.Invoke(NpcNotification.PathToPrimaryAvailable(*//*result.Id*//*));*/ return; }
+    /*
+        if (!result.PathFound) { Notification?.Invoke(NpcNotification.NoAvailablePath(*//*_currentStateId*//*)); Debug.LogError("NO Path Found!!"); return; }
         else
         {
             _currentDestination = result.Destination;
             _currentDestinationForward = result.Forward;
             OnMapDestinationToZone?.Invoke(_currentDestination);
 
-           /* NavMeshObstacle o = _ownerData?.Obstacle;
+           *//* NavMeshObstacle o = _ownerData?.Obstacle;
             if (o !=null && o.enabled && o.carving)
             {
                 _ownerData.Obstacle.enabled = false;
                 _timer.Add(new SetDestinationDelay(Time.deltaTime + Mathf.Epsilon, _currentDestination, result.Path, id, SetDestination));
                 return;
             }
-            SetDestination(result.Path, _currentDestination, id);*/
-        }
+            SetDestination(result.Path, _currentDestination, id);*//*
+        }*/
 
     }
 

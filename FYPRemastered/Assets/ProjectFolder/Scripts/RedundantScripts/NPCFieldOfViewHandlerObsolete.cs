@@ -57,7 +57,7 @@ public class NPCFieldOfViewHandlerObsolete// : IFieldOfViewRunnerObsolete
 
     private void SendResult(FOVResult result)
     {
-        var n = NpcNotification.FOVUpdate(result, false);
+        var n = NpcNotification.FovNotifications.FOVUpdate(result);
         OnFOVSweepComplete?.Invoke(n);
     } 
 
@@ -319,7 +319,7 @@ public class NPCFieldOfViewHandlerNew// : IFieldOfViewRunnerObsolete
 
     private void SendResult(FOVResult result)
     {
-        var n = NpcNotification.FOVUpdate(result, false);
+        var n = NpcNotification.FovNotifications.FOVUpdate(result);
         OnFOVSweepComplete?.Invoke(n);
     } 
 

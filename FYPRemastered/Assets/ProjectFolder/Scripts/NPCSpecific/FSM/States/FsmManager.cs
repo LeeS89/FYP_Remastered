@@ -16,8 +16,8 @@ public class FsmManager : IFsmControl
     
     // Actions Invoked from individual states
     public Action<AnimationCue> OnAnimationIntent { get; set; }
-    public Action<Vector3> OnMapDestinationToZone { get; set; }
-    public Vector3? CurrentDestinationForward { get; private set; }
+   // public Action<Vector3> OnMapDestinationToZone { get; set; }
+   // public Vector3? CurrentDestinationForward { get; private set; }
     // End Actions Invoked from individual states
 
     // Internal Members
@@ -190,7 +190,7 @@ public class FsmManager : IFsmControl
         TryResetAgent("Reset Called From Destination Reached"); // Resets path and Sets speed == 0f
         //Debug.LogError("Reached Destination");
         _current?.OnDestinationReached();
-        Notification?.Invoke(NpcNotification.DestinationReached());
+        Notification?.Invoke(NpcNotification.PathNotifications.DestinationReached());
     }
 
     private void TimerTicks(float dt)
@@ -228,14 +228,14 @@ public class FsmManager : IFsmControl
         StateId id = result.Id;
 
         if (result.RequestReason == ReasonForDestinationCheck.ProbePath && pathResult == DestinationResult.Success)
-        { Notification?.Invoke(NpcNotification.PathToPrimaryAvailable(/*result.Id*/)); return; }
+        { Notification?.Invoke(NpcNotification.PathNotifications.PathToTargetAvailable()); return; }
 
-        if (/*!result.PathFound*/pathResult == DestinationResult.Failed) { Notification?.Invoke(NpcNotification.NoAvailablePath(/*CurrentStateId*/)); Debug.LogError("NO Path Found!!"); return; }
+        if (/*!result.PathFound*/pathResult == DestinationResult.Failed) { Notification?.Invoke(NpcNotification.PathNotifications.NoAvailablePath()); Debug.LogError("NO Path Found!!"); return; }
         else if(pathResult == DestinationResult.Success)
         {
             Vector3 currentDestination = result.Destination;
-            CurrentDestinationForward = result.Forward;
-            OnMapDestinationToZone?.Invoke(currentDestination);
+           // CurrentDestinationForward = result.Forward;
+           // OnMapDestinationToZone?.Invoke(currentDestination);
 
             NavMeshObstacle o = _deps.Obstacle();
             if (o != null && o.enabled && o.carving)
@@ -281,7 +281,7 @@ public class FsmManager : IFsmControl
         {
             Debug.LogError("Failed to Set Destination after multiple attempts");
             _destinationAttemptCounter = 0;
-            Notification?.Invoke(NpcNotification.NoAvailablePath());
+            Notification?.Invoke(NpcNotification.PathNotifications.NoAvailablePath());
         }
     }
 
@@ -291,7 +291,7 @@ public class FsmManager : IFsmControl
         _hasValidDestination = true;
         EvaluatePath();
         _current?.OnDestinationSet();
-        Notification?.Invoke(NpcNotification.DestinationSet());
+        Notification?.Invoke(NpcNotification.PathNotifications.DestinationSet());
     }
 
     protected void ToggleAgent(bool setActive)

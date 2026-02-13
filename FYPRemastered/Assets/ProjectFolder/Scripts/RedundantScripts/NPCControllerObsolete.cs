@@ -280,7 +280,7 @@ public partial class NPCControllerObsolete : ComponentEvents,/* IAgentData,*/ /*
         if (OwnerIsDead) return;
         Debug.LogError("Stable FOVResult: "+result.ToString());
         ApplyFOVStatusUpdate(result);
-        var n = NpcNotification.FOVUpdate(/*_fsmManager.CurrentStateId,*/ CurrentFovState, false);
+        var n = NpcNotification.FovNotifications.FOVUpdate(CurrentFovState);
         OnNotify(n);
     }
 
@@ -290,7 +290,7 @@ public partial class NPCControllerObsolete : ComponentEvents,/* IAgentData,*/ /*
         Debug.LogError("FOVResult: Target Seen");
         ApplyFOVStatusUpdate(FOVResult.ClearFov);
         //  _eManager.AimTowardsTarget(aim: true);
-        var n = NpcNotification.FOVUpdate(/*_fsmManager.CurrentStateId, */CurrentFovState, false);
+        var n = NpcNotification.FovNotifications.FOVUpdate(CurrentFovState);
         OnNotify(n);
 
        /* if (_fsmManager.CurrentStateId == StateId.Patrol)
@@ -738,7 +738,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
      //   if (IsDead) return;
         Debug.LogError("Stable FOVResult: "+result.ToString());
         ApplyFOVStatusUpdate(result);
-        var n = NpcNotification.FOVUpdate(/*_fsmManager.CurrentStateId,*/ CurrentFovState, false);
+        var n = NpcNotification.FovNotifications.FOVUpdate(CurrentFovState);
         OnNotify(n);
     }
 
@@ -748,7 +748,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
         Debug.LogError("FOVResult: Target Seen");
         ApplyFOVStatusUpdate(FOVResult.ClearFov);
         //  _eManager.AimTowardsTarget(aim: true);
-        var n = NpcNotification.FOVUpdate(/*_fsmManager.CurrentStateId, */CurrentFovState, false);
+        var n = NpcNotification.FovNotifications.FOVUpdate(CurrentFovState);
         OnNotify(n);
 
        /* if (_fsmManager.CurrentStateId == StateId.Patrol)
