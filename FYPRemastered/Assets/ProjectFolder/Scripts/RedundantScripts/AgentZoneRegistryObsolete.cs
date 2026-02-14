@@ -175,7 +175,7 @@ public class AgentZoneRegistryObsolete : SceneResources
 }*/
 public class AgentZoneRegistryNew : SceneResources, IAgentAlertService
 {
-    private Dictionary<ZoneId, List<INotificationListener>> _zoneAgents = new();
+    private Dictionary<ZoneId, List<INotificationListener>> _zoneAgents = new(16);
     private readonly HashSet<ZoneId> _alertedZones = new();
 
     public override async Task LoadResources()
@@ -246,9 +246,17 @@ public class AgentZoneRegistryNew : SceneResources, IAgentAlertService
         _zoneAgents.Clear();
     }
 
-    public void RegisterAgentAndZone(INotificationListener agent, ZoneId zone)
+    public bool TryRegisterAgentAndZone(INotificationListener agent, ZoneId zone)
     {
-        throw new NotImplementedException();
+        if (!_zoneAgents.ContainsKey(zone))
+            _zoneAgents[zone] = new List<INotificationListener>();
+
+        if (!_zoneAgents[zone].Contains(agent))
+        {
+            _zoneAgents[zone].Add(agent);
+            return true;
+        }
+        return false;
     }
 
     public void UnregisterAgentAndZone(INotificationListener agent, ZoneId zone)
@@ -258,7 +266,12 @@ public class AgentZoneRegistryNew : SceneResources, IAgentAlertService
 
     public bool TryAlertAgentsInZone(ZoneId zone, INotificationListener listener)
     {
-        return false;
-        //throw new NotImplementedException();
+        if (!_alertedZones.Add(zone)) return false;
+        if (!_zoneAgents.TryGetValue(zone, out var listeners)) return false;
+
+        foreach (var l in listeners)
+            l.OnNotify(NpcNotification.AlertNotifications.ZoneAlert());
+
+        return true;
     }
 }

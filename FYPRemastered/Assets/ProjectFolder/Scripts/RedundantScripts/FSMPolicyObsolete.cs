@@ -36,8 +36,8 @@ public readonly struct StateNotificationObsolete
         => (Kind, DestKind, Id, IsCurrentlyMoving, Destination, Forward) = (kind, destKind, stateId, currentlyMoving, dest, fwd);
 
 
-    public static StateNotificationObsolete DestinationFound(bool currentlyMoving, StateId stateId, DestinationKind destKind, Vector3 dest, Vector3? fwd = null)
-        => new(NotificationType.DestinationFound, destKind, stateId, currentlyMoving, dest, fwd);
+   /* public static StateNotificationObsolete DestinationFound(bool currentlyMoving, StateId stateId, DestinationKind destKind, Vector3 dest, Vector3? fwd = null)
+        => new(NotificationType.DestinationFound, destKind, stateId, currentlyMoving, dest, fwd);*/
 
     public static StateNotificationObsolete TargetMoved(bool currentlyMoving, StateId id)
         => new(NotificationType.TargetMoved, DestinationKind.None, id, currentlyMoving, Vector3.zero, null);

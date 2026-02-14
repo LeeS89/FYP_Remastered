@@ -461,7 +461,7 @@ public interface IDistanceService
 
 public interface IAgentAlertService
 {
-    void RegisterAgentAndZone(INotificationListener agent, ZoneId zone);
+    bool TryRegisterAgentAndZone(INotificationListener agent, ZoneId zone);
     void UnregisterAgentAndZone(INotificationListener agent, ZoneId zone);
     bool TryAlertAgentsInZone(ZoneId zone, INotificationListener listener);
 }

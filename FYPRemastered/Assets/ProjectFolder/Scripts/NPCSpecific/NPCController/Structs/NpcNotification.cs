@@ -52,8 +52,8 @@ public readonly struct NpcNotification
         public static NpcNotification PathBlocked()
         => new(NotificationType.PathBlocked, NotifyPriority.High, Vector3.zero, FOVResult.None, AnimationCue.None);
 
-        public static NpcNotification DestinationSet()
-        => new(NotificationType.DestinationSet, NotifyPriority.High, Vector3.zero, FOVResult.None, AnimationCue.None);
+        public static NpcNotification DestinationSet(Vector3 destination)
+        => new(NotificationType.DestinationSet, NotifyPriority.High, destination, FOVResult.None, AnimationCue.None);
 
         public static NpcNotification DestinationReached(/*bool reachedStaleDestination*/)
         => new(NotificationType.DestinationReached, NotifyPriority.High, Vector3.zero, FOVResult.None, AnimationCue.None);

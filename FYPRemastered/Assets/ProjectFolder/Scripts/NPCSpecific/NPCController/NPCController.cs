@@ -132,11 +132,11 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
 
     private void ApplyFOVStatusUpdate(FOVResult result) => CurrentFovState = result;
 
-    public void AnimationIntent(AnimationCue cue) => _animationControl?.PlayClip(cue);
+    public void SendAnimationIntent(AnimationCue cue) => _animationControl?.PlayClip(cue);
 
-   // public void RotateToTarget(bool rotate) => _fsmManager?.RotateToTarget(rotate);
-   
+    // public void RotateToTarget(bool rotate) => _fsmManager?.RotateToTarget(rotate);
 
+    private bool _zoneRegistered = false;
     // End IFSMNotificationss
 
 
@@ -150,11 +150,34 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
     /// unregistered from the previous zone and registered with the new one.  This method is intended to be used within
     /// the agent's internal state management and should not be called directly in most cases.</remarks>
     /// <param name="destination">The destination position in world coordinates to map to a zone.</param>
-    protected void MapDestinationToZone(Vector3 destination)
+    public void MapDestinationToZone(Vector3 destination)
     {
+        if (_zoneRegistered) return;
+
         ZoneId id;
         bool found = this.GetZoneId(destination, out id);
         if (found)
+        {
+            if (id == _zoneId || id == ZoneId.Unknown) return;
+            else
+            {
+                _zoneRegistered = _alertService?.TryRegisterAgentAndZone(this, id) ?? true;
+                _zoneId = id;
+#if UNITY_EDITOR
+                Debug.LogError("Zone ID on start: " + _zoneId.ToString());
+#endif
+            }
+        }
+        else
+        {
+#if UNITY_EDITOR
+            Debug.LogError("No Zone ID found on start");
+#endif
+            _zoneId = ZoneId.ZoneA;
+            _zoneRegistered = _alertService?.TryRegisterAgentAndZone(this, _zoneId) ?? true;
+            
+        }
+        /*if (found)
         {
             if (id == _zoneId || id == ZoneId.Unknown) return;
             else
@@ -175,7 +198,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
             _zoneId = ZoneId.ZoneA;
             SceneEventAggregator.Instance.RegisterAgentAndZone(this, _zoneId);
             //_fsmManager.OnMapDestinationToZone = null;
-        }
+        }*/
     }
 
     

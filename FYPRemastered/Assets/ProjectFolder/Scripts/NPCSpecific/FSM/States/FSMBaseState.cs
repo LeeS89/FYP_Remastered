@@ -5,7 +5,7 @@ using UnityEngine.AI;
 public abstract class FsmBaseState : IFsmState
 {
     protected readonly IPathResolver _pathResolver;
-    protected readonly IFSMStateContext _stateContext;
+    protected readonly IFsmNotificationSource _stateContext;
     protected Coroutine _runningRoutine;
     protected bool _isAtDestination = false;
     protected bool _isInState = false;
@@ -26,7 +26,7 @@ public abstract class FsmBaseState : IFsmState
     public bool UsesRandomAgentStopDistance => _usesRandomStopDistance;
 
 
-    public FsmBaseState(IFsmStateDeps deps, IFSMStateContext stateContext, bool useRandomStopDistance, StateId id)
+    public FsmBaseState(IFsmStateDeps deps, IFsmNotificationSource stateContext, bool useRandomStopDistance, StateId id)
     {
         _usesRandomStopDistance = useRandomStopDistance;
         _owner = deps.Owner;
@@ -34,7 +34,7 @@ public abstract class FsmBaseState : IFsmState
         _pathResolver = deps.PathResolver;
         _stateContext = stateContext;
         _id = id;
-        _validationCallback = OnPathResultReceived;
+        _validationCallback = OnProcessedDestinationsResult;
     }
 
 
@@ -52,13 +52,13 @@ public abstract class FsmBaseState : IFsmState
         RetrieveCandidateDestinations();
     }
 
-    protected virtual void OnPathResultReceived(in DestinationResultInfo result)
+    protected virtual void OnProcessedDestinationsResult(in DestinationResultInfo result)
     {
         if (!_isInState) return;
        // Debug.LogError("Sending Dest Result from: "+ _id.ToString());
-        _stateContext?.OnDestinationResultReceived(in result);
+        _stateContext?.ProcessDestinationResult(in result);
     }
-
+    
     public virtual void ExitState()
     {
         _isInState = false;

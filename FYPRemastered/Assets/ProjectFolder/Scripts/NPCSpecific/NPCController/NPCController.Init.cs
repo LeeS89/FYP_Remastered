@@ -144,7 +144,7 @@ public partial class NPCController
         }
 
         //_fsmManager.Notification = Notify;
-        _fsmManager.OnAnimationIntent = AnimationIntent;
+        //_fsmManager.OnAnimationIntent = AnimationIntent;
        // _fsmManager.OnMapDestinationToZone = MapDestinationToZone;///// maybe when entering patrol
     }
 
@@ -161,7 +161,7 @@ public partial class NPCController
     protected override void OnSceneEnd()
     {
         //_fsmManager.Notification = null;
-        _fsmManager.OnAnimationIntent = null;
+       // _fsmManager.OnAnimationIntent = null;
       //  _fsmManager.OnMapDestinationToZone = null;
       
         _eManager = null;

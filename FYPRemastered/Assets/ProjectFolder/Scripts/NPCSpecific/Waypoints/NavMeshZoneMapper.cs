@@ -51,7 +51,7 @@ public static class NavMeshZoneMapper
         if (NavMesh.SamplePosition(pos, out NavMeshHit hit, 1.0f, NavMesh.AllAreas))
         {
             zone = FromAreaIndex(hit);
-            return true;
+            return zone != ZoneId.Unknown;
         }
         zone = ZoneId.Unknown;
         return false;

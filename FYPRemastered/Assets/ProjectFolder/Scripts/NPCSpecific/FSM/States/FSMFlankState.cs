@@ -19,7 +19,7 @@ public class FSMFlankState : FsmBaseState
         _flankStepsToTry.EnsureCapacity(10);
         _onFlankCandidatesReceived = OnCandidatesReceived;
     }*/
-    public FSMFlankState(IFlankDeps deps, IFSMStateContext stateContext, bool useRandomStopDistance = false) 
+    public FSMFlankState(IFlankDeps deps, IFsmNotificationSource stateContext, bool useRandomStopDistance = false) 
         : base(deps, stateContext, useRandomStopDistance, StateId.Flank)
     {
         _deps = deps;
@@ -47,7 +47,7 @@ public class FSMFlankState : FsmBaseState
                 Vector3.zero,
                 StateId.Flank
             );
-            base.OnPathResultReceived(in noPathResult);
+            base.OnProcessedDestinationsResult(in noPathResult);
             return;
         }
         // In DestinationResult, change found bool to result enum with values Found, NotFound, NoPrimaryTarget
@@ -61,7 +61,7 @@ public class FSMFlankState : FsmBaseState
         
     }
 
-    protected override void OnPathResultReceived(in DestinationResultInfo result)
+    protected override void OnProcessedDestinationsResult(in DestinationResultInfo result)
     {
         throw new System.NotImplementedException();
     }

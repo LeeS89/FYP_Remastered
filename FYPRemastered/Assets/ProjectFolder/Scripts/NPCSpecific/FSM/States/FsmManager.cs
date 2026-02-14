@@ -217,9 +217,15 @@ public class FsmManager : IFsmControl
     #endregion
 
     #region Destination result & Setting region
+    public void RequestAnimation(AnimationCue cue, StateId id)
+    {
+        if (StateHasChanged(id)) return;
+        Notification?.Invoke(NpcNotification.AnimationNotifications.AnimationIntent(cue));
+    }
+
     private bool StateHasChanged(StateId id) => id != CurrentStateId;
 
-    public void OnDestinationResultReceived(in DestinationResultInfo result)
+    public void ProcessDestinationResult(in DestinationResultInfo result)
     {
        // Debug.LogError("Destination Result Received at source");
         if (StateHasChanged(result.Id) || result.RequestReason == ReasonForDestinationCheck.Cancelled) return;
@@ -258,7 +264,7 @@ public class FsmManager : IFsmControl
         {
 
             _deps.Agent().stoppingDistance = _deps.GetAgentStopDistance(_current.UsesRandomAgentStopDistance);
-            DestinationSet();
+            DestinationSet(destination);
         }
         else
             AttemptRepath("Attempt repath called from failing to set path or dest");
@@ -281,18 +287,23 @@ public class FsmManager : IFsmControl
         {
             Debug.LogError("Failed to Set Destination after multiple attempts");
             _destinationAttemptCounter = 0;
-            Notification?.Invoke(NpcNotification.PathNotifications.NoAvailablePath());
+            NotifyOwner(NpcNotification.PathNotifications.NoAvailablePath());
+            //Notification?.Invoke(NpcNotification.PathNotifications.NoAvailablePath());
         }
     }
 
-    private void DestinationSet()
+    private void DestinationSet(Vector3 destination)
     {
         _pathCheckTimer = _deps.PathStatusInterval;
         _hasValidDestination = true;
         EvaluatePath();
         _current?.OnDestinationSet();
-        Notification?.Invoke(NpcNotification.PathNotifications.DestinationSet());
+        NotifyOwner(NpcNotification.PathNotifications.DestinationSet(destination));
+        //Notification?.Invoke(NpcNotification.PathNotifications.DestinationSet());
     }
+
+    private void NotifyOwner(in NpcNotification n)
+        => Notification?.Invoke(n); 
 
     protected void ToggleAgent(bool setActive)
     {
@@ -376,6 +387,8 @@ public class FsmManager : IFsmControl
     {
         throw new NotImplementedException();
     }
+
+    
 
 
 

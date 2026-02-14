@@ -17,4 +17,7 @@ public interface INPCBrainContext : ITargetable
     void TriggerDeath();
     void OverrideSpeed(SpeedOverride speedOverride);
     void OverrideRotation(RotationOverride rotOverride);
+
+    void SendAnimationIntent(AnimationCue cue);
+    void MapDestinationToZone(Vector3 destination);
 }

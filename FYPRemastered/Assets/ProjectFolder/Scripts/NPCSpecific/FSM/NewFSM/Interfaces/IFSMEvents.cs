@@ -8,25 +8,17 @@ using UnityEngine.AI;
 
 public interface ITargetRef { ITargetable Target { get; } }
 
-public interface IFSMStateContext : IAnimationCueSource//, ITargetRef
+public interface IFsmNotificationSource// : IAnimationCueSource//, ITargetRef
 {
-    //Action<Vector3> OnMapDestinationToZone { get; set; } // Take out
-
+ /*   void PathFound();
+    void NoAvailablePath();
+    void PathToTargetAvailable();*/
     bool HasReachedDestination(); // Take out, replacing with destination reached notification
 
-    void OnDestinationResultReceived(in DestinationResultInfo result);
+    void ProcessDestinationResult(in DestinationResultInfo result);
+    void RequestAnimation(AnimationCue cue, StateId id);
 }
 
-public interface IPathNotificationSource
-{
-    void NoAvailablePath();
-    void PathToTargetAvailable();
-}
-
-public interface IAnimationRequestNotificationSource
-{
-    void RequestAnimation(AnimationCue cue);
-}
 
 
 public interface IFsmDeps

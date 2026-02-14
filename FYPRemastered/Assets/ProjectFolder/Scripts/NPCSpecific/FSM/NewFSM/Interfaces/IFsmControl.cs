@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public interface IFsmControl : IFSMStateContext, ITickable
+public interface IFsmControl : IFsmNotificationSource, ITickable
 {
     bool TestPrint { get; set; }
     StateId CurrentStateId { get; }

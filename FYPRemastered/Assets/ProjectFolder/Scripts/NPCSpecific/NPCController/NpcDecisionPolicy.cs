@@ -11,6 +11,12 @@ public static class NpcDecisionPolicy
             return;
         }
 
+        if(n.Kind == NotificationType.AnimationRequest)
+        {
+            self.SendAnimationIntent(n.Clip);
+            return;
+        }
+
         // If IsDead => return, unless notification is Death related
         var state = self.CurrentFsmState;
 
@@ -58,7 +64,9 @@ public static class NpcDecisionPolicy
 
                 // eventually => Check current health bracket + Targets Health, and possible nextIntent will be Takecover/ flee
                 return;
-
+            case NotificationType.DestinationSet:
+                self.MapDestinationToZone(n.Destination);
+                return;
             default:
                 return;// Or Log Unhandled
         }

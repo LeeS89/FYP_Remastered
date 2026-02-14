@@ -14,7 +14,7 @@ public sealed class FSMPatrolState : FsmBaseState
         _waypointService = waypointService;
         _candidateDestinations.EnsureCapacity(10);
     }*/
-    public FSMPatrolState(IPatrolDeps deps, IFSMStateContext stateContext, bool useRandomStopDistance = false) 
+    public FSMPatrolState(IPatrolDeps deps, IFsmNotificationSource stateContext, bool useRandomStopDistance = false) 
         : base(deps, stateContext, useRandomStopDistance, StateId.Patrol)
     {
         _patrolDeps = deps;
@@ -47,7 +47,7 @@ public sealed class FSMPatrolState : FsmBaseState
                     _id
                 );
 
-                base.OnPathResultReceived(in failedResult);
+                base.OnProcessedDestinationsResult(in failedResult);
                 return;
             }
         }
@@ -95,7 +95,8 @@ public sealed class FSMPatrolState : FsmBaseState
        // }
         if (!_isInState) yield break;
 
-        _stateContext?.OnAnimationIntent?.Invoke(AnimationCue.Look);
+        _stateContext?.RequestAnimation(AnimationCue.Look, _id);
+        //_stateContext?.OnAnimationIntent?.Invoke(AnimationCue.Look);
       
         float _delayTime = Random.Range(minWait, maxWait);
         float elapsedTime = 0.0f;
