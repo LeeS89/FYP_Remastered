@@ -1,3 +1,4 @@
+using Npc.API;
 using UnityEngine;
 
 public readonly struct NpcNotification
@@ -77,3 +78,88 @@ public readonly struct NpcNotification
         => new(NotificationType.AnimationRequest, NotifyPriority.Low, Vector3.zero, FOVResult.None, cue);
     }
 }
+
+namespace Npc.API
+{
+
+    public interface IPathNotifications
+    {
+        void NoAvailablePath();
+        void PathToTargetAvailable();
+        void PathBlocked();
+        void DestinationSet(Vector3 destination);
+        void DestinationReached();
+    }
+
+    public interface IAnimationNotifications
+    {
+        void AnimationIntent(AnimationCue cue);
+        /*   void AnimationFinished(AnimationCue cue);*/
+        /*   void AnimationEvent(AnimationCue cue, string eventName);*/
+    }
+
+    public interface IFovNotifications
+    {
+        void FovUpdate(FOVResult result);
+     /*   void TargetEnteredFov(ITargetable target);
+        void TargetLeftFov(ITargetable target);*/
+    }
+     public interface IAlertNotifications
+    {
+        void ZoneAlert();
+        /*   void TargetEnteredFov(ITargetable target);
+           void TargetLeftFov(ITargetable target);*/
+    }
+}
+
+namespace Npc.Internal
+{
+
+    public readonly struct PathNotificationSender : IPathNotifications
+    {
+        private readonly Notification send;
+
+        public PathNotificationSender(Notification send) => this.send = send;
+
+        public void DestinationReached()
+            => send(NpcNotification.PathNotifications.DestinationReached());
+
+        public void DestinationSet(Vector3 destination)
+            => send(NpcNotification.PathNotifications.DestinationSet(destination));
+
+        public void NoAvailablePath()
+            => send(NpcNotification.PathNotifications.NoAvailablePath());
+
+        public void PathBlocked()
+            => send(NpcNotification.PathNotifications.PathBlocked());
+
+        public void PathToTargetAvailable()
+            => send(NpcNotification.PathNotifications.PathToTargetAvailable());
+    }
+
+    public readonly struct FovNotificationSender : IFovNotifications
+    {
+        private readonly Notification send;
+        public FovNotificationSender(Notification send) => this.send = send;
+        public void FovUpdate(FOVResult result)
+            => send(NpcNotification.FovNotifications.FOVUpdate(result));
+    }
+
+    public readonly struct AlertNotificationSender : IAlertNotifications
+    {
+        private readonly Notification send;
+        public AlertNotificationSender(Notification send) => this.send = send;
+        public void ZoneAlert()
+            => send(NpcNotification.AlertNotifications.ZoneAlert());
+    }
+
+    public readonly struct AnimationNotificationSender : IAnimationNotifications
+    {
+        private readonly Notification send;
+        public AnimationNotificationSender(Notification send) => this.send = send;
+        public void AnimationIntent(AnimationCue cue)
+            => send(NpcNotification.AnimationNotifications.AnimationIntent(cue));
+    }
+}
+
+public delegate void Notification(in NpcNotification n);

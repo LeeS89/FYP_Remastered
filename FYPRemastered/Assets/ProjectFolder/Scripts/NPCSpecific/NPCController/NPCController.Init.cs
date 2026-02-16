@@ -28,7 +28,7 @@ public partial class NPCController
         SetManagerAndServices(services, manager);
       //  SetTargetableCollider();
         SetAgentParams();
-        _componentNotifications = OnNotify;
+        _componentNotifications = OnNotifies;
 
         var anim = GetComponentsInChildren<MonoBehaviour>(true).OfType<INpcAnimationControl>().FirstOrDefault();
         if (anim != null) _animationControl = anim;
@@ -173,7 +173,7 @@ public partial class NPCController
     {
         //_animationControl?.SetIKLookTarget(_primaryTarget?.Transform);
        // _fsmManager?.SwitchTo(StateId.Patrol);
-        OnNotify(NpcNotification.SceneBegin());
+        OnNotifies(NpcNotification.SceneBegin());
     }
 
     public override void Unload()

@@ -227,7 +227,7 @@ public class AgentZoneRegistryNew : SceneResources, IAgentAlertService
             if (agent != source)
             {
                 var n = NpcNotification.AlertNotifications.ZoneAlert();
-                agent.OnNotify(n);
+                agent.OnNotifies(n);
             }
         }
         return true;
@@ -270,7 +270,7 @@ public class AgentZoneRegistryNew : SceneResources, IAgentAlertService
         if (!_zoneAgents.TryGetValue(zone, out var listeners)) return false;
 
         foreach (var l in listeners)
-            l.OnNotify(NpcNotification.AlertNotifications.ZoneAlert());
+            l.OnNotifies(NpcNotification.AlertNotifications.ZoneAlert());
 
         return true;
     }

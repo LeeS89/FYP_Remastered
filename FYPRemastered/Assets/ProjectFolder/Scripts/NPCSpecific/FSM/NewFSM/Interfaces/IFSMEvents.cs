@@ -4,8 +4,6 @@ using UnityEngine.AI;
 
 
 
-
-
 public interface ITargetRef { ITargetable Target { get; } }
 
 public interface IFsmNotificationSource// : IAnimationCueSource//, ITargetRef
@@ -79,7 +77,7 @@ public interface IFlankDeps : IFsmStateDeps, ITargetRef, IFsmDeps
 
 public interface INotificationListener
 {
-    void OnNotify(in NpcNotification n);
+    void OnNotifies(in NpcNotification n);
   //  void EnterAlertPhase();
 }
 

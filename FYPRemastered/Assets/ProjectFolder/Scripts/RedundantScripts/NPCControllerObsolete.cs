@@ -111,7 +111,7 @@ public partial class NPCControllerObsolete : ComponentEvents,/* IAgentData,*/ /*
 
 
     // IFSMNotifications - For notifications received by the FSMManager, i.e. No valid destination, target lost, Target within melee/ shot range, etc.
-    public void OnNotify(in NpcNotification n)
+    public void OnNotifies(in NpcNotification n)
     {
      //   if (_fsmManager.IsInStateTransition /*|| n.Id != _fsmManager.CurrentStateId*/) return;
      
@@ -569,7 +569,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
 
 
     // IFSMNotifications - For notifications received by the FSMManager, i.e. No valid destination, target lost, Target within melee/ shot range, etc.
-    public void OnNotify(in NpcNotification n)
+    public void OnNotifies(in NpcNotification n)
     {
       //  if (_fsmManager.IsInStateTransition /*|| n.Id != _fsmManager.CurrentStateId*/) return;
      

@@ -52,7 +52,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
 
 
     // IFSMNotifications - For notifications received by the FSMManager, i.e. No valid destination, target lost, Target within melee/ shot range, etc.
-    public void OnNotify(in NpcNotification n)
+    public void OnNotifies(in NpcNotification n)
     {
         if (_fsmManager.IsInStateTransition /*|| n.Id != _fsmManager.CurrentStateId*/) return;
 
@@ -232,7 +232,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
         }
         if (_testOverrideRot)
         {
-            OnNotify(NpcNotification.PathNotifications.DestinationReached());
+            OnNotifies(NpcNotification.PathNotifications.DestinationReached());
             _testOverrideRot = false;
         }
 
@@ -310,7 +310,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
         Debug.LogError("Stable FOVResult: " + result.ToString());
         ApplyFOVStatusUpdate(result);
         var n = NpcNotification.FovNotifications.FOVUpdate(CurrentFovState);
-        OnNotify(n);
+        OnNotifies(n);
     }
 
 
@@ -394,4 +394,3 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
     
 }
 
-public delegate void Notification(in NpcNotification n);
