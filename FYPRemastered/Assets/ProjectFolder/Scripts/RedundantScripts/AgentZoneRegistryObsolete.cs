@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 using System.Threading.Tasks;
+using Npc.Internal;
 
 [Obsolete("", true)]
 public class AgentZoneRegistryObsolete : SceneResources

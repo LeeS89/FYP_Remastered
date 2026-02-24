@@ -9,7 +9,7 @@ public class FSMChaseState : FsmBaseState
     private int _distanceCheckSubscriberId = -1;
     float? _initialDistance = null;
   
-    public FSMChaseState(IChaseDeps deps, IFsmNotificationSource stateContext, bool useRandomStopDistance = false)
+    public FSMChaseState(IChaseDeps deps, IFsmStateEvents stateContext, bool useRandomStopDistance = false)
         : base(deps, stateContext, useRandomStopDistance, StateId.Chase) 
     { 
         _deps = deps;

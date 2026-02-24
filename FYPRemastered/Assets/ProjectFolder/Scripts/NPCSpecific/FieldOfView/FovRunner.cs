@@ -1,3 +1,4 @@
+using Npc.API;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,10 +12,11 @@ public class FovRunner : ITickable
     private List<Vector3> _samplePoints = new(5);
     public bool RunMeleeProximityCheck { get; set; } = false;
 
-    public Notification OnFOVSweepComplete { get; private set; }
+    IFovNotifications OnNotify;
+  //  public Notification OnFOVSweepComplete { get; private set; }
 
 
-    public FovRunner(IFovDeps deps, Notification onSweepComplete)
+    public FovRunner(IFovDeps deps, IFovNotifications onNotify/*Notification onSweepComplete*/)
     {
         if (deps == null)
         {
@@ -28,7 +30,7 @@ public class FovRunner : ITickable
         _proximityDetectionResults = new Collider[_deps.MaxTargets()];
         float sweepTime = _deps.GetSweepFrequency();
         _nextSweepTime = Time.time + sweepTime;
-        OnFOVSweepComplete = onSweepComplete;
+        OnNotify = onNotify;
     }
 
 
@@ -38,17 +40,19 @@ public class FovRunner : ITickable
         _proximityDetectionResults = null;
         _hitBuffer = null;
         _samplePoints = null;
-        OnFOVSweepComplete = null;
+       // OnFOVSweepComplete = null;
     }
 
     private void SendResult(FOVResult result)
     {
         //if (!_running) return;
-        var n = NpcNotification.FovNotifications.FOVUpdate(result);
-        OnFOVSweepComplete?.Invoke(n);
+       
+        OnNotify?.FovUpdate(result);
+       /* var n = NpcNotification.FovNotifications.FOVUpdate(result);
+        OnFOVSweepComplete?.Invoke(n);*/
     }
 
-
+    Action<LayerMask, LayerMask, LayerMask> onMasks;
 
     private void RunFOVSweep()
     {

@@ -1,3 +1,4 @@
+using Npc.Internal;
 using System;
 using UnityEngine;
 using UnityEngine.AI;
@@ -6,16 +7,9 @@ using UnityEngine.AI;
 
 public interface ITargetRef { ITargetable Target { get; } }
 
-public interface IFsmNotificationSource// : IAnimationCueSource//, ITargetRef
-{
- /*   void PathFound();
-    void NoAvailablePath();
-    void PathToTargetAvailable();*/
-    bool HasReachedDestination(); // Take out, replacing with destination reached notification
 
-    void ProcessDestinationResult(in DestinationResultInfo result);
-    void RequestAnimation(AnimationCue cue, StateId id);
-}
+
+
 
 
 

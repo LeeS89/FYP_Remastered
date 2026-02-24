@@ -1,7 +1,8 @@
 using System;
 using UnityEngine;
 
-public interface IAnimationCueSource
+[Obsolete("", true)]
+public interface IAnimationCueSourceObsolete
 {
     Action<AnimationCue> OnAnimationIntent { get; set; }
 }

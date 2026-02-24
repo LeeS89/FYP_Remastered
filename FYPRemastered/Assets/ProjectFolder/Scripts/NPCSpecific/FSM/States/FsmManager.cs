@@ -1,15 +1,19 @@
+using Npc.API;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class FsmManager : IFsmControl
+public class FsmManager : IFsmStateEvents, ITickable//IFsmControl
 {
     // Injected Dependancies
     private IReadOnlyDictionary<StateId, IFsmState> _states;
     private IFsmControllerDeps _deps;
+
+    private IPathNotifications _pathNotifies;
+    private IAnimationRequestNotifications _animNotifies;
     // End Injected Dependancies
-    public Notification Notification { get; set; }
+    //public Notification Notification { get; set; }
     // Used by owning Monobehaviour via interface
     public StateId CurrentStateId => _current?.GetId() ?? StateId.None;
     // End used by owning Monobehaviour
@@ -43,10 +47,12 @@ public class FsmManager : IFsmControl
     private RotationOverride _currentRotationOverride = RotationOverride.None;
 
 
-    public FsmManager(IFsmControllerDeps deps, IReadOnlyDictionary<StateId, IFsmState> states, Notification fsmNotifications)
+    public FsmManager(IFsmControllerDeps deps, IReadOnlyDictionary<StateId, IFsmState> states, IPathNotifications pathNotifies, IAnimationRequestNotifications animNotifies = null/*, Notification fsmNotifications*/)
     {
         _deps = deps;
-        Notification = fsmNotifications;
+        _pathNotifies = pathNotifies;
+        _animNotifies = animNotifies;
+        //Notification = fsmNotifications;
         _states = states;
         _pathCheckTimer = _deps.PathStatusInterval;
     }
@@ -63,7 +69,7 @@ public class FsmManager : IFsmControl
             _current = nextstate;
             _current.EnterState();
             IsInStateTransition = false;
-           // UpdateFOVFrequency(CurrentStateId);
+           
         }   // else => Notify state doesnt exist
     }
 /*
@@ -79,9 +85,7 @@ public class FsmManager : IFsmControl
         };
         //_fovHandler.SetFOVSweepFrequency(phase);
     }*/
-/*
-    private void FieldOfViewSweepResult(FOVResult result, bool withinAttackAngles)
-        => Notification?.Invoke(NPCNotification.FOVUpdate(*//*CurrentStateId, *//*result, withinAttackAngles));*/
+
     #endregion
 
     #region Tick Region
@@ -190,7 +194,9 @@ public class FsmManager : IFsmControl
         TryResetAgent("Reset Called From Destination Reached"); // Resets path and Sets speed == 0f
         //Debug.LogError("Reached Destination");
         _current?.OnDestinationReached();
-        Notification?.Invoke(NpcNotification.PathNotifications.DestinationReached());
+
+        _pathNotifies?.DestinationReached();
+        //Notification?.Invoke(NpcNotification.PathNotifications.DestinationReached());
     }
 
     private void TimerTicks(float dt)
@@ -220,7 +226,8 @@ public class FsmManager : IFsmControl
     public void RequestAnimation(AnimationCue cue, StateId id)
     {
         if (StateHasChanged(id)) return;
-        Notification?.Invoke(NpcNotification.AnimationNotifications.AnimationIntent(cue));
+        _animNotifies?.RequestAnimation(cue);
+        //Notification?.Invoke(NpcNotification.AnimationNotifications.AnimationIntent(cue));
     }
 
     private bool StateHasChanged(StateId id) => id != CurrentStateId;
@@ -234,9 +241,9 @@ public class FsmManager : IFsmControl
         StateId id = result.Id;
 
         if (result.RequestReason == ReasonForDestinationCheck.ProbePath && pathResult == DestinationResult.Success)
-        { Notification?.Invoke(NpcNotification.PathNotifications.PathToTargetAvailable()); return; }
+        { _pathNotifies?.PathToTargetAvailable();/*Notification?.Invoke(NpcNotification.PathNotifications.PathToTargetAvailable());*/ return; }
 
-        if (/*!result.PathFound*/pathResult == DestinationResult.Failed) { Notification?.Invoke(NpcNotification.PathNotifications.NoAvailablePath()); Debug.LogError("NO Path Found!!"); return; }
+        if (/*!result.PathFound*/pathResult == DestinationResult.Failed) { NoAvailablePath();/*Notification?.Invoke(NpcNotification.PathNotifications.NoAvailablePath());*/ Debug.LogError("NO Path Found!!"); return; }
         else if(pathResult == DestinationResult.Success)
         {
             Vector3 currentDestination = result.Destination;
@@ -287,7 +294,8 @@ public class FsmManager : IFsmControl
         {
             Debug.LogError("Failed to Set Destination after multiple attempts");
             _destinationAttemptCounter = 0;
-            NotifyOwner(NpcNotification.PathNotifications.NoAvailablePath());
+            NoAvailablePath();
+            //NotifyOwner(NpcNotification.PathNotifications.NoAvailablePath());
             //Notification?.Invoke(NpcNotification.PathNotifications.NoAvailablePath());
         }
     }
@@ -298,12 +306,16 @@ public class FsmManager : IFsmControl
         _hasValidDestination = true;
         EvaluatePath();
         _current?.OnDestinationSet();
-        NotifyOwner(NpcNotification.PathNotifications.DestinationSet(destination));
+        _pathNotifies?.DestinationSet(destination);
+        //NotifyOwner(NpcNotification.PathNotifications.DestinationSet(destination));
         //Notification?.Invoke(NpcNotification.PathNotifications.DestinationSet());
     }
 
-    private void NotifyOwner(in NpcNotification n)
-        => Notification?.Invoke(n); 
+    private void NoAvailablePath()
+        => _pathNotifies?.NoAvailablePath();
+
+  /*  private void NotifyOwners(in NpcNotification n)
+        => Notification?.Invoke(n); */
 
     protected void ToggleAgent(bool setActive)
     {
@@ -313,7 +325,7 @@ public class FsmManager : IFsmControl
     #endregion
 
     #region Speed Region
-    public bool HasReachedDestination() => !_hasValidDestination || (_deps?.Agent().isStopped ?? true);//_speedTier == SpeedTier.Idle;
+    public bool HasReachedDestination() => !_hasValidDestination || (_deps?.Agent().isStopped ?? true);
     
 
     private void UpdateAgentSpeed()

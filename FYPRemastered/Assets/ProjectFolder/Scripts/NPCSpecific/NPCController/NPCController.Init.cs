@@ -1,3 +1,4 @@
+using Npc.Internal;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -13,7 +14,8 @@ public partial class NPCController
     // FSMManager Composition
     //private IPathResolver _pathFinder;
     private FovRunner _fovRunner;
-    private IFsmControl _fsmManager;
+    private FsmManager _fsmManager;
+    //private IFsmControl _fsmManager;
     private Dictionary<StateId, IFsmState> _fsmStates = new(5);
     // end FSMManager Composition
 
@@ -55,22 +57,6 @@ public partial class NPCController
         }
     }
 
-  /*  private void SetTargetableCollider()
-    {
-        if (_targetCollider == null)
-        {
-            if (!TryGetComponent<Collider>(out var coll))
-            {
-                TargetableCollider = gameObject.AddComponent<BoxCollider>();
-            }
-            else
-                TargetableCollider = coll;
-        }
-        else
-        {
-            TargetableCollider = _targetCollider;
-        }
-    }*/
 
     private void SetManagerAndServices(ISceneAIServices services, AgentEventManager manager)
     {
@@ -91,8 +77,10 @@ public partial class NPCController
     private void ConstructFovRunner()
     {
         _fovDeps.SetTarget(_primaryTarget); // TESTING NOW
+
+        var fovNotificationSender = new FovNotificationSender(_componentNotifications);
      //   _fovRunner = new NPCFieldOfViewHandlerNew(_fovDeps, onSweepComplete: _componentNotifications);
-        _fovRunner = new FovRunner(_fovDeps, onSweepComplete: _componentNotifications);
+        _fovRunner = new FovRunner(_fovDeps, onNotify: fovNotificationSender);
     }
 
     private void ConstructFSM()
@@ -106,11 +94,14 @@ public partial class NPCController
        
         if (_aiServices.TryGetPathService(out var pathService)) _fsmDeps._pathResolver = new PathFinder(pathService);//_pathFinder = new PathFinderNew(pathService);
 
-       // _fovRunner = new NPCFieldOfViewHandler(_fovParams);
+        // _fovRunner = new NPCFieldOfViewHandler(_fovParams);
         //_fovRunner = new NPCFieldOfViewHandler(_fovParams, _fsmDeps, onSweepComplete: _componentNotifications);
 
-       // _fsmManager = new FSMBaseNew(data: this, resolver: _pathFinder, runner: _fovRunner, _fsmStates);
-        _fsmManager = new FsmManager(deps: _fsmDeps, _fsmStates, fsmNotifications: _componentNotifications);
+        // _fsmManager = new FSMBaseNew(data: this, resolver: _pathFinder, runner: _fovRunner, _fsmStates);
+        var pathNotificationSender = new PathNotificationSender(_componentNotifications);
+        var animRequestNotificationSender = new AnimationNotificationSender(_componentNotifications);
+
+        _fsmManager = new FsmManager(deps: _fsmDeps, _fsmStates, pathNotificationSender, animRequestNotificationSender);
 
         if (_aiServices.TryGetWaypointService(out _fsmDeps._waypointService))
         {
@@ -121,7 +112,7 @@ public partial class NPCController
 #endif
             }
             //IFSMState patrolState = new FSMPatrolState(wpService, data: this, resolver: _pathFinder, stateContext: _fsmManager);
-            IFsmState patrolState = new FSMPatrolState(deps: _fsmDeps, /*data: this, resolver: _pathFinder,*/ stateContext: _fsmManager);
+            IFsmState patrolState = new FSMPatrolState(deps: _fsmDeps, /*data: this, resolver: _pathFinder,*/ stateEvents: _fsmManager);
             StateId pid = patrolState.GetId();
             _fsmStates.TryAdd(pid, patrolState);
         }

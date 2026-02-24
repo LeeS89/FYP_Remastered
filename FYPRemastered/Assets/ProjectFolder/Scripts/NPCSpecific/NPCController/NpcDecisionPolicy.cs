@@ -1,3 +1,4 @@
+using Npc.Internal;
 using UnityEngine;
 
 public static class NpcDecisionPolicy

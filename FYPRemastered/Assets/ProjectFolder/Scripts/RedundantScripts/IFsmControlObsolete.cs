@@ -1,6 +1,8 @@
+using System;
 using UnityEngine;
 
-public interface IFsmControl : IFsmNotificationSource, ITickable
+[Obsolete("", true)]
+public interface IFsmControlObsolete : /*IFsmNotificationSource, */ITickable
 {
     bool TestPrint { get; set; }
     StateId CurrentStateId { get; }

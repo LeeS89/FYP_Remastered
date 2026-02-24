@@ -5,7 +5,8 @@ using UnityEngine.AI;
 public abstract class FsmBaseState : IFsmState
 {
     protected readonly IPathResolver _pathResolver;
-    protected readonly IFsmNotificationSource _stateContext;
+    protected readonly IFsmStateEvents _stateEvents;
+    //protected readonly IFsmNotificationSource _stateContext;
     protected Coroutine _runningRoutine;
     protected bool _isAtDestination = false;
     protected bool _isInState = false;
@@ -26,13 +27,13 @@ public abstract class FsmBaseState : IFsmState
     public bool UsesRandomAgentStopDistance => _usesRandomStopDistance;
 
 
-    public FsmBaseState(IFsmStateDeps deps, IFsmNotificationSource stateContext, bool useRandomStopDistance, StateId id)
+    public FsmBaseState(IFsmStateDeps deps, IFsmStateEvents stateEvents, bool useRandomStopDistance, StateId id)
     {
         _usesRandomStopDistance = useRandomStopDistance;
         _owner = deps.Owner;
         _path = deps.Path();
         _pathResolver = deps.PathResolver;
-        _stateContext = stateContext;
+        _stateEvents = stateEvents;
         _id = id;
         _validationCallback = OnProcessedDestinationsResult;
     }
@@ -41,7 +42,7 @@ public abstract class FsmBaseState : IFsmState
     public virtual bool NeedsNewPath() => false;
     
     protected bool OwnerDataNull() => _owner == null || _path == null;
-    protected bool IsStationary() => _stateContext?.HasReachedDestination() ?? true;
+   // protected bool IsStationary() => _stateContext?.HasReachedDestination() ?? true;
 
     public virtual void EnterState() { _isInState = true; RetrieveCandidateDestinations(); }
     protected abstract void ValidateCandidateDestinations();
@@ -56,7 +57,7 @@ public abstract class FsmBaseState : IFsmState
     {
         if (!_isInState) return;
        // Debug.LogError("Sending Dest Result from: "+ _id.ToString());
-        _stateContext?.ProcessDestinationResult(in result);
+        _stateEvents?.ProcessDestinationResult(in result);
     }
     
     public virtual void ExitState()

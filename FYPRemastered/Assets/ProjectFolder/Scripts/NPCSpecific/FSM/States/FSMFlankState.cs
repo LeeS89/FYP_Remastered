@@ -19,7 +19,7 @@ public class FSMFlankState : FsmBaseState
         _flankStepsToTry.EnsureCapacity(10);
         _onFlankCandidatesReceived = OnCandidatesReceived;
     }*/
-    public FSMFlankState(IFlankDeps deps, IFsmNotificationSource stateContext, bool useRandomStopDistance = false) 
+    public FSMFlankState(IFlankDeps deps, IFsmStateEvents stateContext, bool useRandomStopDistance = false) 
         : base(deps, stateContext, useRandomStopDistance, StateId.Flank)
     {
         _deps = deps;

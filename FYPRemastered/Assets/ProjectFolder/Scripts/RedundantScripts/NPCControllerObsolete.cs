@@ -1,3 +1,4 @@
+using Npc.Internal;
 using System;
 using System.Collections;
 using UnityEngine;
