@@ -106,26 +106,12 @@ public class AgentFsmDeps : IFsmControllerDeps, IPatrolDeps, IChaseDeps, IFlankD
 
     public IPathResolver PathResolver => _pathResolver;
 
-   // public float MinStoppingDistance => _minStoppingDistance;
-
-  //  public float MaxStoppingDistance => _maxStoppingDistance;
-
+  
     public ITargetable Target => _target;
 
     public float PathStatusInterval => _pathStatusInterval;
 
-    public static bool TryGetEndpoint(string env, out string host, out int port)
-    {
-        bool ok;
-        (ok, host, port) = env switch
-        {
-            "dev" => (true, "localhost", 8080),
-            "prod" => (true, "api.myapp.com", 443),
-            _ => (false, default!, 0)
-        };
-
-        return ok;
-    }
+ 
     private SpeedTier OverrideSpeed(SpeedOverride speedOverride, out float newSpeed, out float lerp)
     {
         SpeedTier newTier;
@@ -176,14 +162,6 @@ public class AgentFsmDeps : IFsmControllerDeps, IPatrolDeps, IChaseDeps, IFlankD
         if (speedOverride != SpeedOverride.None)
             return OverrideSpeed(speedOverride, out newSpeed, out lerp);
 
-        /*  
-
-          if (!usesSpeedByDistance)
-          {
-              newSpeed = WalkSpeed;
-              lerp = 2f;
-              return SpeedTier.Walk;
-          }*/
 
         if (distanceToDestination > _sprintEnterDistance)
         {
