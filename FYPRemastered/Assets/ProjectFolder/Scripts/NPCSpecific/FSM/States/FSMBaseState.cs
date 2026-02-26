@@ -2,7 +2,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public abstract class FsmBaseState : IFsmState
+
+public abstract class FsmBaseState<TDeps> : IFsmState where TDeps : FsmBaseState<TDeps>.FsmBaseStateDeps
 {
     protected readonly IPathResolver _pathResolver;
     protected readonly IFsmStateEvents _stateEvents;
@@ -16,32 +17,81 @@ public abstract class FsmBaseState : IFsmState
     protected List<Vector3> _candidateDestinations = new();
 
     //new
-    protected readonly ITargetable _owner;
-    protected NavMeshPath _path;
+    //protected readonly ITargetable _owner;
+    protected TDeps _deps;
+    protected SharedFsmStateServices _sharedDeps;
+   // protected NavMeshPath _path;
     // end new
 
     public StateId GetId() => _id;
     protected readonly StateId _id = StateId.None;
 
-    private readonly bool _usesRandomStopDistance;
-    public bool UsesRandomAgentStopDistance => _usesRandomStopDistance;
 
 
-    public FsmBaseState(IFsmStateDeps deps, IFsmStateEvents stateEvents, bool useRandomStopDistance, StateId id)
+
+    public FsmBaseState(TDeps deps, SharedFsmStateServices sharedDeps, IFsmStateEvents stateEvents, StateId id)
     {
-        _usesRandomStopDistance = useRandomStopDistance;
-        _owner = deps.Owner;
-        _path = deps.Path();
-        _pathResolver = deps.PathResolver;
+        _deps = deps;
+        _sharedDeps = sharedDeps;
+      //  _owner = deps.Owner;
+      //  _path = deps.Path();
+      //  _pathResolver = deps.PathResolver;
         _stateEvents = stateEvents;
         _id = id;
         _validationCallback = OnProcessedDestinationsResult;
     }
 
+    private bool SharedDepsIsNull() => _sharedDeps == null; // Maybe new Notification
+
+    // Need to make private once the Distance job is updated to accept transform instead of ITargetable
+    /*private*/protected bool TryGetTarget(out ITargetable target)
+    {
+        if (SharedDepsIsNull()) { target = null; return false; }
+
+        target = _sharedDeps.GetCurrentTarget?.Invoke();
+        return target != null; // Maybe new notification if target is null or Func is not set
+    }
+
+    protected bool TryGetTargetPosition(out Vector3 pos)
+    {
+        ITargetable t;
+        if (!TryGetTarget(out t)) { pos = Vector3.zero; return false; }
+        pos = t.Position();
+        return true;
+    }
+
+    private bool OwnerIsNull()
+    {
+        if (!SharedDepsIsNull()) return _sharedDeps.OwnerTransform == null; // Maybe new Notification
+        return true;
+    }
+
+    protected bool TryGetPath(out NavMeshPath path)
+    {
+        if (SharedDepsIsNull()) { path = null; return false; };
+        path = _sharedDeps.Path;
+        return path != null; // Maybe new notification if path is null
+    }
+
+    protected bool TryGetOwnerPosition(out Vector3 pos)
+    {
+        if (OwnerIsNull()) { pos = Vector3.zero; return false; }
+
+        pos = _sharedDeps.OwnerTransform.position;
+        return true;
+    }
+    
+    protected bool TargetIsMoving()
+    {
+        ITargetable target;
+        if (!TryGetTarget(out target)) return false;
+
+        return target.IsMoving();
+    }
 
     public virtual bool NeedsNewPath() => false;
     
-    protected bool OwnerDataNull() => _owner == null || _path == null;
+    //protected bool OwnerDataNull() => _owner == null || _path == null;
    // protected bool IsStationary() => _stateContext?.HasReachedDestination() ?? true;
 
     public virtual void EnterState() { _isInState = true; RetrieveCandidateDestinations(); }
@@ -90,5 +140,15 @@ public abstract class FsmBaseState : IFsmState
     public void Dispose()
     {
         throw new System.NotImplementedException();
+    }
+
+    public float GetDesiredStoppingDistance()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public abstract class FsmBaseStateDeps 
+    { 
+        public virtual float GetStoppingDistance() => 0f; 
     }
 }

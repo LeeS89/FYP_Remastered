@@ -32,13 +32,13 @@ public static class FSMExtension
     private static bool IsValidRemainingDistance(float d)
         => !(float.IsInfinity(d) || float.IsNaN(d)) && d >= 0f;
 
-    public static void RotateTowards(this ITargetable owner, ITargetable rotateTowards)
+    public static void RotateTowards(this Transform owner, Transform rotateTowards)
     {
-        if (owner == null || owner.Transform == null
-            || rotateTowards == null || rotateTowards.Transform == null) return;
+        if (owner == null || owner == null
+            || rotateTowards == null || rotateTowards == null) return;
 
-        Transform t = owner.Transform;
-        Transform target = rotateTowards.Transform;
+        Transform t = owner;
+        Transform target = rotateTowards;
         Vector3 toTarget = target.position - t.position;
         toTarget.y = 0f;
 

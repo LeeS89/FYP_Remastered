@@ -8,14 +8,15 @@ public class FsmManager : IFsmStateEvents, ITickable//IFsmControl
 {
     // Injected Dependancies
     private IReadOnlyDictionary<StateId, IFsmState> _states;
-    private IFsmControllerDeps _deps;
+    private FsmManagerServices _deps;
+    private SharedFsmStateServices _sharedDeps;
 
     private IPathNotifications _pathNotifies;
     private IAnimationRequestNotifications _animNotifies;
     // End Injected Dependancies
     //public Notification Notification { get; set; }
     // Used by owning Monobehaviour via interface
-    public StateId CurrentStateId => _current?.GetId() ?? StateId.None;
+    public StateId CurrentStateId => _currentState?.GetId() ?? StateId.None;
     // End used by owning Monobehaviour
     
     // Actions Invoked from individual states
@@ -26,7 +27,7 @@ public class FsmManager : IFsmStateEvents, ITickable//IFsmControl
 
     // Internal Members
     private List<SetDestinationDelay> _timer = new(2);
-    private IFsmState _current;
+    private IFsmState _currentState;
     public bool IsInStateTransition { get; private set; } = false;
     private bool _hasValidDestination = false;
     private float _lerpSpeed = 0f;
@@ -47,14 +48,15 @@ public class FsmManager : IFsmStateEvents, ITickable//IFsmControl
     private RotationOverride _currentRotationOverride = RotationOverride.None;
 
 
-    public FsmManager(IFsmControllerDeps deps, IReadOnlyDictionary<StateId, IFsmState> states, IPathNotifications pathNotifies, IAnimationRequestNotifications animNotifies = null/*, Notification fsmNotifications*/)
+    public FsmManager(FsmManagerServices deps, SharedFsmStateServices sharedDeps, IReadOnlyDictionary<StateId, IFsmState> states, IPathNotifications pathNotifies, IAnimationRequestNotifications animNotifies = null/*, Notification fsmNotifications*/)
     {
         _deps = deps;
+        _sharedDeps = sharedDeps;
         _pathNotifies = pathNotifies;
         _animNotifies = animNotifies;
         //Notification = fsmNotifications;
         _states = states;
-        _pathCheckTimer = _deps.PathStatusInterval;
+        _pathCheckTimer = _deps.Movement.pathStatusInterval;
     }
 
     #region State Transition & FOV Frequency Updates
@@ -65,9 +67,9 @@ public class FsmManager : IFsmStateEvents, ITickable//IFsmControl
         if (_states != null && _states.TryGetValue(next, out var nextstate))
         {
             IsInStateTransition = true;
-            _current?.ExitState();
-            _current = nextstate;
-            _current.EnterState();
+            _currentState?.ExitState();
+            _currentState = nextstate;
+            _currentState.EnterState();
             IsInStateTransition = false;
            
         }   // else => Notify state doesnt exist
@@ -98,7 +100,7 @@ public class FsmManager : IFsmStateEvents, ITickable//IFsmControl
 
         if (_pathCheckTimer <= 0f)
         {
-            _pathCheckTimer = _deps.PathStatusInterval;
+            _pathCheckTimer = _deps.Movement.pathStatusInterval;
             EvaluatePath();
         }
     }
@@ -106,7 +108,7 @@ public class FsmManager : IFsmStateEvents, ITickable//IFsmControl
     {
         UpdateRotation();
         UpdateAgentSpeed();
-        _current?.LateTick(dt);
+        _currentState?.LateTick(dt);
     }
 
     private void UpdateRotation()
@@ -114,7 +116,7 @@ public class FsmManager : IFsmStateEvents, ITickable//IFsmControl
         if (_currentRotationOverride == RotationOverride.None
             || NullOwnerOrTarget()) return;
 
-        _deps.Owner.RotateTowards(_deps.Target);
+        _sharedDeps.OwnerTransform.RotateTowards(_sharedDeps.GetCurrentTarget?.Invoke().Transform);
     }
 
     private Vector3[] _corners = new Vector3[64];
@@ -122,8 +124,8 @@ public class FsmManager : IFsmStateEvents, ITickable//IFsmControl
   
     public void EvaluatePath()
     {
-        if (!_hasValidDestination || _deps == null || _deps.Agent() == null) return;
-        NavMeshAgent a = _deps.Agent();
+        if (!_hasValidDestination || _deps == null || _deps.Agent == null) return;
+        NavMeshAgent a = _deps.Agent;
 
         if (a.pathPending) return;
         if (TestPrint)
@@ -140,7 +142,7 @@ public class FsmManager : IFsmStateEvents, ITickable//IFsmControl
         {
             _hasValidDestination = false;
             TryResetAgent("Reset Called From Not enabled or on navmesh");
-            _current?.TryRepath(); // Repath instead
+            _currentState?.TryRepath(); // Repath instead
             return;
         }
 
@@ -178,10 +180,10 @@ public class FsmManager : IFsmStateEvents, ITickable//IFsmControl
         }
 
         // Check if current state needs a new path ( target destination moved, etc)
-        if (_current?.NeedsNewPath() ?? false)
+        if (_currentState?.NeedsNewPath() ?? false)
         {
             _hasValidDestination = false;
-            _current?.TryRepath();
+            _currentState?.TryRepath();
             return;
         }
 
@@ -193,7 +195,7 @@ public class FsmManager : IFsmStateEvents, ITickable//IFsmControl
         _hasValidDestination = false;
         TryResetAgent("Reset Called From Destination Reached"); // Resets path and Sets speed == 0f
         //Debug.LogError("Reached Destination");
-        _current?.OnDestinationReached();
+        _currentState?.OnDestinationReached();
 
         _pathNotifies?.DestinationReached();
         //Notification?.Invoke(NpcNotification.PathNotifications.DestinationReached());
@@ -250,10 +252,10 @@ public class FsmManager : IFsmStateEvents, ITickable//IFsmControl
            // CurrentDestinationForward = result.Forward;
            // OnMapDestinationToZone?.Invoke(currentDestination);
 
-            NavMeshObstacle o = _deps.Obstacle();
+            NavMeshObstacle o = _deps.Obstacle;
             if (o != null && o.enabled && o.carving)
             {
-                _deps.Obstacle().enabled = false;
+                _deps.Obstacle.enabled = false;
                 _timer.Add(new SetDestinationDelay(Time.deltaTime + Mathf.Epsilon, currentDestination, result.Path, id, SetDestination));
                 return;
             }
@@ -266,11 +268,11 @@ public class FsmManager : IFsmStateEvents, ITickable//IFsmControl
     {
         if (current != CurrentStateId) return;
         ToggleAgent(setActive: true);
-        if (_deps.Agent().SetPath(path) ||
-            _deps.Agent().SetDestination(destination))
+        if (_deps.Agent.SetPath(path) ||
+            _deps.Agent.SetDestination(destination))
         {
 
-            _deps.Agent().stoppingDistance = _deps.GetAgentStopDistance(_current.UsesRandomAgentStopDistance);
+            _deps.Agent.stoppingDistance = _currentState?.GetDesiredStoppingDistance() ?? 0f;//_deps.GetAgentStopDistance(true); // NEEDS UPDATING
             DestinationSet(destination);
         }
         else
@@ -288,7 +290,7 @@ public class FsmManager : IFsmStateEvents, ITickable//IFsmControl
         {
             _hasValidDestination = false;
             TryResetAgent("Reset Called From Attempt Repath");
-            _current?.TryRepath();
+            _currentState?.TryRepath();
         }
         else
         {
@@ -302,10 +304,10 @@ public class FsmManager : IFsmStateEvents, ITickable//IFsmControl
 
     private void DestinationSet(Vector3 destination)
     {
-        _pathCheckTimer = _deps.PathStatusInterval;
+        _pathCheckTimer = _deps.Movement.pathStatusInterval;
         _hasValidDestination = true;
         EvaluatePath();
-        _current?.OnDestinationSet();
+        _currentState?.OnDestinationSet();
         _pathNotifies?.DestinationSet(destination);
         //NotifyOwner(NpcNotification.PathNotifications.DestinationSet(destination));
         //Notification?.Invoke(NpcNotification.PathNotifications.DestinationSet());
@@ -319,13 +321,13 @@ public class FsmManager : IFsmStateEvents, ITickable//IFsmControl
 
     protected void ToggleAgent(bool setActive)
     {
-        if (_deps.Agent().enabled == setActive) return;
-        _deps.Agent().enabled = setActive;
+        if (_deps.Agent.enabled == setActive) return;
+        _deps.Agent.enabled = setActive;
     }
     #endregion
 
     #region Speed Region
-    public bool HasReachedDestination() => !_hasValidDestination || (_deps?.Agent().isStopped ?? true);
+    public bool HasReachedDestination() => !_hasValidDestination || (_deps?.Agent.isStopped ?? true);
     
 
     private void UpdateAgentSpeed()
@@ -335,13 +337,13 @@ public class FsmManager : IFsmStateEvents, ITickable//IFsmControl
         float rate = (0.5f > 0f) ? Mathf.Max(0.01f, delta / 0.5f) : float.PositiveInfinity;
         a.speed = Mathf.MoveTowards(a.speed, _targetSpeed, rate * Time.deltaTime);*/
 
-        if (_deps.Agent() == null) return;
-        float smoothedSpeed = Mathf.Lerp(_deps.Agent().speed, _targetSpeed, _lerpSpeed * Time.deltaTime);
-        _deps.Agent().speed = smoothedSpeed;
+        if (_deps.Agent == null) return;
+        float smoothedSpeed = Mathf.Lerp(_deps.Agent.speed, _targetSpeed, _lerpSpeed * Time.deltaTime);
+        _deps.Agent.speed = smoothedSpeed;
 
-        float _currentSpeed = _deps.Agent().speed;
+        float _currentSpeed = _deps.Agent.speed;
 
-        if (Mathf.Approximately(_deps.Agent().speed, _targetSpeed)) _deps.Agent().speed = _targetSpeed;
+        if (Mathf.Approximately(_deps.Agent.speed, _targetSpeed)) _deps.Agent.speed = _targetSpeed;
     }
 
     public void OverrideSpeed(SpeedOverride overrideTier)
@@ -350,18 +352,99 @@ public class FsmManager : IFsmStateEvents, ITickable//IFsmControl
 
     private void UpdateSpeedtier(float remainingDistance)
     {
-        if (_deps == null || _deps.Agent() == null || _deps.Agent().isStopped) return;
+        if (_deps == null || _deps.Agent == null || _deps.Agent.isStopped) return;
 
         float speed;
         float lerp;
         SpeedTier tier;
 
-        tier = _deps.TryUpdateAgentTargetSpeed(_currentSpeedTier, _currentSpeedOverride, remainingDistance, out speed, out lerp);
+        tier = TryUpdateAgentTargetSpeed(_currentSpeedTier, _currentSpeedOverride, remainingDistance, out speed, out lerp);
 
         if (tier == _currentSpeedTier) return;
 
         _currentSpeedTier = tier;
         (_targetSpeed, _lerpSpeed) = (speed, lerp);
+
+    }
+
+    private SpeedTier OverrideSpeed(SpeedOverride speedOverride, out float newSpeed, out float lerp)
+    {
+        SpeedTier newTier;
+        var d = _deps.Movement;
+
+        (newTier, newSpeed, lerp) = speedOverride switch
+        {
+            SpeedOverride.ForceWalk =>
+            (
+                SpeedTier.Walk,
+                newSpeed = d.walkSpeed,
+                lerp = 2f
+            ),
+            SpeedOverride.ForceSprint =>
+            (
+                SpeedTier.Sprint,
+                newSpeed = d.sprintSpeed,
+                lerp = 2f
+            ),
+            SpeedOverride.ForceIdle =>
+            (
+                SpeedTier.Idle,
+                newSpeed = 0f,
+                lerp = 10f
+            ),
+            _ =>
+            (
+                SpeedTier.Walk,
+                newSpeed = d.walkSpeed,
+                lerp = 2f
+            )
+
+        };
+        return newTier;
+
+
+    }
+
+
+    public SpeedTier TryUpdateAgentTargetSpeed(SpeedTier currentTier, SpeedOverride speedOverride, float distanceToDestination, out float newSpeed, out float lerp)
+    {
+        if (distanceToDestination <= 0.25f)
+        {
+            newSpeed = 0f;
+            lerp = 10f;
+            return SpeedTier.Idle;
+        }
+
+        if (speedOverride != SpeedOverride.None)
+            return OverrideSpeed(speedOverride, out newSpeed, out lerp);
+
+        var d = _deps.Movement;
+
+        if (distanceToDestination > d.sprintEnterDistance)
+        {
+            newSpeed = d.sprintSpeed;
+            lerp = 2f;
+            return SpeedTier.Sprint;
+        }
+        else if (distanceToDestination < d.sprintExitDistance)
+        {
+            newSpeed = d.walkSpeed;
+            lerp = 2f;
+            return SpeedTier.Walk;
+        }
+        else
+        {
+            if (currentTier == SpeedTier.Idle)
+            {
+                newSpeed = d.walkSpeed;
+                lerp = 2f;
+                return SpeedTier.Walk;
+            }
+            newSpeed = d.sprintSpeed;
+            lerp = 2f;
+            return currentTier;
+        }
+
 
     }
 
@@ -376,24 +459,24 @@ public class FsmManager : IFsmStateEvents, ITickable//IFsmControl
         }
         _hasValidDestination = false;
         UpdateSpeedtier(0f);
-        _deps?.Agent().ResetPath();
+        _deps?.Agent.ResetPath();
         if (CurrentStateId == StateId.Patrol) return;
         ToggleAgent(false);
-        _deps.Obstacle().enabled = true;
+        _deps.Obstacle.enabled = true;
     }
 
  
     public void OverrideRotation(RotationOverride rotOverride)
     {
         if (_currentRotationOverride == rotOverride) return;
-        _deps.Agent().updateRotation = rotOverride == RotationOverride.None;
+        _deps.Agent.updateRotation = rotOverride == RotationOverride.None;
 
         if(TestPrint) Debug.LogError($"Setting Rotation Override to {rotOverride}");
         _currentRotationOverride = rotOverride;
     }
 
-    private bool NullOwnerOrTarget() => _deps.Target == null || _deps.Target.Transform == null || _deps.Owner == null
-            || _deps.Owner.Transform == null || _deps.Agent() == null;
+    private bool NullOwnerOrTarget() => _sharedDeps.GetCurrentTarget == null || _sharedDeps.GetCurrentTarget?.Invoke().Transform == null /*|| _deps.Owner == null*/
+            || _sharedDeps.OwnerTransform == null || _deps.Agent == null;
 
     public void Dispose()
     {
@@ -426,5 +509,23 @@ public class FsmManager : IFsmStateEvents, ITickable//IFsmControl
             OnDone = cb;
         }
     }
+
+}
+
+
+
+public class FsmManagerServices
+{
+    public NavMeshAgent Agent { get; }
+    public NavMeshObstacle Obstacle { get; }
+    public MovementConfig Movement { get; }
+
+    public FsmManagerServices(NavMeshAgent agent, NavMeshObstacle obstacle, MovementConfig config)
+    {
+        Agent = agent;
+        Obstacle = obstacle;
+        Movement = config;
+    }
+
 
 }

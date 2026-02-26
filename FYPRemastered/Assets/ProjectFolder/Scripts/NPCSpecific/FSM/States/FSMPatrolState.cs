@@ -1,12 +1,14 @@
+using Npc.API;
 using System.Collections;
 using Unity.XR.CoreUtils;
 using UnityEngine;
+using UnityEngine.AI;
 using Random = UnityEngine.Random;
 
-public sealed class FSMPatrolState : FsmBaseState
+public sealed class FSMPatrolState : FsmBaseState<PatrolDeps>
 {
     private readonly IWaypointService _waypointService;
-    private readonly IPatrolDeps _patrolDeps;
+  //  private readonly IPatrolDeps _patrolDeps;
 
     /*public FSMPatrolState(IWaypointService waypointService, IAgentData data, IPathResolver resolver, IFSMStateContext stateContext) 
         : base(data, resolver, stateContext, StateId.Patrol)
@@ -14,34 +16,40 @@ public sealed class FSMPatrolState : FsmBaseState
         _waypointService = waypointService;
         _candidateDestinations.EnsureCapacity(10);
     }*/
-    public FSMPatrolState(IPatrolDeps deps, IFsmStateEvents stateEvents, bool useRandomStopDistance = false) 
-        : base(deps, stateEvents, useRandomStopDistance, StateId.Patrol)
+    public FSMPatrolState(PatrolDeps deps, SharedFsmStateServices sharedDeps, IFsmStateEvents stateEvents) 
+        : base(deps, sharedDeps, stateEvents, StateId.Patrol)
     {
-        _patrolDeps = deps;
-        _waypointService = _patrolDeps.WaypointService;
+       // _patrolDeps = deps;
+        _waypointService = _deps.WaypointService;
+        //_waypointService = _patrolDeps.WaypointService;
         _candidateDestinations.EnsureCapacity(10);
     }
 
 
     public override void OnDestinationReached()
     {
-        if (!_isInState || _owner == null) return;
+        if (!_isInState || _sharedDeps.OwnerTransform == null) return;
 
         if (_runningRoutine == null)
             _runningRoutine = CoroutineRunner.Instance.StartCoroutine(PatrolWaitRoutine(
-                _owner.Transform, _patrolDeps.MinTimeAtPatrolPoint, _patrolDeps.MaxTimeAtPatrolPoint));
+                _sharedDeps.OwnerTransform, _deps.MinTimeAtPatrolPoint, _deps.MaxTimeAtPatrolPoint));
     }
 
     protected override void RetrieveCandidateDestinations()
     {
+        if (!_isInState || _candidateDestinations == null) return;
+
         if (_candidateDestinations.Count == 0)
         {
+            NavMeshPath path;
+            if (!TryGetPath(out path)) return;
+
             if (_waypointService == null || !_waypointService.TryGetWaypoints(this, _candidateDestinations))
             {
                 DestinationResultInfo failedResult = new DestinationResultInfo
                 (
                     ReasonForDestinationCheck.ValidatePathForDestination,
-                    _path,
+                    path,
                     DestinationResult.CandidatesNullOrEmpty,
                     Vector3.zero,
                     _id
@@ -56,6 +64,8 @@ public sealed class FSMPatrolState : FsmBaseState
 
     protected override void ValidateCandidateDestinations()
     {
+        if (!_isInState || _candidateDestinations == null) return;
+
         if(_candidateDestinations.Count > 1)
         {
          
@@ -65,7 +75,10 @@ public sealed class FSMPatrolState : FsmBaseState
             _candidateDestinations.Add(temp);
         }
         //ContinueRoutine = true;
-        DestinationRequest req = new DestinationRequest(_id, _owner.Position(), _candidateDestinations, _path, 
+        NavMeshPath path;
+        if (!TryGetPath(out path)) return;
+
+        DestinationRequest req = new DestinationRequest(_id, _sharedDeps.OwnerTransform.position, _candidateDestinations, path, 
             ReasonForDestinationCheck.ValidatePathForDestination, _validationCallback);
         _pathResolver?.ProcessDestinationCandidates(in req);
 
@@ -83,8 +96,8 @@ public sealed class FSMPatrolState : FsmBaseState
        // if (forward != null)
      //   {
             float randomAngle = Random.Range(-180, 180);
-            Vector3 dirOffset = Quaternion.AngleAxis(randomAngle, _owner.Transform.up) * _owner.Transform.forward;
-            Quaternion targetRot = Quaternion.LookRotation(dirOffset, _owner.Transform.up);
+            Vector3 dirOffset = Quaternion.AngleAxis(randomAngle, _sharedDeps.OwnerTransform.up) * _sharedDeps.OwnerTransform.forward;
+            Quaternion targetRot = Quaternion.LookRotation(dirOffset, _sharedDeps.OwnerTransform.up);
             //Quaternion targetRot = Quaternion.LookRotation(forward.Value);
             while (Quaternion.Angle(t.rotation, targetRot) > 2.0f + Mathf.Epsilon)
             {
@@ -110,5 +123,22 @@ public sealed class FSMPatrolState : FsmBaseState
         ValidateCandidateDestinations();
 
         _runningRoutine = null;
+    }
+
+
+    
+}
+
+public sealed class PatrolDeps : FsmBaseState<PatrolDeps>.FsmBaseStateDeps
+{
+    public IWaypointService WaypointService { get; private set; }
+    public float MaxTimeAtPatrolPoint { get; private set; }
+    public float MinTimeAtPatrolPoint { get; private set; }
+
+    public PatrolDeps(IWaypointService waypointService, PatrolStateConfig config)
+    {
+        WaypointService = waypointService;
+        MaxTimeAtPatrolPoint = config?.maxTimeAtWaypoint ?? 10f;
+        MinTimeAtPatrolPoint = config?.minTimeAtWaypoint ?? 0.5f;
     }
 }

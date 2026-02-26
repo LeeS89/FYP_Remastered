@@ -1,12 +1,13 @@
+using Npc.API;
 using System;
 using System.Collections.Generic;
 using Unity.XR.CoreUtils;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class FSMFlankState : FsmBaseState
+public class FsmFlankState : FsmBaseState<FlankDeps>
 {
-    private IFlankDeps _deps;
+   // private IFlankDeps _deps;
     private IFlankService _flankService;
     private Action<bool> _onFlankCandidatesReceived;
     private List<int> _flankStepsToTry = new();
@@ -19,10 +20,10 @@ public class FSMFlankState : FsmBaseState
         _flankStepsToTry.EnsureCapacity(10);
         _onFlankCandidatesReceived = OnCandidatesReceived;
     }*/
-    public FSMFlankState(IFlankDeps deps, IFsmStateEvents stateContext, bool useRandomStopDistance = false) 
-        : base(deps, stateContext, useRandomStopDistance, StateId.Flank)
+    public FsmFlankState(FlankDeps deps, SharedFsmStateServices sharedDeps, IFsmStateEvents stateContext) 
+        : base(deps, sharedDeps, stateContext, StateId.Flank)
     {
-        _deps = deps;
+        //_deps = deps;
         _flankService = _deps.FlankService;
         _candidateDestinations.EnsureCapacity(25);
         _flankStepsToTry.EnsureCapacity(10);
@@ -37,6 +38,8 @@ public class FSMFlankState : FsmBaseState
 
     protected override void RetrieveCandidateDestinations()
     {
+        if (!_isInState || _candidateDestinations == null) return;
+
         if (_flankStepsToTry.Count == 0) // Add in arbitrary steps, 5 to 8 etc.
         {
             DestinationResultInfo noPathResult = new DestinationResultInfo
@@ -50,15 +53,19 @@ public class FSMFlankState : FsmBaseState
             base.OnProcessedDestinationsResult(in noPathResult);
             return;
         }
+
+        Vector3 targetPos;
+        if (!TryGetTargetPosition(out targetPos)) return; // Notify maybe
+
         // In DestinationResult, change found bool to result enum with values Found, NotFound, NoPrimaryTarget
         int stepsToTry = _flankStepsToTry[0];
         _flankStepsToTry.RemoveAt(0);
-        _flankService?.TryGetFlankCandidates(/*_ownerData.PrimaryTarget.Position()*/_deps.Target.Position(), stepsToTry, _candidateDestinations, _onFlankCandidatesReceived);
+        _flankService?.TryGetFlankCandidates(/*_ownerData.PrimaryTarget.Position()*//*_deps.Target.Position()*/targetPos, stepsToTry, _candidateDestinations, _onFlankCandidatesReceived);
     }
 
     protected override void ValidateCandidateDestinations()
     {
-        
+        if (!_isInState || _candidateDestinations == null) return;
     }
 
     protected override void OnProcessedDestinationsResult(in DestinationResultInfo result)
@@ -91,4 +98,22 @@ public class FSMFlankState : FsmBaseState
             temp++;
         }
     }
+
+
+
+}
+
+public sealed class FlankDeps : FsmBaseState<FlankDeps>.FsmBaseStateDeps
+{
+    public IFlankService FlankService { get; private set; }
+    public int MinFlankSteps { get; private set; }
+    public int MaxFlankSteps { get; private set; }
+
+    public FlankDeps(IFlankService flankService, FlankStateConfig config)
+    {
+        FlankService = flankService;
+        MinFlankSteps = config?.minFlankSteps ?? 4;
+        MaxFlankSteps = config?.maxFlankSteps ?? 12;
+    }
+
 }

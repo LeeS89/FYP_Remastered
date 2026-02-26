@@ -2,6 +2,7 @@ using Npc.Internal;
 using System;
 using UnityEngine;
 using UnityEngine.AI;
+using Random = UnityEngine.Random;
 
 
 
@@ -83,54 +84,30 @@ public class SharedFsmStateServices
     public IPathResolver PathResolver { get; }
     public NavMeshPath Path { get; }
     public Transform OwnerTransform { get; }
-    public IFsmStateEvents Events { get; }
+   // public IFsmStateEvents Events { get; }
     public Func<ITargetable> GetCurrentTarget { get; }
 
-    public SharedFsmStateServices(IPathResolver pResolver, NavMeshPath path, Transform ownerTransform, IFsmStateEvents events, Func<ITargetable> getCurrentTarget)
+    public SharedFsmStateServices(IPathResolver pResolver, NavMeshPath path, Transform ownerTransform, /*IFsmStateEvents events, */Func<ITargetable> getCurrentTarget)
     {
         PathResolver = pResolver;
         Path = path;
         OwnerTransform = ownerTransform;
-        Events = events;
+     //   Events = events;
         GetCurrentTarget = getCurrentTarget; 
     }
 }
 
-public class FsmManagerServices
-{
-    public NavMeshAgent Agent { get; }
-    public NavMeshObstacle Obstacle { get; }
-    public MovementConfig Movement { get; }
 
-    public FsmManagerServices(NavMeshAgent agent, NavMeshObstacle obstacle, MovementConfig config)
-    {
-        Agent = agent;
-        Obstacle = obstacle;
-        Movement = config;
-    }
+
+
 
     
-}
 
-[System.Serializable]
-public class MovementConfig
-{
-    [Header("Agent Base Speeds")]
-    public float walkSpeed = 0.9f;
-    public float sprintSpeed = 3.6f;
 
-    [Header("Sprint/ Walk thresholds")]
-    public float sprintEnterDistance = 15;
-    public float sprintExitDistance = 12;
 
-    [Header("Stopping - When remaining distance is <= stopping distance + threshold")]
-    public float stopDistancethreshold = 0.25f;
 
-    [Header("Path status check interval")]
-    public float pathStatusInterval = 0.1f;
 
-    [Header("Lerp Settings")]
-    public float idleLerp = 10f;
-    public float moveLerp = 2f;
-}
+
+
+
 

@@ -18653,10 +18653,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9d0df5d3d812174fa8ed341ac025ed2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _anim: {fileID: 266043408}
-  testDead: 0
-  _agent: {fileID: 1863641518}
-  _speed: 0
 --- !u!95 &266043408
 Animator:
   serializedVersion: 7
@@ -118303,29 +118299,6 @@ MonoBehaviour:
     _walkSpeed: 0.9
     _sprintEnterDistance: 15
     _sprintExitDistance: 12
-  _fovParams:
-    fovOrigin: {fileID: 1599725691}
-    maxFovTargets: 10
-    blockingMask:
-      serializedVersion: 2
-      m_Bits: 537
-    fovRadius: 25
-    ownerOrigin: {fileID: 1863641519}
-    waistHeightOffset: 1
-    eyeHeightOffset: 1.8
-    evaluationCapsuleRadius: 0.4
-    addTargetFallbackPoints: 0
-    fovHalfAngle: 50
-    useSeparateVerticleAngle: 0
-    verticalFovHalfAngle: 25
-    useShootingAngleRestriction: 1
-    halfHorizontalShootAngle: 15
-    idleFOVCheckFrequency: 1
-    heightenedFOVCheckFrequency: 0.5
-    suspiciousFOVCheckFrequency: 0.25
-    alertedFOVCheckFrequency: 0.1
-    alertToSuspiciousDelaySeconds: 3
-    suspiciousToIdleDelaySeconds: 5
   _fovDeps:
     fovOrigin: {fileID: 1599725691}
     maxFovTargets: 10
@@ -118345,11 +118318,26 @@ MonoBehaviour:
     useShootingAngleRestriction: 1
     halfShootAngle: 15
     idleFOVCheckFrequency: 0.5
-    heightenedFOVCheckFrequency: 0.5
     suspiciousFOVCheckFrequency: 0.25
     alertedFOVCheckFrequency: 0.1
-    alertToSuspiciousDelaySeconds: 3
-    suspiciousToIdleDelaySeconds: 5
+  _moveCfg:
+    walkSpeed: 0.9
+    sprintSpeed: 3.6
+    sprintEnterDistance: 15
+    sprintExitDistance: 12
+    stopDistancethreshold: 0.25
+    pathStatusInterval: 0.1
+    idleLerp: 10
+    moveLerp: 2
+  _patrolStateCfg:
+    maxTimeAtWaypoint: 7
+    minTimeAtWaypoint: 0.5
+  _chanceStateCfg:
+    minStoppingdistance: 4
+    maxStoppingdistance: 12
+  _flankStateCfg:
+    maxFlankSteps: 12
+    minFlankSteps: 4
 --- !u!114 &1863641521
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -145323,7 +145311,6 @@ MonoBehaviour:
   _eventManagers: []
   _waypointBlockData: {fileID: 0}
   _waypointManager: {fileID: 0}
-  _enemy: {fileID: 0}
   _testspawn: 0
 --- !u!1 &2025055381
 GameObject:
@@ -153087,10 +153074,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9d0df5d3d812174fa8ed341ac025ed2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _anim: {fileID: 3078094411526946237}
-  testDead: 0
-  _agent: {fileID: 5247023209646184639}
-  _speed: 0
 --- !u!1 &1294591283139018720
 GameObject:
   m_ObjectHideFlags: 0
@@ -156556,29 +156539,6 @@ MonoBehaviour:
     _walkSpeed: 0.9
     _sprintEnterDistance: 15
     _sprintExitDistance: 12
-  _fovParams:
-    fovOrigin: {fileID: 6998231476891555256}
-    maxFovTargets: 10
-    blockingMask:
-      serializedVersion: 2
-      m_Bits: 537
-    fovRadius: 25
-    ownerOrigin: {fileID: 8070524998269774116}
-    waistHeightOffset: 1
-    eyeHeightOffset: 1.8
-    evaluationCapsuleRadius: 0.4
-    addTargetFallbackPoints: 0
-    fovHalfAngle: 50
-    useSeparateVerticleAngle: 0
-    verticalFovHalfAngle: 25
-    useShootingAngleRestriction: 1
-    halfHorizontalShootAngle: 15
-    idleFOVCheckFrequency: 1
-    heightenedFOVCheckFrequency: 0.5
-    suspiciousFOVCheckFrequency: 0.25
-    alertedFOVCheckFrequency: 0.1
-    alertToSuspiciousDelaySeconds: 3
-    suspiciousToIdleDelaySeconds: 5
   _fovDeps:
     fovOrigin: {fileID: 6998231476891555256}
     maxFovTargets: 10
@@ -156598,11 +156558,26 @@ MonoBehaviour:
     useShootingAngleRestriction: 1
     halfShootAngle: 15
     idleFOVCheckFrequency: 0.5
-    heightenedFOVCheckFrequency: 0.5
     suspiciousFOVCheckFrequency: 0.25
     alertedFOVCheckFrequency: 0.1
-    alertToSuspiciousDelaySeconds: 3
-    suspiciousToIdleDelaySeconds: 5
+  _moveCfg:
+    walkSpeed: 0.9
+    sprintSpeed: 3.6
+    sprintEnterDistance: 15
+    sprintExitDistance: 12
+    stopDistancethreshold: 0.25
+    pathStatusInterval: 0.1
+    idleLerp: 10
+    moveLerp: 2
+  _patrolStateCfg:
+    maxTimeAtWaypoint: 7
+    minTimeAtWaypoint: 0.5
+  _chanceStateCfg:
+    minStoppingdistance: 4
+    maxStoppingdistance: 12
+  _flankStateCfg:
+    maxFlankSteps: 12
+    minFlankSteps: 4
 --- !u!114 &8950683044442760031
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,18 +1,21 @@
+using Npc.API;
 using System;
 using Unity.XR.CoreUtils;
 using UnityEngine;
+using UnityEngine.AI;
+using Random = UnityEngine.Random;
 
-public class FSMChaseState : FsmBaseState
+public class FSMChaseState : FsmBaseState<ChaseDeps>
 {
-    private readonly IChaseDeps _deps;
+    //private readonly ChaseDeps _deps;
     private Action<float/*, float*/> _distanceCheckCB;
     private int _distanceCheckSubscriberId = -1;
     float? _initialDistance = null;
   
-    public FSMChaseState(IChaseDeps deps, IFsmStateEvents stateContext, bool useRandomStopDistance = false)
-        : base(deps, stateContext, useRandomStopDistance, StateId.Chase) 
+    public FSMChaseState(ChaseDeps deps, SharedFsmStateServices sharedDeps, IFsmStateEvents stateContext)
+        : base(deps, sharedDeps, stateContext, StateId.Chase) 
     { 
-        _deps = deps;
+       // _deps = deps;
         _distanceCheckCB = DistanceCheckCallback;
         _candidateDestinations.EnsureCapacity(1);
     }
@@ -28,9 +31,10 @@ public class FSMChaseState : FsmBaseState
     protected override void RetrieveCandidateDestinations()
     {
         
-        if (!_isInState || _candidateDestinations == null || TargetIsNull()) return;
+        if (!_isInState || _candidateDestinations == null) return; // Maybe a new notification
 
-        Vector3 chaseTargetPos = _deps.Target.Position();
+        Vector3 chaseTargetPos;
+        if (!TryGetTargetPosition(out chaseTargetPos)) return;
 
         if(_candidateDestinations.Count == 0) _candidateDestinations.Add(chaseTargetPos);
         else _candidateDestinations[0] = chaseTargetPos;
@@ -38,12 +42,18 @@ public class FSMChaseState : FsmBaseState
         ValidateCandidateDestinations();
     }
 
-
+    
     protected override void ValidateCandidateDestinations()
     {
-        if (!_isInState || OwnerDataNull()) return;
+        if (!_isInState /*||*/ /*OwnerIsNull() ||*/ /*TryGetPath()*/) return;
 
-        DestinationRequest req = new DestinationRequest(_id, _owner.Position(), _candidateDestinations, _path,
+        Vector3 pos;
+        if (!TryGetOwnerPosition(out pos)) return;
+
+        NavMeshPath path;
+        if (!TryGetPath(out path)) return;
+
+        DestinationRequest req = new DestinationRequest(_id, pos, _candidateDestinations, path,
             ReasonForDestinationCheck.ValidatePathForDestination, _validationCallback);
 
         _pathResolver?.ProcessDestinationCandidates(in req);
@@ -61,15 +71,23 @@ public class FSMChaseState : FsmBaseState
     
     }
 
-    private bool TargetIsNull() => _deps == null || _deps.Target == null;
+   // private bool TargetIsNull() => _sharedDeps == null || _sharedDeps.GetCurrentTarget?.Invoke() == null;
+    
 
     public override void OnDestinationReached()
     {
         base.OnDestinationReached();
         Debug.LogError("Destination Reached in Chase");
       
-        if (TargetIsNull()) return;
-        _initialDistance = _deps.Target.Position().SqrDistanceTo(_owner.Position());
+        //if (TargetIsNull()) return;
+
+        Vector3 targetPos;
+        if (!TryGetTargetPosition(out targetPos)) return;
+
+        Vector3 ownerPos;
+        if (!TryGetOwnerPosition(out ownerPos)) return;
+
+        _initialDistance = targetPos.SqrDistanceTo(ownerPos);
         RegisterDistanceCheck();
         // Start job to see if player/ target has moved far enough away
         // Add job callback
@@ -81,14 +99,20 @@ public class FSMChaseState : FsmBaseState
     public override bool NeedsNewPath()
     {
         if (!_isInState) return false;
-        return !_isAtDestination && !TargetIsNull() && _deps.Target.IsMoving();
+        return !_isAtDestination /*&& !TargetIsNull()*/ /*&& _deps.Target.IsMoving()*/ && TargetIsMoving();
     }
 
     private void RegisterDistanceCheck()
     {
+        Vector3 ownerPos;
+        if (!TryGetOwnerPosition(out ownerPos)) return;
+
+        ITargetable target;
+        if (!TryGetTarget(out target)) return;
+
         _distanceCheckSubscriberId = _deps.DistanceService.RegisterSubscriber(
-           _owner.Position(),
-           _deps.Target,
+           ownerPos,
+           target,
            _distanceCheckCB
        );
     }
@@ -129,5 +153,26 @@ public class FSMChaseState : FsmBaseState
         }
 
     }
+
+
+   
+
+}
+
+public sealed class ChaseDeps : FsmBaseState<ChaseDeps>.FsmBaseStateDeps
+{
+    public IDistanceService DistanceService { get; private set; }
+    public float MinStoppingDistance { get; private set; }
+    public float MaxStoppingDistance { get; private set; }
+
+    public ChaseDeps(IDistanceService distanceService, ChaseStateConfig config)
+    {
+        DistanceService = distanceService;
+        MinStoppingDistance = config.minStoppingdistance;
+        MaxStoppingDistance = config.maxStoppingdistance;
+    }
+
+    public override float GetStoppingDistance() => Random.Range(MinStoppingDistance, MaxStoppingDistance);
+
 
 }

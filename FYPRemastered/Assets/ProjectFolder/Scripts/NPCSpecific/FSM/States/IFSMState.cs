@@ -17,6 +17,8 @@ public interface IFsmState : ITickable
     bool NeedsNewPath();
     //void RetrieveCandidateDestinations();
 
-    bool UsesRandomAgentStopDistance { get; }
+   // bool UsesRandomAgentStopDistance { get; }
     StateId GetId();
+
+    float GetDesiredStoppingDistance();
 }
