@@ -7,7 +7,7 @@ using Random = UnityEngine.Random;
 
 public class FSMChaseState : FsmBaseState<ChaseDeps>
 {
-    //private readonly ChaseDeps _deps;
+   // private readonly ChaseDeps _depsNew;
     private Action<float/*, float*/> _distanceCheckCB;
     private int _distanceCheckSubscriberId = -1;
     float? _initialDistance = null;
@@ -16,6 +16,7 @@ public class FSMChaseState : FsmBaseState<ChaseDeps>
         : base(deps, sharedDeps, stateContext, StateId.Chase) 
     { 
        // _deps = deps;
+      // _depsNew = dpsNew;
         _distanceCheckCB = DistanceCheckCallback;
         _candidateDestinations.EnsureCapacity(1);
     }
@@ -45,7 +46,7 @@ public class FSMChaseState : FsmBaseState<ChaseDeps>
     
     protected override void ValidateCandidateDestinations()
     {
-        if (!_isInState /*||*/ /*OwnerIsNull() ||*/ /*TryGetPath()*/) return;
+        if (!_isInState || ResolverIsNull()/*||*/ /*OwnerIsNull() ||*/ /*TryGetPath()*/) return;
 
         Vector3 pos;
         if (!TryGetOwnerPosition(out pos)) return;
@@ -56,7 +57,8 @@ public class FSMChaseState : FsmBaseState<ChaseDeps>
         DestinationRequest req = new DestinationRequest(_id, pos, _candidateDestinations, path,
             ReasonForDestinationCheck.ValidatePathForDestination, _validationCallback);
 
-        _pathResolver?.ProcessDestinationCandidates(in req);
+        _deps.PathResolver.ProcessDestinationCandidates(in req);
+        //_pathResolver?.ProcessDestinationCandidates(in req);
 
         /* _pathResolver?.ProcessDestinationCandidates(_id, ReasonForDestinationCheck.ValidatePathForDestination,
              _candidateDestinations, _path, _owner.Position(), _validationCallback);*/
@@ -165,7 +167,7 @@ public sealed class ChaseDeps : FsmBaseState<ChaseDeps>.FsmBaseStateDeps
     public float MinStoppingDistance { get; private set; }
     public float MaxStoppingDistance { get; private set; }
 
-    public ChaseDeps(IDistanceService distanceService, ChaseStateConfig config)
+    public ChaseDeps(IDistanceService distanceService, IPathResolver resolver, ChaseStateConfig config) : base(resolver)
     {
         DistanceService = distanceService;
         MinStoppingDistance = config.minStoppingdistance;

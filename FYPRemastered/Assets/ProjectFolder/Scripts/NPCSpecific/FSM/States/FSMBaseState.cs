@@ -5,7 +5,7 @@ using UnityEngine.AI;
 
 public abstract class FsmBaseState<TDeps> : IFsmState where TDeps : FsmBaseState<TDeps>.FsmBaseStateDeps
 {
-    protected readonly IPathResolver _pathResolver;
+ //   protected readonly IPathResolver _pathResolver;
     protected readonly IFsmStateEvents _stateEvents;
     //protected readonly IFsmNotificationSource _stateContext;
     protected Coroutine _runningRoutine;
@@ -19,7 +19,7 @@ public abstract class FsmBaseState<TDeps> : IFsmState where TDeps : FsmBaseState
     //new
     //protected readonly ITargetable _owner;
     protected TDeps _deps;
-    protected SharedFsmStateServices _sharedDeps;
+    private SharedFsmStateServices _sharedDeps;
    // protected NavMeshPath _path;
     // end new
 
@@ -46,10 +46,14 @@ public abstract class FsmBaseState<TDeps> : IFsmState where TDeps : FsmBaseState
     // Need to make private once the Distance job is updated to accept transform instead of ITargetable
     /*private*/protected bool TryGetTarget(out ITargetable target)
     {
-        if (SharedDepsIsNull()) { target = null; return false; }
+        if (SharedDepsIsNull()) { Debug.LogError("Shared is null"); target = null; return false; }
 
-        target = _sharedDeps.GetCurrentTarget?.Invoke();
-        return target != null; // Maybe new notification if target is null or Func is not set
+        if (_sharedDeps.OnTryGetCurrentTarget?.Invoke(out target) == true) return true;
+
+        Debug.LogError("Delegate is null or returned null");
+        target = null;
+        //target = _sharedDeps.GetCurrentTarget?.Invoke();
+        return false; // Maybe new notification if target is null or Func is not set
     }
 
     protected bool TryGetTargetPosition(out Vector3 pos)
@@ -63,6 +67,13 @@ public abstract class FsmBaseState<TDeps> : IFsmState where TDeps : FsmBaseState
     private bool OwnerIsNull()
     {
         if (!SharedDepsIsNull()) return _sharedDeps.OwnerTransform == null; // Maybe new Notification
+        return true;
+    }
+
+    protected bool TryGetOwnerTransform(out Transform t)
+    {
+        if (OwnerIsNull()) { t = null; return false; }
+        t = _sharedDeps.OwnerTransform;
         return true;
     }
 
@@ -89,10 +100,15 @@ public abstract class FsmBaseState<TDeps> : IFsmState where TDeps : FsmBaseState
         return target.IsMoving();
     }
 
-    public virtual bool NeedsNewPath() => false;
     
+
+    public virtual bool NeedsNewPath() => false;
+
+    private bool DepsIsNull() => _deps == null;
+    protected bool ResolverIsNull() => DepsIsNull() || _deps.PathResolver == null;
+
     //protected bool OwnerDataNull() => _owner == null || _path == null;
-   // protected bool IsStationary() => _stateContext?.HasReachedDestination() ?? true;
+    // protected bool IsStationary() => _stateContext?.HasReachedDestination() ?? true;
 
     public virtual void EnterState() { _isInState = true; RetrieveCandidateDestinations(); }
     protected abstract void ValidateCandidateDestinations();
@@ -109,11 +125,20 @@ public abstract class FsmBaseState<TDeps> : IFsmState where TDeps : FsmBaseState
        // Debug.LogError("Sending Dest Result from: "+ _id.ToString());
         _stateEvents?.ProcessDestinationResult(in result);
     }
+
+    
+
+    protected void CancelCurrentPathRequests()
+    {
+        if (ResolverIsNull()) return;
+        _deps.PathResolver.CancelAll();
+
+    }
     
     public virtual void ExitState()
     {
         _isInState = false;
-        _pathResolver?.CancelAll();
+        //_pathResolver?.CancelAll();
         if (_runningRoutine != null)
         {
             CoroutineRunner.Instance.StopCoroutine(_runningRoutine);
@@ -142,13 +167,15 @@ public abstract class FsmBaseState<TDeps> : IFsmState where TDeps : FsmBaseState
         throw new System.NotImplementedException();
     }
 
-    public float GetDesiredStoppingDistance()
-    {
-        throw new System.NotImplementedException();
-    }
+    public float GetDesiredStoppingDistance() => _deps?.GetStoppingDistance() ?? 0f;
+    
 
     public abstract class FsmBaseStateDeps 
     { 
+        public readonly IPathResolver PathResolver;
+
+        public FsmBaseStateDeps(IPathResolver pathResolver) => PathResolver = pathResolver;
+
         public virtual float GetStoppingDistance() => 0f; 
     }
 }

@@ -111,12 +111,18 @@ public class FsmManager : IFsmStateEvents, ITickable//IFsmControl
         _currentState?.LateTick(dt);
     }
 
+    private bool SharedDepsIsNull() => _sharedDeps == null;
+    private bool OwnerIsNull() => SharedDepsIsNull() || _sharedDeps.OwnerTransform == null;
+
     private void UpdateRotation()
     {
         if (_currentRotationOverride == RotationOverride.None
-            || NullOwnerOrTarget()) return;
+            || /*NullOwnerOrTarget()*/OwnerIsNull()) return;
 
-        _sharedDeps.OwnerTransform.RotateTowards(_sharedDeps.GetCurrentTarget?.Invoke().Transform);
+
+        if (_sharedDeps.OnTryGetCurrentTarget?.Invoke(out var target) == true)
+            _sharedDeps.OwnerTransform.RotateTowards(target.Transform);
+        //_sharedDeps.OwnerTransform.RotateTowards(_sharedDeps.GetCurrentTarget?.Invoke().Transform);
     }
 
     private Vector3[] _corners = new Vector3[64];
@@ -236,7 +242,8 @@ public class FsmManager : IFsmStateEvents, ITickable//IFsmControl
 
     public void ProcessDestinationResult(in DestinationResultInfo result)
     {
-       // Debug.LogError("Destination Result Received at source");
+        Debug.LogError("Destination Result is: "+result.Result.ToString());
+        // Debug.LogError("Destination Result Received at source");
         if (StateHasChanged(result.Id) || result.RequestReason == ReasonForDestinationCheck.Cancelled) return;
         DestinationResult pathResult = result.Result;
         //bool pathFound = result.PathFound;
@@ -475,8 +482,8 @@ public class FsmManager : IFsmStateEvents, ITickable//IFsmControl
         _currentRotationOverride = rotOverride;
     }
 
-    private bool NullOwnerOrTarget() => _sharedDeps.GetCurrentTarget == null || _sharedDeps.GetCurrentTarget?.Invoke().Transform == null /*|| _deps.Owner == null*/
-            || _sharedDeps.OwnerTransform == null || _deps.Agent == null;
+  /*  private bool NullOwnerOrTarget() => _sharedDeps.GetCurrentTarget == null || _sharedDeps.GetCurrentTarget?.Invoke().Transform == null *//*|| _deps.Owner == null*//*
+            || _sharedDeps.OwnerTransform == null || _deps.Agent == null;*/
 
     public void Dispose()
     {

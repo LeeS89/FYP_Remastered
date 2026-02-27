@@ -1,3 +1,4 @@
+using Npc.API;
 using Npc.Internal;
 using System;
 using UnityEngine;
@@ -81,19 +82,17 @@ public interface INotificationListener
 
 public class SharedFsmStateServices
 {
-    public IPathResolver PathResolver { get; }
     public NavMeshPath Path { get; }
     public Transform OwnerTransform { get; }
-   // public IFsmStateEvents Events { get; }
-    public Func<ITargetable> GetCurrentTarget { get; }
 
-    public SharedFsmStateServices(IPathResolver pResolver, NavMeshPath path, Transform ownerTransform, /*IFsmStateEvents events, */Func<ITargetable> getCurrentTarget)
+    public TryGetTarget OnTryGetCurrentTarget;
+    //public Func<ITargetable> GetCurrentTarget { get; }
+
+    public SharedFsmStateServices(NavMeshPath path, Transform ownerTransform, TryGetTarget tryGetCurrentTarget)
     {
-        PathResolver = pResolver;
         Path = path;
         OwnerTransform = ownerTransform;
-     //   Events = events;
-        GetCurrentTarget = getCurrentTarget; 
+        OnTryGetCurrentTarget = tryGetCurrentTarget; 
     }
 }
 

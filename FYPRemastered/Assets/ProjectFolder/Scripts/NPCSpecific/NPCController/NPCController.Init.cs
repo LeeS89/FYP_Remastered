@@ -1,5 +1,6 @@
 using Npc.API;
 using Npc.Internal;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -7,6 +8,8 @@ using UnityEngine.AI;
 
 public partial class NPCController
 {
+    private TryGetTarget OnTryGetCurrentTarget;
+
     [SerializeField] private AgentFsmDeps _fsmDeps;
     // FSMManager Composition - Partly obsolete
     [Header("FOV Data")]
@@ -25,6 +28,7 @@ public partial class NPCController
     private IPlayerRefService _playerRefService;
     private IAgentAlertService _alertService;
     private Notification _componentNotifications;
+   // private Func<ITargetable> OnGetCurrentTarget;
 
     //Latest changes
     [SerializeField] private MovementConfig _moveCfg;
@@ -49,6 +53,7 @@ public partial class NPCController
         ConstructFSM();
 
         OnStableFOVResult = StableFOVResultConfirmed;
+        
     }
 
     protected void SetPrimaryTarget()
@@ -100,8 +105,12 @@ public partial class NPCController
         _fsmDeps.SetObstacleRef(Obstacle);
         _fsmDeps.SetPath(new NavMeshPath());
         // Obsolete end
-       
-        if (_aiServices.TryGetPathService(out var pathService)) _fsmDeps._pathResolver = new PathFinder(pathService);//_pathFinder = new PathFinderNew(pathService);
+        OnTryGetCurrentTarget = TryGetCurrentTarget;
+        // if (_aiServices.TryGetPathService(out var pathService)) _fsmDeps._pathResolver = new PathFinder(pathService);//_pathFinder = new PathFinderNew(pathService);
+        if (!_aiServices.TryGetPathService(out var pathService)) return;
+        
+          //  _fsmDeps._pathResolver = new PathFinder(pathService);
+        IPathResolver pathResolver = new PathFinder(pathService);
 
         // _fovRunner = new NPCFieldOfViewHandler(_fovParams);
         //_fovRunner = new NPCFieldOfViewHandler(_fovParams, _fsmDeps, onSweepComplete: _componentNotifications);
@@ -111,7 +120,7 @@ public partial class NPCController
         var animRequestNotificationSender = new AnimationNotificationSender(_componentNotifications);
 
         FsmManagerServices s = new FsmManagerServices(Agent, Obstacle, _moveCfg);
-        SharedFsmStateServices shared = new SharedFsmStateServices(new PathFinder(pathService), Path, transform, null);
+        SharedFsmStateServices shared = new SharedFsmStateServices(Path, transform, OnTryGetCurrentTarget);
 
         _fsmManager = new FsmManager(deps: s, shared, _fsmStates, pathNotificationSender, animRequestNotificationSender);
         //_fsmManager = new FsmManager(deps: _fsmDeps, _fsmStates, pathNotificationSender, animRequestNotificationSender);
@@ -125,7 +134,7 @@ public partial class NPCController
 #endif
             }
 
-            PatrolDeps pDeps = new PatrolDeps(wps, _patrolStateCfg);
+            PatrolDeps pDeps = new PatrolDeps(wps, pathResolver, _patrolStateCfg);
             //IFSMState patrolState = new FSMPatrolState(wpService, data: this, resolver: _pathFinder, stateContext: _fsmManager);
             IFsmState patrolState = new FSMPatrolState(deps: pDeps, shared, /*data: this, resolver: _pathFinder,*/ stateEvents: _fsmManager);
            // IFsmState patrolState = new FSMPatrolState(deps: _fsmDeps, /*data: this, resolver: _pathFinder,*/ stateEvents: _fsmManager);
@@ -136,7 +145,7 @@ public partial class NPCController
         IFlankService fService;
         if (_aiServices.TryGetFlankService(out fService/*_fsmDeps._flankService*/))
         {
-            FlankDeps fDeps = new FlankDeps(fService, _flankStateCfg);
+            FlankDeps fDeps = new FlankDeps(fService, pathResolver, _flankStateCfg);
 
             IFsmState flankState = new FsmFlankState(deps: fDeps, shared, /*data: this, _pathFinder,*/ _fsmManager);
            // IFsmState flankState = new FsmFlankState(deps: _fsmDeps, /*data: this, _pathFinder,*/ _fsmManager);
@@ -150,7 +159,7 @@ public partial class NPCController
         {
          /*Obsolete line*/   _fsmDeps.SetDistanceService(service); // Maybe assume it is used by all states instead of just chase
 
-            ChaseDeps cDeps = new ChaseDeps(service, _chanceStateCfg);
+            ChaseDeps cDeps = new ChaseDeps(service, pathResolver, _chanceStateCfg);
             IFsmState chaseState = new FSMChaseState(deps: cDeps, shared, stateContext: _fsmManager);
            // IFsmState chaseState = new FSMChaseState(deps: _fsmDeps, stateContext: _fsmManager);
             StateId cid = chaseState.GetId();
@@ -169,6 +178,12 @@ public partial class NPCController
         if (TryGetComponent<NavMeshObstacle>(out var ob)) Obstacle = ob;
 
         Path = new NavMeshPath();
+    }
+
+    private bool TryGetCurrentTarget(out ITargetable t)
+    {
+        t = _primaryTarget;
+        return t != null;
     }
 
   
@@ -194,4 +209,9 @@ public partial class NPCController
     {
         
     }
+}
+
+namespace Npc.API
+{
+    public delegate bool TryGetTarget(out ITargetable t);
 }

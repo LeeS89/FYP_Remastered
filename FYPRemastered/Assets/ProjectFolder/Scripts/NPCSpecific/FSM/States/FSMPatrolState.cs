@@ -28,15 +28,20 @@ public sealed class FSMPatrolState : FsmBaseState<PatrolDeps>
 
     public override void OnDestinationReached()
     {
-        if (!_isInState || _sharedDeps.OwnerTransform == null) return;
+        if (!_isInState /*|| OwnerIsNull()*//*_sharedDeps.OwnerTransform == null*/) return;
+
+        Transform ownerTransform;
+        if (!TryGetOwnerTransform(out ownerTransform)) return;
+
 
         if (_runningRoutine == null)
             _runningRoutine = CoroutineRunner.Instance.StartCoroutine(PatrolWaitRoutine(
-                _sharedDeps.OwnerTransform, _deps.MinTimeAtPatrolPoint, _deps.MaxTimeAtPatrolPoint));
+                ownerTransform, _deps.MinTimeAtPatrolPoint, _deps.MaxTimeAtPatrolPoint));
     }
 
     protected override void RetrieveCandidateDestinations()
     {
+      
         if (!_isInState || _candidateDestinations == null) return;
 
         if (_candidateDestinations.Count == 0)
@@ -44,8 +49,11 @@ public sealed class FSMPatrolState : FsmBaseState<PatrolDeps>
             NavMeshPath path;
             if (!TryGetPath(out path)) return;
 
+            Debug.LogError("successfully retrieved Path");
+
             if (_waypointService == null || !_waypointService.TryGetWaypoints(this, _candidateDestinations))
             {
+                Debug.LogError("Returning Failed Result for patrol");
                 DestinationResultInfo failedResult = new DestinationResultInfo
                 (
                     ReasonForDestinationCheck.ValidatePathForDestination,
@@ -64,9 +72,16 @@ public sealed class FSMPatrolState : FsmBaseState<PatrolDeps>
 
     protected override void ValidateCandidateDestinations()
     {
-        if (!_isInState || _candidateDestinations == null) return;
+        if (!_isInState || _candidateDestinations == null || ResolverIsNull()) return;
 
-        if(_candidateDestinations.Count > 1)
+
+        Vector3 ownerPos;
+        if (!TryGetOwnerPosition(out ownerPos)) return;
+
+        NavMeshPath path;
+        if (!TryGetPath(out path)) return;
+
+        if (_candidateDestinations.Count > 1)
         {
          
             var temp = _candidateDestinations[0];
@@ -75,12 +90,11 @@ public sealed class FSMPatrolState : FsmBaseState<PatrolDeps>
             _candidateDestinations.Add(temp);
         }
         //ContinueRoutine = true;
-        NavMeshPath path;
-        if (!TryGetPath(out path)) return;
+     
 
-        DestinationRequest req = new DestinationRequest(_id, _sharedDeps.OwnerTransform.position, _candidateDestinations, path, 
+        DestinationRequest req = new DestinationRequest(_id, ownerPos, _candidateDestinations, path, 
             ReasonForDestinationCheck.ValidatePathForDestination, _validationCallback);
-        _pathResolver?.ProcessDestinationCandidates(in req);
+        _deps.PathResolver.ProcessDestinationCandidates(in req);
 
 
        /* _pathResolver?.ProcessDestinationCandidates(_id, ReasonForDestinationCheck.ValidatePathForDestination,
@@ -96,8 +110,8 @@ public sealed class FSMPatrolState : FsmBaseState<PatrolDeps>
        // if (forward != null)
      //   {
             float randomAngle = Random.Range(-180, 180);
-            Vector3 dirOffset = Quaternion.AngleAxis(randomAngle, _sharedDeps.OwnerTransform.up) * _sharedDeps.OwnerTransform.forward;
-            Quaternion targetRot = Quaternion.LookRotation(dirOffset, _sharedDeps.OwnerTransform.up);
+            Vector3 dirOffset = Quaternion.AngleAxis(randomAngle, t.up) * t.forward;
+            Quaternion targetRot = Quaternion.LookRotation(dirOffset, t.up);
             //Quaternion targetRot = Quaternion.LookRotation(forward.Value);
             while (Quaternion.Angle(t.rotation, targetRot) > 2.0f + Mathf.Epsilon)
             {
@@ -135,7 +149,7 @@ public sealed class PatrolDeps : FsmBaseState<PatrolDeps>.FsmBaseStateDeps
     public float MaxTimeAtPatrolPoint { get; private set; }
     public float MinTimeAtPatrolPoint { get; private set; }
 
-    public PatrolDeps(IWaypointService waypointService, PatrolStateConfig config)
+    public PatrolDeps(IWaypointService waypointService, IPathResolver resolver, PatrolStateConfig config) : base(resolver)
     {
         WaypointService = waypointService;
         MaxTimeAtPatrolPoint = config?.maxTimeAtWaypoint ?? 10f;

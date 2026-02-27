@@ -109,7 +109,7 @@ public sealed class FlankDeps : FsmBaseState<FlankDeps>.FsmBaseStateDeps
     public int MinFlankSteps { get; private set; }
     public int MaxFlankSteps { get; private set; }
 
-    public FlankDeps(IFlankService flankService, FlankStateConfig config)
+    public FlankDeps(IFlankService flankService, IPathResolver resolver, FlankStateConfig config) : base(resolver)
     {
         FlankService = flankService;
         MinFlankSteps = config?.minFlankSteps ?? 4;
