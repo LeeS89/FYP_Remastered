@@ -79,7 +79,7 @@ public abstract class FSMControllerBaseObsolete : ComponentEvents
     {
         base.UnRegisterGlobalEvents();
         GameManager.OnPlayerMoved -= EnemyStateObsolete.SetPlayerMoved;
-        SceneEventAggregator.Instance.UnRegisterAgentAndZone(this, AgentZone);
+        SceneEventAggregatorObsolete.Instance.UnRegisterAgentAndZone(this, AgentZone);
         GameManager.OnPlayerDeathStatusChanged -= OnPlayerDeathStatusUpdated;
     }
 
@@ -91,7 +91,7 @@ public abstract class FSMControllerBaseObsolete : ComponentEvents
         _deathState = new DeathStateObsolete(_agentEventManager, OwningAgent);
         _destinationManager = new DestinationManager(_agentEventManager, _maxFlankingSteps, _debugFlankCubes, transform, OnDestinationRequestComplete);
         AgentZone = _destinationManager.GetCurrentWPZone();
-        SceneEventAggregator.Instance.RegisterAgentAndZone(this, AgentZone);
+        SceneEventAggregatorObsolete.Instance.RegisterAgentAndZone(this, AgentZone);
         Debug.LogError("WP ZOne: " + AgentZone);
 
     }

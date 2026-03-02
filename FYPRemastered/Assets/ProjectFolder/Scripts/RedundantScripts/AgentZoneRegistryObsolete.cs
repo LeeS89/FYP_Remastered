@@ -11,17 +11,17 @@ public class AgentZoneRegistryObsolete : SceneResources
 
     public override async Task LoadResources()
     {
-        SceneEventAggregator.Instance.OnAgentZoneRegistered += Register;
-        SceneEventAggregator.Instance.OnAlertZoneAgents += AlertZone;
-        SceneEventAggregator.Instance.OnAgentZoneUnRegistered += Unregister;
+        SceneEventAggregatorObsolete.Instance.OnAgentZoneRegistered += Register;
+        SceneEventAggregatorObsolete.Instance.OnAlertZoneAgents += AlertZone;
+        SceneEventAggregatorObsolete.Instance.OnAgentZoneUnRegistered += Unregister;
         await Task.CompletedTask; 
     }
 
     public override async Task UnLoadResources()
     {
-        SceneEventAggregator.Instance.OnAgentZoneRegistered -= Register;
-        SceneEventAggregator.Instance.OnAlertZoneAgents -= AlertZone;
-        SceneEventAggregator.Instance.OnAgentZoneUnRegistered += Unregister;
+        SceneEventAggregatorObsolete.Instance.OnAgentZoneRegistered -= Register;
+        SceneEventAggregatorObsolete.Instance.OnAlertZoneAgents -= AlertZone;
+        SceneEventAggregatorObsolete.Instance.OnAgentZoneUnRegistered += Unregister;
         ClearAll();
         _zoneAgents = null;
         await Task.CompletedTask;
@@ -181,18 +181,18 @@ public class AgentZoneRegistryNew : SceneResources, IAgentAlertService
 
     public override async Task LoadResources()
     {
-        SceneEventAggregator.Instance.OnRegisterAgentAndZone = Register;
-        SceneEventAggregator.Instance.OnAlertAgentsInZone = TryAlertZone;
-        SceneEventAggregator.Instance.OnUnRegisterAgentAndZone = Unregister;
+        SceneEventAggregatorObsolete.Instance.OnRegisterAgentAndZone = Register;
+        SceneEventAggregatorObsolete.Instance.OnAlertAgentsInZone = TryAlertZone;
+        SceneEventAggregatorObsolete.Instance.OnUnRegisterAgentAndZone = Unregister;
         await Task.CompletedTask; 
     }
 
     public override async Task UnLoadResources()
     {
 
-        SceneEventAggregator.Instance.OnRegisterAgentAndZone = null;
-        SceneEventAggregator.Instance.OnAlertAgentsInZone = null;
-        SceneEventAggregator.Instance.OnUnRegisterAgentAndZone = null;
+        SceneEventAggregatorObsolete.Instance.OnRegisterAgentAndZone = null;
+        SceneEventAggregatorObsolete.Instance.OnAlertAgentsInZone = null;
+        SceneEventAggregatorObsolete.Instance.OnUnRegisterAgentAndZone = null;
         ClearAll();
         _zoneAgents = null;
         await Task.CompletedTask;

@@ -17,7 +17,7 @@ public class PathRequestManagerObsolete : SceneResources, IUpdateableResource //
     public override async Task LoadResources()
     {
 
-        SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;
+        SceneEventAggregatorObsolete.Instance.OnResourceRequested += ResourceRequested;
 
         await Task.CompletedTask;
        

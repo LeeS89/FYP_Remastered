@@ -38,8 +38,8 @@ public class PlayerFlankingResourcesObsolete : SceneResources, IUpdateableResour
 
                 if (_flankPointDataSO != null)
                 {
-                    SceneEventAggregator.Instance.OnClosestFlankPointToPlayerJobComplete += SetNearestIndexToPlayer; // => Dont forget to unsubscribe
-                    SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;
+                    SceneEventAggregatorObsolete.Instance.OnClosestFlankPointToPlayerJobComplete += SetNearestIndexToPlayer; // => Dont forget to unsubscribe
+                    SceneEventAggregatorObsolete.Instance.OnResourceRequested += ResourceRequested;
                   //  SceneEventAggregator.Instance.OnAIResourceRequested += AIResourceRequested; // => Dont forget to unsubscribe
                     _savedPoints = new List<FlankPointData>(_flankPointDataSO.savedPoints);
                     //SceneEventAggregator.Instance.OnFlankPointsRequested += ResourceRequested; // => Dont forget to unsubscribe
@@ -108,11 +108,11 @@ public class PlayerFlankingResourcesObsolete : SceneResources, IUpdateableResour
 
     protected override void NotifyClassDependancies()
     {
-        bool exists = SceneEventAggregator.Instance.CheckDependancyExists(typeof(ClosestPointToPlayerJob));
+        bool exists = SceneEventAggregatorObsolete.Instance.CheckDependancyExists(typeof(ClosestPointToPlayerJob));
 
         if (exists) { return; } // Already exists, no need to add again
 
-        SceneEventAggregator.Instance.AddDependancy(new ClosestPointToPlayerJob(_flankPointDataSO));
+        SceneEventAggregatorObsolete.Instance.AddDependancy(new ClosestPointToPlayerJob(_flankPointDataSO));
 
     }
 
@@ -365,11 +365,11 @@ public class PlayerFlankingResourcesNew : SceneResources, IFlankService, ITickab
     [Obsolete]
     protected override void NotifyClassDependancies()
     {
-        bool exists = SceneEventAggregator.Instance.CheckDependancyExists(typeof(ClosestPointToPlayerJob));
+        bool exists = SceneEventAggregatorObsolete.Instance.CheckDependancyExists(typeof(ClosestPointToPlayerJob));
 
         if (exists) { return; } // Already exists, no need to add again
 
-        SceneEventAggregator.Instance.AddDependancy(new ClosestPointToPlayerJob(_flankPointDataSO));
+        SceneEventAggregatorObsolete.Instance.AddDependancy(new ClosestPointToPlayerJob(_flankPointDataSO));
 
     }
 

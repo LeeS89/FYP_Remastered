@@ -385,7 +385,7 @@ public sealed class EnemyFSMControllerObsolete : FSMControllerBaseObsolete
 
     protected override void CallForBackup()
     {
-        SceneEventAggregator.Instance.AlertZoneAgents(AgentZone, this);
+        SceneEventAggregatorObsolete.Instance.AlertZoneAgents(AgentZone, this);
     }
 
     public override void EnterAlertPhase()

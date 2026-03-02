@@ -64,7 +64,7 @@ public class PoolResourcesObsolete : SceneResources, IUpdateableResource
     /// assets.  It filters the resources to include only those with a matching configuration in the internal
     /// address-to-configuration mapping. For each loaded asset, an appropriate object pool is created based on the
     /// resource type, and the pool is pre-warmed to the specified size.  Event handlers for resource requests and
-    /// releases are registered with the <see cref="SceneEventAggregator"/> to manage resource usage
+    /// releases are registered with the <see cref="SceneEventAggregatorObsolete"/> to manage resource usage
     /// dynamically.</remarks>
     /// <returns></returns>
     public override async Task LoadResources(/*string sceneName*/)
@@ -135,9 +135,9 @@ public class PoolResourcesObsolete : SceneResources, IUpdateableResource
                 pool.PreWarmPool(config.PrewarmSize);
             }
 
-            SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;
+            SceneEventAggregatorObsolete.Instance.OnResourceRequested += ResourceRequested;
 
-            SceneEventAggregator.Instance.OnResourceReleased += ResourceReleased;
+            SceneEventAggregatorObsolete.Instance.OnResourceReleased += ResourceReleased;
             _jobs.EnsureCapacity(_maxTrackedPoolObjects);
            
         }

@@ -13,8 +13,8 @@ public class SceneResourceManager
     public SceneResourceManager(params SceneResources[] resources)
     {
         //SceneEventAggregator.Instance.OnDependanciesAdded += AddDependencies;
-        SceneEventAggregator.Instance.OnCheckDependencyExists += CheckDependenciesExist;
-        SceneEventAggregator.Instance.OnDependancyAdded += AddDependancy;
+        SceneEventAggregatorObsolete.Instance.OnCheckDependencyExists += CheckDependenciesExist;
+        SceneEventAggregatorObsolete.Instance.OnDependancyAdded += AddDependancy;
         _resources = new List<SceneResources>(resources);
         _resourceDependancies = new List<SceneResources>();
     }

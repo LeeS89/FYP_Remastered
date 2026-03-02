@@ -147,7 +147,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
     /// <remarks>This method determines the zone corresponding to the given destination and updates the
     /// agent's current zone if it differs from the previously assigned zone. If no zone is found for the destination,
     /// the agent is assigned to a default zone.  The method also handles the registration and unregistration of the
-    /// agent with the appropriate zone using the <see cref="SceneEventAggregator"/>. If the zone changes, the agent is
+    /// agent with the appropriate zone using the <see cref="SceneEventAggregatorObsolete"/>. If the zone changes, the agent is
     /// unregistered from the previous zone and registered with the new one.  This method is intended to be used within
     /// the agent's internal state management and should not be called directly in most cases.</remarks>
     /// <param name="destination">The destination position in world coordinates to map to a zone.</param>
@@ -318,7 +318,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
     protected void TryBroadcastAlert(StateId nextIntent = StateId.None)
     {
         if (IsDead) return;
-        if (SceneEventAggregator.Instance.AlertAgentsInZone(_zoneId, this))
+        if (SceneEventAggregatorObsolete.Instance.AlertAgentsInZone(_zoneId, this))
         {
             //SwitchTo(ChaseState.Instance);
             //   EnterAlertPhase(nextIntent);

@@ -172,7 +172,7 @@ public partial class NPCControllerObsolete : ComponentEvents,/* IAgentData,*/ /*
     /// <remarks>This method determines the zone corresponding to the given destination and updates the
     /// agent's current zone if it differs from the previously assigned zone. If no zone is found for the destination,
     /// the agent is assigned to a default zone.  The method also handles the registration and unregistration of the
-    /// agent with the appropriate zone using the <see cref="SceneEventAggregator"/>. If the zone changes, the agent is
+    /// agent with the appropriate zone using the <see cref="SceneEventAggregatorObsolete"/>. If the zone changes, the agent is
     /// unregistered from the previous zone and registered with the new one.  This method is intended to be used within
     /// the agent's internal state management and should not be called directly in most cases.</remarks>
     /// <param name="destination">The destination position in world coordinates to map to a zone.</param>
@@ -185,9 +185,9 @@ public partial class NPCControllerObsolete : ComponentEvents,/* IAgentData,*/ /*
             if (id == _zoneId || id == ZoneId.Unknown) return;
             else
             {
-                SceneEventAggregator.Instance.UnregisterAgentAndZone(this, _zoneId);
+                SceneEventAggregatorObsolete.Instance.UnregisterAgentAndZone(this, _zoneId);
                 _zoneId = id;
-                SceneEventAggregator.Instance.RegisterAgentAndZone(this, _zoneId);
+                SceneEventAggregatorObsolete.Instance.RegisterAgentAndZone(this, _zoneId);
                 Debug.LogError("Zone ID on start: " + _zoneId.ToString());
               //  _fsmManager.OnMapDestinationToZone = null;
             }
@@ -197,9 +197,9 @@ public partial class NPCControllerObsolete : ComponentEvents,/* IAgentData,*/ /*
 #if UNITY_EDITOR
             Debug.LogError("No Zone ID found on start");
 #endif
-            SceneEventAggregator.Instance.UnregisterAgentAndZone(this, _zoneId);
+            SceneEventAggregatorObsolete.Instance.UnregisterAgentAndZone(this, _zoneId);
             _zoneId = ZoneId.ZoneA;
-            SceneEventAggregator.Instance.RegisterAgentAndZone(this, _zoneId);
+            SceneEventAggregatorObsolete.Instance.RegisterAgentAndZone(this, _zoneId);
            // _fsmManager.OnMapDestinationToZone = null;
         }
     }
@@ -346,7 +346,7 @@ public partial class NPCControllerObsolete : ComponentEvents,/* IAgentData,*/ /*
     protected void TryBroadcastAlert(StateId nextIntent = StateId.None)
     {
         if (OwnerIsDead) return;
-        if(SceneEventAggregator.Instance.AlertAgentsInZone(_zoneId, this))
+        if(SceneEventAggregatorObsolete.Instance.AlertAgentsInZone(_zoneId, this))
         {
             //SwitchTo(ChaseState.Instance);
          //   EnterAlertPhase(nextIntent);
@@ -630,7 +630,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
     /// <remarks>This method determines the zone corresponding to the given destination and updates the
     /// agent's current zone if it differs from the previously assigned zone. If no zone is found for the destination,
     /// the agent is assigned to a default zone.  The method also handles the registration and unregistration of the
-    /// agent with the appropriate zone using the <see cref="SceneEventAggregator"/>. If the zone changes, the agent is
+    /// agent with the appropriate zone using the <see cref="SceneEventAggregatorObsolete"/>. If the zone changes, the agent is
     /// unregistered from the previous zone and registered with the new one.  This method is intended to be used within
     /// the agent's internal state management and should not be called directly in most cases.</remarks>
     /// <param name="destination">The destination position in world coordinates to map to a zone.</param>
@@ -643,9 +643,9 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
             if (id == _zoneId || id == ZoneId.Unknown) return;
             else
             {
-                SceneEventAggregator.Instance.UnregisterAgentAndZone(this, _zoneId);
+                SceneEventAggregatorObsolete.Instance.UnregisterAgentAndZone(this, _zoneId);
                 _zoneId = id;
-                SceneEventAggregator.Instance.RegisterAgentAndZone(this, _zoneId);
+                SceneEventAggregatorObsolete.Instance.RegisterAgentAndZone(this, _zoneId);
                 Debug.LogError("Zone ID on start: " + _zoneId.ToString());
                // _fsmManager.OnMapDestinationToZone = null;
             }
@@ -655,9 +655,9 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
 #if UNITY_EDITOR
             Debug.LogError("No Zone ID found on start");
 #endif
-            SceneEventAggregator.Instance.UnregisterAgentAndZone(this, _zoneId);
+            SceneEventAggregatorObsolete.Instance.UnregisterAgentAndZone(this, _zoneId);
             _zoneId = ZoneId.ZoneA;
-            SceneEventAggregator.Instance.RegisterAgentAndZone(this, _zoneId);
+            SceneEventAggregatorObsolete.Instance.RegisterAgentAndZone(this, _zoneId);
           //  _fsmManager.OnMapDestinationToZone = null;
         }
     }
@@ -804,7 +804,7 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
     protected void TryBroadcastAlert(StateId nextIntent = StateId.None)
     {
      //   if (IsDead) return;
-        if(SceneEventAggregator.Instance.AlertAgentsInZone(_zoneId, this))
+        if(SceneEventAggregatorObsolete.Instance.AlertAgentsInZone(_zoneId, this))
         {
             //SwitchTo(ChaseState.Instance);
          //   EnterAlertPhase(nextIntent);

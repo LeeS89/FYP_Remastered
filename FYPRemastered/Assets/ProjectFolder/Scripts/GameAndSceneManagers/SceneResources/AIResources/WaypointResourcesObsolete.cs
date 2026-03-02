@@ -52,9 +52,9 @@ public class WaypointResourcesObsolete : SceneResources, IWaypointService
             NotifyClassDependancies();
             // Subscribe to the resource requested event
             // ResourceRequestBus<WaypointBlockRequest>.On += WaypointsRequested; /// NEW WAY to test
-            SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;
+            SceneEventAggregatorObsolete.Instance.OnResourceRequested += ResourceRequested;
            // SceneEventAggregator.Instance.OnAIResourceRequested += AIResourceRequested; /////// CURRENT WAY
-            SceneEventAggregator.Instance.OnResourceReleased += ResourceReleased;
+            SceneEventAggregatorObsolete.Instance.OnResourceReleased += ResourceReleased;
         }
         catch (Exception e)
         {
@@ -65,26 +65,26 @@ public class WaypointResourcesObsolete : SceneResources, IWaypointService
 
     protected override void NotifyClassDependancies()
     {
-        bool exists = SceneEventAggregator.Instance.CheckDependancyExists(typeof(PathRequestManagerObsolete));
+        bool exists = SceneEventAggregatorObsolete.Instance.CheckDependancyExists(typeof(PathRequestManagerObsolete));
 
         if (!exists)
         {
 
-            SceneEventAggregator.Instance.AddDependancy(new PathRequestManagerObsolete());
+            SceneEventAggregatorObsolete.Instance.AddDependancy(new PathRequestManagerObsolete());
         }
 
-        exists = SceneEventAggregator.Instance.CheckDependancyExists(typeof(AgentZoneRegistryNew));
+        exists = SceneEventAggregatorObsolete.Instance.CheckDependancyExists(typeof(AgentZoneRegistryNew));
 
         if (!exists)
         {
-            SceneEventAggregator.Instance.AddDependancy(new AgentZoneRegistryNew());
+            SceneEventAggregatorObsolete.Instance.AddDependancy(new AgentZoneRegistryNew());
         }
 
-        exists = SceneEventAggregator.Instance.CheckDependancyExists(typeof(PlayerFlankingResourcesObsolete));
+        exists = SceneEventAggregatorObsolete.Instance.CheckDependancyExists(typeof(PlayerFlankingResourcesObsolete));
 
         if (!exists)
         {
-            SceneEventAggregator.Instance.AddDependancy(new PlayerFlankingResourcesObsolete());
+            SceneEventAggregatorObsolete.Instance.AddDependancy(new PlayerFlankingResourcesObsolete());
         }
         else
         {
@@ -333,26 +333,26 @@ public class WaypointResourcesNew : SceneResources, IWaypointService
     [Obsolete]
     protected override void NotifyClassDependancies()
     {
-        bool exists = SceneEventAggregator.Instance.CheckDependancyExists(typeof(PathRequestManagerObsolete));
+        bool exists = SceneEventAggregatorObsolete.Instance.CheckDependancyExists(typeof(PathRequestManagerObsolete));
 
         if (!exists)
         {
 
-            SceneEventAggregator.Instance.AddDependancy(new PathRequestManagerObsolete());
+            SceneEventAggregatorObsolete.Instance.AddDependancy(new PathRequestManagerObsolete());
         }
 
-        exists = SceneEventAggregator.Instance.CheckDependancyExists(typeof(AgentZoneRegistryNew));
+        exists = SceneEventAggregatorObsolete.Instance.CheckDependancyExists(typeof(AgentZoneRegistryNew));
 
         if (!exists)
         {
-            SceneEventAggregator.Instance.AddDependancy(new AgentZoneRegistryNew());
+            SceneEventAggregatorObsolete.Instance.AddDependancy(new AgentZoneRegistryNew());
         }
 
-        exists = SceneEventAggregator.Instance.CheckDependancyExists(typeof(PlayerFlankingResourcesObsolete));
+        exists = SceneEventAggregatorObsolete.Instance.CheckDependancyExists(typeof(PlayerFlankingResourcesObsolete));
 
         if (!exists)
         {
-            SceneEventAggregator.Instance.AddDependancy(new PlayerFlankingResourcesObsolete());
+            SceneEventAggregatorObsolete.Instance.AddDependancy(new PlayerFlankingResourcesObsolete());
         }
         else
         {

@@ -24,7 +24,7 @@ public class ClosestPointToPlayerJob : SceneResources
     {
         _samplePointData = samplePointData;
         AddSamplePointData(_samplePointData);
-        SceneEventAggregator.Instance.OnRunClosestPointToPlayerJob += RunClosestPointJob;
+        SceneEventAggregatorObsolete.Instance.OnRunClosestPointToPlayerJob += RunClosestPointJob;
     }
 
 
@@ -83,7 +83,7 @@ public class ClosestPointToPlayerJob : SceneResources
             }
 
            // BaseSceneManager._instance.ClosestPointToPlayerJobComplete(minIndex);
-            SceneEventAggregator.Instance.ClosestFlankPointToPlayerJobComplete(minIndex);
+            SceneEventAggregatorObsolete.Instance.ClosestFlankPointToPlayerJobComplete(minIndex);
             //return minIndex;
             //zoneGridManager.SetNearestIndexToPlayer(minIndex);
         }

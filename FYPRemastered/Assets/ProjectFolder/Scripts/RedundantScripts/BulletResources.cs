@@ -52,9 +52,9 @@ public class BulletResources : SceneResources, IUpdateableResource
             }
 
           
-            SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;
+            SceneEventAggregatorObsolete.Instance.OnResourceRequested += ResourceRequested;
 
-            SceneEventAggregator.Instance.OnResourceReleased += ResourceReleased;
+            SceneEventAggregatorObsolete.Instance.OnResourceReleased += ResourceReleased;
         }
         catch(Exception e)
         {
