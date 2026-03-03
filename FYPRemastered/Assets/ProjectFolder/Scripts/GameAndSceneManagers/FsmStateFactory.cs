@@ -1,20 +1,56 @@
 using Npc.API;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class FsmStateFactory
+public class FsmStateFactory : IFsmService
 {
+    private readonly string _sceneName;
+    private List<ITickable> _tickables = new(5);
     private IWaypointService _wpService;
-    private IFlankService _flkService;
+    private IFlankService _flankService;
     private IDistanceService _distService;
 
 
-    private FsmStateFactory() { }
-
-    public FsmStateFactory(IWaypointService wpService = null, IFlankService fService = null, IDistanceService dService = null)
+    public FsmStateFactory(string sceneName)
     {
+        _sceneName = sceneName;
+    }
 
+    public void Dispose()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public async Task InitialiseServicesAsync()
+    {
+        WaypointResources wp = await ServiceFactory.TryCreateAsync<WaypointBlockData, WaypointResources>(_sceneName, "Waypoints");
+
+        if (wp == null)
+            Debug.LogError("Failed to initialise Waypoint Service");
+        else
+        {
+            // _NpcService is only used in scenes containing waypoints
+            if (wp is ITickable t) _tickables.Add(t);
+            _wpService = wp;
+            Debug.LogError("Waypoint Service Initialised");
+        }
+
+        /* // Initialise Flank Service
+         _flankService = await ServiceFactory.TryCreateAsync<FlankPointBlockData, IFlankService, FlankPointServiceNew>(_sceneName, "FlankPointService")
+             ?? throw new Exception("Failed to initialise Flank Point Service");*/
+    }
+
+    public void LateTick(float dt) { }
+   
+
+    public void Tick(float dt)
+    {
+        if (_tickables == null || _tickables.Count == 0) return;
+
+        foreach (var t in _tickables)
+            t.Tick(dt);
     }
 
     /// <summary>
@@ -56,4 +92,9 @@ public class FsmStateFactory
 
     private bool TryCreatePatrol(Dictionary<StateId, IFsmState> _dict, NavMeshPath path, Transform t, TryGetTarget tgt)
         => _dict.TryAdd(StateId.Patrol, new FSMPatrolState(null, null, null));
+}
+
+public interface IFsmService : ITickable
+{
+    bool TryCreateAndAddState(StateId id, Dictionary<StateId, IFsmState> _stateDict, NavMeshPath path, Transform ownerTransform, TryGetTarget targetRetrieverFunc);
 }

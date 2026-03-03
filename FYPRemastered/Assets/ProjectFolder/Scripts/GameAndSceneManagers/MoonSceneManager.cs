@@ -5,7 +5,7 @@ using UnityEngine;
 
 
 
-
+[Obsolete("Use SceneManagement instead", true)]
 public class MoonSceneManager : BaseSceneManager
 {
     [SerializeField] private WaypointBlockData _waypointBlockData;

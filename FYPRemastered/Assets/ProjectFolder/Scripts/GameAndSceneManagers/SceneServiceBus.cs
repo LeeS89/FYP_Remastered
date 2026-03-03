@@ -35,7 +35,7 @@ public class SceneServiceBus : ISceneServiceProvider
     {
         _gameManager = GameManager.Instance;
         // Initialise Waypoint Service
-        WaypointResourcesNew wp = await ServiceFactory.TryCreateAsync<WaypointBlockData, WaypointResourcesNew>(_sceneName, "Waypoints");
+        WaypointResources wp = await ServiceFactory.TryCreateAsync<WaypointBlockData, WaypointResources>(_sceneName, "Waypoints");
 
         if (wp == null)
             Debug.LogError("Failed to initialise Waypoint Service");
@@ -61,6 +61,22 @@ public class SceneServiceBus : ISceneServiceProvider
 
     }
 
+    private List<ISceneService> _services = new(5);
+
+    public bool TryGetService<T>(out T service) where T : class, ISceneService // Placeholder interface
+    {
+        foreach(var s in _services)
+        {
+            if(s is T typed)
+            {
+                service = typed;
+                return true;
+            }
+        }
+        service = null;
+        return false;
+    }
+    
 
     private bool IsPlayer(ITargetable targetable)
     {

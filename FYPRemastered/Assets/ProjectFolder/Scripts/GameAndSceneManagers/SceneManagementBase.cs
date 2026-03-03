@@ -18,20 +18,20 @@ public abstract class SceneManagementBase : MonoBehaviour, ISceneManager
     }
 
     #region Scene Events
-    public event Action OnSceneStarted;
-    public event Action OnSceneComplete;
+   // public event Action OnSceneStarted;
+   // public event Action OnSceneComplete;
 
-    public void SceneStarted()
+   /* public void SceneStarted()
     {
         //GameManager.Instance.SetPlayer();
-        OnSceneStarted?.Invoke();
+      //  OnSceneStarted?.Invoke();
     }
 
     public void SceneComplete()
     {
-        OnSceneComplete?.Invoke();
+      //  OnSceneComplete?.Invoke();
     }
-
+*/
     protected virtual void RegisterGettableComponents()
     {
         ComponentRegistry.SetCapacities<IDamageable>(20);
