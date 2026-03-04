@@ -47,6 +47,9 @@ public class SceneServiceBus : ISceneServiceProvider
             Debug.LogError("Waypoint Service Initialised");
         }
 
+
+       // FsmFactory fsmF = new FsmFactory(_sceneName);
+        //await fsmF.InitialiseServicesAsync();
         /* // Initialise Flank Service
          _flankService = await ServiceFactory.TryCreateAsync<FlankPointBlockData, IFlankService, FlankPointServiceNew>(_sceneName, "FlankPointService")
              ?? throw new Exception("Failed to initialise Flank Point Service");*/

@@ -166,7 +166,7 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
             if (GameManager.Instance.PlayerHasMoved)
             {
                 GameManager.Instance.PlayerHasMoved = false;
-                SceneEventAggregator.Instance.RunClosestPointToPlayerJob();
+               // SceneEventAggregator.Instance.RunClosestPointToPlayerJob(); HAD TO COMMENT OUT FOR NEW ADRRESSABLE
                 //MoonSceneManager._instance.TestRun();
             }
         }

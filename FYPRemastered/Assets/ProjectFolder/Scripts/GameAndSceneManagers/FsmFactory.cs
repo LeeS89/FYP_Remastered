@@ -2,9 +2,12 @@ using Npc.API;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using UnityEngine.AI;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.ResourceManagement.ResourceLocations;
 
-public class FsmStateFactory : IFsmService
+public class FsmFactory : IFsmService
 {
     private readonly string _sceneName;
     private List<ITickable> _tickables = new(5);
@@ -12,8 +15,14 @@ public class FsmStateFactory : IFsmService
     private IFlankService _flankService;
     private IDistanceService _distService;
 
+    // SO's
+    private AgentPatrolData _agentPatrolData;
+    private AgentChaseData _agentChaseData;
+    // End SO's
 
-    public FsmStateFactory(string sceneName)
+    private FsmFactory() { }
+
+    public FsmFactory(string sceneName)
     {
         _sceneName = sceneName;
     }
@@ -28,10 +37,22 @@ public class FsmStateFactory : IFsmService
         WaypointResources wp = await ServiceFactory.TryCreateAsync<WaypointBlockData, WaypointResources>(_sceneName, "Waypoints");
 
         if (wp == null)
-            Debug.LogError("Failed to initialise Waypoint Service");
+            DebugLogs.Err("Failed to initialise Waypoint Service", this);
         else
         {
-            // _NpcService is only used in scenes containing waypoints
+
+            IResourceLocation apd = await ServiceFactory.TryGetSingleLocationAsync<AgentPatrolData>(_sceneName, "AgentPatrolData");
+
+            if (apd != null)
+            {
+                var apdHandle = Addressables.LoadAssetAsync<AgentPatrolData>(apd);
+                await apdHandle.Task;
+
+                if(apdHandle.Status == AsyncOperationStatus.Succeeded) _agentPatrolData = apdHandle.Result;
+                if (_agentPatrolData == null) DebugLogs.Nre(_agentPatrolData, "Agent Patrol Data is null", this);
+                else DebugLogs.Err("Agent patrol data loaded", this);
+            }
+
             if (wp is ITickable t) _tickables.Add(t);
             _wpService = wp;
             Debug.LogError("Waypoint Service Initialised");

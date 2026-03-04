@@ -8,7 +8,7 @@ public static class ResourceRequestExtension
     public static void RequestPool<T>(this T _, PoolIdSO poolId, Action<string, IPoolManager> componentCallback, Action<bool> ownerCallback = null)
     {
         var pool = ResourceRequests.RequestPool(poolId, componentCallback);
-        SceneEventAggregatorObsolete.Instance.ResourceRequested(pool);
+       // SceneEventAggregatorObsolete.Instance.ResourceRequested(pool);
     }
 
     public static void RequestFlankPointEvaluationMasks<T>(this T _, Action<LayerMask, LayerMask, LayerMask> callback)
