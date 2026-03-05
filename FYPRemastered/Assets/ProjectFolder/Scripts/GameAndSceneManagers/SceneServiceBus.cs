@@ -22,6 +22,8 @@ public class SceneServiceBus : ISceneServiceProvider
     private IDistanceService _distanceService;
     private ISceneService _sceneService;
 
+    private FsmFactory _fsmFactory;
+
     //private PathRequestManagerNew _pathService;
 
     public SceneServiceBus(string sceneName, ISceneService sceneService)
@@ -46,13 +48,24 @@ public class SceneServiceBus : ISceneServiceProvider
             _waypointService = wp;
             Debug.LogError("Waypoint Service Initialised");
         }
-
+        await Task.CompletedTask;
 
        // FsmFactory fsmF = new FsmFactory(_sceneName);
         //await fsmF.InitialiseServicesAsync();
         /* // Initialise Flank Service
          _flankService = await ServiceFactory.TryCreateAsync<FlankPointBlockData, IFlankService, FlankPointServiceNew>(_sceneName, "FlankPointService")
              ?? throw new Exception("Failed to initialise Flank Point Service");*/
+    }
+
+
+    private async Task TryInitializeFsmService()
+    {
+        bool exists = await ServiceFactory.ExistsInSceneAsync<WaypointBlockData>(_sceneName, "Waypoints");
+        if (!exists) return;
+
+        _fsmFactory = new FsmFactory(_sceneName);
+        await _fsmFactory.InitialiseServicesAsync();
+
     }
 
     public void Tick(float dt)

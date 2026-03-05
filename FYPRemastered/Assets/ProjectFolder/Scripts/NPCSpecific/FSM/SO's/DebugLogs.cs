@@ -44,6 +44,14 @@ public static class DebugLogs
         Throw(new NullReferenceException($"{nameOrExp} was null"), $"[NRE] {nameOrExp}", ctx);
     }
 
+    [Conditional("UNITY_EDITOR")]
+    [Conditional("DEVELOPMENT_BUILD")]
+    public static void LoadFail(object value, string nameOrExp, object ctx = null)
+    {
+        if (!IsUnityNull(value)) return;
+        Throw(new AssetLoadException($"{nameOrExp} failed to load"), $"[LOADFAIL] {nameOrExp}", ctx);
+    }
+
 
 
     private static void Emit(LogType type, string msg, object ctx)
@@ -109,3 +117,8 @@ public static class DebugLogs
 }
 
 
+public class AssetLoadException : Exception
+{
+    public AssetLoadException(string msg) : base(msg) { }
+   
+}

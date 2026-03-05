@@ -1,4 +1,5 @@
 using Npc.API;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -32,6 +33,33 @@ public class FsmFactory : IFsmService
         throw new System.NotImplementedException();
     }
 
+    public async Task InitialiseServicesAsyncNew()
+    {
+        try
+        {
+            WaypointResources wp = await ServiceFactory.TryCreateAsync<WaypointBlockData, WaypointResources>(_sceneName, "Waypoints");
+
+            if (wp == null)
+                DebugLogs.Err("Failed to create WaypointResources, will switch to manual waypoint system when resource request fails", this);
+            else
+            {
+                IResourceLocation apd = await ServiceFactory.TryGetSingleLocationAsync<AgentPatrolData>(_sceneName, "AgentPatrolData");
+
+                if (apd != null)
+                {
+                    var apdHandle = Addressables.LoadAssetAsync<AgentPatrolData>(apd);
+                    _agentPatrolData = await apdHandle.Task;
+                }
+                else
+                    DebugLogs.Err("Patrol data address faild to load, will fallback to failsafe when data is requested");
+            }
+        }
+        catch(Exception e)
+        {
+            DebugLogs.Warn("Failed to load data containers, switching to service user defined manual data when service request fails");
+            // Manual system yet to be implemented
+        }
+    }
     public async Task InitialiseServicesAsync()
     {
         WaypointResources wp = await ServiceFactory.TryCreateAsync<WaypointBlockData, WaypointResources>(_sceneName, "Waypoints");
