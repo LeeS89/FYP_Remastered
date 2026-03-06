@@ -6,10 +6,50 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceLocations;
 
-public class WaypointResources : SceneResources, IWaypointService
+public class WaypointResources : SceneResources, IWaypointService, IAddressableService
 {
+    private AsyncOperationHandle<WaypointBlockData> _wpHandle;
+
     private WaypointBlockData _waypointBlockData;
     private Dictionary<object, BlockData> _inUseBlockTracker = new(20);
+
+    public async Task<bool> TryInitialiseAsync(IResourceLocation location)
+    {
+
+        // Load the asset from Addressables
+        /*var waypointHandle*/
+        _wpHandle = Addressables.LoadAssetAsync<WaypointBlockData>(location);
+
+        // Wait for the asset to be loaded
+        await _wpHandle.Task;
+
+        // Check if the loading succeeded
+        if (_wpHandle.Status == AsyncOperationStatus.Succeeded)
+        {
+            // Asset is loaded successfully, cast it to the correct type
+            _waypointBlockData = _wpHandle.Result;
+
+            if (_waypointBlockData != null)
+            {
+
+                foreach (var blockData in _waypointBlockData.blockDataArray)
+                    blockData._inUse = false;
+
+                return true;
+            }
+            else
+            {
+                DebugLogs.Nre(_waypointBlockData, "_waypointBlockData", this);
+                return false;
+            }
+        }
+        else
+        {
+            DebugLogs.LoadFail(_wpHandle, "_wpHandle", this);
+            return false;
+        }
+
+    }
 
     public async Task InitialiseAsync(IResourceLocation location)
     {

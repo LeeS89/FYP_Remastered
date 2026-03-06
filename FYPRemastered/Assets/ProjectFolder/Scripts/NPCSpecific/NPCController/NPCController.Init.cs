@@ -98,6 +98,7 @@ public partial class NPCController
 
     private void ConstructFSM()
     {
+
         // Obsolete
         _fsmDeps.SetOwner(this);
         _fsmDeps.SetTarget(_primaryTarget);

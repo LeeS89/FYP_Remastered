@@ -24,7 +24,7 @@ public static class ServiceFactory
     }
 
 
-    public static async Task<IResourceLocation?> TryGetSingleLocationAsync<TAsset>(
+    public static async Task<IResourceLocation> TryGetSingleLocationAsync<TAsset>(
         string sceneLabel,
         string featureLabel)
     {
@@ -46,7 +46,7 @@ public static class ServiceFactory
 
     public static async Task<TInterface?> TryCreateAsync<TAsset, TInterface, TConcrete>(
         string sceneLabel,
-        string featureLabel) where TConcrete : class, TInterface, IAddressableService, new()
+        string featureLabel) where TConcrete : class, TInterface, IAddressableServiceObsolete, new()
     {
         var loc = await TryGetSingleLocationAsync<TAsset>(sceneLabel, featureLabel);
         if (loc == null) return default;
@@ -60,7 +60,7 @@ public static class ServiceFactory
        string sceneLabel,
        string featureLabel,
        IResourceLocation location = null)
-       where TConcrete : class, IAddressableService, new()
+       where TConcrete : class, IAddressableServiceObsolete, new()
     {
         IResourceLocation resolvedLocation = location != null ? location : await TryGetSingleLocationAsync<TAsset>(sceneLabel, featureLabel);
 
@@ -73,6 +73,24 @@ public static class ServiceFactory
     }
 
 
+    public static async Task<(bool found, IResourceLocation location)> TryGetLocationAsync<TAsset>(
+        string sceneLabel,
+        string featureLabel)
+    {
+        var keys = new object[] { sceneLabel, featureLabel };
+
+        var h = Addressables.LoadResourceLocationsAsync(
+            keys,
+            Addressables.MergeMode.Intersection,
+            typeof(TAsset)
+        );
+
+        IList<IResourceLocation> locs = await h.Task;
+        Addressables.Release(h);
+
+        if (locs == null || locs.Count == 0) return (false, null);
+        return (true, locs[0]);
+    }
 
 }
 

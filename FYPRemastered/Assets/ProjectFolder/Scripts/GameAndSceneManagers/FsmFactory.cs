@@ -12,7 +12,7 @@ public class FsmFactory : IFsmService
 {
     private readonly string _sceneName;
     private List<ITickable> _tickables = new(5);
-    private IWaypointService _wpService;
+    private IAddressableService _wpService; // Split interfaces in WaypointResources class so only correct interface is used by relevant classes i.e. => This class need only store it as an IAddressableService
     private IFlankService _flankService;
     private IDistanceService _distService;
 
@@ -21,6 +21,7 @@ public class FsmFactory : IFsmService
     private AgentChaseData _agentChaseData;
     // End SO's
 
+    private List<AsyncOperationHandle> _handles = new(3);
     private FsmFactory() { }
 
     public FsmFactory(string sceneName)
@@ -33,34 +34,58 @@ public class FsmFactory : IFsmService
         throw new System.NotImplementedException();
     }
 
-    public async Task InitialiseServicesAsyncNew()
+    public async Task InitialiseServicesAsync()
     {
         try
         {
-            WaypointResources wp = await ServiceFactory.TryCreateAsync<WaypointBlockData, WaypointResources>(_sceneName, "Waypoints");
+            // Later, I will have an SO for scene Metadata which will show the services the current scene uses, so the TryGetLocation need only return locations
+            var (waypointsUsedInScene, location) = await ServiceFactory.TryGetLocationAsync<WaypointBlockData>(sceneLabel: _sceneName, featureLabel: "Waypoints");
 
-            if (wp == null)
-                DebugLogs.Err("Failed to create WaypointResources, will switch to manual waypoint system when resource request fails", this);
-            else
+            if (waypointsUsedInScene)
             {
+                if (location != null)
+                {
+                    _wpService = new WaypointResources();
+                    bool serviceInitSuccess = await _wpService.TryInitialiseAsync(location);
+
+                    if (!serviceInitSuccess)
+                    {
+                        DebugLogs.LoadFail(_wpService, "Wp service Waypoint data", this);
+                        // At this point, dispose of the _wpService class, but first ensure it release anything it has loaded
+                        // Plus, this will switch to use of manual waypoint system when request is received
+                    }
+                  
+                }
+                else
+                {
+                    DebugLogs.RequireNotNull(location, "waypointDataLocation", this);
+                    // Switch to yet to be implemented manual waypoint system when request is received
+                    return;// Instead of returning, let it continue to still try and load the state data since they can be still used in manual wp system
+                }
+
                 IResourceLocation apd = await ServiceFactory.TryGetSingleLocationAsync<AgentPatrolData>(_sceneName, "AgentPatrolData");
 
                 if (apd != null)
                 {
                     var apdHandle = Addressables.LoadAssetAsync<AgentPatrolData>(apd);
                     _agentPatrolData = await apdHandle.Task;
+                    _handles.Add(apdHandle);
                 }
                 else
-                    DebugLogs.Err("Patrol data address faild to load, will fallback to failsafe when data is requested");
+                    DebugLogs.LoadFail(apd, "Agent Patrol data location", this); // If the address load fails or the asset ends up being null,
+                                                                        // Switch to manually defined data when request comes in
+
+
             }
+
         }
         catch(Exception e)
         {
-            DebugLogs.Warn("Failed to load data containers, switching to service user defined manual data when service request fails");
+            DebugLogs.Warn("Failed to load agent data containers, switching to service user defined manual data when service request fails");
             // Manual system yet to be implemented
         }
     }
-    public async Task InitialiseServicesAsync()
+/*    public async Task InitialiseServicesAsyncOld()
     {
         WaypointResources wp = await ServiceFactory.TryCreateAsync<WaypointBlockData, WaypointResources>(_sceneName, "Waypoints");
 
@@ -86,10 +111,10 @@ public class FsmFactory : IFsmService
             Debug.LogError("Waypoint Service Initialised");
         }
 
-        /* // Initialise Flank Service
+        *//* // Initialise Flank Service
          _flankService = await ServiceFactory.TryCreateAsync<FlankPointBlockData, IFlankService, FlankPointServiceNew>(_sceneName, "FlankPointService")
-             ?? throw new Exception("Failed to initialise Flank Point Service");*/
-    }
+             ?? throw new Exception("Failed to initialise Flank Point Service");*//*
+    }*/
 
     public void LateTick(float dt) { }
    

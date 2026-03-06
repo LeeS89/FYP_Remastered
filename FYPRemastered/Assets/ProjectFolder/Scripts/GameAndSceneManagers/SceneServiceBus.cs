@@ -37,9 +37,9 @@ public class SceneServiceBus : ISceneServiceProvider
     {
         _gameManager = GameManager.Instance;
         // Initialise Waypoint Service
-        WaypointResources wp = await ServiceFactory.TryCreateAsync<WaypointBlockData, WaypointResources>(_sceneName, "Waypoints");
+      //  WaypointResources wp = await ServiceFactory.TryCreateAsync<WaypointBlockData, WaypointResources>(_sceneName, "Waypoints");
 
-        if (wp == null)
+      /*  if (wp == null)
             Debug.LogError("Failed to initialise Waypoint Service");
         else
         {
@@ -47,7 +47,7 @@ public class SceneServiceBus : ISceneServiceProvider
             if (wp is ITickable t) _tickables.Add(t);
             _waypointService = wp;
             Debug.LogError("Waypoint Service Initialised");
-        }
+        }*/
         await Task.CompletedTask;
 
        // FsmFactory fsmF = new FsmFactory(_sceneName);
@@ -244,19 +244,23 @@ public interface IPathService
     void RequestPath(Vector3 from, Vector3 to, NavMeshPath path, Action<DestinationResult> onRequestComplete);
 }
 
-public interface IAddressableService
+public interface IAddressableServiceObsolete
 {
     Task InitialiseAsync(IResourceLocation location);
 }
+public interface IAddressableService
+{
+    Task<bool> TryInitialiseAsync(IResourceLocation location);
+}
 
-public interface IWaypointService : IAddressableService
+public interface IWaypointService// : IAddressableServiceObsolete
 {
     bool TryGetWaypoints(object requester, List<Vector3> buffer);
 
     bool TryReleaseWaypoints(object requester, List<Vector3> buffer);
 }
 
-public interface IFlankService : IAddressableService
+public interface IFlankService : IAddressableServiceObsolete
 {
     void TryGetFlankCandidates(Vector3 flankTargetPos, int numSteps, List<Vector3> buffer, Action<bool> OnRequestComplete);
 }
