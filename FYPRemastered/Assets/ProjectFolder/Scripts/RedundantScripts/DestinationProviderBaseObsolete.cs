@@ -5,7 +5,7 @@ using Unity.XR.CoreUtils;
 using UnityEngine;
 
 [Obsolete("", true)]
-public abstract class DestinationProviderBase
+public abstract class DestinationProviderBaseObsolete
 {
     protected List<(Vector3, Vector3?)> _candidates = new();
 
@@ -23,7 +23,7 @@ public abstract class DestinationProviderBase
 public sealed class DestinationProviderOld 
 {
     public int CurrentWaypointZone { get; private set; } = 0;
-    private Dictionary<DestinationKind, DestinationProviderBase> _providers = new(5);
+    private Dictionary<DestinationKind, DestinationProviderBaseObsolete> _providers = new(5);
     private List<(Vector3, Vector3?)> _candidates = new(1);
 
     public DestinationProviderOld(params DestinationKind[] kinds)
@@ -41,7 +41,7 @@ public sealed class DestinationProviderOld
             _providers.TryAdd(kind, GetProvider(kind));
     }
 
-    private DestinationProviderBase GetProvider(DestinationKind kind)
+    private DestinationProviderBaseObsolete GetProvider(DestinationKind kind)
     {
         return kind switch
         {
@@ -87,7 +87,7 @@ public sealed class DestinationProviderOld
    
 }
 [Obsolete("", true)]
-public class WaypointProviderOld : DestinationProviderBase
+public class WaypointProviderOld : DestinationProviderBaseObsolete
 {
     private BlockData _wayPointBlock;
     private Action<BlockData> _wayPointCallback;
@@ -121,7 +121,7 @@ public class WaypointProviderOld : DestinationProviderBase
             Debug.LogError("Waypoint block data is null. Cannot set waypoints.");
             return;
         }
-        CurrentWaypointZone = _wayPointBlock._blockZone;
+     //   CurrentWaypointZone = _wayPointBlock._blockZone;
 
 
         //_waypointPairs.Clear();

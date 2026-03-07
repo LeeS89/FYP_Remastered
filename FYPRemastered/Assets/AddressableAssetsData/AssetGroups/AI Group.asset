@@ -26,7 +26,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 56e10d251b3db38488488d90c3115c9f
-    m_Address: Assets/ProjectFolder/Scripts/NPCSpecific/FSM/SO's/AgentPatrolData.asset
+    m_Address: AgentPatrolData
     m_ReadOnly: 0
     m_SerializedLabels:
     - AgentPatrolData

@@ -11,7 +11,8 @@ using Random = UnityEngine.Random;
 /// When ever they lose sight of the player from stationary state
 /// Flank points are pre calculated and stored in an SO
 /// </summary>
-public class DestinationManagerHelper
+[Obsolete("", true)]
+public class DestinationManagerHelperObsolete
 {
     
     private Transform _ownerTransform;
@@ -52,7 +53,7 @@ public class DestinationManagerHelper
     private Action<bool> _flankCandidatesCallback;
    
 
-    public DestinationManagerHelper(Transform owner, int maxflankSteps, GameObject debugCube = null)
+    public DestinationManagerHelperObsolete(Transform owner, int maxflankSteps, GameObject debugCube = null)
     {
         _ownerTransform = owner;
         _maxFlankingSteps = maxflankSteps;
@@ -193,7 +194,7 @@ public class DestinationManagerHelper
             return;
         }
 
-        CurrentWaypointZone = _blockData._blockZone;
+      //  CurrentWaypointZone = _blockData._blockZone;
         LoadWaypointData(_blockData);
     }
 

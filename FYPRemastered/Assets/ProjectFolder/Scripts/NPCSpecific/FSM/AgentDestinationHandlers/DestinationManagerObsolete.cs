@@ -16,7 +16,8 @@ using Random = UnityEngine.Random;
 /// When a point is being evaluated, it gets queued for path finding, and the request waits until the path request returns success/ failure.
 /// The final callback to the calling agent only gets fired once a point is validated and that reequests type matches to most recently queued destination type to prevent rapid Destination setting
 /// </summary>
-public class DestinationManager
+[Obsolete("", true)]
+public class DestinationManagerObsolete
 {
     private EnemyEventManager _eventManager;
     private Transform _owner;
@@ -41,13 +42,13 @@ public class DestinationManager
     /////////////////////////////////////////////
 
     /// Helper class which stores and provides Destination candidates
-    private DestinationManagerHelper _candidatePointProvider;
+    private DestinationManagerHelperObsolete _candidatePointProvider;
     private Action<bool> _pathRequestCallback;
 
     /// TESTING
     private GameObject testCube; // OLD
 
-    public DestinationManager(EnemyEventManager eventManager, int maxFlankingSteps, GameObject cube, Transform owner, Action<bool, Vector3, AIDestinationType> callback)
+    public DestinationManagerObsolete(EnemyEventManager eventManager, int maxFlankingSteps, GameObject cube, Transform owner, Action<bool, Vector3, AIDestinationType> callback)
     {
         _eventManager = eventManager;
         _eventManager.OnDeathStatusUpdated += OwnerDeathStatusUpdated;
@@ -65,7 +66,7 @@ public class DestinationManager
         _destinationQueue = new Queue<AIDestinationType>();
         _pathRequestCallback = PathRequestInternalCallback;
     
-        _candidatePointProvider = new DestinationManagerHelper(_owner, maxFlankingSteps, testCube);
+        _candidatePointProvider = new DestinationManagerHelperObsolete(_owner, maxFlankingSteps, testCube);
         _candidatePointProvider?.InitializeWaypoints();
     }
 
@@ -123,11 +124,11 @@ public class DestinationManager
             if (destinationType == AIDestinationType.FlankDestination)
             {
                 yield return CoroutineRunner.Instance.StartCoroutine(_candidatePointProvider.FlankDestinationRoutine());
-                yield return CoroutineRunner.Instance.StartCoroutine(EvaluateDestinationRoutine(_candidatePointProvider.GetFlankCandidates(), DestinationManagerHelper.GetFlankPointCandidatePosition, destinationType, DestinationManagerHelper.MarkFlankPointInUse));
+                yield return CoroutineRunner.Instance.StartCoroutine(EvaluateDestinationRoutine(_candidatePointProvider.GetFlankCandidates(), DestinationManagerHelperObsolete.GetFlankPointCandidatePosition, destinationType, DestinationManagerHelperObsolete.MarkFlankPointInUse));
             }
             else
             {
-                yield return CoroutineRunner.Instance.StartCoroutine(EvaluateDestinationRoutine(_candidatePointProvider.GetCandidates(destinationType), DestinationManagerHelper.ReturnSelf, destinationType));
+                yield return CoroutineRunner.Instance.StartCoroutine(EvaluateDestinationRoutine(_candidatePointProvider.GetCandidates(destinationType), DestinationManagerHelperObsolete.ReturnSelf, destinationType));
             }
             _candidatePointProvider?.ClearCandidates();
         }

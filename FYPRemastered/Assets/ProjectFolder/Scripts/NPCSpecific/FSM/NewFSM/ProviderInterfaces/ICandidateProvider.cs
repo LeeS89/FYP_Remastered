@@ -135,7 +135,7 @@ public sealed class TargetPointProvider : DestinationProvider
     
 }
 
-[Obsolete]
+[Obsolete("", true)]
 public sealed class WaypointProvider : DestinationProvider
 {
     private IWaypointRepository _repo;
@@ -183,7 +183,7 @@ public sealed class WaypointProvider : DestinationProvider
             Debug.LogError("Waypoint block data is null. Cannot set waypoints.");
             return;
         }
-        CurrentWaypointZone = _wayPointBlock._blockZone;
+      //  CurrentWaypointZone = _wayPointBlock._blockZone;
 
         for (int i = 0; i < _wayPointBlock._waypointPositions.Length; i++)
             Candidates.Add((_wayPointBlock._waypointPositions[i], _wayPointBlock._waypointForwards[i]));
@@ -390,7 +390,7 @@ public sealed class WaypointProviderNew : DestinationProviderNew
             Debug.LogError("Waypoint block data is null. Cannot set waypoints.");
             return;
         }
-        CurrentWaypointZone = _wayPointBlock._blockZone;
+       // CurrentWaypointZone = _wayPointBlock._blockZone;
 
         for (int i = 0; i < _wayPointBlock._waypointPositions.Length; i++)
             Candidates.Add((_wayPointBlock._waypointPositions[i], _wayPointBlock._waypointForwards[i]));

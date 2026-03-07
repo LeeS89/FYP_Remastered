@@ -151,7 +151,7 @@ public class LocomotionHandler
             if (GameManager.Instance.PlayerHasMoved)
             {
                 GameManager.Instance.PlayerHasMoved = false;
-                SceneEventAggregatorObsolete.Instance.RunClosestPointToPlayerJob();
+             //   SceneEventAggregatorObsolete.Instance.RunClosestPointToPlayerJob();
                 //MoonSceneManager._instance.TestRun();
             }
         }

@@ -1,7 +1,9 @@
 using Npc.API;
+using Services.Internal;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.AI;
@@ -24,7 +26,7 @@ public class FsmFactory : IFsmService
     private List<AsyncOperationHandle> _handles = new(3);
     private FsmFactory() { }
 
-    public FsmFactory(string sceneName)
+    public FsmFactory(string sceneName/*, SceneMetadata data*/)
     {
         _sceneName = sceneName;
     }
@@ -85,6 +87,75 @@ public class FsmFactory : IFsmService
             // Manual system yet to be implemented
         }
     }
+
+    private async Task<TConcrete> TryLoadStateService<TAsset, TConcrete>(string scene, string featureLabel) where TConcrete : class, IAddressableService, new()
+    {
+        var (usedInScene, location) = await ServiceFactory.TryGetLocationAsync<TAsset>(scene, featureLabel);
+
+        if (!usedInScene) return null;
+
+        var svc = new TConcrete();
+        bool serviceInitSuccess = await svc.TryInitialiseAsync(location);
+
+        if (!serviceInitSuccess)
+        {
+            DebugLogs.LoadFail(svc, $"(The Service of {typeof(TConcrete).Name})", this);
+            return null;
+            // Call Dispose on scv and return null;
+        }
+
+        return svc;
+    }
+
+
+    private async Task<bool> TryLoadPatrolServices()
+    {
+        var (waypointsUsedInScene, location) = await ServiceFactory.TryGetLocationAsync<WaypointBlockData>(sceneLabel: _sceneName, featureLabel: "Waypoints");
+
+        if (waypointsUsedInScene)
+        {
+            if (location != null)
+            {
+                _wpService = new WaypointResources();
+                bool serviceInitSuccess = await _wpService.TryInitialiseAsync(location);
+
+                if (!serviceInitSuccess)
+                {
+                    DebugLogs.LoadFail(_wpService, "Wp service Waypoint data", this);
+                    // At this point, dispose of the _wpService class, but first ensure it release anything it has loaded
+                    // Plus, this will switch to use of manual waypoint system when request is received
+                    return false;
+                }
+
+            }
+            else
+            {
+                DebugLogs.RequireNotNull(location, "waypointDataLocation", this);
+                // Switch to yet to be implemented manual waypoint system when request is received
+                return false;// Instead of returning, let it continue to still try and load the state data since they can be still used in manual wp system
+            }
+
+            IResourceLocation apd = await ServiceFactory.TryGetSingleLocationAsync<AgentPatrolData>(_sceneName, "AgentPatrolData");
+
+            if (apd != null)
+            {
+                var apdHandle = Addressables.LoadAssetAsync<AgentPatrolData>(apd);
+                _agentPatrolData = await apdHandle.Task;
+                _handles.Add(apdHandle);
+                return true;
+            }
+            else
+            {
+                DebugLogs.LoadFail(apd, "Agent Patrol data location", this);
+                return false;
+            }
+                // If the address load fails or the asset ends up being null,
+                                                                             // Switch to manually defined data when request comes in
+            
+
+        }
+        return false;
+    } 
 /*    public async Task InitialiseServicesAsyncOld()
     {
         WaypointResources wp = await ServiceFactory.TryCreateAsync<WaypointBlockData, WaypointResources>(_sceneName, "Waypoints");

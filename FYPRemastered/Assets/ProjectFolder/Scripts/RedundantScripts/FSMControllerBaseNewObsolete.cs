@@ -208,7 +208,7 @@ public abstract class FSMControllerBaseNewObsolete : ComponentEvents
     [SerializeField] protected int _maxFlankingSteps = 0;
     [SerializeField] protected GameObject _debugFlankCubes;
 
-    protected DestinationManager _destinationManager;
+    protected DestinationManagerObsolete _destinationManager;
 
     public int AgentZone { get; protected set; } = 0;
 
@@ -273,7 +273,7 @@ public abstract class FSMControllerBaseNewObsolete : ComponentEvents
         _chasing = new ChasingStateObsolete(_agentEventManager, OwningAgent, _walkSpeed, _sprintSpeed);
         _stationary = new StationaryStateObsolete(_agentEventManager, OwningAgent);
         _deathState = new DeathStateObsolete(_agentEventManager, OwningAgent);
-        _destinationManager = new DestinationManager(_agentEventManager, _maxFlankingSteps, _debugFlankCubes, transform, OnDestinationRequestComplete);
+        _destinationManager = new DestinationManagerObsolete(_agentEventManager, _maxFlankingSteps, _debugFlankCubes, transform, OnDestinationRequestComplete);
         AgentZone = _destinationManager.GetCurrentWPZone();
       //  SceneEventAggregator.Instance.RegisterAgentAndZone(this, AgentZone);
         Debug.LogError("WP ZOne: " + AgentZone);

@@ -51,7 +51,7 @@ public class WaypointResources : SceneResources, IWaypointService, IAddressableS
 
     }
 
-    public async Task InitialiseAsync(IResourceLocation location)
+    public async Task InitialiseAsyncOldToKeepItRunningForNow(IResourceLocation location)
     {
         try
         {

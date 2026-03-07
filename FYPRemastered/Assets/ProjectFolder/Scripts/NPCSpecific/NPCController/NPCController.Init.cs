@@ -138,12 +138,14 @@ public partial class NPCController
             PatrolDeps pDeps = new PatrolDeps(wps, pathResolver, _patrolStateCfg);
             //IFSMState patrolState = new FSMPatrolState(wpService, data: this, resolver: _pathFinder, stateContext: _fsmManager);
             IFsmState patrolState = new FSMPatrolState(deps: pDeps, shared, /*data: this, resolver: _pathFinder,*/ stateEvents: _fsmManager);
-           // IFsmState patrolState = new FSMPatrolState(deps: _fsmDeps, /*data: this, resolver: _pathFinder,*/ stateEvents: _fsmManager);
+            // IFsmState patrolState = new FSMPatrolState(deps: _fsmDeps, /*data: this, resolver: _pathFinder,*/ stateEvents: _fsmManager);
             StateId pid = patrolState.GetId();
             _fsmStates.TryAdd(pid, patrolState);
         }
+        else
+            DebugLogs.Err("Failed to retrieve WaypointService", this);
 
-        IFlankService fService;
+            IFlankService fService;
         if (_aiServices.TryGetFlankService(out fService/*_fsmDeps._flankService*/))
         {
             FlankDeps fDeps = new FlankDeps(fService, pathResolver, _flankStateCfg);

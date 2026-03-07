@@ -52,7 +52,7 @@ public class WaypointManager : MonoBehaviour
         {
             _block = block,  // Store the block's GameObject
             _blockPosition = block.transform.position,
-            _blockZone = this._blockZone,
+            //_blockZone = this._blockZone,
             _inUse = false  // Initially, the block is not in use
         };
 
@@ -118,7 +118,7 @@ public class WaypointManager : MonoBehaviour
             BlockData newBlockData = new BlockData
             {
                 _blockPosition = block._blockPosition,
-                _blockZone = block._blockZone,
+              //  _blockZone = block._blockZone,
                 _waypointPositions = block._waypointPositions,
                 _waypointForwards = block._waypointForwards,
                 _inUse = block._inUse
@@ -175,7 +175,7 @@ public class WaypointManager : MonoBehaviour
         {
             // Instantiate the block prefab and set its position
             GameObject block = Instantiate(_waypointBlockPrefab, blockData._blockPosition, Quaternion.identity);
-            block.name = "WaypointBlock_" + blockData._blockZone;
+            block.name = "WaypointBlock_" + _waypointBlocks.Count + 1;
 
             // Assign the _block reference in BlockData (so it holds the instantiated block)
             blockData._block = block;  // Set the block reference here

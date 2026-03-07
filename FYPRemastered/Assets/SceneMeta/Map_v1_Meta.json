@@ -1,0 +1,18 @@
+{
+  "FsmFeatures": {
+    "UsedInScene": true,
+
+    "Waypoints": {
+      "enabled": true,
+      "addressKey": "Scene01_Waypoints"
+    },
+    "PatrolData": {
+      "enabled": true,
+      "addressKey": "Scene01_PatrolData"
+    },
+    "SpawnPoints": {
+      "enabled": false,
+      "addressKey": ""
+    }
+  }
+}
