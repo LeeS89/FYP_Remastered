@@ -44,7 +44,9 @@ public class SceneServiceBus : ISceneServiceProvider
             return;
         }
 
-        if (meta.FsmFeatures.UsedInScene) _fsmFactory = new FsmFactory(_sceneName);
+        DebugLogs.Log("Meta successfully loaded");
+
+        if (meta.FsmFeatures.UsedInScene) _fsmFactory = new FsmFactory(meta);
         
     }
     // END NEW with meta data
@@ -80,7 +82,7 @@ public class SceneServiceBus : ISceneServiceProvider
         bool exists = await ServiceFactory.ExistsInSceneAsync<WaypointBlockData>(_sceneName, "Waypoints");
         if (!exists) return;
 
-        _fsmFactory = new FsmFactory(_sceneName);
+       // _fsmFactory = new FsmFactory(_sceneName);
         await _fsmFactory.InitialiseServicesAsync();
 
     }

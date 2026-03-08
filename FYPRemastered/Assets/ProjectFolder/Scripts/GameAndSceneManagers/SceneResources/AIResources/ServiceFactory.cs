@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceLocations;
 
 namespace Services.Internal
@@ -77,7 +78,7 @@ namespace Services.Internal
             return svc;
         }
 
-
+        [Obsolete]
         public static async Task<(bool found, IResourceLocation location)> TryGetLocationAsync<TAsset>(
             string sceneLabel,
             string featureLabel)
@@ -97,6 +98,8 @@ namespace Services.Internal
             return (true, locs[0]);
         }
 
+
+       
 
 
         ///NEW
@@ -130,6 +133,8 @@ namespace Services.Internal
         {
             try
             {
+                if (NullOrEmptyString(sceneName)) { DebugLogs.ArgNotNull(sceneName, "sceneName"); return null; }
+
                 string key = $"{sceneName}_Meta";
 
                 var handle = Addressables.LoadAssetAsync<TextAsset>(key);
@@ -154,6 +159,77 @@ namespace Services.Internal
             }
         }
 
+
+        public static async Task<IResourceLocation> TryGetLocationAsyncNew<TAsset>(string addressKey)
+        {
+            try
+            {
+
+                if (NullOrEmptyString(addressKey)) { DebugLogs.ArgNotNull(addressKey, "address key"); return null; }
+
+                var handle = Addressables.LoadResourceLocationsAsync(addressKey, typeof(TAsset));
+
+
+                var locs = await handle.Task;
+
+                if (handle.Status != AsyncOperationStatus.Succeeded)
+                {
+                    Addressables.Release(handle);
+                    return null;
+                }
+
+                Addressables.Release(handle);
+
+                if (locs == null || locs.Count == 0) return null;
+                return locs[0];
+                
+
+            }
+            catch (Exception e)
+            {
+                DebugLogs.LoadFail(null, $"(The Location of {typeof(TAsset).Name})");
+                return null;
+            }
+        }
+
+        public static async Task<TAsset> TryLoadAssetAsync<TAsset>(string addressKey) where TAsset : UnityEngine.Object
+        {
+            IResourceLocation resolvedLocation = await TryGetLocationAsyncNew<TAsset>(addressKey);
+
+            if (resolvedLocation == null) return null;
+
+            await Task.CompletedTask;//svc.InitialiseAsyncOldToKeepItRunningForNow(resolvedLocation);
+            return null;//svc;
+        }
+
+        private static async Task<TAsset> CreateAsync<TAsset>(IResourceLocation location) where TAsset : UnityEngine.Object
+        {
+            try
+            {
+                if (location == null) { DebugLogs.ArgNotNull(location, "resource location"); return null; }
+
+                var handle = Addressables.LoadAssetAsync<TAsset>(location);
+                var asset = await handle.Task;
+
+                if(handle.Status != AsyncOperationStatus.Succeeded)
+                {
+                    DebugLogs.LoadFail(location, $"{typeof(TAsset).Name}");
+                    Addressables.Release(handle);
+                    return null;
+                }
+
+                Addressables.Release(handle);
+                return null;
+            } 
+            catch (Exception e)
+            {
+                return null;
+            }
+        }
+
+
+
+        private static bool NullOrEmptyString(string txt) => string.IsNullOrWhiteSpace(txt) || string.IsNullOrEmpty(txt);
 
 
     }

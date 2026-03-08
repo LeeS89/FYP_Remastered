@@ -12,7 +12,10 @@ using UnityEngine.ResourceManagement.ResourceLocations;
 
 public class FsmFactory : IFsmService
 {
+    [Obsolete("")]
     private readonly string _sceneName;
+    private readonly SceneMetaData _metaData;
+
     private List<ITickable> _tickables = new(5);
     private IAddressableService _wpService; // Split interfaces in WaypointResources class so only correct interface is used by relevant classes i.e. => This class need only store it as an IAddressableService
     private IFlankService _flankService;
@@ -26,10 +29,97 @@ public class FsmFactory : IFsmService
     private List<AsyncOperationHandle> _handles = new(3);
     private FsmFactory() { }
 
-    public FsmFactory(string sceneName/*, SceneMetadata data*/)
+   /* public FsmFactory(string sceneName*//*, SceneMetadata data*//*)
     {
         _sceneName = sceneName;
+    }*/
+
+    public FsmFactory(SceneMetaData data) => _metaData = data;
+
+
+    // NEW META SETUP
+    public async Task InitialiseServicesAsyncMeta()
+    {
+
+        if (_metaData == null) 
+        {
+            DebugLogs.RequireNotNull(_metaData, "SceneMetaData", this);
+            return;
+        } //=> Possibly just switch all to manual systems
+
+        var waypointFeature = _metaData.FsmFeatures.Waypoints;
+        if (waypointFeature.enabled)
+        {
+            _wpService = await TryLoadStateServiceAndInitialize<WaypointBlockData, WaypointResources>(waypointFeature.addressKey);
+
+           
+        }
+
+
+        // Later, I will have an SO for scene Metadata which will show the services the current scene uses, so the TryGetLocation need only return locations
+        var (waypointsUsedInScene, location) = await ServiceFactory.TryGetLocationAsync<WaypointBlockData>(sceneLabel: _sceneName, featureLabel: "Waypoints");
+
+        if (waypointsUsedInScene)
+        {
+            if (location != null)
+            {
+                _wpService = new WaypointResources();
+                bool serviceInitSuccess = await _wpService.TryInitialiseAsync(location);
+
+                if (!serviceInitSuccess)
+                {
+                    DebugLogs.LoadFail(_wpService, "Wp service Waypoint data", this);
+                    // At this point, dispose of the _wpService class, but first ensure it release anything it has loaded
+                    // Plus, this will switch to use of manual waypoint system when request is received
+                }
+
+            }
+            else
+            {
+                DebugLogs.RequireNotNull(location, "waypointDataLocation", this);
+                // Switch to yet to be implemented manual waypoint system when request is received
+                return;// Instead of returning, let it continue to still try and load the state data since they can be still used in manual wp system
+            }
+
+            IResourceLocation apd = await ServiceFactory.TryGetSingleLocationAsync<AgentPatrolData>(_sceneName, "AgentPatrolData");
+
+            if (apd != null)
+            {
+                var apdHandle = Addressables.LoadAssetAsync<AgentPatrolData>(apd);
+                _agentPatrolData = await apdHandle.Task;
+                _handles.Add(apdHandle);
+            }
+            else
+                DebugLogs.LoadFail(apd, "Agent Patrol data location", this); // If the address load fails or the asset ends up being null,
+                                                                             // Switch to manually defined data when request comes in
+
+
+        }
+
+
+
     }
+
+    private async Task<TConcrete> TryLoadStateServiceAndInitialize<TAsset, TConcrete>(string addressKey) where TConcrete : class, IAddressableService, new()
+    {
+        var location = await ServiceFactory.TryGetLocationAsyncNew<TAsset>(addressKey);
+
+        if (location != null) return null;
+       
+        var svc = new TConcrete();
+        bool serviceInitSuccess = await svc.TryInitialiseAsync(location);
+
+        if (!serviceInitSuccess)
+        {
+            DebugLogs.LoadFail(svc, $"(The Service of {typeof(TConcrete).Name})", this);
+            return null;
+            // Call Dispose on scv and return null;
+        }
+
+        return svc;
+    }
+    // END NEW META SETUP
+
 
     public void Dispose()
     {
@@ -88,24 +178,7 @@ public class FsmFactory : IFsmService
         }
     }
 
-    private async Task<TConcrete> TryLoadStateService<TAsset, TConcrete>(string scene, string featureLabel) where TConcrete : class, IAddressableService, new()
-    {
-        var (usedInScene, location) = await ServiceFactory.TryGetLocationAsync<TAsset>(scene, featureLabel);
-
-        if (!usedInScene) return null;
-
-        var svc = new TConcrete();
-        bool serviceInitSuccess = await svc.TryInitialiseAsync(location);
-
-        if (!serviceInitSuccess)
-        {
-            DebugLogs.LoadFail(svc, $"(The Service of {typeof(TConcrete).Name})", this);
-            return null;
-            // Call Dispose on scv and return null;
-        }
-
-        return svc;
-    }
+    
 
 
     private async Task<bool> TryLoadPatrolServices()
