@@ -60,7 +60,7 @@ public class SceneManagement : SceneManagementBase, ISceneService
 
         _sceneServiceBus = new SceneServiceBus(sceneName, this);
 
-        await _sceneServiceBus.InitialiseServicesAsync();
+        //await _sceneServiceBus.InitialiseServicesAsync();
         await _sceneServiceBus.NewInit();
         // await _resources.LoadResourcesAsync();
         //  await _resources.LoadDependancies();

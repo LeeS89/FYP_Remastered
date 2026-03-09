@@ -1,3 +1,4 @@
+using Services.Internal;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -8,49 +9,89 @@ using UnityEngine.ResourceManagement.ResourceLocations;
 
 public class WaypointResources : SceneResources, IWaypointService, IAddressableService
 {
-    private AsyncOperationHandle<WaypointBlockData> _wpHandle;
+    private AsyncOperationHandle<WaypointBlockData>? _wpHandle;
 
     private WaypointBlockData _waypointBlockData;
     private Dictionary<object, BlockData> _inUseBlockTracker = new(20);
 
+    [Obsolete]
     public async Task<bool> TryInitialiseAsync(IResourceLocation location)
     {
+        throw new NotImplementedException();
+    }
 
+   
+
+    public async Task<bool> TryInitialiseAsync(string addressKey)
+    {
+        if (string.IsNullOrWhiteSpace(addressKey)) { DebugLogs.RequireNotNull(addressKey, "addressKey", this); return false; }
+        
         // Load the asset from Addressables
-        /*var waypointHandle*/
-        _wpHandle = Addressables.LoadAssetAsync<WaypointBlockData>(location);
+        _wpHandle = await AddressableLoader.TryLoadAssetAsync<WaypointBlockData>(addressKey);
 
-        // Wait for the asset to be loaded
-        await _wpHandle.Task;
-
-        // Check if the loading succeeded
-        if (_wpHandle.Status == AsyncOperationStatus.Succeeded)
+        if (!_wpHandle.HasValue)
         {
-            // Asset is loaded successfully, cast it to the correct type
-            _waypointBlockData = _wpHandle.Result;
-
-            if (_waypointBlockData != null)
-            {
-
-                foreach (var blockData in _waypointBlockData.blockDataArray)
-                    blockData._inUse = false;
-
-                return true;
-            }
-            else
-            {
-                DebugLogs.Nre(_waypointBlockData, "_waypointBlockData", this);
-                return false;
-            }
-        }
-        else
-        {
-            DebugLogs.LoadFail(_wpHandle, "_wpHandle", this);
+            DebugLogs.Nre(_wpHandle, "_wpHandle", this);
+           // Dispose();
             return false;
         }
 
+        _waypointBlockData = _wpHandle.Value.Result;
+
+        if (_waypointBlockData == null)
+        {
+           // Dispose();
+
+            DebugLogs.Nre(_waypointBlockData, "_waypointBlockData", this);
+            return false;
+        }
+
+        var blocks = _waypointBlockData.blockDataArray;
+
+        if (blocks == null || blocks.Length == 0)
+        {
+            DebugLogs.Err("Waypoint block data array is null or contains no elements", this);
+            //Dispose();
+            return false;
+        }
+
+        foreach (var block in _waypointBlockData.blockDataArray)
+            block._inUse = false;
+
+        DebugLogs.Log("Successfully initialized waypoint blocks", this);
+        return true;
+
     }
 
+    public bool TryGetWaypoints(object requester, List<Vector3> buffer)
+    {
+        if (requester == null || requester.GetType().IsValueType || buffer == null) return false;
+
+        if (_waypointBlockData != null)
+        {
+            foreach (var blockData in _waypointBlockData.blockDataArray)
+            {
+                if (!blockData._inUse)
+                {
+                    TryReleaseWaypoints(requester, buffer);
+                    blockData._inUse = true;
+                    buffer.AddRange(blockData._waypointPositions);
+                    _inUseBlockTracker[requester] = blockData;
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public void Dispose()
+    {
+        if (_wpHandle.Value.IsValid())
+            Addressables.Release(_wpHandle.Value);
+    }
+
+    [Obsolete]
     public async Task InitialiseAsyncOldToKeepItRunningForNow(IResourceLocation location)
     {
         try
@@ -210,27 +251,7 @@ public class WaypointResources : SceneResources, IWaypointService, IAddressableS
     //NEW SETUP
 
 
-    public bool TryGetWaypoints(object requester, List<Vector3> buffer)
-    {
-        if (requester == null || requester.GetType().IsValueType || buffer == null) return false;
-
-        if (_waypointBlockData != null)
-        {
-            foreach (var blockData in _waypointBlockData.blockDataArray)
-            {
-                if (!blockData._inUse)
-                {
-                    TryReleaseWaypoints(requester, buffer);
-                    blockData._inUse = true;
-                    buffer.AddRange(blockData._waypointPositions);
-                    _inUseBlockTracker[requester] = blockData;
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
+  
 
     public bool TryReleaseWaypoints(object requester, List<Vector3> buffer)
     {
@@ -245,6 +266,10 @@ public class WaypointResources : SceneResources, IWaypointService, IAddressableS
 
         return false;
     }
+
+   
+
+
 
 
     //END NEW SETUP

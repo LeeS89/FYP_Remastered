@@ -4,7 +4,7 @@
 
     "Waypoints": {
       "enabled": true,
-      "addressKey": "Scene01_Waypoints"
+      "addressKey": "MoonSceneWP"
     },
     "PatrolData": {
       "enabled": true,

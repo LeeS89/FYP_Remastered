@@ -24,6 +24,7 @@ public class SceneServiceBus : ISceneServiceProvider
     private ISceneService _sceneService;
 
     private FsmFactory _fsmFactory;
+    private SceneMetaData metaData;
 
     //private PathRequestManagerNew _pathService;
 
@@ -36,17 +37,22 @@ public class SceneServiceBus : ISceneServiceProvider
     // NEW with meta data
     public async Task NewInit()
     {
-        var meta = await ServiceFactory.LoadMetaAsync(_sceneName);
 
-        if(meta == null)
+        metaData = await AddressableLoader.LoadMetaAsyncNew<SceneMetaData>(_sceneName);
+        _gameManager = GameManager.Instance;
+        if (metaData == null)
         {
             DebugLogs.Err("No Scene meta data found", this);
             return;
         }
 
-        DebugLogs.Log("Meta successfully loaded");
+        DebugLogs.Err("Meta successfully loaded", this);
 
-        if (meta.FsmFeatures.UsedInScene) _fsmFactory = new FsmFactory(meta);
+        if (metaData.FsmFeatures.UsedInScene)
+        {
+            _fsmFactory = new FsmFactory(metaData);
+            await _fsmFactory.InitialiseAsync();
+        }
         
     }
     // END NEW with meta data
@@ -56,7 +62,7 @@ public class SceneServiceBus : ISceneServiceProvider
     {
         _gameManager = GameManager.Instance;
         // Initialise Waypoint Service
-        WaypointResources wp = await ServiceFactory.TryCreateAsync<WaypointBlockData, WaypointResources>(_sceneName, "Waypoints");
+        WaypointResources wp = await AddressableLoader.TryCreateAsync<WaypointBlockData, WaypointResources>(_sceneName, "Waypoints");
 
         if (wp == null)
             Debug.LogError("Failed to initialise Waypoint Service");
@@ -79,11 +85,11 @@ public class SceneServiceBus : ISceneServiceProvider
 
     private async Task TryInitializeFsmService()
     {
-        bool exists = await ServiceFactory.ExistsInSceneAsync<WaypointBlockData>(_sceneName, "Waypoints");
+        bool exists = false;//await ServiceFactory.ExistsInSceneAsync<WaypointBlockData>(_sceneName, "Waypoints");
         if (!exists) return;
 
-       // _fsmFactory = new FsmFactory(_sceneName);
-        await _fsmFactory.InitialiseServicesAsync();
+        // _fsmFactory = new FsmFactory(_sceneName);
+        await Task.CompletedTask;//_fsmFactory.InitialiseServicesAsync();
 
     }
 
@@ -148,8 +154,11 @@ public class SceneServiceBus : ISceneServiceProvider
 
     public bool TryGetWaypointService(out IWaypointService waypointService)
     {
-        waypointService = _waypointService;
-        return _waypointService != null;
+        waypointService = _fsmFactory?.GetWService();//_waypointService;
+
+
+
+        return waypointService != null;//_waypointService != null;
     }
 
     public bool TryGetAgentAlertService(out IAgentAlertService npcService)
@@ -267,9 +276,14 @@ public interface IAddressableServiceObsolete
 {
     Task InitialiseAsync(IResourceLocation location);
 }
-public interface IAddressableService
+public interface IAddressableService : ILifecycle
 {
+
+    [Obsolete]
     Task<bool> TryInitialiseAsync(IResourceLocation location);
+    Task<bool> TryInitialiseAsync(string addressKey);
+
+    [Obsolete]
     Task InitialiseAsyncOldToKeepItRunningForNow(IResourceLocation location);
 }
 
