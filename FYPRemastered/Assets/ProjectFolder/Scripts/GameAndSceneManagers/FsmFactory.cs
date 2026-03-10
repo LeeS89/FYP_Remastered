@@ -1,21 +1,16 @@
 using Npc.API;
-using Services.Internal;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Unity.XR.CoreUtils.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceLocations;
 
 
-public class FsmFactory : ServiceBundle, IFsmService, ITickable
+public class FsmFactory : ServiceBundle<FsmFeatureGroup>, IFsmService, ITickable
 {
-    [Obsolete("")]
-    private readonly string _sceneName;
-
-    
+  
     private List<ITickable> _tickables = new(5);
     private IAddressableService _wpService; // Split interfaces in WaypointResources class so only correct interface is used by relevant classes i.e. => This class need only store it as an IAddressableService
     private IFlankService _flankService;
@@ -36,7 +31,7 @@ public class FsmFactory : ServiceBundle, IFsmService, ITickable
      }*/
 
     // public FsmFactory(SceneMetaData data) => _metaData = data;
-    public FsmFactory(SceneMetaData data) : base(data) { }
+    public FsmFactory(FsmFeatureGroup data) : base(data) { }
 
     public Task<bool> TryInitialiseAsync(IResourceLocation location)
     {
@@ -64,20 +59,22 @@ public class FsmFactory : ServiceBundle, IFsmService, ITickable
             return;
         } //=> Possibly just switch all to manual systems
 
-        var waypointFeature = _metaData.FsmFeatures.Waypoints;
+        var waypointFeature = _metaData.Waypoints;
         if (waypointFeature.enabled)
         {
-            _wpService = await TryLoadStateServiceAndInitialize<WaypointBlockData, WaypointResources>(waypointFeature.addressKey);
+            _wpService = await TryLoadStateServiceAndInitialize<WaypointBlockData, WaypointResources>(waypointFeature/*.addressKey*/);
             if (_wpService == null) DebugLogs.Nre(_wpService, "WaypointService");
-            else DebugLogs.Err("Found Waypoint service was not null", this);
+            else DebugLogs.Log("Found Waypoint service", this);
+
+
            
         }
 
-     
-        // Later, I will have an SO for scene Metadata which will show the services the current scene uses, so the TryGetLocation need only return locations
-      //  var (waypointsUsedInScene, location) = await ServiceFactory.TryGetLocationAsync<WaypointBlockData>(sceneLabel: _sceneName, featureLabel: "Waypoints");
 
-      /*  if (waypointsUsedInScene)
+        // Later, I will have an SO for scene Metadata which will show the services the current scene uses, so the TryGetLocation need only return locations
+        //  var (waypointsUsedInScene, location) = await ServiceFactory.TryGetLocationAsync<WaypointBlockData>(sceneLabel: _sceneName, featureLabel: "Waypoints");
+/*
+        if (waypointsUsedInScene)
         {
             if (location != null)
             {
@@ -112,18 +109,18 @@ public class FsmFactory : ServiceBundle, IFsmService, ITickable
                                                                              // Switch to manually defined data when request comes in
 
 
-        }*/
-
+        }
+*/
 
 
     }
 
-    private async Task<TConcrete> TryLoadStateServiceAndInitialize<TAsset, TConcrete>(string addressKey) where TConcrete : class, IAddressableService, new()
+    private async Task<TConcrete> TryLoadStateServiceAndInitialize<TAsset, TConcrete>(FeatureMeta data/*string addressKey*/) where TConcrete : class, IAddressableService, new()
     {
-        if (string.IsNullOrWhiteSpace(addressKey)) { DebugLogs.RequireNotNull(addressKey, "addressKey", this); return null; }
+        if (string.IsNullOrWhiteSpace(data.addressKey)) { DebugLogs.RequireNotNull(data.addressKey, "addressKey", this); return null; }
        
         var svc = new TConcrete();
-        bool serviceInitSuccess = await svc.TryInitialiseAsync(addressKey);
+        bool serviceInitSuccess = await svc.TryInitialiseAsync(/*addressKey*/data);
 
         if (!serviceInitSuccess)
         {

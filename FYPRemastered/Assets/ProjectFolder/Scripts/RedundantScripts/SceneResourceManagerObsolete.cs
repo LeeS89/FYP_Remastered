@@ -4,13 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class SceneResourceManager
+[Obsolete("", true)]
+public class SceneResourceManagerObsolete
 {
     private List<SceneResources> _resources;
     private List<SceneResources> _resourceDependancies;
 
     
-    public SceneResourceManager(params SceneResources[] resources)
+    public SceneResourceManagerObsolete(params SceneResources[] resources)
     {
         //SceneEventAggregator.Instance.OnDependanciesAdded += AddDependencies;
         SceneEventAggregatorObsolete.Instance.OnCheckDependencyExists += CheckDependenciesExist;

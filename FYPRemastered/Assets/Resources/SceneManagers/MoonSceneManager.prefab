@@ -9,9 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1730306358030552484}
-  - component: {fileID: 730729865798543561}
   - component: {fileID: 2406689411211726246}
-  - component: {fileID: 2678948082886071746}
+  - component: {fileID: 5719900482977461081}
   m_Layer: 0
   m_Name: MoonSceneManager
   m_TagString: Untagged
@@ -34,24 +33,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &730729865798543561
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7785938470125478005}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2698b3cf1092f7a479dbe4629746662d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _eventManagers: []
-  _normalHitPrefab: {fileID: 0}
-  _deflectAudioPrefab: {fileID: 0}
-  _normalBulletPrefab: {fileID: 0}
-  _enemy: {fileID: 0}
-  _testspawn: 0
 --- !u!114 &2406689411211726246
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -66,7 +47,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _player: {fileID: 0}
   _maxbullets: 100
---- !u!114 &2678948082886071746
+--- !u!114 &5719900482977461081
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -75,6 +56,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 7785938470125478005}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ae9a0022d9958274aba62a232de71756, type: 3}
+  m_Script: {fileID: 11500000, guid: eeea1f19dce3de5439a9eeffb0aff7b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _eventManagers: []
+  _waypointBlockData: {fileID: 0}
+  _waypointManager: {fileID: 0}
+  _testspawn: 0

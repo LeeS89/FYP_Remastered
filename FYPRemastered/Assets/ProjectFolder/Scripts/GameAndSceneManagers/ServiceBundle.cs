@@ -1,11 +1,11 @@
 using System.Threading.Tasks;
 using UnityEngine;
 
-public abstract class ServiceBundle
+public abstract class ServiceBundle<T> where T : class
 {
-    protected readonly SceneMetaData _metaData;
+    protected readonly T _metaData;
 
-    public ServiceBundle(SceneMetaData data) => _metaData = data;
+    public ServiceBundle(T data) => _metaData = data;
 
     public abstract Task InitialiseAsync();
 }

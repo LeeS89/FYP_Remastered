@@ -8,7 +8,7 @@ using UnityEngine.ResourceManagement.ResourceLocations;
 
 
 [Obsolete("", true)]
-public class WaypointResourcesObsolete : SceneResources, IWaypointService
+public class WaypointResourcesObsolete : SceneResources//, IWaypointService
 {
     private WaypointBlockData _waypointBlockData;
   
@@ -73,11 +73,11 @@ public class WaypointResourcesObsolete : SceneResources, IWaypointService
             SceneEventAggregatorObsolete.Instance.AddDependancy(new PathRequestManagerObsolete());
         }
 
-        exists = SceneEventAggregatorObsolete.Instance.CheckDependancyExists(typeof(AgentZoneRegistryNew));
+        exists = SceneEventAggregatorObsolete.Instance.CheckDependancyExists(typeof(AgentZoneRegistry));
 
         if (!exists)
         {
-            SceneEventAggregatorObsolete.Instance.AddDependancy(new AgentZoneRegistryNew());
+            SceneEventAggregatorObsolete.Instance.AddDependancy(new AgentZoneRegistry());
         }
 
         exists = SceneEventAggregatorObsolete.Instance.CheckDependancyExists(typeof(PlayerFlankingResourcesObsolete));

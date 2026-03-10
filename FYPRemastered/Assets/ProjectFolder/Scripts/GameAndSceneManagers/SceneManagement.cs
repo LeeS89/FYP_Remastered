@@ -6,7 +6,7 @@ public class SceneManagement : SceneManagementBase, ISceneService
 {
     [SerializeField] private WaypointBlockData _waypointBlockData;
     [SerializeField] private WaypointManager _waypointManager;
-    private SceneResourceManager _resources;
+   // private SceneResourceManager _resources;
 
     private SceneServiceBus _sceneServiceBus;
 
@@ -133,22 +133,6 @@ public class SceneManagement : SceneManagementBase, ISceneService
 
 
      }*/
-    [Obsolete]
-    protected override async Task LoadSceneResources() // Create Resources Component Later
-    {
-        try
-        {
-
-            await _resources.LoadResourcesAsync(); // Load Waypoint Resources
-
-        }
-        catch (Exception e)
-        {
-            Debug.LogError($"Error loading scene resources: {e.Message}");
-        }
-
-    }
-
    
 
     //public override void UnregisterAgentAndZone(EnemyFSMController agent, int zone) => _zoneAgentRegistry.Unregister(agent, zone);

@@ -6,11 +6,11 @@ using UnityEngine;
 
 
 [Obsolete("Use SceneManagement instead", true)]
-public class MoonSceneManager : BaseSceneManager
+public class MoonSceneManagerObsolete : BaseSceneManager
 {
     [SerializeField] private WaypointBlockData _waypointBlockData;
     [SerializeField] private WaypointManager _waypointManager;
-    private SceneResourceManager _resources;
+    private SceneResourceManagerObsolete _resources;
 
    
 
@@ -48,7 +48,7 @@ public class MoonSceneManager : BaseSceneManager
     public override async Task SetupScene()
     {
        
-        _resources = new SceneResourceManager(new WaypointResourcesObsolete(), new PoolLoaderObsolete());
+        _resources = new SceneResourceManagerObsolete(new WaypointResourcesObsolete(), new PoolLoaderObsolete());
 
         await _resources.LoadResourcesAsync();
         await _resources.LoadDependancies();
@@ -164,12 +164,12 @@ public class MoonSceneManager : BaseSceneManager
 
 
 
-
-public class MoonSceneManagerNew : BaseSceneManager
+[Obsolete("", true)]
+public class MoonSceneManagerNewObsolete : BaseSceneManager
 {
     [SerializeField] private WaypointBlockData _waypointBlockData;
     [SerializeField] private WaypointManager _waypointManager;
-    private SceneResourceManager _resources;
+    private SceneResourceManagerObsolete _resources;
 
     private SceneServiceBus _sceneServiceBus;
 

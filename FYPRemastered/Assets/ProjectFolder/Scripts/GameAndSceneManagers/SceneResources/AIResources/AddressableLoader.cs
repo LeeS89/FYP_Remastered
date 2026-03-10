@@ -34,21 +34,7 @@ namespace Services.Internal
         }
 
 
-        public static async Task<TConcrete?> TryCreateAsync<TAsset, TConcrete>(
-          string sceneLabel,
-          string featureLabel,
-          IResourceLocation location = null)
-          where TConcrete : class, IAddressableService, new()
-        {
-            IResourceLocation resolvedLocation = location != null ? location : await TryGetSingleLocationAsync<TAsset>(sceneLabel, featureLabel);
-
-
-            if (resolvedLocation == null) return null;
-
-            var svc = new TConcrete();
-            await svc.InitialiseAsyncOldToKeepItRunningForNow(resolvedLocation);
-            return svc;
-        }
+     
 
         #endregion
 

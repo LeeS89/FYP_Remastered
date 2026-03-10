@@ -101,8 +101,8 @@ public abstract class SceneManagementBase : MonoBehaviour, ISceneManager
 
 
     #region Obsolete Code
-    [Obsolete]
-    protected abstract Task LoadSceneResources();
+ /*   [Obsolete]
+    protected abstract Task LoadSceneResources();*/
     //protected virtual void LoadWaypoints() { }
     // public virtual void RegisterAgentAndZone(EnemyFSMController agent, int zone) { }
    // public virtual void UnregisterAgentAndZone(EnemyFSMController agent, int zone) { }

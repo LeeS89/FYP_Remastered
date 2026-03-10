@@ -50,7 +50,7 @@ public class SceneServiceBus : ISceneServiceProvider
 
         if (metaData.FsmFeatures.UsedInScene)
         {
-            _fsmFactory = new FsmFactory(metaData);
+            _fsmFactory = new FsmFactory(metaData.FsmFeatures);
             await _fsmFactory.InitialiseAsync();
         }
         
@@ -58,40 +58,6 @@ public class SceneServiceBus : ISceneServiceProvider
     // END NEW with meta data
 
 
-    public async Task InitialiseServicesAsync()
-    {
-        _gameManager = GameManager.Instance;
-        // Initialise Waypoint Service
-        WaypointResources wp = await AddressableLoader.TryCreateAsync<WaypointBlockData, WaypointResources>(_sceneName, "Waypoints");
-
-        if (wp == null)
-            Debug.LogError("Failed to initialise Waypoint Service");
-        else
-        {
-            // _NpcService is only used in scenes containing waypoints
-            if (wp is ITickable t) _tickables.Add(t);
-            _waypointService = wp;
-            Debug.LogError("Waypoint Service Initialised");
-        }
-       // await Task.CompletedTask;
-
-       // FsmFactory fsmF = new FsmFactory(_sceneName);
-        //await fsmF.InitialiseServicesAsync();
-        /* // Initialise Flank Service
-         _flankService = await ServiceFactory.TryCreateAsync<FlankPointBlockData, IFlankService, FlankPointServiceNew>(_sceneName, "FlankPointService")
-             ?? throw new Exception("Failed to initialise Flank Point Service");*/
-    }
-
-
-    private async Task TryInitializeFsmService()
-    {
-        bool exists = false;//await ServiceFactory.ExistsInSceneAsync<WaypointBlockData>(_sceneName, "Waypoints");
-        if (!exists) return;
-
-        // _fsmFactory = new FsmFactory(_sceneName);
-        await Task.CompletedTask;//_fsmFactory.InitialiseServicesAsync();
-
-    }
 
     public void Tick(float dt)
     {
@@ -144,7 +110,7 @@ public class SceneServiceBus : ISceneServiceProvider
     {
         if (_pathService == null)
         {
-            PathRequestManagerNew ps = new PathRequestManagerNew();
+            PathRequestManager ps = new PathRequestManager();
             if (ps is ITickable t) _tickables.Add(t);
             _pathService = ps;
         }
@@ -163,7 +129,7 @@ public class SceneServiceBus : ISceneServiceProvider
 
     public bool TryGetAgentAlertService(out IAgentAlertService npcService)
     {
-        if (_npcService == null) _npcService = new AgentZoneRegistryNew();
+        if (_npcService == null) _npcService = new AgentZoneRegistry();
         npcService = _npcService;
         return _npcService != null;
     }
@@ -278,13 +244,8 @@ public interface IAddressableServiceObsolete
 }
 public interface IAddressableService : ILifecycle
 {
+    Task<bool> TryInitialiseAsync(FeatureMeta data/*string addressKey*/);
 
-    [Obsolete]
-    Task<bool> TryInitialiseAsync(IResourceLocation location);
-    Task<bool> TryInitialiseAsync(string addressKey);
-
-    [Obsolete]
-    Task InitialiseAsyncOldToKeepItRunningForNow(IResourceLocation location);
 }
 
 public interface IWaypointService// : IAddressableServiceObsolete
