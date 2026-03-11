@@ -18614,7 +18614,6 @@ GameObject:
   m_Component:
   - component: {fileID: 266043405}
   - component: {fileID: 266043408}
-  - component: {fileID: 266043407}
   - component: {fileID: 266043409}
   m_Layer: 4
   m_Name: SoldierMecanim
@@ -18641,18 +18640,6 @@ Transform:
   - {fileID: 605914147}
   m_Father: {fileID: 1863641519}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
---- !u!114 &266043407
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 266043404}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c9d0df5d3d812174fa8ed341ac025ed2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!95 &266043408
 Animator:
   serializedVersion: 7
@@ -72945,7 +72932,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 6850746222827836239, guid: 8b63e884631feb14da8f59c2b7e506ef, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -112313,7 +112301,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1777892026}
-  - component: {fileID: 1777892025}
+  - component: {fileID: 1777892027}
   m_Layer: 0
   m_Name: AGGREGATOR
   m_TagString: Untagged
@@ -112321,18 +112309,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1777892025
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1777892024}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4a627005895d5074a81a301d4619d9ed, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &1777892026
 Transform:
   m_ObjectHideFlags: 0
@@ -112348,6 +112324,27 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1777892027
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1777892024}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f6980517b83106498cc5dc6f3dff9d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PrefabSpawnerSample
+  SpawnablePrefab:
+    m_AssetGUID: f25ee36fa90530643a56d63e9a3467ca
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_SubObjectGUID: 
+    m_EditorAssetChanged: 0
+  DelayBetweenSpawns: 2
+  DealyBeforeDestroying: 1
+  NumberOfPrefabsToSpawn: 1
 --- !u!1 &1780366490
 GameObject:
   m_ObjectHideFlags: 0
@@ -153034,18 +153031,6 @@ Transform:
   - {fileID: 6697218256617432362}
   m_Father: {fileID: 7550000667986481658}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1065878892705863064
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4644028827054525788}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c9d0df5d3d812174fa8ed341ac025ed2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1294591283139018720
 GameObject:
   m_ObjectHideFlags: 0
@@ -154193,7 +154178,6 @@ GameObject:
   m_Component:
   - component: {fileID: 3903357424414696676}
   - component: {fileID: 3078094411526946237}
-  - component: {fileID: 1065878892705863064}
   - component: {fileID: 4644028827054525789}
   m_Layer: 4
   m_Name: SoldierMecanim
