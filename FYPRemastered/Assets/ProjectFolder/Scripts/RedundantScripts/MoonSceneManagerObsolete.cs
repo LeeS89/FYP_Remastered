@@ -171,7 +171,7 @@ public class MoonSceneManagerNewObsolete : BaseSceneManager
     [SerializeField] private WaypointManager _waypointManager;
     private SceneResourceManagerObsolete _resources;
 
-    private SceneServiceBus _sceneServiceBus;
+  //  private SceneServiceBus _sceneServiceBus;
 
 
     // public Dictionary<GameObject, float> stats = new Dictionary<GameObject, float>();

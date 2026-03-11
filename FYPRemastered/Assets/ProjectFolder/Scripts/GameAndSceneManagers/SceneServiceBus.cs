@@ -1,4 +1,3 @@
-using Services.Internal;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -6,175 +5,179 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.ResourceManagement.ResourceLocations;
 
-public class SceneServiceBus : ISceneServiceProvider
+namespace Services.Internal
 {
 
-    private readonly string _sceneName;
-    public event Action OnSceneBegin;
-    public event Action OnSceneEnd;
-
-    private List<ITickable> _tickables = new(5);
-    private IWaypointService _waypointService;
-    private IAgentAlertService _npcService;
-    private IFlankService _flankService;
-    private IPoolService _poolService;
-    private IPathService _pathService;
-    private IGameManager _gameManager;
-    private IDistanceService _distanceService;
-    private ISceneService _sceneService;
-
-    private FsmFactory _fsmFactory;
-    private SceneMetaData metaData;
-
-    //private PathRequestManagerNew _pathService;
-
-    public SceneServiceBus(string sceneName, ISceneService sceneService)
-    {
-        _sceneService = sceneService;
-        _sceneName = sceneName;
-    }
-
-    // NEW with meta data
-    public async Task NewInit()
+    public class SceneServiceBus : ISceneServiceProvider
     {
 
-        metaData = await AddressableLoader.LoadMetaAsyncNew<SceneMetaData>(_sceneName);
-        _gameManager = GameManager.Instance;
-        if (metaData == null)
+        private readonly string _sceneName;
+        public event Action OnSceneBegin;
+        public event Action OnSceneEnd;
+
+        private List<ITickable> _tickables = new(5);
+        private IWaypointService _waypointService;
+        private IAgentAlertService _npcService;
+        private IFlankService _flankService;
+        private IPoolService _poolService;
+        private IPathService _pathService;
+        private IGameManager _gameManager;
+        private IDistanceService _distanceService;
+        private ISceneService _sceneService;
+
+        private FsmFactory _fsmFactory;
+        private SceneMetaData metaData;
+
+        //private PathRequestManagerNew _pathService;
+
+        public SceneServiceBus(string sceneName, ISceneService sceneService)
         {
-            DebugLogs.Err("No Scene meta data found", this);
-            return;
+            _sceneService = sceneService;
+            _sceneName = sceneName;
         }
 
-        DebugLogs.Err("Meta successfully loaded", this);
-
-        if (metaData.FsmFeatures.UsedInScene)
+        // NEW with meta data
+        public async Task NewInit()
         {
-            _fsmFactory = new FsmFactory(metaData.FsmFeatures);
-            await _fsmFactory.InitialiseAsync();
-        }
-        
-    }
-    // END NEW with meta data
 
-
-
-    public void Tick(float dt)
-    {
-        if (_tickables == null || _tickables.Count == 0) return;
-
-        foreach (var t in _tickables)
-            t.Tick(dt);
-
-    }
-
-    private List<ISceneService> _services = new(5);
-
-    public bool TryGetService<T>(out T service) where T : class, ISceneService // Placeholder interface
-    {
-        foreach(var s in _services)
-        {
-            if(s is T typed)
+            metaData = await AddressableLoader.LoadMetaAsyncNew<SceneMetaData>(_sceneName);
+            _gameManager = GameManager.Instance;
+            if (metaData == null)
             {
-                service = typed;
-                return true;
+                DebugLogs.Err("No Scene meta data found", this);
+                return;
             }
+
+            DebugLogs.Err("Meta successfully loaded", this);
+
+            if (metaData.FsmFeatures.UsedInScene)
+            {
+                _fsmFactory = new FsmFactory(metaData.FsmFeatures);
+                await _fsmFactory.InitialiseAsync();
+            }
+
         }
-        service = null;
-        return false;
-    }
-    
+        // END NEW with meta data
 
-    private bool IsPlayer(ITargetable targetable)
-    {
-        if (_gameManager == null) return false;
-        return _gameManager.IsPlayerRef(targetable);//targetable == _gameManager.TryGetPlayer();
-    }
 
-    public void OnTargetableDied(ITargetable targetable)
-    {
-        if (targetable == null) return;
 
-        if (IsPlayer(targetable))
-            _gameManager.PlayerDied();
-    }
-
-    public void OnTargetableRespawned(ITargetable targetable)
-    {
-        if (targetable == null) return;
-        if (IsPlayer(targetable))
-            _gameManager.PlayerRespawned();
-    }
-
-    public bool TryGetPathService(out IPathService pathService)
-    {
-        if (_pathService == null)
+        public void Tick(float dt)
         {
-            PathRequestManager ps = new PathRequestManager();
-            if (ps is ITickable t) _tickables.Add(t);
-            _pathService = ps;
+            if (_tickables == null || _tickables.Count == 0) return;
+
+            foreach (var t in _tickables)
+                t.Tick(dt);
+
         }
-        pathService = _pathService;
-        return true;
-    }
 
-    public bool TryGetWaypointService(out IWaypointService waypointService)
-    {
-        waypointService = _fsmFactory?.GetWService();//_waypointService;
+        private List<ISceneService> _services = new(5);
 
-
-
-        return waypointService != null;//_waypointService != null;
-    }
-
-    public bool TryGetAgentAlertService(out IAgentAlertService npcService)
-    {
-        if (_npcService == null) _npcService = new AgentZoneRegistry();
-        npcService = _npcService;
-        return _npcService != null;
-    }
-
-    public bool TryGetFlankService(out IFlankService flankService)
-    {
-        flankService = _flankService;
-        return _flankService != null;
-    }
-
-    public bool TryGetPoolService(out IPoolService poolService)
-    {
-        if (_poolService == null) _poolService = new PoolLoaderNew();
-        poolService = _poolService;
-        return true;
-    }
-
-    public bool TryGetPlayerRefService(out IPlayerRefService playerRefService)
-    {
-        playerRefService = _gameManager;
-        return _gameManager != null;
-    }
-
-    public bool TryGetDistanceService(out IDistanceService distanceService)
-    {
-        if (_distanceService == null)
+        public bool TryGetService<T>(out T service) where T : class, ISceneService // Placeholder interface
         {
-            DistanceManagerJob dj = new DistanceManagerJob();
-
-            if (dj is ITickable t) _tickables.Add(t);
-            _distanceService = dj;
+            foreach (var s in _services)
+            {
+                if (s is T typed)
+                {
+                    service = typed;
+                    return true;
+                }
+            }
+            service = null;
+            return false;
         }
-        distanceService = _distanceService;
 
-        return _distanceService != null;
+
+        private bool IsPlayer(ITargetable targetable)
+        {
+            if (_gameManager == null) return false;
+            return _gameManager.IsPlayerRef(targetable);//targetable == _gameManager.TryGetPlayer();
+        }
+
+        public void OnTargetableDied(ITargetable targetable)
+        {
+            if (targetable == null) return;
+
+            if (IsPlayer(targetable))
+                _gameManager.PlayerDied();
+        }
+
+        public void OnTargetableRespawned(ITargetable targetable)
+        {
+            if (targetable == null) return;
+            if (IsPlayer(targetable))
+                _gameManager.PlayerRespawned();
+        }
+
+        public bool TryGetPathService(out IPathService pathService)
+        {
+            if (_pathService == null)
+            {
+                PathRequestManager ps = new PathRequestManager();
+                if (ps is ITickable t) _tickables.Add(t);
+                _pathService = ps;
+            }
+            pathService = _pathService;
+            return true;
+        }
+
+        public bool TryGetWaypointService(out IWaypointService waypointService)
+        {
+            waypointService = _fsmFactory?.GetWService();//_waypointService;
+
+
+
+            return waypointService != null;//_waypointService != null;
+        }
+
+        public bool TryGetAgentAlertService(out IAgentAlertService npcService)
+        {
+            if (_npcService == null) _npcService = new AgentZoneRegistry();
+            npcService = _npcService;
+            return _npcService != null;
+        }
+
+        public bool TryGetFlankService(out IFlankService flankService)
+        {
+            flankService = _flankService;
+            return _flankService != null;
+        }
+
+        public bool TryGetPoolService(out IPoolService poolService)
+        {
+            if (_poolService == null) _poolService = new PoolLoaderNew();
+            poolService = _poolService;
+            return true;
+        }
+
+        public bool TryGetPlayerRefService(out IPlayerRefService playerRefService)
+        {
+            playerRefService = _gameManager;
+            return _gameManager != null;
+        }
+
+        public bool TryGetDistanceService(out IDistanceService distanceService)
+        {
+            if (_distanceService == null)
+            {
+                DistanceManagerJob dj = new DistanceManagerJob();
+
+                if (dj is ITickable t) _tickables.Add(t);
+                _distanceService = dj;
+            }
+            distanceService = _distanceService;
+
+            return _distanceService != null;
+        }
+
+        public bool TryGetSceneService(out ISceneService sceneService)
+        {
+            sceneService = _sceneService;
+            return _sceneService != null;
+        }
+
+
+
     }
-
-    public bool TryGetSceneService(out ISceneService sceneService)
-    {
-        sceneService = _sceneService;
-        return _sceneService != null;
-    }
-
-   
-
 }
 
 public interface ISceneServiceProvider : ISceneAIServices, IScenePoolServices, IPlaceholderService
@@ -242,9 +245,9 @@ public interface IAddressableServiceObsolete
 {
     Task InitialiseAsync(IResourceLocation location);
 }
-public interface IAddressableService : ILifecycle
+public interface IAddressableService : IDisposable
 {
-    Task<bool> TryInitialiseAsync(FeatureMeta data/*string addressKey*/);
+    Task<bool> TryInitialiseAsync(FeatureMeta data);
 
 }
 

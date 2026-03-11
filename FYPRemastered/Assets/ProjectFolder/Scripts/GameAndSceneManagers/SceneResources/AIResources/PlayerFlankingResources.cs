@@ -1,3 +1,4 @@
+using Services.Internal;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -6,7 +7,7 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceLocations;
 
-public class PlayerFlankingResources : SceneResources, IFlankService, ITickable
+public class PlayerFlankingResources : SceneResources, IFlankService, IAddressableService, ITickable
 {
     private AsyncOperationHandle<SamplePointDataSO> _flankPointHandle;
     private SamplePointDataSO _flankPointDataSO;
@@ -19,6 +20,33 @@ public class PlayerFlankingResources : SceneResources, IFlankService, ITickable
     public PlayerFlankingResources(IClosestFlankPointService closestFlankPointService, string sceneName)
     {
         _closestFlankPointService = closestFlankPointService;
+    }
+
+
+    public async Task<bool> TryInitialiseAsync(FeatureMeta data)
+    {
+        string addressKey = data.addressKey;
+        if (string.IsNullOrWhiteSpace(addressKey)) { DebugLogs.RequireNotNull(addressKey, "addressKey", this); return false; }
+
+        var flankHandle = await AddressableLoader.TryLoadAssetAsync<SamplePointDataSO>(addressKey);
+
+        if(!flankHandle.HasValue || !flankHandle.Value.IsValid())
+        {
+            DebugLogs.Nre(flankHandle, "flank Handle", this);
+            return false;
+        }
+
+        var flankData = flankHandle.Value.Result;
+        if(flankData == null || flankData.savedPoints == null || flankData.savedPoints.Count == 0)
+        {
+            DebugLogs.Nre(flankData, "Flank Data SO", this);
+            Addressables.Release(flankHandle.Value);
+            return false;
+        }
+
+        _savedPoints = new List<FlankPointData>(flankData.savedPoints);
+
+        return true;
     }
 
     public override async Task LoadResources()
@@ -260,4 +288,6 @@ public class PlayerFlankingResources : SceneResources, IFlankService, ITickable
     {
         throw new NotImplementedException();
     }
+
+   
 }

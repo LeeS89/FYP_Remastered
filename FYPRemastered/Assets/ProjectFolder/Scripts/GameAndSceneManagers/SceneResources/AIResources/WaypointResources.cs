@@ -8,15 +8,16 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class WaypointResources : IWaypointService, IAddressableService
 {
-  
-    private AsyncOperationHandle[] _handles = new AsyncOperationHandle[2];
 
-    private WaypointBlockData _waypointBlockData;
+    //private AsyncOperationHandle[] _handles = new AsyncOperationHandle[2];
+    private AsyncOperationHandle<AgentPatrolData>? _patrolDataHandle;
+    //private WaypointBlockData _waypointBlockData;
     private Dictionary<object, BlockData> _inUseBlockTracker = new(20);
 
     private AgentPatrolData _patrolData;
+    private BlockData[] waypointBlocks;
 
-   
+
     public async Task<bool> TryInitialiseAsync(FeatureMeta data)
     {
         string addressKey = data.addressKey;
@@ -28,33 +29,38 @@ public class WaypointResources : IWaypointService, IAddressableService
         if (!wpHandle.HasValue || !wpHandle.Value.IsValid())
         {
             DebugLogs.Nre(wpHandle, "_wpHandle", this);
-            Dispose();
+          //  Dispose();
             return false;
         }
 
-        _waypointBlockData = wpHandle.Value.Result;
+        var wpBlockdata /*_waypointBlockData*/ = wpHandle.Value.Result;
 
-        if (_waypointBlockData == null)
+        if (/*_waypointBlockData*/wpBlockdata == null)
         {
-            DebugLogs.Nre(_waypointBlockData, "_waypointBlockData", this);
-            Dispose();
+            DebugLogs.Nre(/*_waypointBlockData*/wpBlockdata, "_waypointBlockData", this);
+            Addressables.Release(wpHandle.Value);
+            //  Dispose();
             return false;
         }
 
-        var blocks = _waypointBlockData.blockDataArray;
+        //var blocks = _waypointBlockData.blockDataArray;
 
-        if (blocks == null || blocks.Length == 0)
+        if (/*_waypointBlockData*/wpBlockdata.blockDataArray == null || /*_waypointBlockData*/wpBlockdata.blockDataArray.Length == 0)
         {
             DebugLogs.Err("Waypoint block data array is null or contains no elements", this);
-            Dispose();
+            Addressables.Release(wpHandle.Value);
+            //Dispose();
             return false;
         }
 
-        foreach (var block in _waypointBlockData.blockDataArray)
+        waypointBlocks = (BlockData[])/*_waypointBlockData*/wpBlockdata.blockDataArray.Clone();
+
+        foreach (var block in waypointBlocks/*_waypointBlockData.blockDataArray*/)
             block._inUse = false;
 
         DebugLogs.Log("Successfully initialized waypoint blocks", this);
-        _handles[0] = wpHandle.Value;
+        Addressables.Release(wpHandle.Value);
+        //_handles[0] = wpHandle.Value;
 
 
         return await TryLoadSubData(data.subDataKeys);
@@ -69,10 +75,11 @@ public class WaypointResources : IWaypointService, IAddressableService
 
         var key = addressKeys[0];
 
-        var so = await AddressableLoader.TryLoadAssetAsync<AgentPatrolData>(key);
-        if (!so.HasValue || !so.Value.IsValid()) { DebugLogs.Nre(so, $"{so.GetType().Name}", this); return false; }
+        /*var so*/
+        _patrolDataHandle = await AddressableLoader.TryLoadAssetAsync<AgentPatrolData>(key);
+        if (!_patrolDataHandle.HasValue || !_patrolDataHandle.Value.IsValid()) { DebugLogs.Nre(_patrolDataHandle, $"{_patrolDataHandle.GetType().Name}", this); return false; }
 
-        _patrolData = so.Value.Result;
+        _patrolData = _patrolDataHandle.Value.Result;
 
         if (_patrolData == null)
         {
@@ -81,25 +88,26 @@ public class WaypointResources : IWaypointService, IAddressableService
             return false;
         }
 
-        _handles[0] = so.Value;
+       // _handles[0] = so.Value;
         DebugLogs.Log("LOADED PATROL DATA SUCCESS", this);
         return true;
     }
 
     public void Dispose()
     {
-        for (int i = 0; i < _handles.Length; i++)
-            if (_handles[i].IsValid()) Addressables.Release(_handles[i]);
-
+        /*for (int i = 0; i < _handles.Length; i++)
+            if (_handles[i].IsValid()) Addressables.Release(_handles[i]);*/
+        if (_patrolDataHandle.Value.IsValid())
+            Addressables.Release(_patrolDataHandle.Value);
     }
 
     public bool TryGetWaypoints(object requester, List<Vector3> buffer)
     {
         if (requester == null || requester.GetType().IsValueType || buffer == null) return false;
 
-        if (_waypointBlockData != null)
+        if (/*_waypointBlockData*/waypointBlocks != null && waypointBlocks.Length > 0)
         {
-            foreach (var blockData in _waypointBlockData.blockDataArray)
+            foreach (var blockData in waypointBlocks/*_waypointBlockData.blockDataArray*/)
             {
                 if (!blockData._inUse)
                 {

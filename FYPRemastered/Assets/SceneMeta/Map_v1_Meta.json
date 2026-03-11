@@ -13,9 +13,9 @@
       "enabled": true,
       "addressKey": "Scene01_PatrolData"
     },
-    "SpawnPoints": {
-      "enabled": false,
-      "addressKey": ""
+    "FlankPoints": {
+      "enabled": true,
+      "addressKey": "FlankPointData"
     }
   }
 }
