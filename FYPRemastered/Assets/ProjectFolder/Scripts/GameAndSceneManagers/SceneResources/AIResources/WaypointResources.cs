@@ -97,7 +97,7 @@ public class WaypointResources : IWaypointService, IAddressableService
     {
         /*for (int i = 0; i < _handles.Length; i++)
             if (_handles[i].IsValid()) Addressables.Release(_handles[i]);*/
-        if (_patrolDataHandle.Value.IsValid())
+        if (_patrolDataHandle.HasValue && _patrolDataHandle.Value.IsValid())
             Addressables.Release(_patrolDataHandle.Value);
     }
 

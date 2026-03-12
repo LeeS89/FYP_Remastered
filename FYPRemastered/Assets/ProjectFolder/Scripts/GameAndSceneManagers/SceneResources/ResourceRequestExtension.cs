@@ -5,29 +5,35 @@ using UnityEngine.AI;
 
 public static class ResourceRequestExtension
 {
+    [Obsolete]
     public static void RequestPool<T>(this T _, PoolIdSO poolId, Action<string, IPoolManager> componentCallback, Action<bool> ownerCallback = null)
     {
         var pool = ResourceRequests.RequestPool(poolId, componentCallback);
        // SceneEventAggregatorObsolete.Instance.ResourceRequested(pool);
     }
 
+    [Obsolete]
     public static void RequestFlankPointEvaluationMasks<T>(this T _, Action<LayerMask, LayerMask, LayerMask> callback)
     {
         var masks = ResourceRequests.FlankPointTargetAndBlockingMasks(callback);
         SceneEventAggregatorObsolete.Instance.ResourceRequested(masks);
     }
+
+    [Obsolete]
     public static void RequestValidPath<T>(this T _, Vector3 start, Vector3 end, NavMeshPath path, Action<bool> callback)
     {
         var pathReq = ResourceRequests.RequestPath(start, end, path, callback);
         SceneEventAggregatorObsolete.Instance.ResourceRequested(pathReq);
     }
 
+    [Obsolete]
     public static void RequestFlankPointCandidates<T>(this T _, int steps, List<FlankPointData> buffer, Action<bool> callback)
     {
         var points = ResourceRequests.RequestFlankPoints(steps, buffer, callback);
         SceneEventAggregatorObsolete.Instance.ResourceRequested(points);
     }
 
+    [Obsolete]
     public static void RequestWaypointBlock<T>(this T _, Action<BlockData> callback)
     {
         var waypoints = ResourceRequests.RequestWaypoints(callback);

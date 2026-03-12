@@ -178,10 +178,10 @@ public class BulletResources : SceneResources, IUpdateableResource
        
     }
 
-    protected override void ResourceRequested(in ResourceRequests request)
+  /*  protected override void ResourceRequested(in ResourceRequests request)
     {
 
-       /* if (request.PoolType == PoolResourceType.None) return;
+       *//* if (request.PoolType == PoolResourceType.None) return;
 
         IPoolManager pool = request.PoolType switch
         {
@@ -196,10 +196,10 @@ public class BulletResources : SceneResources, IUpdateableResource
         };
 
         request.PoolCallback?.Invoke(request.PoolType, pool);
-*/
+*//*
    
         
-    }
+    }*/
 
    
     public bool SchedulePoolObjectRelease(IPoolManager pool, UnityEngine.Object item, float seconds)

@@ -89891,6 +89891,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 0
   _anim: {fileID: 1425476012}
+  _bullet:
+    m_AssetGUID: f25ee36fa90530643a56d63e9a3467ca
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_SubObjectGUID: 
+    m_EditorAssetChanged: 0
   bulletPoolId: {fileID: 11400000, guid: 6141d1b986a45144bad8d38b32617380, type: 2}
   muzzleFlashPoolId: {fileID: 11400000, guid: e1aac957633022f438e7f902b76c3ec4, type: 2}
   _spawnPoint: {fileID: 722793739}
@@ -154585,6 +154591,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 0
   _anim: {fileID: 0}
+  _bullet:
+    m_AssetGUID: 
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_SubObjectGUID: 
+    m_EditorAssetChanged: 0
   bulletPoolId: {fileID: 0}
   muzzleFlashPoolId: {fileID: 0}
   _spawnPoint: {fileID: 498179001}

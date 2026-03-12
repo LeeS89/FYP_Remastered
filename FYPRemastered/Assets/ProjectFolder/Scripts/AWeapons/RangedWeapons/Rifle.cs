@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using ProjectRemaster.Combat;
+using UnityEngine.AddressableAssets;
 
 public sealed class Rifle : Weapon, IRanged
 {
     [Header("Pool Params")]
+    public AssetReferenceGameObject _bullet;
     [SerializeField] private PoolIdSO bulletPoolId;
     [SerializeField] private PoolIdSO muzzleFlashPoolId;
     private IPoolManager _muzzleFlashPool;

@@ -1,3 +1,4 @@
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -133,7 +134,7 @@ public class ClosestPointToPlayerJob : SceneResources
 
 
 
-public class ClosestPointToPlayerJobNew : SceneResources, IClosestFlankPointService, ITickable
+public sealed class ClosestPointToPlayerJobNew : /*SceneResources,*/ IClosestIndexService, IListInitializable<FlankPointData>, ITickable
 {
 
     private SamplePointDataSO _samplePointData;
@@ -146,6 +147,7 @@ public class ClosestPointToPlayerJobNew : SceneResources, IClosestFlankPointServ
     private bool _jobScheduled;
     private JobHandle _jobHandle;
 
+    public ClosestPointToPlayerJobNew() { }
 
     public ClosestPointToPlayerJobNew(SamplePointDataSO samplePointData)
     {
@@ -155,6 +157,22 @@ public class ClosestPointToPlayerJobNew : SceneResources, IClosestFlankPointServ
 
         foreach (var pos in _samplePointData.savedPoints)
             _samplePositions.Add(pos.position);
+    }
+
+
+
+    public bool TryInit(IReadOnlyList<FlankPointData> data)
+    {
+        if (data == null || data.Count == 0) { DebugLogs.ArgNotNull(data, "flank point data", this); return false; }
+
+        int count = data.Count;
+        _samplePositions = new NativeList<Vector3>(count, Allocator.Persistent);
+
+        foreach(var point in data)
+            _samplePositions.Add(point.position);
+
+        DebugLogs.Log($"Successfully constructed player point job: [{count}]", this);
+        return true;
     }
 
 
@@ -287,6 +305,5 @@ public class ClosestPointToPlayerJobNew : SceneResources, IClosestFlankPointServ
 
     public void LateTick(float dt) { }
 
-
-
+   
 }

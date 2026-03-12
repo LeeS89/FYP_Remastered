@@ -13,5 +13,6 @@ public class FsmFeatureGroup
     public bool UsedInScene;
 
     public FeatureMeta Waypoints;
+    public FeatureMeta FlankPoints;
     public FeatureMeta PatrolData;
 }

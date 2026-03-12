@@ -9,19 +9,19 @@ using UnityEngine.ResourceManagement.ResourceLocations;
 
 public class PlayerFlankingResources : SceneResources, IFlankService, IAddressableService, ITickable
 {
-    private AsyncOperationHandle<SamplePointDataSO> _flankPointHandle;
+    //private AsyncOperationHandle<SamplePointDataSO> _flankPointHandle;
     private SamplePointDataSO _flankPointDataSO;
     private List<FlankPointData> _savedPoints;
     // private int _nearestPointToPlayer = 0;
     // Collider playerCollider;
     /*Vector3 top;*/
-    private IClosestFlankPointService _closestFlankPointService;
+    private ClosestPointToPlayerJobNew _closestFlankPointService;
 
-    public PlayerFlankingResources(IClosestFlankPointService closestFlankPointService, string sceneName)
+    public PlayerFlankingResources()
     {
-        _closestFlankPointService = closestFlankPointService;
+        //closestFlankPointService;
     }
-
+    
 
     public async Task<bool> TryInitialiseAsync(FeatureMeta data)
     {
@@ -45,63 +45,76 @@ public class PlayerFlankingResources : SceneResources, IFlankService, IAddressab
         }
 
         _savedPoints = new List<FlankPointData>(flankData.savedPoints);
+        Addressables.Release(flankHandle.Value);
 
-        return true;
+        _closestFlankPointService = new ClosestPointToPlayerJobNew();
+        return _closestFlankPointService.TryInit(_savedPoints);
+
     }
 
-    public override async Task LoadResources()
+    public void Dispose()
     {
-        try
+        if(_savedPoints != null)
         {
-            // playerCollider = GameManager.Instance.GetPlayerCollider(PlayerPart.DefenceCollider);
-
-            // NotifyDependancies(); // => Needs Closest Point Job
-            // Load the asset from Addressables
-            //var flankPointHandle = Addressables.LoadAssetAsync<ScriptableObject>("SamplePointDataSO");
-            _flankPointHandle = Addressables.LoadAssetAsync<SamplePointDataSO>("FlankPointData");
-
-            // Wait for the asset to be loaded
-            await _flankPointHandle.Task;
-
-            // Check if the loading succeeded
-            if (_flankPointHandle.Status == AsyncOperationStatus.Succeeded)
-            {
-                // Asset is loaded successfully, cast it to the correct type
-                _flankPointDataSO = _flankPointHandle.Result;
-
-                if (_flankPointDataSO != null)
-                {
-                    // SceneEventAggregator.Instance.OnClosestFlankPointToPlayerJobComplete += SetNearestIndexToPlayer; // => Dont forget to unsubscribe
-                    // SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;
-                    //  SceneEventAggregator.Instance.OnAIResourceRequested += AIResourceRequested; // => Dont forget to unsubscribe
-                    _savedPoints = new List<FlankPointData>(_flankPointDataSO.savedPoints);
-                    //SceneEventAggregator.Instance.OnFlankPointsRequested += ResourceRequested; // => Dont forget to unsubscribe
-                    //DeserializeSavedPoints(); // Disabled for new approach
-                }
-                else
-                {
-                    Debug.LogError("Loaded flank point data is null.");
-                }
-            }
-            else
-            {
-
-                Debug.LogError("Failed to load the flank point data from Addressables.");
-            }
-
-            //NotifyClassDependancies(); // => Needs Closest Point Job
-            // Subscribe to the resource requested event
-            /*SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;*/
-            //SceneEventAggregator.Instance.OnResourceReleased += ResourceReleased;
+            _savedPoints.Clear();
+            _savedPoints = null;
         }
-        catch (Exception e)
-        {
-            Debug.LogError($"Error loading player flanking resources: {e.Message}");
-        }
-
+        _closestFlankPointService?.Dispose();
     }
 
-    public override async Task UnLoadResources()
+    /* public override async Task LoadResources()
+     {
+         try
+         {
+             // playerCollider = GameManager.Instance.GetPlayerCollider(PlayerPart.DefenceCollider);
+
+             // NotifyDependancies(); // => Needs Closest Point Job
+             // Load the asset from Addressables
+             //var flankPointHandle = Addressables.LoadAssetAsync<ScriptableObject>("SamplePointDataSO");
+             _flankPointHandle = Addressables.LoadAssetAsync<SamplePointDataSO>("FlankPointData");
+
+             // Wait for the asset to be loaded
+             await _flankPointHandle.Task;
+
+             // Check if the loading succeeded
+             if (_flankPointHandle.Status == AsyncOperationStatus.Succeeded)
+             {
+                 // Asset is loaded successfully, cast it to the correct type
+                 _flankPointDataSO = _flankPointHandle.Result;
+
+                 if (_flankPointDataSO != null)
+                 {
+                     // SceneEventAggregator.Instance.OnClosestFlankPointToPlayerJobComplete += SetNearestIndexToPlayer; // => Dont forget to unsubscribe
+                     // SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;
+                     //  SceneEventAggregator.Instance.OnAIResourceRequested += AIResourceRequested; // => Dont forget to unsubscribe
+                     _savedPoints = new List<FlankPointData>(_flankPointDataSO.savedPoints);
+                     //SceneEventAggregator.Instance.OnFlankPointsRequested += ResourceRequested; // => Dont forget to unsubscribe
+                     //DeserializeSavedPoints(); // Disabled for new approach
+                 }
+                 else
+                 {
+                     Debug.LogError("Loaded flank point data is null.");
+                 }
+             }
+             else
+             {
+
+                 Debug.LogError("Failed to load the flank point data from Addressables.");
+             }
+
+             //NotifyClassDependancies(); // => Needs Closest Point Job
+             // Subscribe to the resource requested event
+             *//*SceneEventAggregator.Instance.OnResourceRequested += ResourceRequested;*//*
+             //SceneEventAggregator.Instance.OnResourceReleased += ResourceReleased;
+         }
+         catch (Exception e)
+         {
+             Debug.LogError($"Error loading player flanking resources: {e.Message}");
+         }
+
+     }
+ */
+   /* public override async Task UnLoadResources()
     {
         try
         {
@@ -120,7 +133,7 @@ public class PlayerFlankingResources : SceneResources, IFlankService, IAddressab
         }
 
         await Task.CompletedTask;
-    }
+    }*/
 
     [Obsolete]
     private void DeserializeSavedPoints()
@@ -139,7 +152,7 @@ public class PlayerFlankingResources : SceneResources, IFlankService, IAddressab
 
     }
 
-    [Obsolete]
+   /* [Obsolete]
     protected override void NotifyClassDependancies()
     {
         bool exists = SceneEventAggregatorObsolete.Instance.CheckDependancyExists(typeof(ClosestPointToPlayerJob));
@@ -148,9 +161,9 @@ public class PlayerFlankingResources : SceneResources, IFlankService, IAddressab
 
         SceneEventAggregatorObsolete.Instance.AddDependancy(new ClosestPointToPlayerJob(_flankPointDataSO));
 
-    }
+    }*/
 
-    [Obsolete]
+/*    [Obsolete]
     protected override void ResourceRequested(in ResourceRequests request)
     {
         AIResourceType type = request.AIResourceType;
@@ -179,7 +192,7 @@ public class PlayerFlankingResources : SceneResources, IFlankService, IAddressab
         LayerMask targetMask = _flankPointDataSO.flankTargetMask;
         LayerMask secondaryTargetMask = _flankPointDataSO.flankSecondaryTargetMask;
         request.FlankPointTargetAndBlockingMasksCallback?.Invoke(blockingMask, targetMask, secondaryTargetMask);
-    }
+    }*/
 
 
 
@@ -279,15 +292,5 @@ public class PlayerFlankingResources : SceneResources, IFlankService, IAddressab
 
     public void LateTick(float dt) { }
 
-    public Task InitialiseAsync(IResourceLocation location)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void Dispose()
-    {
-        throw new NotImplementedException();
-    }
-
-   
+  
 }

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.ResourceManagement.AsyncOperations;
-using UnityEngine.ResourceManagement.ResourceLocations;
+
 
 namespace Services.Internal
 {
@@ -45,32 +45,39 @@ namespace Services.Internal
             var waypointFeature = _metaData.Waypoints;
             if (waypointFeature.enabled)
             {
-                _wpService = await TryLoadStateServiceAndInitialize<WaypointBlockData, WaypointResources>(waypointFeature/*.addressKey*/);
+                _wpService = await TryLoadStateServiceAndInitialize<WaypointBlockData, WaypointResources>(waypointFeature, ()=> new WaypointResources());
                 if (_wpService == null) DebugLogs.Nre(_wpService, "WaypointService");
                 else DebugLogs.Log("Found Waypoint service", this);
 
+            }
 
-
+            var flankFeature = _metaData.FlankPoints;
+            if (flankFeature.enabled)
+            {
+                _flankService = await TryLoadStateServiceAndInitialize<SamplePointDataSO, PlayerFlankingResources>(flankFeature, () => new PlayerFlankingResources());
+                if (_flankService == null) DebugLogs.Nre(_flankService, "Flank service", this);
+                else DebugLogs.Log("Flank Service Constructed successfully", this);
+              //  var flnk = await TryLoadStateServiceAndInitialize<SamplePointDataSO, PlayerFlankingResources>(flankFeature, ()=> new PlayerFlankingResources());
             }
 
 
         }
 
-        private async Task<TConcrete> TryLoadStateServiceAndInitialize<TAsset, TConcrete>(FeatureMeta data/*string addressKey*/) where TConcrete : class, IAddressableService, new()
+        private async Task<TConcrete> TryLoadStateServiceAndInitialize<TAsset, TConcrete>(FeatureMeta data, Func<TConcrete> factory) where TConcrete : class, IAddressableService
         {
             if (string.IsNullOrWhiteSpace(data.addressKey)) { DebugLogs.RequireNotNull(data.addressKey, "addressKey", this); return null; }
 
-            var svc = new TConcrete();
-            bool serviceInitSuccess = await svc.TryInitialiseAsync(/*addressKey*/data);
+            var svc = factory();//new TConcrete();
+            bool serviceInitSuccess = await svc.TryInitialiseAsync(data);
 
             if (!serviceInitSuccess)
             {
                 DebugLogs.LoadFail(svc, $"(The Service of {typeof(TConcrete).Name})", this);
                 svc.Dispose();
                 return null;
-                // Call Dispose on scv and return null;
+              
             }
-
+            
             return svc;
         }
         // END NEW META SETUP

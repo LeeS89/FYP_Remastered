@@ -11,6 +11,7 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceLocations;
 
+[Obsolete("", true)]
 public class PoolResourcesObsolete : SceneResources, IUpdateableResource
 {
     [Header("Handles auto return to pools for Audio & SFX pools")]

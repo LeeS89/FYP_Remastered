@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
-[Obsolete]
+[Obsolete("", true)]
 public class PoolLoaderObsolete : SceneResources, IUpdateableResource
 {
     /// NEW LOADER

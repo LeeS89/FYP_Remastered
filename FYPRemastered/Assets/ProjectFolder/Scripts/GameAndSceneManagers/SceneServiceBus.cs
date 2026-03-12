@@ -258,15 +258,24 @@ public interface IWaypointService// : IAddressableServiceObsolete
     bool TryReleaseWaypoints(object requester, List<Vector3> buffer);
 }
 
-public interface IFlankService : IAddressableServiceObsolete
+public interface IFlankService// : IAddressableServiceObsolete
 {
     void TryGetFlankCandidates(Vector3 flankTargetPos, int numSteps, List<Vector3> buffer, Action<bool> OnRequestComplete);
 }
 
-public interface IClosestFlankPointService
+public interface IClosestIndexService
 {
+    
     void RequestClosestIndex(int id, Vector3 targetPosition, Action<int, int, bool> OnRequestComplete);
 }
+
+public interface IInitializable { }
+
+public interface IListInitializable<T> : IInitializable
+{
+    bool TryInit(IReadOnlyList<T> data);
+}
+
 
 public interface IScenePoolServices
 {

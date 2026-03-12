@@ -16,7 +16,7 @@ public readonly struct PoolRequest<TPool> where TPool : IPoolManager
 }
 
 
-
+[Obsolete("", true)]
 public readonly struct ResourceRequests
 {
     // For AI and Pool requests

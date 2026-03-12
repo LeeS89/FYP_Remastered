@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 
+[Obsolete]
 public abstract class RangedWeaponBaseObsolete : IRangedWeaponObsolete
 {
     protected Transform _bulletSpawnPoint;
