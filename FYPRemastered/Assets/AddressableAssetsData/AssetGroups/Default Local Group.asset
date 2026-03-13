@@ -21,11 +21,6 @@ MonoBehaviour:
     m_SerializedLabels:
     - MoonScene
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 6817a3ddab32026418b20d2a92d842bc
-    m_Address: Map_v1_Meta
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8a01480a7337d1a4c9d702efa8c7e443
     m_Address: ForceProjectilePrefab
     m_ReadOnly: 0

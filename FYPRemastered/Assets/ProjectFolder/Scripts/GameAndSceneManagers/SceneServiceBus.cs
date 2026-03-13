@@ -251,6 +251,12 @@ public interface IAddressableService : IDisposable
 
 }
 
+
+public interface IChaseService
+{
+    bool TryGetTarget(List<Vector3> buffer);
+}
+
 public interface IWaypointService// : IAddressableServiceObsolete
 {
     bool TryGetWaypoints(object requester, List<Vector3> buffer);

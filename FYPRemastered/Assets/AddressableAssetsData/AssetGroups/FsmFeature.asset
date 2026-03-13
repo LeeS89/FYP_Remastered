@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
-  m_Name: AI Group
-  m_EditorClassIdentifier: 
-  m_GroupName: AI Group
-  m_GUID: 1b98657c953220e409caee86753af6b7
+  m_Name: FsmFeature
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: FsmFeature
+  m_GUID: a830178e2dba7af49aeb510032f60620
   m_SerializeEntries:
   - m_GUID: 0b2b569202ea4f34f9cf0be8d1ac73d5
     m_Address: FlankPointData
@@ -32,6 +32,11 @@ MonoBehaviour:
     - AgentPatrolData
     - Map_v1
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5906ba56661a2a840869693aff71d03e
+    m_Address: AgentChaseData
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 68176bf3450091e468e20392c97f8d1b
     m_Address: MoonSceneWP
     m_ReadOnly: 0
@@ -43,5 +48,5 @@ MonoBehaviour:
   m_Settings: {fileID: 11400000, guid: 6b63f10b5a4877b4c8b0b80a43f5a334, type: 2}
   m_SchemaSet:
     m_Schemas:
-    - {fileID: 11400000, guid: cac25cd4a85a84847b407d03aae28fb8, type: 2}
-    - {fileID: 11400000, guid: 71e404efddc378849a87c6019b02fe87, type: 2}
+    - {fileID: 11400000, guid: 34cff69bb4677934eb1aa868dc92ae3f, type: 2}
+    - {fileID: 11400000, guid: a13df2d0f504e684aa70a01b09bf9e61, type: 2}

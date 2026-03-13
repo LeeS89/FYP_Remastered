@@ -15,7 +15,8 @@ namespace Services.Internal
 
         private List<ITickable> _tickables = new(5);
         private IAddressableService _wpService; // Split interfaces in WaypointResources class so only correct interface is used by relevant classes i.e. => This class need only store it as an IAddressableService
-        private IFlankService _flankService;
+        private IAddressableService _flankService;
+        private IAddressableService _chaseService;
         private IDistanceService _distService;
 
         // SO's
@@ -45,7 +46,7 @@ namespace Services.Internal
             var waypointFeature = _metaData.Waypoints;
             if (waypointFeature.enabled)
             {
-                _wpService = await TryLoadStateServiceAndInitialize<WaypointBlockData, WaypointResources>(waypointFeature, ()=> new WaypointResources());
+                _wpService = await TryLoadStateServiceAndInitialize</*WaypointBlockData, */WaypointResources>(waypointFeature/*, ()=> new WaypointResources()*/);
                 if (_wpService == null) DebugLogs.Nre(_wpService, "WaypointService");
                 else DebugLogs.Log("Found Waypoint service", this);
 
@@ -54,12 +55,19 @@ namespace Services.Internal
             var flankFeature = _metaData.FlankPoints;
             if (flankFeature.enabled)
             {
-                _flankService = await TryLoadStateServiceAndInitialize<SamplePointDataSO, PlayerFlankingResources>(flankFeature, () => new PlayerFlankingResources());
+                _flankService = await TryLoadStateServiceAndInitialize</*SamplePointDataSO,*/ PlayerFlankingResources>(flankFeature/*, () => new PlayerFlankingResources()*/);
                 if (_flankService == null) DebugLogs.Nre(_flankService, "Flank service", this);
                 else DebugLogs.Log("Flank Service Constructed successfully", this);
               //  var flnk = await TryLoadStateServiceAndInitialize<SamplePointDataSO, PlayerFlankingResources>(flankFeature, ()=> new PlayerFlankingResources());
             }
 
+            var chaseFeature = _metaData.ChaseData;
+            if (chaseFeature.enabled)
+            {
+                _chaseService = await TryLoadStateServiceAndInitialize<ChaseResources>(chaseFeature);
+                if (_chaseService == null) DebugLogs.Nre(_chaseService, "Chase Service", this);
+                else DebugLogs.Log("Chase service constructed successfully", this);
+            }
 
         }
 
@@ -68,6 +76,23 @@ namespace Services.Internal
             if (string.IsNullOrWhiteSpace(data.addressKey)) { DebugLogs.RequireNotNull(data.addressKey, "addressKey", this); return null; }
 
             var svc = factory();//new TConcrete();
+            bool serviceInitSuccess = await svc.TryInitialiseAsync(data);
+
+            if (!serviceInitSuccess)
+            {
+                DebugLogs.LoadFail(svc, $"(The Service of {typeof(TConcrete).Name})", this);
+                svc.Dispose();
+                return null;
+              
+            }
+            
+            return svc;
+        }
+        private async Task<TConcrete> TryLoadStateServiceAndInitialize<TConcrete>(FeatureMeta data) where TConcrete : class, IAddressableService, new()
+        {
+            if (string.IsNullOrWhiteSpace(data.addressKey)) { DebugLogs.RequireNotNull(data.addressKey, "addressKey", this); return null; }
+
+            var svc = new TConcrete();
             bool serviceInitSuccess = await svc.TryInitialiseAsync(data);
 
             if (!serviceInitSuccess)

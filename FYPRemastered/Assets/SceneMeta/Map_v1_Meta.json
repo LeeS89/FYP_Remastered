@@ -16,6 +16,10 @@
     "FlankPoints": {
       "enabled": true,
       "addressKey": "FlankPointData"
+    },
+    "ChaseData": {
+      "enabled": true,
+      "addressKey": "AgentChaseData"
     }
   }
 }
