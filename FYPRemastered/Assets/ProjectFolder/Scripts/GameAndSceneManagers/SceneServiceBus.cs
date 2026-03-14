@@ -251,20 +251,24 @@ public interface IAddressableService : IDisposable
 
 }
 
+public interface IFsmStateService
+{
+    
+}
 
-public interface IChaseService
+public interface IChaseService : IFsmStateService
 {
     bool TryGetTarget(List<Vector3> buffer);
 }
 
-public interface IWaypointService// : IAddressableServiceObsolete
+public interface IWaypointService : IFsmStateService// : IAddressableServiceObsolete
 {
     bool TryGetWaypoints(object requester, List<Vector3> buffer);
 
     bool TryReleaseWaypoints(object requester, List<Vector3> buffer);
 }
 
-public interface IFlankService// : IAddressableServiceObsolete
+public interface IFlankService : IFsmStateService// : IAddressableServiceObsolete
 {
     void TryGetFlankCandidates(Vector3 flankTargetPos, int numSteps, List<Vector3> buffer, Action<bool> OnRequestComplete);
 }

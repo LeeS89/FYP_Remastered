@@ -156,3 +156,176 @@ public sealed class PatrolDeps : FsmBaseState<PatrolDeps>.FsmBaseStateDeps
         MinTimeAtPatrolPoint = config?.minTimeAtWaypoint ?? 0.5f;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+public sealed class FSMPatrolStateNew : FsmBaseStateNew<IWaypointService>
+{
+    private readonly IWaypointService _waypointService;
+    //  private readonly IPatrolDeps _patrolDeps;
+
+    /*public FSMPatrolState(IWaypointService waypointService, IAgentData data, IPathResolver resolver, IFSMStateContext stateContext) 
+        : base(data, resolver, stateContext, StateId.Patrol)
+    {
+        _waypointService = waypointService;
+        _candidateDestinations.EnsureCapacity(10);
+    }*/
+    public FSMPatrolStateNew(IFsmStateEvents stateController)
+        : base(stateController, StateId.Patrol)
+    {
+        // _patrolDeps = deps;
+        //_waypointService = _deps.WaypointService;
+        //_waypointService = _patrolDeps.WaypointService;
+        _candidateDestinations.EnsureCapacity(10);
+
+     
+    }
+
+
+    public override void OnDestinationReached()
+    {
+        if (!_isInState /*|| OwnerIsNull()*//*_sharedDeps.OwnerTransform == null*/) return;
+
+        Transform ownerTransform;
+        if (!TryGetOwnerTransform(out ownerTransform)) return;
+
+
+        /*if (_runningRoutine == null)
+            _runningRoutine = CoroutineRunner.Instance.StartCoroutine(PatrolWaitRoutine(
+                ownerTransform, _deps.MinTimeAtPatrolPoint, _deps.MaxTimeAtPatrolPoint));*/
+    }
+
+    protected override void RetrieveCandidateDestinations()
+    {
+
+        if (!_isInState || _candidateDestinations == null) return;
+
+        if (_candidateDestinations.Count == 0)
+        {
+            NavMeshPath path;
+            if (!TryGetPath(out path)) return;
+
+            Debug.LogError("successfully retrieved Path");
+
+            if (_waypointService == null || !_waypointService.TryGetWaypoints(this, _candidateDestinations))
+            {
+                Debug.LogError("Returning Failed Result for patrol");
+                DestinationResultInfo failedResult = new DestinationResultInfo
+                (
+                    ReasonForDestinationCheck.ValidatePathForDestination,
+                    path,
+                    DestinationResult.CandidatesNullOrEmpty,
+                    Vector3.zero,
+                    _id
+                );
+
+                base.OnProcessedDestinationsResult(in failedResult);
+                return;
+            }
+        }
+        ValidateCandidateDestinations();
+    }
+
+    protected override void ValidateCandidateDestinations()
+    {
+        if (!_isInState || _candidateDestinations == null || ResolverIsNull()) return;
+
+
+        Vector3 ownerPos;
+        if (!TryGetOwnerPosition(out ownerPos)) return;
+
+        NavMeshPath path;
+        if (!TryGetPath(out path)) return;
+
+        if (_candidateDestinations.Count > 1)
+        {
+
+            var temp = _candidateDestinations[0];
+            _candidateDestinations.RemoveAt(0);
+            ShuffleCandidateList(_candidateDestinations);
+            _candidateDestinations.Add(temp);
+        }
+        //ContinueRoutine = true;
+
+
+        DestinationRequest req = new DestinationRequest(_id, ownerPos, _candidateDestinations, path,
+            ReasonForDestinationCheck.ValidatePathForDestination, _validationCallback);
+       // _deps.PathResolver.ProcessDestinationCandidates(in req);
+
+
+        /* _pathResolver?.ProcessDestinationCandidates(_id, ReasonForDestinationCheck.ValidatePathForDestination,
+             _candidateDestinations, _path, _owner.Position(), _validationCallback);*/
+
+    }
+
+
+
+    private IEnumerator PatrolWaitRoutine(Transform t, float minWait, float maxWait)
+    {
+        Debug.LogError("Patrol wait routine called");
+        // if (forward != null)
+        //   {
+        float randomAngle = Random.Range(-180, 180);
+        Vector3 dirOffset = Quaternion.AngleAxis(randomAngle, t.up) * t.forward;
+        Quaternion targetRot = Quaternion.LookRotation(dirOffset, t.up);
+        //Quaternion targetRot = Quaternion.LookRotation(forward.Value);
+        while (Quaternion.Angle(t.rotation, targetRot) > 2.0f + Mathf.Epsilon)
+        {
+            t.rotation = Quaternion.Slerp(t.rotation, targetRot, Time.deltaTime * 2f);
+            yield return null;
+        }
+
+        // }
+        if (!_isInState) yield break;
+
+        _stateEvents?.RequestAnimation(AnimationCue.Look, _id);
+        //_stateContext?.OnAnimationIntent?.Invoke(AnimationCue.Look);
+
+        float _delayTime = Random.Range(minWait, maxWait);
+        float elapsedTime = 0.0f;
+
+        while (elapsedTime < _delayTime)
+        {
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+        if (!_isInState) yield break;
+        ValidateCandidateDestinations();
+
+        _runningRoutine = null;
+    }
+
+
+
+}

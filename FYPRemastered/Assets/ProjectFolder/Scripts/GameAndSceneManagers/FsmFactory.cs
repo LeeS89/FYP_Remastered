@@ -10,7 +10,7 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 namespace Services.Internal
 {
 
-    public class FsmFactory : ServiceBundle<FsmFeatureGroup>, IFsmService, ITickable
+    public class FsmFactory : ServiceBundle<FsmFeatureGroup>, IFsmFactory, ITickable
     {
 
         private List<ITickable> _tickables = new(5);
@@ -173,7 +173,7 @@ namespace Services.Internal
     }
 }
 
-public interface IFsmService
+public interface IFsmFactory
 {
     bool TryCreateAndAddState(StateId id, Dictionary<StateId, IFsmState> _stateDict, NavMeshPath path, Transform ownerTransform, TryGetTarget targetRetrieverFunc);
 }
