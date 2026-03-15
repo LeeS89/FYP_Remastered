@@ -27,7 +27,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
     public bool TestWalk;
 
     [Header("Data used by the Brain component")]
-    public StateId CurrentFsmState => _fsmManager?.CurrentStateId ?? StateId.None;
+    public StateId CurrentFsmState => _fsmManager?.CurrentState ?? StateId.None;
     public CombatOrder CurrentComOrder { get; private set; } = CombatOrder.None;
    // public RotationOrder CurrentRotOrder { get; private set; } = RotationOrder.None;
     public FOVResult CurrentFovState { get; private set; } = FOVResult.None;
@@ -263,7 +263,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
         _fsmManager?.Tick(Time.deltaTime);
       
         if (_testStateCheck)
-            Debug.LogError("Currentstate: "+_fsmManager?.CurrentStateId.ToString());
+            Debug.LogError("Currentstate: "+_fsmManager?.CurrentState.ToString());
     }
 
     public bool _testStateCheck = false;
@@ -374,7 +374,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
     public void SwitchState(StateId intentState)
     {
         if (_fsmManager == null) return;
-        if (intentState == StateId.None || intentState == _fsmManager.CurrentStateId) return;
+        if (intentState == StateId.None || intentState == _fsmManager.CurrentState) return;
         _fsmManager.SwitchTo(intentState);
     }
 

@@ -169,11 +169,17 @@ namespace Services.Internal
         private bool TryCreatePatrol(Dictionary<StateId, IFsmState> _dict, NavMeshPath path, Transform t, TryGetTarget tgt)
             => _dict.TryAdd(StateId.Patrol, new FSMPatrolState(null, null, null));
 
-
+        public IFsmController CreateFsm(NavMeshAgent a, NavMeshObstacle o, NavMeshPath p, Transform owner, TryGetTarget targetRetrieverFunc, IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
 
 public interface IFsmFactory
 {
+    IFsmController CreateFsm(NavMeshAgent a, NavMeshObstacle o, NavMeshPath p, Transform owner, TryGetTarget targetRetrieverFunc,
+        IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null);
+
     bool TryCreateAndAddState(StateId id, Dictionary<StateId, IFsmState> _stateDict, NavMeshPath path, Transform ownerTransform, TryGetTarget targetRetrieverFunc);
 }

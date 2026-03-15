@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class FsmManager : IFsmStateEvents, ITickable//IFsmControl
+public class FsmManager : IFsmStateEvents, IFsmController
 {
     // Injected Dependancies
     private IReadOnlyDictionary<StateId, IFsmState> _states;
@@ -16,7 +16,7 @@ public class FsmManager : IFsmStateEvents, ITickable//IFsmControl
     // End Injected Dependancies
     //public Notification Notification { get; set; }
     // Used by owning Monobehaviour via interface
-    public StateId CurrentStateId => _currentState?.GetId() ?? StateId.None;
+    public StateId CurrentState => _currentState?.GetId() ?? StateId.None;
     // End used by owning Monobehaviour
     
     // Actions Invoked from individual states
@@ -62,7 +62,7 @@ public class FsmManager : IFsmStateEvents, ITickable//IFsmControl
     #region State Transition & FOV Frequency Updates
     public void SwitchTo(StateId next)
     {
-        if (next == CurrentStateId || next == StateId.None) return; // Allow for none and make current null
+        if (next == CurrentState || next == StateId.None) return; // Allow for none and make current null
 
         if (_states != null && _states.TryGetValue(next, out var nextstate))
         {
@@ -170,7 +170,7 @@ public class FsmManager : IFsmStateEvents, ITickable//IFsmControl
         }*/
 
         //var dist = a.remainingDistance;
-        var dist = a.GetPathDistance(CurrentStateId, _corners);
+        var dist = a.GetPathDistance(CurrentState, _corners);
         var rDist = a.remainingDistance;
         if (TestPrint)
         {
@@ -238,7 +238,7 @@ public class FsmManager : IFsmStateEvents, ITickable//IFsmControl
         //Notification?.Invoke(NpcNotification.AnimationNotifications.AnimationIntent(cue));
     }
 
-    private bool StateHasChanged(StateId id) => id != CurrentStateId;
+    private bool StateHasChanged(StateId id) => id != CurrentState;
 
     public void ProcessDestinationResult(in DestinationResultInfo result)
     {
@@ -273,7 +273,7 @@ public class FsmManager : IFsmStateEvents, ITickable//IFsmControl
 
     protected void SetDestination(NavMeshPath path, Vector3 destination, StateId current)
     {
-        if (current != CurrentStateId) return;
+        if (current != CurrentState) return;
         ToggleAgent(setActive: true);
         if (_deps.Agent.SetPath(path) ||
             _deps.Agent.SetDestination(destination))
@@ -467,12 +467,23 @@ public class FsmManager : IFsmStateEvents, ITickable//IFsmControl
         _hasValidDestination = false;
         UpdateSpeedtier(0f);
         _deps?.Agent.ResetPath();
-        if (CurrentStateId == StateId.Patrol) return;
+        if (CurrentState == StateId.Patrol) return;
         ToggleAgent(false);
         _deps.Obstacle.enabled = true;
     }
 
- 
+    public void Reset()
+    {
+        _hasValidDestination = false;
+        UpdateSpeedtier(0f);
+        _deps?.Agent.ResetPath();
+        if (CurrentState == StateId.Patrol) return;
+        ToggleAgent(false);
+        _deps.Obstacle.enabled = true;
+    }
+
+
+
     public void OverrideRotation(RotationOverride rotOverride)
     {
         if (_currentRotationOverride == rotOverride) return;
@@ -490,7 +501,8 @@ public class FsmManager : IFsmStateEvents, ITickable//IFsmControl
         throw new NotImplementedException();
     }
 
-    
+  
+
 
 
 

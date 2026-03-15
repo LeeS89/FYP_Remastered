@@ -48,3 +48,15 @@ public interface IFsmStateNew<out TContext> : ITickable
 
     float GetDesiredStoppingDistance();
 }
+
+
+public interface IFsmController : ITickable
+{
+    void SwitchTo(StateId state);
+    StateId CurrentState { get; }
+
+    void OverrideSpeed(SpeedOverride speedOverride);
+    void OverrideRotation(RotationOverride rotOverride);
+
+    void Reset();
+}
