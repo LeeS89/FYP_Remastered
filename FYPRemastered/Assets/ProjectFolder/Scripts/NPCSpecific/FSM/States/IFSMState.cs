@@ -59,4 +59,6 @@ public interface IFsmController : ITickable
     void OverrideRotation(RotationOverride rotOverride);
 
     void Reset();
+
+    bool StateExists(StateId id);
 }

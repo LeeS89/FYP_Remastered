@@ -19,17 +19,18 @@ namespace Services.Internal
         private IAddressableService _chaseService;
         private IDistanceService _distService;
 
+        private FsmRegistry _registry;
         // SO's
-  
+
         private AgentChaseData _agentChaseData;
         // End SO's
 
         private readonly List<AsyncOperationHandle> _handles = new(5);
 
-       
+
         public FsmFactory(FsmFeatureGroup data) : base(data) { }
 
-    
+
 
         public IWaypointService GetWService() => _wpService as IWaypointService;
 
@@ -58,7 +59,7 @@ namespace Services.Internal
                 _flankService = await TryLoadStateServiceAndInitialize</*SamplePointDataSO,*/ PlayerFlankingResources>(flankFeature/*, () => new PlayerFlankingResources()*/);
                 if (_flankService == null) DebugLogs.Nre(_flankService, "Flank service", this);
                 else DebugLogs.Log("Flank Service Constructed successfully", this);
-              //  var flnk = await TryLoadStateServiceAndInitialize<SamplePointDataSO, PlayerFlankingResources>(flankFeature, ()=> new PlayerFlankingResources());
+                //  var flnk = await TryLoadStateServiceAndInitialize<SamplePointDataSO, PlayerFlankingResources>(flankFeature, ()=> new PlayerFlankingResources());
             }
 
             var chaseFeature = _metaData.ChaseData;
@@ -83,9 +84,9 @@ namespace Services.Internal
                 DebugLogs.LoadFail(svc, $"(The Service of {typeof(TConcrete).Name})", this);
                 svc.Dispose();
                 return null;
-              
+
             }
-            
+
             return svc;
         }
         private async Task<TConcrete> TryLoadStateServiceAndInitialize<TConcrete>(FeatureMeta data) where TConcrete : class, IAddressableService, new()
@@ -100,9 +101,9 @@ namespace Services.Internal
                 DebugLogs.LoadFail(svc, $"(The Service of {typeof(TConcrete).Name})", this);
                 svc.Dispose();
                 return null;
-              
+
             }
-            
+
             return svc;
         }
         // END NEW META SETUP
@@ -169,17 +170,196 @@ namespace Services.Internal
         private bool TryCreatePatrol(Dictionary<StateId, IFsmState> _dict, NavMeshPath path, Transform t, TryGetTarget tgt)
             => _dict.TryAdd(StateId.Patrol, new FSMPatrolState(null, null, null));
 
-        public IFsmController CreateFsm(NavMeshAgent a, NavMeshObstacle o, NavMeshPath p, Transform owner, TryGetTarget targetRetrieverFunc, IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null)
+        public bool TryCreateFsm(out IFsmController fsm, INpcBody body, TryGetTarget targetRetrieverFunc, IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null)
         {
-            throw new NotImplementedException();
+            if (body == null) { fsm = null; return false; }
+
+            if (_registry == null) _registry = new FsmRegistry();
+            int id = body.Owner.Transform.GetInstanceID();
+
+            if (!_registry.TryRegister(id, body, targetRetrieverFunc)) { fsm = null; return false; }
+
+            fsm = new FsmManager(null, null,null, null, null); // Placeholder
+            return true;
         }
     }
+
+
+    public interface IFsmFactory
+    {
+        bool TryCreateFsm(out IFsmController fsm, INpcBody body, TryGetTarget targetRetrieverFunc,
+            IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null);
+
+        bool TryCreateAndAddState(StateId id, Dictionary<StateId, IFsmState> _stateDict, NavMeshPath path, Transform ownerTransform, TryGetTarget targetRetrieverFunc);
+    }
+
+
+
+
+
+
+
+
+
+    internal interface IFsmManagerView
+    {
+        bool TryGetAgent(IFsmController controller, out NavMeshAgent a);
+        bool TryGetObstacle(IFsmController controller, out NavMeshObstacle o);
+    }
+
+    internal interface IStateView
+    {
+
+    }
+
+
+
+
+
+   
+
+
+
+    internal sealed class FsmRegistry : IDisposable
+    {
+        private readonly Dictionary<int, FsmEntry> _entries = new(25);
+
+        public bool TryRegister(int npcId, INpcBody body, TryGetTarget targetGetter)
+            => _entries.TryAdd(npcId, new FsmEntry(body, targetGetter));
+
+        #region Owning Npc Data
+        public bool TryGetOwnerTransform(int id, out Transform t)
+        {
+            if (!_entries.TryGetValue(id, out var entry)) { t = null; return false; }
+
+            return entry.TryGetOwnerTransform(out t);
+        }
+
+        public bool TryGetOwnerPosition(int id, out Vector3 pos)
+        {
+            if (!_entries.TryGetValue(id, out var entry)) { pos = default; return false; }
+            return entry.TryGetOwnerPosition(out pos);
+        }
+
+        public bool TryGetAgent(int id, out NavMeshAgent agent)
+        {
+            if (!_entries.TryGetValue(id, out var entry)) { agent = null; return false; }
+            return entry.TryGetAgent(out agent);
+        }
+
+        public bool TryGetObstacle(int id, out NavMeshObstacle obstacle)
+        {
+            if(!_entries.TryGetValue(id, out var entry)) { obstacle = null; return false; }
+            return entry.TryGetObstacle(out obstacle);
+        }
+
+        public bool TryGetPath(int id, out NavMeshPath path)
+        {
+            if(!_entries.TryGetValue(id, out var entry)) { path = null; return false; }
+            return entry.TryGetPath(out path);
+        }
+        #endregion
+
+        #region Owning Npc Target Data
+        public bool TryGetTargetPosition(int id, out Vector3 pos)
+        {
+            if (!_entries.TryGetValue(id, out var entry)) { pos = default; return false; }
+            return entry.TryGetTargetPosition(out pos);
+        }
+        #endregion
+
+        public void Dispose()
+        {
+            foreach (var entry in _entries.Values) { entry.Dispose(); }
+            _entries.Clear();
+        }
+
+        private sealed class FsmEntry : IDisposable
+        {
+            private INpcBody _body;
+            private TryGetTarget _targetGetter;
+
+            
+            public FsmEntry(INpcBody body, TryGetTarget targetGetterFunc)
+            {
+                _body = body;
+                _targetGetter = targetGetterFunc;
+            }
+
+            #region Owning Npc Data region
+            public bool TryGetOwnerTransform(out Transform t)
+            {
+                if (_body == null || _body.Owner == null) { t = null; return false; }
+             
+                t = _body.Owner.Transform;
+                return t != null;
+            }
+
+            public bool TryGetOwnerPosition(out Vector3 pos)
+            {
+                if (_body == null || _body.Owner == null) { pos = Vector3.zero; return false; }
+
+                pos = _body.Owner.Position();
+                return true;
+            }
+
+            public bool TryGetAgent(out NavMeshAgent a)
+            {
+                if (_body == null) { a = null; return false; }
+                
+                a = _body.Agent;
+                return a != null;
+            }
+
+            public bool TryGetObstacle(out NavMeshObstacle o)
+            {
+                if (_body == null) { o = null; return false; }
+                o = _body.Obstacle;
+                return o != null;
+            }
+
+            public bool TryGetPath(out NavMeshPath p)
+            {
+                if(_body == null) { p = null; return false; }
+                p = _body.Path;
+                return p != null;
+            }
+            #endregion
+
+            #region Owning Npc Target data
+
+            public bool TryGetTargetPosition(out Vector3 pos)
+            {
+                pos = default;
+
+                if (_targetGetter == null) return false;
+
+                if (!_targetGetter.Invoke(out var target)) return false;
+
+                if (target == null || target.Transform == null) return false;
+                pos = target.Transform.position;
+
+                return true;
+            }
+
+
+            #endregion
+
+            public void Dispose()
+            {
+                _body = null;
+                _targetGetter = null;
+            }
+
+        }
+    }
+    
 }
 
-public interface IFsmFactory
+public interface INpcBody
 {
-    IFsmController CreateFsm(NavMeshAgent a, NavMeshObstacle o, NavMeshPath p, Transform owner, TryGetTarget targetRetrieverFunc,
-        IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null);
-
-    bool TryCreateAndAddState(StateId id, Dictionary<StateId, IFsmState> _stateDict, NavMeshPath path, Transform ownerTransform, TryGetTarget targetRetrieverFunc);
+    ITargetable Owner { get; }
+    NavMeshAgent Agent { get; }
+    NavMeshObstacle Obstacle { get; }
+    NavMeshPath Path { get; }
 }

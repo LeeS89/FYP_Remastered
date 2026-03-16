@@ -59,6 +59,9 @@ public class FsmManager : IFsmStateEvents, IFsmController
         _pathCheckTimer = _deps.Movement.pathStatusInterval;
     }
 
+    public bool StateExists(StateId id) => _states.ContainsKey(id);
+   
+
     #region State Transition & FOV Frequency Updates
     public void SwitchTo(StateId next)
     {
@@ -501,7 +504,9 @@ public class FsmManager : IFsmStateEvents, IFsmController
         throw new NotImplementedException();
     }
 
-  
+   
+
+
 
 
 
