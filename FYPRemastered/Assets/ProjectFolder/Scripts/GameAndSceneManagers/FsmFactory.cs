@@ -172,7 +172,7 @@ namespace Services.Internal
 
         public bool TryCreateFsm(out IFsmController fsm, INpcBody body, TryGetTarget targetRetrieverFunc, IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null)
         {
-            if (body == null) { fsm = null; return false; }
+            if (body == null || body.Owner == null || body.Owner.Transform == null) { fsm = null; return false; }
 
             if (_registry == null) _registry = new FsmRegistry();
             int id = body.Owner.Transform.GetInstanceID();
