@@ -179,7 +179,7 @@ namespace Services.Internal
 
             if (!_registry.TryRegister(id, body, targetRetrieverFunc)) { fsm = null; return false; }
 
-            fsm = new FsmManager(null, null,null, null, null); // Placeholder
+            fsm = new FsmManagerNew(id, _registry); // Placeholder
             return true;
         }
     }
@@ -220,20 +220,39 @@ namespace Services.Internal
 
 
 
-    internal sealed class FsmRegistry : IDisposable
+    internal sealed class FsmRegistry : IFsmAgentData, IFsmOwnerData, ITargetData, IDisposable
     {
         private readonly Dictionary<int, FsmEntry> _entries = new(25);
 
         public bool TryRegister(int npcId, INpcBody body, TryGetTarget targetGetter)
             => _entries.TryAdd(npcId, new FsmEntry(body, targetGetter));
 
+
+        private bool TryGet<T>(int id, Func<FsmEntry, T> getter, out T value)
+        {
+            if (_entries.TryGetValue(id, out var entry))
+            {
+                value = getter(entry);
+                return true;
+            }
+            value = default;
+            return false;
+        }
+
         #region Owning Npc Data
         public bool TryGetOwnerTransform(int id, out Transform t)
         {
-            if (!_entries.TryGetValue(id, out var entry)) { t = null; return false; }
+            t = null;
+            if (!_entries.TryGetValue(id, out var entry)) { return false; }
+            if (entry.Body == null || entry.Body.Owner == null) return false;
 
-            return entry.TryGetOwnerTransform(out t);
+            var owner = entry.Body?.Owner;
+            if (owner == null) return false;
+          
+            t = owner.Transform;
+            return t != null;
         }
+      
 
         public bool TryGetOwnerPosition(int id, out Vector3 pos)
         {
@@ -266,6 +285,12 @@ namespace Services.Internal
             if (!_entries.TryGetValue(id, out var entry)) { pos = default; return false; }
             return entry.TryGetTargetPosition(out pos);
         }
+
+        public bool TryGetTargetTransform(int id, out Transform t)
+        {
+            if (!_entries.TryGetValue(id, out var entry)) { t = null; return false; }
+            return entry.TryGetTargetTransform(out t);
+        }
         #endregion
 
         public void Dispose()
@@ -274,8 +299,13 @@ namespace Services.Internal
             _entries.Clear();
         }
 
+
+
         private sealed class FsmEntry : IDisposable
         {
+            public INpcBody Body { get; }
+            public TryGetTarget TargetGetter { get; }
+
             private INpcBody _body;
             private TryGetTarget _targetGetter;
 
@@ -342,6 +372,17 @@ namespace Services.Internal
                 return true;
             }
 
+            public bool TryGetTargetTransform(out Transform t)
+            {
+                t = null;
+                if (_targetGetter == null) return false;
+                if (!_targetGetter.Invoke(out var target)) return false;
+                if (target == null || target.Transform == null) return false;
+                t = target.Transform;
+
+                return true;
+            }
+
 
             #endregion
 
@@ -354,6 +395,26 @@ namespace Services.Internal
         }
     }
     
+}
+
+public interface ITargetData
+{
+    bool TryGetTargetPosition(int id, out Vector3 pos);
+}
+
+public interface IFsmOwnerData
+{
+    bool TryGetOwnerPosition(int id, out Vector3 pos);
+}
+
+
+public interface IFsmAgentData
+{
+    bool TryGetOwnerTransform(int id, out Transform t);
+    bool TryGetTargetTransform(int id, out Transform t);
+    bool TryGetAgent(int id, out NavMeshAgent agent);
+    bool TryGetObstacle(int id, out NavMeshObstacle obstacle);
+    bool TryGetPath(int id, out NavMeshPath path);
 }
 
 public interface INpcBody
