@@ -4,7 +4,7 @@ public interface ITargetable
 {
     Vector3 Forward { get; }
 
-    Vector3 Position();
+    Vector3? Position();
 
     Quaternion Rotation();
 

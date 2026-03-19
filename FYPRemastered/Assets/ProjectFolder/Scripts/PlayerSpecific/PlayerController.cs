@@ -156,7 +156,7 @@ public sealed class PlayerController : TargetableInit<IPlaceholderService, Playe
         _locomotion?.Tick(_controller.isGrounded);
 
 #if UNITY_EDITOR
-        float movedDistance = Vector3.Distance(Position(), _lastPosition);
+        float movedDistance = Vector3.Distance(Position().Value, _lastPosition);
 
         _isStationary = movedDistance <= movementThreshold;
 
@@ -185,7 +185,7 @@ public sealed class PlayerController : TargetableInit<IPlaceholderService, Playe
             }
         }*/
 
-        _lastPosition = Position();
+        _lastPosition = Position().Value;
 #endif
 
     }

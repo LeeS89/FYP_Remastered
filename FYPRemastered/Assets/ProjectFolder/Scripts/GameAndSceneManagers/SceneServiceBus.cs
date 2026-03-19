@@ -258,7 +258,7 @@ public interface IFsmStateService
 
 public interface IChaseService : IFsmStateService
 {
-    bool TryGetTarget(List<Vector3> buffer);
+    bool TryGetCandidates(List<Vector3> buffer);
 }
 
 public interface IWaypointService : IFsmStateService// : IAddressableServiceObsolete

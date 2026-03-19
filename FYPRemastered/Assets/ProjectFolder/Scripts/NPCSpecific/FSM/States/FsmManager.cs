@@ -619,8 +619,19 @@ public class FsmManagerNew : IFsmStateEvents, IFsmController
     private SpeedOverride _currentSpeedOverride = SpeedOverride.None;
     private RotationOverride _currentRotationOverride = RotationOverride.None;
 
-    public FsmManagerNew(int instanceId, IFsmAgentData data) { }
+    // NEW
+    private readonly IFsmAgentData _ownerData;
+    private readonly IReadOnlyDictionary<StateId, IFsmStateNew<IFsmStateService>> _statesNew;
 
+    public FsmManagerNew(int instanceId, IFsmAgentData data, IReadOnlyDictionary<StateId, IFsmStateNew<IFsmStateService>> states)
+    {
+        _instanceId = instanceId;
+        _ownerData = data;
+        _statesNew = states;
+    }
+
+
+    // END NEW
 
     public FsmManagerNew(FsmManagerServices deps, SharedFsmStateServices sharedDeps, IReadOnlyDictionary<StateId, IFsmState> states, IPathNotifications pathNotifies, IAnimationRequestNotifications animNotifies = null/*, Notification fsmNotifications*/)
     {
@@ -1041,6 +1052,7 @@ public class FsmManagerNew : IFsmStateEvents, IFsmController
         {
             Debug.LogError(msg);
         }
+        
         _hasValidDestination = false;
         UpdateSpeedtier(0f);
         _deps?.Agent.ResetPath();

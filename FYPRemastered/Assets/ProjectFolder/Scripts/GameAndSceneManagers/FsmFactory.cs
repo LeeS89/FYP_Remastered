@@ -47,7 +47,7 @@ namespace Services.Internal
             var waypointFeature = _metaData.Waypoints;
             if (waypointFeature.enabled)
             {
-                _wpService = await TryLoadStateServiceAndInitialize</*WaypointBlockData, */WaypointResources>(waypointFeature/*, ()=> new WaypointResources()*/);
+                _wpService = await TryLoadStateServiceAndInitialize(waypointFeature, () => new WaypointResources());
                 if (_wpService == null) DebugLogs.Nre(_wpService, "WaypointService");
                 else DebugLogs.Log("Found Waypoint service", this);
 
@@ -56,7 +56,7 @@ namespace Services.Internal
             var flankFeature = _metaData.FlankPoints;
             if (flankFeature.enabled)
             {
-                _flankService = await TryLoadStateServiceAndInitialize</*SamplePointDataSO,*/ PlayerFlankingResources>(flankFeature/*, () => new PlayerFlankingResources()*/);
+                _flankService = await TryLoadStateServiceAndInitialize(flankFeature, () => new PlayerFlankingResources());
                 if (_flankService == null) DebugLogs.Nre(_flankService, "Flank service", this);
                 else DebugLogs.Log("Flank Service Constructed successfully", this);
                 //  var flnk = await TryLoadStateServiceAndInitialize<SamplePointDataSO, PlayerFlankingResources>(flankFeature, ()=> new PlayerFlankingResources());
@@ -65,14 +65,14 @@ namespace Services.Internal
             var chaseFeature = _metaData.ChaseData;
             if (chaseFeature.enabled)
             {
-                _chaseService = await TryLoadStateServiceAndInitialize<ChaseResources>(chaseFeature);
+                _chaseService = await TryLoadStateServiceAndInitialize(chaseFeature, ()=> new ChaseResources());
                 if (_chaseService == null) DebugLogs.Nre(_chaseService, "Chase Service", this);
                 else DebugLogs.Log("Chase service constructed successfully", this);
             }
 
         }
 
-        private async Task<TConcrete> TryLoadStateServiceAndInitialize<TAsset, TConcrete>(FeatureMeta data, Func<TConcrete> factory) where TConcrete : class, IAddressableService
+      /*  private async Task<TConcrete> TryLoadStateServiceAndInitialize<TAsset, TConcrete>(FeatureMeta data, Func<TConcrete> factory) where TConcrete : class, IAddressableService
         {
             if (string.IsNullOrWhiteSpace(data.addressKey)) { DebugLogs.RequireNotNull(data.addressKey, "addressKey", this); return null; }
 
@@ -88,12 +88,35 @@ namespace Services.Internal
             }
 
             return svc;
-        }
-        private async Task<TConcrete> TryLoadStateServiceAndInitialize<TConcrete>(FeatureMeta data) where TConcrete : class, IAddressableService, new()
+        }*/
+       /* private async Task<TConcrete> TryLoadStateServiceAndInitialize<TConcrete>(FeatureMeta data) where TConcrete : class, IAddressableService, new()
         {
             if (string.IsNullOrWhiteSpace(data.addressKey)) { DebugLogs.RequireNotNull(data.addressKey, "addressKey", this); return null; }
 
             var svc = new TConcrete();
+            bool serviceInitSuccess = await svc.TryInitialiseAsync(data);
+
+            if (!serviceInitSuccess)
+            {
+                DebugLogs.LoadFail(svc, $"(The Service of {typeof(TConcrete).Name})", this);
+                svc.Dispose();
+                return null;
+
+            }
+
+            return svc;
+        }*/
+        private async Task<TConcrete> TryLoadStateServiceAndInitialize<TConcrete>(FeatureMeta data, Func<TConcrete> createFunc) where TConcrete : class, IAddressableService
+        {
+            if (string.IsNullOrWhiteSpace(data.addressKey)) { DebugLogs.RequireNotNull(data.addressKey, "addressKey", this); return null; }
+
+            var svc = createFunc?.Invoke();
+            if(svc == null)
+            {
+                DebugLogs.RequireNotNull(svc, $"{typeof(TConcrete).Name}", this);
+                return null;
+            }
+
             bool serviceInitSuccess = await svc.TryInitialiseAsync(data);
 
             if (!serviceInitSuccess)
@@ -179,7 +202,7 @@ namespace Services.Internal
 
             if (!_registry.TryRegister(id, body, targetRetrieverFunc)) { fsm = null; return false; }
 
-            fsm = new FsmManagerNew(id, _registry); // Placeholder
+            fsm = null;//new FsmManagerNew(id, _registry); // Placeholder
             return true;
         }
     }
@@ -239,57 +262,118 @@ namespace Services.Internal
             return false;
         }
 
+        private bool TryGetEntry(IInstanceIdentifiable id, out FsmEntry entry)
+        {
+            entry = null;
+            if (id == null) return false;
+
+            return _entries.TryGetValue(id.EntityId, out entry);
+        }
+           //> _entries.TryGetValue(id, out entry);
+
         #region Owning Npc Data
-        public bool TryGetOwnerTransform(int id, out Transform t)
+        public bool TryGetOwnerTransform(IInstanceIdentifiable id, out Transform t)
         {
             t = null;
-            if (!_entries.TryGetValue(id, out var entry)) { return false; }
-            if (entry.Body == null || entry.Body.Owner == null) return false;
+            if (!TryGetEntry(id, out var entry)) { return false; }
 
-            var owner = entry.Body?.Owner;
-            if (owner == null) return false;
-          
-            t = owner.Transform;
+            if (entry.Body == null) return false;
+
+            t = entry.Body.Owner?.Transform;
             return t != null;
+
         }
       
 
-        public bool TryGetOwnerPosition(int id, out Vector3 pos)
+        public bool TryGetOwnerPosition(IInstanceIdentifiable id, out Vector3 pos)
         {
-            if (!_entries.TryGetValue(id, out var entry)) { pos = default; return false; }
-            return entry.TryGetOwnerPosition(out pos);
+            pos = default;
+            if (!TryGetEntry(id, out var entry)) return false;
+
+            var owner = entry.Body?.Owner;
+            if (owner == null) return false;
+
+            var p = owner.Position();
+            if (p == null) return false;
+
+            pos = p.Value;
+            return true; 
+
         }
 
-        public bool TryGetAgent(int id, out NavMeshAgent agent)
+        public bool TryGetAgent(IInstanceIdentifiable id, out NavMeshAgent agent)
         {
-            if (!_entries.TryGetValue(id, out var entry)) { agent = null; return false; }
-            return entry.TryGetAgent(out agent);
+            agent = null;
+            if (!TryGetEntry(id, out var entry)) return false;
+
+            agent = entry.Body?.Agent;
+           
+            return agent != null;
+
         }
 
-        public bool TryGetObstacle(int id, out NavMeshObstacle obstacle)
+        public bool TryGetObstacle(IInstanceIdentifiable id, out NavMeshObstacle obstacle)
         {
-            if(!_entries.TryGetValue(id, out var entry)) { obstacle = null; return false; }
-            return entry.TryGetObstacle(out obstacle);
+            obstacle = null;
+            if (!TryGetEntry(id, out var entry)) return false;
+
+            obstacle = entry.Body?.Obstacle;
+            return obstacle != null;
+
+           /* if(!_entries.TryGetValue(id, out var entry)) { obstacle = null; return false; }
+            return entry.TryGetObstacle(out obstacle);*/
         }
 
-        public bool TryGetPath(int id, out NavMeshPath path)
+        public bool TryGetPath(IInstanceIdentifiable id, out NavMeshPath path)
         {
-            if(!_entries.TryGetValue(id, out var entry)) { path = null; return false; }
-            return entry.TryGetPath(out path);
+            path = null;
+            if (!TryGetEntry(id, out var entry)) return false;
+
+            path = entry.Body?.Path;
+            return path != null;
+
+            /*if(!_entries.TryGetValue(id, out var entry)) { path = null; return false; }
+            return entry.TryGetPath(out path);*/
         }
         #endregion
 
         #region Owning Npc Target Data
-        public bool TryGetTargetPosition(int id, out Vector3 pos)
+        private bool TryGetTarget(FsmEntry entry, out ITargetable target)
         {
-            if (!_entries.TryGetValue(id, out var entry)) { pos = default; return false; }
-            return entry.TryGetTargetPosition(out pos);
+            target = null;
+            if (entry == null) return false;
+            if (entry.TargetGetter == null) return false;
+
+            return entry.TargetGetter.Invoke(out target);
+        }
+        
+        
+        public bool TryGetTargetPosition(IInstanceIdentifiable id, out Vector3 pos)
+        {
+            pos = default;
+            if (!TryGetEntry(id, out var entry)) return false;
+            if (!TryGetTarget(entry, out var target)) return false;
+            if (target == null || target.Position() == null) return false;
+
+            pos = target.Position().Value;
+
+            return true;
+          /*  if (!_entries.TryGetValue(id, out var entry)) { pos = default; return false; }
+            return entry.TryGetTargetPosition(out pos);*/
         }
 
-        public bool TryGetTargetTransform(int id, out Transform t)
+        public bool TryGetTargetTransform(IInstanceIdentifiable id, out Transform t)
         {
+            t = null;
+            if (!TryGetEntry(id, out var entry)) return false;
+            if (!TryGetTarget(entry, out var target)) return false;
+            if (target == null) return false;
+
+            t = target.Transform;
+            return t != null;
+/*
             if (!_entries.TryGetValue(id, out var entry)) { t = null; return false; }
-            return entry.TryGetTargetTransform(out t);
+            return entry.TryGetTargetTransform(out t);*/
         }
         #endregion
 
@@ -303,21 +387,21 @@ namespace Services.Internal
 
         private sealed class FsmEntry : IDisposable
         {
-            public INpcBody Body { get; }
-            public TryGetTarget TargetGetter { get; }
+            public INpcBody Body { get; private set; }
+            public TryGetTarget TargetGetter { get; private set; }
 
-            private INpcBody _body;
+          /*  private INpcBody _body;
             private TryGetTarget _targetGetter;
 
-            
+            */
             public FsmEntry(INpcBody body, TryGetTarget targetGetterFunc)
             {
-                _body = body;
-                _targetGetter = targetGetterFunc;
+                Body = body;
+                TargetGetter = targetGetterFunc;
             }
 
             #region Owning Npc Data region
-            public bool TryGetOwnerTransform(out Transform t)
+          /*  public bool TryGetOwnerTransform(out Transform t)
             {
                 if (_body == null || _body.Owner == null) { t = null; return false; }
              
@@ -329,7 +413,8 @@ namespace Services.Internal
             {
                 if (_body == null || _body.Owner == null) { pos = Vector3.zero; return false; }
 
-                pos = _body.Owner.Position();
+                pos = _body.Owner.Position().Value;
+
                 return true;
             }
 
@@ -353,12 +438,12 @@ namespace Services.Internal
                 if(_body == null) { p = null; return false; }
                 p = _body.Path;
                 return p != null;
-            }
+            }*/
             #endregion
 
             #region Owning Npc Target data
 
-            public bool TryGetTargetPosition(out Vector3 pos)
+          /*  public bool TryGetTargetPosition(out Vector3 pos)
             {
                 pos = default;
 
@@ -381,15 +466,15 @@ namespace Services.Internal
                 t = target.Transform;
 
                 return true;
-            }
+            }*/
 
 
             #endregion
 
             public void Dispose()
             {
-                _body = null;
-                _targetGetter = null;
+                Body = null;
+                TargetGetter = null;
             }
 
         }
@@ -399,22 +484,22 @@ namespace Services.Internal
 
 public interface ITargetData
 {
-    bool TryGetTargetPosition(int id, out Vector3 pos);
+    bool TryGetTargetPosition(IInstanceIdentifiable id, out Vector3 pos);
 }
 
 public interface IFsmOwnerData
 {
-    bool TryGetOwnerPosition(int id, out Vector3 pos);
+    bool TryGetOwnerPosition(IInstanceIdentifiable id, out Vector3 pos);
 }
 
 
 public interface IFsmAgentData
 {
-    bool TryGetOwnerTransform(int id, out Transform t);
-    bool TryGetTargetTransform(int id, out Transform t);
-    bool TryGetAgent(int id, out NavMeshAgent agent);
-    bool TryGetObstacle(int id, out NavMeshObstacle obstacle);
-    bool TryGetPath(int id, out NavMeshPath path);
+    bool TryGetOwnerTransform(IInstanceIdentifiable id, out Transform t);
+    bool TryGetTargetTransform(IInstanceIdentifiable id, out Transform t);
+    bool TryGetAgent(IInstanceIdentifiable id, out NavMeshAgent agent);
+    bool TryGetObstacle(IInstanceIdentifiable id, out NavMeshObstacle obstacle);
+    bool TryGetPath(IInstanceIdentifiable id, out NavMeshPath path);
 }
 
 public interface INpcBody

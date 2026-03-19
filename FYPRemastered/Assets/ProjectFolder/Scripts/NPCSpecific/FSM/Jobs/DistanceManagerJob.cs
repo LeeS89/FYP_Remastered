@@ -69,7 +69,7 @@ public class DistanceManagerJob : IDistanceService, ITickable
         int index = _subscriberPositions.Length;
         _subscriberPositions.Add(position);
         _targets.Add(target);
-        _subscriberTargetPositions.Add(target != null ? target.Position() : default);
+        _subscriberTargetPositions.Add(target != null ? target.Position().Value : default);
         // _subscriberTargetPositions.Add(targetPosiiton);
 
         // _initialDistances.Add(0f);
@@ -140,7 +140,7 @@ public class DistanceManagerJob : IDistanceService, ITickable
                 _removeQueue.Enqueue(_subscriberIds[i]);
                 continue;
             }
-            _subscriberTargetPositions[i] = t.Position();
+            _subscriberTargetPositions[i] = t.Position().Value;
         }
     }
 

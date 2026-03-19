@@ -132,7 +132,7 @@ public class PathFinderObsolete// : IPathResolver
                 _pathChecked = false;
                 _isValid = false;
 
-                this.RequestValidPath(LineOfSightUtility.GetClosestPointOnNavMesh(reqInfo.Caller.Position()),
+                this.RequestValidPath(LineOfSightUtility.GetClosestPointOnNavMesh(reqInfo.Caller.Position().Value),
                      LineOfSightUtility.GetClosestPointOnNavMesh(pos), reqInfo.Path, PathCheckCallback);
 
                 yield return _waitUntilPathCheckComplete;

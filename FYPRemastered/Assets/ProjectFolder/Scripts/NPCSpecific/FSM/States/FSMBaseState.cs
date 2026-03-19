@@ -60,7 +60,7 @@ public abstract class FsmBaseState<TDeps> : IFsmState where TDeps : FsmBaseState
     {
         ITargetable t;
         if (!TryGetTarget(out t)) { pos = Vector3.zero; return false; }
-        pos = t.Position();
+        pos = t.Position().Value;
         return true;
     }
 
@@ -286,7 +286,7 @@ public abstract class FsmBaseStateNew<TContext> : IFsmStateNew<TContext>// where
     {
         ITargetable t;
         if (!TryGetTarget(out t)) { pos = Vector3.zero; return false; }
-        pos = t.Position();
+        pos = t.Position().Value;
         return true;
     }
 

@@ -36,7 +36,7 @@ public class ChaseResources : IChaseService, IAddressableService
         return true;
     }
 
-    public bool TryGetTarget(List<Vector3> buffer)
+    public bool TryGetCandidates(List<Vector3> buffer)
     {
         throw new System.NotImplementedException();
     }
