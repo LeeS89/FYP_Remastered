@@ -10,7 +10,7 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 namespace Services.Internal
 {
 
-    public class FsmFactory : ServiceBundle<FsmFeatureGroup>, IFsmFactory, ITickable
+    public sealed class FsmFactory : ServiceBundle<FsmFeatureGroup>, IFsmFactory, ITickable
     {
 
         private List<ITickable> _tickables = new(5);
@@ -47,7 +47,7 @@ namespace Services.Internal
             var waypointFeature = _metaData.Waypoints;
             if (waypointFeature.enabled)
             {
-                _wpService = await TryLoadStateServiceAndInitialize(waypointFeature, () => new WaypointResources());
+                _wpService = await TryLoadStateServiceAndInitialize(waypointFeature, () => new WaypointResources(_registry));
                 if (_wpService == null) DebugLogs.Nre(_wpService, "WaypointService");
                 else DebugLogs.Log("Found Waypoint service", this);
 
@@ -56,7 +56,7 @@ namespace Services.Internal
             var flankFeature = _metaData.FlankPoints;
             if (flankFeature.enabled)
             {
-                _flankService = await TryLoadStateServiceAndInitialize(flankFeature, () => new PlayerFlankingResources());
+                _flankService = await TryLoadStateServiceAndInitialize(flankFeature, () => new PlayerFlankingResources(_registry, _registry));
                 if (_flankService == null) DebugLogs.Nre(_flankService, "Flank service", this);
                 else DebugLogs.Log("Flank Service Constructed successfully", this);
                 //  var flnk = await TryLoadStateServiceAndInitialize<SamplePointDataSO, PlayerFlankingResources>(flankFeature, ()=> new PlayerFlankingResources());
@@ -65,47 +65,14 @@ namespace Services.Internal
             var chaseFeature = _metaData.ChaseData;
             if (chaseFeature.enabled)
             {
-                _chaseService = await TryLoadStateServiceAndInitialize(chaseFeature, ()=> new ChaseResources());
+                _chaseService = await TryLoadStateServiceAndInitialize(chaseFeature, ()=> new ChaseResources(_registry, _registry));
                 if (_chaseService == null) DebugLogs.Nre(_chaseService, "Chase Service", this);
                 else DebugLogs.Log("Chase service constructed successfully", this);
             }
 
         }
 
-      /*  private async Task<TConcrete> TryLoadStateServiceAndInitialize<TAsset, TConcrete>(FeatureMeta data, Func<TConcrete> factory) where TConcrete : class, IAddressableService
-        {
-            if (string.IsNullOrWhiteSpace(data.addressKey)) { DebugLogs.RequireNotNull(data.addressKey, "addressKey", this); return null; }
-
-            var svc = factory();//new TConcrete();
-            bool serviceInitSuccess = await svc.TryInitialiseAsync(data);
-
-            if (!serviceInitSuccess)
-            {
-                DebugLogs.LoadFail(svc, $"(The Service of {typeof(TConcrete).Name})", this);
-                svc.Dispose();
-                return null;
-
-            }
-
-            return svc;
-        }*/
-       /* private async Task<TConcrete> TryLoadStateServiceAndInitialize<TConcrete>(FeatureMeta data) where TConcrete : class, IAddressableService, new()
-        {
-            if (string.IsNullOrWhiteSpace(data.addressKey)) { DebugLogs.RequireNotNull(data.addressKey, "addressKey", this); return null; }
-
-            var svc = new TConcrete();
-            bool serviceInitSuccess = await svc.TryInitialiseAsync(data);
-
-            if (!serviceInitSuccess)
-            {
-                DebugLogs.LoadFail(svc, $"(The Service of {typeof(TConcrete).Name})", this);
-                svc.Dispose();
-                return null;
-
-            }
-
-            return svc;
-        }*/
+      
         private async Task<TConcrete> TryLoadStateServiceAndInitialize<TConcrete>(FeatureMeta data, Func<TConcrete> createFunc) where TConcrete : class, IAddressableService
         {
             if (string.IsNullOrWhiteSpace(data.addressKey)) { DebugLogs.RequireNotNull(data.addressKey, "addressKey", this); return null; }
@@ -205,6 +172,44 @@ namespace Services.Internal
             fsm = null;//new FsmManagerNew(id, _registry); // Placeholder
             return true;
         }
+
+
+        #region Obsolete
+        /*  private async Task<TConcrete> TryLoadStateServiceAndInitialize<TAsset, TConcrete>(FeatureMeta data, Func<TConcrete> factory) where TConcrete : class, IAddressableService
+        {
+            if (string.IsNullOrWhiteSpace(data.addressKey)) { DebugLogs.RequireNotNull(data.addressKey, "addressKey", this); return null; }
+
+            var svc = factory();//new TConcrete();
+            bool serviceInitSuccess = await svc.TryInitialiseAsync(data);
+
+            if (!serviceInitSuccess)
+            {
+                DebugLogs.LoadFail(svc, $"(The Service of {typeof(TConcrete).Name})", this);
+                svc.Dispose();
+                return null;
+
+            }
+
+            return svc;
+        }*/
+        /* private async Task<TConcrete> TryLoadStateServiceAndInitialize<TConcrete>(FeatureMeta data) where TConcrete : class, IAddressableService, new()
+         {
+             if (string.IsNullOrWhiteSpace(data.addressKey)) { DebugLogs.RequireNotNull(data.addressKey, "addressKey", this); return null; }
+
+             var svc = new TConcrete();
+             bool serviceInitSuccess = await svc.TryInitialiseAsync(data);
+
+             if (!serviceInitSuccess)
+             {
+                 DebugLogs.LoadFail(svc, $"(The Service of {typeof(TConcrete).Name})", this);
+                 svc.Dispose();
+                 return null;
+
+             }
+
+             return svc;
+         }*/
+        #endregion
     }
 
 
@@ -243,7 +248,7 @@ namespace Services.Internal
 
 
 
-    internal sealed class FsmRegistry : IFsmAgentData, IFsmOwnerData, ITargetData, IDisposable
+    internal sealed class FsmRegistry : IFsmNavigationControl, IFsmNavigationQuery, IFsmTargetQuery//IFsmAgentRegistry, IFsmOwnerRegistry, IFsmTargetRegistry, IDisposable
     {
         private readonly Dictionary<int, FsmEntry> _entries = new(25);
 
@@ -375,6 +380,15 @@ namespace Services.Internal
             if (!_entries.TryGetValue(id, out var entry)) { t = null; return false; }
             return entry.TryGetTargetTransform(out t);*/
         }
+
+        public bool TargetIsMoving(IInstanceIdentifiable id)
+        {
+            if (!TryGetEntry(id, out var entry)) return false;
+            if (!TryGetTarget(entry, out var target)) return false;
+            if (target == null) return false;
+
+            return target.IsMoving();
+        }
         #endregion
 
         public void Dispose()
@@ -383,7 +397,7 @@ namespace Services.Internal
             _entries.Clear();
         }
 
-
+        
 
         private sealed class FsmEntry : IDisposable
         {
@@ -482,25 +496,58 @@ namespace Services.Internal
     
 }
 
-public interface ITargetData
+/*public interface IFsmTargetRegistry
 {
-    bool TryGetTargetPosition(IInstanceIdentifiable id, out Vector3 pos);
-}
-
-public interface IFsmOwnerData
-{
-    bool TryGetOwnerPosition(IInstanceIdentifiable id, out Vector3 pos);
-}
-
-
-public interface IFsmAgentData
-{
-    bool TryGetOwnerTransform(IInstanceIdentifiable id, out Transform t);
+    bool TryGetTargetPosition(IInstanceIdentifiable id, out Vector3 pos); // Certain states
     bool TryGetTargetTransform(IInstanceIdentifiable id, out Transform t);
-    bool TryGetAgent(IInstanceIdentifiable id, out NavMeshAgent agent);
-    bool TryGetObstacle(IInstanceIdentifiable id, out NavMeshObstacle obstacle);
+}
+
+public interface IFsmOwnerRegistry
+{
+    bool TryGetOwnerPosition(IInstanceIdentifiable id, out Vector3 pos); // All states
+    bool TryGetOwnerTransform(IInstanceIdentifiable id, out Transform t); // Manager
+  //  bool TryGetPath(IInstanceIdentifiable id, out NavMeshPath path); // All States
+}
+
+public interface IFsmPathRegistry { bool TryGetPath(IInstanceIdentifiable id, out NavMeshPath path); }
+
+public interface IFsmAgentRegistry : IFsmPathRegistry
+{
+    
+    bool TryGetTargetTransform(IInstanceIdentifiable id, out Transform t); // Manager
+    bool TryGetAgent(IInstanceIdentifiable id, out NavMeshAgent agent); // Manager
+    bool TryGetObstacle(IInstanceIdentifiable id, out NavMeshObstacle obstacle); // Manager
+    
+}*/
+
+
+
+
+
+
+public interface IFsmNavigationQuery
+{
+    bool TryGetOwnerPosition(IInstanceIdentifiable id, out Vector3 position);
     bool TryGetPath(IInstanceIdentifiable id, out NavMeshPath path);
 }
+
+public interface IFsmNavigationControl
+{
+    bool TryGetOwnerTransform(IInstanceIdentifiable id, out Transform t);
+    bool TryGetAgent(IInstanceIdentifiable id, out NavMeshAgent agent);
+    bool TryGetObstacle(IInstanceIdentifiable id, out NavMeshObstacle obstacle);
+}
+
+public interface IFsmTargetQuery
+{
+    bool TryGetTargetPosition(IInstanceIdentifiable id, out Vector3 position);
+    bool TryGetTargetTransform(IInstanceIdentifiable id, out Transform t);
+    bool TargetIsMoving(IInstanceIdentifiable id);
+}
+
+
+
+
 
 public interface INpcBody
 {

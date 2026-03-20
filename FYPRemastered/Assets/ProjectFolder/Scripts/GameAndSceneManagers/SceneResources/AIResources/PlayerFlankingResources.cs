@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.AI;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceLocations;
 
@@ -17,8 +18,15 @@ public class PlayerFlankingResources : SceneResources, IFlankService, IAddressab
     /*Vector3 top;*/
     private ClosestPointToPlayerJobNew _closestFlankPointService;
 
-    public PlayerFlankingResources()
+    private readonly IFsmNavigationQuery _navQuery;
+    private readonly IFsmTargetQuery _targetQuery;
+
+    private PlayerFlankingResources() { }
+
+    public PlayerFlankingResources(IFsmNavigationQuery navQuery, IFsmTargetQuery targetQuery)
     {
+        _navQuery = navQuery;
+        _targetQuery = targetQuery;
         //closestFlankPointService;
     }
     
@@ -292,5 +300,19 @@ public class PlayerFlankingResources : SceneResources, IFlankService, IAddressab
 
     public void LateTick(float dt) { }
 
-  
+    public bool TryGetOwnerPosition(IInstanceIdentifiable id, out Vector3 pos)
+    {
+        pos = default;
+        if (id == null) { DebugLogs.RequireNotNull(id, "InstancIdentifiable"); return false; }
+
+        return _navQuery.TryGetOwnerPosition(id, out pos);
+    }
+
+    public bool TryGetPath(IInstanceIdentifiable id, out NavMeshPath path)
+    {
+        path = null;
+        if (id == null) { DebugLogs.RequireNotNull(id, "InstancIdentifiable"); return false; }
+        return _navQuery.TryGetPath(id, out path);
+    }
+
 }

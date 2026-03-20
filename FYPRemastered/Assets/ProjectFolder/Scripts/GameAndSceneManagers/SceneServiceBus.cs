@@ -253,12 +253,16 @@ public interface IAddressableService : IDisposable
 
 public interface IFsmStateService
 {
-    
+    bool TryGetOwnerPosition(IInstanceIdentifiable id, out Vector3 pos);
+    bool TryGetPath(IInstanceIdentifiable id, out NavMeshPath path);
 }
 
 public interface IChaseService : IFsmStateService
 {
-    bool TryGetCandidates(List<Vector3> buffer);
+    bool TryGetChaseCandidates(IInstanceIdentifiable id, List<Vector3> buffer);
+    bool TargetIsMoving(IInstanceIdentifiable id);
+
+    bool TryGetSqrDistanceToTarget(IInstanceIdentifiable id, Vector3 from, out float sqrDistance);
 }
 
 public interface IWaypointService : IFsmStateService// : IAddressableServiceObsolete

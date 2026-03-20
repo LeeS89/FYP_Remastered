@@ -201,8 +201,8 @@ public sealed class FSMPatrolStateNew : FsmBaseStateNew<IWaypointService>
         _waypointService = waypointService;
         _candidateDestinations.EnsureCapacity(10);
     }*/
-    public FSMPatrolStateNew(IFsmStateEvents stateController)
-        : base(stateController, StateId.Patrol)
+    public FSMPatrolStateNew(IFsmStateEvents stateController, IWaypointService service)
+        : base(stateController, service, StateId.Patrol)
     {
         // _patrolDeps = deps;
         //_waypointService = _deps.WaypointService;

@@ -573,12 +573,43 @@ public class FsmManagerServices
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 public class FsmManagerNew : IFsmStateEvents, IFsmController
 {
     // Injected Dependancies
     private IReadOnlyDictionary<StateId, IFsmState> _states;
-    private FsmManagerServices _deps;
-    private SharedFsmStateServices _sharedDeps;
+   // private FsmManagerServices _deps;
+    //private SharedFsmStateServices _sharedDeps;
 
     private IPathNotifications _pathNotifies;
     private IAnimationRequestNotifications _animNotifies;
@@ -620,20 +651,22 @@ public class FsmManagerNew : IFsmStateEvents, IFsmController
     private RotationOverride _currentRotationOverride = RotationOverride.None;
 
     // NEW
-    private readonly IFsmAgentData _ownerData;
+    private readonly IFsmNavigationControl _navControl;
+    private readonly IFsmTargetQuery _targetQuery;
     private readonly IReadOnlyDictionary<StateId, IFsmStateNew<IFsmStateService>> _statesNew;
 
-    public FsmManagerNew(int instanceId, IFsmAgentData data, IReadOnlyDictionary<StateId, IFsmStateNew<IFsmStateService>> states)
+    public FsmManagerNew(int instanceId, IFsmNavigationControl navControl, IFsmTargetQuery targetQuery, IReadOnlyDictionary<StateId, IFsmStateNew<IFsmStateService>> states)
     {
         _instanceId = instanceId;
-        _ownerData = data;
+        _navControl = navControl;
+        _targetQuery = targetQuery;
         _statesNew = states;
     }
 
 
     // END NEW
 
-    public FsmManagerNew(FsmManagerServices deps, SharedFsmStateServices sharedDeps, IReadOnlyDictionary<StateId, IFsmState> states, IPathNotifications pathNotifies, IAnimationRequestNotifications animNotifies = null/*, Notification fsmNotifications*/)
+   /* public FsmManagerNew(FsmManagerServices deps, SharedFsmStateServices sharedDeps, IReadOnlyDictionary<StateId, IFsmState> states, IPathNotifications pathNotifies, IAnimationRequestNotifications animNotifies = null*//*, Notification fsmNotifications*//*)
     {
         _deps = deps;
         _sharedDeps = sharedDeps;
@@ -642,7 +675,7 @@ public class FsmManagerNew : IFsmStateEvents, IFsmController
         //Notification = fsmNotifications;
         _states = states;
         _pathCheckTimer = _deps.Movement.pathStatusInterval;
-    }
+    }*/
 
     public bool StateExists(StateId id) => _states.ContainsKey(id);
 
@@ -688,7 +721,7 @@ public class FsmManagerNew : IFsmStateEvents, IFsmController
 
         if (_pathCheckTimer <= 0f)
         {
-            _pathCheckTimer = _deps.Movement.pathStatusInterval;
+           // _pathCheckTimer = _deps.Movement.pathStatusInterval; // COMMENTED OUT FOR NOW
             EvaluatePath();
         }
     }
@@ -699,27 +732,39 @@ public class FsmManagerNew : IFsmStateEvents, IFsmController
         _currentState?.LateTick(dt);
     }
 
-    private bool SharedDepsIsNull() => _sharedDeps == null;
-    private bool OwnerIsNull() => SharedDepsIsNull() || _sharedDeps.OwnerTransform == null;
+  //  private bool SharedDepsIsNull() => _sharedDeps == null;
+  //  private bool OwnerIsNull() => SharedDepsIsNull() || _sharedDeps.OwnerTransform == null;
 
     private void UpdateRotation()
     {
-        if (_currentRotationOverride == RotationOverride.None
-            || /*NullOwnerOrTarget()*/OwnerIsNull()) return;
+        if (_currentRotationOverride == RotationOverride.None)
+            /*|| *//*NullOwnerOrTarget()*//*OwnerIsNull()*/ return;
 
 
-        if (_sharedDeps.OnTryGetCurrentTarget?.Invoke(out var target) == true)
-            _sharedDeps.OwnerTransform.RotateTowards(target.Transform);
+        if (!TryGetOwnerTransform(out var ot) ||
+            !TryGetTargetTransform(out var tt)) return;
+
+        ot.RotateTowards(tt);
+
+       /* if (_sharedDeps.OnTryGetCurrentTarget?.Invoke(out var target) == true)
+            _sharedDeps.OwnerTransform.RotateTowards(target.Transform);*/
         //_sharedDeps.OwnerTransform.RotateTowards(_sharedDeps.GetCurrentTarget?.Invoke().Transform);
     }
 
     private Vector3[] _corners = new Vector3[64];
 
+    private bool TryGetOwnerTransform(out Transform t) => _navControl.TryGetOwnerTransform(this, out t);
+    private bool TryGetAgent(out NavMeshAgent agent) => _navControl.TryGetAgent(this, out agent);
+    private bool TryGetObstacle(out NavMeshObstacle obstacle) => _navControl.TryGetObstacle(this, out obstacle);
+    private bool TryGetTargetTransform(out Transform t) => _targetQuery.TryGetTargetTransform(this, out t); 
+
 
     public void EvaluatePath()
     {
-        if (!_hasValidDestination || _deps == null || _deps.Agent == null) return;
-        NavMeshAgent a = _deps.Agent;
+        if (!_hasValidDestination) return;// || _deps == null || _deps.Agent == null) return;
+        if (!TryGetAgent(out var a)) return;
+
+      //  NavMeshAgent a = _deps.Agent;
 
         if (a.pathPending) return;
         if (TestPrint)
@@ -781,7 +826,7 @@ public class FsmManagerNew : IFsmStateEvents, IFsmController
             return;
         }
 
-        UpdateSpeedtier(dist);
+        UpdateSpeedtier(dist, agent: a);
     }
 
     private void DestinationReached()
@@ -847,12 +892,18 @@ public class FsmManagerNew : IFsmStateEvents, IFsmController
             // CurrentDestinationForward = result.Forward;
             // OnMapDestinationToZone?.Invoke(currentDestination);
 
-            NavMeshObstacle o = _deps.Obstacle;
-            if (o != null && o.enabled && o.carving)
+         //   NavMeshObstacle o = _deps.Obstacle;
+
+            if (TryGetObstacle(out var o))
             {
-                _deps.Obstacle.enabled = false;
-                _timer.Add(new SetDestinationDelay(Time.deltaTime + Mathf.Epsilon, currentDestination, result.Path, id, SetDestination));
-                return;
+                if (o != null && o.enabled && o.carving)
+                {
+                    ToggleObstacle(false, o);
+                   // o.enabled = false;
+                    //_deps.Obstacle.enabled = false;
+                    _timer.Add(new SetDestinationDelay(Time.deltaTime + Mathf.Epsilon, currentDestination, result.Path, id, SetDestination));
+                    return;
+                }
             }
             SetDestination(result.Path, currentDestination, id);
         }
@@ -862,16 +913,20 @@ public class FsmManagerNew : IFsmStateEvents, IFsmController
     protected void SetDestination(NavMeshPath path, Vector3 destination, StateId current)
     {
         if (current != CurrentState) return;
-        ToggleAgent(setActive: true);
-        if (_deps.Agent.SetPath(path) ||
-            _deps.Agent.SetDestination(destination))
-        {
 
-            _deps.Agent.stoppingDistance = _currentState?.GetDesiredStoppingDistance() ?? 0f;//_deps.GetAgentStopDistance(true); // NEEDS UPDATING
-            DestinationSet(destination);
+        if (TryGetAgent(out var agent))
+        {
+            ToggleAgent(setActive: true, agent);
+            if (agent.SetPath(path) ||
+                agent.SetDestination(destination))
+            {
+
+                agent.stoppingDistance = _currentState?.GetDesiredStoppingDistance() ?? 0f;//_deps.GetAgentStopDistance(true); // NEEDS UPDATING
+                DestinationSet(destination);
+            }
+            else
+                AttemptRepath("Attempt repath called from failing to set path or dest");
         }
-        else
-            AttemptRepath("Attempt repath called from failing to set path or dest");
     }
 
     private void AttemptRepath(string msg)
@@ -899,7 +954,7 @@ public class FsmManagerNew : IFsmStateEvents, IFsmController
 
     private void DestinationSet(Vector3 destination)
     {
-        _pathCheckTimer = _deps.Movement.pathStatusInterval;
+        //_pathCheckTimer = _deps.Movement.pathStatusInterval; // COMMENTED OUT FOR NOW
         _hasValidDestination = true;
         EvaluatePath();
         _currentState?.OnDestinationSet();
@@ -914,15 +969,24 @@ public class FsmManagerNew : IFsmStateEvents, IFsmController
     /*  private void NotifyOwners(in NpcNotification n)
           => Notification?.Invoke(n); */
 
-    protected void ToggleAgent(bool setActive)
+    protected void ToggleAgent(bool setActive, NavMeshAgent agent = null)
     {
-        if (_deps.Agent.enabled == setActive) return;
-        _deps.Agent.enabled = setActive;
+        if(agent != null)
+        {
+            if(agent.enabled != setActive) { agent.enabled = setActive; }
+            return;
+        }
+
+        if (!TryGetAgent(out var a)) return;
+        if (a.enabled == setActive) return;
+        a.enabled = setActive;
+        /*if (_deps.Agent.enabled == setActive) return;
+        _deps.Agent.enabled = setActive;*/
     }
     #endregion
 
     #region Speed Region
-    public bool HasReachedDestination() => !_hasValidDestination || (_deps?.Agent.isStopped ?? true);
+   // public bool HasReachedDestination() => !_hasValidDestination || (_deps?.Agent.isStopped ?? true);
 
 
     private void UpdateAgentSpeed()
@@ -932,22 +996,25 @@ public class FsmManagerNew : IFsmStateEvents, IFsmController
         float rate = (0.5f > 0f) ? Mathf.Max(0.01f, delta / 0.5f) : float.PositiveInfinity;
         a.speed = Mathf.MoveTowards(a.speed, _targetSpeed, rate * Time.deltaTime);*/
 
-        if (_deps.Agent == null) return;
-        float smoothedSpeed = Mathf.Lerp(_deps.Agent.speed, _targetSpeed, _lerpSpeed * Time.deltaTime);
-        _deps.Agent.speed = smoothedSpeed;
+        if (!TryGetAgent(out var agent)) return;
 
-        float _currentSpeed = _deps.Agent.speed;
+      //  if (_deps.Agent == null) return;
+        float smoothedSpeed = Mathf.Lerp(agent.speed, _targetSpeed, _lerpSpeed * Time.deltaTime);
+        agent.speed = smoothedSpeed;
 
-        if (Mathf.Approximately(_deps.Agent.speed, _targetSpeed)) _deps.Agent.speed = _targetSpeed;
+        float _currentSpeed = agent.speed;
+
+        if (Mathf.Approximately(agent.speed, _targetSpeed)) agent.speed = _targetSpeed;
     }
 
     public void OverrideSpeed(SpeedOverride overrideTier)
      => _currentSpeedOverride = overrideTier;
 
 
-    private void UpdateSpeedtier(float remainingDistance)
+    private void UpdateSpeedtier(float remainingDistance, NavMeshAgent agent)
     {
-        if (_deps == null || _deps.Agent == null || _deps.Agent.isStopped) return;
+        if (agent == null || agent.isStopped) return;
+        //if (_deps == null || _deps.Agent == null || _deps.Agent.isStopped) return;
 
         float speed;
         float lerp;
@@ -964,37 +1031,39 @@ public class FsmManagerNew : IFsmStateEvents, IFsmController
 
     private SpeedTier OverrideSpeed(SpeedOverride speedOverride, out float newSpeed, out float lerp)
     {
-        SpeedTier newTier;
-        var d = _deps.Movement;
+        SpeedTier newTier = SpeedTier.Walk;
+        /*  var d = _deps.Movement;
 
-        (newTier, newSpeed, lerp) = speedOverride switch
-        {
-            SpeedOverride.ForceWalk =>
-            (
-                SpeedTier.Walk,
-                newSpeed = d.walkSpeed,
-                lerp = 2f
-            ),
-            SpeedOverride.ForceSprint =>
-            (
-                SpeedTier.Sprint,
-                newSpeed = d.sprintSpeed,
-                lerp = 2f
-            ),
-            SpeedOverride.ForceIdle =>
-            (
-                SpeedTier.Idle,
-                newSpeed = 0f,
-                lerp = 10f
-            ),
-            _ =>
-            (
-                SpeedTier.Walk,
-                newSpeed = d.walkSpeed,
-                lerp = 2f
-            )
+          (newTier, newSpeed, lerp) = speedOverride switch
+          {
+              SpeedOverride.ForceWalk =>
+              (
+                  SpeedTier.Walk,
+                  newSpeed = d.walkSpeed,
+                  lerp = 2f
+              ),
+              SpeedOverride.ForceSprint =>
+              (
+                  SpeedTier.Sprint,
+                  newSpeed = d.sprintSpeed,
+                  lerp = 2f
+              ),
+              SpeedOverride.ForceIdle =>
+              (
+                  SpeedTier.Idle,
+                  newSpeed = 0f,
+                  lerp = 10f
+              ),
+              _ =>
+              (
+                  SpeedTier.Walk,
+                  newSpeed = d.walkSpeed,
+                  lerp = 2f
+              )
 
-        };
+          };*/
+        newSpeed = 0f; // Placeholder
+        lerp = 0f; // Placeholder
         return newTier;
 
 
@@ -1013,7 +1082,7 @@ public class FsmManagerNew : IFsmStateEvents, IFsmController
         if (speedOverride != SpeedOverride.None)
             return OverrideSpeed(speedOverride, out newSpeed, out lerp);
 
-        var d = _deps.Movement;
+      /*  var d = _deps.Movement;
 
         if (distanceToDestination > d.sprintEnterDistance)
         {
@@ -1038,8 +1107,10 @@ public class FsmManagerNew : IFsmStateEvents, IFsmController
             newSpeed = d.sprintSpeed;
             lerp = 2f;
             return currentTier;
-        }
-
+        }*/
+      newSpeed = 0f; // Placeholder
+        lerp = 0f; // Placeholder
+        return SpeedTier.Idle;// Placeholder
 
     }
 
@@ -1054,21 +1125,58 @@ public class FsmManagerNew : IFsmStateEvents, IFsmController
         }
         
         _hasValidDestination = false;
-        UpdateSpeedtier(0f);
-        _deps?.Agent.ResetPath();
+        
+
+        TryGetAgent(out var agent);
+        UpdateSpeedtier(0f, agent);
+        ResetPath(agent);
+       // if (TryGetAgent(out var a)) a.ResetPath();
+        //_deps?.Agent.ResetPath();
         if (CurrentState == StateId.Patrol) return;
         ToggleAgent(false);
-        _deps.Obstacle.enabled = true;
+
+        ToggleObstacle(true);
+       // if (TryGetObstacle(out var o)) o.enabled = true;
+        //_deps.Obstacle.enabled = true;
+    }
+
+    private void ToggleObstacle(bool enabled, NavMeshObstacle obstacle = null)
+    {
+        if(obstacle != null)
+        {
+            if(obstacle.enabled != enabled) { obstacle.enabled = enabled; }
+            return;
+        }
+
+        if (!TryGetObstacle(out var o)) return;
+        if(o.enabled != enabled) o.enabled = enabled;
+    }
+
+    private void ResetPath(NavMeshAgent agent = null)
+    {
+        if(agent != null)
+        {
+            if (agent.hasPath) agent.ResetPath();
+            return;
+        }
+
+        if (!TryGetAgent(out var a)) return;
+        if(a.hasPath) a.ResetPath();
     }
 
     public void Reset()
     {
         _hasValidDestination = false;
-        UpdateSpeedtier(0f);
-        _deps?.Agent.ResetPath();
+
+        TryGetAgent(out var agent);
+        UpdateSpeedtier(0f, agent);
+
+        ResetPath(agent);
+      //  _deps?.Agent.ResetPath();
         if (CurrentState == StateId.Patrol) return;
-        ToggleAgent(false);
-        _deps.Obstacle.enabled = true;
+        ToggleAgent(false, agent);
+        ToggleObstacle(enabled: true);
+       // _deps.Obstacle.enabled = true;
     }
 
 
@@ -1076,7 +1184,10 @@ public class FsmManagerNew : IFsmStateEvents, IFsmController
     public void OverrideRotation(RotationOverride rotOverride)
     {
         if (_currentRotationOverride == rotOverride) return;
-        _deps.Agent.updateRotation = rotOverride == RotationOverride.None;
+        if (!TryGetAgent(out var a)) return;
+
+        a.updateRotation = rotOverride == RotationOverride.None;
+        //_deps.Agent.updateRotation = rotOverride == RotationOverride.None;
 
         if (TestPrint) Debug.LogError($"Setting Rotation Override to {rotOverride}");
         _currentRotationOverride = rotOverride;

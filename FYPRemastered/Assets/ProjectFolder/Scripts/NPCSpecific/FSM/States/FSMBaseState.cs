@@ -190,6 +190,40 @@ public abstract class FsmBaseState<TDeps> : IFsmState where TDeps : FsmBaseState
 
 
 
+public class CoTest
+{
+    public void HIDY() { }
+}
+public class CoTestTwo : CoTest
+{
+    public void Howdy() { }
+}
+
+public class CoTestThree
+{
+    CoTest first = new CoTest();
+    CoTestTwo second = new CoTestTwo();
+
+    List<CoTest> _list = new List<CoTest>();
+    List<CoTestTwo> _list2 = new List<CoTestTwo>();
+    List<MonoBehaviour> _ints = new List<MonoBehaviour>();
+
+    public void Begin()
+    {
+        _list.Add(first);
+        _list.Add(second);
+
+//        Testing(_ints);
+    }
+
+    public void Testing(IEnumerable<CoTest> _list)
+    {
+        foreach (var _ in _list)
+        {
+            _.HIDY();
+        }
+    }
+}
 
 
 
@@ -205,8 +239,7 @@ public abstract class FsmBaseState<TDeps> : IFsmState where TDeps : FsmBaseState
 
 
 
-
-public abstract class FsmBaseStateNew<TContext> : IFsmStateNew<TContext>// where TContext : FsmBaseState<TContext>.FsmBaseStateDeps
+public abstract class FsmBaseStateNew<TContext> : IFsmStateNew<TContext> where TContext : IFsmStateService// where TContext : FsmBaseState<TContext>.FsmBaseStateDeps
 {
  //   protected readonly IPathResolver _pathResolver;
     protected readonly IFsmStateEvents _stateEvents;
@@ -217,12 +250,12 @@ public abstract class FsmBaseStateNew<TContext> : IFsmStateNew<TContext>// where
     protected DestinationResultCallback _validationCallback;
 
 
-    protected List<Vector3> _candidateDestinations = new();
+    protected readonly List<Vector3> _candidateDestinations = new();
 
     //new
     //protected readonly ITargetable _owner;
     protected TContext _deps;
-    private SharedFsmStateServices _sharedDeps;
+  //  private SharedFsmStateServices _sharedDeps;
    // protected NavMeshPath _path;
     // end new
 
@@ -238,9 +271,10 @@ public abstract class FsmBaseStateNew<TContext> : IFsmStateNew<TContext>// where
 
     internal void SetContext(TContext context) => Context = context;
 
-    public FsmBaseStateNew(IFsmStateEvents stateController, StateId id)
+    public FsmBaseStateNew(IFsmStateEvents stateController, TContext service, StateId id)
     {
         _stateEvents = stateController;
+        Context = service;
         _id = id;
     }
 
@@ -255,7 +289,7 @@ public abstract class FsmBaseStateNew<TContext> : IFsmStateNew<TContext>// where
 
 
 
-    public FsmBaseStateNew(TContext deps, SharedFsmStateServices sharedDeps, IFsmStateEvents stateEvents, StateId id)
+  /*  public FsmBaseStateNew(TContext deps, SharedFsmStateServices sharedDeps, IFsmStateEvents stateEvents, StateId id)
     {
         _deps = deps;
         _sharedDeps = sharedDeps;
@@ -265,12 +299,14 @@ public abstract class FsmBaseStateNew<TContext> : IFsmStateNew<TContext>// where
         _stateEvents = stateEvents;
         _id = id;
         _validationCallback = OnProcessedDestinationsResult;
-    }
 
-    private bool SharedDepsIsNull() => _sharedDeps == null; // Maybe new Notification
+       
+    }
+*/
+   // private bool SharedDepsIsNull() => _sharedDeps == null; // Maybe new Notification
 
     // Need to make private once the Distance job is updated to accept transform instead of ITargetable
-    /*private*/protected bool TryGetTarget(out ITargetable target)
+    /*private*//*protected bool TryGetTarget(out ITargetable target)
     {
         if (SharedDepsIsNull()) { Debug.LogError("Shared is null"); target = null; return false; }
 
@@ -280,53 +316,63 @@ public abstract class FsmBaseStateNew<TContext> : IFsmStateNew<TContext>// where
         target = null;
         //target = _sharedDeps.GetCurrentTarget?.Invoke();
         return false; // Maybe new notification if target is null or Func is not set
-    }
+    }*/
 
-    protected bool TryGetTargetPosition(out Vector3 pos)
+  /*  protected bool TryGetTargetPosition(out Vector3 pos)
     {
         ITargetable t;
         if (!TryGetTarget(out t)) { pos = Vector3.zero; return false; }
         pos = t.Position().Value;
         return true;
-    }
+    }*/
 
-    private bool OwnerIsNull()
+   /* private bool OwnerIsNull()
     {
         if (!SharedDepsIsNull()) return _sharedDeps.OwnerTransform == null; // Maybe new Notification
         return true;
-    }
+    }*/
 
-    protected bool TryGetOwnerTransform(out Transform t)
+   /* protected bool TryGetOwnerTransform(out Transform t)
     {
+        
         if (OwnerIsNull()) { t = null; return false; }
         t = _sharedDeps.OwnerTransform;
         return true;
-    }
+    }*/
 
-    protected bool TryGetPath(out NavMeshPath path)
-    {
+    protected bool TryGetPath(out NavMeshPath path) => Context.TryGetPath(_stateEvents, out path);
+    /*{
         if (SharedDepsIsNull()) { path = null; return false; };
         path = _sharedDeps.Path;
         return path != null; // Maybe new notification if path is null
-    }
+    }*/
 
-    protected bool TryGetOwnerPosition(out Vector3 pos)
-    {
+    protected bool TryGetOwnerPosition(out Vector3 pos) =>  Context.TryGetOwnerPosition(_stateEvents, out pos);
+   /* {
         if (OwnerIsNull()) { pos = Vector3.zero; return false; }
 
-        pos = _sharedDeps.OwnerTransform.position;
-        return true;
-    }
+       
+
+       *//* pos = _sharedDeps.OwnerTransform.position;
+        return true;*//*
+    }*/
     
-    protected bool TargetIsMoving()
+   /* protected bool TargetIsMoving()
     {
         ITargetable target;
         if (!TryGetTarget(out target)) return false;
 
         return target.IsMoving();
+    }*/
+
+    protected bool TryGetOwnerTransform(out Transform ownerTransform)
+    {
+        ownerTransform = null;
+        return false;
     }
 
-    
+
+
 
     public virtual bool NeedsNewPath() => false;
 

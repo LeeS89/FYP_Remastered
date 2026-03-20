@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.AI;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
 
@@ -17,6 +18,12 @@ public class WaypointResources : IWaypointService, IAddressableService
     private AgentPatrolData _patrolData;
     private BlockData[] waypointBlocks;
 
+    private readonly IFsmNavigationQuery _navQuery;
+
+    private WaypointResources() { }
+
+    public WaypointResources(IFsmNavigationQuery navQuery) => _navQuery = navQuery;
+   
 
     public async Task<bool> TryInitialiseAsync(FeatureMeta data)
     {
@@ -137,5 +144,19 @@ public class WaypointResources : IWaypointService, IAddressableService
         return false;
     }
 
-   
+    public bool TryGetOwnerPosition(IInstanceIdentifiable id, out Vector3 pos)
+    {
+        pos = default;
+        if (id == null) { DebugLogs.RequireNotNull(id, "InstancIdentifiable"); return false; }
+
+        return _navQuery.TryGetOwnerPosition(id, out pos);
+    }
+
+    public bool TryGetPath(IInstanceIdentifiable id, out NavMeshPath path)
+    {
+        path = null;
+        if (id == null) { DebugLogs.RequireNotNull(id, "InstancIdentifiable"); return false; }
+        return _navQuery.TryGetPath(id, out path);
+    }
+        
 }
