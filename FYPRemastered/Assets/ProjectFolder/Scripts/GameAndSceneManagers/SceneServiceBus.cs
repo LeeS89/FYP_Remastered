@@ -22,7 +22,7 @@ namespace Services.Internal
         private IPoolService _poolService;
         private IPathService _pathService;
         private IGameManager _gameManager;
-        private IDistanceService _distanceService;
+        private IDistanceMonitoringService _distanceService;
         private ISceneService _sceneService;
 
         private FsmFactory _fsmFactory;
@@ -155,7 +155,7 @@ namespace Services.Internal
             return _gameManager != null;
         }
 
-        public bool TryGetDistanceService(out IDistanceService distanceService)
+        public bool TryGetDistanceService(out IDistanceMonitoringService distanceService)
         {
             if (_distanceService == null)
             {
@@ -214,7 +214,7 @@ public interface IPlayerRefService
 
 public interface IUtilityServices
 {
-    bool TryGetDistanceService(out IDistanceService distanceService);
+    bool TryGetDistanceService(out IDistanceMonitoringService distanceService);
 }
 
 public interface ISceneAIServices : IUtilityServices
@@ -255,14 +255,19 @@ public interface IFsmStateService
 {
     bool TryGetOwnerPosition(IInstanceIdentifiable id, out Vector3 pos);
     bool TryGetPath(IInstanceIdentifiable id, out NavMeshPath path);
+
+    bool TryGetDestinationCandidates(IInstanceIdentifiable id, List<Vector3> buffer);
+    void ReleaseDestinationCandidates(IInstanceIdentifiable id, List<Vector3> buffer);
 }
 
 public interface IChaseService : IFsmStateService
 {
-    bool TryGetChaseCandidates(IInstanceIdentifiable id, List<Vector3> buffer);
+    //bool TryGetDestinationCandidates(IInstanceIdentifiable id, List<Vector3> buffer);
     bool TargetIsMoving(IInstanceIdentifiable id);
-
     bool TryGetSqrDistanceToTarget(IInstanceIdentifiable id, Vector3 from, out float sqrDistance);
+
+    bool TryRegisterDistanceToTargetMonitoring(IInstanceIdentifiable id, Action<float> onDistanceUpdate, out float initialDistance);
+    bool TryUnregisterDistanceToTargetMonitoring(IInstanceIdentifiable id);
 }
 
 public interface IWaypointService : IFsmStateService// : IAddressableServiceObsolete
@@ -297,9 +302,11 @@ public interface IScenePoolServices
     // IPoolService PoolService { get; }
 }
 
-public interface IDistanceService
+public interface IDistanceMonitoringService
 {
     int RegisterSubscriber(Vector3 position, ITargetable target/*Vector3 targetPosiiton*/, /*float bufferMultiplier,*/ Action<float/*, float*/> callback);
+    bool TryRegisterSubscriber(IInstanceIdentifiable id, Vector3 currentPosition, ITargetable targetToCompare, Action<float> callback);
+    bool TryUnregisterSubscriber(IInstanceIdentifiable id);
     bool UnregisterSubscriber(int subscriberId);
 }
 

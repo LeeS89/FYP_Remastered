@@ -315,4 +315,13 @@ public class PlayerFlankingResources : SceneResources, IFlankService, IAddressab
         return _navQuery.TryGetPath(id, out path);
     }
 
+    public bool TryGetDestinationCandidates(IInstanceIdentifiable id, List<Vector3> buffer)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void ReleaseDestinationCandidates(IInstanceIdentifiable id, List<Vector3> buffer)
+    {
+        throw new NotImplementedException();
+    }
 }

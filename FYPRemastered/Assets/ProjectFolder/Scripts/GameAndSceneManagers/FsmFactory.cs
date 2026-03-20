@@ -17,7 +17,7 @@ namespace Services.Internal
         private IAddressableService _wpService; // Split interfaces in WaypointResources class so only correct interface is used by relevant classes i.e. => This class need only store it as an IAddressableService
         private IAddressableService _flankService;
         private IAddressableService _chaseService;
-        private IDistanceService _distService;
+        private IDistanceMonitoringService _distService;
 
         private FsmRegistry _registry;
         // SO's
@@ -65,13 +65,19 @@ namespace Services.Internal
             var chaseFeature = _metaData.ChaseData;
             if (chaseFeature.enabled)
             {
-                _chaseService = await TryLoadStateServiceAndInitialize(chaseFeature, ()=> new ChaseResources(_registry, _registry));
+                CreateDistanceMonitorService();
+                _chaseService = await TryLoadStateServiceAndInitialize(chaseFeature, ()=> new ChaseResources(_registry, _registry, _distService));
                 if (_chaseService == null) DebugLogs.Nre(_chaseService, "Chase Service", this);
                 else DebugLogs.Log("Chase service constructed successfully", this);
             }
 
         }
 
+        private void CreateDistanceMonitorService()
+        {
+            if (_distService != null) return;
+            _distService = new DistanceManagerJob();
+        }
       
         private async Task<TConcrete> TryLoadStateServiceAndInitialize<TConcrete>(FeatureMeta data, Func<TConcrete> createFunc) where TConcrete : class, IAddressableService
         {
@@ -389,6 +395,18 @@ namespace Services.Internal
 
             return target.IsMoving();
         }
+
+
+        // Temporary accessor for distance job, will switch to Func<Vector3>
+        public bool TryGetTarget(IInstanceIdentifiable id, out ITargetable target)
+        {
+            target = null;
+            if (!TryGetEntry(id, out var entry)) return false;
+
+            return TryGetTarget(entry, out target);
+            //if (!TryGetTarget(entry, out var tar)) return false;
+        }
+
         #endregion
 
         public void Dispose()
@@ -540,6 +558,7 @@ public interface IFsmNavigationControl
 
 public interface IFsmTargetQuery
 {
+    bool TryGetTarget(IInstanceIdentifiable id, out ITargetable target); // TEMPORARY until job accepts Func<Vector3>
     bool TryGetTargetPosition(IInstanceIdentifiable id, out Vector3 position);
     bool TryGetTargetTransform(IInstanceIdentifiable id, out Transform t);
     bool TargetIsMoving(IInstanceIdentifiable id);

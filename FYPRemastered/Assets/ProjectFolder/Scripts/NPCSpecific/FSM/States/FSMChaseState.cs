@@ -164,11 +164,11 @@ public class FSMChaseState : FsmBaseState<ChaseDeps>
 
 public sealed class ChaseDeps : FsmBaseState<ChaseDeps>.FsmBaseStateDeps
 {
-    public IDistanceService DistanceService { get; private set; }
+    public IDistanceMonitoringService DistanceService { get; private set; }
     public float MinStoppingDistance { get; private set; }
     public float MaxStoppingDistance { get; private set; }
 
-    public ChaseDeps(IDistanceService distanceService, IPathResolver resolver, ChaseStateConfig config) : base(resolver)
+    public ChaseDeps(IDistanceMonitoringService distanceService, IPathResolver resolver, ChaseStateConfig config) : base(resolver)
     {
         DistanceService = distanceService;
         MinStoppingDistance = config.minStoppingdistance;
@@ -218,8 +218,8 @@ public sealed class ChaseDeps : FsmBaseState<ChaseDeps>.FsmBaseStateDeps
 public class FSMChaseStateNew : FsmBaseStateNew<IChaseService>
 {
     
-    private Action<float/*, float*/> _distanceCheckCB;
-    private int _distanceCheckSubscriberId = -1;
+    private Action<float> _distanceCheckCB;
+  //  private int _distanceCheckSubscriberId = -1;
     float? _initialDistance = null;
 
 
@@ -250,7 +250,7 @@ public class FSMChaseStateNew : FsmBaseStateNew<IChaseService>
         /*Vector3 chaseTargetPos;
         if (!TryGetTargetPosition(out chaseTargetPos)) return;*/
 
-        if (!Context.TryGetChaseCandidates(_stateEvents, _candidateDestinations)) return;
+        if (!Context.TryGetDestinationCandidates(_stateEvents, _candidateDestinations)) return;
         if (_candidateDestinations.Count == 0) return;
 
        /* if (_candidateDestinations.Count == 0) _candidateDestinations.Add(chaseTargetPos);
@@ -340,10 +340,18 @@ public class FSMChaseStateNew : FsmBaseStateNew<IChaseService>
 
     private void RegisterDistanceCheck()
     {
-        Vector3 ownerPos;
+
+        if (Context.TryRegisterDistanceToTargetMonitoring(_stateEvents, _distanceCheckCB, out float initDist))
+            _initialDistance = initDist;
+        else _initialDistance = null;
+
+        
+
+       /* Vector3 ownerPos;
         if (!TryGetOwnerPosition(out ownerPos)) return;
 
-        ITargetable target;
+        ITargetable target;*/
+
         // if (!Context.TryGetTarget(out target)) return; // COMMENTED OUT FOR NOW
 
         /*  _distanceCheckSubscriberId = _deps.DistanceService.RegisterSubscriber(
@@ -355,17 +363,20 @@ public class FSMChaseStateNew : FsmBaseStateNew<IChaseService>
 
     private void UnregisterDistanceCheck()
     {
-        if (_distanceCheckSubscriberId >= 0)
+        Context.TryUnregisterDistanceToTargetMonitoring(_stateEvents);
+        _initialDistance = null;
+
+       /* if (_distanceCheckSubscriberId >= 0)
         {
-            /*if (!_deps.DistanceService.UnregisterSubscriber(_distanceCheckSubscriberId))
+            *//*if (!_deps.DistanceService.UnregisterSubscriber(_distanceCheckSubscriberId))
             {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 Debug.LogError("Failed to unregister distance check subscriber with id: " + _distanceCheckSubscriberId);
 #endif
-            }*/ // COMMENTED OUT FOR NO
-            _distanceCheckSubscriberId = -1;
+            }*//* // COMMENTED OUT FOR NO
+           // _distanceCheckSubscriberId = -1;
             _initialDistance = null;
-        }
+        }*/
     }
 
 

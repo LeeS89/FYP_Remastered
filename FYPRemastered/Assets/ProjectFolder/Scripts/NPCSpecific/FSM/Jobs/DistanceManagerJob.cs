@@ -6,7 +6,7 @@ using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 
-public class DistanceManagerJob : IDistanceService, ITickable
+public class DistanceManagerJob : IDistanceMonitoringService, ITickable
 {
     private NativeList<int> _subscriberIds;
     private List<ITargetable> _targets = new(25);
@@ -80,6 +80,33 @@ public class DistanceManagerJob : IDistanceService, ITickable
         _subscriberIndexMap[subscriberId] = index;
         _subscriberCallbacks[subscriberId] = callback;
         return subscriberId;
+    }
+
+    public bool TryRegisterSubscriber(IInstanceIdentifiable id, Vector3 currentPosition, ITargetable targetToCompare, Action<float> callback)
+    {
+        if (id == null || targetToCompare == null || targetToCompare.Position() == null || callback == null) return false;
+        int subscriberId = id.EntityId;
+        int index = _subscriberPositions.Length;
+
+        _subscriberPositions.Add(currentPosition);
+        _targets.Add(targetToCompare);
+        _subscriberTargetPositions.Add(targetToCompare.Position().Value);
+        _currentDistances.Add(0f);
+
+        _subscriberIds.Add(subscriberId);
+
+        _subscriberIndexMap[subscriberId] = index;
+        _subscriberCallbacks[subscriberId] = callback;
+
+        return true;
+    }
+
+    public bool TryUnregisterSubscriber(IInstanceIdentifiable id)
+    {
+        if (id == null || !_subscriberIndexMap.ContainsKey(id.EntityId)) return false;
+
+        _removeQueue.Enqueue(id.EntityId);
+        return true;
     }
 
     public bool UnregisterSubscriber(int subscriberId)
@@ -205,6 +232,8 @@ public class DistanceManagerJob : IDistanceService, ITickable
 
         SafeRemove();
     }
+
+   
 
     [BurstCompile]
     private struct DistanceCheckJob : IJobParallelFor

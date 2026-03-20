@@ -158,5 +158,14 @@ public class WaypointResources : IWaypointService, IAddressableService
         if (id == null) { DebugLogs.RequireNotNull(id, "InstancIdentifiable"); return false; }
         return _navQuery.TryGetPath(id, out path);
     }
-        
+
+    public bool TryGetDestinationCandidates(IInstanceIdentifiable id, List<Vector3> buffer)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void ReleaseDestinationCandidates(IInstanceIdentifiable id, List<Vector3> buffer)
+    {
+        throw new System.NotImplementedException();
+    }
 }
