@@ -37,7 +37,7 @@ public class AgentFsmDeps : IFsmControllerDeps, IPatrolDeps, IChaseDeps, IFlankD
     public IPathResolver _pathResolver;
     private ITargetable _owner;
     private ITargetable _target;
-    public IWaypointService _waypointService;
+    public IPatrolService _waypointService;
     public IFlankService _flankService;
 
     private IDistanceMonitoringService _distanceService;
@@ -91,7 +91,7 @@ public class AgentFsmDeps : IFsmControllerDeps, IPatrolDeps, IChaseDeps, IFlankD
 
     
 
-    public IWaypointService WaypointService => _waypointService;
+    public IPatrolService WaypointService => _waypointService;
     public float MaxTimeAtPatrolPoint => _maxTimeAtWaypoint;
     public float MinTimeAtPatrolPoint => _minTimeAtWaypoint;
 

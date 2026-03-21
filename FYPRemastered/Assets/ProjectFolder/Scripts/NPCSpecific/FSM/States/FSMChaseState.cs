@@ -215,15 +215,16 @@ public sealed class ChaseDeps : FsmBaseState<ChaseDeps>.FsmBaseStateDeps
 
 
 
-public class FSMChaseStateNew : FsmBaseStateNew<IChaseService>
+public sealed class FSMChaseStateNew : FsmBaseStateNew<IChaseService>
 {
     
     private Action<float> _distanceCheckCB;
   //  private int _distanceCheckSubscriberId = -1;
-    float? _initialDistance = null;
+    private float? _initialDistance = null;
 
 
-    public FSMChaseStateNew(IFsmStateEvents stateController, IChaseService service) : base(stateController, service, StateId.Chase) { }
+    public FSMChaseStateNew(IFsmStateEvents stateController, IChaseService service, IPathResolver pathResolver)
+        : base(stateController, service, pathResolver, StateId.Chase) { _candidateDestinations.EnsureCapacity(1); }
 
  /*   public FSMChaseStateNew(ChaseDeps deps, SharedFsmStateServices sharedDeps, IFsmStateEvents stateContext)
         : base(deps, sharedDeps, stateContext, StateId.Chase)
@@ -256,25 +257,25 @@ public class FSMChaseStateNew : FsmBaseStateNew<IChaseService>
        /* if (_candidateDestinations.Count == 0) _candidateDestinations.Add(chaseTargetPos);
         else _candidateDestinations[0] = chaseTargetPos;*/
 
-        ValidateCandidateDestinations();
+        ValidateAndSendCandidateDestinations();
        
     }
 
 
-    protected override void ValidateCandidateDestinations()
+    protected override void ValidateAndSendCandidateDestinations()
     {
-        if (!_isInState || ResolverIsNull()/*||*/ /*OwnerIsNull() ||*/ /*TryGetPath()*/) return;
+        if (!_isInState /*|| ResolverIsNull()*//*||*/ /*OwnerIsNull() ||*/ /*TryGetPath()*/) return;
 
         Vector3 pos;
-        if (!TryGetOwnerPosition(out pos)) return;
-
         NavMeshPath path;
-        if (!TryGetPath(out path)) return;
+        if (!TryGetCurrentPositionAndPath(out pos, out path)) return;
+       /* if (!TryGetCurrentPosition(out pos)) return;
+        if (!TryGetPath(out path)) return;*/
 
-        DestinationRequest req = new DestinationRequest(_id, pos, _candidateDestinations, path,
+        DestinationRequest req = new DestinationRequest(_stateId, pos, _candidateDestinations, path,
             ReasonForDestinationCheck.ValidatePathForDestination, _validationCallback);
 
-
+        _pathResolver?.ProcessDestinationCandidates(in req);
         
    //     _deps.PathResolver.ProcessDestinationCandidates(in req); // Connented out for now
 
@@ -319,7 +320,7 @@ public class FSMChaseStateNew : FsmBaseStateNew<IChaseService>
 
 
         Vector3 ownerPos;
-        if (!TryGetOwnerPosition(out ownerPos)) return;
+        if (!TryGetCurrentPosition(out ownerPos)) return;
 
         if (!Context.TryGetSqrDistanceToTarget(_stateEvents, ownerPos, out float initialDistance)) return;
 
@@ -351,7 +352,7 @@ public class FSMChaseStateNew : FsmBaseStateNew<IChaseService>
         if (!TryGetOwnerPosition(out ownerPos)) return;
 
         ITargetable target;*/
-
+       
         // if (!Context.TryGetTarget(out target)) return; // COMMENTED OUT FOR NOW
 
         /*  _distanceCheckSubscriberId = _deps.DistanceService.RegisterSubscriber(
@@ -363,8 +364,9 @@ public class FSMChaseStateNew : FsmBaseStateNew<IChaseService>
 
     private void UnregisterDistanceCheck()
     {
-        Context.TryUnregisterDistanceToTargetMonitoring(_stateEvents);
         _initialDistance = null;
+        Context.TryUnregisterDistanceToTargetMonitoring(_stateEvents);
+        
 
        /* if (_distanceCheckSubscriberId >= 0)
         {

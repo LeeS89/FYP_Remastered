@@ -7,7 +7,7 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.AI;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
-public class ChaseResources : IChaseService, IAddressableService
+public sealed class ChaseResources : IChaseService, IAddressableService
 {
     private AsyncOperationHandle<AgentChaseData>? _chaseDataHandle;
     private AgentChaseData _data;
@@ -49,10 +49,10 @@ public class ChaseResources : IChaseService, IAddressableService
         return true;
     }
 
-    public bool TryGetOwnerPosition(IInstanceIdentifiable id, out Vector3 pos)
+    public bool TryGetCurrentPosition(IInstanceIdentifiable id, out Vector3 pos)
     {
         pos = default;
-        if (id == null) { DebugLogs.RequireNotNull(id, "InstancIdentifiable"); return false; }
+        if (id == null) { DebugLogs.RequireNotNull(id, "InstancIdentifiable", this); return false; }
 
         return _navQuery.TryGetOwnerPosition(id, out pos);
     }
@@ -123,5 +123,13 @@ public class ChaseResources : IChaseService, IAddressableService
     public void ReleaseDestinationCandidates(IInstanceIdentifiable id, List<Vector3> buffer)
     {
         throw new NotImplementedException();
+    }
+
+    public bool TryGetCurrentPositionAndPath(IInstanceIdentifiable id, out Vector3 currentPos, out NavMeshPath path)
+    {
+        currentPos = default;
+        path = null;
+        if (id == null) return false;
+        return _navQuery.TryGetOwnerPositionAndPath(id, out currentPos, out path);
     }
 }

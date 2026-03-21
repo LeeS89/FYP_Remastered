@@ -1,6 +1,9 @@
 using Npc.API;
+using NUnit.Framework.Constraints;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -506,7 +509,12 @@ public class FsmManager : IFsmStateEvents, IFsmController
         throw new NotImplementedException();
     }
 
-   
+    public void RequestRotation(float requestedAngle, StateId id, Action<bool> onComplete)
+    {
+        throw new NotImplementedException();
+    }
+
+
 
 
 
@@ -627,7 +635,7 @@ public class FsmManagerNew : IFsmStateEvents, IFsmController
 
     // Internal Members
     private List<SetDestinationDelay> _timer = new(2);
-    private IFsmState _currentState;
+    private IFsmStateNew<IFsmStateService> _currentState;
     public bool IsInStateTransition { get; private set; } = false;
     private bool _hasValidDestination = false;
     private float _lerpSpeed = 0f;
@@ -655,12 +663,16 @@ public class FsmManagerNew : IFsmStateEvents, IFsmController
     private readonly IFsmTargetQuery _targetQuery;
     private readonly IReadOnlyDictionary<StateId, IFsmStateNew<IFsmStateService>> _statesNew;
 
-    public FsmManagerNew(int instanceId, IFsmNavigationControl navControl, IFsmTargetQuery targetQuery, IReadOnlyDictionary<StateId, IFsmStateNew<IFsmStateService>> states)
+    public FsmManagerNew(int instanceId, IFsmNavigationControl navControl, IFsmTargetQuery targetQuery, IReadOnlyDictionary<StateId, IFsmStateNew<IFsmStateService>> states,
+        IPathNotifications pathNotifies, IAnimationRequestNotifications animNotifies = null)
     {
         _instanceId = instanceId;
         _navControl = navControl;
         _targetQuery = targetQuery;
         _statesNew = states;
+
+        _pathNotifies = pathNotifies;
+        _animNotifies = animNotifies;
     }
 
 
@@ -685,8 +697,9 @@ public class FsmManagerNew : IFsmStateEvents, IFsmController
     {
         if (next == CurrentState || next == StateId.None) return; // Allow for none and make current null
 
-        if (_states != null && _states.TryGetValue(next, out var nextstate))
+        if (_statesNew != null && _statesNew.TryGetValue(next, out var nextstate))
         {
+            DebugLogs.Err("Calling enter State", this);
             IsInStateTransition = true;
             _currentState?.ExitState();
             _currentState = nextstate;
@@ -749,6 +762,33 @@ public class FsmManagerNew : IFsmStateEvents, IFsmController
        /* if (_sharedDeps.OnTryGetCurrentTarget?.Invoke(out var target) == true)
             _sharedDeps.OwnerTransform.RotateTowards(target.Transform);*/
         //_sharedDeps.OwnerTransform.RotateTowards(_sharedDeps.GetCurrentTarget?.Invoke().Transform);
+    }
+
+    public void RequestRotation(float requestedAngle, StateId id, Action<bool> onComplete)
+    {
+        if (onComplete == null) return;
+        if (!TryGetOwnerTransform(out var t)) return;
+        CoroutineRunner.Instance.StartCoroutine(RotateRoutine(t, requestedAngle, id, onComplete));  
+    }
+
+    private IEnumerator RotateRoutine(Transform owner, float angle, StateId id, Action<bool> onComplete)
+    {
+        Vector3 dirOffset = Quaternion.AngleAxis(angle, owner.up) * owner.forward;
+        Quaternion targetRot = Quaternion.LookRotation(dirOffset, owner.up);
+
+        while (Quaternion.Angle(owner.rotation, targetRot) > 2.0f + Mathf.Epsilon)
+        {
+            owner.rotation = Quaternion.Slerp(owner.rotation, targetRot, Time.deltaTime * 2f);
+
+            if (StateHasChanged(id))
+            {
+                onComplete.Invoke(false);
+                yield break;
+            }
+            yield return null;
+        }
+
+        onComplete?.Invoke(true);
     }
 
     private Vector3[] _corners = new Vector3[64];
@@ -1200,6 +1240,11 @@ public class FsmManagerNew : IFsmStateEvents, IFsmController
     {
         throw new NotImplementedException();
     }
+
+    public bool HasReachedDestination()
+    => !_hasValidDestination;
+
+
 
 
 

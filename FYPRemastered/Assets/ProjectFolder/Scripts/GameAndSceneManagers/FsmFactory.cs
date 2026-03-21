@@ -32,12 +32,12 @@ namespace Services.Internal
 
 
 
-        public IWaypointService GetWService() => _wpService as IWaypointService;
+        public IPatrolService GetWService() => _wpService as IPatrolService;
 
 
         public override async Task InitialiseAsync()
         {
-
+            if (_registry == null) _registry = new FsmRegistry();
             if (_metaData == null)
             {
                 DebugLogs.RequireNotNull(_metaData, "SceneMetaData", this);
@@ -170,12 +170,21 @@ namespace Services.Internal
         {
             if (body == null || body.Owner == null || body.Owner.Transform == null) { fsm = null; return false; }
 
-            if (_registry == null) _registry = new FsmRegistry();
+           // if (_registry == null) _registry = new FsmRegistry();
             int id = body.Owner.Transform.GetInstanceID();
 
             if (!_registry.TryRegister(id, body, targetRetrieverFunc)) { fsm = null; return false; }
+            //  fsm = new FsmManagerNew(id, _registry, _registry, null); // Placeholder
+            Dictionary<StateId, IFsmStateNew<IFsmStateService>> _states = new();
 
-            fsm = null;//new FsmManagerNew(id, _registry); // Placeholder
+            FsmManagerNew fsNew = new FsmManagerNew(id, _registry, _registry, _states, pathNotifySender, animNotifySender);
+
+            
+
+            IFsmStateNew<IFsmStateService> patrol = new FSMPatrolStateNew(fsNew, (IPatrolService)_wpService, new PathFinder(new PathRequestManager()));
+            _states.Add(StateId.Patrol, patrol);
+            fsm = fsNew;
+
             return true;
         }
 
@@ -312,6 +321,31 @@ namespace Services.Internal
 
         }
 
+        private bool TryGetOwnerPosition(FsmEntry entry, out Vector3? pos)
+        {
+            pos = null;
+            if (entry == null) return false;
+
+            var owner = entry.Body?.Owner;
+            if (owner == null) return false;
+            var p = owner.Position();
+            if (p == null) return false;
+
+            pos = p.Value;
+            return true;
+        }
+
+        public bool TryGetOwnerPositionAndPath(IInstanceIdentifiable id, out Vector3 position, out NavMeshPath path)
+        {
+            position = default; path = null;
+            if (!TryGetEntry(id, out var entry)) return false;
+
+            if (!TryGetOwnerPosition(entry, out var pos)) return false;
+            position = pos.Value;
+           
+            return TryGetPath(entry, out path);
+        }
+
         public bool TryGetAgent(IInstanceIdentifiable id, out NavMeshAgent agent)
         {
             agent = null;
@@ -333,6 +367,15 @@ namespace Services.Internal
 
            /* if(!_entries.TryGetValue(id, out var entry)) { obstacle = null; return false; }
             return entry.TryGetObstacle(out obstacle);*/
+        }
+
+        private bool TryGetPath(FsmEntry entry, out NavMeshPath path)
+        {
+            path = null;
+            if (entry == null) return false;
+            path = entry.Body?.Path;
+
+            return path != null;
         }
 
         public bool TryGetPath(IInstanceIdentifiable id, out NavMeshPath path)
@@ -415,7 +458,7 @@ namespace Services.Internal
             _entries.Clear();
         }
 
-        
+       
 
         private sealed class FsmEntry : IDisposable
         {
@@ -547,6 +590,8 @@ public interface IFsmNavigationQuery
 {
     bool TryGetOwnerPosition(IInstanceIdentifiable id, out Vector3 position);
     bool TryGetPath(IInstanceIdentifiable id, out NavMeshPath path);
+
+    bool TryGetOwnerPositionAndPath(IInstanceIdentifiable id, out Vector3 position, out NavMeshPath path);
 }
 
 public interface IFsmNavigationControl

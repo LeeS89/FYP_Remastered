@@ -203,7 +203,7 @@ public class MoonSceneManagerNewObsolete : BaseSceneManager
 
     }
 
-    private IWaypointService _waypointService;
+    private IPatrolService _waypointService;
 
     public override async Task SetupScene()
     {

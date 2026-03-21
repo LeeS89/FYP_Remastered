@@ -45,7 +45,7 @@ public interface IFsmStateDeps : IFsmDeps
 
 public interface IPatrolDeps : IFsmStateDeps//, IFsmDeps
 {
-    IWaypointService WaypointService { get; }
+    IPatrolService WaypointService { get; }
     float MaxTimeAtPatrolPoint { get; }
     float MinTimeAtPatrolPoint { get; }
 }

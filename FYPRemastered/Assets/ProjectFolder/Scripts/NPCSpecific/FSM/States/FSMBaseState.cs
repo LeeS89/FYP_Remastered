@@ -254,13 +254,13 @@ public abstract class FsmBaseStateNew<TContext> : IFsmStateNew<TContext> where T
 
     //new
     //protected readonly ITargetable _owner;
-    protected TContext _deps;
+   // protected TContext _deps;
   //  private SharedFsmStateServices _sharedDeps;
    // protected NavMeshPath _path;
     // end new
 
-    public StateId GetId() => _id;
-    protected readonly StateId _id = StateId.None;
+    public StateId GetId() => _stateId;
+    protected readonly StateId _stateId = StateId.None;
 
 
 
@@ -269,13 +269,15 @@ public abstract class FsmBaseStateNew<TContext> : IFsmStateNew<TContext> where T
 
     TContext IFsmStateNew<TContext>.Context => Context;
 
-    internal void SetContext(TContext context) => Context = context;
+    //internal void SetContext(TContext context) => Context = context;
+    protected readonly IPathResolver _pathResolver;
 
-    public FsmBaseStateNew(IFsmStateEvents stateController, TContext service, StateId id)
+    public FsmBaseStateNew(IFsmStateEvents stateController, TContext service, IPathResolver pathResolver, StateId id)
     {
         _stateEvents = stateController;
         Context = service;
-        _id = id;
+        _pathResolver = pathResolver;
+        _stateId = id;
     }
 
     #endregion
@@ -347,7 +349,7 @@ public abstract class FsmBaseStateNew<TContext> : IFsmStateNew<TContext> where T
         return path != null; // Maybe new notification if path is null
     }*/
 
-    protected bool TryGetOwnerPosition(out Vector3 pos) =>  Context.TryGetOwnerPosition(_stateEvents, out pos);
+    protected bool TryGetCurrentPosition(out Vector3 pos) =>  Context.TryGetCurrentPosition(_stateEvents, out pos);
    /* {
         if (OwnerIsNull()) { pos = Vector3.zero; return false; }
 
@@ -365,25 +367,27 @@ public abstract class FsmBaseStateNew<TContext> : IFsmStateNew<TContext> where T
         return target.IsMoving();
     }*/
 
-    protected bool TryGetOwnerTransform(out Transform ownerTransform)
+ /*   protected bool TryGetOwnerTransform(out Transform ownerTransform)
     {
         ownerTransform = null;
         return false;
     }
 
+*/
 
-
+    protected bool TryGetCurrentPositionAndPath(out Vector3 position, out NavMeshPath path)
+        => Context.TryGetCurrentPositionAndPath(_stateEvents, out position, out path);
 
     public virtual bool NeedsNewPath() => false;
 
-    private bool DepsIsNull() => _deps == null;
-    protected bool ResolverIsNull() => DepsIsNull();// || _deps.PathResolver == null;  => Had error with new setup
+ //   private bool DepsIsNull() => _deps == null;
+  //  protected bool ResolverIsNull() => DepsIsNull();// || _deps.PathResolver == null;  => Had error with new setup
 
     //protected bool OwnerDataNull() => _owner == null || _path == null;
     // protected bool IsStationary() => _stateContext?.HasReachedDestination() ?? true;
 
-    public virtual void EnterState() { _isInState = true; RetrieveCandidateDestinations(); }
-    protected abstract void ValidateCandidateDestinations();
+    public virtual void EnterState() { DebugLogs.Err($"Entering {_stateId.ToString()} state", this);  _isInState = true; RetrieveCandidateDestinations(); }
+    protected abstract void ValidateAndSendCandidateDestinations();
     protected abstract void RetrieveCandidateDestinations();
     public void TryRepath()
     {
@@ -398,14 +402,14 @@ public abstract class FsmBaseStateNew<TContext> : IFsmStateNew<TContext> where T
         _stateEvents?.ProcessDestinationResult(in result);
     }
 
-    
 
-    protected void CancelCurrentPathRequests()
-    {
+
+    protected void CancelCurrentPathRequests() => _pathResolver.CancelAll();
+  /*  {
         if (ResolverIsNull()) return;
        // _deps.PathResolver.CancelAll(); => Had error with new setup
 
-    }
+    }*/
     
     public virtual void ExitState()
     {
@@ -443,12 +447,12 @@ public abstract class FsmBaseStateNew<TContext> : IFsmStateNew<TContext> where T
 
 
 
-    public abstract class FsmBaseStateDeps 
+  /*  public abstract class FsmBaseStateDeps 
     { 
         public readonly IPathResolver PathResolver;
 
         public FsmBaseStateDeps(IPathResolver pathResolver) => PathResolver = pathResolver;
 
         public virtual float GetStoppingDistance() => 0f; 
-    }
+    }*/
 }

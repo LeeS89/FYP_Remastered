@@ -11,8 +11,8 @@ public readonly struct DestinationRequest
     public readonly ReasonForDestinationCheck Reason;
     public readonly DestinationResultCallback Callback;
 
-    public DestinationRequest(StateId id, Vector3 from, List<Vector3> candidates, NavMeshPath path, ReasonForDestinationCheck reason, DestinationResultCallback cb)
-        => (StateId, From, Candidates, Path, Reason, Callback) = (id, from, candidates, path, reason, cb);
+    public DestinationRequest(StateId id, Vector3 currentPosition, List<Vector3> candidates, NavMeshPath path, ReasonForDestinationCheck reason, DestinationResultCallback cb)
+        => (StateId, From, Candidates, Path, Reason, Callback) = (id, currentPosition, candidates, path, reason, cb);
 
 }
 

@@ -7,13 +7,15 @@ using UnityEngine.AI;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
 
-public class WaypointResources : IWaypointService, IAddressableService
+public class WaypointResources : IPatrolService, IAddressableService
 {
 
+   
     //private AsyncOperationHandle[] _handles = new AsyncOperationHandle[2];
     private AsyncOperationHandle<AgentPatrolData>? _patrolDataHandle;
     //private WaypointBlockData _waypointBlockData;
-    private Dictionary<object, BlockData> _inUseBlockTracker = new(20);
+    private Dictionary<IInstanceIdentifiable, BlockData> _inUseBlockTracker = new(20);
+    //private Dictionary<object, BlockData> _inUseBlockTracker = new(20);
 
     private AgentPatrolData _patrolData;
     private BlockData[] waypointBlocks;
@@ -108,9 +110,9 @@ public class WaypointResources : IWaypointService, IAddressableService
             Addressables.Release(_patrolDataHandle.Value);
     }
 
-    public bool TryGetWaypoints(object requester, List<Vector3> buffer)
+    private bool TryGetWaypoints(IInstanceIdentifiable id, List<Vector3> buffer)
     {
-        if (requester == null || requester.GetType().IsValueType || buffer == null) return false;
+        if (id == null || /*id.GetType().IsValueType ||*/ buffer == null) return false;
 
         if (/*_waypointBlockData*/waypointBlocks != null && waypointBlocks.Length > 0)
         {
@@ -118,10 +120,11 @@ public class WaypointResources : IWaypointService, IAddressableService
             {
                 if (!blockData._inUse)
                 {
-                    TryReleaseWaypoints(requester, buffer);
+                    if (blockData._waypointPositions == null || blockData._waypointPositions.Length == 0) continue;
+                    TryReleaseWaypoints(id, buffer);
                     blockData._inUse = true;
                     buffer.AddRange(blockData._waypointPositions);
-                    _inUseBlockTracker[requester] = blockData;
+                    _inUseBlockTracker[id] = blockData;
                     return true;
                 }
             }
@@ -130,7 +133,7 @@ public class WaypointResources : IWaypointService, IAddressableService
         return false;
     }
 
-    public bool TryReleaseWaypoints(object requester, List<Vector3> buffer)
+    private bool TryReleaseWaypoints(IInstanceIdentifiable requester, List<Vector3> buffer)
     {
         if (requester == null || requester.GetType().IsValueType) return false;
 
@@ -144,7 +147,7 @@ public class WaypointResources : IWaypointService, IAddressableService
         return false;
     }
 
-    public bool TryGetOwnerPosition(IInstanceIdentifiable id, out Vector3 pos)
+    public bool TryGetCurrentPosition(IInstanceIdentifiable id, out Vector3 pos)
     {
         pos = default;
         if (id == null) { DebugLogs.RequireNotNull(id, "InstancIdentifiable"); return false; }
@@ -158,14 +161,18 @@ public class WaypointResources : IWaypointService, IAddressableService
         if (id == null) { DebugLogs.RequireNotNull(id, "InstancIdentifiable"); return false; }
         return _navQuery.TryGetPath(id, out path);
     }
-
+    
     public bool TryGetDestinationCandidates(IInstanceIdentifiable id, List<Vector3> buffer)
-    {
-        throw new System.NotImplementedException();
-    }
+        => TryGetWaypoints(id, buffer);
 
     public void ReleaseDestinationCandidates(IInstanceIdentifiable id, List<Vector3> buffer)
+        => TryReleaseWaypoints(id, buffer);
+
+    public bool TryGetCurrentPositionAndPath(IInstanceIdentifiable id, out Vector3 currentPos, out NavMeshPath path)
     {
-        throw new System.NotImplementedException();
+        currentPos = default;
+        path = null;
+        if (id == null) return false;
+        return _navQuery.TryGetOwnerPositionAndPath(id, out currentPos, out path);
     }
 }

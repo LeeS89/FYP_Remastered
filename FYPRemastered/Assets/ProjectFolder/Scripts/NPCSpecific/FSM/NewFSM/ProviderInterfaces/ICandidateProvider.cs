@@ -307,7 +307,7 @@ public abstract class DestinationProviderNew : ICandidateProviderNew
 [Obsolete("", true)]
 public sealed class WaypointProviderNew : DestinationProviderNew
 {
-    private IWaypointService _service;
+    private IPatrolService _service;
     //private IWaypointRepository _repo;
     public int CurrentWaypointZone { get; private set; } = -1;
 
@@ -316,7 +316,7 @@ public sealed class WaypointProviderNew : DestinationProviderNew
     private Action<BlockData> _wpRequestCB;
     private Action<bool, int> OnDelayedCandidateRequest;
 
-    public WaypointProviderNew(IWaypointService waypointService)
+    public WaypointProviderNew(IPatrolService waypointService)
     {
         _service = waypointService;
         Candidates.EnsureCapacity(15);

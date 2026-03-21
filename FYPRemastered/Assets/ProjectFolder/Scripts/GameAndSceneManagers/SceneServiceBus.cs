@@ -1,3 +1,4 @@
+using Services.Internal;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -16,7 +17,7 @@ namespace Services.Internal
         public event Action OnSceneEnd;
 
         private List<ITickable> _tickables = new(5);
-        private IWaypointService _waypointService;
+        private IPatrolService _waypointService;
         private IAgentAlertService _npcService;
         private IFlankService _flankService;
         private IPoolService _poolService;
@@ -120,7 +121,13 @@ namespace Services.Internal
             return true;
         }
 
-        public bool TryGetWaypointService(out IWaypointService waypointService)
+        public bool TryGetFsmFactory(out IFsmFactory fsmFactory)
+        {
+            fsmFactory = _fsmFactory;
+            return fsmFactory != null;
+        }
+
+        public bool TryGetWaypointService(out IPatrolService waypointService)
         {
             waypointService = _fsmFactory?.GetWService();//_waypointService;
 
@@ -175,8 +182,7 @@ namespace Services.Internal
             return _sceneService != null;
         }
 
-
-
+       
     }
 }
 
@@ -219,12 +225,13 @@ public interface IUtilityServices
 
 public interface ISceneAIServices : IUtilityServices
 {
+    bool TryGetFsmFactory(out IFsmFactory fsmFactory);
     bool TryGetPlayerRefService(out IPlayerRefService playerRefService);
 
     bool TryGetPathService(out IPathService pathService);
     // IPathService PathService { get; }
 
-    bool TryGetWaypointService(out IWaypointService waypointService);
+    bool TryGetWaypointService(out IPatrolService waypointService);
     // IWaypointService WaypointService { get; }
 
     bool TryGetAgentAlertService(out IAgentAlertService npcService);
@@ -253,11 +260,12 @@ public interface IAddressableService : IDisposable
 
 public interface IFsmStateService
 {
-    bool TryGetOwnerPosition(IInstanceIdentifiable id, out Vector3 pos);
+    bool TryGetCurrentPosition(IInstanceIdentifiable id, out Vector3 currentPosition);
     bool TryGetPath(IInstanceIdentifiable id, out NavMeshPath path);
-
+    bool TryGetCurrentPositionAndPath(IInstanceIdentifiable id, out Vector3 currentPos, out NavMeshPath path);
     bool TryGetDestinationCandidates(IInstanceIdentifiable id, List<Vector3> buffer);
     void ReleaseDestinationCandidates(IInstanceIdentifiable id, List<Vector3> buffer);
+  
 }
 
 public interface IChaseService : IFsmStateService
@@ -270,11 +278,11 @@ public interface IChaseService : IFsmStateService
     bool TryUnregisterDistanceToTargetMonitoring(IInstanceIdentifiable id);
 }
 
-public interface IWaypointService : IFsmStateService// : IAddressableServiceObsolete
+public interface IPatrolService : IFsmStateService// : IAddressableServiceObsolete
 {
-    bool TryGetWaypoints(object requester, List<Vector3> buffer);
+   // bool TryGetWaypoints(object requester, List<Vector3> buffer);
 
-    bool TryReleaseWaypoints(object requester, List<Vector3> buffer);
+   // bool TryReleaseWaypoints(object requester, List<Vector3> buffer);
 }
 
 public interface IFlankService : IFsmStateService// : IAddressableServiceObsolete

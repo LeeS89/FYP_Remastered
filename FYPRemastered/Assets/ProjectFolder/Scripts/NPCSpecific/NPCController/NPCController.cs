@@ -7,7 +7,7 @@ using UnityEngine.AI;
 [RequireComponent(typeof(AgentEventManager))]
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(NavMeshObstacle))]
-public partial class NPCController : TargetableInit<ISceneAIServices, AgentEventManager>, /*IAgentData, */INPCBrainContext, INotificationListener
+public partial class NPCController : TargetableInit<ISceneAIServices, AgentEventManager>, INpcBody, /*IAgentData, */INPCBrainContext, INotificationListener
 { // Remove IAgentData
     
     //   private bool _isInStateTransition = false;
@@ -19,6 +19,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
     public NavMeshAgent Agent { get; protected set; }
     public NavMeshObstacle Obstacle { get; protected set; }
     public NavMeshPath Path { get; protected set; }
+
 
     // End FSM Data
 
@@ -39,7 +40,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
 
     public float SprintExitDist => throw new NotImplementedException();
 
-
+    public ITargetable Owner => this;
 
     [Header(@"How many consecutive FOV results required to ""See ""or ""Lose ""the target")]
     [SerializeField] private uint _requiredSeenStreak = 3;
@@ -248,8 +249,8 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
             _testAgentStop = false;
         }
 
-        if(_fsmManager != null)
-        _fsmManager.TestPrint = _showDistance;
+    /*    if(_fsmManager != null)
+        _fsmManager.TestPrint = _showDistance;*/
        /* if (_showDistance)
         {
             float distance = Vector3.Distance(transform.position, _primaryTarget.Position());

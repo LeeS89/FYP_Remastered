@@ -300,7 +300,7 @@ public class PlayerFlankingResources : SceneResources, IFlankService, IAddressab
 
     public void LateTick(float dt) { }
 
-    public bool TryGetOwnerPosition(IInstanceIdentifiable id, out Vector3 pos)
+    public bool TryGetCurrentPosition(IInstanceIdentifiable id, out Vector3 pos)
     {
         pos = default;
         if (id == null) { DebugLogs.RequireNotNull(id, "InstancIdentifiable"); return false; }
@@ -323,5 +323,13 @@ public class PlayerFlankingResources : SceneResources, IFlankService, IAddressab
     public void ReleaseDestinationCandidates(IInstanceIdentifiable id, List<Vector3> buffer)
     {
         throw new NotImplementedException();
+    }
+
+    public bool TryGetCurrentPositionAndPath(IInstanceIdentifiable id, out Vector3 currentPos, out NavMeshPath path)
+    {
+        currentPos = default;
+        path = null;
+        if (id == null) return false;
+        return _navQuery.TryGetOwnerPositionAndPath(id, out currentPos, out path);
     }
 }

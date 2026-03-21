@@ -7,7 +7,7 @@ using Random = UnityEngine.Random;
 
 public sealed class FSMPatrolState : FsmBaseState<PatrolDeps>
 {
-    private readonly IWaypointService _waypointService;
+    private readonly IPatrolService _waypointService;
   //  private readonly IPatrolDeps _patrolDeps;
 
     /*public FSMPatrolState(IWaypointService waypointService, IAgentData data, IPathResolver resolver, IFSMStateContext stateContext) 
@@ -51,7 +51,7 @@ public sealed class FSMPatrolState : FsmBaseState<PatrolDeps>
 
             Debug.LogError("successfully retrieved Path");
 
-            if (_waypointService == null || !_waypointService.TryGetWaypoints(this, _candidateDestinations))
+            if (_waypointService == null /*|| !_waypointService.TryGetWaypoints(this, _candidateDestinations)*/)
             {
                 Debug.LogError("Returning Failed Result for patrol");
                 DestinationResultInfo failedResult = new DestinationResultInfo
@@ -145,11 +145,11 @@ public sealed class FSMPatrolState : FsmBaseState<PatrolDeps>
 
 public sealed class PatrolDeps : FsmBaseState<PatrolDeps>.FsmBaseStateDeps
 {
-    public IWaypointService WaypointService { get; private set; }
+    public IPatrolService WaypointService { get; private set; }
     public float MaxTimeAtPatrolPoint { get; private set; }
     public float MinTimeAtPatrolPoint { get; private set; }
 
-    public PatrolDeps(IWaypointService waypointService, IPathResolver resolver, PatrolStateConfig config) : base(resolver)
+    public PatrolDeps(IPatrolService waypointService, IPathResolver resolver, PatrolStateConfig config) : base(resolver)
     {
         WaypointService = waypointService;
         MaxTimeAtPatrolPoint = config?.maxTimeAtWaypoint ?? 10f;
@@ -190,9 +190,9 @@ public sealed class PatrolDeps : FsmBaseState<PatrolDeps>.FsmBaseStateDeps
 
 
 
-public sealed class FSMPatrolStateNew : FsmBaseStateNew<IWaypointService>
+public sealed class FSMPatrolStateNew : FsmBaseStateNew<IPatrolService>
 {
-    private readonly IWaypointService _waypointService;
+ //   private readonly IPatrolService _waypointService;
     //  private readonly IPatrolDeps _patrolDeps;
 
     /*public FSMPatrolState(IWaypointService waypointService, IAgentData data, IPathResolver resolver, IFSMStateContext stateContext) 
@@ -201,8 +201,8 @@ public sealed class FSMPatrolStateNew : FsmBaseStateNew<IWaypointService>
         _waypointService = waypointService;
         _candidateDestinations.EnsureCapacity(10);
     }*/
-    public FSMPatrolStateNew(IFsmStateEvents stateController, IWaypointService service)
-        : base(stateController, service, StateId.Patrol)
+    public FSMPatrolStateNew(IFsmStateEvents stateController, IPatrolService service, IPathResolver pathResolver)
+        : base(stateController, service, pathResolver, StateId.Patrol)
     {
         // _patrolDeps = deps;
         //_waypointService = _deps.WaypointService;
@@ -218,11 +218,14 @@ public sealed class FSMPatrolStateNew : FsmBaseStateNew<IWaypointService>
         if (!_isInState /*|| OwnerIsNull()*//*_sharedDeps.OwnerTransform == null*/) return;
 
         Transform ownerTransform;
-        if (!TryGetOwnerTransform(out ownerTransform)) return;
+        // if (!TryGetOwnerTransform(out ownerTransform)) return;
 
 
+        if (_runningRoutine == null)
+            _runningRoutine = CoroutineRunner.Instance.StartCoroutine(PatrolWaitRoutineNew(
+                0.5f, 7f));
         /*if (_runningRoutine == null)
-            _runningRoutine = CoroutineRunner.Instance.StartCoroutine(PatrolWaitRoutine(
+            _runningRoutine = CoroutineRunner.Instance.StartCoroutine(PatrolWaitRoutineNew(
                 ownerTransform, _deps.MinTimeAtPatrolPoint, _deps.MaxTimeAtPatrolPoint));*/
     }
 
@@ -238,7 +241,7 @@ public sealed class FSMPatrolStateNew : FsmBaseStateNew<IWaypointService>
 
             Debug.LogError("successfully retrieved Path");
 
-            if (_waypointService == null || !_waypointService.TryGetWaypoints(this, _candidateDestinations))
+            if (Context == null || !Context.TryGetDestinationCandidates(_stateEvents, _candidateDestinations)/*!_waypointService.TryGetWaypoints(this, _candidateDestinations)*/)
             {
                 Debug.LogError("Returning Failed Result for patrol");
                 DestinationResultInfo failedResult = new DestinationResultInfo
@@ -247,26 +250,31 @@ public sealed class FSMPatrolStateNew : FsmBaseStateNew<IWaypointService>
                     path,
                     DestinationResult.CandidatesNullOrEmpty,
                     Vector3.zero,
-                    _id
+                    _stateId
                 );
 
                 base.OnProcessedDestinationsResult(in failedResult);
                 return;
             }
         }
-        ValidateCandidateDestinations();
+        ValidateAndSendCandidateDestinations();
     }
 
-    protected override void ValidateCandidateDestinations()
+    protected override void ValidateAndSendCandidateDestinations()
     {
-        if (!_isInState || _candidateDestinations == null || ResolverIsNull()) return;
+        if (!_isInState || _candidateDestinations == null/* || ResolverIsNull()*/) return;
 
 
-        Vector3 ownerPos;
-        if (!TryGetOwnerPosition(out ownerPos)) return;
+        /*Vector3 ownerPos;
+        if (!TryGetCurrentPosition(out ownerPos)) return;
 
         NavMeshPath path;
-        if (!TryGetPath(out path)) return;
+        if (!TryGetPath(out path)) return;*/
+        Vector3 ownerPos;
+        NavMeshPath path;
+        if (!TryGetCurrentPositionAndPath(out ownerPos, out path)) return;
+
+        DebugLogs.Err("GOTTEN PATH AND OWNER POS", this);
 
         if (_candidateDestinations.Count > 1)
         {
@@ -279,8 +287,10 @@ public sealed class FSMPatrolStateNew : FsmBaseStateNew<IWaypointService>
         //ContinueRoutine = true;
 
 
-        DestinationRequest req = new DestinationRequest(_id, ownerPos, _candidateDestinations, path,
+        DestinationRequest req = new DestinationRequest(_stateId, ownerPos, _candidateDestinations, path,
             ReasonForDestinationCheck.ValidatePathForDestination, _validationCallback);
+
+        _pathResolver?.ProcessDestinationCandidates(in req);
        // _deps.PathResolver.ProcessDestinationCandidates(in req);
 
 
@@ -291,7 +301,7 @@ public sealed class FSMPatrolStateNew : FsmBaseStateNew<IWaypointService>
 
 
 
-    private IEnumerator PatrolWaitRoutine(Transform t, float minWait, float maxWait)
+    /*private IEnumerator PatrolWaitRoutine(Transform t, float minWait, float maxWait)
     {
         Debug.LogError("Patrol wait routine called");
         // if (forward != null)
@@ -305,11 +315,11 @@ public sealed class FSMPatrolStateNew : FsmBaseStateNew<IWaypointService>
             t.rotation = Quaternion.Slerp(t.rotation, targetRot, Time.deltaTime * 2f);
             yield return null;
         }
-
+  
         // }
         if (!_isInState) yield break;
 
-        _stateEvents?.RequestAnimation(AnimationCue.Look, _id);
+        _stateEvents?.RequestAnimation(AnimationCue.Look, _stateId);
         //_stateContext?.OnAnimationIntent?.Invoke(AnimationCue.Look);
 
         float _delayTime = Random.Range(minWait, maxWait);
@@ -321,9 +331,45 @@ public sealed class FSMPatrolStateNew : FsmBaseStateNew<IWaypointService>
             yield return null;
         }
         if (!_isInState) yield break;
-        ValidateCandidateDestinations();
+        ValidateAndSendCandidateDestinations();
 
         _runningRoutine = null;
+    }*/
+
+    private IEnumerator PatrolWaitRoutineNew(float minWait, float maxWait)
+    {
+        Debug.LogError("Patrol wait routine called");
+       
+        float randomAngle = Random.Range(-180, 180);
+        bool done = false;
+        bool canContinue = false;
+      
+
+        _stateEvents.RequestRotation(randomAngle, _stateId, allowed =>
+        {
+            done = true;
+            canContinue = allowed;
+        });
+
+        while (!done)
+            yield return null;
+
+        if (!canContinue) yield break;
+
+        _stateEvents?.RequestAnimation(AnimationCue.Look, _stateId);
+        float _delayTime = Random.Range(minWait, maxWait);
+        float elapsedTime = 0.0f;
+
+        while (elapsedTime < _delayTime)
+        {
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+        if (!_isInState) yield break;
+        ValidateAndSendCandidateDestinations();
+
+        _runningRoutine = null;
+
     }
 
 

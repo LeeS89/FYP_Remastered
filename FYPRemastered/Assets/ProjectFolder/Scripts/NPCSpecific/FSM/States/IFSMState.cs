@@ -52,6 +52,10 @@ public interface IFsmStateNew<out TContext> : ITickable
 
 public interface IFsmController : ITickable
 {
+    bool IsInStateTransition { get; }
+    bool HasReachedDestination();
+    ///Above to keep NPCController working for now
+
     void SwitchTo(StateId state);
     StateId CurrentState { get; }
 
