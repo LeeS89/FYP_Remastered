@@ -16,7 +16,7 @@ namespace Services.Internal
         public event Action OnSceneBegin;
         public event Action OnSceneEnd;
 
-        private List<ITickable> _tickables = new(5);
+      //  private List<ITickable> _tickables = new(5);
         private IPatrolService _waypointService;
         private IAgentAlertService _npcService;
         private IFlankService _flankService;
@@ -26,15 +26,19 @@ namespace Services.Internal
         private IDistanceMonitoringService _distanceService;
         private ISceneService _sceneService;
 
+        private readonly ITickableGroup _tickHost;
         private FsmFactory _fsmFactory;
         private SceneMetaData metaData;
 
         //private PathRequestManagerNew _pathService;
 
-        public SceneServiceBus(string sceneName, ISceneService sceneService)
+        public SceneServiceBus(string sceneName, ISceneService sceneService, ITickableGroup tickHost)
         {
             _sceneService = sceneService;
             _sceneName = sceneName;
+            _tickHost = tickHost;
+
+
         }
 
         // NEW with meta data
@@ -53,8 +57,10 @@ namespace Services.Internal
 
             if (metaData.FsmFeatures.UsedInScene)
             {
-                _fsmFactory = new FsmFactory(metaData.FsmFeatures);
+                _fsmFactory = new FsmFactory(metaData.FsmFeatures, _tickHost);
                 await _fsmFactory.InitialiseAsync();
+
+               // if(_fsmFactory is ITickable t) _tickables.Add(t);
             }
 
         }
@@ -62,14 +68,14 @@ namespace Services.Internal
 
 
 
-        public void Tick(float dt)
+       /* public void Tick(float dt)
         {
             if (_tickables == null || _tickables.Count == 0) return;
 
             foreach (var t in _tickables)
                 t.Tick(dt);
 
-        }
+        }*/
 
         private List<ISceneService> _services = new(5);
 
@@ -109,12 +115,12 @@ namespace Services.Internal
                 _gameManager.PlayerRespawned();
         }
 
-        public bool TryGetPathService(out IPathService pathService)
+        public bool TryGetPathService(out IPathService pathService) // To be made Obsolete
         {
             if (_pathService == null)
             {
-                PathRequestManager ps = new PathRequestManager();
-                if (ps is ITickable t) _tickables.Add(t);
+                PathRequestManager ps = new PathRequestManager(null);
+             //   if (ps is ITickable t) _tickables.Add(t);
                 _pathService = ps;
             }
             pathService = _pathService;
@@ -162,13 +168,13 @@ namespace Services.Internal
             return _gameManager != null;
         }
 
-        public bool TryGetDistanceService(out IDistanceMonitoringService distanceService)
+        public bool TryGetDistanceService(out IDistanceMonitoringService distanceService) // To be Made obsolete
         {
             if (_distanceService == null)
             {
                 DistanceManagerJob dj = new DistanceManagerJob();
 
-                if (dj is ITickable t) _tickables.Add(t);
+              //  if (dj is ITickable t) _tickables.Add(t);
                 _distanceService = dj;
             }
             distanceService = _distanceService;
@@ -258,6 +264,16 @@ public interface IAddressableService : IDisposable
 
 }
 
+public interface IFsmControlService
+{
+    bool TryGetOwnerTransform(IInstanceIdentifiable id, out Transform t);
+    bool TryGetAgent(IInstanceIdentifiable id, out NavMeshAgent agent);
+    bool TryGetObstacle(IInstanceIdentifiable id, out NavMeshObstacle obstacle);
+
+    float GetWalkSpeed();
+    float GetSprintSpeed();
+}
+
 public interface IFsmStateService
 {
     bool TryGetCurrentPosition(IInstanceIdentifiable id, out Vector3 currentPosition);
@@ -280,6 +296,7 @@ public interface IChaseService : IFsmStateService
 
 public interface IPatrolService : IFsmStateService// : IAddressableServiceObsolete
 {
+    float GetIdleTimeSeconds();
    // bool TryGetWaypoints(object requester, List<Vector3> buffer);
 
    // bool TryReleaseWaypoints(object requester, List<Vector3> buffer);

@@ -262,7 +262,7 @@ public abstract class FsmBaseStateNew<TContext> : IFsmStateNew<TContext> where T
     public StateId GetId() => _stateId;
     protected readonly StateId _stateId = StateId.None;
 
-
+    protected readonly ICoroutineHost _host;
 
     #region New region
     protected TContext Context { get; private set; }
@@ -272,12 +272,17 @@ public abstract class FsmBaseStateNew<TContext> : IFsmStateNew<TContext> where T
     //internal void SetContext(TContext context) => Context = context;
     protected readonly IPathResolver _pathResolver;
 
-    public FsmBaseStateNew(IFsmStateEvents stateController, TContext service, IPathResolver pathResolver, StateId id)
+    public FsmBaseStateNew(IFsmStateEvents stateController, TContext service, IPathResolver pathResolver, ICoroutineHost host, StateId id)
     {
         _stateEvents = stateController;
         Context = service;
         _pathResolver = pathResolver;
+        _host = host;
         _stateId = id;
+        _validationCallback = OnProcessedDestinationsResult;
+
+        if (_pathResolver == null) DebugLogs.Nre(_pathResolver, "Path resolver", this);
+        else DebugLogs.Err("Path resolver was not null", this);
     }
 
     #endregion
@@ -398,7 +403,8 @@ public abstract class FsmBaseStateNew<TContext> : IFsmStateNew<TContext> where T
     protected virtual void OnProcessedDestinationsResult(in DestinationResultInfo result)
     {
         if (!_isInState) return;
-       // Debug.LogError("Sending Dest Result from: "+ _id.ToString());
+        // Debug.LogError("Sending Dest Result from: "+ _id.ToString());
+        DebugLogs.Err("FORWARDING PATH RESULT TO MANAGER", this);
         _stateEvents?.ProcessDestinationResult(in result);
     }
 

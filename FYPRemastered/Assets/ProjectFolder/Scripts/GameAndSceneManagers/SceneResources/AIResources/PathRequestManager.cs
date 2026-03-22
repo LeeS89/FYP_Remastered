@@ -8,9 +8,19 @@ using UnityEngine.AI;
 /// </summary>
 public class PathRequestManager : SceneResources, IPathService, ITickable // Change to ITickable
 {
-
+    private readonly ITickableGroup _tickHost;
     private Queue<PathRequest> _pathRequestQueue = new(25);
     private int _maxConcurrentRequests = 5;
+
+    private PathRequestManager() { }
+
+    public PathRequestManager(ITickableGroup tickHost)
+    {
+        _tickHost = tickHost;
+
+        _tickHost?.Register(this);
+    }
+
 
     public void ExecutePathRequests()
     {

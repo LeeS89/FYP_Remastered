@@ -223,8 +223,8 @@ public sealed class FSMChaseStateNew : FsmBaseStateNew<IChaseService>
     private float? _initialDistance = null;
 
 
-    public FSMChaseStateNew(IFsmStateEvents stateController, IChaseService service, IPathResolver pathResolver)
-        : base(stateController, service, pathResolver, StateId.Chase) { _candidateDestinations.EnsureCapacity(1); }
+    public FSMChaseStateNew(IFsmStateEvents stateController, IChaseService service, IPathResolver pathResolver, ICoroutineHost host)
+        : base(stateController, service, pathResolver, host, StateId.Chase) { _candidateDestinations.EnsureCapacity(1); }
 
  /*   public FSMChaseStateNew(ChaseDeps deps, SharedFsmStateServices sharedDeps, IFsmStateEvents stateContext)
         : base(deps, sharedDeps, stateContext, StateId.Chase)

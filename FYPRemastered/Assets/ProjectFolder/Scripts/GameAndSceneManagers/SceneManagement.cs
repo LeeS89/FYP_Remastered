@@ -1,16 +1,17 @@
 using Services.Internal;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class SceneManagement : SceneManagementBase, ISceneService
+public class SceneManagement : SceneManagementBase, ISceneService, ITickableGroup
 {
     [SerializeField] private WaypointBlockData _waypointBlockData;
     [SerializeField] private WaypointManager _waypointManager;
    // private SceneResourceManager _resources;
 
     private SceneServiceBus _sceneServiceBus;
-
+    private HashSet<ITickable> _tickables = new(25);
 
     // public Dictionary<GameObject, float> stats = new Dictionary<GameObject, float>();
 
@@ -39,7 +40,10 @@ public class SceneManagement : SceneManagementBase, ISceneService
             _testspawn = false;
         }
 
-        _sceneServiceBus?.Tick(Time.deltaTime);
+       // _sceneServiceBus?.Tick(Time.deltaTime);
+
+        foreach (var t in _tickables)
+            t.Tick(Time.deltaTime);
         //_resources?.UpdateResources();
 
     }
@@ -59,7 +63,7 @@ public class SceneManagement : SceneManagementBase, ISceneService
     {
         string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
 
-        _sceneServiceBus = new SceneServiceBus(sceneName, this);
+        _sceneServiceBus = new SceneServiceBus(sceneName, this, this);
 
         //await _sceneServiceBus.InitialiseServicesAsync();
         await _sceneServiceBus.NewInit();
@@ -77,7 +81,10 @@ public class SceneManagement : SceneManagementBase, ISceneService
 
 
 
-
+    public void Register(ITickable tickable) => _tickables.Add(tickable);
+    
+    public void Unregister(ITickable tickable) => _tickables.Remove(tickable);
+   
 
 
     protected override void UnloadSceneResources()
@@ -107,6 +114,8 @@ public class SceneManagement : SceneManagementBase, ISceneService
 
     }
 
+   
+
 
 
     /*public override void GetBulletPool(ref PoolManager manager)
@@ -134,7 +143,7 @@ public class SceneManagement : SceneManagementBase, ISceneService
 
 
      }*/
-   
+
 
     //public override void UnregisterAgentAndZone(EnemyFSMController agent, int zone) => _zoneAgentRegistry.Unregister(agent, zone);
     //public override void RegisterAgentAndZone(EnemyFSMController agent, int zone) => _zoneAgentRegistry.Register(agent, zone);

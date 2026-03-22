@@ -20,6 +20,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4109ad4f610fec740b6400e4eb4c90fc
+    m_Address: AgentSpeedData
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4dee39e88433d0d4aa236aafefbe0151
     m_Address: SamplePointDataSO
     m_ReadOnly: 0

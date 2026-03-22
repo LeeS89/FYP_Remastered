@@ -52,7 +52,9 @@ public class WaypointResources : IPatrolService, IAddressableService
             return false;
         }
 
+       
         //var blocks = _waypointBlockData.blockDataArray;
+
 
         if (/*_waypointBlockData*/wpBlockdata.blockDataArray == null || /*_waypointBlockData*/wpBlockdata.blockDataArray.Length == 0)
         {
@@ -75,6 +77,8 @@ public class WaypointResources : IPatrolService, IAddressableService
         return await TryLoadSubData(data.subDataKeys);
        
     }
+
+   
 
 
     private async Task<bool> TryLoadSubData(List<string> addressKeys)
@@ -174,5 +178,80 @@ public class WaypointResources : IPatrolService, IAddressableService
         path = null;
         if (id == null) return false;
         return _navQuery.TryGetOwnerPositionAndPath(id, out currentPos, out path);
+    }
+
+    public float GetIdleTimeSeconds()
+    {
+        if (_patrolData == null) return 1f;
+        //Random.Range(minWait, maxWait);
+        float min = _patrolData.MinTimeAtPatrolPoint;
+        float max = _patrolData.MaxTimeAtPatrolPoint;
+        return Random.Range(min, max);
+    }
+}
+
+
+
+public class FsmResources : IAddressableService, IFsmControlService
+{
+
+    private readonly IFsmNavigationControl _navControl;
+    private AgentSpeedData _speedData;
+
+    private FsmResources() { }
+
+    public FsmResources(IFsmNavigationControl navControl) => _navControl = navControl;
+    
+
+    public async Task<bool> TryInitialiseAsync(FeatureMeta data)
+    {
+        string addressKey = data.addressKey;
+        if (string.IsNullOrWhiteSpace(addressKey)) { DebugLogs.RequireNotNull(addressKey, "addressKey", this); return false; }
+
+        var spHandle = await AddressableLoader.TryLoadAssetAsync<AgentSpeedData>(addressKey);
+        if (!spHandle.HasValue || !spHandle.Value.IsValid())
+        {
+            DebugLogs.Nre(spHandle, "Agent Speed Handle", this);
+            return false;
+        }
+
+        _speedData = spHandle.Value.Result;
+        if (_speedData == null)
+        {
+            DebugLogs.Nre(_speedData, "Agent Speed Data asset", this);
+            Addressables.Release(spHandle.Value);
+            return false;
+        }
+
+        DebugLogs.Err($"WalkSpeed: {_speedData.SprintSpeed}");
+        return true;
+        // await Task.CompletedTask;
+    }
+
+
+
+
+    public bool TryGetOwnerTransform(IInstanceIdentifiable id, out Transform t)
+        => _navControl.TryGetOwnerTransform(id, out t);
+
+    public bool TryGetAgent(IInstanceIdentifiable id, out NavMeshAgent agent)
+        => _navControl.TryGetAgent(id, out agent);
+
+    public bool TryGetObstacle(IInstanceIdentifiable id, out NavMeshObstacle obstacle)
+        => _navControl.TryGetObstacle(id, out obstacle);
+
+    public float GetWalkSpeed()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public float GetSprintSpeed()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void Dispose()
+    {
+        throw new System.NotImplementedException();
     }
 }

@@ -659,22 +659,36 @@ public class FsmManagerNew : IFsmStateEvents, IFsmController
     private RotationOverride _currentRotationOverride = RotationOverride.None;
 
     // NEW
+    private readonly ICoroutineHost _routineHost;
+    private readonly ITickableGroup _tickHost;
+
     private readonly IFsmNavigationControl _navControl;
     private readonly IFsmTargetQuery _targetQuery;
     private readonly IReadOnlyDictionary<StateId, IFsmStateNew<IFsmStateService>> _statesNew;
 
     public FsmManagerNew(int instanceId, IFsmNavigationControl navControl, IFsmTargetQuery targetQuery, IReadOnlyDictionary<StateId, IFsmStateNew<IFsmStateService>> states,
-        IPathNotifications pathNotifies, IAnimationRequestNotifications animNotifies = null)
+        ICoroutineHost host, ITickableGroup tickHost, IPathNotifications pathNotifies, IAnimationRequestNotifications animNotifies = null)
     {
         _instanceId = instanceId;
         _navControl = navControl;
         _targetQuery = targetQuery;
         _statesNew = states;
 
+        _routineHost = host;
+        _tickHost = tickHost;
         _pathNotifies = pathNotifies;
         _animNotifies = animNotifies;
+
+        
+        _tickHost?.Register(this);
     }
 
+    // newest
+    private readonly INpcBody _owner;
+    public FsmManagerNew(INpcBody owner)
+    {
+        _owner = owner;
+    }
 
     // END NEW
 
@@ -768,7 +782,8 @@ public class FsmManagerNew : IFsmStateEvents, IFsmController
     {
         if (onComplete == null) return;
         if (!TryGetOwnerTransform(out var t)) return;
-        CoroutineRunner.Instance.StartCoroutine(RotateRoutine(t, requestedAngle, id, onComplete));  
+        _routineHost?.StartCoroutine(RotateRoutine(t, requestedAngle, id, onComplete));
+        //CoroutineRunner.Instance.StartCoroutine(RotateRoutine(t, requestedAngle, id, onComplete));  
     }
 
     private IEnumerator RotateRoutine(Transform owner, float angle, StateId id, Action<bool> onComplete)
@@ -912,7 +927,7 @@ public class FsmManagerNew : IFsmStateEvents, IFsmController
     }
 
     private bool StateHasChanged(StateId id) => id != CurrentState;
-
+    
     public void ProcessDestinationResult(in DestinationResultInfo result)
     {
         Debug.LogError("Destination Result is: " + result.Result.ToString());

@@ -201,8 +201,8 @@ public sealed class FSMPatrolStateNew : FsmBaseStateNew<IPatrolService>
         _waypointService = waypointService;
         _candidateDestinations.EnsureCapacity(10);
     }*/
-    public FSMPatrolStateNew(IFsmStateEvents stateController, IPatrolService service, IPathResolver pathResolver)
-        : base(stateController, service, pathResolver, StateId.Patrol)
+    public FSMPatrolStateNew(IFsmStateEvents stateController, IPatrolService service, IPathResolver pathResolver, ICoroutineHost host)
+        : base(stateController, service, pathResolver, host, StateId.Patrol)
     {
         // _patrolDeps = deps;
         //_waypointService = _deps.WaypointService;
@@ -222,8 +222,8 @@ public sealed class FSMPatrolStateNew : FsmBaseStateNew<IPatrolService>
 
 
         if (_runningRoutine == null)
-            _runningRoutine = CoroutineRunner.Instance.StartCoroutine(PatrolWaitRoutineNew(
-                0.5f, 7f));
+            _runningRoutine = _host?.StartCoroutine(PatrolWaitRoutineNew(/*0.5f, 7f)*/));//CoroutineRunner.Instance.StartCoroutine(PatrolWaitRoutineNew(
+               // 0.5f, 7f));
         /*if (_runningRoutine == null)
             _runningRoutine = CoroutineRunner.Instance.StartCoroutine(PatrolWaitRoutineNew(
                 ownerTransform, _deps.MinTimeAtPatrolPoint, _deps.MaxTimeAtPatrolPoint));*/
@@ -336,7 +336,7 @@ public sealed class FSMPatrolStateNew : FsmBaseStateNew<IPatrolService>
         _runningRoutine = null;
     }*/
 
-    private IEnumerator PatrolWaitRoutineNew(float minWait, float maxWait)
+    private IEnumerator PatrolWaitRoutineNew(/*float minWait, float maxWait*/)
     {
         Debug.LogError("Patrol wait routine called");
        
@@ -357,7 +357,7 @@ public sealed class FSMPatrolStateNew : FsmBaseStateNew<IPatrolService>
         if (!canContinue) yield break;
 
         _stateEvents?.RequestAnimation(AnimationCue.Look, _stateId);
-        float _delayTime = Random.Range(minWait, maxWait);
+        float _delayTime = Context.GetIdleTimeSeconds();//Random.Range(minWait, maxWait);
         float elapsedTime = 0.0f;
 
         while (elapsedTime < _delayTime)

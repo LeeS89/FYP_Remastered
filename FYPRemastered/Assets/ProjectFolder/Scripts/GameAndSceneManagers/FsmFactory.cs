@@ -1,5 +1,6 @@
 using Npc.API;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -10,25 +11,28 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 namespace Services.Internal
 {
 
-    public sealed class FsmFactory : ServiceBundle<FsmFeatureGroup>, IFsmFactory, ITickable
+    public sealed class FsmFactory : ServiceBundle<FsmFeatureGroup>, IFsmFactory//, ITickable
     {
 
-        private List<ITickable> _tickables = new(5);
+      //  private List<ITickable> _tickables = new(5);
         private IAddressableService _wpService; // Split interfaces in WaypointResources class so only correct interface is used by relevant classes i.e. => This class need only store it as an IAddressableService
         private IAddressableService _flankService;
         private IAddressableService _chaseService;
+        private IAddressableService _fsmControlService;
         private IDistanceMonitoringService _distService;
+        private IPathService _pathService;
 
         private FsmRegistry _registry;
         // SO's
 
         private AgentChaseData _agentChaseData;
+        private readonly ITickableGroup _tickHost;
         // End SO's
 
         private readonly List<AsyncOperationHandle> _handles = new(5);
 
 
-        public FsmFactory(FsmFeatureGroup data) : base(data) { }
+        public FsmFactory(FsmFeatureGroup data, ITickableGroup tickHost) : base(data) { _tickHost = tickHost; }
 
 
 
@@ -38,6 +42,12 @@ namespace Services.Internal
         public override async Task InitialiseAsync()
         {
             if (_registry == null) _registry = new FsmRegistry();
+
+            var controlFeature = _metaData.SpeedData;
+
+            _fsmControlService = await TryLoadStateServiceAndInitialize(controlFeature, () => new FsmResources(_registry));
+            _pathService = new PathRequestManager(_tickHost);
+         //   if(_pathService is ITickable t) _tickables.Add(t);
             if (_metaData == null)
             {
                 DebugLogs.RequireNotNull(_metaData, "SceneMetaData", this);
@@ -49,7 +59,11 @@ namespace Services.Internal
             {
                 _wpService = await TryLoadStateServiceAndInitialize(waypointFeature, () => new WaypointResources(_registry));
                 if (_wpService == null) DebugLogs.Nre(_wpService, "WaypointService");
-                else DebugLogs.Log("Found Waypoint service", this);
+                else
+                {
+                  //  if(_wpService is ITickable tick) _tickables.Add(tick);
+                    DebugLogs.Log("Found Waypoint service", this);
+                }
 
             }
 
@@ -118,13 +132,13 @@ namespace Services.Internal
         public void LateTick(float dt) { }
 
 
-        public void Tick(float dt)
+      /*  public void Tick(float dt)
         {
             if (_tickables == null || _tickables.Count == 0) return;
 
             foreach (var t in _tickables)
                 t.Tick(dt);
-        }
+        }*/
 
         /// <summary>
         /// Attempts to create a new state with the specified identifier and add it to the provided state dictionary.
@@ -166,7 +180,7 @@ namespace Services.Internal
         private bool TryCreatePatrol(Dictionary<StateId, IFsmState> _dict, NavMeshPath path, Transform t, TryGetTarget tgt)
             => _dict.TryAdd(StateId.Patrol, new FSMPatrolState(null, null, null));
 
-        public bool TryCreateFsm(out IFsmController fsm, INpcBody body, TryGetTarget targetRetrieverFunc, IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null)
+        public bool TryCreateFsm(out IFsmController fsm, INpcBody body, TryGetTarget targetRetrieverFunc, ITickableGroup tickHost, ICoroutineHost coroutineHost, IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null)
         {
             if (body == null || body.Owner == null || body.Owner.Transform == null) { fsm = null; return false; }
 
@@ -177,11 +191,11 @@ namespace Services.Internal
             //  fsm = new FsmManagerNew(id, _registry, _registry, null); // Placeholder
             Dictionary<StateId, IFsmStateNew<IFsmStateService>> _states = new();
 
-            FsmManagerNew fsNew = new FsmManagerNew(id, _registry, _registry, _states, pathNotifySender, animNotifySender);
+            FsmManagerNew fsNew = new FsmManagerNew(id, _registry, _registry, _states, coroutineHost, tickHost, pathNotifySender, animNotifySender);
 
             
 
-            IFsmStateNew<IFsmStateService> patrol = new FSMPatrolStateNew(fsNew, (IPatrolService)_wpService, new PathFinder(new PathRequestManager()));
+            IFsmStateNew<IFsmStateService> patrol = new FSMPatrolStateNew(fsNew, (IPatrolService)_wpService, new PathFinder(_pathService), coroutineHost);
             _states.Add(StateId.Patrol, patrol);
             fsm = fsNew;
 
@@ -230,29 +244,10 @@ namespace Services.Internal
 
     public interface IFsmFactory
     {
-        bool TryCreateFsm(out IFsmController fsm, INpcBody body, TryGetTarget targetRetrieverFunc,
-            IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null);
+        bool TryCreateFsm(out IFsmController fsm, INpcBody body, TryGetTarget targetRetrieverFunc, ITickableGroup tickHost,
+            ICoroutineHost coroutineHost, IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null);
 
         bool TryCreateAndAddState(StateId id, Dictionary<StateId, IFsmState> _stateDict, NavMeshPath path, Transform ownerTransform, TryGetTarget targetRetrieverFunc);
-    }
-
-
-
-
-
-
-
-
-
-    internal interface IFsmManagerView
-    {
-        bool TryGetAgent(IFsmController controller, out NavMeshAgent a);
-        bool TryGetObstacle(IFsmController controller, out NavMeshObstacle o);
-    }
-
-    internal interface IStateView
-    {
-
     }
 
 
@@ -619,4 +614,16 @@ public interface INpcBody
     NavMeshAgent Agent { get; }
     NavMeshObstacle Obstacle { get; }
     NavMeshPath Path { get; }
+}
+
+
+public interface ICoroutineHost
+{
+    Coroutine StartCoroutine(IEnumerator routine);
+}
+
+public interface ITickableGroup 
+{
+    void Register(ITickable tickable);
+    void Unregister(ITickable tickable);
 }

@@ -1,13 +1,15 @@
 using Npc.Internal;
+using NUnit.Framework;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
 [RequireComponent(typeof(AgentEventManager))]
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(NavMeshObstacle))]
-public partial class NPCController : TargetableInit<ISceneAIServices, AgentEventManager>, INpcBody, /*IAgentData, */INPCBrainContext, INotificationListener
+public partial class NPCController : TargetableInit<ISceneAIServices, AgentEventManager>, INpcBody, /*IAgentData, */INPCBrainContext, INotificationListener, ICoroutineHost, ITickableGroup
 { // Remove IAgentData
     
     //   private bool _isInStateTransition = false;
@@ -49,9 +51,9 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
     private uint _currentSeenStreak = 0;
     private uint _currentNotSeenStreak = 0;
     private Action<FOVResult> OnStableFOVResult;
-  
-    //private readonly BufferedInbox _inbox = new();
 
+    //private readonly BufferedInbox _inbox = new();
+    private HashSet<ITickable> _tickables = new(5);
 
     // IFSMNotifications - For notifications received by the FSMManager, i.e. No valid destination, target lost, Target within melee/ shot range, etc.
     public void OnNotifies(in NpcNotification n)
@@ -64,6 +66,11 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
         this.Decide(in n);
 
     }
+
+    public void Register(ITickable tickable) => _tickables.Add(tickable);
+
+    public void Unregister(ITickable tickable) => _tickables.Remove(tickable);
+   
 
     private void ResetAll()
     {
@@ -261,7 +268,9 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
         _fovRunner?.Tick(Time.deltaTime);
 
         if (_testAgentStop2) { return; }
-        _fsmManager?.Tick(Time.deltaTime);
+        //  _fsmManager?.Tick(Time.deltaTime);
+        foreach (var t in _tickables)
+            t.Tick(Time.deltaTime);
       
         if (_testStateCheck)
             Debug.LogError("Currentstate: "+_fsmManager?.CurrentState.ToString());
@@ -392,7 +401,6 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
     // Sets Sweep Frequency
     public void UpdateAlertPhase(AlertPhase newPhase) => _fovDeps?.SetAlertPhase(newPhase);
 
-
-    
+   
 }
 

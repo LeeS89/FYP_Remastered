@@ -71,7 +71,7 @@ public interface IFlankDeps : IFsmStateDeps, ITargetRef, IFsmDeps
 
 
 
-public interface INotificationListener
+public interface INotificationListener // => To be made Obsolete
 {
     void OnNotifies(in NpcNotification n);
   //  void EnterAlertPhase();

@@ -2,6 +2,10 @@
   "FsmFeatures": {
     "UsedInScene": true,
 
+    "SpeedData": {
+      "addressKey": "AgentSpeedData"
+    },
+
     "Waypoints": {
       "enabled": true,
       "addressKey": "MoonSceneWP",
