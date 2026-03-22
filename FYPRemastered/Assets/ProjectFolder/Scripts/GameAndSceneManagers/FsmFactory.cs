@@ -610,7 +610,10 @@ public interface IFsmTargetQuery
 
 public interface INpcBody
 {
+    [Obsolete]
     ITargetable Owner { get; }
+    Transform Transform { get; }
+    Vector3? Position();
     NavMeshAgent Agent { get; }
     NavMeshObstacle Obstacle { get; }
     NavMeshPath Path { get; }

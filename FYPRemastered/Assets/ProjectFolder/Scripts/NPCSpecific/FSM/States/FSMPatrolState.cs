@@ -189,7 +189,6 @@ public sealed class PatrolDeps : FsmBaseState<PatrolDeps>.FsmBaseStateDeps
 
 
 
-
 public sealed class FSMPatrolStateNew : FsmBaseStateNew<IPatrolService>
 {
  //   private readonly IPatrolService _waypointService;
@@ -223,10 +222,12 @@ public sealed class FSMPatrolStateNew : FsmBaseStateNew<IPatrolService>
 
         if (_runningRoutine == null)
             _runningRoutine = _host?.StartCoroutine(PatrolWaitRoutineNew(/*0.5f, 7f)*/));//CoroutineRunner.Instance.StartCoroutine(PatrolWaitRoutineNew(
-               // 0.5f, 7f));
+                                                                                         // 0.5f, 7f));
         /*if (_runningRoutine == null)
             _runningRoutine = CoroutineRunner.Instance.StartCoroutine(PatrolWaitRoutineNew(
                 ownerTransform, _deps.MinTimeAtPatrolPoint, _deps.MaxTimeAtPatrolPoint));*/
+
+        _stateEvents.Test();
     }
 
     protected override void RetrieveCandidateDestinations()
