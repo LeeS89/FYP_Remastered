@@ -1,10 +1,12 @@
 using Services.Internal;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.AI;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using Random = UnityEngine.Random;
 
 
 public class WaypointResources : IPatrolService, IAddressableService
@@ -26,6 +28,12 @@ public class WaypointResources : IPatrolService, IAddressableService
 
     public WaypointResources(IFsmNavigationQuery navQuery) => _navQuery = navQuery;
    
+
+    public bool TryGetDestinationCandidates(ITargetContext id, List<Vector3> buffer)
+    {
+        return false;
+    }
+
 
     public async Task<bool> TryInitialiseAsync(FeatureMeta data)
     {
@@ -165,10 +173,14 @@ public class WaypointResources : IPatrolService, IAddressableService
         if (id == null) { DebugLogs.RequireNotNull(id, "InstancIdentifiable"); return false; }
         return _navQuery.TryGetPath(id, out path);
     }
-    
+
+    [Obsolete]
     public bool TryGetDestinationCandidates(IInstanceIdentifiable id, List<Vector3> buffer)
         => TryGetWaypoints(id, buffer);
 
+   /* bool TryGetDestinationCandidates(ITargetContext context, List<Vector3> buffer)
+        => TryGetWaypoints(null, buffer);
+*/
     public void ReleaseDestinationCandidates(IInstanceIdentifiable id, List<Vector3> buffer)
         => TryReleaseWaypoints(id, buffer);
 
@@ -188,6 +200,8 @@ public class WaypointResources : IPatrolService, IAddressableService
         float max = _patrolData.MaxTimeAtPatrolPoint;
         return Random.Range(min, max);
     }
+
+  
 }
 
 
@@ -253,5 +267,102 @@ public class FsmResources : IAddressableService, IFsmControlService
     public void Dispose()
     {
         throw new System.NotImplementedException();
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Testing below
+
+
+
+public abstract class CandidateDestinationProvider/*<TContext>*/ : IFsmStateServiceNew// where TContext : IContext
+{
+    //  public abstract bool TryGetDestinationCandidates(T id, List<Vector3> buffer);
+
+    //  public abstract bool TryGetDestinationCandidates<IContext>(IContext context, List<Vector3> buffer);
+    public abstract bool TryGetDestinationCandidates<TContext>(TContext context, List<Vector3> buffer) where TContext : IContext;
+    /*{
+        throw new NotImplementedException();
+    }*/
+}
+
+
+public class OtherTest : CandidateDestinationProvider//<ITargetContext>
+{
+    /*   public override bool TryGetDestinationCandidates<ITargetContext>(ITargetContext id, List<Vector3> buffer)
+       {
+           throw new NotImplementedException();
+       }*/
+    /*public override bool TryGetDestinationCandidates(ITargetContext id, List<Vector3> buffer)
+    {
+        throw new NotImplementedException();
+    }*/
+    public override bool TryGetDestinationCandidates<ITargetContext>(ITargetContext context, List<Vector3> buffer)
+    {
+     
+        return true;
+        //throw new NotImplementedException();
+    }
+}
+
+public interface INewTest
+{
+    void TryGet<T>(T id);
+}
+
+public interface IFsmStateServiceNew//<TContext>  where TContext : IContext
+{
+    bool TryGetDestinationCandidates<TContext>(TContext context, List<Vector3> buffer) where TContext : IContext;
+    /*   [Obsolete("Use INpcBody instead")]
+       bool TryGetCurrentPosition(IInstanceIdentifiable id, out Vector3 currentPosition);
+
+       [Obsolete("Use INpcBody instead")]
+       bool TryGetPath(IInstanceIdentifiable id, out NavMeshPath path);
+       [Obsolete("Use INpcBody instead")]
+       bool TryGetCurrentPositionAndPath(IInstanceIdentifiable id, out Vector3 currentPos, out NavMeshPath path);
+
+
+     //  bool TryGetDestinationCandidates(ITargetContext context, List<Vector3> buffer);
+       [Obsolete("Use INpcBody instead")]
+       bool TryGetDestinationCandidates(IInstanceIdentifiable id, List<Vector3> buffer);
+       void ReleaseDestinationCandidates(IInstanceIdentifiable id, List<Vector3> buffer);*/
+
+}
+
+public class otherClass
+{
+    public IFsmStateServiceNew _new;
+    public IContext _iContext;
+    public ITargetContext _tContext;
+
+    public void returnNew()
+    {
+        _new.TryGetDestinationCandidates(_tContext, new List<Vector3>());
     }
 }

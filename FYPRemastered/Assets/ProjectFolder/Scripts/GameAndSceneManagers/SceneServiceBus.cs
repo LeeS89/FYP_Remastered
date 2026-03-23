@@ -274,17 +274,46 @@ public interface IFsmControlService
     float GetSprintSpeed();
 }
 
+
 public interface IFsmStateService
 {
+    [Obsolete("Use INpcBody instead")]
     bool TryGetCurrentPosition(IInstanceIdentifiable id, out Vector3 currentPosition);
+
+    [Obsolete("Use INpcBody instead")]
     bool TryGetPath(IInstanceIdentifiable id, out NavMeshPath path);
+    [Obsolete("Use INpcBody instead")]
     bool TryGetCurrentPositionAndPath(IInstanceIdentifiable id, out Vector3 currentPos, out NavMeshPath path);
+
+
+    //  bool TryGetDestinationCandidates(ITargetContext context, List<Vector3> buffer);
+    [Obsolete("Use INpcBody instead")]
     bool TryGetDestinationCandidates(IInstanceIdentifiable id, List<Vector3> buffer);
     void ReleaseDestinationCandidates(IInstanceIdentifiable id, List<Vector3> buffer);
+
   
 }
 
-public interface IChaseService : IFsmStateService
+public interface IFsmStateService<TContext> : IFsmStateService where TContext : IContext
+{
+     bool TryGetDestinationCandidates(TContext id, List<Vector3> buffer);
+    /*   [Obsolete("Use INpcBody instead")]
+       bool TryGetCurrentPosition(IInstanceIdentifiable id, out Vector3 currentPosition);
+
+       [Obsolete("Use INpcBody instead")]
+       bool TryGetPath(IInstanceIdentifiable id, out NavMeshPath path);
+       [Obsolete("Use INpcBody instead")]
+       bool TryGetCurrentPositionAndPath(IInstanceIdentifiable id, out Vector3 currentPos, out NavMeshPath path);
+
+
+     //  bool TryGetDestinationCandidates(ITargetContext context, List<Vector3> buffer);
+       [Obsolete("Use INpcBody instead")]
+       bool TryGetDestinationCandidates(IInstanceIdentifiable id, List<Vector3> buffer);
+       void ReleaseDestinationCandidates(IInstanceIdentifiable id, List<Vector3> buffer);*/
+
+}
+
+public interface IChaseService : IFsmStateService<ITargetContext>
 {
     //bool TryGetDestinationCandidates(IInstanceIdentifiable id, List<Vector3> buffer);
     bool TargetIsMoving(IInstanceIdentifiable id);
@@ -294,7 +323,7 @@ public interface IChaseService : IFsmStateService
     bool TryUnregisterDistanceToTargetMonitoring(IInstanceIdentifiable id);
 }
 
-public interface IPatrolService : IFsmStateService// : IAddressableServiceObsolete
+public interface IPatrolService : IFsmStateService<ITargetContext>// : IAddressableServiceObsolete
 {
     float GetIdleTimeSeconds();
    // bool TryGetWaypoints(object requester, List<Vector3> buffer);
@@ -302,7 +331,7 @@ public interface IPatrolService : IFsmStateService// : IAddressableServiceObsole
    // bool TryReleaseWaypoints(object requester, List<Vector3> buffer);
 }
 
-public interface IFlankService : IFsmStateService// : IAddressableServiceObsolete
+public interface IFlankService : IFsmStateService//<ITargetContext>// : IAddressableServiceObsolete
 {
     void TryGetFlankCandidates(Vector3 flankTargetPos, int numSteps, List<Vector3> buffer, Action<bool> OnRequestComplete);
 }

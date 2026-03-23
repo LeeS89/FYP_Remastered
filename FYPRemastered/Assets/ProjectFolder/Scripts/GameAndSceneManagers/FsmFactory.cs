@@ -189,13 +189,13 @@ namespace Services.Internal
 
             if (!_registry.TryRegister(id, body, targetRetrieverFunc)) { fsm = null; return false; }
             //  fsm = new FsmManagerNew(id, _registry, _registry, null); // Placeholder
-            Dictionary<StateId, IFsmStateNew<IFsmStateService>> _states = new();
+            Dictionary<StateId, IFsmStateNew> _states = new();
 
             FsmManagerNew fsNew = new FsmManagerNew(id, _registry, _registry, _states, coroutineHost, tickHost, pathNotifySender, animNotifySender);
 
             
 
-            IFsmStateNew<IFsmStateService> patrol = new FSMPatrolStateNew(fsNew, (IPatrolService)_wpService, new PathFinder(_pathService), coroutineHost);
+            IFsmStateNew patrol = new FSMPatrolStateNew(fsNew, (IPatrolService)_wpService, new PathFinder(_pathService), coroutineHost);
             _states.Add(StateId.Patrol, patrol);
             fsm = fsNew;
 

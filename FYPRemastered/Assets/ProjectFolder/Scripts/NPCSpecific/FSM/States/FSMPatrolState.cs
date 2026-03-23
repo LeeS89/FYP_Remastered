@@ -189,7 +189,7 @@ public sealed class PatrolDeps : FsmBaseState<PatrolDeps>.FsmBaseStateDeps
 
 
 
-public sealed class FSMPatrolStateNew : FsmBaseStateNew<IPatrolService>
+public sealed class FSMPatrolStateNew : FsmBaseStateNew<IPatrolService, ITargetContext>
 {
  //   private readonly IPatrolService _waypointService;
     //  private readonly IPatrolDeps _patrolDeps;
@@ -242,7 +242,7 @@ public sealed class FSMPatrolStateNew : FsmBaseStateNew<IPatrolService>
 
             Debug.LogError("successfully retrieved Path");
 
-            if (Context == null || !Context.TryGetDestinationCandidates(_stateEvents, _candidateDestinations)/*!_waypointService.TryGetWaypoints(this, _candidateDestinations)*/)
+            if (Service == null || !Service.TryGetDestinationCandidates(_stateEvents, _candidateDestinations)/*!_waypointService.TryGetWaypoints(this, _candidateDestinations)*/)
             {
                 Debug.LogError("Returning Failed Result for patrol");
                 DestinationResultInfo failedResult = new DestinationResultInfo
@@ -358,7 +358,7 @@ public sealed class FSMPatrolStateNew : FsmBaseStateNew<IPatrolService>
         if (!canContinue) yield break;
 
         _stateEvents?.RequestAnimation(AnimationCue.Look, _stateId);
-        float _delayTime = Context.GetIdleTimeSeconds();//Random.Range(minWait, maxWait);
+        float _delayTime = Service.GetIdleTimeSeconds();//Random.Range(minWait, maxWait);
         float elapsedTime = 0.0f;
 
         while (elapsedTime < _delayTime)

@@ -239,7 +239,10 @@ public class CoTestThree
 
 
 
-public abstract class FsmBaseStateNew<TContext> : IFsmStateNew<TContext> where TContext : IFsmStateService// where TContext : FsmBaseState<TContext>.FsmBaseStateDeps
+public abstract class FsmBaseStateNew<TService, TContext> : IFsmStateNew<TService> 
+  //  where TContext : IContext
+    where TService : IFsmStateService<TContext>// where TContext : FsmBaseState<TContext>.FsmBaseStateDeps
+    where TContext : IContext
 {
  //   protected readonly IPathResolver _pathResolver;
     protected readonly IFsmStateEvents _stateEvents;
@@ -265,17 +268,17 @@ public abstract class FsmBaseStateNew<TContext> : IFsmStateNew<TContext> where T
     protected readonly ICoroutineHost _host;
 
     #region New region
-    protected TContext Context { get; private set; }
+    protected TService Service { get; private set; }
 
-    TContext IFsmStateNew<TContext>.Context => Context;
+   // TService IFsmStateNew<TService>.Context => Context;
 
     //internal void SetContext(TContext context) => Context = context;
     protected readonly IPathResolver _pathResolver;
 
-    public FsmBaseStateNew(IFsmStateEvents stateController, TContext service, IPathResolver pathResolver, ICoroutineHost host, StateId id)
+    public FsmBaseStateNew(IFsmStateEvents stateController, TService service, IPathResolver pathResolver, ICoroutineHost host, StateId id)
     {
         _stateEvents = stateController;
-        Context = service;
+        Service = service;
         _pathResolver = pathResolver;
         _host = host;
         _stateId = id;
@@ -283,6 +286,8 @@ public abstract class FsmBaseStateNew<TContext> : IFsmStateNew<TContext> where T
 
         if (_pathResolver == null) DebugLogs.Nre(_pathResolver, "Path resolver", this);
         else DebugLogs.Err("Path resolver was not null", this);
+
+        Service.TryGetDestinationCandidates(_stateEvents, new List<Vector3>());
     }
 
     #endregion
@@ -347,14 +352,14 @@ public abstract class FsmBaseStateNew<TContext> : IFsmStateNew<TContext> where T
         return true;
     }*/
 
-    protected bool TryGetPath(out NavMeshPath path) => Context.TryGetPath(_stateEvents, out path);
+    protected bool TryGetPath(out NavMeshPath path) => Service.TryGetPath(_stateEvents, out path);
     /*{
         if (SharedDepsIsNull()) { path = null; return false; };
         path = _sharedDeps.Path;
         return path != null; // Maybe new notification if path is null
     }*/
 
-    protected bool TryGetCurrentPosition(out Vector3 pos) =>  Context.TryGetCurrentPosition(_stateEvents, out pos);
+    protected bool TryGetCurrentPosition(out Vector3 pos) =>  Service.TryGetCurrentPosition(_stateEvents, out pos);
    /* {
         if (OwnerIsNull()) { pos = Vector3.zero; return false; }
 
@@ -381,7 +386,7 @@ public abstract class FsmBaseStateNew<TContext> : IFsmStateNew<TContext> where T
 */
 
     protected bool TryGetCurrentPositionAndPath(out Vector3 position, out NavMeshPath path)
-        => Context.TryGetCurrentPositionAndPath(_stateEvents, out position, out path);
+        => Service.TryGetCurrentPositionAndPath(_stateEvents, out position, out path);
 
     public virtual bool NeedsNewPath() => false;
 

@@ -132,4 +132,9 @@ public sealed class ChaseResources : IChaseService, IAddressableService
         if (id == null) return false;
         return _navQuery.TryGetOwnerPositionAndPath(id, out currentPos, out path);
     }
+
+    public bool TryGetDestinationCandidates(ITargetContext id, List<Vector3> buffer)
+    {
+        throw new NotImplementedException();
+    }
 }

@@ -645,7 +645,7 @@ public class FsmManagerNew : IFsmStateEvents, IFsmController
 
     // Internal Members
     private List<SetDestinationDelay> _timer = new(2);
-    private IFsmStateNew<IFsmStateService> _currentState;
+    private IFsmStateNew _currentState;
     public bool IsInStateTransition { get; private set; } = false;
     private bool _hasValidDestination = false;
     private float _lerpSpeed = 0f;
@@ -674,9 +674,9 @@ public class FsmManagerNew : IFsmStateEvents, IFsmController
 
    // private readonly IFsmNavigationControl _navControl;
     private readonly IFsmTargetQuery _targetQuery;
-    private readonly IReadOnlyDictionary<StateId, IFsmStateNew<IFsmStateService>> _statesNew;
+    private readonly IReadOnlyDictionary<StateId, IFsmStateNew> _statesNew;
 
-    public FsmManagerNew(int instanceId, IFsmNavigationControl navControl, IFsmTargetQuery targetQuery, IReadOnlyDictionary<StateId, IFsmStateNew<IFsmStateService>> states,
+    public FsmManagerNew(int instanceId, IFsmNavigationControl navControl, IFsmTargetQuery targetQuery, IReadOnlyDictionary<StateId, IFsmStateNew> states,
         ICoroutineHost host, ITickableGroup tickHost, IPathNotifications pathNotifies, IAnimationRequestNotifications animNotifies = null)
     {
         _instanceId = instanceId;
