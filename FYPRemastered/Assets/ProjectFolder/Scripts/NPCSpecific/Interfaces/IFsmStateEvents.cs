@@ -23,3 +23,9 @@ public interface IInstanceIdentifiable
 
     int EntityId { get; }
 }
+
+
+public interface ITargetProvider
+{
+    bool TryGetTargetPosition(out Vector3? position);
+}

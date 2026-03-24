@@ -2,12 +2,22 @@ using Services.Internal;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.AI;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using Random = UnityEngine.Random;
 
+
+public sealed class WaypointSet 
+{
+    public readonly Vector3[] Points;
+
+    private WaypointSet() { }
+    public WaypointSet(Vector3[] points) => Points = points;
+
+}
 
 public class WaypointResources : IPatrolService, IAddressableService
 {
@@ -20,7 +30,9 @@ public class WaypointResources : IPatrolService, IAddressableService
     //private Dictionary<object, BlockData> _inUseBlockTracker = new(20);
 
     private AgentPatrolData _patrolData;
-    private BlockData[] waypointBlocks;
+    //private BlockData[] waypointBlocks;
+
+    private Dictionary<WaypointSet, BlockData> _waypointRegistry = new(25);
 
     private readonly IFsmNavigationQuery _navQuery;
 
@@ -72,10 +84,19 @@ public class WaypointResources : IPatrolService, IAddressableService
             return false;
         }
 
-        waypointBlocks = (BlockData[])/*_waypointBlockData*/wpBlockdata.blockDataArray.Clone();
+        foreach(var block in wpBlockdata.blockDataArray)
+        {
+            if (block is null || block._waypointPositions is null || block._waypointPositions.Length is 0) continue;
 
-        foreach (var block in waypointBlocks/*_waypointBlockData.blockDataArray*/)
             block._inUse = false;
+            var points = (Vector3[])block._waypointPositions.Clone();
+            _waypointRegistry.Add(new WaypointSet(points), block);
+        }
+
+        /*waypointBlocks = (BlockData[])*//*_waypointBlockData*//*wpBlockdata.blockDataArray.Clone();
+
+        foreach (var block in waypointBlocks*//*_waypointBlockData.blockDataArray*//*)
+            block._inUse = false;*/
 
         DebugLogs.Log("Successfully initialized waypoint blocks", this);
         Addressables.Release(wpHandle.Value);
@@ -126,9 +147,9 @@ public class WaypointResources : IPatrolService, IAddressableService
     {
         if (id == null || /*id.GetType().IsValueType ||*/ buffer == null) return false;
 
-        if (/*_waypointBlockData*/waypointBlocks != null && waypointBlocks.Length > 0)
+       /* if (*//*_waypointBlockData*//*waypointBlocks != null && waypointBlocks.Length > 0)
         {
-            foreach (var blockData in waypointBlocks/*_waypointBlockData.blockDataArray*/)
+            foreach (var blockData in waypointBlocks*//*_waypointBlockData.blockDataArray*//*)
             {
                 if (!blockData._inUse)
                 {
@@ -140,10 +161,35 @@ public class WaypointResources : IPatrolService, IAddressableService
                     return true;
                 }
             }
-        }
+        }*/
+
+       
+
 
         return false;
     }
+
+    
+    public bool TryGetWaypointSet(out WaypointSet set)
+    {
+        
+        foreach(var (key, value) in _waypointRegistry)
+        {
+            if (value._inUse) continue;
+            value._inUse = true;
+            set = key;
+            return true;
+        }
+        set = null;
+        return false;
+    }
+
+    public void ReturnWaypointSet(WaypointSet set)
+    {
+        if(_waypointRegistry.TryGetValue(set, out var data))
+            data._inUse = false;
+    }
+
 
     private bool TryReleaseWaypoints(IInstanceIdentifiable requester, List<Vector3> buffer)
     {
@@ -261,6 +307,7 @@ public class FsmResources : IAddressableService, IFsmControlService
 
     public float GetSprintSpeed()
     {
+      
         throw new System.NotImplementedException();
     }
 
@@ -364,5 +411,97 @@ public class otherClass
     public void returnNew()
     {
         _new.TryGetDestinationCandidates(_tContext, new List<Vector3>());
+    }
+}
+
+
+
+
+
+
+
+
+public interface IFsmDestinationProvider
+{
+    bool TryGetDestinationCandidates(List<Vector3> buffer);
+    void ReleaseCandidates(List<Vector3> buffer);
+}
+
+
+
+public interface IFsmDataProvider { }
+
+
+
+
+
+
+
+
+public abstract class StateServiceBridge<TService> : IFsmDestinationProvider, IFsmDataProvider
+{
+    protected readonly TService _service;
+
+    public StateServiceBridge(TService service) => _service = service;
+
+    public abstract void ReleaseCandidates(List<Vector3> buffer);
+
+    public abstract bool TryGetDestinationCandidates(List<Vector3> buffer);
+   
+}
+
+public sealed class PatrolServiceBridge : StateServiceBridge<IPatrolService>
+{
+    private WaypointSet _wpSet;
+
+    public PatrolServiceBridge(IPatrolService service) : base(service) { }
+    
+
+    public override void ReleaseCandidates(List<Vector3> buffer)
+    {
+        if(_service is WaypointResources r)
+        {
+            r.ReturnWaypointSet(_wpSet);
+            _wpSet = null;
+        }
+    }
+
+    public override bool TryGetDestinationCandidates(List<Vector3> buffer)
+    {
+        if(_wpSet is null)
+        {
+            if (_service is WaypointResources r)
+            {
+                if (!r.TryGetWaypointSet(out _wpSet)) return false;
+            }
+        }
+        buffer.Clear();
+
+        foreach(var point in _wpSet.Points)
+            buffer.Add(point);
+
+        return true;
+    }
+}
+
+public sealed class ChaseServiceBridge : StateServiceBridge<IChaseService>
+{
+    private readonly ITargetProvider _targetProvider;
+
+    public ChaseServiceBridge(IChaseService service, ITargetProvider targetProvider) : base(service) 
+    { _targetProvider = targetProvider; }
+
+    public override void ReleaseCandidates(List<Vector3> buffer)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override bool TryGetDestinationCandidates(List<Vector3> buffer)
+    {
+        if (buffer is null || _targetProvider is null) return false;
+        buffer.Clear();
+        if (!_targetProvider.TryGetTargetPosition(out var pos) || pos is null) return false;
+        buffer.Add(pos.Value);
+        return true;
     }
 }
