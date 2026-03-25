@@ -358,6 +358,7 @@ public interface IScenePoolServices
 
 public interface IDistanceMonitoringService
 {
+    [Obsolete]
     int RegisterSubscriber(Vector3 position, ITargetable target/*Vector3 targetPosiiton*/, /*float bufferMultiplier,*/ Action<float/*, float*/> callback);
     bool TryRegisterSubscriber(IInstanceIdentifiable id, Vector3 currentPosition, ITargetable targetToCompare, Action<float> callback);
     bool TryUnregisterSubscriber(IInstanceIdentifiable id);

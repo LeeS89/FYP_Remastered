@@ -431,6 +431,15 @@ public interface IFsmDestinationProvider
 
 public interface IFsmDataProvider { }
 
+public interface IFsmPatrolDataProvider : IFsmDataProvider { }
+public interface IFsmChaseDataProvider : IFsmDataProvider
+{
+    bool TryRegisterDistanceMonitoring(IInstanceIdentifiable id, Vector3 currentPosition, /*ITargetable targetToCompare,*/ Action<float> callback, out float initDist);
+    bool TryUnregisterDistanceMonitoring(IInstanceIdentifiable id);
+    bool TargetIsMoving();
+}
+
+
 
 
 
@@ -450,7 +459,7 @@ public abstract class StateServiceBridge<TService> : IFsmDestinationProvider, IF
    
 }
 
-public sealed class PatrolServiceBridge : StateServiceBridge<IPatrolService>
+public sealed class PatrolServiceBridge : StateServiceBridge<IPatrolService>, IFsmPatrolDataProvider
 {
     private WaypointSet _wpSet;
 
@@ -484,17 +493,20 @@ public sealed class PatrolServiceBridge : StateServiceBridge<IPatrolService>
     }
 }
 
-public sealed class ChaseServiceBridge : StateServiceBridge<IChaseService>
+public sealed class ChaseServiceBridge : StateServiceBridge<IChaseService>, IFsmChaseDataProvider
 {
     private readonly ITargetProvider _targetProvider;
+    private readonly IDistanceMonitoringService _distanceService;
 
-    public ChaseServiceBridge(IChaseService service, ITargetProvider targetProvider) : base(service) 
-    { _targetProvider = targetProvider; }
+    public ChaseServiceBridge(IChaseService service, IDistanceMonitoringService distService, ITargetProvider targetProvider) : base(service) 
+    { (_distanceService, _targetProvider) = (distService, targetProvider); }
 
     public override void ReleaseCandidates(List<Vector3> buffer)
     {
         throw new NotImplementedException();
     }
+
+    
 
     public override bool TryGetDestinationCandidates(List<Vector3> buffer)
     {
@@ -503,5 +515,28 @@ public sealed class ChaseServiceBridge : StateServiceBridge<IChaseService>
         if (!_targetProvider.TryGetTargetPosition(out var pos) || pos is null) return false;
         buffer.Add(pos.Value);
         return true;
+    }
+
+    // Needs targets ITargetable
+    private bool TryGetTarget(out ITargetable target) => _targetProvider.TryGetTarget(out target);
+
+    public bool TargetIsMoving()
+    {
+        if (!TryGetTarget(out var target)) return false;
+        return target.IsMoving();
+    }
+
+    public bool TryRegisterDistanceMonitoring(IInstanceIdentifiable id, Vector3 currentPosition, Action<float> callback, out float initDist)
+    {
+        initDist = 0f; // Remember to get
+        if (id is null || callback is null) return false;
+        if (!_targetProvider.TryGetTarget(out var target)) return false;
+        return _distanceService.TryRegisterSubscriber(id, currentPosition, target, callback);
+    }
+
+    public bool TryUnregisterDistanceMonitoring(IInstanceIdentifiable id)
+    {
+        if (id is null) return false;
+        return _distanceService.TryUnregisterSubscriber(id);
     }
 }

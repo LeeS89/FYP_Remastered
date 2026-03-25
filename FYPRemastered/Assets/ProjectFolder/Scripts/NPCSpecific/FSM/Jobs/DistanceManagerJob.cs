@@ -63,6 +63,7 @@ public class DistanceManagerJob : IDistanceMonitoringService, ITickable
     // Unused interface function
     public void LateTick(float dt) { }
 
+    [Obsolete]
     public int RegisterSubscriber(Vector3 position, ITargetable target/*Vector3 targetPosiiton*/, /*float bufferMultiplier,*/ Action<float/*, float*/> callback)
     {
         int subscriberId = _nextSubscriberId++;

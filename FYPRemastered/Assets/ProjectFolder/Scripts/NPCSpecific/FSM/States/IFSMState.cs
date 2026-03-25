@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public interface IFsmState : ITickable
@@ -23,6 +24,7 @@ public interface IFsmState : ITickable
     float GetDesiredStoppingDistance();
 }
 
+[Obsolete]
 public interface IFsmStateNew : ITickable
 {
     
@@ -48,9 +50,10 @@ public interface IFsmStateNew : ITickable
     float GetDesiredStoppingDistance();
 }
 
+[Obsolete]
 public interface IFsmStateNew<TService/*, TContext*/> : IFsmStateNew where TService : IFsmStateService// where TContext : IContext //, ITickable
 {
-   // TContext Context { get; }
+    // TContext Context { get; }
     /* TContext Context { get; }
 
      void EnterState();
@@ -73,6 +76,30 @@ public interface IFsmStateNew<TService/*, TContext*/> : IFsmStateNew where TServ
 
      float GetDesiredStoppingDistance();*/
 }
+
+public interface IFsmStateNewest : ITickable
+{
+    void EnterState();
+
+    void ExitState();
+
+    void OnDestinationReached();
+
+    void OnDestinationSet();
+
+    // void ValidateCandidateDestinations();
+
+    void TryRepath();
+
+    bool NeedsNewPath();
+    //void RetrieveCandidateDestinations();
+
+    // bool UsesRandomAgentStopDistance { get; }
+    StateId GetId();
+
+    float GetDesiredStoppingDistance();
+}
+
 
 
 public interface IFsmController : ITickable
