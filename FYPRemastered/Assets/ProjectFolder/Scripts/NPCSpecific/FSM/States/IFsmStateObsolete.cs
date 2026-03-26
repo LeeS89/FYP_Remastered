@@ -1,7 +1,8 @@
 using System;
 using UnityEngine;
 
-public interface IFsmState : ITickable
+[Obsolete("", true)]
+public interface IFsmStateObsolete : ITickable
 {
     void EnterState();
 
@@ -24,7 +25,7 @@ public interface IFsmState : ITickable
     float GetDesiredStoppingDistance();
 }
 
-[Obsolete]
+[Obsolete("", true)]
 public interface IFsmStateNew : ITickable
 {
     

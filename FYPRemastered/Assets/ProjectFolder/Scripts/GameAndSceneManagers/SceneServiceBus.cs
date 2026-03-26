@@ -264,7 +264,8 @@ public interface IAddressableService : IDisposable
 
 }
 
-public interface IFsmControlService
+[Obsolete("",true)]
+public interface IFsmControlServiceObsolete
 {
     bool TryGetOwnerTransform(IInstanceIdentifiable id, out Transform t);
     bool TryGetAgent(IInstanceIdentifiable id, out NavMeshAgent agent);
@@ -275,6 +276,7 @@ public interface IFsmControlService
 }
 
 
+[Obsolete("", true)]
 public interface IFsmStateService
 {
     [Obsolete("Use INpcBody instead")]
@@ -294,6 +296,7 @@ public interface IFsmStateService
   
 }
 
+[Obsolete("", true)]
 public interface IFsmStateService<TContext> : IFsmStateService where TContext : IContext
 {
      bool TryGetDestinationCandidates(TContext id, List<Vector3> buffer);
@@ -313,28 +316,11 @@ public interface IFsmStateService<TContext> : IFsmStateService where TContext : 
 
 }
 
-public interface IChaseService : IFsmStateService<ITargetContext>
-{
-    //bool TryGetDestinationCandidates(IInstanceIdentifiable id, List<Vector3> buffer);
-    bool TargetIsMoving(IInstanceIdentifiable id);
-    bool TryGetSqrDistanceToTarget(IInstanceIdentifiable id, Vector3 from, out float sqrDistance);
 
-    bool TryRegisterDistanceToTargetMonitoring(IInstanceIdentifiable id, Action<float> onDistanceUpdate, out float initialDistance);
-    bool TryUnregisterDistanceToTargetMonitoring(IInstanceIdentifiable id);
-}
 
-public interface IPatrolService : IFsmStateService<ITargetContext>// : IAddressableServiceObsolete
-{
-    float GetIdleTimeSeconds();
-   // bool TryGetWaypoints(object requester, List<Vector3> buffer);
 
-   // bool TryReleaseWaypoints(object requester, List<Vector3> buffer);
-}
 
-public interface IFlankService : IFsmStateService//<ITargetContext>// : IAddressableServiceObsolete
-{
-    void TryGetFlankCandidates(Vector3 flankTargetPos, int numSteps, List<Vector3> buffer, Action<bool> OnRequestComplete);
-}
+
 
 public interface IClosestIndexService
 {

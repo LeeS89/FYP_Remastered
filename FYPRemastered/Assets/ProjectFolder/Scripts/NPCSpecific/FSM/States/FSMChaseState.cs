@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using Random = UnityEngine.Random;
 
+[Obsolete("", true)]
 public class FSMChaseState : FsmBaseState<ChaseDeps>
 {
    // private readonly ChaseDeps _depsNew;
@@ -13,7 +14,7 @@ public class FSMChaseState : FsmBaseState<ChaseDeps>
     private int _distanceCheckSubscriberId = -1;
     float? _initialDistance = null;
   
-    public FSMChaseState(ChaseDeps deps, SharedFsmStateServices sharedDeps, IFsmStateEvents stateContext)
+    public FSMChaseState(ChaseDeps deps, SharedFsmStateServices sharedDeps, IFsmStateEventsObsoleteO stateContext)
         : base(deps, sharedDeps, stateContext, StateId.Chase) 
     { 
        // _deps = deps;
@@ -162,6 +163,7 @@ public class FSMChaseState : FsmBaseState<ChaseDeps>
 
 }
 
+[Obsolete("", true)]
 public sealed class ChaseDeps : FsmBaseState<ChaseDeps>.FsmBaseStateDeps
 {
     public IDistanceMonitoringService DistanceService { get; private set; }
@@ -214,8 +216,8 @@ public sealed class ChaseDeps : FsmBaseState<ChaseDeps>.FsmBaseStateDeps
 
 
 
-
-public sealed class FSMChaseStateNew : FsmBaseStateNew<IChaseService, ITargetContext>
+[Obsolete]
+public sealed class FSMChaseStateNew : FsmBaseStateNew<IFsmStateService<ITargetContext>, ITargetContext>
 {
     
     private Action<float> _distanceCheckCB;
@@ -223,7 +225,7 @@ public sealed class FSMChaseStateNew : FsmBaseStateNew<IChaseService, ITargetCon
     private float? _initialDistance = null;
 
 
-    public FSMChaseStateNew(IFsmStateEvents stateController, IChaseService service, IPathResolver pathResolver, ICoroutineHost host)
+    public FSMChaseStateNew(IFsmStateEventsObsoleteO stateController, IFsmStateService<ITargetContext> service, IPathResolver pathResolver, ICoroutineHost host)
         : base(stateController, service, pathResolver, host, StateId.Chase) { _candidateDestinations.EnsureCapacity(1); }
 
  /*   public FSMChaseStateNew(ChaseDeps deps, SharedFsmStateServices sharedDeps, IFsmStateEvents stateContext)
@@ -251,7 +253,7 @@ public sealed class FSMChaseStateNew : FsmBaseStateNew<IChaseService, ITargetCon
         /*Vector3 chaseTargetPos;
         if (!TryGetTargetPosition(out chaseTargetPos)) return;*/
 
-        if (!Service.TryGetDestinationCandidates(_stateEvents, _candidateDestinations)) return;
+       // if (!Service.TryGetDestinationCandidates(_stateEvents, _candidateDestinations)) return;
         if (_candidateDestinations.Count == 0) return;
 
        /* if (_candidateDestinations.Count == 0) _candidateDestinations.Add(chaseTargetPos);
@@ -286,9 +288,9 @@ public sealed class FSMChaseStateNew : FsmBaseStateNew<IChaseService, ITargetCon
         /* _pathResolver?.ProcessDestinationCandidates(_id, ReasonForDestinationCheck.ValidatePathForDestination,
              _candidateDestinations, _path, _owner.Position(), _validationCallback);*/
     }
-   
 
-    protected bool TargetIsMoving() => Service.TargetIsMoving(_stateEvents);
+
+    protected bool TargetIsMoving() => false;// Service.TargetIsMoving(_stateEvents);
    /* {
         *//*ITargetable target;
         if (!TryGetTarget(out target)) return false;*//*
@@ -322,9 +324,9 @@ public sealed class FSMChaseStateNew : FsmBaseStateNew<IChaseService, ITargetCon
         Vector3 ownerPos;
         if (!TryGetCurrentPosition(out ownerPos)) return;
 
-        if (!Service.TryGetSqrDistanceToTarget(_stateEvents, ownerPos, out float initialDistance)) return;
+        //if (!Service.TryGetSqrDistanceToTarget(_stateEvents, ownerPos, out float initialDistance)) return;
 
-        _initialDistance = initialDistance;// = targetPos.SqrDistanceTo(ownerPos);
+        _initialDistance = 0f;//initialDistance;// = targetPos.SqrDistanceTo(ownerPos);
         RegisterDistanceCheck();
         // Start job to see if player/ target has moved far enough away
         // Add job callback
@@ -341,13 +343,13 @@ public sealed class FSMChaseStateNew : FsmBaseStateNew<IChaseService, ITargetCon
 
     private void RegisterDistanceCheck()
     {
-
+/*
         if (Service.TryRegisterDistanceToTargetMonitoring(_stateEvents, _distanceCheckCB, out float initDist))
             _initialDistance = initDist;
         else _initialDistance = null;
 
         
-
+*/
        /* Vector3 ownerPos;
         if (!TryGetOwnerPosition(out ownerPos)) return;
 
@@ -365,7 +367,7 @@ public sealed class FSMChaseStateNew : FsmBaseStateNew<IChaseService, ITargetCon
     private void UnregisterDistanceCheck()
     {
         _initialDistance = null;
-        Service.TryUnregisterDistanceToTargetMonitoring(_stateEvents);
+      //  Service.TryUnregisterDistanceToTargetMonitoring(_stateEvents);
         
 
        /* if (_distanceCheckSubscriberId >= 0)

@@ -150,7 +150,7 @@ namespace Services.Internal
         /// <param name="ownerTransform">The transform representing the owner of the state. Used to initialize the new state.</param>
         /// <param name="targetRetrieverFunc">A delegate used to retrieve the target for the state. The function is invoked whenever a state needs to know its targets position</param>
         /// <returns>true if the state was successfully created and added to the dictionary; otherwise, false.</returns>
-        public bool TryCreateAndAddState(StateId id, Dictionary<StateId, IFsmState> _stateDict, NavMeshPath path, Transform ownerTransform, TryGetTarget targetRetrieverFunc)
+        public bool TryCreateAndAddState(StateId id, Dictionary<StateId, IFsmStateNewest> _stateDict, NavMeshPath path, Transform ownerTransform, TryGetTarget targetRetrieverFunc)
         {
             if (id == StateId.None || _stateDict == null || path == null ||
                 ownerTransform == null || targetRetrieverFunc == null) return false;
@@ -177,8 +177,8 @@ namespace Services.Internal
 
         }
 
-        private bool TryCreatePatrol(Dictionary<StateId, IFsmState> _dict, NavMeshPath path, Transform t, TryGetTarget tgt)
-            => _dict.TryAdd(StateId.Patrol, new FSMPatrolState(null, null, null));
+        private bool TryCreatePatrol(Dictionary<StateId, IFsmStateNewest> _dict, NavMeshPath path, Transform t, TryGetTarget tgt)
+            => _dict.TryAdd(StateId.Patrol, new FSMPatrolStateNewest(null, null, null, null, null));
 
         public bool TryCreateFsm(out IFsmController fsm, INpcBody body, TryGetTarget targetRetrieverFunc, ITickableGroup tickHost, ICoroutineHost coroutineHost, IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null)
         {
@@ -189,13 +189,13 @@ namespace Services.Internal
 
             if (!_registry.TryRegister(id, body, targetRetrieverFunc)) { fsm = null; return false; }
             //  fsm = new FsmManagerNew(id, _registry, _registry, null); // Placeholder
-            Dictionary<StateId, IFsmStateNew> _states = new();
+            Dictionary<StateId, IFsmStateNewest> _states = new();
 
-            FsmManagerNew fsNew = new FsmManagerNew(id, _registry, _registry, _states, coroutineHost, tickHost, pathNotifySender, animNotifySender);
+            FsmManagerNewest fsNew = new FsmManagerNewest(id, _registry, _registry, _states, coroutineHost, tickHost, pathNotifySender, animNotifySender);
 
             
 
-            IFsmStateNew patrol = new FSMPatrolStateNew(fsNew, (IPatrolService)_wpService, new PathFinder(_pathService), coroutineHost);
+            IFsmStateNewest patrol = new FSMPatrolStateNewest(fsNew, null, /*(IPatrolService)_wpService,*/null, new PathFinder(_pathService), coroutineHost);
             _states.Add(StateId.Patrol, patrol);
             fsm = fsNew;
 
@@ -247,7 +247,7 @@ namespace Services.Internal
         bool TryCreateFsm(out IFsmController fsm, INpcBody body, TryGetTarget targetRetrieverFunc, ITickableGroup tickHost,
             ICoroutineHost coroutineHost, IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null);
 
-        bool TryCreateAndAddState(StateId id, Dictionary<StateId, IFsmState> _stateDict, NavMeshPath path, Transform ownerTransform, TryGetTarget targetRetrieverFunc);
+        bool TryCreateAndAddState(StateId id, Dictionary<StateId, IFsmStateNewest> _stateDict, NavMeshPath path, Transform ownerTransform, TryGetTarget targetRetrieverFunc);
     }
 
 
@@ -580,7 +580,7 @@ public interface IFsmAgentRegistry : IFsmPathRegistry
 
 
 
-
+[Obsolete]
 public interface IFsmNavigationQuery
 {
     bool TryGetOwnerPosition(IInstanceIdentifiable id, out Vector3 position);
@@ -589,6 +589,7 @@ public interface IFsmNavigationQuery
     bool TryGetOwnerPositionAndPath(IInstanceIdentifiable id, out Vector3 position, out NavMeshPath path);
 }
 
+[Obsolete]
 public interface IFsmNavigationControl
 {
     bool TryGetOwnerTransform(IInstanceIdentifiable id, out Transform t);
@@ -596,6 +597,7 @@ public interface IFsmNavigationControl
     bool TryGetObstacle(IInstanceIdentifiable id, out NavMeshObstacle obstacle);
 }
 
+[Obsolete("Use ITargetProvider instead")]
 public interface IFsmTargetQuery
 {
     bool TryGetTarget(IInstanceIdentifiable id, out ITargetable target); // TEMPORARY until job accepts Func<Vector3>

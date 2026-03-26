@@ -1,12 +1,14 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using Random = UnityEngine.Random;
 
-
-public abstract class FsmBaseState<TDeps> : IFsmState where TDeps : FsmBaseState<TDeps>.FsmBaseStateDeps
+[Obsolete("", true)]
+public abstract class FsmBaseState<TDeps> : IFsmStateObsolete where TDeps : FsmBaseState<TDeps>.FsmBaseStateDeps
 {
  //   protected readonly IPathResolver _pathResolver;
-    protected readonly IFsmStateEvents _stateEvents;
+    protected readonly IFsmStateEventsObsoleteO _stateEvents;
     //protected readonly IFsmNotificationSource _stateContext;
     protected Coroutine _runningRoutine;
     protected bool _isAtDestination = false;
@@ -29,7 +31,7 @@ public abstract class FsmBaseState<TDeps> : IFsmState where TDeps : FsmBaseState
 
 
 
-    public FsmBaseState(TDeps deps, SharedFsmStateServices sharedDeps, IFsmStateEvents stateEvents, StateId id)
+    public FsmBaseState(TDeps deps, SharedFsmStateServices sharedDeps, IFsmStateEventsObsoleteO stateEvents, StateId id)
     {
         _deps = deps;
         _sharedDeps = sharedDeps;
@@ -238,14 +240,14 @@ public class CoTestThree
 
 
 
-
+[Obsolete]
 public abstract class FsmBaseStateNew<TService, TContext> : IFsmStateNew<TService> 
   //  where TContext : IContext
     where TService : IFsmStateService<TContext>// where TContext : FsmBaseState<TContext>.FsmBaseStateDeps
     where TContext : IContext
 {
  //   protected readonly IPathResolver _pathResolver;
-    protected readonly IFsmStateEvents _stateEvents;
+    protected readonly IFsmStateEventsObsoleteO _stateEvents;
     //protected readonly IFsmNotificationSource _stateContext;
     protected Coroutine _runningRoutine;
     protected bool _isAtDestination = false;
@@ -275,7 +277,7 @@ public abstract class FsmBaseStateNew<TService, TContext> : IFsmStateNew<TServic
     //internal void SetContext(TContext context) => Context = context;
     protected readonly IPathResolver _pathResolver;
 
-    public FsmBaseStateNew(IFsmStateEvents stateController, TService service, IPathResolver pathResolver, ICoroutineHost host, StateId id)
+    public FsmBaseStateNew(IFsmStateEventsObsoleteO stateController, TService service, IPathResolver pathResolver, ICoroutineHost host, StateId id)
     {
         _stateEvents = stateController;
         Service = service;

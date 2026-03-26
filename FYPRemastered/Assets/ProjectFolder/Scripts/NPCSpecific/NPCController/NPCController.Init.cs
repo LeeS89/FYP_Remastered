@@ -19,9 +19,11 @@ public partial class NPCController
     //private IPathResolver _pathFinder;
     private FovRunner _fovRunner;
     private IFsmController _fsmManager;
-   // private FsmManager _fsmManager;
+    // private FsmManager _fsmManager;
     //private IFsmControl _fsmManager;
-    private Dictionary<StateId, IFsmState> _fsmStates = new(5);
+
+    [Obsolete("", true)]
+    private Dictionary<StateId, IFsmStateObsolete> _fsmStates = new(5);
     // end FSMManager Composition
 
     private INpcAnimationControl _animationControl;
@@ -99,7 +101,7 @@ public partial class NPCController
 
     private void ConstructFSM()
     {
-        if(_aiServices.TryGetFsmFactory(out var factory))
+        if (_aiServices.TryGetFsmFactory(out var factory))
         {
             var pathNotificationSenderNew = new PathNotificationSender(_componentNotifications);
             var animRequestNotificationSenderNew = new AnimationNotificationSender(_componentNotifications);
@@ -109,11 +111,18 @@ public partial class NPCController
             }
             else
                 DebugLogs.Err("Failed to create FSM manager", this);
-        }else
+        }
+        else
             DebugLogs.Err("Failed to retrieve Factory", this);
 
 
-        return;
+      /*  return;
+        ConstructObsolete();*/
+    }
+
+    [Obsolete("", true)]
+    private void ConstructObsolete()
+    {
         // Obsolete
         _fsmDeps.SetOwner(this);
         _fsmDeps.SetTarget(_primaryTarget);
@@ -124,8 +133,8 @@ public partial class NPCController
         OnTryGetCurrentTarget = TryGetCurrentTarget;
         // if (_aiServices.TryGetPathService(out var pathService)) _fsmDeps._pathResolver = new PathFinder(pathService);//_pathFinder = new PathFinderNew(pathService);
         if (!_aiServices.TryGetPathService(out var pathService)) return;
-        
-          //  _fsmDeps._pathResolver = new PathFinder(pathService);
+
+        //  _fsmDeps._pathResolver = new PathFinder(pathService);
         IPathResolver pathResolver = new PathFinder(pathService);
 
         // _fovRunner = new NPCFieldOfViewHandler(_fovParams);
@@ -152,7 +161,7 @@ public partial class NPCController
 
             PatrolDeps pDeps = new PatrolDeps(wps, pathResolver, _patrolStateCfg);
             //IFSMState patrolState = new FSMPatrolState(wpService, data: this, resolver: _pathFinder, stateContext: _fsmManager);
-            IFsmState patrolState = new FSMPatrolState(deps: pDeps, shared, /*data: this, resolver: _pathFinder,*/ stateEvents: /*_fsmManager*/null);
+            IFsmStateObsolete patrolState = new FSMPatrolState(deps: pDeps, shared, /*data: this, resolver: _pathFinder,*/ stateEvents: /*_fsmManager*/null);
             // IFsmState patrolState = new FSMPatrolState(deps: _fsmDeps, /*data: this, resolver: _pathFinder,*/ stateEvents: _fsmManager);
             StateId pid = patrolState.GetId();
             _fsmStates.TryAdd(pid, patrolState);
@@ -160,13 +169,13 @@ public partial class NPCController
         else
             DebugLogs.Err("Failed to retrieve WaypointService", this);
 
-            IFlankService fService;
+        IFlankService fService;
         if (_aiServices.TryGetFlankService(out fService/*_fsmDeps._flankService*/))
         {
             FlankDeps fDeps = new FlankDeps(fService, pathResolver, _flankStateCfg);
 
-            IFsmState flankState = new FsmFlankState(deps: fDeps, shared, /*data: this, _pathFinder,*/ /*_fsmManager*/null);
-           // IFsmState flankState = new FsmFlankState(deps: _fsmDeps, /*data: this, _pathFinder,*/ _fsmManager);
+            IFsmStateObsolete flankState = new FsmFlankState(deps: fDeps, shared, /*data: this, _pathFinder,*/ /*_fsmManager*/null);
+            // IFsmState flankState = new FsmFlankState(deps: _fsmDeps, /*data: this, _pathFinder,*/ _fsmManager);
             //IFSMState flankState = new FSMFlankState(flankService, data: this, _pathFinder, _fsmManager);
             StateId fid = flankState.GetId();
             _fsmStates.TryAdd(fid, flankState);
@@ -175,18 +184,19 @@ public partial class NPCController
         //IFSMState chaseState = new FSMChaseState(PrimaryTarget, data: this, resolver: _pathFinder, stateContext: _fsmManager);
         if (_aiServices.TryGetDistanceService(out var service))
         {
-         /*Obsolete line*/   _fsmDeps.SetDistanceService(service); // Maybe assume it is used by all states instead of just chase
+            /*Obsolete line*/
+            _fsmDeps.SetDistanceService(service); // Maybe assume it is used by all states instead of just chase
 
             ChaseDeps cDeps = new ChaseDeps(service, pathResolver, _chanceStateCfg);
-            IFsmState chaseState = new FSMChaseState(deps: cDeps, shared, stateContext: /*_fsmManager*/null);
-           // IFsmState chaseState = new FSMChaseState(deps: _fsmDeps, stateContext: _fsmManager);
+            IFsmStateObsolete chaseState = new FSMChaseState(deps: cDeps, shared, stateContext: /*_fsmManager*/null);
+            // IFsmState chaseState = new FSMChaseState(deps: _fsmDeps, stateContext: _fsmManager);
             StateId cid = chaseState.GetId();
             _fsmStates.TryAdd(cid, chaseState);
         }
 
         //_fsmManager.Notification = Notify;
         //_fsmManager.OnAnimationIntent = AnimationIntent;
-       // _fsmManager.OnMapDestinationToZone = MapDestinationToZone;///// maybe when entering patrol
+        // _fsmManager.OnMapDestinationToZone = MapDestinationToZone;///// maybe when entering patrol
     }
 
     private void SetAgentParams()

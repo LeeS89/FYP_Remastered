@@ -1,10 +1,12 @@
 using Npc.API;
+using System;
 using System.Collections;
 using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.AI;
 using Random = UnityEngine.Random;
 
+[Obsolete("",true)]
 public sealed class FSMPatrolState : FsmBaseState<PatrolDeps>
 {
     private readonly IPatrolService _waypointService;
@@ -16,7 +18,7 @@ public sealed class FSMPatrolState : FsmBaseState<PatrolDeps>
         _waypointService = waypointService;
         _candidateDestinations.EnsureCapacity(10);
     }*/
-    public FSMPatrolState(PatrolDeps deps, SharedFsmStateServices sharedDeps, IFsmStateEvents stateEvents) 
+    public FSMPatrolState(PatrolDeps deps, SharedFsmStateServices sharedDeps, IFsmStateEventsObsoleteO stateEvents) 
         : base(deps, sharedDeps, stateEvents, StateId.Patrol)
     {
        // _patrolDeps = deps;
@@ -143,6 +145,7 @@ public sealed class FSMPatrolState : FsmBaseState<PatrolDeps>
     
 }
 
+[Obsolete("", true)]
 public sealed class PatrolDeps : FsmBaseState<PatrolDeps>.FsmBaseStateDeps
 {
     public IPatrolService WaypointService { get; private set; }
@@ -188,8 +191,8 @@ public sealed class PatrolDeps : FsmBaseState<PatrolDeps>.FsmBaseStateDeps
 
 
 
-
-public sealed class FSMPatrolStateNew : FsmBaseStateNew<IPatrolService, ITargetContext>
+[Obsolete]
+public sealed class FSMPatrolStateNew : FsmBaseStateNew<IFsmStateService<ITargetContext>, ITargetContext>
 {
  //   private readonly IPatrolService _waypointService;
     //  private readonly IPatrolDeps _patrolDeps;
@@ -200,7 +203,7 @@ public sealed class FSMPatrolStateNew : FsmBaseStateNew<IPatrolService, ITargetC
         _waypointService = waypointService;
         _candidateDestinations.EnsureCapacity(10);
     }*/
-    public FSMPatrolStateNew(IFsmStateEvents stateController, IPatrolService service, IPathResolver pathResolver, ICoroutineHost host)
+    public FSMPatrolStateNew(IFsmStateEventsObsoleteO stateController, IFsmStateService<ITargetContext> service, IPathResolver pathResolver, ICoroutineHost host)
         : base(stateController, service, pathResolver, host, StateId.Patrol)
     {
         // _patrolDeps = deps;
@@ -358,7 +361,7 @@ public sealed class FSMPatrolStateNew : FsmBaseStateNew<IPatrolService, ITargetC
         if (!canContinue) yield break;
 
         _stateEvents?.RequestAnimation(AnimationCue.Look, _stateId);
-        float _delayTime = Service.GetIdleTimeSeconds();//Random.Range(minWait, maxWait);
+        float _delayTime = 0f;// Service.GetIdleTimeSeconds();//Random.Range(minWait, maxWait);
         float elapsedTime = 0.0f;
 
         while (elapsedTime < _delayTime)

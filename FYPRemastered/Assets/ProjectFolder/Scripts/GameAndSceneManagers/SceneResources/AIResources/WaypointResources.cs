@@ -41,11 +41,6 @@ public class WaypointResources : IPatrolService, IAddressableService
     public WaypointResources(IFsmNavigationQuery navQuery) => _navQuery = navQuery;
    
 
-    public bool TryGetDestinationCandidates(ITargetContext id, List<Vector3> buffer)
-    {
-        return false;
-    }
-
 
     public async Task<bool> TryInitialiseAsync(FeatureMeta data)
     {
@@ -252,7 +247,7 @@ public class WaypointResources : IPatrolService, IAddressableService
 
 
 
-public class FsmResources : IAddressableService, IFsmControlService
+public class FsmResources : IAddressableService//, IFsmControlServiceObsolete
 {
 
     private readonly IFsmNavigationControl _navControl;
@@ -348,71 +343,6 @@ public class FsmResources : IAddressableService, IFsmControlService
 
 
 
-public abstract class CandidateDestinationProvider/*<TContext>*/ : IFsmStateServiceNew// where TContext : IContext
-{
-    //  public abstract bool TryGetDestinationCandidates(T id, List<Vector3> buffer);
-
-    //  public abstract bool TryGetDestinationCandidates<IContext>(IContext context, List<Vector3> buffer);
-    public abstract bool TryGetDestinationCandidates<TContext>(TContext context, List<Vector3> buffer) where TContext : IContext;
-    /*{
-        throw new NotImplementedException();
-    }*/
-}
-
-
-public class OtherTest : CandidateDestinationProvider//<ITargetContext>
-{
-    /*   public override bool TryGetDestinationCandidates<ITargetContext>(ITargetContext id, List<Vector3> buffer)
-       {
-           throw new NotImplementedException();
-       }*/
-    /*public override bool TryGetDestinationCandidates(ITargetContext id, List<Vector3> buffer)
-    {
-        throw new NotImplementedException();
-    }*/
-    public override bool TryGetDestinationCandidates<ITargetContext>(ITargetContext context, List<Vector3> buffer)
-    {
-     
-        return true;
-        //throw new NotImplementedException();
-    }
-}
-
-public interface INewTest
-{
-    void TryGet<T>(T id);
-}
-
-public interface IFsmStateServiceNew//<TContext>  where TContext : IContext
-{
-    bool TryGetDestinationCandidates<TContext>(TContext context, List<Vector3> buffer) where TContext : IContext;
-    /*   [Obsolete("Use INpcBody instead")]
-       bool TryGetCurrentPosition(IInstanceIdentifiable id, out Vector3 currentPosition);
-
-       [Obsolete("Use INpcBody instead")]
-       bool TryGetPath(IInstanceIdentifiable id, out NavMeshPath path);
-       [Obsolete("Use INpcBody instead")]
-       bool TryGetCurrentPositionAndPath(IInstanceIdentifiable id, out Vector3 currentPos, out NavMeshPath path);
-
-
-     //  bool TryGetDestinationCandidates(ITargetContext context, List<Vector3> buffer);
-       [Obsolete("Use INpcBody instead")]
-       bool TryGetDestinationCandidates(IInstanceIdentifiable id, List<Vector3> buffer);
-       void ReleaseDestinationCandidates(IInstanceIdentifiable id, List<Vector3> buffer);*/
-
-}
-
-public class otherClass
-{
-    public IFsmStateServiceNew _new;
-    public IContext _iContext;
-    public ITargetContext _tContext;
-
-    public void returnNew()
-    {
-        _new.TryGetDestinationCandidates(_tContext, new List<Vector3>());
-    }
-}
 
 
 
@@ -421,37 +351,30 @@ public class otherClass
 
 
 
-public interface IFsmDestinationProvider
-{
-    bool TryGetDestinationCandidates(List<Vector3> buffer);
-    void ReleaseCandidates(List<Vector3> buffer);
-}
-
-
-
-public interface IFsmDataProvider { }
-
-public interface IFsmPatrolDataProvider : IFsmDataProvider { }
-public interface IFsmChaseDataProvider : IFsmDataProvider
-{
-    bool TryRegisterDistanceMonitoring(IInstanceIdentifiable id, Vector3 currentPosition, /*ITargetable targetToCompare,*/ Action<float> callback, out float initDist);
-    bool TryUnregisterDistanceMonitoring(IInstanceIdentifiable id);
-    bool TargetIsMoving();
-}
-
-
-
-
-
-
-
-
-
-public abstract class StateServiceBridge<TService> : IFsmDestinationProvider, IFsmDataProvider
+public abstract class FsmServiceBridge<TService> : IFsmDataProvider
 {
     protected readonly TService _service;
+    public FsmServiceBridge(TService service) => _service = service;
+}
 
-    public StateServiceBridge(TService service) => _service = service;
+
+public sealed class FsmControlBridge : FsmServiceBridge<IFsmControlService>, IFsmControlDataProvider
+{
+    public FsmControlBridge(IFsmControlService service) : base(service) { }
+
+    public float SprintEnterDistance => _service.GetSprintEnterDistance();
+    public float SprintExitDistance => _service.GetSprintExitDistance();
+
+    public float WalkSpeed => _service.GetWalkSpeed();
+
+    public float SprintSpeed => _service.GetSprintSpeed();
+}
+
+
+public abstract class StateServiceBridge<TService> : FsmServiceBridge<TService>, IFsmDestinationProvider
+{
+
+    public StateServiceBridge(TService service) : base(service) { }
 
     public abstract void ReleaseCandidates(List<Vector3> buffer);
 

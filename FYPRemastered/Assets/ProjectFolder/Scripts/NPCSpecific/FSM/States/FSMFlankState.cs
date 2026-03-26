@@ -5,6 +5,7 @@ using Unity.XR.CoreUtils;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
+[Obsolete("", true)]
 public class FsmFlankState : FsmBaseState<FlankDeps>
 {
    // private IFlankDeps _deps;
@@ -20,7 +21,7 @@ public class FsmFlankState : FsmBaseState<FlankDeps>
         _flankStepsToTry.EnsureCapacity(10);
         _onFlankCandidatesReceived = OnCandidatesReceived;
     }*/
-    public FsmFlankState(FlankDeps deps, SharedFsmStateServices sharedDeps, IFsmStateEvents stateContext) 
+    public FsmFlankState(FlankDeps deps, SharedFsmStateServices sharedDeps, IFsmStateEventsObsoleteO stateContext) 
         : base(deps, sharedDeps, stateContext, StateId.Flank)
     {
         //_deps = deps;
@@ -103,6 +104,7 @@ public class FsmFlankState : FsmBaseState<FlankDeps>
 
 }
 
+[Obsolete("", true)]
 public sealed class FlankDeps : FsmBaseState<FlankDeps>.FsmBaseStateDeps
 {
     public IFlankService FlankService { get; private set; }
@@ -116,4 +118,169 @@ public sealed class FlankDeps : FsmBaseState<FlankDeps>.FsmBaseStateDeps
         MaxFlankSteps = config?.maxFlankSteps ?? 12;
     }
 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+public class FsmFlankStateNewest : FsmBaseStateNewest<IFsmFlankDataProvider>
+{
+    // private IFlankDeps _deps;
+    private IFlankService _flankService;
+    private Action<bool> _onFlankCandidatesReceived;
+    private List<int> _flankStepsToTry = new();
+
+    /* public FSMFlankState(IFlankService flankService, IAgentData data, IPathResolver resolver, IFSMStateContext stateContext) 
+         : base(data, resolver, stateContext, StateId.Flank)
+     {
+         _flankService = flankService;
+         _candidateDestinations.EnsureCapacity(25);
+         _flankStepsToTry.EnsureCapacity(10);
+         _onFlankCandidatesReceived = OnCandidatesReceived;
+     }*/
+  /*  public FsmFlankStateNewest(FlankDeps deps, SharedFsmStateServices sharedDeps, IFsmStateEventsObsoleteO stateContext)
+        : base(deps, sharedDeps, stateContext, StateId.Flank)
+    {
+        //_deps = deps;
+        _flankService = _deps.FlankService;
+        _candidateDestinations.EnsureCapacity(25);
+        _flankStepsToTry.EnsureCapacity(10);
+        _onFlankCandidatesReceived = OnCandidatesReceived;
+    }*/
+
+
+    public FsmFlankStateNewest(IFsmStateContext stateController, IFsmDestinationProvider destP, IFsmFlankDataProvider dataP, IPathResolver pathResolver, ICoroutineHost host)
+        : base(stateController, destP, dataP, pathResolver, host, StateId.Flank) { _candidateDestinations.EnsureCapacity(15); _onFlankCandidatesReceived = OnCandidatesReceived; }
+
+
+    public override void EnterState()
+    {
+        SortStepsToTry();
+        base.EnterState();
+    }
+
+    protected override void RetrieveCandidateDestinations()
+    {
+        if (!_isInState || _candidateDestinations == null) return;
+
+        if (_flankStepsToTry.Count == 0) // Add in arbitrary steps, 5 to 8 etc.
+        {
+            DestinationResultInfo noPathResult = new DestinationResultInfo
+            (
+                ReasonForDestinationCheck.ValidatePathForDestination,
+                null,
+                DestinationResult.CandidatesNullOrEmpty,
+                Vector3.zero,
+                StateId.Flank
+            );
+            base.OnProcessedDestinationsResult(in noPathResult);
+            return;
+        }
+
+       /* Vector3 targetPos;
+        if (!TryGetTargetPosition(out targetPos)) return; // Notify maybe
+
+        // In DestinationResult, change found bool to result enum with values Found, NotFound, NoPrimaryTarget
+        int stepsToTry = _flankStepsToTry[0];
+        _flankStepsToTry.RemoveAt(0);
+        _flankService?.TryGetFlankCandidates(*//*_ownerData.PrimaryTarget.Position()*//*_deps.Target.Position()*//*targetPos, stepsToTry, _candidateDestinations, _onFlankCandidatesReceived);*/
+    }
+
+    protected override void ValidateAndSendCandidateDestinations()
+    {
+        if (!_isInState || _candidateDestinations == null) return;
+    }
+
+    protected override void OnProcessedDestinationsResult(in DestinationResultInfo result)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    private void OnCandidatesReceived(bool success)
+    {
+        if (!_isInState) return;
+        // if ! success or no candidates, Send PathResult with found = false
+    }
+
+    private void SortStepsToTry()
+    {
+        _flankStepsToTry.Clear();
+
+      //  int randomIndex = Random.Range(/*_ownerData.MinFlankSteps*/_deps.MinFlankSteps, /*_ownerData.MaxFlankSteps + 1*/_deps.MaxFlankSteps + 1);
+
+     /*   int temp = randomIndex;
+        while (temp >= _deps.MinFlankSteps) // 4 will eventually be changed to a passed minSteps parameter
+        {
+            _flankStepsToTry.Add(temp);
+            temp--;
+        }
+        temp = randomIndex + 1;
+        while (temp <= *//*_ownerData.MaxFlankSteps*//*_deps.MaxFlankSteps)
+        {
+            _flankStepsToTry.Add(temp);
+            temp++;
+        }*/
+    }
+
+ 
 }
