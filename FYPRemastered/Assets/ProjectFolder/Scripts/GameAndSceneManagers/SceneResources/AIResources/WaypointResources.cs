@@ -187,7 +187,7 @@ public class WaypointResources : IPatrolService, IAddressableService
             data._inUse = false;
     }
 
-
+    // To be deleted
     private bool TryReleaseWaypoints(IInstanceIdentifiable requester, List<Vector3> buffer)
     {
         if (requester == null || requester.GetType().IsValueType) return false;
@@ -202,38 +202,7 @@ public class WaypointResources : IPatrolService, IAddressableService
         return false;
     }
 
-    public bool TryGetCurrentPosition(IInstanceIdentifiable id, out Vector3 pos)
-    {
-        pos = default;
-        if (id == null) { DebugLogs.RequireNotNull(id, "InstancIdentifiable"); return false; }
 
-        return _navQuery.TryGetOwnerPosition(id, out pos);
-    }
-
-    public bool TryGetPath(IInstanceIdentifiable id, out NavMeshPath path)
-    {
-        path = null;
-        if (id == null) { DebugLogs.RequireNotNull(id, "InstancIdentifiable"); return false; }
-        return _navQuery.TryGetPath(id, out path);
-    }
-
-    [Obsolete]
-    public bool TryGetDestinationCandidates(IInstanceIdentifiable id, List<Vector3> buffer)
-        => TryGetWaypoints(id, buffer);
-
-   /* bool TryGetDestinationCandidates(ITargetContext context, List<Vector3> buffer)
-        => TryGetWaypoints(null, buffer);
-*/
-    public void ReleaseDestinationCandidates(IInstanceIdentifiable id, List<Vector3> buffer)
-        => TryReleaseWaypoints(id, buffer);
-
-    public bool TryGetCurrentPositionAndPath(IInstanceIdentifiable id, out Vector3 currentPos, out NavMeshPath path)
-    {
-        currentPos = default;
-        path = null;
-        if (id == null) return false;
-        return _navQuery.TryGetOwnerPositionAndPath(id, out currentPos, out path);
-    }
 
     public float GetIdleTimeSeconds()
     {
@@ -249,17 +218,11 @@ public class WaypointResources : IPatrolService, IAddressableService
 
 
 
-public class FsmResources : IAddressableService//, IFsmControlServiceObsolete
+public class FsmResources : IAddressableService, IFsmControlService
 {
-    [Obsolete]
-    private readonly IFsmNavigationControl _navControl;
     private AgentSpeedData _speedData;
 
-    private FsmResources() { }
-
-    [Obsolete]
-    public FsmResources(IFsmNavigationControl navControl) => _navControl = navControl;
-    
+   
 
     public async Task<bool> TryInitialiseAsync(FeatureMeta data)
     {
@@ -288,16 +251,6 @@ public class FsmResources : IAddressableService//, IFsmControlServiceObsolete
 
 
 
-
-    public bool TryGetOwnerTransform(IInstanceIdentifiable id, out Transform t)
-        => _navControl.TryGetOwnerTransform(id, out t);
-
-    public bool TryGetAgent(IInstanceIdentifiable id, out NavMeshAgent agent)
-        => _navControl.TryGetAgent(id, out agent);
-
-    public bool TryGetObstacle(IInstanceIdentifiable id, out NavMeshObstacle obstacle)
-        => _navControl.TryGetObstacle(id, out obstacle);
-
     public float GetWalkSpeed()
     {
         throw new System.NotImplementedException();
@@ -312,6 +265,16 @@ public class FsmResources : IAddressableService//, IFsmControlServiceObsolete
     public void Dispose()
     {
         throw new System.NotImplementedException();
+    }
+
+    public float GetSprintEnterDistance()
+    {
+        throw new NotImplementedException();
+    }
+
+    public float GetSprintExitDistance()
+    {
+        throw new NotImplementedException();
     }
 }
 
