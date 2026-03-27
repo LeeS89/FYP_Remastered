@@ -11,12 +11,16 @@ public sealed class ChaseResources : IChaseService, IAddressableService
 {
     private AsyncOperationHandle<AgentChaseData>? _chaseDataHandle;
     private AgentChaseData _data;
+
+    [Obsolete]
     private readonly IFsmTargetQuery _targetQuery;
+    [Obsolete]
     private readonly IFsmNavigationQuery _navQuery;
     private readonly IDistanceMonitoringService _distService;
 
     private ChaseResources() { }
 
+    [Obsolete]
     public ChaseResources(IFsmNavigationQuery navQuery, IFsmTargetQuery targetRegistry, IDistanceMonitoringService distanceService)
     {
         _navQuery = navQuery;

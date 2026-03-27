@@ -34,10 +34,12 @@ public class WaypointResources : IPatrolService, IAddressableService
 
     private Dictionary<WaypointSet, BlockData> _waypointRegistry = new(25);
 
+    [Obsolete]
     private readonly IFsmNavigationQuery _navQuery;
 
     private WaypointResources() { }
 
+    [Obsolete]
     public WaypointResources(IFsmNavigationQuery navQuery) => _navQuery = navQuery;
    
 
@@ -249,12 +251,13 @@ public class WaypointResources : IPatrolService, IAddressableService
 
 public class FsmResources : IAddressableService//, IFsmControlServiceObsolete
 {
-
+    [Obsolete]
     private readonly IFsmNavigationControl _navControl;
     private AgentSpeedData _speedData;
 
     private FsmResources() { }
 
+    [Obsolete]
     public FsmResources(IFsmNavigationControl navControl) => _navControl = navControl;
     
 

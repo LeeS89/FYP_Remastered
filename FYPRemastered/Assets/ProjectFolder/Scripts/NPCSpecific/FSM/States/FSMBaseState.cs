@@ -240,7 +240,7 @@ public class CoTestThree
 
 
 
-[Obsolete]
+[Obsolete("",true)]
 public abstract class FsmBaseStateNew<TService, TContext> : IFsmStateNew<TService> 
   //  where TContext : IContext
     where TService : IFsmStateService<TContext>// where TContext : FsmBaseState<TContext>.FsmBaseStateDeps

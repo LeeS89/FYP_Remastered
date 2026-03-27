@@ -51,7 +51,7 @@ public interface IFsmStateNew : ITickable
     float GetDesiredStoppingDistance();
 }
 
-[Obsolete]
+[Obsolete("", true)]
 public interface IFsmStateNew<TService/*, TContext*/> : IFsmStateNew where TService : IFsmStateService// where TContext : IContext //, ITickable
 {
     // TContext Context { get; }

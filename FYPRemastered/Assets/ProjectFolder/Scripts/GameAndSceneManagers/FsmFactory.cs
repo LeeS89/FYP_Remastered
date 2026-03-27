@@ -45,7 +45,7 @@ namespace Services.Internal
 
             var controlFeature = _metaData.SpeedData;
 
-            _fsmControlService = await TryLoadStateServiceAndInitialize(controlFeature, () => new FsmResources(_registry));
+            _fsmControlService = await TryLoadStateServiceAndInitialize(controlFeature, () => new FsmResources(/*_registry*/null));
             _pathService = new PathRequestManager(_tickHost);
          //   if(_pathService is ITickable t) _tickables.Add(t);
             if (_metaData == null)
@@ -57,7 +57,7 @@ namespace Services.Internal
             var waypointFeature = _metaData.Waypoints;
             if (waypointFeature.enabled)
             {
-                _wpService = await TryLoadStateServiceAndInitialize(waypointFeature, () => new WaypointResources(_registry));
+                _wpService = await TryLoadStateServiceAndInitialize(waypointFeature, () => new WaypointResources(/*_registry*/null));
                 if (_wpService == null) DebugLogs.Nre(_wpService, "WaypointService");
                 else
                 {
@@ -70,7 +70,7 @@ namespace Services.Internal
             var flankFeature = _metaData.FlankPoints;
             if (flankFeature.enabled)
             {
-                _flankService = await TryLoadStateServiceAndInitialize(flankFeature, () => new PlayerFlankingResources(_registry, _registry));
+                _flankService = await TryLoadStateServiceAndInitialize(flankFeature, () => new PlayerFlankingResources(/*_registry, _registry*/null, null));
                 if (_flankService == null) DebugLogs.Nre(_flankService, "Flank service", this);
                 else DebugLogs.Log("Flank Service Constructed successfully", this);
                 //  var flnk = await TryLoadStateServiceAndInitialize<SamplePointDataSO, PlayerFlankingResources>(flankFeature, ()=> new PlayerFlankingResources());
@@ -80,7 +80,7 @@ namespace Services.Internal
             if (chaseFeature.enabled)
             {
                 CreateDistanceMonitorService();
-                _chaseService = await TryLoadStateServiceAndInitialize(chaseFeature, ()=> new ChaseResources(_registry, _registry, _distService));
+                _chaseService = await TryLoadStateServiceAndInitialize(chaseFeature, ()=> new ChaseResources(/*_registry, _registry*/null, null, _distService));
                 if (_chaseService == null) DebugLogs.Nre(_chaseService, "Chase Service", this);
                 else DebugLogs.Log("Chase service constructed successfully", this);
             }
@@ -191,7 +191,8 @@ namespace Services.Internal
             //  fsm = new FsmManagerNew(id, _registry, _registry, null); // Placeholder
             Dictionary<StateId, IFsmStateNewest> _states = new();
 
-            FsmManagerNewest fsNew = new FsmManagerNewest(id, _registry, _registry, _states, coroutineHost, tickHost, pathNotifySender, animNotifySender);
+            FsmManagerNewest fsNew = new FsmManagerNewest(body, targetRetrieverFunc, null, _states, tickHost, pathNotifySender, animNotifySender);
+           // FsmManagerNewest fsNew = new FsmManagerNewest(id, _registry, _registry, _states, coroutineHost, tickHost, pathNotifySender, animNotifySender);
 
             
 
@@ -203,42 +204,6 @@ namespace Services.Internal
         }
 
 
-        #region Obsolete
-        /*  private async Task<TConcrete> TryLoadStateServiceAndInitialize<TAsset, TConcrete>(FeatureMeta data, Func<TConcrete> factory) where TConcrete : class, IAddressableService
-        {
-            if (string.IsNullOrWhiteSpace(data.addressKey)) { DebugLogs.RequireNotNull(data.addressKey, "addressKey", this); return null; }
-
-            var svc = factory();//new TConcrete();
-            bool serviceInitSuccess = await svc.TryInitialiseAsync(data);
-
-            if (!serviceInitSuccess)
-            {
-                DebugLogs.LoadFail(svc, $"(The Service of {typeof(TConcrete).Name})", this);
-                svc.Dispose();
-                return null;
-
-            }
-
-            return svc;
-        }*/
-        /* private async Task<TConcrete> TryLoadStateServiceAndInitialize<TConcrete>(FeatureMeta data) where TConcrete : class, IAddressableService, new()
-         {
-             if (string.IsNullOrWhiteSpace(data.addressKey)) { DebugLogs.RequireNotNull(data.addressKey, "addressKey", this); return null; }
-
-             var svc = new TConcrete();
-             bool serviceInitSuccess = await svc.TryInitialiseAsync(data);
-
-             if (!serviceInitSuccess)
-             {
-                 DebugLogs.LoadFail(svc, $"(The Service of {typeof(TConcrete).Name})", this);
-                 svc.Dispose();
-                 return null;
-
-             }
-
-             return svc;
-         }*/
-        #endregion
     }
 
 
@@ -258,7 +223,7 @@ namespace Services.Internal
 
 
 
-    internal sealed class FsmRegistry : IFsmNavigationControl, IFsmNavigationQuery, IFsmTargetQuery//IFsmAgentRegistry, IFsmOwnerRegistry, IFsmTargetRegistry, IDisposable
+    internal sealed class FsmRegistry// : IFsmNavigationControl, IFsmNavigationQuery, IFsmTargetQuery//IFsmAgentRegistry, IFsmOwnerRegistry, IFsmTargetRegistry, IDisposable
     {
         private readonly Dictionary<int, FsmEntry> _entries = new(25);
 
@@ -580,7 +545,7 @@ public interface IFsmAgentRegistry : IFsmPathRegistry
 
 
 
-[Obsolete]
+[Obsolete("", true)]
 public interface IFsmNavigationQuery
 {
     bool TryGetOwnerPosition(IInstanceIdentifiable id, out Vector3 position);
@@ -589,7 +554,7 @@ public interface IFsmNavigationQuery
     bool TryGetOwnerPositionAndPath(IInstanceIdentifiable id, out Vector3 position, out NavMeshPath path);
 }
 
-[Obsolete]
+[Obsolete("", true)]
 public interface IFsmNavigationControl
 {
     bool TryGetOwnerTransform(IInstanceIdentifiable id, out Transform t);
@@ -597,7 +562,7 @@ public interface IFsmNavigationControl
     bool TryGetObstacle(IInstanceIdentifiable id, out NavMeshObstacle obstacle);
 }
 
-[Obsolete("Use ITargetProvider instead")]
+[Obsolete("Use ITargetProvider instead", true)]
 public interface IFsmTargetQuery
 {
     bool TryGetTarget(IInstanceIdentifiable id, out ITargetable target); // TEMPORARY until job accepts Func<Vector3>

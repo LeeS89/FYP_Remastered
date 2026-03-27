@@ -18,11 +18,14 @@ public class PlayerFlankingResources : SceneResources, IFlankService, IAddressab
     /*Vector3 top;*/
     private ClosestPointToPlayerJobNew _closestFlankPointService;
 
+    [Obsolete]
     private readonly IFsmNavigationQuery _navQuery;
+    [Obsolete]
     private readonly IFsmTargetQuery _targetQuery;
 
     private PlayerFlankingResources() { }
 
+    [Obsolete]
     public PlayerFlankingResources(IFsmNavigationQuery navQuery, IFsmTargetQuery targetQuery)
     {
         _navQuery = navQuery;

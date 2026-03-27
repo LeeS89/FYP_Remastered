@@ -1450,7 +1450,7 @@ public class FsmManagerNewest : IFsmStateContext, IFsmController, ITargetProvide
   //  private readonly IFsmTargetQuery _targetQuery;
     private readonly IReadOnlyDictionary<StateId, IFsmStateNewest> _statesNew;
 
-    [Obsolete]
+    [Obsolete("", true)]
     public FsmManagerNewest(int instanceId, IFsmNavigationControl navControl, IFsmTargetQuery targetQuery, IReadOnlyDictionary<StateId, IFsmStateNewest> states,
         ICoroutineHost host, ITickableGroup tickHost, IPathNotifications pathNotifies, IAnimationRequestNotifications animNotifies = null)
     {
