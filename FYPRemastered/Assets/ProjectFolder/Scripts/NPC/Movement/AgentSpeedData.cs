@@ -5,7 +5,11 @@ public class AgentSpeedData : ScriptableObject
 {
     [SerializeField] private float _walkSpeed;
     [SerializeField] private float _sprintSpeed;
+    [SerializeField] private float _sprintEnterdistance;
+    [SerializeField] private float _sprintExitdistance;
 
     public float WalkSpeed => _walkSpeed;
     public float SprintSpeed => _sprintSpeed;
+    public float SprintEnterdistance => _sprintEnterdistance;
+    public float SprintExitdistance => _sprintExitdistance;
 }

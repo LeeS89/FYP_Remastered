@@ -518,8 +518,8 @@ public abstract class FsmBaseStateNew<TService, TContext> : IFsmStateNew<TServic
 
 
 
-public abstract class FsmBaseStateNewest<TProvider> : IFsmStateNewest
- where TProvider : IFsmDataProvider
+public abstract class FsmBaseStateNewest<TProvider> : IFsmState
+ where TProvider : IFsmData
 {
 
     protected Coroutine _runningRoutine;

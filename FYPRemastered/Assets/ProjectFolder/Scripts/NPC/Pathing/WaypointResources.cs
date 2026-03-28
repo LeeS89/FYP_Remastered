@@ -1,3 +1,4 @@
+using Npc.API;
 using Services.Internal;
 using System;
 using System.Collections.Generic;
@@ -218,65 +219,6 @@ public class WaypointResources : IPatrolService, IAddressableService
 
 
 
-public class FsmResources : IAddressableService, IFsmControlService
-{
-    private AgentSpeedData _speedData;
-
-   
-
-    public async Task<bool> TryInitialiseAsync(FeatureMeta data)
-    {
-        string addressKey = data.addressKey;
-        if (string.IsNullOrWhiteSpace(addressKey)) { DebugLogs.RequireNotNull(addressKey, "addressKey", this); return false; }
-
-        var spHandle = await AddressableLoader.TryLoadAssetAsync<AgentSpeedData>(addressKey);
-        if (!spHandle.HasValue || !spHandle.Value.IsValid())
-        {
-            DebugLogs.Nre(spHandle, "Agent Speed Handle", this);
-            return false;
-        }
-
-        _speedData = spHandle.Value.Result;
-        if (_speedData == null)
-        {
-            DebugLogs.Nre(_speedData, "Agent Speed Data asset", this);
-            Addressables.Release(spHandle.Value);
-            return false;
-        }
-
-        DebugLogs.Err($"WalkSpeed: {_speedData.SprintSpeed}");
-        return true;
-        // await Task.CompletedTask;
-    }
-
-
-
-    public float GetWalkSpeed()
-    {
-        throw new System.NotImplementedException();
-    }
-
-    public float GetSprintSpeed()
-    {
-      
-        throw new System.NotImplementedException();
-    }
-
-    public void Dispose()
-    {
-        throw new System.NotImplementedException();
-    }
-
-    public float GetSprintEnterDistance()
-    {
-        throw new NotImplementedException();
-    }
-
-    public float GetSprintExitDistance()
-    {
-        throw new NotImplementedException();
-    }
-}
 
 
 
@@ -317,115 +259,84 @@ public class FsmResources : IAddressableService, IFsmControlService
 
 
 
-public abstract class FsmServiceBridge<TService> : IFsmDataProvider
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+public sealed class FsmContext
 {
-    protected readonly TService _service;
-    public FsmServiceBridge(TService service) => _service = service;
-}
+    public INpcBody Owner { get; private set; }
+    public TryGetTarget TargetGetter { get; private set; }
+    public int InstanceId { get; private set; }
 
-
-public sealed class FsmControlBridge : FsmServiceBridge<IFsmControlService>, IFsmControlDataProvider
-{
-    public FsmControlBridge(IFsmControlService service) : base(service) { }
-
-    public float SprintEnterDistance => _service.GetSprintEnterDistance();
-    public float SprintExitDistance => _service.GetSprintExitDistance();
-
-    public float WalkSpeed => _service.GetWalkSpeed();
-
-    public float SprintSpeed => _service.GetSprintSpeed();
-}
-
-
-public abstract class StateServiceBridge<TService> : FsmServiceBridge<TService>, IFsmDestinationProvider
-{
-
-    public StateServiceBridge(TService service) : base(service) { }
-
-    public abstract void ReleaseCandidates(List<Vector3> buffer);
-
-    public abstract bool TryGetDestinationCandidates(List<Vector3> buffer);
-   
-}
-
-public sealed class PatrolServiceBridge : StateServiceBridge<IPatrolService>, IFsmPatrolDataProvider
-{
-    private WaypointSet _wpSet;
-
-    public PatrolServiceBridge(IPatrolService service) : base(service) { }
-    
-
-    public override void ReleaseCandidates(List<Vector3> buffer)
+    public FsmContext(INpcBody owner, TryGetTarget targetGetter, int instanceId)
     {
-        if(_service is WaypointResources r)
-        {
-            r.ReturnWaypointSet(_wpSet);
-            _wpSet = null;
-        }
-    }
-
-    public override bool TryGetDestinationCandidates(List<Vector3> buffer)
-    {
-        if(_wpSet is null)
-        {
-            if (_service is WaypointResources r)
-            {
-                if (!r.TryGetWaypointSet(out _wpSet)) return false;
-            }
-        }
-        buffer.Clear();
-
-        foreach(var point in _wpSet.Points)
-            buffer.Add(point);
-
-        return true;
+        Owner = owner;
+        TargetGetter = targetGetter;
+        InstanceId = instanceId;
     }
 }
 
-public sealed class ChaseServiceBridge : StateServiceBridge<IChaseService>, IFsmChaseDataProvider
+public sealed class FsmServices
 {
-    private readonly ITargetProvider _targetProvider;
-    private readonly IDistanceMonitoringService _distanceService;
+    public ITickableGroup TickHost { get; private set; }
+    public ICoroutineHost CoroutineHost { get; private set; }
+    public IPathNotifications PathNotifications { get; private set; }
+    public IAnimationRequestNotifications AnimationRequestNotifications { get; private set; }
 
-    public ChaseServiceBridge(IChaseService service, IDistanceMonitoringService distService, ITargetProvider targetProvider) : base(service) 
-    { (_distanceService, _targetProvider) = (distService, targetProvider); }
-
-    public override void ReleaseCandidates(List<Vector3> buffer)
+    public FsmServices(ITickableGroup tickHost, ICoroutineHost coroutineHost, IPathNotifications pathNotifications, IAnimationRequestNotifications animationRequestNotifications)
     {
-        throw new NotImplementedException();
+        TickHost = tickHost;
+        CoroutineHost = coroutineHost;
+        PathNotifications = pathNotifications;
+        AnimationRequestNotifications = animationRequestNotifications;
     }
+}
 
-    
+public sealed class FsmConfig
+{
+    public IFsmSpeedControlData ControlData { get; private set; }
+    public IReadOnlyDictionary<StateId, IFsmState> States { get; private set; }
 
-    public override bool TryGetDestinationCandidates(List<Vector3> buffer)
+    public FsmConfig(IFsmSpeedControlData controlData, IReadOnlyDictionary<StateId, IFsmState> states)
     {
-        if (buffer is null || _targetProvider is null) return false;
-        buffer.Clear();
-        if (!_targetProvider.TryGetTargetPosition(out var pos) || pos is null) return false;
-        buffer.Add(pos.Value);
-        return true;
-    }
-
-    // Needs targets ITargetable
-    private bool TryGetTarget(out ITargetable target) => _targetProvider.TryGetTarget(out target);
-
-    public bool TargetIsMoving()
-    {
-        if (!TryGetTarget(out var target)) return false;
-        return target.IsMoving();
-    }
-
-    public bool TryRegisterDistanceMonitoring(IInstanceIdentifiable id, Vector3 currentPosition, Action<float> callback, out float initDist)
-    {
-        initDist = 0f; // Remember to get
-        if (id is null || callback is null) return false;
-        if (!_targetProvider.TryGetTarget(out var target)) return false;
-        return _distanceService.TryRegisterSubscriber(id, currentPosition, target, callback);
-    }
-
-    public bool TryUnregisterDistanceMonitoring(IInstanceIdentifiable id)
-    {
-        if (id is null) return false;
-        return _distanceService.TryUnregisterSubscriber(id);
+        ControlData = controlData;
+        States = states;
     }
 }

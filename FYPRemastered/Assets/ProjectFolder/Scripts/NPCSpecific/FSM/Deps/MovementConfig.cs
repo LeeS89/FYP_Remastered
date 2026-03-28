@@ -1,9 +1,11 @@
+using System;
 using UnityEngine;
 
 namespace Npc.API
 {
 
     [System.Serializable]
+    [Obsolete]
     public sealed class MovementConfig
     {
         [Header("Agent Base Speeds")]

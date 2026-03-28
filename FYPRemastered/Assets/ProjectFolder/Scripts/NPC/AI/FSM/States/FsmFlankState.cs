@@ -183,7 +183,7 @@ public sealed class FlankDeps : FsmBaseState<FlankDeps>.FsmBaseStateDeps
 
 
 
-public class FsmFlankStateNewest : FsmBaseStateNewest<IFsmFlankDataProvider>
+public class FsmFlankStateNewest : FsmBaseStateNewest<IFsmFlankData>
 {
     // private IFlankDeps _deps;
     private IFlankService _flankService;
@@ -209,7 +209,7 @@ public class FsmFlankStateNewest : FsmBaseStateNewest<IFsmFlankDataProvider>
     }*/
 
 
-    public FsmFlankStateNewest(IFsmStateContext stateController, IFsmDestinationProvider destP, IFsmFlankDataProvider dataP, IPathResolver pathResolver, ICoroutineHost host)
+    public FsmFlankStateNewest(IFsmStateContext stateController, IFsmDestinationProvider destP, IFsmFlankData dataP, IPathResolver pathResolver, ICoroutineHost host)
         : base(stateController, destP, dataP, pathResolver, host, StateId.Flank) { _candidateDestinations.EnsureCapacity(15); _onFlankCandidatesReceived = OnCandidatesReceived; }
 
 

@@ -258,11 +258,7 @@ public interface IAddressableServiceObsolete
 {
     Task InitialiseAsync(IResourceLocation location);
 }
-public interface IAddressableService : IDisposable
-{
-    Task<bool> TryInitialiseAsync(FeatureMeta data);
 
-}
 
 [Obsolete("",true)]
 public interface IFsmControlServiceObsolete

@@ -471,7 +471,7 @@ public sealed class FSMChaseStateNew : FsmBaseStateNew<IFsmStateService<ITargetC
 
 
 
-public sealed class FSMChaseStateNewest : FsmBaseStateNewest<IFsmChaseDataProvider>
+public sealed class FSMChaseStateNewest : FsmBaseStateNewest<IFsmChaseData>
 {
     
     private Action<float> _distanceCheckCB;
@@ -479,7 +479,7 @@ public sealed class FSMChaseStateNewest : FsmBaseStateNewest<IFsmChaseDataProvid
     private float? _initialDistance = null;
 
 
-    public FSMChaseStateNewest(IFsmStateContext stateController, IFsmDestinationProvider destP, IFsmChaseDataProvider dataP, IPathResolver pathResolver, ICoroutineHost host)
+    public FSMChaseStateNewest(IFsmStateContext stateController, IFsmDestinationProvider destP, IFsmChaseData dataP, IPathResolver pathResolver, ICoroutineHost host)
         : base(stateController, destP, dataP, pathResolver, host, StateId.Chase) { _candidateDestinations.EnsureCapacity(1); _distanceCheckCB = DistanceCheckCallback; }
 
  /*   public FSMChaseStateNew(ChaseDeps deps, SharedFsmStateServices sharedDeps, IFsmStateEvents stateContext)

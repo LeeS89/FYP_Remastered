@@ -14,3 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AgentSpeedData
   _walkSpeed: 0.9
   _sprintSpeed: 3.6
+  _sprintEnterdistance: 15
+  _sprintExitdistance: 12

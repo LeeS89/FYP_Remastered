@@ -431,10 +431,10 @@ public sealed class FSMPatrolStateNew : FsmBaseStateNew<IFsmStateService<ITarget
 
 
 
-public sealed class FSMPatrolStateNewest : FsmBaseStateNewest<IFsmPatrolDataProvider>
+public sealed class FSMPatrolStateNewest : FsmBaseStateNewest<IFsmPatrolData>
 {
  
-    public FSMPatrolStateNewest(IFsmStateContext stateController, IFsmDestinationProvider destP, IFsmPatrolDataProvider dataP, IPathResolver pathResolver, ICoroutineHost host)
+    public FSMPatrolStateNewest(IFsmStateContext stateController, IFsmDestinationProvider destP, IFsmPatrolData dataP, IPathResolver pathResolver, ICoroutineHost host)
         : base(stateController, destP, dataP, pathResolver, host, StateId.Patrol)
     {
         _candidateDestinations.EnsureCapacity(10);

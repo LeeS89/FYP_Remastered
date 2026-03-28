@@ -1399,7 +1399,7 @@ public class FsmManagerNew : IFsmStateEventsObsoleteO, IFsmController
 public class FsmManagerNewest : IFsmStateContext, IFsmController, ITargetProvider
 {
     // Injected Dependancies
-    private IReadOnlyDictionary<StateId, IFsmStateNewest> _states;
+    private IReadOnlyDictionary<StateId, IFsmState> _states;
    // private FsmManagerServices _deps;
 
 
@@ -1418,7 +1418,7 @@ public class FsmManagerNewest : IFsmStateContext, IFsmController, ITargetProvide
 
     // Internal Members
     private List<SetDestinationDelay> _timer = new(2);
-    private IFsmStateNewest _currentState;
+    private IFsmState _currentState;
     public bool IsInStateTransition { get; private set; } = false;
     private bool _hasValidDestination = false;
     private float _lerpSpeed = 0f;
@@ -1443,15 +1443,15 @@ public class FsmManagerNewest : IFsmStateContext, IFsmController, ITargetProvide
 
     // NEW
     private readonly ICoroutineHost _routineHost;
-    private readonly IFsmControlDataProvider _dataProvider;
+    private readonly IFsmSpeedControlData _dataProvider;
     private readonly ITickableGroup _tickHost;
 
    // private readonly IFsmNavigationControl _navControl;
   //  private readonly IFsmTargetQuery _targetQuery;
-    private readonly IReadOnlyDictionary<StateId, IFsmStateNewest> _statesNew;
+    private readonly IReadOnlyDictionary<StateId, IFsmState> _statesNew;
 
     [Obsolete("", true)]
-    public FsmManagerNewest(int instanceId, IFsmNavigationControl navControl, IFsmTargetQuery targetQuery, IReadOnlyDictionary<StateId, IFsmStateNewest> states,
+    public FsmManagerNewest(int instanceId, IFsmNavigationControl navControl, IFsmTargetQuery targetQuery, IReadOnlyDictionary<StateId, IFsmState> states,
         ICoroutineHost host, ITickableGroup tickHost, IPathNotifications pathNotifies, IAnimationRequestNotifications animNotifies = null)
     {
         _instanceId = instanceId;
@@ -1472,7 +1472,8 @@ public class FsmManagerNewest : IFsmStateContext, IFsmController, ITargetProvide
     private readonly INpcBody _owner;
     private readonly TryGetTarget _ownerTargetGetter;
 
-    public FsmManagerNewest(INpcBody owner, TryGetTarget ownerTargetGetter, IFsmControlDataProvider dataProvider, IReadOnlyDictionary<StateId, IFsmStateNewest> states,
+    [Obsolete("", true)]
+    public FsmManagerNewest(INpcBody owner, TryGetTarget ownerTargetGetter, IFsmSpeedControlData dataProvider, IReadOnlyDictionary<StateId, IFsmState> states,
         ITickableGroup tickHost, IPathNotifications pathNotifies, IAnimationRequestNotifications animNotifies = null)
     {
         _owner = owner;
@@ -1482,6 +1483,24 @@ public class FsmManagerNewest : IFsmStateContext, IFsmController, ITargetProvide
         _tickHost = tickHost;
         _pathNotifies = pathNotifies;
         _animNotifies = animNotifies;
+
+        _tickHost?.Register(this);
+    }
+
+
+    public FsmManagerNewest(FsmContext context, FsmServices services, FsmConfig config)
+    {
+        _owner = context.Owner;
+        _ownerTargetGetter = context.TargetGetter;
+        _instanceId = context.InstanceId;
+
+        _tickHost = services.TickHost;
+        _routineHost = services.CoroutineHost;
+        _pathNotifies = services.PathNotifications;
+        _animNotifies = services.AnimationRequestNotifications;
+
+        _dataProvider = config.ControlData;
+        _statesNew = config.States;
 
         _tickHost?.Register(this);
     }
@@ -2106,5 +2125,68 @@ public class FsmManagerNewest : IFsmStateContext, IFsmController, ITargetProvide
     }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
