@@ -1443,7 +1443,7 @@ public class FsmManagerNewest : IFsmStateContext, IFsmController, ITargetProvide
 
     // NEW
     private readonly ICoroutineHost _routineHost;
-    private readonly IFsmSpeedControlData _dataProvider;
+    private readonly IFsmSpeedData _dataProvider;
     private readonly ITickableGroup _tickHost;
 
    // private readonly IFsmNavigationControl _navControl;
@@ -1473,7 +1473,7 @@ public class FsmManagerNewest : IFsmStateContext, IFsmController, ITargetProvide
     private readonly TryGetTarget _ownerTargetGetter;
 
     [Obsolete("", true)]
-    public FsmManagerNewest(INpcBody owner, TryGetTarget ownerTargetGetter, IFsmSpeedControlData dataProvider, IReadOnlyDictionary<StateId, IFsmState> states,
+    public FsmManagerNewest(INpcBody owner, TryGetTarget ownerTargetGetter, IFsmSpeedData dataProvider, IReadOnlyDictionary<StateId, IFsmState> states,
         ITickableGroup tickHost, IPathNotifications pathNotifies, IAnimationRequestNotifications animNotifies = null)
     {
         _owner = owner;

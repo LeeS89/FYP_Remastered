@@ -7,17 +7,17 @@ using UnityEngine;
 [Obsolete("", true)]
 public class SceneResourceManagerObsolete
 {
-    private List<SceneResources> _resources;
-    private List<SceneResources> _resourceDependancies;
+    private List<SceneResourcesObsolete> _resources;
+    private List<SceneResourcesObsolete> _resourceDependancies;
 
     
-    public SceneResourceManagerObsolete(params SceneResources[] resources)
+    public SceneResourceManagerObsolete(params SceneResourcesObsolete[] resources)
     {
         //SceneEventAggregator.Instance.OnDependanciesAdded += AddDependencies;
         SceneEventAggregatorObsolete.Instance.OnCheckDependencyExists += CheckDependenciesExist;
         SceneEventAggregatorObsolete.Instance.OnDependancyAdded += AddDependancy;
-        _resources = new List<SceneResources>(resources);
-        _resourceDependancies = new List<SceneResources>();
+        _resources = new List<SceneResourcesObsolete>(resources);
+        _resourceDependancies = new List<SceneResourcesObsolete>();
     }
 
     
@@ -60,7 +60,7 @@ public class SceneResourceManagerObsolete
         return _resourceDependancies.Any(r => r.GetType() == type) || _resources.Any(s => s.GetType() == type);
     }
 
-    private void AddDependancy(SceneResources resource)
+    private void AddDependancy(SceneResourcesObsolete resource)
     {
         //Debug.LogError($"Adding dependancy: {resource.GetType().Name}");
         //if (_resourceDependancies == null) { _resourceDependancies = new List<SceneResources>(); }

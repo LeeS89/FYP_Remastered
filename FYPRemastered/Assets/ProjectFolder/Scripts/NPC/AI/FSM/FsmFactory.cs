@@ -45,7 +45,7 @@ namespace Services.Internal
 
             var controlFeature = _metaData.SpeedData;
 
-            _fsmControlService = await TryLoadStateServiceAndInitialize(controlFeature, () => new FsmResources(/*_registry*/));
+            _fsmControlService = await TryLoadStateServiceAndInitialize(controlFeature, () => new FsmSpeedResources(/*_registry*/));
             _pathService = new PathRequestManager(_tickHost);
          //   if(_pathService is ITickable t) _tickables.Add(t);
             if (_metaData == null)

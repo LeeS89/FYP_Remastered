@@ -8,7 +8,7 @@ using UnityEngine.ResourceManagement.ResourceLocations;
 
 
 [Obsolete("", true)]
-public class WaypointResourcesObsolete : SceneResources//, IWaypointService
+public class WaypointResourcesObsolete : SceneResourcesObsolete//, IWaypointService
 {
     private WaypointBlockData _waypointBlockData;
   
@@ -97,7 +97,7 @@ public class WaypointResourcesObsolete : SceneResources//, IWaypointService
         SceneEventAggregator.Instance.AddDependancies(dependancies);*/
     }
 
-    protected override void ResourceRequested(in ResourceRequests request)
+    protected override void ResourceRequested(in ResourceRequestsObsolete request)
     {
         if (request.AIResourceType != AIResourceType.WaypointBlock) return;
 

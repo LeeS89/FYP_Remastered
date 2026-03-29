@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 [Obsolete("", true)]
-public sealed class WaypointRepo : IWaypointRepository
+public sealed class WaypointRepo : IWaypointRepositoryObsolete
 {
     public static readonly WaypointRepo Instance = new();
     private WaypointRepo() { }

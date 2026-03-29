@@ -7,13 +7,13 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
 [Obsolete("", true)]
-public class PoolLoaderObsolete : SceneResources, IUpdateableResource
+public class PoolLoaderObsolete : SceneResourcesObsolete, IUpdateableResource
 {
     /// NEW LOADER
     private readonly Dictionary<string, PoolManagerBase> _cache = new();
     private readonly HashSet<string> _loading = new();
-    private readonly Dictionary<string, List<ResourceRequests>> _waiters = new();
-    private readonly Queue<ResourceRequests> _queue = new();
+    private readonly Dictionary<string, List<ResourceRequestsObsolete>> _waiters = new();
+    private readonly Queue<ResourceRequestsObsolete> _queue = new();
     private bool _isProcessing;
     private readonly Dictionary<string, AsyncOperationHandle<GameObject>> _assetHandles = new();
     private readonly HashSet<string> _poolsToLoad = new(10);
@@ -45,7 +45,7 @@ public class PoolLoaderObsolete : SceneResources, IUpdateableResource
     // CancellationToken
     /// </summary>
     // NEW FUNCTIONS
-    public void RequestPool(in ResourceRequests req)
+    public void RequestPool(in ResourceRequestsObsolete req)
     {
         if(_cache.TryGetValue(req.PoolId.Id, out var pool))
         {
@@ -93,7 +93,7 @@ public class PoolLoaderObsolete : SceneResources, IUpdateableResource
             }
 
             _loading.Add(req.PoolId.Id);
-            _waiters[req.PoolId.Id] = new List<ResourceRequests> { req };
+            _waiters[req.PoolId.Id] = new List<ResourceRequestsObsolete> { req };
 
             _= LoadPoolAsync(req.PoolId, notifyWaiters: true);
 
@@ -311,7 +311,7 @@ public class PoolLoaderObsolete : SceneResources, IUpdateableResource
     }
 
 
-    protected override void ResourceRequested(in ResourceRequests req)
+    protected override void ResourceRequested(in ResourceRequestsObsolete req)
     {
         if (req.PoolId == null || string.IsNullOrEmpty(req.PoolId.Id)) return;
         
@@ -434,7 +434,7 @@ public class PoolLoaderObsolete : SceneResources, IUpdateableResource
 
 
 
-public class PoolLoaderNew : SceneResources, IPoolService, ITickable
+public class PoolLoaderNew : SceneResourcesObsolete, IPoolService, ITickable
 {
     /// NEW LOADER
     private readonly Dictionary<string, PoolManagerBase> _cache = new();

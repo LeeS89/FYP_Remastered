@@ -52,7 +52,7 @@ public abstract class RangedWeaponBaseObsolete : IRangedWeaponObsolete
                 break;
         }
       
-        var bulletPool = ResourceRequests.RequestPool(_normalBulletPoolId, PoolRequestCallback);
+        var bulletPool = ResourceRequestsObsolete.RequestPool(_normalBulletPoolId, PoolRequestCallback);
 
         SceneEventAggregatorObsolete.Instance.ResourceRequested(bulletPool);
 

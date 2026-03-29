@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-[Obsolete]
+[Obsolete("", true)]
 public enum AIResourceType
 {
     None,
@@ -12,6 +12,7 @@ public enum AIResourceType
    
 }
 
+[Obsolete("", true)]
 public enum AIDestinationType
 {
     None,

@@ -30,11 +30,11 @@ public class FSMManagerObsolete : FSMBaseObsolete
 
         if (resolver == null)
         {
-            Dictionary<StateId, ICandidateProvider> providers = new()
+            Dictionary<StateId, ICandidateProviderObsolete> providers = new()
             {
-                { StateId.Patrol, new WaypointProvider(WaypointRepo.Instance) }
+                { StateId.Patrol, new WaypointProviderObsolete(WaypointRepo.Instance) }
             };
-            ICandidateProvider destResolver = new DestinationResolver(providers);
+            ICandidateProviderObsolete destResolver = new DestinationResolverObsolete(providers);
            // _pathFinder = new PathFinderObsolete(destResolver);
         }
         else _pathFinder = resolver;
@@ -290,7 +290,7 @@ public class FSMManagerObsolete : FSMBaseObsolete
         if (StateHasChanged(current)) return;
       //  if (current != _currentStateId) return;
 
-        ValidateDestination request;
+        ValidateDestinationObsolete request;
 
        /* switch (current)
         {

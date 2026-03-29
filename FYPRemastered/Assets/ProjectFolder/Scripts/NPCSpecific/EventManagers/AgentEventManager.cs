@@ -72,6 +72,7 @@ public class AgentEventManager : EventManagerBase
     // Chasing Events
     public event Action<AlertStatus> OnRequestStationaryState;
     // public event Action OnRequestChasingState;
+    [Obsolete]
     public event Action<AIDestinationType> OnDestinationRequested;
     public event Action<bool> OnPendingNewDestination;
     public event Action<bool, bool> OnDestinationRequestStatus;
@@ -242,7 +243,7 @@ public class AgentEventManager : EventManagerBase
     {
         OnRotateAtPatrolPoint?.Invoke(point);
     }
-
+    [Obsolete]
     public void DestinationRequested(AIDestinationType type) // Obsolete
     {
         OnDestinationRequested?.Invoke(type);

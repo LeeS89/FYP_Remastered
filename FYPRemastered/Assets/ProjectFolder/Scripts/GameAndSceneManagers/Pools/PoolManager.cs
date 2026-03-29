@@ -11,14 +11,14 @@ public sealed class PoolManager<T> : PoolManagerBase where T : UnityEngine.Objec
     private Transform _poolContainer;
     private T _prefab;
     private Dictionary<T,Transform> _transformCache = new();
-    private SceneResources _manager;
+    private SceneResourcesObsolete _manager;
     private List<T> _active = new(30);
 
     public override Type ItemType => typeof(T);
 
  
     ///////  NEW CONSTRUCTOR
-    public PoolManager(SceneResources manager, T prefab, int defaultCapacity = 10, int maxSize = 50)
+    public PoolManager(SceneResourcesObsolete manager, T prefab, int defaultCapacity = 10, int maxSize = 50)
     {
         _prefab = prefab ?? throw new ArgumentNullException(nameof(prefab));
         _poolContainer = new GameObject($"PoolContainer_{prefab.name}").transform;

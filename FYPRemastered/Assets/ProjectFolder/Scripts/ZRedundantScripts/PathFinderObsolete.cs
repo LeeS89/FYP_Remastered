@@ -32,12 +32,12 @@ public class PathFinderObsolete// : IPathResolver
     private bool _isValid = false;
   
 
-    private Queue<(List<(Vector3, Vector3?)>, ValidateDestination)> _pathQueue = new(10);
+    private Queue<(List<(Vector3, Vector3?)>, ValidateDestinationObsolete)> _pathQueue = new(10);
    // private IReadOnlyDictionary<StateId, ICandidateProvider> _providerMap;
-    private ICandidateProvider _destResolver;
+    private ICandidateProviderObsolete _destResolver;
 
 
-    public PathFinderObsolete(ICandidateProvider destResolver/*IReadOnlyDictionary<StateId, ICandidateProvider> providers*/)
+    public PathFinderObsolete(ICandidateProviderObsolete destResolver/*IReadOnlyDictionary<StateId, ICandidateProvider> providers*/)
     {
       //  _providerMap = providers;
        // _map = providers;
@@ -51,7 +51,7 @@ public class PathFinderObsolete// : IPathResolver
         };*/
     }
 
-    public List<(Vector3 position, Vector3? forward)> TryGet(in ValidateDestination request)
+    public List<(Vector3 position, Vector3? forward)> TryGet(in ValidateDestinationObsolete request)
     {
         return _destResolver?.TryGet(request); 
         // if (_providerMap.TryGetValue(request.StateId, out var p)) return p.TryGet(request);
@@ -99,7 +99,7 @@ public class PathFinderObsolete// : IPathResolver
     }
 
 
-    public void TryGetDestination(in ValidateDestination req)
+    public void TryGetDestination(in ValidateDestinationObsolete req)
     {
         List<(Vector3 position, Vector3? forward)> destinations;
         destinations = TryGet(req);
@@ -115,7 +115,7 @@ public class PathFinderObsolete// : IPathResolver
             _runningRoutine = CoroutineRunner.Instance.StartCoroutine(PathFindRoutineNew(_pathQueue));
     }
     
-    private IEnumerator PathFindRoutineNew(Queue<(List<(Vector3, Vector3?)>, ValidateDestination)> q)
+    private IEnumerator PathFindRoutineNew(Queue<(List<(Vector3, Vector3?)>, ValidateDestinationObsolete)> q)
     {
        
         while (q.Count > 0)

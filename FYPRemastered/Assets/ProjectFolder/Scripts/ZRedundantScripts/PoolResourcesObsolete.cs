@@ -12,7 +12,7 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceLocations;
 
 [Obsolete("", true)]
-public class PoolResourcesObsolete : SceneResources, IUpdateableResource
+public class PoolResourcesObsolete : SceneResourcesObsolete, IUpdateableResource
 {
     [Header("Handles auto return to pools for Audio & SFX pools")]
     private int _maxTrackedPoolObjects = 256;
@@ -161,7 +161,7 @@ public class PoolResourcesObsolete : SceneResources, IUpdateableResource
      }
 
 
-    protected override void ResourceRequested(in ResourceRequests request)
+    protected override void ResourceRequested(in ResourceRequestsObsolete request)
     {
         if (string.IsNullOrEmpty(request.PoolId.Id)) return;
         var id = request.PoolId.Id;    

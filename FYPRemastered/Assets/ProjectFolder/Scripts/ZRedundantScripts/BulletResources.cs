@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
-public class BulletResources : SceneResources, IUpdateableResource
+public class BulletResources : SceneResourcesObsolete, IUpdateableResource
 {
     private int _maxTrackedPoolObjects = 256;
     private List<PoolObjectTracker> _jobs;

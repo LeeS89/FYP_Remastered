@@ -13,9 +13,9 @@ public partial class NPCControllerObsolete
 
     // FSMManager Composition
     private IPathResolver _pathFinder;
-    private ICandidateProvider _destinationResolver;
+    private ICandidateProviderObsolete _destinationResolver;
     private IFieldOfViewRunnerObsolete _fovRunner;
-    private Dictionary<StateId, ICandidateProvider> _destinationProviders;
+    private Dictionary<StateId, ICandidateProviderObsolete> _destinationProviders;
     //private IFSMControl _fsmManager;
     private Dictionary<StateId, IFsmStateObsolete> _fsmStates = new(5);
     // end FSMManager Composition
@@ -62,11 +62,11 @@ public partial class NPCControllerObsolete
     {
         _destinationProviders = new()
         {
-            [StateId.Patrol] = new WaypointProvider(WaypointRepo.Instance),
-            [StateId.Chase] = new TargetPointProvider(PrimaryTarget),
+            [StateId.Patrol] = new WaypointProviderObsolete(WaypointRepo.Instance),
+            [StateId.Chase] = new TargetPointProviderObsolete(PrimaryTarget),
         };
 
-        _destinationResolver = new DestinationResolver(_destinationProviders);
+        _destinationResolver = new DestinationResolverObsolete(_destinationProviders);
         _fovParams.FOVTarget = PrimaryTarget;
        // _pathFinder = new PathFinderObsolete(_destinationResolver);
        // _fovRunner = new NPCFieldOfViewHandlerObsolete(_fovParams);
@@ -160,9 +160,9 @@ public partial class NPCControllerNew
     protected AgentEventManager _eManager;
     // FSMManager Composition
     private IPathResolver _pathFinder;
-    private ICandidateProvider _destinationResolver;
+    private ICandidateProviderObsolete _destinationResolver;
     private IFieldOfViewRunnerObsolete _fovRunner;
-    private Dictionary<StateId, ICandidateProvider> _destinationProviders;
+    private Dictionary<StateId, ICandidateProviderObsolete> _destinationProviders;
   //  private IFSMControl _fsmManager;
     private Dictionary<StateId, IFsmStateObsolete> _fsmStates = new(5);
     // end FSMManager Composition

@@ -7,7 +7,7 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceLocations;
 
 [Obsolete("", true)]
-public class PlayerFlankingResourcesObsolete : SceneResources, IUpdateableResource
+public class PlayerFlankingResourcesObsolete : SceneResourcesObsolete, IUpdateableResource
 {
     private AsyncOperationHandle<SamplePointDataSO> _flankPointHandle;
     private SamplePointDataSO _flankPointDataSO;
@@ -108,11 +108,11 @@ public class PlayerFlankingResourcesObsolete : SceneResources, IUpdateableResour
 
     protected override void NotifyClassDependancies()
     {
-        bool exists = SceneEventAggregatorObsolete.Instance.CheckDependancyExists(typeof(ClosestPointToPlayerJob));
+        bool exists = SceneEventAggregatorObsolete.Instance.CheckDependancyExists(typeof(ClosestPointToPlayerJobObsolete));
 
         if (exists) { return; } // Already exists, no need to add again
 
-        SceneEventAggregatorObsolete.Instance.AddDependancy(new ClosestPointToPlayerJob(_flankPointDataSO));
+        SceneEventAggregatorObsolete.Instance.AddDependancy(new ClosestPointToPlayerJobObsolete(_flankPointDataSO));
 
     }
 
@@ -122,7 +122,7 @@ public class PlayerFlankingResourcesObsolete : SceneResources, IUpdateableResour
         _nearestPointToPlayer = nearestPointIndex;
     }
 
-    protected override void ResourceRequested(in ResourceRequests request)
+    protected override void ResourceRequested(in ResourceRequestsObsolete request)
     {
         AIResourceType type = request.AIResourceType;
 
@@ -144,7 +144,7 @@ public class PlayerFlankingResourcesObsolete : SceneResources, IUpdateableResour
 
    
 
-    private void ProcessFlankPointEvaluationMaskRequest(in ResourceRequests request)
+    private void ProcessFlankPointEvaluationMaskRequest(in ResourceRequestsObsolete request)
     {
         LayerMask blockingMask = _flankPointDataSO.flankBlockingMask;
         LayerMask targetMask = _flankPointDataSO.flankTargetMask;
@@ -152,7 +152,7 @@ public class PlayerFlankingResourcesObsolete : SceneResources, IUpdateableResour
         request.FlankPointTargetAndBlockingMasksCallback?.Invoke(blockingMask, targetMask, secondaryTargetMask);
     }
 
-    private void ProcessFlankPointCandidatesRequest(in ResourceRequests request)
+    private void ProcessFlankPointCandidatesRequest(in ResourceRequestsObsolete request)
     {
         int step = request.FlankCandidateSteps;
         var buffer = request.FlankCandidates;

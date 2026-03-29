@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Npc.Internal;
 
 [Obsolete("", true)]
-public class AgentZoneRegistryObsolete : SceneResources
+public class AgentZoneRegistryObsolete : SceneResourcesObsolete
 {
     private Dictionary<int, List<FSMControllerBaseObsolete>> _zoneAgents = new();
 

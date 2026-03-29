@@ -8,10 +8,10 @@ using UnityEngine.AI;
 /// Class used to to limit concurrent path calculations to a set number per frame
 /// </summary>
 [Obsolete("", true)]
-public class PathRequestManagerObsolete : SceneResources, IUpdateableResource // Change to ITickable
+public class PathRequestManagerObsolete : SceneResourcesObsolete, IUpdateableResource // Change to ITickable
 {
  
-    private Queue<ResourceRequests> _pathRequestQueue = new Queue<ResourceRequests>();
+    private Queue<ResourceRequestsObsolete> _pathRequestQueue = new Queue<ResourceRequestsObsolete>();
     private int _maxConcurrentRequests = 5;
 
     public override async Task LoadResources()
@@ -50,7 +50,7 @@ public class PathRequestManagerObsolete : SceneResources, IUpdateableResource //
         return path.status == NavMeshPathStatus.PathComplete;
     }
 
-    protected override void ResourceRequested(in ResourceRequests request)
+    protected override void ResourceRequested(in ResourceRequestsObsolete request)
     {
         if (request.AIResourceType != AIResourceType.Path) return;
         _pathRequestQueue.Enqueue(request);

@@ -31,15 +31,15 @@ public class SceneEventAggregatorObsolete : MonoBehaviour
    // public event Action<AIDestinationRequestData> OnAIResourceRequested;
     public event Action<ResourceRequest> OnResourceReleased;
     //public event Action<List<Type>> OnDependanciesAdded;
-    public event Action<SceneResources> OnDependancyAdded;
+    public event Action<SceneResourcesObsolete> OnDependancyAdded;
     public event Func<Type, bool> OnCheckDependencyExists;
 
     // new way
-    public delegate void ResourcesRequestedHandler(in ResourceRequests request);
+    public delegate void ResourcesRequestedHandler(in ResourceRequestsObsolete request);
     public event ResourcesRequestedHandler OnResourceRequested;
    // public event Action<ResourceRequests> OnResourcesRequested;
 
-    public void ResourceRequested(in ResourceRequests request) => OnResourceRequested?.Invoke(request);
+    public void ResourceRequested(in ResourceRequestsObsolete request) => OnResourceRequested?.Invoke(request);
 
     //NEW AI
     //public event Action<T> OnAIResourceRequest;
@@ -74,7 +74,7 @@ public class SceneEventAggregatorObsolete : MonoBehaviour
         OnDependanciesAdded?.Invoke(resourceDependancies);
     }*/
 
-    public void AddDependancy(SceneResources resource)
+    public void AddDependancy(SceneResourcesObsolete resource)
     {
         // Invoke the event with the resource
         OnDependancyAdded?.Invoke(resource);
