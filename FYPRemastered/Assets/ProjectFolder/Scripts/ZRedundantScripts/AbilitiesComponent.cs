@@ -27,7 +27,7 @@ public class AbilitiesComponent : BaseAbilitiesObsolete
     private PlayerEventManager _playerEventManager;
     private int _deflectableCount = 0;
 
-    public override void RegisterLocalEvents(EventManager eventManager)
+    public override void RegisterLocalEvents(EventManagerObsolete eventManager)
     {
      //   _playerEventManager = eventManager as PlayerEventManager;
      //   base.RegisterLocalEvents(_playerEventManager);
@@ -40,7 +40,7 @@ public class AbilitiesComponent : BaseAbilitiesObsolete
         RegisterGlobalEvents();
     }
 
-    public override void UnRegisterLocalEvents(EventManager eventManager)
+    public override void UnRegisterLocalEvents(EventManagerObsolete eventManager)
     {
      //   base.UnRegisterLocalEvents(_playerEventManager);
         Array.Clear(_bulletTraceresults, 0, _bulletTraceresults.Length);

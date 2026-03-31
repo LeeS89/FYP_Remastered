@@ -124,7 +124,7 @@ public abstract class RangedWeaponBaseObsolete : IRangedWeaponObsolete
    
 
 
-    public virtual void Initialize(EventManager eventManager, Transform spawnPoint, AmmoType type, FireRate fireRate, int clipCapacity) { }
+    public virtual void Initialize(EventManagerObsolete eventManager, Transform spawnPoint, AmmoType type, FireRate fireRate, int clipCapacity) { }
 
     public virtual void OnInstanceDestroyed()
     {

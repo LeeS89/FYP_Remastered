@@ -9,7 +9,7 @@ public sealed class DeflectableProjectileFXObsolete : VFXBase//ProjectileFXBase
 
     [SerializeField] protected PoolIdSO DeflectAudioPoolId;
     public IPoolManager DeflectAudioPoolManager { get; protected set; }
-    public override void RegisterLocalEvents(EventManager eventManager)
+    public override void RegisterLocalEvents(EventManagerObsolete eventManager)
     {
         base.RegisterLocalEvents(eventManager);
 
@@ -32,7 +32,7 @@ public sealed class DeflectableProjectileFXObsolete : VFXBase//ProjectileFXBase
             this.RequestPool(DeflectAudioPoolId, PoolRequestCallback);
     }
 
-    public override void UnRegisterLocalEvents(EventManager eventManager)
+    public override void UnRegisterLocalEvents(EventManagerObsolete eventManager)
     {
       //  base.UnRegisterLocalEvents(eventManager);
         //_cmbtEventManager.Expired();

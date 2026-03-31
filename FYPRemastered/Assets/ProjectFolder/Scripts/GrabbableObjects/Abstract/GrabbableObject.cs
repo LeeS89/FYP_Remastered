@@ -12,13 +12,13 @@ public abstract class GrabbableObject : ComponentEvents
     [SerializeField] protected PlayerEventManager _playerEventManager;
    
 
-    public override void RegisterLocalEvents(EventManager eventManager)
+    public override void RegisterLocalEvents(EventManagerObsolete eventManager)
     {
        _grabbableEventManager = eventManager as GrabbableEventManager;
 
     }
 
-    public override void UnRegisterLocalEvents(EventManager eventManager)
+    public override void UnRegisterLocalEvents(EventManagerObsolete eventManager)
     {
         _grabbableEventManager = null;
     }

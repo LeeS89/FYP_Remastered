@@ -244,7 +244,7 @@ public class CoTestThree
 public abstract class FsmBaseStateNew<TService, TContext> : IFsmStateNew<TService> 
   //  where TContext : IContext
     where TService : IFsmStateService<TContext>// where TContext : FsmBaseState<TContext>.FsmBaseStateDeps
-    where TContext : IContext
+    where TContext : IContextObsolete
 {
  //   protected readonly IPathResolver _pathResolver;
     protected readonly IFsmStateEventsObsoleteO _stateEvents;
@@ -289,7 +289,7 @@ public abstract class FsmBaseStateNew<TService, TContext> : IFsmStateNew<TServic
         if (_pathResolver == null) DebugLogs.Nre(_pathResolver, "Path resolver", this);
         else DebugLogs.Err("Path resolver was not null", this);
 
-        Service.TryGetDestinationCandidates(_stateEvents, new List<Vector3>());
+        //Service.TryGetDestinationCandidates(_stateEvents, new List<Vector3>());
     }
 
     #endregion
@@ -303,21 +303,21 @@ public abstract class FsmBaseStateNew<TService, TContext> : IFsmStateNew<TServic
 
 
 
-  /*  public FsmBaseStateNew(TContext deps, SharedFsmStateServices sharedDeps, IFsmStateEvents stateEvents, StateId id)
-    {
-        _deps = deps;
-        _sharedDeps = sharedDeps;
-      //  _owner = deps.Owner;
-      //  _path = deps.Path();
-      //  _pathResolver = deps.PathResolver;
-        _stateEvents = stateEvents;
-        _id = id;
-        _validationCallback = OnProcessedDestinationsResult;
+    /*  public FsmBaseStateNew(TContext deps, SharedFsmStateServices sharedDeps, IFsmStateEvents stateEvents, StateId id)
+      {
+          _deps = deps;
+          _sharedDeps = sharedDeps;
+        //  _owner = deps.Owner;
+        //  _path = deps.Path();
+        //  _pathResolver = deps.PathResolver;
+          _stateEvents = stateEvents;
+          _id = id;
+          _validationCallback = OnProcessedDestinationsResult;
 
-       
-    }
-*/
-   // private bool SharedDepsIsNull() => _sharedDeps == null; // Maybe new Notification
+
+      }
+  */
+    // private bool SharedDepsIsNull() => _sharedDeps == null; // Maybe new Notification
 
     // Need to make private once the Distance job is updated to accept transform instead of ITargetable
     /*private*//*protected bool TryGetTarget(out ITargetable target)
@@ -332,63 +332,63 @@ public abstract class FsmBaseStateNew<TService, TContext> : IFsmStateNew<TServic
         return false; // Maybe new notification if target is null or Func is not set
     }*/
 
-  /*  protected bool TryGetTargetPosition(out Vector3 pos)
-    {
-        ITargetable t;
-        if (!TryGetTarget(out t)) { pos = Vector3.zero; return false; }
-        pos = t.Position().Value;
-        return true;
-    }*/
+    /*  protected bool TryGetTargetPosition(out Vector3 pos)
+      {
+          ITargetable t;
+          if (!TryGetTarget(out t)) { pos = Vector3.zero; return false; }
+          pos = t.Position().Value;
+          return true;
+      }*/
 
-   /* private bool OwnerIsNull()
-    {
-        if (!SharedDepsIsNull()) return _sharedDeps.OwnerTransform == null; // Maybe new Notification
-        return true;
-    }*/
+    /* private bool OwnerIsNull()
+     {
+         if (!SharedDepsIsNull()) return _sharedDeps.OwnerTransform == null; // Maybe new Notification
+         return true;
+     }*/
 
-   /* protected bool TryGetOwnerTransform(out Transform t)
-    {
-        
-        if (OwnerIsNull()) { t = null; return false; }
-        t = _sharedDeps.OwnerTransform;
-        return true;
-    }*/
+    /* protected bool TryGetOwnerTransform(out Transform t)
+     {
 
-    protected bool TryGetPath(out NavMeshPath path) => Service.TryGetPath(_stateEvents, out path);
+         if (OwnerIsNull()) { t = null; return false; }
+         t = _sharedDeps.OwnerTransform;
+         return true;
+     }*/
+
+    protected bool TryGetPath(out NavMeshPath path) { path = null; return false; }//=> Service.TryGetPath(_stateEvents, out path);
     /*{
         if (SharedDepsIsNull()) { path = null; return false; };
         path = _sharedDeps.Path;
         return path != null; // Maybe new notification if path is null
     }*/
 
-    protected bool TryGetCurrentPosition(out Vector3 pos) =>  Service.TryGetCurrentPosition(_stateEvents, out pos);
-   /* {
-        if (OwnerIsNull()) { pos = Vector3.zero; return false; }
+    protected bool TryGetCurrentPosition(out Vector3 pos) { pos = default; return false; }//=>  Service.TryGetCurrentPosition(_stateEvents, out pos);
+    /* {
+         if (OwnerIsNull()) { pos = Vector3.zero; return false; }
 
-       
 
-       *//* pos = _sharedDeps.OwnerTransform.position;
-        return true;*//*
-    }*/
-    
-   /* protected bool TargetIsMoving()
-    {
-        ITargetable target;
-        if (!TryGetTarget(out target)) return false;
 
-        return target.IsMoving();
-    }*/
+        *//* pos = _sharedDeps.OwnerTransform.position;
+         return true;*//*
+     }*/
 
- /*   protected bool TryGetOwnerTransform(out Transform ownerTransform)
-    {
-        ownerTransform = null;
-        return false;
-    }
+    /* protected bool TargetIsMoving()
+     {
+         ITargetable target;
+         if (!TryGetTarget(out target)) return false;
 
-*/
+         return target.IsMoving();
+     }*/
 
-    protected bool TryGetCurrentPositionAndPath(out Vector3 position, out NavMeshPath path)
-        => Service.TryGetCurrentPositionAndPath(_stateEvents, out position, out path);
+    /*   protected bool TryGetOwnerTransform(out Transform ownerTransform)
+       {
+           ownerTransform = null;
+           return false;
+       }
+
+   */
+
+    protected bool TryGetCurrentPositionAndPath(out Vector3 position, out NavMeshPath path) { position = default; path = null; return false; }
+        //=> Service.TryGetCurrentPositionAndPath(_stateEvents, out position, out path);
 
     public virtual bool NeedsNewPath() => false;
 

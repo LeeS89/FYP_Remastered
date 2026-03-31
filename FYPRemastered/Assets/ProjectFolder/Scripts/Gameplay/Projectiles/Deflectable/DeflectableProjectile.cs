@@ -1,0 +1,198 @@
+using UnityEngine;
+
+[RequireComponent(typeof(DeflectableCollisionComponent))]
+public sealed class DeflectableProjectile : ProjectileBase, IFreezeAndDeflectable
+{
+    [Header("Deflection Speed")]
+    [SerializeField] private float _deflectSpeed;
+
+    public bool testFreeze = false;
+    [SerializeField] private Animator _anim;
+    
+    [Header("How close to the camera can freezeable projectile be before it gets culled")]
+    [SerializeField] private float _cullDistance = 0.5f;
+    public float DistanceToPlayer { get; private set; }
+
+
+    private GameObject _componentRegistryTargetObj;
+    public static readonly byte IsFrozen = 1 << 1;
+    private const byte IsCulled = 1 << 2;
+
+    public bool DeflectionProcessed { get; private set; } = false;
+
+    public override void RegisterLocalEvents(EventManagerObsolete eventManager)
+    {
+        base.RegisterLocalEvents(eventManager);
+        _projectileEventManager.OnGetDirectionToTarget += GetDirectionToOwnerOnDeflect;
+        ComponentRegistry.Register<IFreezeAndDeflectable>(_componentRegistryTargetObj, this);
+
+    }
+
+    public override void UnRegisterLocalEvents(EventManagerObsolete eventManager)
+    {
+        base.UnRegisterLocalEvents(eventManager);
+        ComponentRegistry.Unregister<IFreezeAndDeflectable>(_componentRegistryTargetObj);
+        _projectileEventManager.OnGetDirectionToTarget -= GetDirectionToOwnerOnDeflect;
+    }
+
+    protected override void CreateDefaultColliderIfNoneExists(GameObject target, bool exists)
+    {
+        _componentRegistryTargetObj = target;
+        if (!exists)
+        {
+            _componentRegistryTargetObj.AddComponent<CapsuleCollider>();
+        }
+        ComponentRegistry.Register<IFreezeAndDeflectable>(_componentRegistryTargetObj, this);
+    }
+
+    protected override void AttachMovementHandler()
+        => _movementHandler = new DeflectableProjectileMovementManager(_projectileEventManager, GetComponent<Rigidbody>(), _projectileSpeed, _movementType, _deflectSpeed, _acceleration, _maxSpeed, _useGravity) as DeflectableProjectileMovementManager;
+
+
+    private Vector3 GetDirectionToOwnerOnDeflect()
+    {
+        Vector3 directionTotarget = TargetingUtility.GetDirectionToTarget(Owner, gameObject, true);
+        return directionTotarget;
+    }
+
+    protected override void OnExpired()
+    {
+        RemoveFromJob();
+        DistanceToPlayer = float.MaxValue;
+        if (DeflectionProcessed) DeflectionProcessed = false;
+
+        _projectileEventManager.ParticleEnd(this/*, _bulletType*/);
+        if (HasState(IsFrozen))
+        {
+            ClearState(IsFrozen);
+
+        }
+        base.OnExpired();
+
+    }
+
+    public bool _testUnFreeze = false;
+    protected override void Update()
+    {
+        if (!HasState(IsFrozen))
+        {
+            base.Update();
+        }
+
+#if UNITY_EDITOR
+        if (testFreeze)
+        {
+            Freeze();
+            testFreeze = false;
+        }
+
+        if (_testUnFreeze)
+        {
+            Deflect(ProjectileKickType.ReFire);
+            _testUnFreeze = false;
+        }
+#endif
+    }
+
+    protected override void FixedUpdate()
+    {
+        if (HasState(IsFrozen)) return;
+        base.FixedUpdate();
+    }
+
+    public void SetDistanceToPlayer(float distance)
+    {
+        if (!HasState(IsFrozen)) { return; }
+        DistanceToPlayer = distance;
+
+        if (DistanceToPlayer <= _cullDistance)
+        {
+            if (!HasState(IsCulled))
+            {
+                Cull(true);
+            }
+        }
+        else
+        {
+            if (HasState(IsCulled))
+            {
+                Cull();
+            }
+        }
+    }
+
+    private void Cull(bool cull = false)
+    {
+        if (cull)
+        {
+            _anim.SetTrigger("minimize");
+            _projectileEventManager.ParticleEnd(this/*, _bulletType*/);
+            SetState(IsCulled);
+
+        }
+        else
+        {
+            _anim.SetTrigger("maximize");
+            _projectileEventManager.ParticleBegin(this/*, _bulletType*/);
+            ClearState(IsCulled);
+
+        }
+    }
+
+    public override void LaunchPoolable(GameObject bulletOwner)
+    {
+        base.LaunchPoolable(bulletOwner);
+        _projectileEventManager.ParticleBegin(this);
+
+    }
+
+    public void Freeze()
+    {
+
+        if (HasState(IsFrozen)) { return; }
+
+        if (BulletDistanceJob.Instance.AddFrozenProjectile(this))
+        {
+            SetState(IsFrozen);      
+        }
+      
+        _projectileEventManager.Freeze();
+        _timeOut = _lifespan;
+    }
+
+
+
+    private void RemoveFromJob()
+    {
+        if (BulletDistanceJob.Instance.RemoveFrozenProjectile(this))
+        {
+            //SetState(IsFrozen);
+            ClearState(IsFrozen);
+
+        }
+        if (HasState(IsFrozen)) { return; }
+        if (HasState(IsCulled))
+        {
+            Cull(false);
+        }
+
+
+    }
+
+    public void Deflect(ProjectileKickType type)
+    {
+        if (DeflectionProcessed) return;
+
+        DeflectionProcessed = true;
+        if (type == ProjectileKickType.ReFire)
+        {
+            if (!HasState(IsFrozen)) { return; }
+            RemoveFromJob();
+        }
+        _projectileEventManager.Deflected(type);
+    }
+
+
+
+
+}

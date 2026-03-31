@@ -99,7 +99,7 @@ public class WaypointResourcesObsolete : SceneResourcesObsolete//, IWaypointServ
 
     protected override void ResourceRequested(in ResourceRequestsObsolete request)
     {
-        if (request.AIResourceType != AIResourceType.WaypointBlock) return;
+        if (request.AIResourceType != AIResourceTypeObsolete.WaypointBlock) return;
 
         if(_waypointBlockData == null)
         {

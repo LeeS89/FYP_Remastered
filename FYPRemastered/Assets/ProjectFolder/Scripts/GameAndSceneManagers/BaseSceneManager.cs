@@ -9,7 +9,7 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
 {
     public static BaseSceneManager _instance { get; private set; }
 
-    [SerializeField] protected List<EventManager> _eventManagers;
+    [SerializeField] protected List<EventManagerObsolete> _eventManagers;
 
     protected List<PoolIdSO> _scenePoolsToLoad;
 
@@ -66,9 +66,9 @@ public abstract class BaseSceneManager : MonoBehaviour, ISceneManager
 
     protected virtual void LoadActiveSceneEventManagers()
     {
-        _eventManagers = new List<EventManager>();
+        _eventManagers = new List<EventManagerObsolete>();
 
-        _eventManagers.AddRange(FindObjectsByType<EventManager>(FindObjectsInactive.Include, FindObjectsSortMode.None));
+        _eventManagers.AddRange(FindObjectsByType<EventManagerObsolete>(FindObjectsInactive.Include, FindObjectsSortMode.None));
 
         foreach (var eventManager in _eventManagers)
         {

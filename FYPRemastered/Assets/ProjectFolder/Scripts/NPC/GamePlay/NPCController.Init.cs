@@ -10,7 +10,7 @@ public partial class NPCController
 {
     private TryGetTarget OnTryGetCurrentTarget;
 
-    [SerializeField] private AgentFsmDeps _fsmDeps;
+    [SerializeField] private AgentFsmDepsObsolete _fsmDeps;
     // FSMManager Composition - Partly obsolete
     [Header("FOV Data")]
     [SerializeField] private FovData _fovDeps;

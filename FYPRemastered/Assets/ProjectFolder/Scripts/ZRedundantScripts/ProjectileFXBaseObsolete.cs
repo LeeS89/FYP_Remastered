@@ -20,7 +20,7 @@ public class ProjectileFXBaseObsolete : ComponentEvents
 
     
 
-    public override void RegisterLocalEvents(EventManager eventManager)
+    public override void RegisterLocalEvents(EventManagerObsolete eventManager)
     {
         _projectileEventManager = eventManager as CombatEventManager;
         PoolRequestCallback = OnPoolReceived;
@@ -35,7 +35,7 @@ public class ProjectileFXBaseObsolete : ComponentEvents
     }
 
 
-    public override void UnRegisterLocalEvents(EventManager eventManager)
+    public override void UnRegisterLocalEvents(EventManagerObsolete eventManager)
     {
         _projectileEventManager.Expired();
 

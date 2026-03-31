@@ -25,7 +25,7 @@ public class FSMControllerObsolete : FSMControllerBaseNewObsolete
 
 
     #region Agent and FSM Setup / Scene Initialization
-    public override void RegisterLocalEvents(EventManager eventManager)
+    public override void RegisterLocalEvents(EventManagerObsolete eventManager)
     {
         base.RegisterLocalEvents(eventManager);
         SetupFSM();
@@ -230,7 +230,7 @@ public class FSMControllerObsolete : FSMControllerBaseNewObsolete
         ChangeState(_stationary, alertStatus);
     }
 
-    protected override void OnDestinationRequestComplete(bool success, Vector3 destination, AIDestinationType destType)
+    protected override void OnDestinationRequestComplete(bool success, Vector3 destination, AIDestinationTypeObsolete destType)
     {
         if (!success)
         {
@@ -242,13 +242,13 @@ public class FSMControllerObsolete : FSMControllerBaseNewObsolete
 
         switch (destType)
         {
-            case AIDestinationType.PatrolDestination:
+            case AIDestinationTypeObsolete.PatrolDestination:
                 break;
-            case AIDestinationType.ChaseDestination:
+            case AIDestinationTypeObsolete.ChaseDestination:
                 ChangeState(_chasing, AlertStatus.Chasing);
                 stoppingDistance = Random.Range(4, 11);
                 break;
-            case AIDestinationType.FlankDestination:
+            case AIDestinationTypeObsolete.FlankDestination:
                 ChangeState(_chasing, AlertStatus.Flanking);
                 break;
             default:
@@ -429,7 +429,7 @@ public class FSMControllerObsolete : FSMControllerBaseNewObsolete
 
             //_alertStatus = AlertStatus.Alert;
 
-            _agentEventManager.DestinationRequested(AIDestinationType.ChaseDestination);
+            _agentEventManager.DestinationRequested(AIDestinationTypeObsolete.ChaseDestination);
 
         }
 

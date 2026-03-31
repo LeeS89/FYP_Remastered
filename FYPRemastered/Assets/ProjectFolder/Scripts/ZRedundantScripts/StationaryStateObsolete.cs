@@ -70,7 +70,7 @@ public class StationaryStateObsolete : EnemyStateObsolete
                 if (!_canSeePlayer && !_newStateRequestAlreadySent)
                 {
                     _newStateRequestAlreadySent = true;
-                    _eventManager.DestinationRequested(AIDestinationType.FlankDestination);
+                    _eventManager.DestinationRequested(AIDestinationTypeObsolete.FlankDestination);
                     _isStationary = false;
                     yield break;
                 }
@@ -97,7 +97,7 @@ public class StationaryStateObsolete : EnemyStateObsolete
         if (canChase && !_newStateRequestAlreadySent)
         {
             _newStateRequestAlreadySent = true;
-            _eventManager.DestinationRequested(AIDestinationType.ChaseDestination);
+            _eventManager.DestinationRequested(AIDestinationTypeObsolete.ChaseDestination);
 
            /* if (!_queuedForNewFlankPoint)
             {

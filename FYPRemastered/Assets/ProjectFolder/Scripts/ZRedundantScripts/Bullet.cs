@@ -17,14 +17,14 @@ public sealed class Bullet : Projectile, IFreezeAndDeflectable
     private GameObject _componentRegistryTargetObj;
 
 
-    public override void RegisterLocalEvents(EventManager eventManager)
+    public override void RegisterLocalEvents(EventManagerObsolete eventManager)
     {
         base.RegisterLocalEvents(eventManager);
         _projectileEventManager.OnGetDirectionToTarget += GetDirectionToOwnerOnDeflect;
 
     }
 
-    public override void UnRegisterLocalEvents(EventManager eventManager)
+    public override void UnRegisterLocalEvents(EventManagerObsolete eventManager)
     {
         base.UnRegisterLocalEvents(eventManager);
         ComponentRegistry.Unregister<IFreezeAndDeflectable>(_componentRegistryTargetObj);

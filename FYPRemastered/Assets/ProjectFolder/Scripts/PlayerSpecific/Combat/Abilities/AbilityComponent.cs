@@ -32,7 +32,7 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
 
    
 
-    public override void RegisterLocalEvents(EventManager eventManager)
+    public override void RegisterLocalEvents(EventManagerObsolete eventManager)
     {
         _eventManager = eventManager;
         base.RegisterLocalEvents(eventManager);
@@ -61,7 +61,7 @@ public class AbilityComponent : ComponentEvents, IAbilityOwner
         InitializeRuntimes();
     }
 
-    public override void UnRegisterLocalEvents(EventManager eventManager)
+    public override void UnRegisterLocalEvents(EventManagerObsolete eventManager)
     {
         _eventManager.OnTryUseAbility -= TryActivate;
         _eventManager.OnEndAbility -= EndChannel;

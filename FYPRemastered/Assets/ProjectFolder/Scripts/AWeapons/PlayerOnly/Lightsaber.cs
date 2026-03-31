@@ -19,7 +19,7 @@ public class Lightsaber : GrabbableObject
 
    
 
-    public override void RegisterLocalEvents(EventManager eventManager)
+    public override void RegisterLocalEvents(EventManagerObsolete eventManager)
     {
         base.RegisterLocalEvents(eventManager);
         if (TryGetComponent<Animator>(out Animator anim))

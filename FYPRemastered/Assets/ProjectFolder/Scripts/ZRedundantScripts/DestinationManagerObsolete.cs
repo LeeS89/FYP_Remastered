@@ -21,7 +21,7 @@ public class DestinationManagerObsolete
 {
     private EnemyEventManager _eventManager;
     private Transform _owner;
-    private AIDestinationType _globalDestinationType = AIDestinationType.None;
+    private AIDestinationTypeObsolete _globalDestinationType = AIDestinationTypeObsolete.None;
 
    
 
@@ -29,7 +29,7 @@ public class DestinationManagerObsolete
     private Coroutine _runningRoutine;
     private WaitUntil _waitUntilResultReceived;
     
-    private Queue<AIDestinationType> _destinationQueue;
+    private Queue<AIDestinationTypeObsolete> _destinationQueue;
     private bool _resultReceived = false;
     private bool _isValid = false;
     ////////////////////////////////////
@@ -37,7 +37,7 @@ public class DestinationManagerObsolete
 
     // Path Calculation Request callback function and data provided to request
     private NavMeshPath _path;
-    private readonly Action<bool, Vector3, AIDestinationType> _onDestinationRequestComplete;
+    private readonly Action<bool, Vector3, AIDestinationTypeObsolete> _onDestinationRequestComplete;
    // private AIDestinationRequestData _destinationRequest;
     /////////////////////////////////////////////
 
@@ -48,7 +48,7 @@ public class DestinationManagerObsolete
     /// TESTING
     private GameObject testCube; // OLD
 
-    public DestinationManagerObsolete(EnemyEventManager eventManager, int maxFlankingSteps, GameObject cube, Transform owner, Action<bool, Vector3, AIDestinationType> callback)
+    public DestinationManagerObsolete(EnemyEventManager eventManager, int maxFlankingSteps, GameObject cube, Transform owner, Action<bool, Vector3, AIDestinationTypeObsolete> callback)
     {
         _eventManager = eventManager;
         _eventManager.OnDeathStatusUpdated += OwnerDeathStatusUpdated;
@@ -63,7 +63,7 @@ public class DestinationManagerObsolete
 
         _eventManager.OnDestinationRequested += DestinationRequested;
 
-        _destinationQueue = new Queue<AIDestinationType>();
+        _destinationQueue = new Queue<AIDestinationTypeObsolete>();
         _pathRequestCallback = PathRequestInternalCallback;
     
         _candidatePointProvider = new DestinationManagerHelperObsolete(_owner, maxFlankingSteps, testCube);
@@ -91,7 +91,7 @@ public class DestinationManagerObsolete
         }
     }
 
-    private void DestinationRequested(AIDestinationType destType)
+    private void DestinationRequested(AIDestinationTypeObsolete destType)
     {
         if (OwnerIsDead) { return; }
 
@@ -121,7 +121,7 @@ public class DestinationManagerObsolete
         {
             var destinationType = _destinationQueue.Dequeue();
 
-            if (destinationType == AIDestinationType.FlankDestination)
+            if (destinationType == AIDestinationTypeObsolete.FlankDestination)
             {
                 yield return CoroutineRunner.Instance.StartCoroutine(_candidatePointProvider.FlankDestinationRoutine());
                 yield return CoroutineRunner.Instance.StartCoroutine(EvaluateDestinationRoutine(_candidatePointProvider.GetFlankCandidates(), DestinationManagerHelperObsolete.GetFlankPointCandidatePosition, destinationType, DestinationManagerHelperObsolete.MarkFlankPointInUse));
@@ -138,7 +138,7 @@ public class DestinationManagerObsolete
     private IEnumerator EvaluateDestinationRoutine<T>(
     List<T> candidates,
     Func<T, Vector3> getPositionFunc,
-    AIDestinationType destType = AIDestinationType.None,
+    AIDestinationTypeObsolete destType = AIDestinationTypeObsolete.None,
     Action<T> markInUseFunc = null
     )
     {
@@ -161,7 +161,7 @@ public class DestinationManagerObsolete
 
             if (!_isValid) continue;
 
-            if (destType == AIDestinationType.PatrolDestination)
+            if (destType == AIDestinationTypeObsolete.PatrolDestination)
             {
                 Vector3 wpForward = _candidatePointProvider.GetWaypointForward(point);
                 _eventManager.RotateAtPatrolPoint(wpForward);

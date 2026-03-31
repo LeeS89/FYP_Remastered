@@ -227,9 +227,9 @@ public class MoonSceneManagerNewObsolete : BaseSceneManager
 
     protected void LoadActiveSceneEventManagersNew()
     {
-        _eventManagers = new List<EventManager>();
+        _eventManagers = new List<EventManagerObsolete>();
 
-        _eventManagers.AddRange(FindObjectsByType<EventManager>(FindObjectsInactive.Include, FindObjectsSortMode.None));
+        _eventManagers.AddRange(FindObjectsByType<EventManagerObsolete>(FindObjectsInactive.Include, FindObjectsSortMode.None));
 
         foreach (var eventManager in _eventManagers)
         {

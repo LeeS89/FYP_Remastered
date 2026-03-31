@@ -55,7 +55,7 @@ public class ChasingStateObsolete : EnemyStateObsolete
 
             if (CheckIfPlayerHasMoved())
             {
-                _eventManager.DestinationRequested(AIDestinationType.ChaseDestination);
+                _eventManager.DestinationRequested(AIDestinationTypeObsolete.ChaseDestination);
 
                 yield return _waitUntilDestinationApplied;
                 _destinationApplied = false;

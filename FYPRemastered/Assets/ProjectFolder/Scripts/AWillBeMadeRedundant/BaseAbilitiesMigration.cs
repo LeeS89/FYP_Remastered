@@ -30,7 +30,7 @@ public class BaseAbilitiesMigration : ComponentEvents
         set => _targetTransform = value;
     }
 
-    public override void RegisterLocalEvents(EventManager eventManager)
+    public override void RegisterLocalEvents(EventManagerObsolete eventManager)
     {
         base.RegisterLocalEvents(eventManager);
      

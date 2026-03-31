@@ -15,7 +15,7 @@ public class GunBase //: IRangedWeapon
     private Transform _target;
     private int _clipCapacity;
     private int _clipCount;
-    private EventManager _eventManager;
+    private EventManagerObsolete _eventManager;
 
     private GameObject _owner;
 
@@ -37,7 +37,7 @@ public class GunBase //: IRangedWeapon
     #region Constructors
   
 
-    public GunBase(Transform bulletSpawnPoint, Transform target, EventManager eventManager, GameObject gunOwner, /*PoolManager bulletPool,*/ int clipCapacity)
+    public GunBase(Transform bulletSpawnPoint, Transform target, EventManagerObsolete eventManager, GameObject gunOwner, /*PoolManager bulletPool,*/ int clipCapacity)
     {
         _bulletSpawnPoint = bulletSpawnPoint;
         _target = target;
@@ -153,7 +153,7 @@ public class GunBase //: IRangedWeapon
 
     }
 
-    public void Equip(EventManager eventManager)
+    public void Equip(EventManagerObsolete eventManager)
     {
         _eventManager = eventManager;
     }

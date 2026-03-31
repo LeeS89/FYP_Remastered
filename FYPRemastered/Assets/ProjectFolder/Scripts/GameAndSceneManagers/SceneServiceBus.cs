@@ -293,7 +293,7 @@ public interface IFsmStateService
 }
 
 [Obsolete("", true)]
-public interface IFsmStateService<TContext> : IFsmStateService where TContext : IContext
+public interface IFsmStateService<TContext> : IFsmStateService where TContext : IContextObsolete
 {
      bool TryGetDestinationCandidates(TContext id, List<Vector3> buffer);
     /*   [Obsolete("Use INpcBody instead")]

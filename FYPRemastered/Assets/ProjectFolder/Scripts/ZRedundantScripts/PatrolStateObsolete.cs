@@ -61,7 +61,7 @@ public class PatrolStateObsolete : EnemyStateObsolete
             _eventManager.DestinationReached(false);
             //SetDestinationReached(false);
          
-            _eventManager.DestinationRequested(AIDestinationType.PatrolDestination);
+            _eventManager.DestinationRequested(AIDestinationTypeObsolete.PatrolDestination);
            // Debug.LogError("Patrol State: Requesting Patrol Destination");
             yield return _waitUntilDestinationApplied;
             _destinationApplied = false;

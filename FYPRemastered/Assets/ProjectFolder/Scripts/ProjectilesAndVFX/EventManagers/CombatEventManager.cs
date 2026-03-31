@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 
-public sealed class CombatEventManager : EventManager
+public sealed class CombatEventManager : EventManagerObsolete
 {
     //private List<ComponentEvents> _cachedListeners;
     public event Action OnExpired;

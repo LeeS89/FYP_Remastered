@@ -24,7 +24,7 @@ public partial class NPCControllerObsolete
     private INpcAnimationControl _animationControl;
   
 
-    public override void RegisterLocalEvents(EventManager eventManager)
+    public override void RegisterLocalEvents(EventManagerObsolete eventManager)
     {
         _eManager = eventManager as EnemyEventManager;
 
@@ -88,7 +88,7 @@ public partial class NPCControllerObsolete
         Path = new NavMeshPath();
     }
 
-    public override void UnRegisterLocalEvents(EventManager eventManager)
+    public override void UnRegisterLocalEvents(EventManagerObsolete eventManager)
     {
         OnMeleeRangeCheckCallback = null;
         base.UnRegisterLocalEvents(_eManager);
@@ -280,7 +280,7 @@ public partial class NPCControllerNew
         Path = new NavMeshPath();
     }
 
-    public void UnRegisterLocalEvents(EventManager eventManager)
+    public void UnRegisterLocalEvents(EventManagerObsolete eventManager)
     {
         OnMeleeRangeCheckCallback = null;
       //  base.UnRegisterLocalEvents(_eManager);

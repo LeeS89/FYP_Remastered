@@ -217,7 +217,7 @@ public sealed class ChaseDeps : FsmBaseState<ChaseDeps>.FsmBaseStateDeps
 
 
 [Obsolete]
-public sealed class FSMChaseStateNew : FsmBaseStateNew<IFsmStateService<ITargetContext>, ITargetContext>
+public sealed class FSMChaseStateNew : FsmBaseStateNew<IFsmStateService<ITargetContextObsolete>, ITargetContextObsolete>
 {
     
     private Action<float> _distanceCheckCB;
@@ -225,7 +225,7 @@ public sealed class FSMChaseStateNew : FsmBaseStateNew<IFsmStateService<ITargetC
     private float? _initialDistance = null;
 
 
-    public FSMChaseStateNew(IFsmStateEventsObsoleteO stateController, IFsmStateService<ITargetContext> service, IPathResolver pathResolver, ICoroutineHost host)
+    public FSMChaseStateNew(IFsmStateEventsObsoleteO stateController, IFsmStateService<ITargetContextObsolete> service, IPathResolver pathResolver, ICoroutineHost host)
         : base(stateController, service, pathResolver, host, StateId.Chase) { _candidateDestinations.EnsureCapacity(1); }
 
  /*   public FSMChaseStateNew(ChaseDeps deps, SharedFsmStateServices sharedDeps, IFsmStateEvents stateContext)

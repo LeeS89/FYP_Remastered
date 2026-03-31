@@ -34,7 +34,7 @@ public class NPCAnimComponentObsolete : ComponentEvents//, INpcAnimationControl
     [Range(0f, 1f)] public float clampWeight = 0.5f;
 
 
-    public override void RegisterLocalEvents(EventManager eventManager)
+    public override void RegisterLocalEvents(EventManagerObsolete eventManager)
     {
         _em = eventManager as EnemyEventManager;
     /*    _em.OnAnimationTriggered = PlayAnimationType;
@@ -51,7 +51,7 @@ public class NPCAnimComponentObsolete : ComponentEvents//, INpcAnimationControl
     }
 
 
-    public override void UnRegisterLocalEvents(EventManager eventManager)
+    public override void UnRegisterLocalEvents(EventManagerObsolete eventManager)
     {
       /*  _em.OnAnimationTriggered = null;
         _em.OnTogglingAnimationLayerNew = null;

@@ -93,7 +93,7 @@ public class CombatComponentObsolete : BaseAbilitiesObsolete
 
   
 
-    public override void RegisterLocalEvents(EventManager eventManager)
+    public override void RegisterLocalEvents(EventManagerObsolete eventManager)
     {
         _enemyEventManager = eventManager as EnemyEventManager;
         base.RegisterLocalEvents(_enemyEventManager);
@@ -125,7 +125,7 @@ public class CombatComponentObsolete : BaseAbilitiesObsolete
 
    
 
-    public override void UnRegisterLocalEvents(EventManager eventManager)
+    public override void UnRegisterLocalEvents(EventManagerObsolete eventManager)
     {
         _meleeCheckWait = null;
     

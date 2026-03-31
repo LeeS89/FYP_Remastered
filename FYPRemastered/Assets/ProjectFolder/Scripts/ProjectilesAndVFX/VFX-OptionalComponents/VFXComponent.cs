@@ -13,7 +13,7 @@ public class VFXComponent : VFXBase
     /// Will become Obsolete
     [SerializeField] private ParticleManager _particleManager;
 
-    public override void RegisterLocalEvents(EventManager eventManager)
+    public override void RegisterLocalEvents(EventManagerObsolete eventManager)
     {
         base.RegisterLocalEvents(eventManager);
 
@@ -35,7 +35,7 @@ public class VFXComponent : VFXBase
             this.RequestPool(DeflectAudioPoolId, PoolRequestCallback);
     }
 
-    public override void UnRegisterLocalEvents(EventManager eventManager)
+    public override void UnRegisterLocalEvents(EventManagerObsolete eventManager)
     {
          base.UnRegisterLocalEvents(_cmbtEventManager);
         _cmbtEventManager.OnCollision -= FireCollisionParticle;

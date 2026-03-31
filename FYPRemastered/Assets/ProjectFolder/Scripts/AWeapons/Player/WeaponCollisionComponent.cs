@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 
-public class WeaponCollisionComponent : EventManager
+public class WeaponCollisionComponent : EventManagerObsolete
 {
     [SerializeField] private Transform _traceStart;
     [SerializeField] private Transform _traceEnd;

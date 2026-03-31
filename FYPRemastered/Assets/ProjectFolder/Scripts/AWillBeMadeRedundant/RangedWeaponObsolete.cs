@@ -10,7 +10,7 @@ public class RangedWeaponObsolete : WeaponBaseObsolete
 
     
 
-    public override void RegisterLocalEvents(EventManager eventManager)
+    public override void RegisterLocalEvents(EventManagerObsolete eventManager)
     {
         OnPoolReceived = OnPoolRequestComplete;
         if (string.IsNullOrEmpty(_poolId.Id)) this.RequestPool(_poolId, OnPoolReceived);

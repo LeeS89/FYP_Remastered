@@ -31,7 +31,7 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
     
    
 
-    public override void RegisterLocalEvents(EventManager eventManager)
+    public override void RegisterLocalEvents(EventManagerObsolete eventManager)
     {
         base.RegisterLocalEvents(eventManager);
         if (eventManager == null)
@@ -56,7 +56,7 @@ public class Locomotion : ComponentEvents//, IPlayerEvents
         RegisterGlobalEvents();
     }
 
-    public override void UnRegisterLocalEvents(EventManager eventManager)
+    public override void UnRegisterLocalEvents(EventManagerObsolete eventManager)
     {
         if (eventManager == null)
         {

@@ -231,14 +231,14 @@ public class DestinationManagerHelperObsolete
 
     public static Vector3 ReturnSelf(Vector3 v) => v;
 
-    public List<Vector3> GetCandidates(AIDestinationType destType)
+    public List<Vector3> GetCandidates(AIDestinationTypeObsolete destType)
     {
         // when destType == AIDestinationType.FlankDestination, _candidatePositions is populated in the Flank coroutine
-        if (destType == AIDestinationType.ChaseDestination)
+        if (destType == AIDestinationTypeObsolete.ChaseDestination)
         {
             AddPlayerDestinationToCandidatePoints();
         }
-        else if (destType == AIDestinationType.PatrolDestination)
+        else if (destType == AIDestinationTypeObsolete.PatrolDestination)
         {
             AddWaypointsToCandidatePoints();
         }

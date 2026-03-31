@@ -43,7 +43,7 @@ public class Gun
     private ResourceRequest _request;
 
     #region Constructors
-    public Gun(EventManager eventManager, GameObject gunOwner)
+    public Gun(EventManagerObsolete eventManager, GameObject gunOwner)
     {
 
         if(eventManager is EnemyEventManager enemyEventManager)
@@ -73,7 +73,7 @@ public class Gun
         }
     }
 
-    public Gun(Transform bulletSpawnPoint, EventManager eventManager, GameObject gunOwner) : this(eventManager, gunOwner)
+    public Gun(Transform bulletSpawnPoint, EventManagerObsolete eventManager, GameObject gunOwner) : this(eventManager, gunOwner)
     {
         _bulletSpawnPoint = bulletSpawnPoint;
 
@@ -87,7 +87,7 @@ public class Gun
         //BaseSceneManager._instance.GetBulletPool(ref _poolManager);
     }
 
-    public Gun(Transform bulletSpawnPoint, Transform target, EventManager eventManager, GameObject gunOwner) : this(bulletSpawnPoint, eventManager, gunOwner)
+    public Gun(Transform bulletSpawnPoint, Transform target, EventManagerObsolete eventManager, GameObject gunOwner) : this(bulletSpawnPoint, eventManager, gunOwner)
     {
         _target = target;
     }

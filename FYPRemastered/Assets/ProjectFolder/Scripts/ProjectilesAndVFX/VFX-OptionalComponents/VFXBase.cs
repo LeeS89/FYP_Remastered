@@ -24,7 +24,7 @@ public abstract class VFXBase : ComponentEvents
     protected CombatEventManager _cmbtEventManager;
 
 
-    public override void RegisterLocalEvents(EventManager eventManager)
+    public override void RegisterLocalEvents(EventManagerObsolete eventManager)
     {
         _cmbtEventManager = eventManager as CombatEventManager;
         base.RegisterLocalEvents(_cmbtEventManager);
@@ -32,7 +32,7 @@ public abstract class VFXBase : ComponentEvents
         _cmbtEventManager.OnSpawnParticle += SpawnParticle;
     }
 
-    public override void UnRegisterLocalEvents(EventManager eventManager)
+    public override void UnRegisterLocalEvents(EventManagerObsolete eventManager)
     {
         _cmbtEventManager.OnSpawnParticle -= SpawnParticle;
         base.UnRegisterLocalEvents(eventManager);

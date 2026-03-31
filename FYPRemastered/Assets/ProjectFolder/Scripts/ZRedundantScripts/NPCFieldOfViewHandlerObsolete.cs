@@ -13,7 +13,7 @@ public class NPCFieldOfViewHandlerObsolete// : IFieldOfViewRunnerObsolete
     private Vector3[] _evaluationHitPoints;
     private Collider[] _proximityDetectionResults;
     private RaycastHit[] _hitBuffer = new RaycastHit[10];
-    private ITargetRef _fovTarget;
+    private ITargetRefObsolete _fovTarget;
 
     //public Action<FOVResult, bool> OnFOVSweepComplete { get; set; }
    // public Action<NPCNotification> OnFOVSweepCompleted { get; set; }
@@ -36,7 +36,7 @@ public class NPCFieldOfViewHandlerObsolete// : IFieldOfViewRunnerObsolete
         _nextCheckTime = Time.time + GetCheckFrequency(_currentAlertPhase);
         _fovSweepFrequency = GetCheckFrequency(_currentAlertPhase);
     }
-    public NPCFieldOfViewHandlerObsolete(FOVParameters fovParams, ITargetRef fovTarget, Notification onSweepComplete)
+    public NPCFieldOfViewHandlerObsolete(FOVParameters fovParams, ITargetRefObsolete fovTarget, Notification onSweepComplete)
     {
         if (fovParams == null)
         {

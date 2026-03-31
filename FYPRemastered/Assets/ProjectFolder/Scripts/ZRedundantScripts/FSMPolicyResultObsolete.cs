@@ -50,7 +50,7 @@ public readonly struct PathRequest
 
 
     // For AI and Pool requests
-    public readonly AIResourceType AIResourceType;
+    public readonly AIResourceTypeObsolete AIResourceType;
     //  public readonly PoolResourceType PoolType;
     // public readonly string PoolId;
     public readonly PoolIdSO PoolId;
@@ -72,7 +72,7 @@ public readonly struct PathRequest
     public readonly Action<bool> PathRequestCallback;
 
     private PathRequest(
-        AIResourceType airt,
+        AIResourceTypeObsolete airt,
         // PoolResourceType prt,
         //string pid,
         PoolIdSO pid,
@@ -103,17 +103,17 @@ public readonly struct PathRequest
     }
 
     public static PathRequest RequestPool(PoolIdSO type, Action<string, IPoolManager> pool)
-        => new(AIResourceType.None, type, default, default, null, null, -1, null, pool, null, null, null);
+        => new(AIResourceTypeObsolete.None, type, default, default, null, null, -1, null, pool, null, null, null);
 
     public static PathRequest FlankPointTargetAndBlockingMasks(Action<LayerMask, LayerMask, LayerMask> masks)
-        => new(AIResourceType.FlankPointEvaluationMasks, null, default, default, null, null, -1, null, null, masks, null, null);
+        => new(AIResourceTypeObsolete.FlankPointEvaluationMasks, null, default, default, null, null, -1, null, null, masks, null, null);
 
     public static PathRequest RequestWaypoints(Action<BlockData> callback)
-        => new(AIResourceType.WaypointBlock, null, default, default, null, null, -1, null, null, null, callback, null);
+        => new(AIResourceTypeObsolete.WaypointBlock, null, default, default, null, null, -1, null, null, null, callback, null);
 
     public static PathRequest RequestPath(Vector3 start, Vector3 end, NavMeshPath path, Action<bool> cb)
-        => new(AIResourceType.Path, null, start, end, path, null, -1, null, null, null, null, cb);
+        => new(AIResourceTypeObsolete.Path, null, start, end, path, null, -1, null, null, null, null, cb);
 
     public static PathRequest RequestFlankPoints(int steps, List<FlankPointData> data, Action<bool> flankCB)
-        => new(AIResourceType.FlankPointCandidates, null, default, default, null, data, steps, flankCB, null, null, null, null);
+        => new(AIResourceTypeObsolete.FlankPointCandidates, null, default, default, null, data, steps, flankCB, null, null, null, null);
 }

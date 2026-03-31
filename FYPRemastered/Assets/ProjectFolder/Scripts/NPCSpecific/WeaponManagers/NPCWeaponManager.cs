@@ -11,7 +11,7 @@ public sealed class NPCWeaponManager : WeaponManagerBase
 
     // private Dictionary<AmmoType, IEquippable> _weaponsByTypeStore = new(5);
 
-    public override void RegisterLocalEvents(EventManager eventManager)
+    public override void RegisterLocalEvents(EventManagerObsolete eventManager)
     {
         _eEventManager = eventManager as EnemyEventManager;
         base.RegisterLocalEvents(_eEventManager);
@@ -32,7 +32,7 @@ public sealed class NPCWeaponManager : WeaponManagerBase
         if (_equippedWeapon is IRanged rw) rw.Fire();
     }*/
 
-    public override void UnRegisterLocalEvents(EventManager eventManager)
+    public override void UnRegisterLocalEvents(EventManagerObsolete eventManager)
     {
         base.UnRegisterLocalEvents(eventManager);
       

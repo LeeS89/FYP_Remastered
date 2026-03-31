@@ -823,10 +823,10 @@ public class FsmManagerNew : IFsmStateEventsObsoleteO, IFsmController
 
     private Vector3[] _corners = new Vector3[64];
 
-   /* private bool TryGetOwnerTransform(out Transform t) => _navControl.TryGetOwnerTransform(this, out t);
-    private bool TryGetAgent(out NavMeshAgent agent) => _navControl.TryGetAgent(this, out agent);
-    private bool TryGetObstacle(out NavMeshObstacle obstacle) => _navControl.TryGetObstacle(this, out obstacle);*/
-    private bool TryGetTargetTransform(out Transform t) => _targetQuery.TryGetTargetTransform(this, out t); 
+    /* private bool TryGetOwnerTransform(out Transform t) => _navControl.TryGetOwnerTransform(this, out t);
+     private bool TryGetAgent(out NavMeshAgent agent) => _navControl.TryGetAgent(this, out agent);
+     private bool TryGetObstacle(out NavMeshObstacle obstacle) => _navControl.TryGetObstacle(this, out obstacle);*/
+    private bool TryGetTargetTransform(out Transform t) { t = null; return false; }//targetQuery.TryGetTargetTransform(this, out t); 
 
     private Transform Transform => _owner.Transform;
     private Vector3? Position => _owner.Position() ?? _owner.Transform?.position;

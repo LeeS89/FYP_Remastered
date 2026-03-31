@@ -39,7 +39,7 @@ public abstract class Projectile : ComponentEvents, IPoolable
     protected void ClearState(byte state) => _state &= (byte)~state;
     public bool HasState(byte state) => (_state & state) != 0;
 
-    public override void RegisterLocalEvents(EventManager eventManager)
+    public override void RegisterLocalEvents(EventManagerObsolete eventManager)
     {
         _projectileEventManager = eventManager as CombatEventManager;
         ComponentRegistry.Register<IPoolable>(gameObject, this);
@@ -87,7 +87,7 @@ public abstract class Projectile : ComponentEvents, IPoolable
 
 
 
-    public override void UnRegisterLocalEvents(EventManager eventManager)
+    public override void UnRegisterLocalEvents(EventManagerObsolete eventManager)
     {
         ComponentRegistry.Unregister<IPoolable>(gameObject);
         _projectileEventManager.OnExpired -= OnExpired;

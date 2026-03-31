@@ -3,7 +3,7 @@ using UnityEngine;
 [Obsolete]
 public class AbilityBase
 {
-    protected EventManager _eventManager;
+    protected EventManagerObsolete _eventManager;
     protected AbilityDefinition _abilityDef;
     protected PoolIdSO BeginPoolId, InProgressPoolId, EndPoolId;
     protected IPoolManager BeginPool, InProgressPool, EndPool;

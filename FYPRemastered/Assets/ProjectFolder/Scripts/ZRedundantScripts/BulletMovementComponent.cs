@@ -28,7 +28,7 @@ public class BulletMovementComponent : ComponentEvents
     }
 
 
-    public override void RegisterLocalEvents(EventManager eventManager)
+    public override void RegisterLocalEvents(EventManagerObsolete eventManager)
     {
         _bulletEventManager = eventManager as CombatEventManager;
         _rb = GetComponentInParent<Rigidbody>(true);
@@ -40,7 +40,7 @@ public class BulletMovementComponent : ComponentEvents
 
     }
 
-    public override void UnRegisterLocalEvents(EventManager eventManager)
+    public override void UnRegisterLocalEvents(EventManagerObsolete eventManager)
     {
         _bulletEventManager.OnLaunch -= Launch;
         //_bulletEventManager.OnDeflected -= Deflected;

@@ -192,7 +192,7 @@ public sealed class PatrolDeps : FsmBaseState<PatrolDeps>.FsmBaseStateDeps
 
 
 [Obsolete]
-public sealed class FSMPatrolStateNew : FsmBaseStateNew<IFsmStateService<ITargetContext>, ITargetContext>
+public sealed class FSMPatrolStateNew : FsmBaseStateNew<IFsmStateService<ITargetContextObsolete>, ITargetContextObsolete>
 {
  //   private readonly IPatrolService _waypointService;
     //  private readonly IPatrolDeps _patrolDeps;
@@ -203,7 +203,7 @@ public sealed class FSMPatrolStateNew : FsmBaseStateNew<IFsmStateService<ITarget
         _waypointService = waypointService;
         _candidateDestinations.EnsureCapacity(10);
     }*/
-    public FSMPatrolStateNew(IFsmStateEventsObsoleteO stateController, IFsmStateService<ITargetContext> service, IPathResolver pathResolver, ICoroutineHost host)
+    public FSMPatrolStateNew(IFsmStateEventsObsoleteO stateController, IFsmStateService<ITargetContextObsolete> service, IPathResolver pathResolver, ICoroutineHost host)
         : base(stateController, service, pathResolver, host, StateId.Patrol)
     {
         // _patrolDeps = deps;

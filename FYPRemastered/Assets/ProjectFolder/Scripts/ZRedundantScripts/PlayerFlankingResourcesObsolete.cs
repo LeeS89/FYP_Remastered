@@ -124,14 +124,14 @@ public class PlayerFlankingResourcesObsolete : SceneResourcesObsolete, IUpdateab
 
     protected override void ResourceRequested(in ResourceRequestsObsolete request)
     {
-        AIResourceType type = request.AIResourceType;
+        AIResourceTypeObsolete type = request.AIResourceType;
 
         switch (type)
         {
-            case AIResourceType.FlankPointCandidates:
+            case AIResourceTypeObsolete.FlankPointCandidates:
                 ProcessFlankPointCandidatesRequest(in request);
                 break;
-            case AIResourceType.FlankPointEvaluationMasks:
+            case AIResourceTypeObsolete.FlankPointEvaluationMasks:
                 ProcessFlankPointEvaluationMaskRequest(in request);
                 break;
             default:

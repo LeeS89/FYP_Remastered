@@ -42,7 +42,7 @@ public abstract class FSMControllerBaseObsolete : ComponentEvents
     public bool TargetInView { get; protected set; } = false;
     protected GameObject OwningAgent => gameObject;
 
-    public override void RegisterLocalEvents(EventManager eventManager)
+    public override void RegisterLocalEvents(EventManagerObsolete eventManager)
     {
         _agentEventManager = eventManager as EnemyEventManager;
         base.RegisterLocalEvents(_agentEventManager);
@@ -55,7 +55,7 @@ public abstract class FSMControllerBaseObsolete : ComponentEvents
         RegisterGlobalEvents();
     }
 
-    public override void UnRegisterLocalEvents(EventManager eventManager)
+    public override void UnRegisterLocalEvents(EventManagerObsolete eventManager)
     {
         base.UnRegisterLocalEvents(_agentEventManager);
         _agentEventManager.OnRotateTowardsTarget -= ToggleAgentControlledRotationToTarget;
@@ -102,7 +102,7 @@ public abstract class FSMControllerBaseObsolete : ComponentEvents
 
     protected virtual void StationaryStateRequested(AlertStatus alertStatus) { }
   
-    protected virtual void OnDestinationRequestComplete(bool success, Vector3 destination, AIDestinationType destType) { }
+    protected virtual void OnDestinationRequestComplete(bool success, Vector3 destination, AIDestinationTypeObsolete destType) { }
 
     protected virtual void CheckIfDestinationReached() { }
 

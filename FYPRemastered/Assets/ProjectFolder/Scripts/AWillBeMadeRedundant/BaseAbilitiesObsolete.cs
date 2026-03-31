@@ -30,7 +30,7 @@ public class BaseAbilitiesObsolete : ComponentEvents
         set => _targetTransform = value;
     }
 
-    public override void RegisterLocalEvents(EventManager eventManager)
+    public override void RegisterLocalEvents(EventManagerObsolete eventManager)
     {
         base.RegisterLocalEvents(eventManager);
        // _request = new ResourceRequest();

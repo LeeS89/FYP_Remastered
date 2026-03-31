@@ -57,7 +57,7 @@ public sealed class PlayerController : TargetableInit<IPlaceholderService, Playe
     }*/
     #endregion ITargetable Implementation
 
-    public /*override*/ void RegisterLocalEvents(EventManager eventManager)
+    public /*override*/ void RegisterLocalEvents(EventManagerObsolete eventManager)
     {
        // _eManager = eventManager as PlayerEventManager;
     

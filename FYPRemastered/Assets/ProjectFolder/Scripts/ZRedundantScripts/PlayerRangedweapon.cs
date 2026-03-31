@@ -14,7 +14,7 @@ public abstract class PlayerRangedweapon : IRangedWeaponObsolete
   
     
 
-    public virtual void Equip(EventManager eventManager)
+    public virtual void Equip(EventManagerObsolete eventManager)
     {
         throw new System.NotImplementedException();
     }
@@ -34,7 +34,7 @@ public abstract class PlayerRangedweapon : IRangedWeaponObsolete
         throw new System.NotImplementedException();
     }
 
-    public void Initialize(EventManager eventManager, Transform spawnPoint, AmmoType type, FireRate fireRate, int clipCapacity)
+    public void Initialize(EventManagerObsolete eventManager, Transform spawnPoint, AmmoType type, FireRate fireRate, int clipCapacity)
     {
         throw new System.NotImplementedException();
     }

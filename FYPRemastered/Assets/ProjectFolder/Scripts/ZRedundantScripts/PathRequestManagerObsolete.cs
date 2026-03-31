@@ -52,7 +52,7 @@ public class PathRequestManagerObsolete : SceneResourcesObsolete, IUpdateableRes
 
     protected override void ResourceRequested(in ResourceRequestsObsolete request)
     {
-        if (request.AIResourceType != AIResourceType.Path) return;
+        if (request.AIResourceType != AIResourceTypeObsolete.Path) return;
         _pathRequestQueue.Enqueue(request);
     }
 

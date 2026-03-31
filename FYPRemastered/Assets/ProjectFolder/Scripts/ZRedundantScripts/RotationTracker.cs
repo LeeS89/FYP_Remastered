@@ -27,14 +27,14 @@ public class RotationTracker : ComponentEvents//, IPlayerEvents
     public event RotationHandler OnRotationChanged;*/
 
   
-    public override void RegisterLocalEvents(EventManager eventManager)
+    public override void RegisterLocalEvents(EventManagerObsolete eventManager)
     {
        // _playerEventManager = (PlayerEventManager)eventManager;
 
         RegisterGlobalEvents();
     }
 
-    public override void UnRegisterLocalEvents(EventManager eventManager)
+    public override void UnRegisterLocalEvents(EventManagerObsolete eventManager)
     {
         UnRegisterGlobalEvents();
         _playerEventManager = null;

@@ -17,7 +17,7 @@ public class WeaponManager : WeaponManagerBase
     
     public Transform Target { get; protected set; } = null;
 
-    public override void RegisterLocalEvents(EventManager eventManager)
+    public override void RegisterLocalEvents(EventManagerObsolete eventManager)
     {
        // _pEventManager = eventManager as PlayerEventManager;
       //  base.RegisterLocalEvents(_pEventManager);
@@ -25,7 +25,7 @@ public class WeaponManager : WeaponManagerBase
 
     }
 
-    public override void UnRegisterLocalEvents(EventManager eventManager)
+    public override void UnRegisterLocalEvents(EventManagerObsolete eventManager)
     {
         base.UnRegisterLocalEvents(eventManager);
         _pEventManager = null;

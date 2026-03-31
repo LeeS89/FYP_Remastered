@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class TestSpawn : EventManager
+public class TestSpawn : EventManagerObsolete
 {
     //public GameObject _bullet;
     public Transform _player;

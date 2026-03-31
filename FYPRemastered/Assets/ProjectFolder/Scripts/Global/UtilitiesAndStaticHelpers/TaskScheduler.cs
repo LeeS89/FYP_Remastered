@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+[Obsolete("", true)]
 public class TaskScheduler : MonoBehaviour 
 {
     public static TaskScheduler Instance { get; private set; }

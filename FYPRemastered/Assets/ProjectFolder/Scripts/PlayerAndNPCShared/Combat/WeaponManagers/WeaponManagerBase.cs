@@ -13,14 +13,14 @@ public abstract class WeaponManagerBase : ComponentInit<IPlaceholderService, Pla
     public abstract void OnEquippableCue(EquippableCue signal, IEquippable equippable);
    
 
-    public virtual/*override*/ void RegisterLocalEvents(EventManager eventManager)
+    public virtual/*override*/ void RegisterLocalEvents(EventManagerObsolete eventManager)
     {
        // base.RegisterLocalEvents(eventManager);
         eventManager.OnEquipped += EquipWeapon;
         eventManager.OnUnEquipped += UnEquipWeapon;
     }
 
-    public virtual/*override*/ void UnRegisterLocalEvents(EventManager eventManager)
+    public virtual/*override*/ void UnRegisterLocalEvents(EventManagerObsolete eventManager)
     {
         //base.UnRegisterLocalEvents(eventManager);
         eventManager.OnEquipped -= EquipWeapon;

@@ -16,5 +16,5 @@ public interface IRangedWeaponObsolete : IWeaponObsolete
 
    
 
-    void Initialize(EventManager eventManager, Transform spawnPoint, AmmoType type, FireRate fireRate, int clipCapacity);
+    void Initialize(EventManagerObsolete eventManager, Transform spawnPoint, AmmoType type, FireRate fireRate, int clipCapacity);
 }
