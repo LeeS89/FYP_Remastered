@@ -10,6 +10,7 @@ public partial class NPCController
 {
     private TryGetTarget OnTryGetCurrentTarget;
 
+    [Obsolete]
     [SerializeField] private AgentFsmDepsObsolete _fsmDeps;
     // FSMManager Composition - Partly obsolete
     [Header("FOV Data")]
@@ -242,4 +243,241 @@ public partial class NPCController
 namespace Npc.API
 {
     public delegate bool TryGetTarget(out ITargetable t);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+public partial class NPCControllerNewest
+{
+    private TryGetTarget OnTryGetCurrentTarget;
+
+   // [SerializeField] private AgentFsmDepsObsolete _fsmDeps;
+    // FSMManager Composition - Partly obsolete
+    [Header("FOV Data")]
+    [SerializeField] private FovData _fovDeps;
+    protected AgentEventManager _eManager;
+    // FSMManager Composition
+    //private IPathResolver _pathFinder;
+    private FovRunner _fovRunner;
+    private IFsmController _fsmManager;
+    // private FsmManager _fsmManager;
+    //private IFsmControl _fsmManager;
+
+    [Obsolete("", true)]
+    private Dictionary<StateId, IFsmStateObsolete> _fsmStates = new(5);
+    // end FSMManager Composition
+
+    private INpcAnimationControl _animationControl;
+    private ISceneAIServices _aiServices;
+    private IPlayerRefService _playerRefService;
+    private IAgentAlertService _alertService;
+    private Notification _componentNotifications;
+    // private Func<ITargetable> OnGetCurrentTarget;
+
+    //Latest changes
+    [SerializeField] private MovementConfig _moveCfg;
+    [SerializeField] private PatrolStateConfig _patrolStateCfg;
+    [SerializeField] private ChaseStateConfig _chanceStateCfg;
+    [SerializeField] private FlankStateConfig _flankStateCfg;
+    // end latest changes
+
+    public override void Init(ISceneAIServices services, AgentEventManager manager)
+    {
+        SetManagerAndServices(services, manager);
+        //  SetTargetableCollider();
+        SetAgentParams();
+        _componentNotifications = OnNotifies;
+
+        var anim = GetComponentsInChildren<MonoBehaviour>(true).OfType<INpcAnimationControl>().FirstOrDefault();
+        if (anim != null) _animationControl = anim;
+
+        SetPrimaryTarget();
+
+        ConstructFovRunner();
+        ConstructFSM();
+
+        OnStableFOVResult = StableFOVResultConfirmed;
+
+    }
+
+    protected void SetPrimaryTarget()
+    {
+        if (_aiServices == null) return;
+
+        if (_aiServices.TryGetPlayerRefService(out _playerRefService))
+            _playerRefService.TryGetPlayer(out _primaryTarget);
+        else
+        {
+#if UNITY_EDITOR
+            Debug.LogError("NULL PLAYER REF");
+#endif
+        }
+    }
+
+
+    private void SetManagerAndServices(ISceneAIServices services, AgentEventManager manager)
+    {
+        if (manager == null)
+        {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            Debug.LogError(manager + " is null in NPCControllerNew Init");
+#endif
+            _eManager = gameObject.AddComponent<AgentEventManager>();
+        }
+        else
+            _eManager = manager;
+
+        _aiServices = services;
+
+    }
+
+    private void ConstructFovRunner()
+    {
+        _fovDeps.SetTarget(_primaryTarget); // TESTING NOW
+
+        var fovNotificationSender = new FovNotificationSender(_componentNotifications);
+        //   _fovRunner = new NPCFieldOfViewHandlerNew(_fovDeps, onSweepComplete: _componentNotifications);
+        _fovRunner = new FovRunner(_fovDeps, onNotify: fovNotificationSender);
+    }
+
+    private void ConstructFSM()
+    {
+        OnTryGetCurrentTarget = TryGetCurrentTarget;
+        if (_aiServices.TryGetFsmFactory(out var factory))
+        {
+            var pathNotificationSenderNew = new PathNotificationSender(_componentNotifications);
+            var animRequestNotificationSenderNew = new AnimationNotificationSender(_componentNotifications);
+            if (factory.TryCreateFsm(out var manager, this, OnTryGetCurrentTarget, tickHost: this, coroutineHost: this, pathNotificationSenderNew, animRequestNotificationSenderNew))
+            {
+                _fsmManager = manager;
+            }
+            else
+                DebugLogs.Err("Failed to create FSM manager", this);
+        }
+        else
+            DebugLogs.Err("Failed to retrieve Factory", this);
+
+        
+    }
+
+   
+
+    private void SetAgentParams()
+    {
+        if (TryGetComponent<NavMeshAgent>(out var agent)) Agent = agent;
+
+        if (TryGetComponent<NavMeshObstacle>(out var ob)) Obstacle = ob;
+
+        Path = new NavMeshPath();
+    }
+
+    private bool TryGetCurrentTarget(out ITargetable t)
+    {
+        t = _primaryTarget;
+        return t != null;
+    }
+
+
+    protected override void OnSceneEnd()
+    {
+        //_fsmManager.Notification = null;
+        // _fsmManager.OnAnimationIntent = null;
+        //  _fsmManager.OnMapDestinationToZone = null;
+
+        _eManager = null;
+        // OnTargetSeen = null;
+        // OnTargetLost = null;
+    }
+
+    protected override void OnSceneBegin()
+    {
+        //_animationControl?.SetIKLookTarget(_primaryTarget?.Transform);
+        // _fsmManager?.SwitchTo(StateId.Patrol);
+        OnNotifies(NpcNotification.SceneBegin());
+    }
+
+    public override void Unload()
+    {
+
+    }
 }

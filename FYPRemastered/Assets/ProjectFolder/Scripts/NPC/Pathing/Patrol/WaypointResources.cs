@@ -35,15 +35,6 @@ public class WaypointResources : IPatrolService, IAddressableService
 
     private Dictionary<WaypointSet, BlockData> _waypointRegistry = new(25);
 
-    [Obsolete]
-    private readonly IFsmNavigationQuery _navQuery;
-
-    private WaypointResources() { }
-
-    [Obsolete]
-    public WaypointResources(IFsmNavigationQuery navQuery) => _navQuery = navQuery;
-   
-
 
     public async Task<bool> TryInitialiseAsync(FeatureMeta data)
     {

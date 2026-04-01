@@ -56,6 +56,17 @@ public static class NavMeshZoneMapper
         zone = ZoneId.Unknown;
         return false;
     }
+    public static bool GetZoneIdNew(this NPCControllerNewest self, Vector3 pos, out ZoneId zone)
+    {
+        // var pos = self.transform.position;
+        if (NavMesh.SamplePosition(pos, out NavMeshHit hit, 1.0f, NavMesh.AllAreas))
+        {
+            zone = FromAreaIndex(hit);
+            return zone != ZoneId.Unknown;
+        }
+        zone = ZoneId.Unknown;
+        return false;
+    }
 }
 
 public enum ZoneId

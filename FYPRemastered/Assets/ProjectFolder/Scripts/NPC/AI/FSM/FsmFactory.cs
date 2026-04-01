@@ -45,7 +45,7 @@ namespace Services.Internal
 
             var controlFeature = _metaData.SpeedData;
 
-            _fsmControlService = await TryLoadStateServiceAndInitialize(controlFeature, () => new FsmSpeedResources(/*_registry*/));
+            _fsmControlService = await TryLoadStateServiceAndInitialize<FsmSpeedResources>(controlFeature/*, () => new FsmSpeedResources(*//*_registry*//*)*/);
             _pathService = new PathRequestManager(_tickHost);
          //   if(_pathService is ITickable t) _tickables.Add(t);
             if (_metaData == null)
@@ -57,7 +57,7 @@ namespace Services.Internal
             var waypointFeature = _metaData.Waypoints;
             if (waypointFeature.enabled)
             {
-                _wpService = await TryLoadStateServiceAndInitialize(waypointFeature, () => new WaypointResources(/*_registry*/null));
+                _wpService = await TryLoadStateServiceAndInitialize<WaypointResources>(waypointFeature/*, () => new WaypointResources())*/);
                 if (_wpService == null) DebugLogs.Nre(_wpService, "WaypointService");
                 else
                 {
@@ -70,7 +70,7 @@ namespace Services.Internal
             var flankFeature = _metaData.FlankPoints;
             if (flankFeature.enabled)
             {
-                _flankService = await TryLoadStateServiceAndInitialize(flankFeature, () => new PlayerFlankingResources(/*_registry, _registry*/null, null));
+                _flankService = await TryLoadStateServiceAndInitialize<PlayerFlankingResources>(flankFeature/*, () => new PlayerFlankingResources()*/);
                 if (_flankService == null) DebugLogs.Nre(_flankService, "Flank service", this);
                 else DebugLogs.Log("Flank Service Constructed successfully", this);
                 //  var flnk = await TryLoadStateServiceAndInitialize<SamplePointDataSO, PlayerFlankingResources>(flankFeature, ()=> new PlayerFlankingResources());
@@ -80,7 +80,7 @@ namespace Services.Internal
             if (chaseFeature.enabled)
             {
                 CreateDistanceMonitorService();
-                _chaseService = await TryLoadStateServiceAndInitialize(chaseFeature, ()=> new ChaseResources(/*_registry, _registry*/null, null, _distService));
+                _chaseService = await TryLoadStateServiceAndInitialize<ChaseResources>(chaseFeature/*, ()=> new ChaseResources()*/);
                 if (_chaseService == null) DebugLogs.Nre(_chaseService, "Chase Service", this);
                 else DebugLogs.Log("Chase service constructed successfully", this);
             }
@@ -93,11 +93,11 @@ namespace Services.Internal
             _distService = new DistanceManagerJob();
         }
       
-        private async Task<TConcrete> TryLoadStateServiceAndInitialize<TConcrete>(FeatureMeta data, Func<TConcrete> createFunc) where TConcrete : class, IAddressableService
+        private async Task<TConcrete> TryLoadStateServiceAndInitialize<TConcrete>(FeatureMeta data/*, Func<TConcrete> createFunc*/) where TConcrete : class, IAddressableService, new() 
         {
             if (string.IsNullOrWhiteSpace(data.addressKey)) { DebugLogs.RequireNotNull(data.addressKey, "addressKey", this); return null; }
 
-            var svc = createFunc?.Invoke();
+            var svc = new TConcrete();//createFunc?.Invoke();
             if(svc == null)
             {
                 DebugLogs.RequireNotNull(svc, $"{typeof(TConcrete).Name}", this);
@@ -204,7 +204,6 @@ namespace Services.Internal
 
             return true;
         }
-
 
     }
 

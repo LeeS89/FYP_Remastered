@@ -4,7 +4,7 @@ using UnityEngine.AI;
 using Random = UnityEngine.Random;
 
 [System.Serializable]
-[Obsolete]
+[Obsolete("", true)]
 public class AgentFsmDepsObsolete : IFsmControllerDeps, IPatrolDepsObsolete, IChaseDepsObsolete, IFlankDepsObsolete
 {
     [Header("Agent Components")]
