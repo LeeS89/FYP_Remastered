@@ -1,3 +1,3 @@
 using UnityEngine;
 
-public interface IFsmPatrolData : IFsmData { }
+public interface IFsmPatrolData : IFsmData { float GetIdleTimeSeconds(); }

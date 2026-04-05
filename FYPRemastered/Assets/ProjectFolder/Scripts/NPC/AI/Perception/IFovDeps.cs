@@ -1,5 +1,7 @@
+using System;
 using UnityEngine;
 
+[Obsolete]
 public interface IFovDeps
 {
     public void DebugFrequency();

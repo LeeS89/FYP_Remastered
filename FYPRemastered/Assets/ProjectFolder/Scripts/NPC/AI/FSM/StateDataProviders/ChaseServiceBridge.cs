@@ -58,4 +58,5 @@ public sealed class ChaseServiceBridge : StateServiceBridge<IChaseService>, IFsm
         if (id is null) return false;
         return _distanceService.TryUnregisterSubscriber(id);
     }
+
 }

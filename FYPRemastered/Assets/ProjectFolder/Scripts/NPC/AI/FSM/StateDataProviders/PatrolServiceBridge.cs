@@ -7,6 +7,8 @@ public sealed class PatrolServiceBridge : StateServiceBridge<IPatrolService>, IF
 
     public PatrolServiceBridge(IPatrolService service) : base(service) { }
 
+    public float GetIdleTimeSeconds() => _service.GetIdleTimeSeconds();
+
 
     public override void ReleaseCandidates(List<Vector3> buffer)
     {
@@ -14,6 +16,7 @@ public sealed class PatrolServiceBridge : StateServiceBridge<IPatrolService>, IF
         {
             r.ReturnWaypointSet(_wpSet);
             _wpSet = null;
+       
         }
     }
 
@@ -33,4 +36,5 @@ public sealed class PatrolServiceBridge : StateServiceBridge<IPatrolService>, IF
 
         return true;
     }
+
 }

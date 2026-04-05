@@ -3,10 +3,8 @@ using Services.Internal;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
-using UnityEngine.AI;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using Random = UnityEngine.Random;
 
@@ -20,7 +18,7 @@ public sealed class WaypointSet
 
 }
 
-public class WaypointResources : IPatrolService, IAddressableService
+public class WaypointResources : FsmResources, IPatrolService//, IAddressableService
 {
 
    
@@ -36,7 +34,7 @@ public class WaypointResources : IPatrolService, IAddressableService
     private Dictionary<WaypointSet, BlockData> _waypointRegistry = new(25);
 
 
-    public async Task<bool> TryInitialiseAsync(FeatureMeta data)
+    public override async Task<bool> TryInitialiseAsync(FeatureMeta data)
     {
         string addressKey = data.addressKey;
         if (string.IsNullOrWhiteSpace(addressKey)) { DebugLogs.RequireNotNull(addressKey, "addressKey", this); return false; }
@@ -99,7 +97,7 @@ public class WaypointResources : IPatrolService, IAddressableService
    
 
 
-    private async Task<bool> TryLoadSubData(List<string> addressKeys)
+    protected override async Task<bool> TryLoadSubData(List<string> addressKeys)
     {
         if (addressKeys == null) { DebugLogs.Nre(addressKeys, "addressKeys", this); return false; }
         if (addressKeys.Count == 0) { DebugLogs.Err("addressKeys contains no elements", this); return false; }
@@ -124,7 +122,7 @@ public class WaypointResources : IPatrolService, IAddressableService
         return true;
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
         /*for (int i = 0; i < _handles.Length; i++)
             if (_handles[i].IsValid()) Addressables.Release(_handles[i]);*/
@@ -205,7 +203,7 @@ public class WaypointResources : IPatrolService, IAddressableService
         return Random.Range(min, max);
     }
 
-  
+    
 }
 
 

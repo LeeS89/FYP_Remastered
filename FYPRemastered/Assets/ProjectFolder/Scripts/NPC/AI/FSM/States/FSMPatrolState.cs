@@ -538,7 +538,8 @@ public sealed class FSMPatrolStateNewest : FsmBaseStateNewest<IFsmPatrolData>
         if (!canContinue) yield break;
 
         _stateContext?.RequestAnimation(AnimationCue.Look, _stateId);
-        float _delayTime = 2.5f;//Service.GetIdleTimeSeconds();//Random.Range(minWait, maxWait);
+        float _delayTime = _dataProvider.GetIdleTimeSeconds();
+        DebugLogs.Err($"Wait Time is: {_delayTime}", this);
         float elapsedTime = 0.0f;
 
         while (elapsedTime < _delayTime)

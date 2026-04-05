@@ -7,7 +7,7 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.AI;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
-public sealed class ChaseResources : IChaseService, IAddressableService
+public sealed class ChaseResources : FsmResources, IChaseService//, IAddressableService
 {
     private AsyncOperationHandle<AgentChaseData>? _chaseDataHandle;
     private AgentChaseData _data;
@@ -28,7 +28,7 @@ public sealed class ChaseResources : IChaseService, IAddressableService
         _distService = distanceService;
     }*/
 
-    public async Task<bool> TryInitialiseAsync(FeatureMeta data)
+    public override async Task<bool> TryInitialiseAsync(FeatureMeta data)
     {
         string addressKey = data.addressKey;
         if (string.IsNullOrWhiteSpace(addressKey)) { DebugLogs.RequireNotNull(addressKey, "addressKey", this); return false; }
@@ -58,12 +58,14 @@ public sealed class ChaseResources : IChaseService, IAddressableService
    
   
 
-    public void Dispose()
+    public override void Dispose()
     {
         if(_chaseDataHandle.HasValue && _chaseDataHandle.Value.IsValid())
             Addressables.Release(_chaseDataHandle.Value);
     }
 
-
- 
+    public override float GetStoppingDistance()
+    {
+        throw new NotImplementedException();
+    }
 }

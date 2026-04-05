@@ -1,3 +1,6 @@
 using UnityEngine;
 
-public interface IFsmData { }
+public interface IFsmData
+{
+
+}

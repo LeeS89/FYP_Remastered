@@ -241,7 +241,7 @@ public class FovRunner : ITickable
         }
         if (Time.time >= _nextSweepTime)
         {
-            _deps.DebugFrequency(); // Obsolete, just for testing
+            //_deps.DebugFrequency(); // Obsolete, just for testing
             _nextSweepTime = Time.time + _deps.GetSweepFrequency();
             RunFOVSweep();
         }

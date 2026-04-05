@@ -544,12 +544,12 @@ public abstract class FsmBaseStateNewest<TProvider> : IFsmState
     protected readonly IPathResolver _pathResolver;
 
     public FsmBaseStateNewest(IFsmStateContext stateController, IFsmDestinationProvider destP, 
-        TProvider dataP, IPathResolver pathResolver, ICoroutineHost host, StateId id)
+        TProvider dataProvider, IPathResolver pathResolver, ICoroutineHost host, StateId id)
     {
         _stateContext = stateController;
         
         _destProvider = destP;
-        _dataProvider = dataP;
+        _dataProvider = dataProvider;
         _pathResolver = pathResolver;
         _host = host;
         _stateId = id;
@@ -641,7 +641,7 @@ public abstract class FsmBaseStateNewest<TProvider> : IFsmState
         throw new System.NotImplementedException();
     }
 
-    public float GetDesiredStoppingDistance() => 0.0f;//_deps?.GetStoppingDistance() ?? 0f;  => Had error with new setup
+    public float GetDesiredStoppingDistance() => _destProvider.GetStoppingDistance();//0.0f;//_deps?.GetStoppingDistance() ?? 0f;  => Had error with new setup
 
 
 }

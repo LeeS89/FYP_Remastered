@@ -4,11 +4,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
-using UnityEngine.AI;
-using UnityEngine.ResourceManagement.AsyncOperations;
-using UnityEngine.ResourceManagement.ResourceLocations;
 
-public class PlayerFlankingResources : SceneResourcesObsolete, IFlankService, IAddressableService, ITickable
+
+public sealed class PlayerFlankingResources : FsmResources/*SceneResourcesObsolete*/, IFlankService, /*IAddressableService,*/ ITickable
 {
     //private AsyncOperationHandle<SamplePointDataSO> _flankPointHandle;
     private SamplePointDataSO _flankPointDataSO;
@@ -21,7 +19,7 @@ public class PlayerFlankingResources : SceneResourcesObsolete, IFlankService, IA
  
     
 
-    public async Task<bool> TryInitialiseAsync(FeatureMeta data)
+    public override async Task<bool> TryInitialiseAsync(FeatureMeta data)
     {
         string addressKey = data.addressKey;
         if (string.IsNullOrWhiteSpace(addressKey)) { DebugLogs.RequireNotNull(addressKey, "addressKey", this); return false; }
@@ -50,7 +48,7 @@ public class PlayerFlankingResources : SceneResourcesObsolete, IFlankService, IA
 
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
         if(_savedPoints != null)
         {
@@ -302,5 +300,5 @@ public class PlayerFlankingResources : SceneResourcesObsolete, IFlankService, IA
         throw new NotImplementedException();
     }
 
-  
+    
 }

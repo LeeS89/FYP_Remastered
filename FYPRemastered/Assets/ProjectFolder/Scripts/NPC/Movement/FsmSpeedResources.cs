@@ -1,30 +1,31 @@
 using Services.Internal;
 using System.Threading.Tasks;
 using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
-public class FsmSpeedResources : IAddressableService, IFsmSpeedService
+public sealed class FsmSpeedResources : FsmResources, IFsmSpeedService
 {
     private AgentSpeedData _speedData;
+    private AsyncOperationHandle<AgentSpeedData>? _dataHandle;
 
 
-
-    public async Task<bool> TryInitialiseAsync(FeatureMeta data)
+    public override async Task<bool> TryInitialiseAsync(FeatureMeta data)
     {
         string addressKey = data.addressKey;
         if (string.IsNullOrWhiteSpace(addressKey)) { DebugLogs.RequireNotNull(addressKey, "addressKey", this); return false; }
 
-        var spHandle = await AddressableLoader.TryLoadAssetAsync<AgentSpeedData>(addressKey);
-        if (!spHandle.HasValue || !spHandle.Value.IsValid())
+        _dataHandle = await AddressableLoader.TryLoadAssetAsync<AgentSpeedData>(addressKey);
+        if (!_dataHandle.HasValue || !_dataHandle.Value.IsValid())
         {
-            DebugLogs.Nre(spHandle, "Agent Speed Handle", this);
+            DebugLogs.Nre(_dataHandle, "Agent Speed Handle", this);
             return false;
         }
 
-        _speedData = spHandle.Value.Result;
+        _speedData = _dataHandle.Value.Result;
         if (_speedData == null)
         {
             DebugLogs.Nre(_speedData, "Agent Speed Data asset", this);
-            Addressables.Release(spHandle.Value);
+            Addressables.Release(_dataHandle.Value);
             return false;
         }
 
@@ -41,9 +42,13 @@ public class FsmSpeedResources : IAddressableService, IFsmSpeedService
     public float GetSprintSpeed() => _speedData.SprintSpeed;
 
 
-    public void Dispose()
+    public override void Dispose()
     {
-        throw new System.NotImplementedException();
+        if (_dataHandle.HasValue && _dataHandle.Value.IsValid())
+        {
+            Addressables.Release(_dataHandle.Value);
+            _dataHandle = null;
+        }
     }
 
     public float GetSprintEnterDistance() => _speedData.SprintEnterdistance;
@@ -51,5 +56,6 @@ public class FsmSpeedResources : IAddressableService, IFsmSpeedService
 
     public float GetSprintExitDistance() => _speedData.SprintExitdistance;
 
+  
 }
 

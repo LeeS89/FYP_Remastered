@@ -1399,7 +1399,7 @@ public class FsmManagerNew : IFsmStateEventsObsoleteO, IFsmController
 public class FsmManagerNewest : IFsmStateContext, IFsmController, ITargetProvider
 {
     // Injected Dependancies
-    private IReadOnlyDictionary<StateId, IFsmState> _states;
+  //  private IReadOnlyDictionary<StateId, IFsmState> _states;
    // private FsmManagerServices _deps;
 
 
@@ -1446,46 +1446,12 @@ public class FsmManagerNewest : IFsmStateContext, IFsmController, ITargetProvide
     private readonly IFsmSpeedData _dataProvider;
     private readonly ITickableGroup _tickHost;
 
-   // private readonly IFsmNavigationControl _navControl;
-  //  private readonly IFsmTargetQuery _targetQuery;
-    private readonly IReadOnlyDictionary<StateId, IFsmState> _statesNew;
+    private readonly IReadOnlyDictionary<StateId, IFsmState> _states;
 
-    [Obsolete("", true)]
-    public FsmManagerNewest(int instanceId, IFsmNavigationControl navControl, IFsmTargetQuery targetQuery, IReadOnlyDictionary<StateId, IFsmState> states,
-        ICoroutineHost host, ITickableGroup tickHost, IPathNotifications pathNotifies, IAnimationRequestNotifications animNotifies = null)
-    {
-        _instanceId = instanceId;
-       // _navControl = navControl;
-     //  _targetQuery = targetQuery;
-        _statesNew = states;
-
-        _routineHost = host;
-        _tickHost = tickHost;
-        _pathNotifies = pathNotifies;
-        _animNotifies = animNotifies;
-
-        
-        _tickHost?.Register(this);
-    }
-
+ 
     // newest
     private readonly INpcBody _owner;
     private readonly TryGetTarget _ownerTargetGetter;
-
-    [Obsolete("", true)]
-    public FsmManagerNewest(INpcBody owner, TryGetTarget ownerTargetGetter, IFsmSpeedData dataProvider, IReadOnlyDictionary<StateId, IFsmState> states,
-        ITickableGroup tickHost, IPathNotifications pathNotifies, IAnimationRequestNotifications animNotifies = null)
-    {
-        _owner = owner;
-        _ownerTargetGetter = ownerTargetGetter;
-        _dataProvider = dataProvider;
-        _statesNew = states;
-        _tickHost = tickHost;
-        _pathNotifies = pathNotifies;
-        _animNotifies = animNotifies;
-
-        _tickHost?.Register(this);
-    }
 
 
     public FsmManagerNewest(FsmContext context, FsmServices services, FsmConfig config)
@@ -1500,7 +1466,7 @@ public class FsmManagerNewest : IFsmStateContext, IFsmController, ITargetProvide
         _animNotifies = services.AnimationRequestNotifications;
 
         _dataProvider = config.ControlData;
-        _statesNew = config.States;
+        _states = config.States;
 
         _tickHost?.Register(this);
     }
@@ -1515,7 +1481,7 @@ public class FsmManagerNewest : IFsmStateContext, IFsmController, ITargetProvide
     {
         if (next == CurrentState || next == StateId.None) return; // Allow for none and make current null
 
-        if (_statesNew != null && _statesNew.TryGetValue(next, out var nextstate))
+        if (_states != null && _states.TryGetValue(next, out var nextstate))
         {
             DebugLogs.Err("Calling enter State", this);
             IsInStateTransition = true;
