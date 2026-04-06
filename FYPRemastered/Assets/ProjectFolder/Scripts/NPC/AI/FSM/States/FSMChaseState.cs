@@ -7,7 +7,7 @@ using UnityEngine.AI;
 using Random = UnityEngine.Random;
 
 [Obsolete("", true)]
-public class FSMChaseState : FsmBaseState<ChaseDeps>
+public class FSMChaseState : FsmBaseStateObsolete<ChaseDeps>
 {
    // private readonly ChaseDeps _depsNew;
     private Action<float/*, float*/> _distanceCheckCB;
@@ -164,7 +164,7 @@ public class FSMChaseState : FsmBaseState<ChaseDeps>
 }
 
 [Obsolete("", true)]
-public sealed class ChaseDeps : FsmBaseState<ChaseDeps>.FsmBaseStateDeps
+public sealed class ChaseDeps : FsmBaseStateObsolete<ChaseDeps>.FsmBaseStateDeps
 {
     public IDistanceMonitoringService DistanceService { get; private set; }
     public float MinStoppingDistance { get; private set; }
@@ -471,7 +471,7 @@ public sealed class FSMChaseStateNew : FsmBaseStateNew<IFsmStateService<ITargetC
 
 
 
-public sealed class FSMChaseStateNewest : FsmBaseStateNewest<IFsmChaseData>
+public sealed class FSMChaseStateNewest : FsmBaseState<IFsmChaseData>
 {
     
     private Action<float> _distanceCheckCB;

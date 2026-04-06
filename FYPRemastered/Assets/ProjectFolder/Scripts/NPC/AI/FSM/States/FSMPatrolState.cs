@@ -7,7 +7,7 @@ using UnityEngine.AI;
 using Random = UnityEngine.Random;
 
 [Obsolete("",true)]
-public sealed class FSMPatrolState : FsmBaseState<PatrolDeps>
+public sealed class FSMPatrolState : FsmBaseStateObsolete<PatrolDeps>
 {
     private readonly IPatrolService _waypointService;
   //  private readonly IPatrolDeps _patrolDeps;
@@ -146,7 +146,7 @@ public sealed class FSMPatrolState : FsmBaseState<PatrolDeps>
 }
 
 [Obsolete("", true)]
-public sealed class PatrolDeps : FsmBaseState<PatrolDeps>.FsmBaseStateDeps
+public sealed class PatrolDeps : FsmBaseStateObsolete<PatrolDeps>.FsmBaseStateDeps
 {
     public IPatrolService WaypointService { get; private set; }
     public float MaxTimeAtPatrolPoint { get; private set; }
@@ -431,7 +431,7 @@ public sealed class FSMPatrolStateNew : FsmBaseStateNew<IFsmStateService<ITarget
 
 
 
-public sealed class FSMPatrolStateNewest : FsmBaseStateNewest<IFsmPatrolData>
+public sealed class FSMPatrolStateNewest : FsmBaseState<IFsmPatrolData>
 {
  
     public FSMPatrolStateNewest(IFsmStateContext stateController, IFsmDestinationProvider destP, IFsmPatrolData dataP, IPathResolver pathResolver, ICoroutineHost host)

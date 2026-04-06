@@ -6,7 +6,7 @@ using UnityEngine;
 using Random = UnityEngine.Random;
 
 [Obsolete("", true)]
-public class FsmFlankState : FsmBaseState<FlankDeps>
+public class FsmFlankState : FsmBaseStateObsolete<FlankDeps>
 {
    // private IFlankDeps _deps;
     private IFlankService _flankService;
@@ -105,7 +105,7 @@ public class FsmFlankState : FsmBaseState<FlankDeps>
 }
 
 [Obsolete("", true)]
-public sealed class FlankDeps : FsmBaseState<FlankDeps>.FsmBaseStateDeps
+public sealed class FlankDeps : FsmBaseStateObsolete<FlankDeps>.FsmBaseStateDeps
 {
     public IFlankService FlankService { get; private set; }
     public int MinFlankSteps { get; private set; }
@@ -183,7 +183,7 @@ public sealed class FlankDeps : FsmBaseState<FlankDeps>.FsmBaseStateDeps
 
 
 
-public class FsmFlankStateNewest : FsmBaseStateNewest<IFsmFlankData>
+public class FsmFlankStateNewest : FsmBaseState<IFsmFlankData>
 {
     // private IFlankDeps _deps;
     private IFlankService _flankService;
