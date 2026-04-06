@@ -18,23 +18,24 @@ public sealed class WaypointSet
 
 }
 
-public class WaypointResources : FsmResources, IPatrolService//, IAddressableService
+public class WaypointResources : FsmResources, IPatrolService
 {
 
    
     //private AsyncOperationHandle[] _handles = new AsyncOperationHandle[2];
-    private AsyncOperationHandle<AgentPatrolData>? _patrolDataHandle;
+  //  private AsyncOperationHandle<AgentPatrolData>? patrolDataHandle;
     //private WaypointBlockData _waypointBlockData;
     private Dictionary<IInstanceIdentifiable, BlockData> _inUseBlockTracker = new(20);
     //private Dictionary<object, BlockData> _inUseBlockTracker = new(20);
 
-    private AgentPatrolData _patrolData;
-    //private BlockData[] waypointBlocks;
+   // private AgentPatrolData patrolData;
+    private float _minWaitSeconds;
+    private float _maxWaitSeconds;
 
     private Dictionary<WaypointSet, BlockData> _waypointRegistry = new(25);
 
 
-    public override async Task<bool> TryInitialiseAsync(FeatureMeta data)
+  /*  public override async Task<bool> TryInitialiseAsync(FeatureMeta data)
     {
         string addressKey = data.addressKey;
         if (string.IsNullOrWhiteSpace(addressKey)) { DebugLogs.RequireNotNull(addressKey, "addressKey", this); return false; }
@@ -49,11 +50,11 @@ public class WaypointResources : FsmResources, IPatrolService//, IAddressableSer
             return false;
         }
 
-        var wpBlockdata /*_waypointBlockData*/ = wpHandle.Value.Result;
+        var wpBlockdata *//*_waypointBlockData*//* = wpHandle.Value.Result;
 
-        if (/*_waypointBlockData*/wpBlockdata == null)
+        if (*//*_waypointBlockData*//*wpBlockdata == null)
         {
-            DebugLogs.Nre(/*_waypointBlockData*/wpBlockdata, "_waypointBlockData", this);
+            DebugLogs.Nre(*//*_waypointBlockData*//*wpBlockdata, "_waypointBlockData", this);
             Addressables.Release(wpHandle.Value);
             //  Dispose();
             return false;
@@ -63,7 +64,7 @@ public class WaypointResources : FsmResources, IPatrolService//, IAddressableSer
         //var blocks = _waypointBlockData.blockDataArray;
 
 
-        if (/*_waypointBlockData*/wpBlockdata.blockDataArray == null || /*_waypointBlockData*/wpBlockdata.blockDataArray.Length == 0)
+        if (*//*_waypointBlockData*//*wpBlockdata.blockDataArray == null || *//*_waypointBlockData*//*wpBlockdata.blockDataArray.Length == 0)
         {
             DebugLogs.Err("Waypoint block data array is null or contains no elements", this);
             Addressables.Release(wpHandle.Value);
@@ -80,10 +81,10 @@ public class WaypointResources : FsmResources, IPatrolService//, IAddressableSer
             _waypointRegistry.Add(new WaypointSet(points), block);
         }
 
-        /*waypointBlocks = (BlockData[])*//*_waypointBlockData*//*wpBlockdata.blockDataArray.Clone();
+        *//*waypointBlocks = (BlockData[])*//*_waypointBlockData*//*wpBlockdata.blockDataArray.Clone();
 
         foreach (var block in waypointBlocks*//*_waypointBlockData.blockDataArray*//*)
-            block._inUse = false;*/
+            block._inUse = false;*//*
 
         DebugLogs.Log("Successfully initialized waypoint blocks", this);
         Addressables.Release(wpHandle.Value);
@@ -92,11 +93,57 @@ public class WaypointResources : FsmResources, IPatrolService//, IAddressableSer
 
         return await TryLoadSubData(data.subDataKeys);
        
+    }*/
+
+    protected override async Task<bool> TryLoadPathingData(FeatureMeta meta)
+    {
+        string addressKey = meta.pathingDataKey;
+        if (string.IsNullOrWhiteSpace(addressKey)) { DebugLogs.RequireNotNull(addressKey, "addressKey", this); return false; }
+
+        // Load the asset from Addressables
+        var wpHandle = await AddressableLoader.TryLoadAssetAsync<WaypointBlockData>(addressKey);
+
+        if (!wpHandle.HasValue || !wpHandle.Value.IsValid())
+        {
+            DebugLogs.Nre(wpHandle, "_wpHandle", this);
+            return false;
+        }
+
+        var wpBlockdata = wpHandle.Value.Result;
+
+        if (wpBlockdata == null)
+        {
+            DebugLogs.Nre(wpBlockdata, "_waypointBlockData", this);
+            Addressables.Release(wpHandle.Value);
+            return false;
+        }
+
+
+        if (wpBlockdata.blockDataArray is null || wpBlockdata.blockDataArray.Length is 0)
+        {
+            DebugLogs.Err("Waypoint block data array is null or contains no elements", this);
+            Addressables.Release(wpHandle.Value);
+            return false;
+        }
+
+        foreach (var block in wpBlockdata.blockDataArray)
+        {
+            if (block is null || block._waypointPositions is null || block._waypointPositions.Length is 0) continue;
+
+            block._inUse = false;
+            var points = (Vector3[])block._waypointPositions.Clone();
+            _waypointRegistry.Add(new WaypointSet(points), block);
+        }
+
+        DebugLogs.Log("Successfully initialized waypoint blocks", this);
+        Addressables.Release(wpHandle.Value);
+        
+        return true;
     }
 
    
 
-
+/*
     protected override async Task<bool> TryLoadSubData(List<string> addressKeys)
     {
         if (addressKeys == null) { DebugLogs.Nre(addressKeys, "addressKeys", this); return false; }
@@ -104,31 +151,42 @@ public class WaypointResources : FsmResources, IPatrolService//, IAddressableSer
 
         var key = addressKeys[0];
 
-        /*var so*/
-        _patrolDataHandle = await AddressableLoader.TryLoadAssetAsync<AgentPatrolData>(key);
-        if (!_patrolDataHandle.HasValue || !_patrolDataHandle.Value.IsValid()) { DebugLogs.Nre(_patrolDataHandle, $"{_patrolDataHandle.GetType().Name}", this); return false; }
+        *//*var so*//*
+        var patrolDataHandle = await AddressableLoader.TryLoadAssetAsync<AgentPatrolData>(key);
+        if (!patrolDataHandle.HasValue || !patrolDataHandle.Value.IsValid()) { DebugLogs.Nre(patrolDataHandle, $"{patrolDataHandle.GetType().Name}", this); return false; }
 
-        _patrolData = _patrolDataHandle.Value.Result;
+        var patrolData = patrolDataHandle.Value.Result;
 
-        if (_patrolData == null)
+        if (patrolData == null)
         {
-            Addressables.Release(key);
+            Addressables.Release(patrolDataHandle);
             DebugLogs.Err("_patrol data SO was loaded but was null", this);
             return false;
         }
 
        // _handles[0] = so.Value;
         DebugLogs.Log("LOADED PATROL DATA SUCCESS", this);
+      //  ExtractData(patrolData);
+
+        Addressables.Release(patrolDataHandle.Value);
+
         return true;
+    }*/
+
+    protected override void ExtractData(IReadOnlyList<ScriptableObject> subData)
+    {
+        foreach(var data in subData)
+        {
+            if (data is AgentPatrolData patrolData)
+            {
+                _minWaitSeconds = patrolData.MinTimeAtPatrolPoint;
+                _maxWaitSeconds = patrolData.MaxTimeAtPatrolPoint;
+                return;
+            }
+        }
+        
     }
 
-    public override void Dispose()
-    {
-        /*for (int i = 0; i < _handles.Length; i++)
-            if (_handles[i].IsValid()) Addressables.Release(_handles[i]);*/
-        if (_patrolDataHandle.HasValue && _patrolDataHandle.Value.IsValid())
-            Addressables.Release(_patrolDataHandle.Value);
-    }
 
     private bool TryGetWaypoints(IInstanceIdentifiable id, List<Vector3> buffer)
     {
@@ -194,16 +252,8 @@ public class WaypointResources : FsmResources, IPatrolService//, IAddressableSer
 
 
 
-    public float GetIdleTimeSeconds()
-    {
-        if (_patrolData == null) return 1f;
-        //Random.Range(minWait, maxWait);
-        float min = _patrolData.MinTimeAtPatrolPoint;
-        float max = _patrolData.MaxTimeAtPatrolPoint;
-        return Random.Range(min, max);
-    }
-
-    
+    public float GetIdleTimeSeconds() => Random.Range(_minWaitSeconds, _maxWaitSeconds);
+   
 }
 
 

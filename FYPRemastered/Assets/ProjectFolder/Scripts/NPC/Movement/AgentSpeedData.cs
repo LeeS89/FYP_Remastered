@@ -10,6 +10,6 @@ public class AgentSpeedData : ScriptableObject
 
     public float WalkSpeed => _walkSpeed;
     public float SprintSpeed => _sprintSpeed;
-    public float SprintEnterdistance => _sprintEnterdistance;
-    public float SprintExitdistance => _sprintExitdistance;
+    public float SprintEnterDistance => _sprintEnterdistance;
+    public float SprintExitDistance => _sprintExitdistance;
 }

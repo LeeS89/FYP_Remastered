@@ -1,61 +1,45 @@
 using Services.Internal;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
 public sealed class FsmSpeedResources : FsmResources, IFsmSpeedService
 {
-    private AgentSpeedData _speedData;
-    private AsyncOperationHandle<AgentSpeedData>? _dataHandle;
+   
+    private float _walkSpeed;
+    private float _sprintSpeed;
+    private float _sprintEnterDistance;
+    private float _sprintExitDistance;
 
 
-    public override async Task<bool> TryInitialiseAsync(FeatureMeta data)
+
+    public float GetWalkSpeed() => _walkSpeed;
+
+
+    public float GetSprintSpeed() => _sprintSpeed;
+
+
+
+    public float GetSprintEnterDistance() => _sprintEnterDistance;
+
+
+    public float GetSprintExitDistance() => _sprintExitDistance;
+
+    protected override void ExtractData(IReadOnlyList<ScriptableObject> subData)
     {
-        string addressKey = data.addressKey;
-        if (string.IsNullOrWhiteSpace(addressKey)) { DebugLogs.RequireNotNull(addressKey, "addressKey", this); return false; }
-
-        _dataHandle = await AddressableLoader.TryLoadAssetAsync<AgentSpeedData>(addressKey);
-        if (!_dataHandle.HasValue || !_dataHandle.Value.IsValid())
+        DebugLogs.Log($"Extracting data from {subData.Count} SO's", this);
+        foreach (var d in subData)
         {
-            DebugLogs.Nre(_dataHandle, "Agent Speed Handle", this);
-            return false;
-        }
-
-        _speedData = _dataHandle.Value.Result;
-        if (_speedData == null)
-        {
-            DebugLogs.Nre(_speedData, "Agent Speed Data asset", this);
-            Addressables.Release(_dataHandle.Value);
-            return false;
-        }
-
-        DebugLogs.Err($"WalkSpeed: {_speedData.SprintSpeed}");
-        return true;
-        // await Task.CompletedTask;
-    }
-
-
-
-    public float GetWalkSpeed() => _speedData.WalkSpeed;
-
-
-    public float GetSprintSpeed() => _speedData.SprintSpeed;
-
-
-    public override void Dispose()
-    {
-        if (_dataHandle.HasValue && _dataHandle.Value.IsValid())
-        {
-            Addressables.Release(_dataHandle.Value);
-            _dataHandle = null;
+            if (d is AgentSpeedData s)
+            {
+                _walkSpeed = s.WalkSpeed;
+                _sprintSpeed = s.SprintSpeed;
+                _sprintEnterDistance = s.SprintEnterDistance;
+                _sprintExitDistance = s.SprintExitDistance;
+            }
         }
     }
-
-    public float GetSprintEnterDistance() => _speedData.SprintEnterdistance;
-
-
-    public float GetSprintExitDistance() => _speedData.SprintExitdistance;
-
-  
 }
 

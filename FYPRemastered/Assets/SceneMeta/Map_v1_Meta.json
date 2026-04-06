@@ -3,12 +3,14 @@
     "UsedInScene": true,
 
     "SpeedData": {
-      "addressKey": "AgentSpeedData"
+      "subDataKeys": [
+        "AgentSpeedData"
+      ]
     },
 
     "Waypoints": {
       "enabled": true,
-      "addressKey": "MoonSceneWP",
+      "pathingDataKey": "MoonSceneWP",
       "subDataKeys": [
         "AgentPatrolData"
       ]
@@ -19,11 +21,13 @@
     },
     "FlankPoints": {
       "enabled": true,
-      "addressKey": "FlankPointData"
+      "pathingDataKey": "FlankPointData"
     },
     "ChaseData": {
       "enabled": true,
-      "addressKey": "AgentChaseData"
+      "subDataKeys": [
+        "AgentChaseData"
+      ]
     }
   }
 }

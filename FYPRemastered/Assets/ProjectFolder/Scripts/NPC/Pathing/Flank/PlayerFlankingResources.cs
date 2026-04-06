@@ -18,7 +18,7 @@ public sealed class PlayerFlankingResources : FsmResources/*SceneResourcesObsole
 
  
     
-
+/*
     public override async Task<bool> TryInitialiseAsync(FeatureMeta data)
     {
         string addressKey = data.addressKey;
@@ -46,6 +46,34 @@ public sealed class PlayerFlankingResources : FsmResources/*SceneResourcesObsole
         _closestFlankPointService = new ClosestPointToPlayerJobNew();
         return _closestFlankPointService.TryInit(_savedPoints);
 
+    }*/
+
+    protected override async Task<bool> TryLoadPathingData(FeatureMeta data)
+    {
+        string addressKey = data.pathingDataKey;
+        if (string.IsNullOrWhiteSpace(addressKey)) { DebugLogs.RequireNotNull(addressKey, "addressKey", this); return false; }
+
+        var flankHandle = await AddressableLoader.TryLoadAssetAsync<SamplePointDataSO>(addressKey);
+
+        if (!flankHandle.HasValue || !flankHandle.Value.IsValid())
+        {
+            DebugLogs.Nre(flankHandle, "flank Handle", this);
+            return false;
+        }
+
+        var flankData = flankHandle.Value.Result;
+        if (flankData == null || flankData.savedPoints == null || flankData.savedPoints.Count == 0)
+        {
+            DebugLogs.Nre(flankData, "Flank Data SO", this);
+            Addressables.Release(flankHandle.Value);
+            return false;
+        }
+
+        _savedPoints = new List<FlankPointData>(flankData.savedPoints);
+        Addressables.Release(flankHandle.Value);
+
+        _closestFlankPointService = new ClosestPointToPlayerJobNew();
+        return _closestFlankPointService.TryInit(_savedPoints);
     }
 
     public override void Dispose()
@@ -300,5 +328,8 @@ public sealed class PlayerFlankingResources : FsmResources/*SceneResourcesObsole
         throw new NotImplementedException();
     }
 
-    
+    protected override void ExtractData(IReadOnlyList<ScriptableObject> subData)
+    {
+        
+    }
 }

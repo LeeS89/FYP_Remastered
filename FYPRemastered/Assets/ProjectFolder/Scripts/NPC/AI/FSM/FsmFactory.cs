@@ -95,9 +95,9 @@ namespace Services.Internal
       
         private async Task<TConcrete> TryLoadStateServiceAndInitialize<TConcrete>(FeatureMeta data/*, Func<TConcrete> createFunc*/) where TConcrete : class, IAddressableService, new() 
         {
-            if (string.IsNullOrWhiteSpace(data.addressKey)) { DebugLogs.RequireNotNull(data.addressKey, "addressKey", this); return null; }
+        //    if (string.IsNullOrWhiteSpace(data.addressKey)) { DebugLogs.RequireNotNull(data.addressKey, "addressKey", this); return null; }
 
-            var svc = new TConcrete();//createFunc?.Invoke();
+            var svc = new TConcrete();
             if(svc == null)
             {
                 DebugLogs.RequireNotNull(svc, $"{typeof(TConcrete).Name}", this);

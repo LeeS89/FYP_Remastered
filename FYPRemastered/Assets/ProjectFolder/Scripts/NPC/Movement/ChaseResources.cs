@@ -1,71 +1,63 @@
 using Services.Internal;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
-using UnityEngine.AI;
-using UnityEngine.ResourceManagement.AsyncOperations;
+using Random = UnityEngine.Random;
 
-public sealed class ChaseResources : FsmResources, IChaseService//, IAddressableService
+
+
+public sealed class ChaseResources : FsmResources, IChaseService
 {
-    private AsyncOperationHandle<AgentChaseData>? _chaseDataHandle;
-    private AgentChaseData _data;
 
-/*    [Obsolete]
-    private readonly IFsmTargetQuery _targetQuery;
-    [Obsolete]
-    private readonly IFsmNavigationQuery _navQuery;
-    private readonly IDistanceMonitoringService _distService;*/
+    private float _minStoppingDistance;
+    private float _maxStoppingDistance;
 
-  /*  private ChaseResources() { }
 
-    [Obsolete]
-    public ChaseResources(IFsmNavigationQuery navQuery, IFsmTargetQuery targetRegistry, IDistanceMonitoringService distanceService)
-    {
-        _navQuery = navQuery;
-        _targetQuery = targetRegistry;
-        _distService = distanceService;
-    }*/
-
-    public override async Task<bool> TryInitialiseAsync(FeatureMeta data)
+   /* public override async Task<bool> TryInitialiseAsync(FeatureMeta data)
     {
         string addressKey = data.addressKey;
         if (string.IsNullOrWhiteSpace(addressKey)) { DebugLogs.RequireNotNull(addressKey, "addressKey", this); return false; }
 
-        _chaseDataHandle = await AddressableLoader.TryLoadAssetAsync<AgentChaseData>(addressKey);
+        var chaseDataHandle = await AddressableLoader.TryLoadAssetAsync<AgentChaseData>(addressKey);
         
-        if(!_chaseDataHandle.HasValue || !_chaseDataHandle.Value.IsValid())
+        if(!chaseDataHandle.HasValue || !chaseDataHandle.Value.IsValid())
         {
-            DebugLogs.Nre(_chaseDataHandle, "Chase data handle", this);
+            DebugLogs.Nre(chaseDataHandle, "Chase data handle", this);
             return false;
         }
 
-        _data = _chaseDataHandle.Value.Result;
+        var chaseData = chaseDataHandle.Value.Result;
 
-        if(_data == null)
+        if(chaseData == null)
         {
-            DebugLogs.Nre(_data, "Agent chase data", this);
-            Addressables.Release(_chaseDataHandle.Value);
+            DebugLogs.Nre(chaseData, "Agent chase data", this);
+            Addressables.Release(chaseDataHandle.Value);
             return false;
         }
+
+        ExtractData(chaseData);
+
+        Addressables.Release(chaseDataHandle.Value);
 
         return true;
-    }
+    }*/
 
-  
 
-   
-  
 
-    public override void Dispose()
+    protected override void ExtractData(IReadOnlyList<ScriptableObject> subData)
     {
-        if(_chaseDataHandle.HasValue && _chaseDataHandle.Value.IsValid())
-            Addressables.Release(_chaseDataHandle.Value);
+        foreach (var data in subData)
+        {
+            if (data is AgentChaseData chaseData)
+            {
+                _minStoppingDistance = chaseData.MinStoppingDistance;
+                _maxStoppingDistance = chaseData.MaxStoppingDistance;
+            }
+        }
     }
 
-    public override float GetStoppingDistance()
-    {
-        throw new NotImplementedException();
-    }
+
+    public override float GetStoppingDistance() => Random.Range(_minStoppingDistance, _maxStoppingDistance);
+
 }

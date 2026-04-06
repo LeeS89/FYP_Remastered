@@ -7,6 +7,6 @@ using UnityEngine;
 public class FeatureMeta
 {
     public bool enabled;
-    public string addressKey;
+    public string pathingDataKey;
     public List<string> subDataKeys;
 }
