@@ -370,12 +370,12 @@ public sealed class FsmServices
 
 public sealed class FsmConfig
 {
-    public IFsmSpeedData ControlData { get; private set; }
+    public IFsmSpeedData SpeedData { get; private set; }
     public IReadOnlyDictionary<StateId, IFsmState> States { get; private set; }
 
-    public FsmConfig(IFsmSpeedData controlData, IReadOnlyDictionary<StateId, IFsmState> states)
+    public FsmConfig(IFsmSpeedData speedData, IReadOnlyDictionary<StateId, IFsmState> states)
     {
-        ControlData = controlData;
+        SpeedData = speedData;
         States = states;
     }
 }

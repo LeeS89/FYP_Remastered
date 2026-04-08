@@ -148,7 +148,7 @@ public partial class NPCController
         FsmManagerServices s = new FsmManagerServices(Agent, Obstacle, _moveCfg);
         SharedFsmStateServices shared = new SharedFsmStateServices(Path, transform, OnTryGetCurrentTarget);
 
-        _fsmManager = new FsmManager(deps: s, shared, _fsmStates, pathNotificationSender, animRequestNotificationSender);
+        _fsmManager = new FsmManagerObsoleteO(deps: s, shared, _fsmStates, pathNotificationSender, animRequestNotificationSender);
         //_fsmManager = new FsmManager(deps: _fsmDeps, _fsmStates, pathNotificationSender, animRequestNotificationSender);
         IPatrolService wps;
         if (_aiServices.TryGetWaypointService(out wps/*_fsmDeps._waypointService*/))

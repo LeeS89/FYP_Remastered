@@ -195,7 +195,7 @@ namespace Services.Internal
             FsmServices s = new FsmServices(tickHost, coroutineHost, pathNotifySender, animNotifySender);
             FsmConfig cfg = new FsmConfig(new FsmControlBridge((IFsmSpeedService)_fsmControlService), _states);
 
-            FsmManagerNewest fsNew = new FsmManagerNewest(c, s, cfg);
+            FsmManager fsNew = new FsmManager(c, s, cfg);
 
             PatrolServiceBridge pb = new PatrolServiceBridge((IPatrolService)_wpService);
             IFsmState patrol = new FSMPatrolStateNewest(fsNew, pb, pb, new PathFinder(_pathService), coroutineHost);
