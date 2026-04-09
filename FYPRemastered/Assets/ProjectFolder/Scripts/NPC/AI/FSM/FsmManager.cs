@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Rendering.LookDev;
 
 public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
 {
@@ -52,7 +53,7 @@ public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
 
     // NEW
     private readonly ICoroutineHost _routineHost;
-    private readonly IFsmSpeedData _dataProvider;
+    private readonly IFsmSpeedControl _dataProvider;
     private readonly ITickableGroup _tickHost;
 
     private readonly IReadOnlyDictionary<StateId, IFsmState> _states;
@@ -122,7 +123,8 @@ public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
     public void LateTick(float dt)
     {
         UpdateRotation();
-        UpdateAgentSpeed();
+        Agent.speed = _dataProvider.UpdateSpeed(dt);
+      //  UpdateAgentSpeed();
         _currentState?.LateTick(dt);
     }
 
@@ -266,7 +268,8 @@ public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
             return;
         }
 
-        UpdateSpeedtier(dist, agent: Agent);
+        _dataProvider.UpdateTargetSpeed(dist);
+       // UpdateSpeedtier(dist, agent: Agent);
     }
 
     private void DestinationReached()
@@ -430,29 +433,29 @@ public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
     // public bool HasReachedDestination() => !_hasValidDestination || (_deps?.Agent.isStopped ?? true);
 
 
-    private void UpdateAgentSpeed()
-    {
-        /*var a = Owner.Agent; if (!a) return;
-        float delta = Mathf.Abs(_targetSpeed - a.speed);
-        float rate = (0.5f > 0f) ? Mathf.Max(0.01f, delta / 0.5f) : float.PositiveInfinity;
-        a.speed = Mathf.MoveTowards(a.speed, _targetSpeed, rate * Time.deltaTime);*/
+    /*    private void UpdateAgentSpeed()
+        {
+            *//*var a = Owner.Agent; if (!a) return;
+            float delta = Mathf.Abs(_targetSpeed - a.speed);
+            float rate = (0.5f > 0f) ? Mathf.Max(0.01f, delta / 0.5f) : float.PositiveInfinity;
+            a.speed = Mathf.MoveTowards(a.speed, _targetSpeed, rate * Time.deltaTime);*//*
 
-        if (Agent == null) return;
+            if (Agent == null) return;
 
-        //  if (_deps.Agent == null) return;
-        float smoothedSpeed = Mathf.Lerp(Agent.speed, _targetSpeed, _lerpSpeed * Time.deltaTime);
-        Agent.speed = smoothedSpeed;
+            //  if (_deps.Agent == null) return;
+            float smoothedSpeed = Mathf.Lerp(Agent.speed, _targetSpeed, _lerpSpeed * Time.deltaTime);
+            Agent.speed = smoothedSpeed;
 
-        float _currentSpeed = Agent.speed;
+            float _currentSpeed = Agent.speed;
 
-        if (Mathf.Approximately(Agent.speed, _targetSpeed)) Agent.speed = _targetSpeed;
-    }
+            if (Mathf.Approximately(Agent.speed, _targetSpeed)) Agent.speed = _targetSpeed;
+        }*/
 
     public void OverrideSpeed(SpeedOverride overrideTier)
-     => _currentSpeedOverride = overrideTier;
+     => _dataProvider.OverrideMovement(overrideTier);//_currentSpeedOverride = overrideTier;
 
 
-    private void UpdateSpeedtier(float remainingDistance, NavMeshAgent agent)
+/*    private void UpdateSpeedtier(float remainingDistance, NavMeshAgent agent)
     {
         if (agent == null || agent.isStopped) return;
         //if (_deps == null || _deps.Agent == null || _deps.Agent.isStopped) return;
@@ -468,9 +471,9 @@ public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
         _currentSpeedTier = tier;
         (_targetSpeed, _lerpSpeed) = (speed, lerp);
 
-    }
+    }*/
 
-    private SpeedTier OverrideSpeed(SpeedOverride speedOverride, out float newSpeed, out float lerp)
+/*    private SpeedTier OverrideSpeed(SpeedOverride speedOverride, out float newSpeed, out float lerp)
     {
         SpeedTier newTier = SpeedTier.Walk;
         // var d = _deps.Movement;
@@ -551,7 +554,7 @@ public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
         }
 
 
-    }
+    }*/
 
     #endregion
 
@@ -567,7 +570,8 @@ public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
 
 
         //TryGetAgent(out var agent);
-        UpdateSpeedtier(0f, Agent);
+        _dataProvider.UpdateTargetSpeed(0f);
+       //UpdateSpeedtier(0f, Agent);
         ResetPath(Agent);
         // if (TryGetAgent(out var a)) a.ResetPath();
         //_deps?.Agent.ResetPath();
@@ -607,8 +611,8 @@ public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
     {
         _hasValidDestination = false;
 
-
-        UpdateSpeedtier(0f, Agent);
+        _dataProvider.UpdateTargetSpeed(0f);
+      //  UpdateSpeedtier(0f, Agent);
 
         ResetPath(Agent);
         //  _deps?.Agent.ResetPath();
