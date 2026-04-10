@@ -162,7 +162,7 @@ public partial class NPCController
 
             PatrolDeps pDeps = new PatrolDeps(wps, pathResolver, _patrolStateCfg);
             //IFSMState patrolState = new FSMPatrolState(wpService, data: this, resolver: _pathFinder, stateContext: _fsmManager);
-            IFsmStateObsolete patrolState = new FSMPatrolState(deps: pDeps, shared, /*data: this, resolver: _pathFinder,*/ stateEvents: /*_fsmManager*/null);
+            IFsmStateObsolete patrolState = new FSMPatrolStateObsolete(deps: pDeps, shared, /*data: this, resolver: _pathFinder,*/ stateEvents: /*_fsmManager*/null);
             // IFsmState patrolState = new FSMPatrolState(deps: _fsmDeps, /*data: this, resolver: _pathFinder,*/ stateEvents: _fsmManager);
             StateId pid = patrolState.GetId();
             _fsmStates.TryAdd(pid, patrolState);
@@ -175,7 +175,7 @@ public partial class NPCController
         {
             FlankDeps fDeps = new FlankDeps(fService, pathResolver, _flankStateCfg);
 
-            IFsmStateObsolete flankState = new FsmFlankState(deps: fDeps, shared, /*data: this, _pathFinder,*/ /*_fsmManager*/null);
+            IFsmStateObsolete flankState = new FsmFlankStateObsolete(deps: fDeps, shared, /*data: this, _pathFinder,*/ /*_fsmManager*/null);
             // IFsmState flankState = new FsmFlankState(deps: _fsmDeps, /*data: this, _pathFinder,*/ _fsmManager);
             //IFSMState flankState = new FSMFlankState(flankService, data: this, _pathFinder, _fsmManager);
             StateId fid = flankState.GetId();
@@ -189,7 +189,7 @@ public partial class NPCController
             _fsmDeps.SetDistanceService(service); // Maybe assume it is used by all states instead of just chase
 
             ChaseDeps cDeps = new ChaseDeps(service, pathResolver, _chanceStateCfg);
-            IFsmStateObsolete chaseState = new FSMChaseState(deps: cDeps, shared, stateContext: /*_fsmManager*/null);
+            IFsmStateObsolete chaseState = new FSMChaseStateObsolete(deps: cDeps, shared, stateContext: /*_fsmManager*/null);
             // IFsmState chaseState = new FSMChaseState(deps: _fsmDeps, stateContext: _fsmManager);
             StateId cid = chaseState.GetId();
             _fsmStates.TryAdd(cid, chaseState);

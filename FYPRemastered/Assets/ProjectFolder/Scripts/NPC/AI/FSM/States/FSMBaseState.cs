@@ -125,7 +125,7 @@ public abstract class FsmBaseState<TProvider> : IFsmState
         throw new System.NotImplementedException();
     }
 
-    public float GetDesiredStoppingDistance() => _destProvider.GetStoppingDistance();//0.0f;//_deps?.GetStoppingDistance() ?? 0f;  => Had error with new setup
+    public float GetArrivalThreshold() => _destProvider.GetArrivalThreshold();//0.0f;//_deps?.GetStoppingDistance() ?? 0f;  => Had error with new setup
 
 
 }

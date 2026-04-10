@@ -196,7 +196,7 @@ public class AgentFsmDepsObsolete : IFsmControllerDeps, IPatrolDepsObsolete, ICh
 
 }
 
-
+[Obsolete]
 public enum SpeedTier
 {
     Idle,

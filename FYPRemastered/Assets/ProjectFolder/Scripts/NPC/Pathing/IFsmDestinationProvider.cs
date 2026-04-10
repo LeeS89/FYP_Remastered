@@ -3,7 +3,7 @@ using UnityEngine;
 
 public interface IFsmDestinationProvider
 {
-    float GetStoppingDistance();
+    float GetArrivalThreshold();
     bool TryGetDestinationCandidates(List<Vector3> buffer);
     void ReleaseCandidates(List<Vector3> buffer);
 }

@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.Rendering.LookDev;
+
 
 public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
 {
@@ -31,8 +31,8 @@ public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
     private IFsmState _currentState;
     public bool IsInStateTransition { get; private set; } = false;
     private bool _hasValidDestination = false;
-    private float _lerpSpeed = 0f;
-    private float _targetSpeed = 0f;
+    //private float _lerpSpeed = 0f;
+  //  private float _targetSpeed = 0f;
     private float _pathCheckTimer;
 
     //  public bool RotatingToTarget { get; private set; } = false;
@@ -47,13 +47,13 @@ public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
     private int _destinationAttemptCounter = 0;
 
 
-    private SpeedTier _currentSpeedTier = SpeedTier.Idle;
-    private SpeedOverride _currentSpeedOverride = SpeedOverride.None;
+    //private SpeedTier _currentSpeedTier = SpeedTier.Idle;
+   // private SpeedOverride _currentSpeedOverride = SpeedOverride.None;
     private RotationOverride _currentRotationOverride = RotationOverride.None;
 
     // NEW
     private readonly ICoroutineHost _routineHost;
-    private readonly IFsmSpeedControl _dataProvider;
+    private readonly IFsmSpeedControl _speedController;
     private readonly ITickableGroup _tickHost;
 
     private readonly IReadOnlyDictionary<StateId, IFsmState> _states;
@@ -75,7 +75,7 @@ public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
         _pathNotifies = services.PathNotifications;
         _animNotifies = services.AnimationRequestNotifications;
 
-        _dataProvider = config.SpeedData;
+        _speedController = config.SpeedData;
         _states = config.States;
 
         _tickHost?.Register(this);
@@ -123,7 +123,7 @@ public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
     public void LateTick(float dt)
     {
         UpdateRotation();
-        Agent.speed = _dataProvider.UpdateSpeed(dt);
+        Agent.speed = _speedController.UpdateSpeed(dt);
       //  UpdateAgentSpeed();
         _currentState?.LateTick(dt);
     }
@@ -145,7 +145,7 @@ public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
         //_sharedDeps.OwnerTransform.RotateTowards(_sharedDeps.GetCurrentTarget?.Invoke().Transform);
     }
 
-    public void RequestRotation(float requestedAngle, StateId id, Action<bool> onComplete)
+    void IFsmStateContext.RequestRotation(float requestedAngle, StateId id, Action<bool> onComplete)
     {
         if (onComplete == null) return;
         if (Transform == null) return;
@@ -268,7 +268,7 @@ public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
             return;
         }
 
-        _dataProvider.UpdateTargetSpeed(dist);
+        _speedController.UpdateTargetSpeed(dist);
        // UpdateSpeedtier(dist, agent: Agent);
     }
 
@@ -364,7 +364,7 @@ public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
                 Agent.SetDestination(destination))
             {
 
-                Agent.stoppingDistance = _currentState?.GetDesiredStoppingDistance() ?? 0f;//_deps.GetAgentStopDistance(true); // NEEDS UPDATING
+                Agent.stoppingDistance = _currentState?.GetArrivalThreshold() ?? 0f;//_deps.GetAgentStopDistance(true); // NEEDS UPDATING
                 DestinationSet(destination);
             }
             else
@@ -433,128 +433,12 @@ public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
     // public bool HasReachedDestination() => !_hasValidDestination || (_deps?.Agent.isStopped ?? true);
 
 
-    /*    private void UpdateAgentSpeed()
-        {
-            *//*var a = Owner.Agent; if (!a) return;
-            float delta = Mathf.Abs(_targetSpeed - a.speed);
-            float rate = (0.5f > 0f) ? Mathf.Max(0.01f, delta / 0.5f) : float.PositiveInfinity;
-            a.speed = Mathf.MoveTowards(a.speed, _targetSpeed, rate * Time.deltaTime);*//*
-
-            if (Agent == null) return;
-
-            //  if (_deps.Agent == null) return;
-            float smoothedSpeed = Mathf.Lerp(Agent.speed, _targetSpeed, _lerpSpeed * Time.deltaTime);
-            Agent.speed = smoothedSpeed;
-
-            float _currentSpeed = Agent.speed;
-
-            if (Mathf.Approximately(Agent.speed, _targetSpeed)) Agent.speed = _targetSpeed;
-        }*/
+ 
 
     public void OverrideSpeed(SpeedOverride overrideTier)
-     => _dataProvider.OverrideMovement(overrideTier);//_currentSpeedOverride = overrideTier;
+     => _speedController.OverrideMovement(overrideTier);//_currentSpeedOverride = overrideTier;
 
 
-/*    private void UpdateSpeedtier(float remainingDistance, NavMeshAgent agent)
-    {
-        if (agent == null || agent.isStopped) return;
-        //if (_deps == null || _deps.Agent == null || _deps.Agent.isStopped) return;
-
-        float speed;
-        float lerp;
-        SpeedTier tier;
-
-        tier = TryUpdateAgentTargetSpeed(_currentSpeedTier, _currentSpeedOverride, remainingDistance, out speed, out lerp);
-
-        if (tier == _currentSpeedTier) return;
-
-        _currentSpeedTier = tier;
-        (_targetSpeed, _lerpSpeed) = (speed, lerp);
-
-    }*/
-
-/*    private SpeedTier OverrideSpeed(SpeedOverride speedOverride, out float newSpeed, out float lerp)
-    {
-        SpeedTier newTier = SpeedTier.Walk;
-        // var d = _deps.Movement;
-
-        (newTier, newSpeed, lerp) = speedOverride switch
-        {
-            SpeedOverride.ForceWalk =>
-            (
-                SpeedTier.Walk,
-                newSpeed = _dataProvider.WalkSpeed,
-                lerp = 2f
-            ),
-            SpeedOverride.ForceSprint =>
-            (
-                SpeedTier.Sprint,
-                newSpeed = _dataProvider.SprintSpeed,
-                lerp = 2f
-            ),
-            SpeedOverride.ForceIdle =>
-            (
-                SpeedTier.Idle,
-                newSpeed = 0f,
-                lerp = 10f
-            ),
-            _ =>
-            (
-                SpeedTier.Walk,
-                newSpeed = _dataProvider.WalkSpeed,
-                lerp = 2f
-            )
-
-        };
-        // newSpeed = 0f; // Placeholder
-        //lerp = 0f; // Placeholder
-        return newTier;
-
-
-    }
-
-
-    public SpeedTier TryUpdateAgentTargetSpeed(SpeedTier currentTier, SpeedOverride speedOverride, float distanceToDestination, out float newSpeed, out float lerp)
-    {
-        if (distanceToDestination <= 0.25f)
-        {
-            newSpeed = 0f;
-            lerp = 10f;
-            return SpeedTier.Idle;
-        }
-
-        if (speedOverride != SpeedOverride.None)
-            return OverrideSpeed(speedOverride, out newSpeed, out lerp);
-
-        // var d = _deps.Movement;
-
-        if (distanceToDestination > _dataProvider.SprintEnterDistance)
-        {
-            newSpeed = _dataProvider.SprintSpeed;
-            lerp = 2f;
-            return SpeedTier.Sprint;
-        }
-        else if (distanceToDestination < _dataProvider.SprintExitDistance)
-        {
-            newSpeed = _dataProvider.WalkSpeed;
-            lerp = 2f;
-            return SpeedTier.Walk;
-        }
-        else
-        {
-            if (currentTier == SpeedTier.Idle)
-            {
-                newSpeed = _dataProvider.WalkSpeed;
-                lerp = 2f;
-                return SpeedTier.Walk;
-            }
-            newSpeed = _dataProvider.SprintSpeed;
-            lerp = 2f;
-            return currentTier;
-        }
-
-
-    }*/
 
     #endregion
 
@@ -570,7 +454,7 @@ public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
 
 
         //TryGetAgent(out var agent);
-        _dataProvider.UpdateTargetSpeed(0f);
+        _speedController.UpdateTargetSpeed(0f);
        //UpdateSpeedtier(0f, Agent);
         ResetPath(Agent);
         // if (TryGetAgent(out var a)) a.ResetPath();
@@ -611,7 +495,7 @@ public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
     {
         _hasValidDestination = false;
 
-        _dataProvider.UpdateTargetSpeed(0f);
+        _speedController.UpdateTargetSpeed(0f);
       //  UpdateSpeedtier(0f, Agent);
 
         ResetPath(Agent);
@@ -703,5 +587,132 @@ public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
             OnDone = cb;
         }
     }
+
+
+
+
+
+    #region Old Speed Update Region - To be removed once new speed controller is fully integrated and tested
+    /*    private void UpdateAgentSpeed()
+     {
+         *//*var a = Owner.Agent; if (!a) return;
+         float delta = Mathf.Abs(_targetSpeed - a.speed);
+         float rate = (0.5f > 0f) ? Mathf.Max(0.01f, delta / 0.5f) : float.PositiveInfinity;
+         a.speed = Mathf.MoveTowards(a.speed, _targetSpeed, rate * Time.deltaTime);*//*
+
+         if (Agent == null) return;
+
+         //  if (_deps.Agent == null) return;
+         float smoothedSpeed = Mathf.Lerp(Agent.speed, _targetSpeed, _lerpSpeed * Time.deltaTime);
+         Agent.speed = smoothedSpeed;
+
+         float _currentSpeed = Agent.speed;
+
+         if (Mathf.Approximately(Agent.speed, _targetSpeed)) Agent.speed = _targetSpeed;
+     }*/
+
+
+    /*    private void UpdateSpeedtier(float remainingDistance, NavMeshAgent agent)
+    {
+        if (agent == null || agent.isStopped) return;
+        //if (_deps == null || _deps.Agent == null || _deps.Agent.isStopped) return;
+
+        float speed;
+        float lerp;
+        SpeedTier tier;
+
+        tier = TryUpdateAgentTargetSpeed(_currentSpeedTier, _currentSpeedOverride, remainingDistance, out speed, out lerp);
+
+        if (tier == _currentSpeedTier) return;
+
+        _currentSpeedTier = tier;
+        (_targetSpeed, _lerpSpeed) = (speed, lerp);
+
+    }*/
+
+    /*    private SpeedTier OverrideSpeed(SpeedOverride speedOverride, out float newSpeed, out float lerp)
+        {
+            SpeedTier newTier = SpeedTier.Walk;
+            // var d = _deps.Movement;
+
+            (newTier, newSpeed, lerp) = speedOverride switch
+            {
+                SpeedOverride.ForceWalk =>
+                (
+                    SpeedTier.Walk,
+                    newSpeed = _dataProvider.WalkSpeed,
+                    lerp = 2f
+                ),
+                SpeedOverride.ForceSprint =>
+                (
+                    SpeedTier.Sprint,
+                    newSpeed = _dataProvider.SprintSpeed,
+                    lerp = 2f
+                ),
+                SpeedOverride.ForceIdle =>
+                (
+                    SpeedTier.Idle,
+                    newSpeed = 0f,
+                    lerp = 10f
+                ),
+                _ =>
+                (
+                    SpeedTier.Walk,
+                    newSpeed = _dataProvider.WalkSpeed,
+                    lerp = 2f
+                )
+
+            };
+            // newSpeed = 0f; // Placeholder
+            //lerp = 0f; // Placeholder
+            return newTier;
+
+
+        }
+
+
+        public SpeedTier TryUpdateAgentTargetSpeed(SpeedTier currentTier, SpeedOverride speedOverride, float distanceToDestination, out float newSpeed, out float lerp)
+        {
+            if (distanceToDestination <= 0.25f)
+            {
+                newSpeed = 0f;
+                lerp = 10f;
+                return SpeedTier.Idle;
+            }
+
+            if (speedOverride != SpeedOverride.None)
+                return OverrideSpeed(speedOverride, out newSpeed, out lerp);
+
+            // var d = _deps.Movement;
+
+            if (distanceToDestination > _dataProvider.SprintEnterDistance)
+            {
+                newSpeed = _dataProvider.SprintSpeed;
+                lerp = 2f;
+                return SpeedTier.Sprint;
+            }
+            else if (distanceToDestination < _dataProvider.SprintExitDistance)
+            {
+                newSpeed = _dataProvider.WalkSpeed;
+                lerp = 2f;
+                return SpeedTier.Walk;
+            }
+            else
+            {
+                if (currentTier == SpeedTier.Idle)
+                {
+                    newSpeed = _dataProvider.WalkSpeed;
+                    lerp = 2f;
+                    return SpeedTier.Walk;
+                }
+                newSpeed = _dataProvider.SprintSpeed;
+                lerp = 2f;
+                return currentTier;
+            }
+
+
+        }*/
+
+    #endregion
 
 }

@@ -1,20 +1,20 @@
 using UnityEngine;
 
-public sealed class FsmControlBridge : FsmServiceBridge<IFsmSpeedService>, IFsmSpeedControl
+public sealed class FsmSpeedControlBridge : FsmServiceBridge<IFsmSpeedService>, IFsmSpeedControl
 {
     private float _targetSpeed;
     private float _currentSpeed;
-    private float _accel;
+    private float _accel; // Future fix to replace lerp with actual acceleration value
     private SpeedOverride _currentSpeedOverride = SpeedOverride.None;
 
-    public FsmControlBridge(IFsmSpeedService service) : base(service) { }
+    public FsmSpeedControlBridge(IFsmSpeedService service) : base(service) { }
 
-    public float SprintEnterDistance => _service.GetSprintEnterDistance();
-    public float SprintExitDistance => _service.GetSprintExitDistance();
+    private float SprintEnterDistance => _service.GetSprintEnterDistance();
+    private float SprintExitDistance => _service.GetSprintExitDistance();
 
-    public float WalkSpeed => _service.GetWalkSpeed();
+    private float WalkSpeed => _service.GetWalkSpeed();
 
-    public float SprintSpeed => _service.GetSprintSpeed();
+    private float SprintSpeed => _service.GetSprintSpeed();
 
 
     public void UpdateTargetSpeed(float remainingDistance)

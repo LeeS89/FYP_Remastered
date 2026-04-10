@@ -8,7 +8,7 @@ public abstract class StateServiceBridge<TService> : FsmServiceBridge<TService>,
 
     public StateServiceBridge(TService service) : base(service) { }
 
-    public float GetStoppingDistance() => _service.GetStoppingDistance();
+    public float GetArrivalThreshold() => _service.GetStoppingDistance();
 
     public abstract void ReleaseCandidates(List<Vector3> buffer);
 

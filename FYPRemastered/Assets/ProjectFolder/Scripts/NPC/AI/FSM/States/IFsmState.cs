@@ -20,7 +20,7 @@ public interface IFsmState : ITickable
     // bool UsesRandomAgentStopDistance { get; }
     StateId GetId();
 
-    float GetDesiredStoppingDistance();
+    float GetArrivalThreshold();
 }
 
 

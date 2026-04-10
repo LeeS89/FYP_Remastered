@@ -178,7 +178,7 @@ namespace Services.Internal
         }
 
         private bool TryCreatePatrol(Dictionary<StateId, IFsmState> _dict, NavMeshPath path, Transform t, TryGetTarget tgt)
-            => _dict.TryAdd(StateId.Patrol, new FSMPatrolStateNewest(null, null, null, null, null));
+            => _dict.TryAdd(StateId.Patrol, new FsmPatrolState(null, null, null, null, null));
 
         public bool TryCreateFsm(out IFsmController fsm, INpcBody body, TryGetTarget targetRetrieverFunc, ITickableGroup tickHost, ICoroutineHost coroutineHost, IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null)
         {
@@ -193,12 +193,12 @@ namespace Services.Internal
 
             FsmContext c = new FsmContext(body, targetRetrieverFunc, id);
             FsmServices s = new FsmServices(tickHost, coroutineHost, pathNotifySender, animNotifySender);
-            FsmConfig cfg = new FsmConfig(new FsmControlBridge((IFsmSpeedService)_fsmControlService), _states);
+            FsmConfig cfg = new FsmConfig(new FsmSpeedControlBridge((IFsmSpeedService)_fsmControlService), _states);
 
             FsmManager fsNew = new FsmManager(c, s, cfg);
 
             PatrolServiceBridge pb = new PatrolServiceBridge((IPatrolService)_wpService);
-            IFsmState patrol = new FSMPatrolStateNewest(fsNew, pb, pb, new PathFinder(_pathService), coroutineHost);
+            IFsmState patrol = new FsmPatrolState(fsNew, pb, pb, new PathFinder(_pathService), coroutineHost);
             _states.Add(StateId.Patrol, patrol);
             fsm = fsNew;
 
