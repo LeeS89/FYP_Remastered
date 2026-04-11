@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 
@@ -22,12 +23,21 @@ public class PathFinder : IPathResolver
     private Coroutine _runningRoutine;
 
     private DestinationResult _lastResult;
+    private readonly ICoroutineHost _routineRunner;
 
 
 
     public PathFinder(IPathService pathService)
     {
         _pathService = pathService;
+        PathValidationCallback = OnPathValidationCallback;
+        _waitUntilPathCheckComplete = new WaitUntil(() => _pathChecked);
+
+    }
+    public PathFinder(IPathService pathService, ICoroutineHost routineRunner)
+    {
+        _pathService = pathService;
+        _routineRunner = routineRunner;
         PathValidationCallback = OnPathValidationCallback;
         _waitUntilPathCheckComplete = new WaitUntil(() => _pathChecked);
 
@@ -48,6 +58,8 @@ public class PathFinder : IPathResolver
             DestinationResultInfo cancelled = new DestinationResultInfo(ReasonForDestinationCheck.Cancelled, req.Path, DestinationResult.RequestCancelled, Vector3.zero, req.StateId);
         }
     }
+ 
+
 
     private Queue<DestinationRequest> _requests = new(15);
 
@@ -143,6 +155,127 @@ public class PathFinder : IPathResolver
         _pathChecked = true;
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    private Queue<(DestinationRequest req, TaskCompletionSource<DestinationResultInfo> tcs)> _queue = new(5);
+
+
+    public void CancelAllNew()
+    {
+        Gen++;
+        if (_runningRoutine != null)
+        {
+            _routineRunner.StopCoroutine(_runningRoutine);
+            _runningRoutine = null;
+        }
+        while (_queue.Count > 0)
+        {
+            var (req, tcs) = _queue.Dequeue();
+            DestinationResultInfo cancelled = new DestinationResultInfo(ReasonForDestinationCheck.Cancelled, req.Path, DestinationResult.RequestCancelled, Vector3.zero, req.StateId);
+            tcs.SetResult(cancelled);
+        }
+    }
+
+
+
+    public Task<DestinationResultInfo> ProcessCandidates(in DestinationRequest request)
+    {
+        var tcs = new TaskCompletionSource<DestinationResultInfo>();
+
+        _queue.Enqueue((request, tcs));
+        if (_runningRoutine == null)
+            _runningRoutine = _routineRunner.StartCoroutine(PathFindRoutineNewest(_queue));
+
+        return tcs.Task;
+    }
+
+
+
     
+
+
+    private IEnumerator PathFindRoutineNewest(Queue<(DestinationRequest, TaskCompletionSource<DestinationResultInfo>)> q)
+    {
+
+        while (q.Count > 0)
+        {
+            bool found = false;
+            var (request, tcs) = q.Dequeue();
+
+            _activeGen = Gen;
+
+            foreach (var point in request.Candidates)
+            {
+                if (_activeGen != Gen) break;
+
+                _pathChecked = false;
+                _lastResult = DestinationResult.None;
+                //_isValid = false;
+
+                Vector3 from = LineOfSightUtility.GetClosestPointOnNavMesh(request.From);
+                Vector3 to = LineOfSightUtility.GetClosestPointOnNavMesh(point);
+                _pathService?.RequestPath(from, to, request.Path, PathValidationCallback);
+
+                yield return _waitUntilPathCheckComplete;
+
+                if (_activeGen != Gen) break;
+                if (_lastResult == DestinationResult.NullPathParameter)
+                {
+                    DestinationResultInfo nullPath = new DestinationResultInfo(request.Reason, request.Path, DestinationResult.NullPathParameter, Vector3.zero, request.StateId);
+                    tcs.SetResult(nullPath);
+                  //  request.Callback?.Invoke(nullPath);
+                    break;
+                }
+
+                if (_lastResult == DestinationResult.Failed) continue;
+
+                // if (!_isValid) continue;
+                // Debug.LogError("Sending successful Callback");
+                DestinationResultInfo success = new DestinationResultInfo(request.Reason, request.Path, DestinationResult.Success, to, request.StateId);
+                tcs.SetResult(success);
+                //request.Callback?.Invoke(success);
+
+                found = true;
+                break;
+            }
+
+            if (_activeGen != Gen) break;
+            if (!found)
+            {
+                DestinationResultInfo failed = new DestinationResultInfo(request.Reason, request.Path, DestinationResult.Failed, Vector3.zero, request.StateId);
+                tcs.SetResult(failed);
+               // request.Callback?.Invoke(failed);
+            }
+
+        }
+
+        _runningRoutine = null;
+
+    }
+
+
 }
 

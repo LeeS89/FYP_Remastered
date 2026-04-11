@@ -74,6 +74,7 @@ public abstract class FsmBaseState<TProvider> : IFsmState
 
     public virtual void EnterState() { DebugLogs.Err($"Entering {_stateId.ToString()} state", this); _isInState = true; RetrieveCandidateDestinations(); }
     protected abstract void ValidateAndSendCandidateDestinations();
+    protected virtual void ValidateAndSendCandidateDestinationsNew() { }
     protected abstract void RetrieveCandidateDestinations();
     public void TryRepath()
     {

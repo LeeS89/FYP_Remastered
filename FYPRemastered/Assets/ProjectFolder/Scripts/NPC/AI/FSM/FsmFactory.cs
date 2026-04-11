@@ -591,6 +591,7 @@ public interface INpcBody
 public interface ICoroutineHost
 {
     Coroutine StartCoroutine(IEnumerator routine);
+    void StopCoroutine(Coroutine routine);
 }
 
 public interface ITickableGroup 

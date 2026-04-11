@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Threading.Tasks;
 using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.AI;
@@ -61,6 +62,11 @@ public sealed class FsmPatrolState : FsmBaseState<IFsmPatrolData>
         ValidateAndSendCandidateDestinations();
     }
 
+    protected override async void ValidateAndSendCandidateDestinationsNew()
+    {
+        await Task.CompletedTask;
+    }
+
     protected override void ValidateAndSendCandidateDestinations()
     {
         if (!_isInState || _candidateDestinations is null) return;
@@ -87,7 +93,7 @@ public sealed class FsmPatrolState : FsmBaseState<IFsmPatrolData>
 
     }
 
-
+   
 
     private IEnumerator PatrolWaitRoutineNew(/*float minWait, float maxWait*/)
     {

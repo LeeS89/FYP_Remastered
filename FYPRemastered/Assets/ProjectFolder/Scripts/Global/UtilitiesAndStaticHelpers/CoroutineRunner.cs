@@ -1,5 +1,7 @@
+using System;
 using UnityEngine;
 
+[Obsolete]
 public class CoroutineRunner : MonoBehaviour
 {
     public static CoroutineRunner Instance;
