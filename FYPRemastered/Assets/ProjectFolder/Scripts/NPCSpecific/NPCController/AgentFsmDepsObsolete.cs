@@ -37,7 +37,7 @@ public class AgentFsmDepsObsolete : IFsmControllerDeps, IPatrolDepsObsolete, ICh
     [SerializeField] private float _sprintExitDistance;
 
     // FSM Deps
-    public IPathResolver _pathResolver;
+    public IDestinationResolver _pathResolver;
     private ITargetable _owner;
     private ITargetable _target;
     public IPatrolService _waypointService;
@@ -107,7 +107,7 @@ public class AgentFsmDepsObsolete : IFsmControllerDeps, IPatrolDepsObsolete, ICh
 
     public ITargetable Owner => _owner;
 
-    public IPathResolver PathResolver => _pathResolver;
+    public IDestinationResolver PathResolver => _pathResolver;
 
   
     public ITargetable Target => _target;

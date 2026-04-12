@@ -41,7 +41,7 @@ public interface IFsmControllerDeps : IFsmDepsObsolete, ITargetRefObsolete
 public interface IFsmStateDepsObsolete : IFsmDepsObsolete
 {
     //ITargetable NpcOwner { get; }
-    IPathResolver PathResolver { get; }
+    IDestinationResolver PathResolver { get; }
     NavMeshPath Path();
 }
 

@@ -179,7 +179,7 @@ public class FsmManagerObsoleteO : IFsmStateEventsObsoleteO, IFsmController
         }*/
 
         //var dist = a.remainingDistance;
-        var dist = a.GetPathDistance(CurrentState, _corners);
+        var dist = a.GetPathDistance(a.path, CurrentState, _corners);
         var rDist = a.remainingDistance;
         if (TestPrint)
         {
@@ -253,12 +253,12 @@ public class FsmManagerObsoleteO : IFsmStateEventsObsoleteO, IFsmController
     {
         Debug.LogError("Destination Result is: "+result.Result.ToString());
         // Debug.LogError("Destination Result Received at source");
-        if (StateHasChanged(result.Id) || result.RequestReason == ReasonForDestinationCheck.Cancelled) return;
+        if (StateHasChanged(result.Id) || result.RequestReason == DestinationRequestReason.Cancelled) return;
         DestinationResult pathResult = result.Result;
         //bool pathFound = result.PathFound;
         StateId id = result.Id;
 
-        if (result.RequestReason == ReasonForDestinationCheck.ProbePath && pathResult == DestinationResult.Success)
+        if (result.RequestReason == DestinationRequestReason.ProbePath && pathResult == DestinationResult.Success)
         { _pathNotifies?.PathToTargetAvailable();/*Notification?.Invoke(NpcNotification.PathNotifications.PathToTargetAvailable());*/ return; }
 
         if (/*!result.PathFound*/pathResult == DestinationResult.Failed) { NoAvailablePath();/*Notification?.Invoke(NpcNotification.PathNotifications.NoAvailablePath());*/ Debug.LogError("NO Path Found!!"); return; }
@@ -671,14 +671,14 @@ public class FsmManagerNew : IFsmStateEventsObsoleteO, IFsmController
 
     // NEW
     private readonly ICoroutineHost _routineHost;
-    private readonly ITickableGroup _tickHost;
+    private readonly ITickableRunner _tickHost;
 
    // private readonly IFsmNavigationControl _navControl;
     private readonly IFsmTargetQuery _targetQuery;
     private readonly IReadOnlyDictionary<StateId, IFsmStateNew> _statesNew;
 
     public FsmManagerNew(int instanceId, IFsmNavigationControl navControl, IFsmTargetQuery targetQuery, IReadOnlyDictionary<StateId, IFsmStateNew> states,
-        ICoroutineHost host, ITickableGroup tickHost, IPathNotifications pathNotifies, IAnimationRequestNotifications animNotifies = null)
+        ICoroutineHost host, ITickableRunner tickHost, IPathNotifications pathNotifies, IAnimationRequestNotifications animNotifies = null)
     {
         _instanceId = instanceId;
        // _navControl = navControl;
@@ -878,7 +878,7 @@ public class FsmManagerNew : IFsmStateEventsObsoleteO, IFsmController
          }*/
 
         //var dist = a.remainingDistance;
-        var dist = Agent.GetPathDistance(CurrentState, _corners);
+        var dist = Agent.GetPathDistance(Path, CurrentState, _corners);
         var rDist = Agent.remainingDistance;
         if (TestPrint)
         {
@@ -952,12 +952,12 @@ public class FsmManagerNew : IFsmStateEventsObsoleteO, IFsmController
     {
         Debug.LogError("Destination Result is: " + result.Result.ToString());
         // Debug.LogError("Destination Result Received at source");
-        if (StateHasChanged(result.Id) || result.RequestReason == ReasonForDestinationCheck.Cancelled) return;
+        if (StateHasChanged(result.Id) || result.RequestReason == DestinationRequestReason.Cancelled) return;
         DestinationResult pathResult = result.Result;
         //bool pathFound = result.PathFound;
         StateId id = result.Id;
 
-        if (result.RequestReason == ReasonForDestinationCheck.ProbePath && pathResult == DestinationResult.Success)
+        if (result.RequestReason == DestinationRequestReason.ProbePath && pathResult == DestinationResult.Success)
         { _pathNotifies?.PathToTargetAvailable();/*Notification?.Invoke(NpcNotification.PathNotifications.PathToTargetAvailable());*/ return; }
 
         if (/*!result.PathFound*/pathResult == DestinationResult.Failed) { NoAvailablePath();/*Notification?.Invoke(NpcNotification.PathNotifications.NoAvailablePath());*/ Debug.LogError("NO Path Found!!"); return; }

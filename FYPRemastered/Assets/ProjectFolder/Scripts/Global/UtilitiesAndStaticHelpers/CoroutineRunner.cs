@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-[Obsolete]
+[Obsolete("", true)]
 public class CoroutineRunner : MonoBehaviour
 {
     public static CoroutineRunner Instance;

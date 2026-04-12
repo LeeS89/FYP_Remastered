@@ -133,7 +133,7 @@ public abstract class FsmBaseStateObsolete<TDeps> : IFsmStateObsolete where TDep
     protected void CancelCurrentPathRequests()
     {
         if (ResolverIsNull()) return;
-        _deps.PathResolver.CancelAll();
+       // _deps.PathResolver.CancelAll();
 
     }
     
@@ -174,9 +174,9 @@ public abstract class FsmBaseStateObsolete<TDeps> : IFsmStateObsolete where TDep
 
     public abstract class FsmBaseStateDeps 
     { 
-        public readonly IPathResolver PathResolver;
+        public readonly IDestinationResolver PathResolver;
 
-        public FsmBaseStateDeps(IPathResolver pathResolver) => PathResolver = pathResolver;
+        public FsmBaseStateDeps(IDestinationResolver pathResolver) => PathResolver = pathResolver;
 
         public virtual float GetStoppingDistance() => 0f; 
     }
@@ -275,9 +275,9 @@ public abstract class FsmBaseStateNew<TService, TContext> : IFsmStateNew<TServic
    // TService IFsmStateNew<TService>.Context => Context;
 
     //internal void SetContext(TContext context) => Context = context;
-    protected readonly IPathResolver _pathResolver;
+    protected readonly IDestinationResolver _pathResolver;
 
-    public FsmBaseStateNew(IFsmStateEventsObsoleteO stateController, TService service, IPathResolver pathResolver, ICoroutineHost host, StateId id)
+    public FsmBaseStateNew(IFsmStateEventsObsoleteO stateController, TService service, IDestinationResolver pathResolver, ICoroutineHost host, StateId id)
     {
         _stateEvents = stateController;
         Service = service;
@@ -417,7 +417,7 @@ public abstract class FsmBaseStateNew<TService, TContext> : IFsmStateNew<TServic
 
 
 
-    protected void CancelCurrentPathRequests() => _pathResolver.CancelAll();
+    protected void CancelCurrentPathRequests() { }// => _pathResolver.CancelAll();
   /*  {
         if (ResolverIsNull()) return;
        // _deps.PathResolver.CancelAll(); => Had error with new setup

@@ -26,7 +26,7 @@ public abstract class FSMBaseObsolete// : IFSMControlObsolete
 
     protected StateId _currentStateId = StateId.None;
 
-    protected IPathResolver _pathFinder;
+    protected IDestinationResolver _pathFinder;
 
     protected Coroutine _runningRoutine;
 

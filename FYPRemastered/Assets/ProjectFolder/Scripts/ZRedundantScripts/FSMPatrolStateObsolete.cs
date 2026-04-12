@@ -58,7 +58,7 @@ public sealed class FSMPatrolStateObsolete : FsmBaseStateObsolete<PatrolDeps>
                 Debug.LogError("Returning Failed Result for patrol");
                 DestinationResultInfo failedResult = new DestinationResultInfo
                 (
-                    ReasonForDestinationCheck.ValidatePathForDestination,
+                    DestinationRequestReason.ValidatePathForDestination,
                     path,
                     DestinationResult.CandidatesNullOrEmpty,
                     Vector3.zero,
@@ -95,8 +95,8 @@ public sealed class FSMPatrolStateObsolete : FsmBaseStateObsolete<PatrolDeps>
      
 
         DestinationRequest req = new DestinationRequest(_id, ownerPos, _candidateDestinations, path, 
-            ReasonForDestinationCheck.ValidatePathForDestination, _validationCallback);
-        _deps.PathResolver.ProcessDestinationCandidates(in req);
+            DestinationRequestReason.ValidatePathForDestination, _validationCallback);
+      //  _deps.PathResolver.ProcessDestinationCandidates(in req);
 
 
        /* _pathResolver?.ProcessDestinationCandidates(_id, ReasonForDestinationCheck.ValidatePathForDestination,
@@ -152,7 +152,7 @@ public sealed class PatrolDeps : FsmBaseStateObsolete<PatrolDeps>.FsmBaseStateDe
     public float MaxTimeAtPatrolPoint { get; private set; }
     public float MinTimeAtPatrolPoint { get; private set; }
 
-    public PatrolDeps(IPatrolService waypointService, IPathResolver resolver, PatrolStateConfig config) : base(resolver)
+    public PatrolDeps(IPatrolService waypointService, IDestinationResolver resolver, PatrolStateConfig config) : base(resolver)
     {
         WaypointService = waypointService;
         MaxTimeAtPatrolPoint = config?.maxTimeAtWaypoint ?? 10f;
@@ -203,7 +203,7 @@ public sealed class FSMPatrolStateNewObsolete : FsmBaseStateNew<IFsmStateService
         _waypointService = waypointService;
         _candidateDestinations.EnsureCapacity(10);
     }*/
-    public FSMPatrolStateNewObsolete(IFsmStateEventsObsoleteO stateController, IFsmStateService<ITargetContextObsolete> service, IPathResolver pathResolver, ICoroutineHost host)
+    public FSMPatrolStateNewObsolete(IFsmStateEventsObsoleteO stateController, IFsmStateService<ITargetContextObsolete> service, IDestinationResolver pathResolver, ICoroutineHost host)
         : base(stateController, service, pathResolver, host, StateId.Patrol)
     {
         // _patrolDeps = deps;
@@ -250,7 +250,7 @@ public sealed class FSMPatrolStateNewObsolete : FsmBaseStateNew<IFsmStateService
                 Debug.LogError("Returning Failed Result for patrol");
                 DestinationResultInfo failedResult = new DestinationResultInfo
                 (
-                    ReasonForDestinationCheck.ValidatePathForDestination,
+                    DestinationRequestReason.ValidatePathForDestination,
                     path,
                     DestinationResult.CandidatesNullOrEmpty,
                     Vector3.zero,
@@ -292,9 +292,9 @@ public sealed class FSMPatrolStateNewObsolete : FsmBaseStateNew<IFsmStateService
 
 
         DestinationRequest req = new DestinationRequest(_stateId, ownerPos, _candidateDestinations, path,
-            ReasonForDestinationCheck.ValidatePathForDestination, _validationCallback);
+            DestinationRequestReason.ValidatePathForDestination, _validationCallback);
 
-        _pathResolver?.ProcessDestinationCandidates(in req);
+    //    _pathResolver?.ProcessDestinationCandidates(in req);
        // _deps.PathResolver.ProcessDestinationCandidates(in req);
 
 

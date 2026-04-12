@@ -10,7 +10,7 @@ public sealed class FsmChaseState : FsmBaseState<IFsmChaseData>
     private float? _initialDistance = null;
 
 
-    public FsmChaseState(IFsmStateContext stateController, IFsmDestinationProvider destP, IFsmChaseData dataP, IPathResolver pathResolver, ICoroutineHost host)
+    public FsmChaseState(IFsmStateContext stateController, IFsmDestinationProvider destP, IFsmChaseData dataP, IDestinationResolver pathResolver, ICoroutineHost host)
         : base(stateController, destP, dataP, pathResolver, host, StateId.Chase) { _candidateDestinations.EnsureCapacity(1); _distanceCheckCB = DistanceCheckCallback; }
 
     /*   public FSMChaseStateNew(ChaseDeps deps, SharedFsmStateServices sharedDeps, IFsmStateEvents stateContext)
@@ -35,8 +35,6 @@ public sealed class FsmChaseState : FsmBaseState<IFsmChaseData>
 
         if (!_isInState || _candidateDestinations == null) return; // Maybe a new notification
 
-        /*Vector3 chaseTargetPos;
-        if (!TryGetTargetPosition(out chaseTargetPos)) return;*/
 
         if (!_destProvider.TryGetDestinationCandidates(_candidateDestinations)) return;
         if (_candidateDestinations.Count is 0) return;
@@ -44,23 +42,11 @@ public sealed class FsmChaseState : FsmBaseState<IFsmChaseData>
         /* if (_candidateDestinations.Count == 0) _candidateDestinations.Add(chaseTargetPos);
          else _candidateDestinations[0] = chaseTargetPos;*/
 
-        ValidateAndSendCandidateDestinations();
+        CreateDestinationRequest(DestinationRequestReason.ValidatePathForDestination);
+       // ValidateAndSendCandidateDestinations();
 
     }
 
-
-    protected override void ValidateAndSendCandidateDestinations()
-    {
-        if (!_isInState) return;
-
-        if (!TryGetCurrentPosition(out var pos) ||
-        !TryGetPath(out var path)) return;
-
-        DestinationRequest req = new DestinationRequest(_stateId, pos.Value, _candidateDestinations, path,
-            ReasonForDestinationCheck.ValidatePathForDestination, _validationCallback);
-
-        _pathResolver?.ProcessDestinationCandidates(in req);
-    }
 
 
     private bool TargetIsMoving() => _dataProvider?.TargetIsMoving() ?? false;

@@ -94,7 +94,7 @@ public class PathFinderObsolete// : IPathResolver
         while(_pathQueue.Count > 0)
         {
             var (_, req) = _pathQueue.Dequeue();
-            DestinationResultObsolete cancelled = new DestinationResultObsolete(ReasonForDestinationCheck.Cancelled, req.Path, false, Vector3.zero, req.StateId);
+            DestinationResultObsolete cancelled = new DestinationResultObsolete(DestinationRequestReason.Cancelled, req.Path, false, Vector3.zero, req.StateId);
         }
     }
 
@@ -253,12 +253,12 @@ public class PathFinderObsolete// : IPathResolver
         return null;
     }
 
-    public void ProcessDestinationCandidates(StateId id, ReasonForDestinationCheck reason, List<Vector3> candidates, NavMeshPath path, Vector3 fromPos)
+    public void ProcessDestinationCandidates(StateId id, DestinationRequestReason reason, List<Vector3> candidates, NavMeshPath path, Vector3 fromPos)
     {
         throw new NotImplementedException();
     }
 
-    public void ProcessDestinationCandidates(StateId id, ReasonForDestinationCheck reason, List<Vector3> candidates, NavMeshPath path, Vector3 fromPos, DestinationValidationCallbackObsolete callBack)
+    public void ProcessDestinationCandidates(StateId id, DestinationRequestReason reason, List<Vector3> candidates, NavMeshPath path, Vector3 fromPos, DestinationValidationCallbackObsolete callBack)
     {
         throw new NotImplementedException();
     }
@@ -317,11 +317,11 @@ public readonly struct PathRequestInfoObsolete
 {
     public readonly List<(Vector3, Vector3?)> Points;
     public readonly Vector3 StartPos;
-    public readonly ReasonForDestinationCheck Reason;
+    public readonly DestinationRequestReason Reason;
     public readonly NavMeshPath Path;
     public readonly uint Id;
 
-    public PathRequestInfoObsolete(List<(Vector3, Vector3?)> pts, Vector3 startPos, ReasonForDestinationCheck reason, NavMeshPath path, uint id)
+    public PathRequestInfoObsolete(List<(Vector3, Vector3?)> pts, Vector3 startPos, DestinationRequestReason reason, NavMeshPath path, uint id)
     {
         Points = pts;
         StartPos = startPos;
@@ -338,14 +338,14 @@ public readonly struct PathRequestInfoObsolete
 public readonly struct DestinationResultObsolete
 {
 
-    public readonly ReasonForDestinationCheck Reason;
+    public readonly DestinationRequestReason Reason;
     public readonly NavMeshPath Path;
     public readonly bool PathFound;
     public readonly Vector3 Destination;
     public readonly Vector3? Forward;
     public readonly StateId Id;
 
-    public DestinationResultObsolete(ReasonForDestinationCheck reason, NavMeshPath path, bool found, Vector3 dest, StateId id, Vector3? fwd = null)
+    public DestinationResultObsolete(DestinationRequestReason reason, NavMeshPath path, bool found, Vector3 dest, StateId id, Vector3? fwd = null)
     {
         Reason = reason;
         Path = path;

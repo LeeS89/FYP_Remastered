@@ -3,8 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Profiling;
 
-public class SceneManagement : SceneManagementBase, ISceneService, ITickableGroup
+public class SceneManagement : SceneManagementBase, ISceneService, ITickableRunner
 {
     [SerializeField] private WaypointBlockData _waypointBlockData;
     [SerializeField] private WaypointManager _waypointManager;
@@ -32,7 +33,10 @@ public class SceneManagement : SceneManagementBase, ISceneService, ITickableGrou
     // Update used for Testing only - Delete Later
     private void Update()
     {
-
+       /* if (Input.GetKeyDown(KeyCode.Space))
+        {
+            LogHeap();
+        }*/
 
         if (_testspawn)
         {
@@ -114,7 +118,7 @@ public class SceneManagement : SceneManagementBase, ISceneService, ITickableGrou
 
     }
 
-   
+
 
 
 
@@ -151,4 +155,18 @@ public class SceneManagement : SceneManagementBase, ISceneService, ITickableGrou
     //public override void AlertZoneAgents(int zone, EnemyFSMController source) => _zoneAgentRegistry.AlertZone(zone, source);
     #endregion
 
+
+
+
+
+   /* void OnGUI()
+    {
+        long heap = Profiler.GetMonoHeapSizeLong();
+        long used = Profiler.GetMonoUsedSizeLong();
+        long allocated = Profiler.GetTotalAllocatedMemoryLong();
+
+        GUI.Label(new Rect(10, 10, 600, 30), $"Mono Heap: {(heap / 1024f / 1024f):F2} MB");
+        GUI.Label(new Rect(10, 40, 600, 30), $"Mono Used: {(used / 1024f / 1024f):F2} MB");
+        GUI.Label(new Rect(10, 70, 600, 30), $"Allocated: {(allocated / 1024f / 1024f):F2} MB");
+    }*/
 }

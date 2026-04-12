@@ -106,7 +106,7 @@ public enum DestinationKind
     Flee*/
 }
 
-public enum ReasonForDestinationCheck
+public enum DestinationRequestReason
 {
     ProbePath,
     ValidatePathForDestination,

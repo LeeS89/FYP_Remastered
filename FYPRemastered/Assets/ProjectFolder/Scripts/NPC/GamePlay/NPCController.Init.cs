@@ -136,7 +136,7 @@ public partial class NPCController
         if (!_aiServices.TryGetPathService(out var pathService)) return;
 
         //  _fsmDeps._pathResolver = new PathFinder(pathService);
-        IPathResolver pathResolver = new PathFinder(pathService);
+        IDestinationResolver pathResolver = null;// new PathFinder(pathService);
 
         // _fovRunner = new NPCFieldOfViewHandler(_fovParams);
         //_fovRunner = new NPCFieldOfViewHandler(_fovParams, _fsmDeps, onSweepComplete: _componentNotifications);

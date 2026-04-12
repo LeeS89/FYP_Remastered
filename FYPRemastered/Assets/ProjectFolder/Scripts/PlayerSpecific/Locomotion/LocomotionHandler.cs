@@ -53,10 +53,17 @@ public class LocomotionHandler
 
 
 
-
+    /// <summary>
+    /// Coroutine runner has been made obsolete, so this method will need to be updated to work with the new system for handling coroutines in the player manager. 
+    /// The idea is that when knockback is triggered, we start a timer and apply the knockback velocity for the duration of the timer, 
+    /// then reset it back to normal movement after the duration has passed.
+    /// </summary>
+    /// <param name="direction"></param>
+    /// <param name="force"></param>
+    /// <param name="duration"></param>
     private void ApplyKnockback(Vector3 direction, float force, float duration)
     {
-        CoroutineRunner.Instance.StartCoroutine(HandleKnockback(direction, force, duration));
+        //CoroutineRunner.Instance.StartCoroutine(HandleKnockback(direction, force, duration));
     }
 
     private IEnumerator HandleKnockback(Vector3 direction, float force, float duration)

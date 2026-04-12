@@ -6,15 +6,15 @@ using UnityEngine.AI;
 /// <summary>
 /// Class used to to limit concurrent path calculations to a set number per frame
 /// </summary>
-public class PathRequestManager : SceneResourcesObsolete, IPathService, ITickable // Change to ITickable
+public class PathRequestManager : IPathService, ITickable 
 {
-    private readonly ITickableGroup _tickHost;
+    private readonly ITickableRunner _tickHost;
     private Queue<PathRequest> _pathRequestQueue = new(25);
     private int _maxConcurrentRequests = 5;
 
     private PathRequestManager() { }
 
-    public PathRequestManager(ITickableGroup tickHost)
+    public PathRequestManager(ITickableRunner tickHost)
     {
         _tickHost = tickHost;
 
@@ -31,7 +31,7 @@ public class PathRequestManager : SceneResourcesObsolete, IPathService, ITickabl
             var request = _pathRequestQueue.Dequeue();
 
             //bool success = HasClearPathToTarget(request.From, request.To, request.Path);
-            DestinationResult result = HasClearPathToTarget(request.From, request.To, request.Path) ? DestinationResult.Success : DestinationResult.Failed;
+            PathResult result = HasClearPathToTarget(request.From, request.To, request.Path) ? PathResult.Success : PathResult.Failed;
 
             //Debug.LogError($"Path request from {request.start} to {request.end} success: {success}, please");
             //request.externalCallback?.Invoke(success);
@@ -51,11 +51,11 @@ public class PathRequestManager : SceneResourcesObsolete, IPathService, ITickabl
 
 
 
-    public void RequestPath(Vector3 from, Vector3 to, NavMeshPath path, Action<DestinationResult> onRequestComplete)
+    public void RequestPath(Vector3 from, Vector3 to, NavMeshPath path, Action<PathResult> onRequestComplete)
     {
         if (path == null)
         {
-            onRequestComplete?.Invoke(DestinationResult.NullPathParameter);
+            onRequestComplete?.Invoke(PathResult.NullPathParameter);
             return;
         }
         PathRequest req = new PathRequest
@@ -76,7 +76,7 @@ public class PathRequestManager : SceneResourcesObsolete, IPathService, ITickabl
     public void Tick(float dt)
     {
         if (_pathRequestQueue.Count == 0) { return; }
-        // Debug.LogError("Ticking Path Requests");
+        
         ExecutePathRequests();
     }
 
@@ -84,7 +84,9 @@ public class PathRequestManager : SceneResourcesObsolete, IPathService, ITickabl
 
     public void Dispose()
     {
-        throw new NotImplementedException();
+        _pathRequestQueue.Clear();
+        _pathRequestQueue = null;
+        _tickHost?.Unregister(this);
     }
 
     private readonly struct PathRequest
@@ -92,9 +94,9 @@ public class PathRequestManager : SceneResourcesObsolete, IPathService, ITickabl
         public readonly Vector3 From;
         public readonly Vector3 To;
         public readonly NavMeshPath Path;
-        public readonly Action<DestinationResult> OnRequestComplete;
+        public readonly Action<PathResult> OnRequestComplete;
 
-        public PathRequest(Vector3 from, Vector3 to, NavMeshPath path, Action<DestinationResult> onRequestComplete)
+        public PathRequest(Vector3 from, Vector3 to, NavMeshPath path, Action<PathResult> onRequestComplete)
             => (From, To, Path, OnRequestComplete) = (from, to, path, onRequestComplete);
 
     }

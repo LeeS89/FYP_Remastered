@@ -9,7 +9,7 @@ public abstract class FsmBaseState<TProvider> : IFsmState
     protected Coroutine _runningRoutine;
     protected bool _isAtDestination = false;
     protected bool _isInState = false;
-    protected DestinationResultCallback _validationCallback;
+   // protected DestinationResultCallback _validationCallback;
 
 
     protected readonly List<Vector3> _candidateDestinations = new();
@@ -25,10 +25,10 @@ public abstract class FsmBaseState<TProvider> : IFsmState
     protected readonly TProvider _dataProvider;
     protected readonly IFsmStateContext _stateContext;
 
-    protected readonly IPathResolver _pathResolver;
+    protected readonly IDestinationResolver _pathResolver;
 
     public FsmBaseState(IFsmStateContext stateController, IFsmDestinationProvider destP,
-        TProvider dataProvider, IPathResolver pathResolver, ICoroutineHost host, StateId id)
+        TProvider dataProvider, IDestinationResolver pathResolver, ICoroutineHost host, StateId id)
     {
         _stateContext = stateController;
 
@@ -37,12 +37,10 @@ public abstract class FsmBaseState<TProvider> : IFsmState
         _pathResolver = pathResolver;
         _host = host;
         _stateId = id;
-        _validationCallback = OnProcessedDestinationsResult;
-
+        
         if (_pathResolver == null) DebugLogs.Nre(_pathResolver, "Path resolver", this);
         else DebugLogs.Err("Path resolver was not null", this);
 
-        //  Service.TryGetDestinationCandidates(_stateEvents, new List<Vector3>());
     }
 
     #endregion
@@ -55,16 +53,7 @@ public abstract class FsmBaseState<TProvider> : IFsmState
     protected bool TryGetCurrentPosition(out Vector3? pos) => _stateContext.TryGetCurrentPosition(out pos);
 
 
-    /* protected bool TargetIsMoving()
-     {
-         ITargetable target;
-         if (!TryGetTarget(out target)) return false;
-
-         return target.IsMoving();
-     }*/
-
-
-
+   
 
     public virtual bool NeedsNewPath() => false;
 
@@ -73,8 +62,37 @@ public abstract class FsmBaseState<TProvider> : IFsmState
     // protected bool IsStationary() => _stateContext?.HasReachedDestination() ?? true;
 
     public virtual void EnterState() { DebugLogs.Err($"Entering {_stateId.ToString()} state", this); _isInState = true; RetrieveCandidateDestinations(); }
-    protected abstract void ValidateAndSendCandidateDestinations();
-    protected virtual void ValidateAndSendCandidateDestinationsNew() { }
+ //   protected abstract void ValidateAndSendCandidateDestinations();
+    
+   
+
+    protected void CreateDestinationRequest(DestinationRequestReason reason)
+    {
+        if (!_isInState || _candidateDestinations is null || _candidateDestinations.Count is 0) return;
+
+        if (!TryGetCurrentPosition(out var pos) ||
+            !TryGetPath(out var path)) return;
+
+        DestinationRequest req = new DestinationRequest(
+            
+            _stateId,
+            pos.Value,
+            _candidateDestinations,
+            path,
+            reason
+        );
+
+        SendDestinationRequest(req);
+    }
+
+    private async void SendDestinationRequest(DestinationRequest req)
+    {
+        var result = await _pathResolver.ProcessCandidates(in req);
+
+        OnProcessedDestinationsResult(in result);
+    }
+
+
     protected abstract void RetrieveCandidateDestinations();
     public void TryRepath()
     {
@@ -82,7 +100,7 @@ public abstract class FsmBaseState<TProvider> : IFsmState
         RetrieveCandidateDestinations();
     }
 
-    protected virtual void OnProcessedDestinationsResult(in DestinationResultInfo result)
+    protected void OnProcessedDestinationsResult(in DestinationResultInfo result)
     {
         if (!_isInState) return;
         // Debug.LogError("Sending Dest Result from: "+ _id.ToString());
@@ -96,11 +114,12 @@ public abstract class FsmBaseState<TProvider> : IFsmState
 
     public virtual void ExitState()
     {
+        CancelCurrentPathRequests();
         _isInState = false;
         //_pathResolver?.CancelAll();
         if (_runningRoutine != null)
         {
-            CoroutineRunner.Instance.StopCoroutine(_runningRoutine);
+            _host.StopCoroutine(_runningRoutine);
             _runningRoutine = null;
         }
     }
@@ -112,13 +131,19 @@ public abstract class FsmBaseState<TProvider> : IFsmState
 
     public virtual void LateTick(float dt) { }
 
-    protected virtual void ShuffleCandidateList<T>(List<T> candidates)
+    protected void ShuffleList<T>(List<T> candidates)
     {
+        if (candidates is null || candidates.Count <= 1) return;
+
+        var temp = candidates[0];
+        candidates.RemoveAt(0);
+
         for (int i = 0; i < candidates.Count; i++)
         {
             int randIndex = Random.Range(i, candidates.Count);
             (candidates[i], candidates[randIndex]) = (candidates[randIndex], candidates[i]);
         }
+        candidates.Add(temp);
     }
 
     public void Dispose()

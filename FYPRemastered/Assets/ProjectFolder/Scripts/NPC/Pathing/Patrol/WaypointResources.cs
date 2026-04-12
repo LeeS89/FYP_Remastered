@@ -354,12 +354,12 @@ public sealed class FsmContext
 
 public sealed class FsmServices
 {
-    public ITickableGroup TickHost { get; private set; }
+    public ITickableRunner TickHost { get; private set; }
     public ICoroutineHost CoroutineHost { get; private set; }
     public IPathNotifications PathNotifications { get; private set; }
     public IAnimationRequestNotifications AnimationRequestNotifications { get; private set; }
 
-    public FsmServices(ITickableGroup tickHost, ICoroutineHost coroutineHost, IPathNotifications pathNotifications, IAnimationRequestNotifications animationRequestNotifications)
+    public FsmServices(ITickableRunner tickHost, ICoroutineHost coroutineHost, IPathNotifications pathNotifications, IAnimationRequestNotifications animationRequestNotifications)
     {
         TickHost = tickHost;
         CoroutineHost = coroutineHost;

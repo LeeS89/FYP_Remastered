@@ -7,7 +7,7 @@ using UnityEngine.AI;
 public sealed class FsmPatrolState : FsmBaseState<IFsmPatrolData>
 {
 
-    public FsmPatrolState(IFsmStateContext stateController, IFsmDestinationProvider destP, IFsmPatrolData dataP, IPathResolver pathResolver, ICoroutineHost host)
+    public FsmPatrolState(IFsmStateContext stateController, IFsmDestinationProvider destP, IFsmPatrolData dataP, IDestinationResolver pathResolver, ICoroutineHost host)
         : base(stateController, destP, dataP, pathResolver, host, StateId.Patrol)
     {
         _candidateDestinations.EnsureCapacity(10);
@@ -18,17 +18,9 @@ public sealed class FsmPatrolState : FsmBaseState<IFsmPatrolData>
     {
         if (!_isInState) return;
 
-        Transform ownerTransform;
-        // if (!TryGetOwnerTransform(out ownerTransform)) return;
-
-
         if (_runningRoutine == null)
-            _runningRoutine = _host?.StartCoroutine(PatrolWaitRoutineNew(/*0.5f, 7f)*/));//CoroutineRunner.Instance.StartCoroutine(PatrolWaitRoutineNew(
-                                                                                         // 0.5f, 7f));
-        /*if (_runningRoutine == null)
-            _runningRoutine = CoroutineRunner.Instance.StartCoroutine(PatrolWaitRoutineNew(
-                ownerTransform, _deps.MinTimeAtPatrolPoint, _deps.MaxTimeAtPatrolPoint));*/
-
+            _runningRoutine = _host?.StartCoroutine(PatrolWaitRoutineNew());
+      
     }
 
     protected override void RetrieveCandidateDestinations()
@@ -41,14 +33,14 @@ public sealed class FsmPatrolState : FsmBaseState<IFsmPatrolData>
             NavMeshPath path;
             if (!TryGetPath(out path)) return;
 
-            Debug.LogError("successfully retrieved Path");
+            DebugLogs.Log("successfully retrieved Path");
 
             if (_destProvider is null || !_destProvider.TryGetDestinationCandidates(_candidateDestinations))
             {
-                Debug.LogError("Returning Failed Result for patrol");
+                DebugLogs.Err("Returning Failed Result for patrol", this);
                 DestinationResultInfo failedResult = new DestinationResultInfo
                 (
-                    ReasonForDestinationCheck.ValidatePathForDestination,
+                    DestinationRequestReason.ValidatePathForDestination,
                     path,
                     DestinationResult.CandidatesNullOrEmpty,
                     Vector3.zero,
@@ -59,43 +51,24 @@ public sealed class FsmPatrolState : FsmBaseState<IFsmPatrolData>
                 return;
             }
         }
-        ValidateAndSendCandidateDestinations();
-    }
 
-    protected override async void ValidateAndSendCandidateDestinationsNew()
-    {
-        await Task.CompletedTask;
-    }
-
-    protected override void ValidateAndSendCandidateDestinations()
-    {
-        if (!_isInState || _candidateDestinations is null) return;
-
-
-        if (!TryGetCurrentPosition(out var pos) ||
-            !TryGetPath(out var path)) return;
-
-        DebugLogs.Err("GOTTEN PATH AND OWNER POS", this);
-
-        if (_candidateDestinations.Count > 1)
+        ShuffleList(_candidateDestinations);
+        /*if (_candidateDestinations.Count > 1)
         {
 
             var temp = _candidateDestinations[0];
             _candidateDestinations.RemoveAt(0);
-            ShuffleCandidateList(_candidateDestinations);
+            ShuffleList(_candidateDestinations);
             _candidateDestinations.Add(temp);
-        }
-
-        DestinationRequest req = new DestinationRequest(_stateId, pos.Value, _candidateDestinations, path,
-            ReasonForDestinationCheck.ValidatePathForDestination, _validationCallback);
-
-        _pathResolver?.ProcessDestinationCandidates(in req);
-
+        }*/
+        CreateDestinationRequest(DestinationRequestReason.ValidatePathForDestination);
+       
     }
+
 
    
 
-    private IEnumerator PatrolWaitRoutineNew(/*float minWait, float maxWait*/)
+    private IEnumerator PatrolWaitRoutineNew()
     {
         Debug.LogError("Patrol wait routine called");
 
@@ -126,12 +99,67 @@ public sealed class FsmPatrolState : FsmBaseState<IFsmPatrolData>
             yield return null;
         }
         if (!_isInState) yield break;
-        ValidateAndSendCandidateDestinations();
-
+        RetrieveCandidateDestinations();
+       
         _runningRoutine = null;
 
     }
 
 
+
+    #region Obsolete code
+    /*    protected override async void ValidateAndSendCandidateDestinationsNew()
+    {
+        if (!_isInState || _candidateDestinations is null || _candidateDestinations.Count is 0) return;
+
+        if (!TryGetCurrentPosition(out var pos) ||
+            !TryGetPath(out var path)) return;
+
+        DebugLogs.Err("GOTTEN PATH AND OWNER POS in new await function", this);
+
+        if (_candidateDestinations.Count > 1)
+        {
+
+            var temp = _candidateDestinations[0];
+            _candidateDestinations.RemoveAt(0);
+            ShuffleCandidateList(_candidateDestinations);
+            _candidateDestinations.Add(temp);
+        }
+
+        DestinationRequest req = new DestinationRequest(_stateId, pos.Value, _candidateDestinations, path,
+            DestinationRequestReason.ValidatePathForDestination, _validationCallback);
+
+        var result = await _pathResolver.ProcessCandidates(in req);
+
+        OnProcessedDestinationsResult(in result);
+    }*/
+
+    /*    protected override void ValidateAndSendCandidateDestinations()
+        {
+            if (!_isInState || _candidateDestinations is null) return;
+
+
+            if (!TryGetCurrentPosition(out var pos) ||
+                !TryGetPath(out var path)) return;
+
+            DebugLogs.Err("GOTTEN PATH AND OWNER POS", this);
+
+            if (_candidateDestinations.Count > 1)
+            {
+
+                var temp = _candidateDestinations[0];
+                _candidateDestinations.RemoveAt(0);
+                ShuffleCandidateList(_candidateDestinations);
+                _candidateDestinations.Add(temp);
+            }
+
+            DestinationRequest req = new DestinationRequest(_stateId, pos.Value, _candidateDestinations, path,
+                DestinationRequestReason.ValidatePathForDestination, _validationCallback);
+
+            _pathResolver?.ProcessDestinationCandidates(in req);
+
+        }*/
+
+    #endregion
 
 }

@@ -2,11 +2,12 @@ using System;
 using System.Collections;
 using UnityEngine;
 
+[Obsolete]
 public static class WeaponHandlerExtensionsObsolete
 {
     public static Coroutine StartSingleFireRoutine(this WeaponHandlerBaseObsolete weaponHandler, WaitForSeconds shotInterval/*, Action callback*/)
     {
-        return CoroutineRunner.Instance.StartCoroutine(SingleFireRoutine(weaponHandler, shotInterval/*, callback*/));
+        return null;// CoroutineRunner.Instance.StartCoroutine(SingleFireRoutine(weaponHandler, shotInterval/*, callback*/));
     }
 
     private static IEnumerator SingleFireRoutine(WeaponHandlerBaseObsolete weaponHandler, WaitForSeconds interval/*, Action callback*/)

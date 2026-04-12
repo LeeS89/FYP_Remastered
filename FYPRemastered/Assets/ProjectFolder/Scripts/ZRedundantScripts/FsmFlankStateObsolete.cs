@@ -45,7 +45,7 @@ public class FsmFlankStateObsolete : FsmBaseStateObsolete<FlankDeps>
         {
             DestinationResultInfo noPathResult = new DestinationResultInfo
             (
-                ReasonForDestinationCheck.ValidatePathForDestination,
+                DestinationRequestReason.ValidatePathForDestination,
                 null,
                 DestinationResult.CandidatesNullOrEmpty,
                 Vector3.zero,
@@ -111,7 +111,7 @@ public sealed class FlankDeps : FsmBaseStateObsolete<FlankDeps>.FsmBaseStateDeps
     public int MinFlankSteps { get; private set; }
     public int MaxFlankSteps { get; private set; }
 
-    public FlankDeps(IFlankService flankService, IPathResolver resolver, FlankStateConfig config) : base(resolver)
+    public FlankDeps(IFlankService flankService, IDestinationResolver resolver, FlankStateConfig config) : base(resolver)
     {
         FlankService = flankService;
         MinFlankSteps = config?.minFlankSteps ?? 4;

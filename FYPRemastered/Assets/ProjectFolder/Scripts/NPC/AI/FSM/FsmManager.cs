@@ -54,7 +54,7 @@ public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
     // NEW
     private readonly ICoroutineHost _routineHost;
     private readonly IFsmSpeedControl _speedController;
-    private readonly ITickableGroup _tickHost;
+    private readonly ITickableRunner _tickHost;
 
     private readonly IReadOnlyDictionary<StateId, IFsmState> _states;
 
@@ -245,7 +245,7 @@ public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
          }*/
 
         //var dist = a.remainingDistance;
-        var dist = Agent.GetPathDistance(CurrentState, _corners);
+        var dist = Agent.GetPathDistance(Path, CurrentState, _corners);
         var rDist = Agent.remainingDistance;
         if (TestPrint)
         {
@@ -320,12 +320,12 @@ public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
     {
         Debug.LogError("Destination Result is: " + result.Result.ToString());
         // Debug.LogError("Destination Result Received at source");
-        if (StateHasChanged(result.Id) || result.RequestReason == ReasonForDestinationCheck.Cancelled) return;
+        if (StateHasChanged(result.Id) || result.RequestReason == DestinationRequestReason.Cancelled) return;
         DestinationResult pathResult = result.Result;
         //bool pathFound = result.PathFound;
         StateId id = result.Id;
 
-        if (result.RequestReason == ReasonForDestinationCheck.ProbePath && pathResult == DestinationResult.Success)
+        if (result.RequestReason == DestinationRequestReason.ProbePath && pathResult == DestinationResult.Success)
         { _pathNotifies?.PathToTargetAvailable();/*Notification?.Invoke(NpcNotification.PathNotifications.PathToTargetAvailable());*/ return; }
 
         if (/*!result.PathFound*/pathResult == DestinationResult.Failed) { NoAvailablePath();/*Notification?.Invoke(NpcNotification.PathNotifications.NoAvailablePath());*/ Debug.LogError("NO Path Found!!"); return; }
@@ -353,10 +353,37 @@ public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
 
     }
 
-    protected void SetDestination(NavMeshPath path, Vector3 destination, StateId current)
+    protected void SetDestination(NavMeshPath path, Vector3 destination, StateId id)
     {
-        if (current != CurrentState) return;
+        if (id != CurrentState) return;
 
+        if (Agent is not null)
+        {
+            ToggleAgent(setActive: true, Agent);
+
+            if (Agent.SetPath(path))
+            {
+                Agent.stoppingDistance = _currentState?.GetArrivalThreshold() ?? 0f;
+                DestinationSet(destination);
+                return;
+            }
+
+            if (Agent.SetDestination(destination))
+            {
+                Agent.CalculatePath(destination, path);
+                Agent.stoppingDistance = _currentState?.GetArrivalThreshold() ?? 0f;
+                DestinationSet(destination);
+            }
+            else
+            {
+                AttemptRepath("Attempt repath called from failing to set path or dest in SetDestination");
+            }
+
+
+
+
+        }
+/*
         if (Agent is not null)
         {
             ToggleAgent(setActive: true, Agent);
@@ -364,12 +391,12 @@ public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
                 Agent.SetDestination(destination))
             {
 
-                Agent.stoppingDistance = _currentState?.GetArrivalThreshold() ?? 0f;//_deps.GetAgentStopDistance(true); // NEEDS UPDATING
+                Agent.stoppingDistance = _currentState?.GetArrivalThreshold() ?? 0f;
                 DestinationSet(destination);
             }
             else
                 AttemptRepath("Attempt repath called from failing to set path or dest");
-        }
+        }*/
     }
 
     private void AttemptRepath(string msg)

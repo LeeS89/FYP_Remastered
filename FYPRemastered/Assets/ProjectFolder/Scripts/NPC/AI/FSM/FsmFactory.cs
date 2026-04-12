@@ -26,13 +26,13 @@ namespace Services.Internal
         // SO's
 
         private AgentChaseData _agentChaseData;
-        private readonly ITickableGroup _tickHost;
+        private readonly ITickableRunner _tickHost;
         // End SO's
 
         private readonly List<AsyncOperationHandle> _handles = new(5);
 
 
-        public FsmFactory(FsmFeatureGroup data, ITickableGroup tickHost) : base(data) { _tickHost = tickHost; }
+        public FsmFactory(FsmFeatureGroup data, ITickableRunner tickHost) : base(data) { _tickHost = tickHost; }
 
 
 
@@ -180,7 +180,7 @@ namespace Services.Internal
         private bool TryCreatePatrol(Dictionary<StateId, IFsmState> _dict, NavMeshPath path, Transform t, TryGetTarget tgt)
             => _dict.TryAdd(StateId.Patrol, new FsmPatrolState(null, null, null, null, null));
 
-        public bool TryCreateFsm(out IFsmController fsm, INpcBody body, TryGetTarget targetRetrieverFunc, ITickableGroup tickHost, ICoroutineHost coroutineHost, IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null)
+        public bool TryCreateFsm(out IFsmController fsm, INpcBody body, TryGetTarget targetRetrieverFunc, ITickableRunner tickHost, ICoroutineHost coroutineHost, IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null)
         {
             if (body == null || body.Owner == null || body.Owner.Transform == null) { fsm = null; return false; }
 
@@ -198,7 +198,7 @@ namespace Services.Internal
             FsmManager fsNew = new FsmManager(c, s, cfg);
 
             PatrolServiceBridge pb = new PatrolServiceBridge((IPatrolService)_wpService);
-            IFsmState patrol = new FsmPatrolState(fsNew, pb, pb, new PathFinder(_pathService), coroutineHost);
+            IFsmState patrol = new FsmPatrolState(fsNew, pb, pb, new DestinationProcessor(_pathService, coroutineHost), coroutineHost);
             _states.Add(StateId.Patrol, patrol);
             fsm = fsNew;
 
@@ -210,7 +210,7 @@ namespace Services.Internal
 
     public interface IFsmFactory
     {
-        bool TryCreateFsm(out IFsmController fsm, INpcBody body, TryGetTarget targetRetrieverFunc, ITickableGroup tickHost,
+        bool TryCreateFsm(out IFsmController fsm, INpcBody body, TryGetTarget targetRetrieverFunc, ITickableRunner tickHost,
             ICoroutineHost coroutineHost, IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null);
 
         bool TryCreateAndAddState(StateId id, Dictionary<StateId, IFsmState> _stateDict, NavMeshPath path, Transform ownerTransform, TryGetTarget targetRetrieverFunc);
@@ -594,7 +594,7 @@ public interface ICoroutineHost
     void StopCoroutine(Coroutine routine);
 }
 
-public interface ITickableGroup 
+public interface ITickableRunner 
 {
     void Register(ITickable tickable);
     void Unregister(ITickable tickable);

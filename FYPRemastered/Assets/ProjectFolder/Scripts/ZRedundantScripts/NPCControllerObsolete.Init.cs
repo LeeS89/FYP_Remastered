@@ -12,7 +12,7 @@ public partial class NPCControllerObsolete
     [SerializeField] protected FOVParameters _fovParams;
 
     // FSMManager Composition
-    private IPathResolver _pathFinder;
+    private IDestinationResolver _pathFinder;
     private ICandidateProviderObsolete _destinationResolver;
     private IFieldOfViewRunnerObsolete _fovRunner;
     private Dictionary<StateId, ICandidateProviderObsolete> _destinationProviders;
@@ -159,7 +159,7 @@ public partial class NPCControllerNew
     [SerializeField] protected FOVParameters _fovParams;
     protected AgentEventManager _eManager;
     // FSMManager Composition
-    private IPathResolver _pathFinder;
+    private IDestinationResolver _pathFinder;
     private ICandidateProviderObsolete _destinationResolver;
     private IFieldOfViewRunnerObsolete _fovRunner;
     private Dictionary<StateId, ICandidateProviderObsolete> _destinationProviders;
@@ -242,7 +242,7 @@ public partial class NPCControllerNew
 
         _destinationResolver = new DestinationResolver(_destinationProviders);*/
         _fovParams.FOVTarget = PrimaryTarget;
-        if(_services.TryGetPathService(out var pathService)) _pathFinder = new PathFinder(pathService);
+        if (_services.TryGetPathService(out var pathService)) return;// _pathFinder = new PathFinder(pathService);
 
        // _fovRunner = new NPCFieldOfViewHandlerObsolete(_fovParams);
 

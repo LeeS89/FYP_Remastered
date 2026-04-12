@@ -46,7 +46,8 @@ public class FreezeAndTrackExecutor: ExecutorBase
     {
         if (_arr == null || _arr.Length == 0) return;
 
-        CoroutineRunner.Instance.StartCoroutine(FireFreezablesDelay());
+        // CoroutineRunner has been made obsolete - So needs updating to use the ICoroutineHost passed in the constructor. For now, just fire them back immediately without delay.
+        // CoroutineRunner.Instance.StartCoroutine(FireFreezablesDelay());
     }
 
     private IEnumerator FireFreezablesDelay()

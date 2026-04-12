@@ -8,3 +8,12 @@ public enum DestinationResult
     CandidatesNullOrEmpty,
     RequestCancelled
 }
+
+public enum PathResult
+{
+    None,
+    Success,
+    Failed,
+    NullPathParameter,
+    NullEndPoints
+}

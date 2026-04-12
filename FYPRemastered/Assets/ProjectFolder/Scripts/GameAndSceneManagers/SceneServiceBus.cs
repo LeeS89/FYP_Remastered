@@ -26,13 +26,13 @@ namespace Services.Internal
         private IDistanceMonitoringService _distanceService;
         private ISceneService _sceneService;
 
-        private readonly ITickableGroup _tickHost;
+        private readonly ITickableRunner _tickHost;
         private FsmFactory _fsmFactory;
         private SceneMetaData metaData;
 
         //private PathRequestManagerNew _pathService;
 
-        public SceneServiceBus(string sceneName, ISceneService sceneService, ITickableGroup tickHost)
+        public SceneServiceBus(string sceneName, ISceneService sceneService, ITickableRunner tickHost)
         {
             _sceneService = sceneService;
             _sceneName = sceneName;
@@ -251,7 +251,7 @@ public interface IPlaceholderService { }
 
 public interface IPathService
 {
-    void RequestPath(Vector3 from, Vector3 to, NavMeshPath path, Action<DestinationResult> onRequestComplete);
+    void RequestPath(Vector3 from, Vector3 to, NavMeshPath path, Action<PathResult> onRequestComplete);
 }
 
 public interface IAddressableServiceObsolete

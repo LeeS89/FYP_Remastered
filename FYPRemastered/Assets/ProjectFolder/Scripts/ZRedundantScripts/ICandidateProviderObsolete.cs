@@ -214,14 +214,14 @@ public readonly struct ValidateDestinationObsolete
     public readonly ITargetable Caller;
     public readonly ITargetable Target;
     public readonly NavMeshPath Path;
-    public readonly ReasonForDestinationCheck Reason;
+    public readonly DestinationRequestReason Reason;
     public readonly Action<bool, int> WaypointZoneCallback;
     public readonly uint MaxFlankSteps;
     public readonly uint MinFlankSteps;
 
     private ValidateDestinationObsolete(
         StateId stateId,
-        ReasonForDestinationCheck reason,
+        DestinationRequestReason reason,
         ITargetable caller,
         ITargetable target,
         NavMeshPath path,
@@ -241,12 +241,12 @@ public readonly struct ValidateDestinationObsolete
     }
 
     public static ValidateDestinationObsolete GetPatrolPoint(ITargetable caller, NavMeshPath path, Action<bool, int> waypointZoneCB = null)
-        => new ValidateDestinationObsolete(StateId.Patrol, ReasonForDestinationCheck.ValidatePathForDestination, caller, null, path, 0, 0, waypointZoneCB);
+        => new ValidateDestinationObsolete(StateId.Patrol, DestinationRequestReason.ValidatePathForDestination, caller, null, path, 0, 0, waypointZoneCB);
 
     public static ValidateDestinationObsolete GetFlankPoint(NavMeshPath path, ITargetable caller, ITargetable flankTarget, uint maxFlankSteps = 15, uint minFlankSteps = 4)
-        => new ValidateDestinationObsolete(StateId.Flank, ReasonForDestinationCheck.ValidatePathForDestination, caller, flankTarget, path, maxFlankSteps, minFlankSteps);
+        => new ValidateDestinationObsolete(StateId.Flank, DestinationRequestReason.ValidatePathForDestination, caller, flankTarget, path, maxFlankSteps, minFlankSteps);
 
-    public static ValidateDestinationObsolete GetTargetPosition(NavMeshPath path, ReasonForDestinationCheck reason, ITargetable caller, ITargetable target)
+    public static ValidateDestinationObsolete GetTargetPosition(NavMeshPath path, DestinationRequestReason reason, ITargetable caller, ITargetable target)
         => new ValidateDestinationObsolete(StateId.Chase, reason, caller, target, path, 0, 0);
 }
 

@@ -29,7 +29,7 @@ public class FsmFlankState : FsmBaseState<IFsmFlankData>
       }*/
 
 
-    public FsmFlankState(IFsmStateContext stateController, IFsmDestinationProvider destP, IFsmFlankData dataP, IPathResolver pathResolver, ICoroutineHost host)
+    public FsmFlankState(IFsmStateContext stateController, IFsmDestinationProvider destP, IFsmFlankData dataP, IDestinationResolver pathResolver, ICoroutineHost host)
         : base(stateController, destP, dataP, pathResolver, host, StateId.Flank) { _candidateDestinations.EnsureCapacity(15); _onFlankCandidatesReceived = OnCandidatesReceived; }
 
 
@@ -47,7 +47,7 @@ public class FsmFlankState : FsmBaseState<IFsmFlankData>
         {
             DestinationResultInfo noPathResult = new DestinationResultInfo
             (
-                ReasonForDestinationCheck.ValidatePathForDestination,
+                DestinationRequestReason.ValidatePathForDestination,
                 null,
                 DestinationResult.CandidatesNullOrEmpty,
                 Vector3.zero,
@@ -66,15 +66,12 @@ public class FsmFlankState : FsmBaseState<IFsmFlankData>
          _flankService?.TryGetFlankCandidates(*//*_ownerData.PrimaryTarget.Position()*//*_deps.Target.Position()*//*targetPos, stepsToTry, _candidateDestinations, _onFlankCandidatesReceived);*/
     }
 
-    protected override void ValidateAndSendCandidateDestinations()
+    protected /*override*/ void ValidateAndSendCandidateDestinations()
     {
         if (!_isInState || _candidateDestinations == null) return;
     }
 
-    protected override void OnProcessedDestinationsResult(in DestinationResultInfo result)
-    {
-        throw new System.NotImplementedException();
-    }
+ 
 
     private void OnCandidatesReceived(bool success)
     {

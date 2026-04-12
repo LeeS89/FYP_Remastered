@@ -57,9 +57,9 @@ public class FSMChaseStateObsolete : FsmBaseStateObsolete<ChaseDeps>
         if (!TryGetPath(out path)) return;
 
         DestinationRequest req = new DestinationRequest(_id, pos, _candidateDestinations, path,
-            ReasonForDestinationCheck.ValidatePathForDestination, _validationCallback);
+            DestinationRequestReason.ValidatePathForDestination, _validationCallback);
 
-        _deps.PathResolver.ProcessDestinationCandidates(in req);
+     //   _deps.PathResolver.ProcessDestinationCandidates(in req);
         //_pathResolver?.ProcessDestinationCandidates(in req);
 
         /* _pathResolver?.ProcessDestinationCandidates(_id, ReasonForDestinationCheck.ValidatePathForDestination,
@@ -170,7 +170,7 @@ public sealed class ChaseDeps : FsmBaseStateObsolete<ChaseDeps>.FsmBaseStateDeps
     public float MinStoppingDistance { get; private set; }
     public float MaxStoppingDistance { get; private set; }
 
-    public ChaseDeps(IDistanceMonitoringService distanceService, IPathResolver resolver, ChaseStateConfig config) : base(resolver)
+    public ChaseDeps(IDistanceMonitoringService distanceService, IDestinationResolver resolver, ChaseStateConfig config) : base(resolver)
     {
         DistanceService = distanceService;
         MinStoppingDistance = config.minStoppingdistance;
@@ -225,7 +225,7 @@ public sealed class FSMChaseStateNewObsolete : FsmBaseStateNew<IFsmStateService<
     private float? _initialDistance = null;
 
 
-    public FSMChaseStateNewObsolete(IFsmStateEventsObsoleteO stateController, IFsmStateService<ITargetContextObsolete> service, IPathResolver pathResolver, ICoroutineHost host)
+    public FSMChaseStateNewObsolete(IFsmStateEventsObsoleteO stateController, IFsmStateService<ITargetContextObsolete> service, IDestinationResolver pathResolver, ICoroutineHost host)
         : base(stateController, service, pathResolver, host, StateId.Chase) { _candidateDestinations.EnsureCapacity(1); }
 
  /*   public FSMChaseStateNew(ChaseDeps deps, SharedFsmStateServices sharedDeps, IFsmStateEvents stateContext)
@@ -275,9 +275,9 @@ public sealed class FSMChaseStateNewObsolete : FsmBaseStateNew<IFsmStateService<
         if (!TryGetPath(out path)) return;*/
 
         DestinationRequest req = new DestinationRequest(_stateId, pos, _candidateDestinations, path,
-            ReasonForDestinationCheck.ValidatePathForDestination, _validationCallback);
+            DestinationRequestReason.ValidatePathForDestination, _validationCallback);
 
-        _pathResolver?.ProcessDestinationCandidates(in req);
+       // _pathResolver?.ProcessDestinationCandidates(in req);
         
    //     _deps.PathResolver.ProcessDestinationCandidates(in req); // Connented out for now
 

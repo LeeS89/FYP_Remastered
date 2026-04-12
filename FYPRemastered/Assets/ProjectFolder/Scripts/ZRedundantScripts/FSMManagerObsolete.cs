@@ -16,7 +16,7 @@ public class FSMManagerObsolete : FSMBaseObsolete
     private Action OnChaseReached;
     
 
-    public FSMManagerObsolete(/*IAgentData data, */IPathResolver resolver, IFieldOfViewRunnerObsolete runner)
+    public FSMManagerObsolete(/*IAgentData data, */IDestinationResolver resolver, IFieldOfViewRunnerObsolete runner)
     {/*
         if (data == null)
         {
@@ -130,11 +130,11 @@ public class FSMManagerObsolete : FSMBaseObsolete
     public override void OnPathRequestComplete(in DestinationResultObsolete result)
     {
 
-        if (StateHasChanged(result.Id) || result.Reason == ReasonForDestinationCheck.Cancelled) return;
+        if (StateHasChanged(result.Id) || result.Reason == DestinationRequestReason.Cancelled) return;
         bool pathFound = result.PathFound;
         StateId id = result.Id;
 
-        if (result.Reason == ReasonForDestinationCheck.ProbePath && pathFound)
+        if (result.Reason == DestinationRequestReason.ProbePath && pathFound)
         { /*Notification?.Invoke(NpcNotification.PathToPrimaryAvailable(*//*result.Id*//*));*/ return; }
     /*
         if (!result.PathFound) { Notification?.Invoke(NpcNotification.NoAvailablePath(*//*_currentStateId*//*)); Debug.LogError("NO Path Found!!"); return; }
@@ -381,7 +381,7 @@ public class FSMManagerObsolete : FSMBaseObsolete
         TryResetAgent();
         OnDestinationReached = null;
         CancelRunningCoroutine();
-        _pathFinder?.CancelAll();
+    //    _pathFinder?.CancelAll();
     }
 
     public override void OnInstanceDestroyed()
