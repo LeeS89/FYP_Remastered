@@ -42,13 +42,15 @@ public abstract class ComponentEvents : MonoBehaviour
 }
 
 
-public abstract class ComponentInit<TServices, TManager> : MonoBehaviour, IServicable<TServices, TManager>
+public abstract class ComponentInit<TServices, TManager> : MonoBehaviour, IServicable<TServices, TManager>, IInstanceIdentifiable
     where TServices : class
     where TManager : EventManagerBase
 {
 
   //  public bool IsDead { get; protected set; } = false; // Remove
     public ISceneService SceneService { get; private set; }
+
+    public int EntityId => GetInstanceID();
 
     public abstract void Init(TServices services, TManager manager);
     
@@ -107,7 +109,7 @@ public abstract class TargetableInit<TServices, TManager> : ComponentInit<TServi
     [SerializeField] protected LayerMask _selfTargetMask;
     public LayerMask LayerMask => _selfTargetMask;
 
-
+   
     protected virtual void OnDeath() { IsDead = true; SceneService?.OnTargetableDied(this); }
     protected virtual void OnRespawn() { IsDead = false; SceneService?.OnTargetableRespawned(this); }
 

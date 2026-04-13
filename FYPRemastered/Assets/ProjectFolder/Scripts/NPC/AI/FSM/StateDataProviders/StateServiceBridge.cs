@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class StateServiceBridge<TService> : FsmServiceBridge<TService>, IFsmDestinationProvider
+public abstract class StateServiceBridge<TService> : FsmServiceBridge<TService>, IFsmStateData
     where TService : IFsmService
 
 {

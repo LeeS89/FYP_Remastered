@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Rendering.LookDev;
 
 public abstract class FsmBaseState<TProvider> : IFsmState
- where TProvider : IFsmData
+ where TProvider : IFsmStateData
 {
 
     protected Coroutine _runningRoutine;
@@ -21,18 +22,18 @@ public abstract class FsmBaseState<TProvider> : IFsmState
 
     #region New region
 
-    protected readonly IFsmDestinationProvider _destProvider;
+   // protected readonly IFsmDestinationProvider _destProvider;
     protected readonly TProvider _dataProvider;
     protected readonly IFsmStateContext _stateContext;
 
     protected readonly IDestinationResolver _pathResolver;
 
-    public FsmBaseState(IFsmStateContext stateController, IFsmDestinationProvider destP,
+    public FsmBaseState(IFsmStateContext stateController, /*IFsmDestinationProvider destP,*/
         TProvider dataProvider, IDestinationResolver pathResolver, ICoroutineHost host, StateId id)
     {
         _stateContext = stateController;
 
-        _destProvider = destP;
+       /* _destProvider = destP;*/
         _dataProvider = dataProvider;
         _pathResolver = pathResolver;
         _host = host;
@@ -151,7 +152,7 @@ public abstract class FsmBaseState<TProvider> : IFsmState
         throw new System.NotImplementedException();
     }
 
-    public float GetArrivalThreshold() => _destProvider.GetArrivalThreshold();//0.0f;//_deps?.GetStoppingDistance() ?? 0f;  => Had error with new setup
+    public float GetArrivalThreshold() => _dataProvider.GetArrivalThreshold();//0.0f;//_deps?.GetStoppingDistance() ?? 0f;  => Had error with new setup
 
 
 }

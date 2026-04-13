@@ -7,8 +7,8 @@ using UnityEngine.AI;
 public sealed class FsmPatrolState : FsmBaseState<IFsmPatrolData>
 {
 
-    public FsmPatrolState(IFsmStateContext stateController, IFsmDestinationProvider destP, IFsmPatrolData dataP, IDestinationResolver pathResolver, ICoroutineHost host)
-        : base(stateController, destP, dataP, pathResolver, host, StateId.Patrol)
+    public FsmPatrolState(IFsmStateContext stateController, IFsmPatrolData dataP, IDestinationResolver pathResolver, ICoroutineHost host)
+        : base(stateController, dataP, pathResolver, host, StateId.Patrol)
     {
         _candidateDestinations.EnsureCapacity(10);
     }
@@ -35,7 +35,7 @@ public sealed class FsmPatrolState : FsmBaseState<IFsmPatrolData>
 
             DebugLogs.Log("successfully retrieved Path");
 
-            if (_destProvider is null || !_destProvider.TryGetDestinationCandidates(_candidateDestinations))
+            if (_dataProvider is null || !_dataProvider.TryGetDestinationCandidates(_candidateDestinations))
             {
                 DebugLogs.Err("Returning Failed Result for patrol", this);
                 DestinationResultInfo failedResult = new DestinationResultInfo

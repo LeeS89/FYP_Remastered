@@ -153774,6 +153774,14 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1156439162831152789, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1156439162831152789, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
+      propertyPath: m_SkinWidth
+      value: 0.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 1156439162831152789, guid: be125e7185d038b4d8270b96b334f7e8, type: 3}
       propertyPath: m_ExcludeLayers.m_Bits
       value: 448
       objectReference: {fileID: 0}

@@ -14,7 +14,7 @@ namespace Services.Internal
     public sealed class FsmFactory : ServiceBundle<FsmFeatureGroup>, IFsmFactory//, ITickable
     {
 
-      //  private List<ITickable> _tickables = new(5);
+        //  private List<ITickable> _tickables = new(5);
         private IAddressableService _wpService; // Split interfaces in WaypointResources class so only correct interface is used by relevant classes i.e. => This class need only store it as an IAddressableService
         private IAddressableService _flankService;
         private IAddressableService _chaseService;
@@ -47,7 +47,7 @@ namespace Services.Internal
 
             _fsmControlService = await TryLoadStateServiceAndInitialize<FsmSpeedResources>(controlFeature/*, () => new FsmSpeedResources(*//*_registry*//*)*/);
             _pathService = new PathRequestManager(_tickHost);
-         //   if(_pathService is ITickable t) _tickables.Add(t);
+            //   if(_pathService is ITickable t) _tickables.Add(t);
             if (_metaData == null)
             {
                 DebugLogs.RequireNotNull(_metaData, "SceneMetaData", this);
@@ -61,7 +61,7 @@ namespace Services.Internal
                 if (_wpService == null) DebugLogs.Nre(_wpService, "WaypointService");
                 else
                 {
-                  //  if(_wpService is ITickable tick) _tickables.Add(tick);
+                    //  if(_wpService is ITickable tick) _tickables.Add(tick);
                     DebugLogs.Log("Found Waypoint service", this);
                 }
 
@@ -92,13 +92,13 @@ namespace Services.Internal
             if (_distService != null) return;
             _distService = new DistanceManagerJob();
         }
-      
-        private async Task<TConcrete> TryLoadStateServiceAndInitialize<TConcrete>(FeatureMeta data/*, Func<TConcrete> createFunc*/) where TConcrete : class, IAddressableService, new() 
+
+        private async Task<TConcrete> TryLoadStateServiceAndInitialize<TConcrete>(FeatureMeta data/*, Func<TConcrete> createFunc*/) where TConcrete : class, IAddressableService, new()
         {
-        //    if (string.IsNullOrWhiteSpace(data.addressKey)) { DebugLogs.RequireNotNull(data.addressKey, "addressKey", this); return null; }
+            //    if (string.IsNullOrWhiteSpace(data.addressKey)) { DebugLogs.RequireNotNull(data.addressKey, "addressKey", this); return null; }
 
             var svc = new TConcrete();
-            if(svc == null)
+            if (svc == null)
             {
                 DebugLogs.RequireNotNull(svc, $"{typeof(TConcrete).Name}", this);
                 return null;
@@ -132,13 +132,13 @@ namespace Services.Internal
         public void LateTick(float dt) { }
 
 
-      /*  public void Tick(float dt)
-        {
-            if (_tickables == null || _tickables.Count == 0) return;
+        /*  public void Tick(float dt)
+          {
+              if (_tickables == null || _tickables.Count == 0) return;
 
-            foreach (var t in _tickables)
-                t.Tick(dt);
-        }*/
+              foreach (var t in _tickables)
+                  t.Tick(dt);
+          }*/
 
         /// <summary>
         /// Attempts to create a new state with the specified identifier and add it to the provided state dictionary.
@@ -178,14 +178,14 @@ namespace Services.Internal
         }
 
         private bool TryCreatePatrol(Dictionary<StateId, IFsmState> _dict, NavMeshPath path, Transform t, TryGetTarget tgt)
-            => _dict.TryAdd(StateId.Patrol, new FsmPatrolState(null, null, null, null, null));
+            => _dict.TryAdd(StateId.Patrol, new FsmPatrolState(null, null, null, null));
 
-        public bool TryCreateFsm(out IFsmController fsm, INpcBody body, TryGetTarget targetRetrieverFunc, ITickableRunner tickHost, ICoroutineHost coroutineHost, IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null)
+        public bool TryCreateFsm(out IFsmController fsm, IInstanceIdentifiable callerId, INpcBody body, TryGetTarget targetRetrieverFunc, ITickableRunner tickHost, ICoroutineHost coroutineHost, IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null)
         {
-            if (body == null || body.Owner == null || body.Owner.Transform == null) { fsm = null; return false; }
+            if (body is null || body.Transform is null) { fsm = null; return false; }
 
-           // if (_registry == null) _registry = new FsmRegistry();
-            int id = body.Owner.Transform.GetInstanceID();
+            // if (_registry == null) _registry = new FsmRegistry();
+            int id = callerId.EntityId;
 
             if (!_registry.TryRegister(id, body, targetRetrieverFunc)) { fsm = null; return false; }
             //  fsm = new FsmManagerNew(id, _registry, _registry, null); // Placeholder
@@ -198,19 +198,31 @@ namespace Services.Internal
             FsmManager fsNew = new FsmManager(c, s, cfg);
 
             PatrolServiceBridge pb = new PatrolServiceBridge((IPatrolService)_wpService);
-            IFsmState patrol = new FsmPatrolState(fsNew, pb, pb, new DestinationProcessor(_pathService, coroutineHost), coroutineHost);
+            IFsmState patrol = new FsmPatrolState(fsNew, pb, new DestinationProcessor(_pathService, coroutineHost), coroutineHost);
             _states.Add(StateId.Patrol, patrol);
             fsm = fsNew;
 
             return true;
         }
 
+        private void CreateFsmManager()
+        {
+            
+        }
+
+        private void CreateHumanoidFsm(Dictionary<StateId, IFsmState> stateBuffer)
+        {
+            
+        }
+
     }
+
+  
 
 
     public interface IFsmFactory
     {
-        bool TryCreateFsm(out IFsmController fsm, INpcBody body, TryGetTarget targetRetrieverFunc, ITickableRunner tickHost,
+        bool TryCreateFsm(out IFsmController fsm, IInstanceIdentifiable callerId, INpcBody body, TryGetTarget targetRetrieverFunc, ITickableRunner tickHost,
             ICoroutineHost coroutineHost, IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null);
 
         bool TryCreateAndAddState(StateId id, Dictionary<StateId, IFsmState> _stateDict, NavMeshPath path, Transform ownerTransform, TryGetTarget targetRetrieverFunc);
@@ -260,7 +272,7 @@ namespace Services.Internal
 
             if (entry.Body == null) return false;
 
-            t = entry.Body.Owner?.Transform;
+            t = null;// entry.Body.Owner?.Transform;
             return t != null;
 
         }
@@ -271,13 +283,13 @@ namespace Services.Internal
             pos = default;
             if (!TryGetEntry(id, out var entry)) return false;
 
-            var owner = entry.Body?.Owner;
+            object owner = default;// entry.Body?.Owner;
             if (owner == null) return false;
 
-            var p = owner.Position();
+            object p = null;// owner.Position();
             if (p == null) return false;
 
-            pos = p.Value;
+            pos = default;// p.Value;
             return true; 
 
         }
@@ -287,12 +299,12 @@ namespace Services.Internal
             pos = null;
             if (entry == null) return false;
 
-            var owner = entry.Body?.Owner;
+            object owner = null;// entry.Body?.Owner;
             if (owner == null) return false;
-            var p = owner.Position();
+            object p = null;// owner.Position();
             if (p == null) return false;
 
-            pos = p.Value;
+            pos = default;//p.Value;
             return true;
         }
 
@@ -578,8 +590,8 @@ public interface IFsmTargetQuery
 
 public interface INpcBody
 {
-    [Obsolete]
-    ITargetable Owner { get; }
+   /* [Obsolete]
+    ITargetable Owner { get; }*/
     Transform Transform { get; }
     Vector3? Position();
     NavMeshAgent Agent { get; }

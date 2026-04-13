@@ -106,7 +106,7 @@ public partial class NPCController
         {
             var pathNotificationSenderNew = new PathNotificationSender(_componentNotifications);
             var animRequestNotificationSenderNew = new AnimationNotificationSender(_componentNotifications);
-            if (factory.TryCreateFsm(out var manager, this, OnTryGetCurrentTarget, tickHost: this, coroutineHost: this, pathNotificationSenderNew, animRequestNotificationSenderNew))
+            if (factory.TryCreateFsm(out var manager, this, this, OnTryGetCurrentTarget, tickHost: this, coroutineHost: this, pathNotificationSenderNew, animRequestNotificationSenderNew))
             {
                 _fsmManager = manager;
             }
@@ -427,7 +427,7 @@ public partial class NPCControllerNewest
         {
             var pathNotificationSenderNew = new PathNotificationSender(_componentNotifications);
             var animRequestNotificationSenderNew = new AnimationNotificationSender(_componentNotifications);
-            if (factory.TryCreateFsm(out var manager, this, OnTryGetCurrentTarget, tickHost: this, coroutineHost: this, pathNotificationSenderNew, animRequestNotificationSenderNew))
+            if (factory.TryCreateFsm(out var manager, this, this, OnTryGetCurrentTarget, tickHost: this, coroutineHost: this, pathNotificationSenderNew, animRequestNotificationSenderNew))
             {
                 _fsmManager = manager;
             }

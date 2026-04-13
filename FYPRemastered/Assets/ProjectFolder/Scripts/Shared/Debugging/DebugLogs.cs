@@ -6,6 +6,9 @@ using UObject = UnityEngine.Object;
 
 public static class DebugLogs
 {
+
+    private static bool _active = true;
+
     [Conditional("UNITY_EDITOR")]
     [Conditional("DEVELOPMENT_BUILD")]
     public static void Log(string msg, object context = null) => Emit(LogType.DebugLog, msg, context);
@@ -56,6 +59,8 @@ public static class DebugLogs
 
     private static void Emit(LogType type, string msg, object ctx)
     {
+        if(!_active) return;
+
         if(ctx is UObject u)
         {
             if(u == null)
@@ -94,7 +99,8 @@ public static class DebugLogs
 
     private static void Throw(Exception ex, string tagMsg, object ctx)
     {
-       // Emit(LogType.DebugError, tagMsg, ctx);
+        if (!_active) return;
+        // Emit(LogType.DebugError, tagMsg, ctx);
 
         throw ex;
     }

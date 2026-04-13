@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface IFsmDestinationProvider
+public interface IFsmStateData
 {
     float GetArrivalThreshold();
     bool TryGetDestinationCandidates(List<Vector3> buffer);

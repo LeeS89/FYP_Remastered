@@ -1,3 +1,3 @@
 using UnityEngine;
 
-public interface IFsmFlankData : IFsmData { }
+public interface IFsmFlankData : IFsmData, IFsmStateData { }

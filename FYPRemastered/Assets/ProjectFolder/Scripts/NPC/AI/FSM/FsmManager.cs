@@ -318,7 +318,7 @@ public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
 
     public void ProcessDestinationResult(in DestinationResultInfo result)
     {
-        Debug.LogError("Destination Result is: " + result.Result.ToString());
+        DebugLogs.Err("Destination Result is: " + result.Result.ToString());
         // Debug.LogError("Destination Result Received at source");
         if (StateHasChanged(result.Id) || result.RequestReason == DestinationRequestReason.Cancelled) return;
         DestinationResult pathResult = result.Result;

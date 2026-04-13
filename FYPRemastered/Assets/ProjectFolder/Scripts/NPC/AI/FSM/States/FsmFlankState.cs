@@ -29,8 +29,8 @@ public class FsmFlankState : FsmBaseState<IFsmFlankData>
       }*/
 
 
-    public FsmFlankState(IFsmStateContext stateController, IFsmDestinationProvider destP, IFsmFlankData dataP, IDestinationResolver pathResolver, ICoroutineHost host)
-        : base(stateController, destP, dataP, pathResolver, host, StateId.Flank) { _candidateDestinations.EnsureCapacity(15); _onFlankCandidatesReceived = OnCandidatesReceived; }
+    public FsmFlankState(IFsmStateContext stateController, IFsmFlankData dataP, IDestinationResolver pathResolver, ICoroutineHost host)
+        : base(stateController, dataP, pathResolver, host, StateId.Flank) { _candidateDestinations.EnsureCapacity(15); _onFlankCandidatesReceived = OnCandidatesReceived; }
 
 
     public override void EnterState()
