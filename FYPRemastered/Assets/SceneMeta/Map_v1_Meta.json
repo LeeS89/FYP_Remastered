@@ -2,32 +2,36 @@
   "FsmFeatures": {
     "UsedInScene": true,
 
-    "SpeedData": {
-      "subDataKeys": [
-        "AgentSpeedData"
-      ]
-    },
+    "Humanoid": {
 
-    "Waypoints": {
-      "enabled": true,
-      "pathingDataKey": "MoonSceneWP",
-      "subDataKeys": [
-        "AgentPatrolData"
-      ]
-    },
-    "PatrolData": {
-      "enabled": true,
-      "addressKey": "Scene01_PatrolData"
-    },
-    "FlankPoints": {
-      "enabled": true,
-      "pathingDataKey": "FlankPointData"
-    },
-    "ChaseData": {
-      "enabled": true,
-      "subDataKeys": [
-        "AgentChaseData"
-      ]
+      "SpeedData": {
+        "subDataKeys": [
+          "AgentSpeedData"
+        ]
+      },
+
+      "Waypoints": {
+        "enabled": true,
+        "pathingDataKey": "MoonSceneWP",
+        "subDataKeys": [
+          "AgentPatrolData"
+        ]
+      },
+      "PatrolData": {
+        "enabled": true,
+        "addressKey": "Scene01_PatrolData"
+      },
+      "FlankPoints": {
+        "enabled": true,
+        "pathingDataKey": "FlankPointData"
+      },
+      "ChaseData": {
+        "enabled": true,
+        "subDataKeys": [
+          "AgentChaseData"
+        ]
+      }
     }
+
   }
 }

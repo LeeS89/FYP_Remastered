@@ -15,6 +15,8 @@ public abstract class FsmResources : IAddressableService, IFsmService
 
     public async Task<bool> TryInitialiseAsync(FeatureMeta data)
     {
+        if (data is null) return false;
+
         if (!await TryLoadPathingData(data)) return false;
 
         var subDataList = new List<ScriptableObject>();
