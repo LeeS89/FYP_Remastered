@@ -1,17 +1,21 @@
 using Npc.API;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Unity.Mathematics;
 using UnityEngine;
 
 public abstract class FsmAssemblyBase<T> where T : FsmFeatureBase
 {
     protected readonly T _metaData;
+    protected readonly IPathService _pathService;
     protected IAddressableService _fsmSpeedService;
+    protected Task<bool> _fsmSpeedServiceInitTask;
 
-    public FsmAssemblyBase(T metaData)
+    public FsmAssemblyBase(T metaData, IPathService pathService)
     {
         if (metaData == null) DebugLogs.RequireNotNull(metaData, "metaData", this);
         _metaData = metaData;
+        _pathService = pathService;
     }
 
 
@@ -42,28 +46,45 @@ public abstract class FsmAssemblyBase<T> where T : FsmFeatureBase
     protected abstract Task<Dictionary<StateId, IFsmState>> CreateStates();
 
 
-    protected async Task<TConcrete> TryLoadStateServiceAndInitialize<TConcrete>(FeatureMeta data/*, Func<TConcrete> createFunc*/) where TConcrete : class, IAddressableService, new()
+    /// <summary>
+    /// Attempts to load and initialize a state service instance of the specified type. Returns the initialized instance
+    /// if successful; otherwise, returns null.
+    /// Contains safety to prevent multiple initialization attempts on the same instance, and ensures proper disposal of the service if initialization fails.
+    /// </summary>
+    /// <remarks>If initialization fails, the service instance is disposed before returning null. This method
+    /// is typically used to ensure that a service is both created and properly initialized before use.</remarks>
+    /// <typeparam name="TConcrete">The concrete service type to initialize. Must implement IAddressableService and have a parameterless
+    /// constructor.</typeparam>
+    /// <param name="instance">An existing instance of the service to initialize, or null to create a new instance.</param>
+    /// <param name="initTask">A task representing the asynchronous initialization operation. If null, the method will invoke
+    /// TryInitialiseAsync on the instance.</param>
+    /// <param name="data">The feature metadata used to initialize the service.</param>
+    /// <returns>The initialized service instance if initialization succeeds; otherwise, null.</returns>
+    protected Task<TConcrete> TryLoadStateServiceAndInitialize<TConcrete>(
+        ref TConcrete instance,
+        ref Task<bool> initTask,
+        FeatureMeta data)
+        where TConcrete : class, IAddressableService, new()
     {
-        //    if (string.IsNullOrWhiteSpace(data.addressKey)) { DebugLogs.RequireNotNull(data.addressKey, "addressKey", this); return null; }
 
-        var svc = new TConcrete();
-        if (svc == null)
+        if (instance is null)
+            instance = new TConcrete();
+
+        if (initTask is null)
+            initTask = instance.TryInitialiseAsync(data);
+
+        return Awaitandcheck(instance, initTask);
+
+        static async Task<TConcrete> Awaitandcheck(TConcrete svc, Task<bool> task)
         {
-            DebugLogs.RequireNotNull(svc, $"{typeof(TConcrete).Name}", this);
-            return null;
+            if (!await task)
+            {
+                svc.Dispose();
+                return null;
+            }
+            return svc;
         }
-
-        bool serviceInitSuccess = await svc.TryInitialiseAsync(data);
-
-        if (!serviceInitSuccess)
-        {
-            DebugLogs.LoadFail(svc, $"(The Service of {typeof(TConcrete).Name})", this);
-            svc.Dispose();
-            return null;
-
-        }
-
-        return svc;
+       
     }
 
 }
