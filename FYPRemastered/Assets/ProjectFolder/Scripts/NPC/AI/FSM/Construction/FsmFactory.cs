@@ -178,7 +178,7 @@ namespace Services.Internal
         }
 
         private bool TryCreatePatrol(Dictionary<StateId, IFsmState> _dict, NavMeshPath path, Transform t, TryGetTarget tgt)
-            => _dict.TryAdd(StateId.Patrol, new FsmPatrolState(null, null, null, null));
+            => _dict.TryAdd(StateId.Patrol, new FsmPatrolState(/*null,*/ null, null, null));
 
         public bool TryCreateFsm(out IFsmController fsm, IInstanceIdentifiable callerId, INpcBody body, TryGetTarget targetRetrieverFunc, ITickableRunner tickHost, ICoroutineHost coroutineHost, IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null)
         {
@@ -198,12 +198,32 @@ namespace Services.Internal
             FsmManager fsNew = new FsmManager(c, s, cfg);
 
             PatrolServiceBridge pb = new PatrolServiceBridge((IPatrolService)_wpService);
-            IFsmState patrol = new FsmPatrolState(fsNew, pb, new DestinationProcessor(_pathService, coroutineHost), coroutineHost);
+            IFsmState patrol = new FsmPatrolState(/*fsNew,*/ pb, new DestinationProcessor(_pathService, coroutineHost), coroutineHost);
             _states.Add(StateId.Patrol, patrol);
             fsm = fsNew;
 
             return true;
         }
+
+        private HumanoidFactory _humanoidFactory;
+
+        public async Task<IFsmController> CreateFsm(IInstanceIdentifiable callerId, INpcBody body, TryGetTarget targetRetrieverFunc, ITickableRunner tickHost, ICoroutineHost coroutineHost,
+        IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null)
+        {
+            _pathService ??= new PathRequestManager(_tickHost);
+            IFsmController fsm = null;
+            var humanoid = _metaData.Humanoid;
+
+            if (humanoid is not null)
+            {
+                _humanoidFactory ??= new HumanoidFactory(_metaData.Humanoid, _pathService);
+                fsm = await _humanoidFactory.Build(callerId, body, targetRetrieverFunc, tickHost, coroutineHost,
+                    pathNotifySender, animNotifySender);
+            }
+                
+            return fsm;
+        }
+
 
         private void CreateFsmManager()
         {
@@ -216,7 +236,7 @@ namespace Services.Internal
         }
 
     }
-
+    
   
 
 
@@ -226,6 +246,9 @@ namespace Services.Internal
             ICoroutineHost coroutineHost, IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null);
 
         bool TryCreateAndAddState(StateId id, Dictionary<StateId, IFsmState> _stateDict, NavMeshPath path, Transform ownerTransform, TryGetTarget targetRetrieverFunc);
+
+        Task<IFsmController> CreateFsm(IInstanceIdentifiable callerId, INpcBody body, TryGetTarget targetRetrieverFunc, ITickableRunner tickHost, ICoroutineHost coroutineHost,
+        IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null);
     }
 
 

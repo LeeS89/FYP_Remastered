@@ -10,8 +10,8 @@ public sealed class FsmChaseState : FsmBaseState<IFsmChaseData>
     private float? _initialDistance = null;
 
 
-    public FsmChaseState(IFsmStateContext stateController, IFsmChaseData dataP, IDestinationResolver pathResolver, ICoroutineHost host)
-        : base(stateController, dataP, pathResolver, host, StateId.Chase) { _candidateDestinations.EnsureCapacity(1); _distanceCheckCB = DistanceCheckCallback; }
+    public FsmChaseState(/*IFsmStateContext stateController, */IFsmChaseData dataP, IDestinationResolver pathResolver, ICoroutineHost host)
+        : base(/*stateController,*/ dataP, pathResolver, host, StateId.Chase) { _candidateDestinations.EnsureCapacity(1); _distanceCheckCB = DistanceCheckCallback; }
 
 
 

@@ -3,6 +3,7 @@ using Npc.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -54,7 +55,7 @@ public partial class NPCController
         SetPrimaryTarget();
 
         ConstructFovRunner();
-        ConstructFSM();
+        _ = ConstructFSM();
 
         OnStableFOVResult = StableFOVResultConfirmed;
         
@@ -100,18 +101,24 @@ public partial class NPCController
         _fovRunner = new FovRunner(_fovDeps, onNotify: fovNotificationSender);
     }
 
-    private void ConstructFSM()
+    private async Task ConstructFSM()
     {
         if (_aiServices.TryGetFsmFactory(out var factory))
         {
             var pathNotificationSenderNew = new PathNotificationSender(_componentNotifications);
             var animRequestNotificationSenderNew = new AnimationNotificationSender(_componentNotifications);
-            if (factory.TryCreateFsm(out var manager, this, this, OnTryGetCurrentTarget, tickHost: this, coroutineHost: this, pathNotificationSenderNew, animRequestNotificationSenderNew))
-            {
-                _fsmManager = manager;
-            }
-            else
-                DebugLogs.Err("Failed to create FSM manager", this);
+            /*    if (factory.TryCreateFsm(out var manager, this, this, OnTryGetCurrentTarget, tickHost: this, coroutineHost: this, pathNotificationSenderNew, animRequestNotificationSenderNew))
+                {
+                    _fsmManager = manager;
+                }
+                else
+                    DebugLogs.Err("Failed to create FSM manager", this);*/
+            _fsmManager = await factory.CreateFsm(this, this, OnTryGetCurrentTarget, this, this, pathNotificationSenderNew, animRequestNotificationSenderNew);
+
+            if(_fsmManager is null) DebugLogs.Err("Factory returned null FSM manager", this);
+            else DebugLogs.Err("Successfully created FSM manager with factory", this);
+
+            OnNotifies(NpcNotification.SceneBegin());
         }
         else
             DebugLogs.Err("Failed to retrieve Factory", this);
@@ -231,7 +238,8 @@ public partial class NPCController
     {
         //_animationControl?.SetIKLookTarget(_primaryTarget?.Transform);
        // _fsmManager?.SwitchTo(StateId.Patrol);
-        OnNotifies(NpcNotification.SceneBegin());
+        
+        //OnNotifies(NpcNotification.SceneBegin()); Remember to Un comment
     }
 
     public override void Unload()

@@ -58,7 +58,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
     // IFSMNotifications - For notifications received by the FSMManager, i.e. No valid destination, target lost, Target within melee/ shot range, etc.
     public void OnNotifies(in NpcNotification n)
     {
-        if (_fsmManager.IsInStateTransition /*|| n.Id != _fsmManager.CurrentStateId*/) return;
+        if (_fsmManager?.IsInStateTransition ?? true /*|| n.Id != _fsmManager.CurrentStateId*/) return;
 
       //  if (n.Kind == NotificationKind.FOVUpdate) Debug.LogError("FOV Result: "+n.FOVResult.ToString());
 

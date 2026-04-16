@@ -7,5 +7,5 @@ public abstract class ServiceBundle<T> where T : class
 
     public ServiceBundle(T data) => _metaData = data;
 
-    public abstract Task InitialiseAsync();
+    public virtual Task InitialiseAsync() { return Task.CompletedTask; }
 }

@@ -1,15 +1,27 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.Rendering.LookDev;
 
-public abstract class FsmBaseState<TProvider> : IFsmState
+
+public abstract class FsmBaseState
+{
+    protected IFsmStateContext _stateContext;
+
+    internal void InjectManager(IFsmStateContext manager)
+    {
+        if (_stateContext is not null) return;
+        _stateContext = manager;
+    }
+}
+
+public abstract class FsmBaseState<TProvider> : FsmBaseState, IFsmState
  where TProvider : IFsmStateData
 {
 
     protected Coroutine _runningRoutine;
     protected bool _isAtDestination = false;
     protected bool _isInState = false;
+   // protected IFsmStateContext _manager;
    // protected DestinationResultCallback _validationCallback;
 
 
@@ -24,14 +36,14 @@ public abstract class FsmBaseState<TProvider> : IFsmState
 
    // protected readonly IFsmDestinationProvider _destProvider;
     protected readonly TProvider _dataProvider;
-    protected readonly IFsmStateContext _stateContext;
+    
 
     protected readonly IDestinationResolver _pathResolver;
 
-    public FsmBaseState(IFsmStateContext stateController, /*IFsmDestinationProvider destP,*/
+    public FsmBaseState(/*IFsmStateContext stateController,*/ /*IFsmDestinationProvider destP,*/
         TProvider dataProvider, IDestinationResolver pathResolver, ICoroutineHost host, StateId id)
     {
-        _stateContext = stateController;
+       // _stateContext = stateController;
 
        /* _destProvider = destP;*/
         _dataProvider = dataProvider;
@@ -46,7 +58,7 @@ public abstract class FsmBaseState<TProvider> : IFsmState
 
     #endregion
 
-
+   
 
     protected bool TryGetPath(out NavMeshPath path) => _stateContext.TryGetPath(out path);
 
