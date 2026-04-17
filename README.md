@@ -112,7 +112,7 @@ redundant calculations, and limited flexibility. This remaster focuses on an eve
 
 - [Quick Demo of agent losing sight of player and then moving to within view](https://drive.google.com/file/d/1nXlU8e6fQI-vGR5_MLiJcoOxxfPgEko-/view?usp=drive_link)
 
-- [Some Code Snippets](https://docs.google.com/document/d/1dTBKOFOfGZgch1Si9fJ0h0nwBVLeQuxA_a4_3nHgupc/edit?usp=drive_link)
+- [Some Code Snippets](https://docs.google.com/document/d/1dTBKOFOfGZgch1Si9fJ0h0nwBVLeQuxA_a4_3nHgupc/edit?usp=drive_link) - To be updated soon
 <!--
 Drop in comparison gifs, before/after screenshots or diagrams here.
 -->
