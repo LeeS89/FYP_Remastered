@@ -56,7 +56,7 @@ public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
     private readonly IFsmSpeedControl _speedController;
     private readonly ITickableRunner _tickHost;
 
-    private readonly IReadOnlyDictionary<StateId, IFsmState> _states;
+    private IReadOnlyDictionary<StateId, IFsmState> _states;
 
 
     // newest
@@ -80,6 +80,9 @@ public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
 
         _tickHost?.Register(this);
     }
+
+    public void InjectStates(IReadOnlyDictionary<StateId, IFsmState> states) => _states = states;
+
 
     // END NEW
 

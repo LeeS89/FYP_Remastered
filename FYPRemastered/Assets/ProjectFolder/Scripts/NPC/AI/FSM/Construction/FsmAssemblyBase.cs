@@ -8,8 +8,9 @@ public abstract class FsmAssemblyBase<T> where T : FsmFeatureBase
 {
     protected readonly T _metaData;
     protected readonly IPathService _pathService;
-   /* protected IAddressableService _fsmSpeedService;
-    protected Task<bool> _fsmSpeedServiceInitTask;*/
+    protected IDistanceMonitoringService _distService;
+    /* protected IAddressableService _fsmSpeedService;
+     protected Task<bool> _fsmSpeedServiceInitTask;*/
 
     public FsmAssemblyBase(T metaData, IPathService pathService)
     {
@@ -23,40 +24,40 @@ public abstract class FsmAssemblyBase<T> where T : FsmFeatureBase
         IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null)
     {
         if (callerId is null || body is null || tickHost is null || coroutineHost is null) return null;
-        DebugLogs.Err("Calling Build Humanoid");
+        DebugLogs.Log("Calling Build Fsm");
 
-        var states = await CreateStates(coroutineHost);
-        if (states is null) { DebugLogs.Err("States failed to create"); return null; }
-
-        var manager = await CreateManager(callerId, body, states, targetRetrieverFunc, tickHost, coroutineHost, pathNotifySender, animNotifySender);
+       
+        var manager = await CreateManager(callerId, body, targetRetrieverFunc, tickHost, coroutineHost, pathNotifySender, animNotifySender);
 
         if(manager is null) return null;
 
-        foreach(var state in states.Values)
-        {
-            if(state is FsmBaseState baseState)
-                baseState.InjectManager(manager);
-        }
-           
+        var states = await CreateStates(manager, coroutineHost);
+        if (states is null) { DebugLogs.Err("States failed to create"); return null; }
+
+        manager.InjectStates(states);
+
+        foreach (var state in states.Values)
+            DebugLogs.Err($"State created: {state.GetId()}");
+
         return manager;
        
     }
 
-    protected async Task<FsmManager> CreateManager(IInstanceIdentifiable id, INpcBody body, IReadOnlyDictionary<StateId, IFsmState> states, TryGetTarget targetRetrieverFunc, ITickableRunner tickHost, 
+    protected async Task<FsmManager> CreateManager(IInstanceIdentifiable id, INpcBody body, TryGetTarget targetRetrieverFunc, ITickableRunner tickHost, 
         ICoroutineHost coroutineHost, IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null)
     {
         FsmContext ctx = new FsmContext(body, targetRetrieverFunc, id.EntityId);
         FsmServices svs = new FsmServices(tickHost, coroutineHost, pathNotifySender, animNotifySender);
-        FsmConfig config = await CreateConfig(states);
+        FsmConfig config = await CreateConfig();
 
         if(config is null) return null;
 
         return new FsmManager(ctx, svs, config);
     }
 
-    protected abstract Task<FsmConfig> CreateConfig(IReadOnlyDictionary<StateId, IFsmState> states);
+    protected abstract Task<FsmConfig> CreateConfig();
     
-    protected abstract Task<Dictionary<StateId, IFsmState>> CreateStates(ICoroutineHost coroutineHost);
+    protected abstract Task<Dictionary<StateId, IFsmState>> CreateStates(FsmManager manager, ICoroutineHost coroutineHost);
 
 
     /// <summary>

@@ -14,11 +14,11 @@ public class FsmFeatureGroup
 
     public HumanoidFsmFeature Humanoid;
 
-    public FeatureMeta SpeedData;
+ /*   public FeatureMeta SpeedData;
     public FeatureMeta Waypoints;
     public FeatureMeta FlankPoints;
     public FeatureMeta PatrolData;
-    public FeatureMeta ChaseData;
+    public FeatureMeta ChaseData;*/
 }
 
 

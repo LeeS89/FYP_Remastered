@@ -7,8 +7,8 @@ using UnityEngine.AI;
 public sealed class FsmPatrolState : FsmBaseState<IFsmPatrolData>
 {
 
-    public FsmPatrolState(/*IFsmStateContext stateController,*/ IFsmPatrolData dataP, IDestinationResolver pathResolver, ICoroutineHost host)
-        : base(/*stateController,*/ dataP, pathResolver, host, StateId.Patrol)
+    public FsmPatrolState(IFsmStateContext stateController, IFsmPatrolData dataP, IDestinationResolver pathResolver, ICoroutineHost host)
+        : base(stateController, dataP, pathResolver, host, StateId.Patrol)
     {
         _candidateDestinations.EnsureCapacity(10);
     }

@@ -105,6 +105,37 @@ public partial class NPCController
     {
         if (_aiServices.TryGetFsmFactory(out var factory))
         {
+            try
+            {
+                var pathNotificationSenderNew = new PathNotificationSender(_componentNotifications);
+                var animRequestNotificationSenderNew = new AnimationNotificationSender(_componentNotifications);
+        
+                _fsmManager = await factory.CreateFsm(callerId: this, body: this, OnTryGetCurrentTarget, tickHost: this, coroutineHost: this, pathNotificationSenderNew, animRequestNotificationSenderNew);
+
+                if (_fsmManager is null) DebugLogs.Err("Factory returned null FSM manager", this);
+                else DebugLogs.Log("Successfully created FSM manager with factory", this);
+
+                OnNotifies(NpcNotification.SceneBegin());
+            }
+            catch (Exception ex)
+            {
+                DebugLogs.Err("Exception occurred while constructing FSM: " + ex.Message, this);
+                //   DebugLogs.Throw(ex, "Exception during FSM construction", this);
+            }
+        }
+        else
+            DebugLogs.Err("Failed to retrieve Factory", this);
+
+
+      /*  return;
+        ConstructObsolete();*/
+    }
+
+    [Obsolete("", true)]
+    private async Task ConstructFSMOld()
+    {
+        if (_aiServices.TryGetFsmFactory(out var factory))
+        {
             var pathNotificationSenderNew = new PathNotificationSender(_componentNotifications);
             var animRequestNotificationSenderNew = new AnimationNotificationSender(_componentNotifications);
             /*    if (factory.TryCreateFsm(out var manager, this, this, OnTryGetCurrentTarget, tickHost: this, coroutineHost: this, pathNotificationSenderNew, animRequestNotificationSenderNew))

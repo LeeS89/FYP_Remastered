@@ -3,21 +3,12 @@ using UnityEngine;
 using UnityEngine.AI;
 
 
-public abstract class FsmBaseState
-{
-    protected IFsmStateContext _stateContext;
 
-    internal void InjectManager(IFsmStateContext manager)
-    {
-        if (_stateContext is not null) return;
-        _stateContext = manager;
-    }
-}
 
-public abstract class FsmBaseState<TProvider> : FsmBaseState, IFsmState
+public abstract class FsmBaseState<TProvider> : IFsmState
  where TProvider : IFsmStateData
 {
-
+    protected readonly IFsmStateContext _stateContext;
     protected Coroutine _runningRoutine;
     protected bool _isAtDestination = false;
     protected bool _isInState = false;
@@ -40,10 +31,10 @@ public abstract class FsmBaseState<TProvider> : FsmBaseState, IFsmState
 
     protected readonly IDestinationResolver _pathResolver;
 
-    public FsmBaseState(/*IFsmStateContext stateController,*/ /*IFsmDestinationProvider destP,*/
+    public FsmBaseState(IFsmStateContext stateController, /*IFsmDestinationProvider destP,*/
         TProvider dataProvider, IDestinationResolver pathResolver, ICoroutineHost host, StateId id)
     {
-       // _stateContext = stateController;
+        _stateContext = stateController;
 
        /* _destProvider = destP;*/
         _dataProvider = dataProvider;

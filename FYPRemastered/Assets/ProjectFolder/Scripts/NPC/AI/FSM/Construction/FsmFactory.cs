@@ -39,13 +39,13 @@ namespace Services.Internal
         public IPatrolService GetWService() => _wpService as IPatrolService;
 
 
-        public override async Task InitialiseAsync()
+        /*public override async Task InitialiseAsync()
         {
             if (_registry == null) _registry = new FsmRegistry();
 
             var controlFeature = _metaData.SpeedData;
 
-            _fsmControlService = await TryLoadStateServiceAndInitialize<FsmSpeedResources>(controlFeature/*, () => new FsmSpeedResources(*//*_registry*//*)*/);
+            _fsmControlService = await TryLoadStateServiceAndInitialize<FsmSpeedResources>(controlFeature*//*, () => new FsmSpeedResources(*//*_registry*//*)*//*);
             _pathService = new PathRequestManager(_tickHost);
             //   if(_pathService is ITickable t) _tickables.Add(t);
             if (_metaData == null)
@@ -57,7 +57,7 @@ namespace Services.Internal
             var waypointFeature = _metaData.Waypoints;
             if (waypointFeature.enabled)
             {
-                _wpService = await TryLoadStateServiceAndInitialize<WaypointResources>(waypointFeature/*, () => new WaypointResources())*/);
+                _wpService = await TryLoadStateServiceAndInitialize<WaypointResources>(waypointFeature*//*, () => new WaypointResources())*//*);
                 if (_wpService == null) DebugLogs.Nre(_wpService, "WaypointService");
                 else
                 {
@@ -70,7 +70,7 @@ namespace Services.Internal
             var flankFeature = _metaData.FlankPoints;
             if (flankFeature.enabled)
             {
-                _flankService = await TryLoadStateServiceAndInitialize<PlayerFlankingResources>(flankFeature/*, () => new PlayerFlankingResources()*/);
+                _flankService = await TryLoadStateServiceAndInitialize<PlayerFlankingResources>(flankFeature*//*, () => new PlayerFlankingResources()*//*);
                 if (_flankService == null) DebugLogs.Nre(_flankService, "Flank service", this);
                 else DebugLogs.Log("Flank Service Constructed successfully", this);
                 //  var flnk = await TryLoadStateServiceAndInitialize<SamplePointDataSO, PlayerFlankingResources>(flankFeature, ()=> new PlayerFlankingResources());
@@ -80,12 +80,12 @@ namespace Services.Internal
             if (chaseFeature.enabled)
             {
                 CreateDistanceMonitorService();
-                _chaseService = await TryLoadStateServiceAndInitialize<ChaseResources>(chaseFeature/*, ()=> new ChaseResources()*/);
+                _chaseService = await TryLoadStateServiceAndInitialize<ChaseResources>(chaseFeature*//*, ()=> new ChaseResources()*//*);
                 if (_chaseService == null) DebugLogs.Nre(_chaseService, "Chase Service", this);
                 else DebugLogs.Log("Chase service constructed successfully", this);
             }
 
-        }
+        }*/
 
         private void CreateDistanceMonitorService()
         {
@@ -178,7 +178,7 @@ namespace Services.Internal
         }
 
         private bool TryCreatePatrol(Dictionary<StateId, IFsmState> _dict, NavMeshPath path, Transform t, TryGetTarget tgt)
-            => _dict.TryAdd(StateId.Patrol, new FsmPatrolState(/*null,*/ null, null, null));
+            => _dict.TryAdd(StateId.Patrol, new FsmPatrolState(null, null, null, null));
 
         public bool TryCreateFsm(out IFsmController fsm, IInstanceIdentifiable callerId, INpcBody body, TryGetTarget targetRetrieverFunc, ITickableRunner tickHost, ICoroutineHost coroutineHost, IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null)
         {
@@ -198,7 +198,7 @@ namespace Services.Internal
             FsmManager fsNew = new FsmManager(c, s, cfg);
 
             PatrolServiceBridge pb = new PatrolServiceBridge((IPatrolService)_wpService);
-            IFsmState patrol = new FsmPatrolState(/*fsNew,*/ pb, new DestinationProcessor(_pathService, coroutineHost), coroutineHost);
+            IFsmState patrol = new FsmPatrolState(fsNew, pb, new DestinationProcessor(_pathService, coroutineHost), coroutineHost);
             _states.Add(StateId.Patrol, patrol);
             fsm = fsNew;
 
