@@ -45,9 +45,12 @@ redundant calculations, and limited flexibility. This remaster focuses on an eve
 - States include: **Patrol**, **Stationary**, **Chase**, **Flank**, **Death**
 
 ### FSM → Destination Flow
-1. FSM state coroutine starts (e.g., Patrol)
-2. Sends event to request a `DestinationType` (Patrol, Flank, etc.)
-3. FSM handles the result, applies destination, and transitions animation/speed
+1. State sends a buffer list to injected candidate destination provider
+2. Forwards the list to the Path resolver and awaits the result
+3. Path resolver iterates the list, sending 1 at a time to be queued for path calculation to the Path calculation manager
+4. Returns the first successfully reachable destination back to the state which forwards the result to the Fsm manager or failed result if none found
+5. Fsm manager interprets the result and is responsible for setting the agents destination via Set Path
+
 
 ### Flanking Logic
 - Scene Editor places cube markers on NavMesh
