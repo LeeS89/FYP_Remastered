@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public interface INPCBrainContext : ITargetable
+public interface INpcBrainContext : ITargetable
 {
     StateId CurrentFsmState { get; }
     CombatOrder CurrentComOrder { get; }

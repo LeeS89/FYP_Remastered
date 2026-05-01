@@ -36,8 +36,8 @@ public abstract class FsmAssemblyBase<T> where T : FsmFeatureBase
 
         manager.InjectStates(states);
 
-        foreach (var state in states.Values)
-            DebugLogs.Err($"State created: {state.GetId()}");
+        /*foreach (var state in states.Values)
+            DebugLogs.Err($"State created: {state.GetId()}");*/
 
         return manager;
        
@@ -50,9 +50,11 @@ public abstract class FsmAssemblyBase<T> where T : FsmFeatureBase
         FsmServices svs = new FsmServices(tickHost, coroutineHost, pathNotifySender, animNotifySender);
         FsmConfig config = await CreateConfig();
 
-        if(config is null) return null;
 
-        return new FsmManager(ctx, svs, config);
+        return config is not null ? new FsmManager(ctx, svs, config) : null;
+      /*  if(config is null) return null;
+
+        return new FsmManager(ctx, svs, config);*/
     }
 
     protected abstract Task<FsmConfig> CreateConfig();
@@ -87,9 +89,9 @@ public abstract class FsmAssemblyBase<T> where T : FsmFeatureBase
         if (initTask is null)
             initTask = instance.TryInitialiseAsync(data);
 
-        return Awaitandcheck(instance, initTask);
+        return AwaitAndCheck(instance, initTask);
 
-        static async Task<TConcrete> Awaitandcheck(TConcrete svc, Task<bool> task)
+        static async Task<TConcrete> AwaitAndCheck(TConcrete svc, Task<bool> task)
         {
             if (!await task)
             {

@@ -133,6 +133,7 @@ namespace Services.Internal
             return fsmFactory != null;
         }
 
+        [Obsolete]
         public bool TryGetWaypointService(out IPatrolService waypointService)
         {
             waypointService = _fsmFactory?.GetWService();//_waypointService;
@@ -237,6 +238,7 @@ public interface ISceneAIServices : IUtilityServices
     bool TryGetPathService(out IPathService pathService);
     // IPathService PathService { get; }
 
+    [Obsolete]
     bool TryGetWaypointService(out IPatrolService waypointService);
     // IWaypointService WaypointService { get; }
 

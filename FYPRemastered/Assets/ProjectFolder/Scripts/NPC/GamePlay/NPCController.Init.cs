@@ -464,6 +464,7 @@ public partial class NPCControllerNewest
         OnTryGetCurrentTarget = TryGetCurrentTarget;
         if (_aiServices.TryGetFsmFactory(out var factory))
         {
+            // Refine Notification Setup in future refactor
             var pathNotificationSenderNew = new PathNotificationSender(_componentNotifications);
             var animRequestNotificationSenderNew = new AnimationNotificationSender(_componentNotifications);
             if (factory.TryCreateFsm(out var manager, this, this, OnTryGetCurrentTarget, tickHost: this, coroutineHost: this, pathNotificationSenderNew, animRequestNotificationSenderNew))

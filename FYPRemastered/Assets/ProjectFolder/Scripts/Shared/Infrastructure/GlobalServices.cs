@@ -7,7 +7,13 @@ public static class GlobalServices
     private static readonly Dictionary<Type, object> _services = new();
     private static readonly Dictionary<Type, int> _refCounts = new();
 
-    public static T Acquire<T>(Func<T> factory)
+    /// <summary>
+    /// srga
+    /// </summary>
+    /// <typeparam name="T">dx</typeparam>
+    /// <param name="factory"></param>
+    /// <returns></returns>
+    public static T Acquire<T>(Func<T> factory) where T : IGlobalService
     {
         var type = typeof(T);
 
@@ -25,7 +31,7 @@ public static class GlobalServices
 
     }
 
-    public static void Release<T>()
+    public static void Release<T>() where T : IGlobalService
     {
         var type = typeof(T);
         if (_services.TryGetValue(type, out var existing))
@@ -46,3 +52,5 @@ public static class GlobalServices
         }
     }
 }
+
+public interface IGlobalService { }

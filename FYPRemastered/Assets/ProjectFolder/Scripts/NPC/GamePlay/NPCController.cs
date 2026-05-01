@@ -9,7 +9,7 @@ using UnityEngine.AI;
 [RequireComponent(typeof(AgentEventManager))]
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(NavMeshObstacle))]
-public partial class NPCController : TargetableInit<ISceneAIServices, AgentEventManager>, INpcBody, /*IAgentData, */INPCBrainContext, INotificationListener, ICoroutineHost, ITickableRunner
+public partial class NPCController : TargetableInit<ISceneAIServices, AgentEventManager>, INpcBody, /*IAgentData, */INpcBrainContext, INotificationListener, ICoroutineHost, ITickableRunner
 { // Remove IAgentData
     
     //   private bool _isInStateTransition = false;
@@ -470,7 +470,7 @@ public partial class NPCController : TargetableInit<ISceneAIServices, AgentEvent
 [RequireComponent(typeof(AgentEventManager))]
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(NavMeshObstacle))]
-public partial class NPCControllerNewest : TargetableInit<ISceneAIServices, AgentEventManager>, INpcBody, /*IAgentData, */INPCBrainContext, INotificationListener, ICoroutineHost, ITickableRunner
+public partial class NPCControllerNewest : TargetableInit<ISceneAIServices, AgentEventManager>, INpcBody, /*IAgentData, */INpcBrainContext, INotificationListener, ICoroutineHost, ITickableRunner
 { // Remove IAgentData
     
     //   private bool _isInStateTransition = false;

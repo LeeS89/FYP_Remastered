@@ -22,7 +22,7 @@ public static class NPCDecisionPolicyObsolete
     }
 
 */
-    public static bool TryDecide(this INPCBrainContext self, in NpcNotification n, out BrainDecision decision)
+    public static bool TryDecide(this INpcBrainContext self, in NpcNotification n, out BrainDecision decision)
     {
         var state = self.CurrentFsmState;
         decision = default;
@@ -36,7 +36,7 @@ public static class NPCDecisionPolicyObsolete
         };
     }
 
-    private static bool DecidePatrol(INPCBrainContext self, in NpcNotification n, out BrainDecision d)
+    private static bool DecidePatrol(INpcBrainContext self, in NpcNotification n, out BrainDecision d)
     {
         d = default;
 
@@ -75,7 +75,7 @@ public static class NPCDecisionPolicyObsolete
     private static bool TargetSeen(FOVResult result) => result == FOVResult.ClearFov || result == FOVResult.TargetSeenAndWithinMeleeRadius
                     || result == FOVResult.TargetSeenAndWithinShootingAngles;
 
-    private static bool DecideChase(INPCBrainContext self, in NpcNotification n, out BrainDecision d)
+    private static bool DecideChase(INpcBrainContext self, in NpcNotification n, out BrainDecision d)
     {
         d = default;
         switch (n.Kind)
@@ -99,13 +99,13 @@ public static class NPCDecisionPolicyObsolete
        
     }
 
-    private static bool DecideFlank(INPCBrainContext self, in NpcNotification n, out BrainDecision d)
+    private static bool DecideFlank(INpcBrainContext self, in NpcNotification n, out BrainDecision d)
     {
         d = default;
         return false;
     }
 
-    private static bool FOVStatusChanged(INPCBrainContext c, FOVResult r) => c.CurrentFovState != r;
+    private static bool FOVStatusChanged(INpcBrainContext c, FOVResult r) => c.CurrentFovState != r;
 
     private static RotationOrder DecideNextRotationOrder(RotationOrder currentOrder, FOVResult newFOVStatus)
     {

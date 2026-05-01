@@ -25,7 +25,7 @@ public class HumanoidFactory : FsmAssemblyBase<HumanoidFsmFeature>
         if (_speedService is null) return null;
         FsmSpeedControlBridge bridge = new FsmSpeedControlBridge(_speedService);
 
-        return new FsmConfig(bridge, null);
+        return new FsmConfig(bridge, null); // Remember to remove the null param
     }
 
     protected override async Task<Dictionary<StateId, IFsmState>> CreateStates(FsmManager manager, ICoroutineHost coroutineHost)
@@ -73,3 +73,4 @@ public class HumanoidFactory : FsmAssemblyBase<HumanoidFsmFeature>
         return states;
     }
 }
+

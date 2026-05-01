@@ -5,7 +5,7 @@ using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 
-public class DistanceManagerJob : IDistanceMonitoringService, ITickable
+public class DistanceManagerJob : IDistanceMonitoringService, ITickable, IGlobalService
 {
     private NativeList<int> _subscriberIds;
     private List<ITargetable> _targets = new(25);
