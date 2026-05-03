@@ -150,7 +150,7 @@ namespace Services.Internal
         /// <param name="ownerTransform">The transform representing the owner of the state. Used to initialize the new state.</param>
         /// <param name="targetRetrieverFunc">A delegate used to retrieve the target for the state. The function is invoked whenever a state needs to know its targets position</param>
         /// <returns>true if the state was successfully created and added to the dictionary; otherwise, false.</returns>
-        public bool TryCreateAndAddState(StateId id, Dictionary<StateId, IFsmState> _stateDict, NavMeshPath path, Transform ownerTransform, TryGetTarget targetRetrieverFunc)
+        public bool TryCreateAndAddState(StateId id, Dictionary<StateId, IFsmState> _stateDict, NavMeshPath path, Transform ownerTransform, TryGetCombatTarget targetRetrieverFunc)
         {
             if (id == StateId.None || _stateDict == null || path == null ||
                 ownerTransform == null || targetRetrieverFunc == null) return false;
@@ -177,10 +177,10 @@ namespace Services.Internal
 
         }
 
-        private bool TryCreatePatrol(Dictionary<StateId, IFsmState> _dict, NavMeshPath path, Transform t, TryGetTarget tgt)
+        private bool TryCreatePatrol(Dictionary<StateId, IFsmState> _dict, NavMeshPath path, Transform t, TryGetCombatTarget tgt)
             => _dict.TryAdd(StateId.Patrol, new FsmPatrolState(null, null, null, null));
 
-        public bool TryCreateFsm(out IFsmController fsm, IInstanceIdentifiable callerId, INpcBody body, TryGetTarget targetRetrieverFunc, ITickableRunner tickHost, ICoroutineHost coroutineHost, IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null)
+        public bool TryCreateFsm(out IFsmController fsm, IInstanceIdentifiable callerId, INpcBody body, TryGetCombatTarget targetRetrieverFunc, ITickableRunner tickHost, ICoroutineHost coroutineHost, IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null)
         {
             if (body is null || body.Transform is null) { fsm = null; return false; }
 
@@ -207,21 +207,22 @@ namespace Services.Internal
 
         private HumanoidFactory _humanoidFactory;
 
-        public async Task<IFsmController> CreateFsm(IInstanceIdentifiable callerId, INpcBody body, TryGetTarget targetRetrieverFunc, ITickableRunner tickHost, ICoroutineHost coroutineHost,
+        public async Task<(IFsmController manager, INpcBrain brain)> CreateFsm(IInstanceIdentifiable callerId, INpcBody body, TryGetCombatTarget targetRetrieverFunc, ITickableRunner tickHost, ICoroutineHost coroutineHost,
         IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null)
         {
             _pathService ??= new PathRequestManager(_tickHost);
             IFsmController fsm = null;
+            INpcBrain brain = null;
             var humanoid = _metaData.Humanoid;
 
             if (humanoid is not null)
             {
                 _humanoidFactory ??= new HumanoidFactory(_metaData.Humanoid, _pathService);
-                fsm = await _humanoidFactory.Build(callerId, body, targetRetrieverFunc, tickHost, coroutineHost,
+                (fsm, brain) = await _humanoidFactory.Build(callerId, body, targetRetrieverFunc, tickHost, coroutineHost,
                     pathNotifySender, animNotifySender);
             }
                 
-            return fsm;
+            return (fsm, brain);
         }
 
 
@@ -242,12 +243,12 @@ namespace Services.Internal
 
     public interface IFsmFactory
     {
-        bool TryCreateFsm(out IFsmController fsm, IInstanceIdentifiable callerId, INpcBody body, TryGetTarget targetRetrieverFunc, ITickableRunner tickHost,
+        bool TryCreateFsm(out IFsmController fsm, IInstanceIdentifiable callerId, INpcBody body, TryGetCombatTarget targetRetrieverFunc, ITickableRunner tickHost,
             ICoroutineHost coroutineHost, IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null);
 
-        bool TryCreateAndAddState(StateId id, Dictionary<StateId, IFsmState> _stateDict, NavMeshPath path, Transform ownerTransform, TryGetTarget targetRetrieverFunc);
+        bool TryCreateAndAddState(StateId id, Dictionary<StateId, IFsmState> _stateDict, NavMeshPath path, Transform ownerTransform, TryGetCombatTarget targetRetrieverFunc);
 
-        Task<IFsmController> CreateFsm(IInstanceIdentifiable callerId, INpcBody body, TryGetTarget targetRetrieverFunc, ITickableRunner tickHost, ICoroutineHost coroutineHost,
+        Task<(IFsmController manager, INpcBrain brain)> CreateFsm(IInstanceIdentifiable callerId, INpcBody body, TryGetCombatTarget combatTargetRetrieverFunc, ITickableRunner tickHost, ICoroutineHost coroutineHost,
         IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null);
     }
 
@@ -263,7 +264,7 @@ namespace Services.Internal
     {
         private readonly Dictionary<int, FsmEntry> _entries = new(25);
 
-        public bool TryRegister(int npcId, INpcBody body, TryGetTarget targetGetter)
+        public bool TryRegister(int npcId, INpcBody body, TryGetCombatTarget targetGetter)
             => _entries.TryAdd(npcId, new FsmEntry(body, targetGetter));
 
 
@@ -459,13 +460,13 @@ namespace Services.Internal
         private sealed class FsmEntry : IDisposable
         {
             public INpcBody Body { get; private set; }
-            public TryGetTarget TargetGetter { get; private set; }
+            public TryGetCombatTarget TargetGetter { get; private set; }
 
           /*  private INpcBody _body;
             private TryGetTarget _targetGetter;
 
             */
-            public FsmEntry(INpcBody body, TryGetTarget targetGetterFunc)
+            public FsmEntry(INpcBody body, TryGetCombatTarget targetGetterFunc)
             {
                 Body = body;
                 TargetGetter = targetGetterFunc;

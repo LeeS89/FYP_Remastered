@@ -20,30 +20,27 @@ public abstract class FsmAssemblyBase<T> where T : FsmFeatureBase
     }
 
 
-    public async Task<IFsmController> Build(IInstanceIdentifiable callerId, INpcBody body, TryGetTarget targetRetrieverFunc, ITickableRunner tickHost, ICoroutineHost coroutineHost,
+    public async Task<(IFsmController manager, INpcBrain brain)> Build(IInstanceIdentifiable callerId, INpcBody body, TryGetCombatTarget targetRetrieverFunc, ITickableRunner tickHost, ICoroutineHost coroutineHost,
         IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null)
     {
-        if (callerId is null || body is null || tickHost is null || coroutineHost is null) return null;
+        if (callerId is null || body is null || tickHost is null || coroutineHost is null) return (null, null);
         DebugLogs.Log("Calling Build Fsm");
 
        
         var manager = await CreateManager(callerId, body, targetRetrieverFunc, tickHost, coroutineHost, pathNotifySender, animNotifySender);
 
-        if(manager is null) return null;
+        if(manager is null) return (null, null);
 
         var states = await CreateStates(manager, coroutineHost);
-        if (states is null) { DebugLogs.Err("States failed to create"); return null; }
+        if (states is null) { DebugLogs.Err("States failed to create"); return (null, null); }
 
         manager.InjectStates(states);
 
-        /*foreach (var state in states.Values)
-            DebugLogs.Err($"State created: {state.GetId()}");*/
-
-        return manager;
+        return (manager, GetBrain());
        
     }
 
-    protected async Task<FsmManager> CreateManager(IInstanceIdentifiable id, INpcBody body, TryGetTarget targetRetrieverFunc, ITickableRunner tickHost, 
+    protected async Task<FsmManager> CreateManager(IInstanceIdentifiable id, INpcBody body, TryGetCombatTarget targetRetrieverFunc, ITickableRunner tickHost, 
         ICoroutineHost coroutineHost, IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null)
     {
         FsmContext ctx = new FsmContext(body, targetRetrieverFunc, id.EntityId);
@@ -58,6 +55,8 @@ public abstract class FsmAssemblyBase<T> where T : FsmFeatureBase
     }
 
     protected abstract Task<FsmConfig> CreateConfig();
+
+    protected abstract INpcBrain GetBrain();
     
     protected abstract Task<Dictionary<StateId, IFsmState>> CreateStates(FsmManager manager, ICoroutineHost coroutineHost);
 

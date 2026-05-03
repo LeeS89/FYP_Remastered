@@ -696,9 +696,9 @@ public class FsmManagerNew : IFsmStateEventsObsoleteO, IFsmController
 
     // newest
     private readonly INpcBody _owner;
-    private readonly TryGetTarget _ownerTargetGetter;
+    private readonly TryGetCombatTarget _ownerTargetGetter;
 
-    public FsmManagerNew(INpcBody owner, TryGetTarget ownerTargetGetter)
+    public FsmManagerNew(INpcBody owner, TryGetCombatTarget ownerTargetGetter)
     {
         _owner = owner;
         _ownerTargetGetter = ownerTargetGetter;

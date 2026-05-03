@@ -72,5 +72,8 @@ public class HumanoidFactory : FsmAssemblyBase<HumanoidFsmFeature>
         
         return states;
     }
+
+    protected override INpcBrain GetBrain() => NpcHumanoidBrain.Instance;
+    
 }
 

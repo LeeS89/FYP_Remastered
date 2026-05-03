@@ -58,7 +58,7 @@ public class AgentZoneRegistry : SceneResourcesObsolete, IAgentAlertService
             if (agent != source)
             {
                 var n = NpcNotification.AlertNotifications.ZoneAlert();
-                agent.OnNotifies(n);
+                agent.OnNotificationReceived(n);
             }
         }
         return true;
@@ -101,7 +101,7 @@ public class AgentZoneRegistry : SceneResourcesObsolete, IAgentAlertService
         if (!_zoneAgents.TryGetValue(zone, out var listeners)) return false;
 
         foreach (var l in listeners)
-            l.OnNotifies(NpcNotification.AlertNotifications.ZoneAlert());
+            l.OnNotificationReceived(NpcNotification.AlertNotifications.ZoneAlert());
 
         return true;
     }

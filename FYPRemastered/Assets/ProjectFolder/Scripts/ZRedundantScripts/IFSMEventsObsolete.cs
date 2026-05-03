@@ -77,7 +77,7 @@ public interface IFlankDepsObsolete : IFsmStateDepsObsolete, ITargetRefObsolete,
 
 public interface INotificationListener // => To be made Obsolete
 {
-    void OnNotifies(in NpcNotification n);
+    void OnNotificationReceived(in NpcNotification n);
   //  void EnterAlertPhase();
 }
 
@@ -89,10 +89,10 @@ public class SharedFsmStateServices
     public NavMeshPath Path { get; }
     public Transform OwnerTransform { get; }
 
-    public TryGetTarget OnTryGetCurrentTarget;
+    public TryGetCombatTarget OnTryGetCurrentTarget;
     //public Func<ITargetable> GetCurrentTarget { get; }
 
-    public SharedFsmStateServices(NavMeshPath path, Transform ownerTransform, TryGetTarget tryGetCurrentTarget)
+    public SharedFsmStateServices(NavMeshPath path, Transform ownerTransform, TryGetCombatTarget tryGetCurrentTarget)
     {
         Path = path;
         OwnerTransform = ownerTransform;

@@ -118127,7 +118127,7 @@ GameObject:
   - component: {fileID: 1863641515}
   - component: {fileID: 1863641514}
   - component: {fileID: 1863641512}
-  - component: {fileID: 1863641520}
+  - component: {fileID: 1863641522}
   - component: {fileID: 1863641521}
   m_Layer: 4
   m_Name: TestRunner2 (1)
@@ -118251,7 +118251,7 @@ Transform:
   - {fileID: 99692068}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
---- !u!114 &1863641520
+--- !u!114 &1863641521
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -118260,9 +118260,22 @@ MonoBehaviour:
   m_GameObject: {fileID: 1863641510}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0dad097637c8ea848a99d762118e5a81, type: 3}
+  m_Script: {fileID: 11500000, guid: 9eb00770dd0468a41b37de612cbaade3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _testRespawn: 0
+--- !u!114 &1863641522
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1863641510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0451520931ca6364eb09ce3d9553394c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NpcController
   _rootTransform: {fileID: 1863641519}
   _targetCollider: {fileID: 99692069}
   _selfTargetMask:
@@ -118334,19 +118347,6 @@ MonoBehaviour:
   _flankStateCfg:
     maxFlankSteps: 12
     minFlankSteps: 4
---- !u!114 &1863641521
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1863641510}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9eb00770dd0468a41b37de612cbaade3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _testRespawn: 0
 --- !u!1001 &1863965890
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -154897,7 +154897,7 @@ GameObject:
   - component: {fileID: 4565709518911953609}
   - component: {fileID: 8895819321149061180}
   - component: {fileID: 210860844461334392}
-  - component: {fileID: 8950683044442760030}
+  - component: {fileID: 8950683044442760032}
   - component: {fileID: 8950683044442760031}
   m_Layer: 4
   m_Name: TestRunner2
@@ -156475,7 +156475,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6697218256617432362}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8950683044442760030
+--- !u!114 &8950683044442760031
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -156484,9 +156484,22 @@ MonoBehaviour:
   m_GameObject: {fileID: 6179558967993662372}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0dad097637c8ea848a99d762118e5a81, type: 3}
+  m_Script: {fileID: 11500000, guid: 9eb00770dd0468a41b37de612cbaade3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _testRespawn: 0
+--- !u!114 &8950683044442760032
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6179558967993662372}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0451520931ca6364eb09ce3d9553394c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NpcController
   _rootTransform: {fileID: 8070524998269774116}
   _targetCollider: {fileID: 226800903}
   _selfTargetMask:
@@ -156558,19 +156571,6 @@ MonoBehaviour:
   _flankStateCfg:
     maxFlankSteps: 12
     minFlankSteps: 4
---- !u!114 &8950683044442760031
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6179558967993662372}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9eb00770dd0468a41b37de612cbaade3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _testRespawn: 0
 --- !u!4 &8992343795732171483
 Transform:
   m_ObjectHideFlags: 0

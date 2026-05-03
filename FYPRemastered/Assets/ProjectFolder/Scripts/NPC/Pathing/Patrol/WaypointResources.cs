@@ -341,10 +341,10 @@ public class WaypointResources : FsmResources, IPatrolService
 public sealed class FsmContext
 {
     public INpcBody Owner { get; private set; }
-    public TryGetTarget TargetGetter { get; private set; }
+    public TryGetCombatTarget TargetGetter { get; private set; }
     public int InstanceId { get; private set; }
 
-    public FsmContext(INpcBody owner, TryGetTarget targetGetter, int instanceId)
+    public FsmContext(INpcBody owner, TryGetCombatTarget targetGetter, int instanceId)
     {
         Owner = owner;
         TargetGetter = targetGetter;

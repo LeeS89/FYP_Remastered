@@ -210,11 +210,11 @@ public interface INpcBrain
 
 
 
-public class NpcDecisionPolicyNew : INpcBrain
+public class NpcHumanoidBrain : INpcBrain
 {
 
-    public static readonly NpcDecisionPolicyNew Instance = new NpcDecisionPolicyNew();
-    private NpcDecisionPolicyNew() { }
+    public static readonly NpcHumanoidBrain Instance = new NpcHumanoidBrain();
+    private NpcHumanoidBrain() { }
 
     public void Decide(INpcBrainContext self, in NpcNotification n)
     {

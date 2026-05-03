@@ -61,7 +61,7 @@ public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
 
     // newest
     private readonly INpcBody _owner;
-    private readonly TryGetTarget _ownerTargetGetter;
+    private readonly TryGetCombatTarget _ownerTargetGetter;
 
 
     public FsmManager(FsmContext context, FsmServices services, FsmConfig config)
