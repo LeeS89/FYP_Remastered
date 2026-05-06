@@ -9,6 +9,8 @@ public abstract class FsmAssemblyBase<T> where T : FsmFeatureBase
     protected readonly T _metaData;
     protected readonly IPathService _pathService;
     protected IDistanceMonitoringService _distService;
+
+    protected Dictionary<int, Dictionary<StateId, IFsmState>> _registry = new();
     /* protected IAddressableService _fsmSpeedService;
      protected Task<bool> _fsmSpeedServiceInitTask;*/
 
@@ -25,7 +27,9 @@ public abstract class FsmAssemblyBase<T> where T : FsmFeatureBase
     {
         if (callerId is null || body is null || tickHost is null || coroutineHost is null) return (null, null);
         DebugLogs.Log("Calling Build Fsm");
+        int id = callerId.EntityId;
 
+        if (_registry.ContainsKey(id)) return (null, null);
        
         var manager = await CreateManager(callerId, body, targetRetrieverFunc, tickHost, coroutineHost, pathNotifySender, animNotifySender);
 
@@ -36,6 +40,8 @@ public abstract class FsmAssemblyBase<T> where T : FsmFeatureBase
 
         manager.InjectStates(states);
 
+        _registry.Add(id, states);
+
         return (manager, GetBrain());
        
     }
@@ -44,17 +50,18 @@ public abstract class FsmAssemblyBase<T> where T : FsmFeatureBase
         ICoroutineHost coroutineHost, IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null)
     {
         FsmContext ctx = new FsmContext(body, targetRetrieverFunc, id.EntityId);
-        FsmServices svs = new FsmServices(tickHost, coroutineHost, pathNotifySender, animNotifySender);
-        FsmConfig config = await CreateConfig();
+        FsmServices svs = new FsmServices(tickHost, coroutineHost);
+        FsmOutputChannels cnls = new FsmOutputChannels(pathNotifySender, animNotifySender);
+        /*FsmConfig config*/IFsmSpeedControl sc = await CreateSpeedcontroller();
 
 
-        return config is not null ? new FsmManager(ctx, svs, config) : null;
+        return sc is not null ? new FsmManager(ctx, svs, cnls, sc) : null;
       /*  if(config is null) return null;
 
         return new FsmManager(ctx, svs, config);*/
     }
 
-    protected abstract Task<FsmConfig> CreateConfig();
+    protected abstract Task<IFsmSpeedControl> CreateSpeedcontroller();
 
     protected abstract INpcBrain GetBrain();
     

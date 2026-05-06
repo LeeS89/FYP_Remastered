@@ -18,14 +18,14 @@ public class HumanoidFactory : FsmAssemblyBase<HumanoidFsmFeature>
     public HumanoidFactory(HumanoidFsmFeature meta, IPathService pathService) : base(meta, pathService) { }
    
 
-    protected override async Task<FsmConfig> CreateConfig()
+    protected override async Task<IFsmSpeedControl> CreateSpeedcontroller()
     {
         _speedService = await TryLoadStateServiceAndInitialize(ref _speedService, ref _speedServiceInitTask, _metaData.SpeedData);
 
         if (_speedService is null) return null;
-        FsmSpeedControlBridge bridge = new FsmSpeedControlBridge(_speedService);
+      //  FsmSpeedControlBridge bridge = new FsmSpeedControlBridge(_speedService);
 
-        return new FsmConfig(bridge, null); // Remember to remove the null param
+        return new FsmSpeedControlBridge(_speedService);//new FsmConfig(bridge, null); // Remember to remove the null param
     }
 
     protected override async Task<Dictionary<StateId, IFsmState>> CreateStates(FsmManager manager, ICoroutineHost coroutineHost)

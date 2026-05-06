@@ -64,7 +64,7 @@ public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
     private readonly TryGetCombatTarget _ownerTargetGetter;
 
 
-    public FsmManager(FsmContext context, FsmServices services, FsmConfig config)
+   /* public FsmManager(FsmContext context, FsmServices services, FsmConfig config)
     {
         _owner = context.Owner;
         _ownerTargetGetter = context.TargetGetter;
@@ -76,8 +76,23 @@ public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
         _animNotifies = services.AnimationRequestNotifications;
 
         _speedController = config.SpeedData;
-        _states = config.States;
+       // _states = config.States;
 
+        _tickHost?.Register(this);
+    }*/
+
+    public FsmManager(FsmContext context, FsmServices services, FsmOutputChannels outputChannels, IFsmSpeedControl speedController)
+    {
+        _owner = context.Owner;
+        _ownerTargetGetter = context.TargetGetter;
+        _instanceId = context.InstanceId;
+
+        _tickHost = services.TickHost;
+        _routineHost = services.CoroutineHost;
+        _pathNotifies = outputChannels.PathNotifications;
+        _animNotifies = outputChannels.AnimationRequestNotifications;
+
+        _speedController = speedController;
         _tickHost?.Register(this);
     }
 

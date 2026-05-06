@@ -356,18 +356,31 @@ public sealed class FsmServices
 {
     public ITickableRunner TickHost { get; private set; }
     public ICoroutineHost CoroutineHost { get; private set; }
-    public IPathNotifications PathNotifications { get; private set; }
+  /*  public IPathNotifications PathNotifications { get; private set; }
     public IAnimationRequestNotifications AnimationRequestNotifications { get; private set; }
-
-    public FsmServices(ITickableRunner tickHost, ICoroutineHost coroutineHost, IPathNotifications pathNotifications, IAnimationRequestNotifications animationRequestNotifications)
+*/
+    public FsmServices(ITickableRunner tickHost, ICoroutineHost coroutineHost/*, IPathNotifications pathNotifications, IAnimationRequestNotifications animationRequestNotifications*/)
     {
         TickHost = tickHost;
         CoroutineHost = coroutineHost;
+       /* PathNotifications = pathNotifications;
+        AnimationRequestNotifications = animationRequestNotifications;*/
+    }
+}
+
+public sealed class FsmOutputChannels
+{
+    public IPathNotifications PathNotifications { get; private set; }
+    public IAnimationRequestNotifications AnimationRequestNotifications { get; private set; }
+
+    public FsmOutputChannels(IPathNotifications pathNotifications, IAnimationRequestNotifications animationRequestNotifications = null)
+    {
         PathNotifications = pathNotifications;
         AnimationRequestNotifications = animationRequestNotifications;
     }
 }
 
+[Obsolete]
 public sealed class FsmConfig
 {
     public IFsmSpeedControl SpeedData { get; private set; }

@@ -1,4 +1,5 @@
 using Npc.API;
+using Services.Internal;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,10 +12,9 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 namespace Services.Internal
 {
 
-    public sealed class FsmFactory : ServiceBundle<FsmFeatureGroup>, IFsmFactory//, ITickable
+    public sealed class FsmFactory : ServiceBundle<FsmFeatureGroup>, IFsmFactory
     {
 
-        //  private List<ITickable> _tickables = new(5);
         private IAddressableService _wpService; // Split interfaces in WaypointResources class so only correct interface is used by relevant classes i.e. => This class need only store it as an IAddressableService
         private IAddressableService _flankService;
         private IAddressableService _chaseService;
@@ -25,7 +25,6 @@ namespace Services.Internal
         private FsmRegistry _registry;
         // SO's
 
-        private AgentChaseData _agentChaseData;
         private readonly ITickableRunner _tickHost;
         // End SO's
 
@@ -37,108 +36,6 @@ namespace Services.Internal
 
 
         public IPatrolService GetWService() => _wpService as IPatrolService;
-
-
-        /*public override async Task InitialiseAsync()
-        {
-            if (_registry == null) _registry = new FsmRegistry();
-
-            var controlFeature = _metaData.SpeedData;
-
-            _fsmControlService = await TryLoadStateServiceAndInitialize<FsmSpeedResources>(controlFeature*//*, () => new FsmSpeedResources(*//*_registry*//*)*//*);
-            _pathService = new PathRequestManager(_tickHost);
-            //   if(_pathService is ITickable t) _tickables.Add(t);
-            if (_metaData == null)
-            {
-                DebugLogs.RequireNotNull(_metaData, "SceneMetaData", this);
-                return;
-            } //=> Possibly just switch all to manual systems
-
-            var waypointFeature = _metaData.Waypoints;
-            if (waypointFeature.enabled)
-            {
-                _wpService = await TryLoadStateServiceAndInitialize<WaypointResources>(waypointFeature*//*, () => new WaypointResources())*//*);
-                if (_wpService == null) DebugLogs.Nre(_wpService, "WaypointService");
-                else
-                {
-                    //  if(_wpService is ITickable tick) _tickables.Add(tick);
-                    DebugLogs.Log("Found Waypoint service", this);
-                }
-
-            }
-
-            var flankFeature = _metaData.FlankPoints;
-            if (flankFeature.enabled)
-            {
-                _flankService = await TryLoadStateServiceAndInitialize<PlayerFlankingResources>(flankFeature*//*, () => new PlayerFlankingResources()*//*);
-                if (_flankService == null) DebugLogs.Nre(_flankService, "Flank service", this);
-                else DebugLogs.Log("Flank Service Constructed successfully", this);
-                //  var flnk = await TryLoadStateServiceAndInitialize<SamplePointDataSO, PlayerFlankingResources>(flankFeature, ()=> new PlayerFlankingResources());
-            }
-
-            var chaseFeature = _metaData.ChaseData;
-            if (chaseFeature.enabled)
-            {
-                CreateDistanceMonitorService();
-                _chaseService = await TryLoadStateServiceAndInitialize<ChaseResources>(chaseFeature*//*, ()=> new ChaseResources()*//*);
-                if (_chaseService == null) DebugLogs.Nre(_chaseService, "Chase Service", this);
-                else DebugLogs.Log("Chase service constructed successfully", this);
-            }
-
-        }*/
-
-        private void CreateDistanceMonitorService()
-        {
-            if (_distService != null) return;
-            _distService = new DistanceManagerJob();
-        }
-
-        private async Task<TConcrete> TryLoadStateServiceAndInitialize<TConcrete>(FeatureMeta data/*, Func<TConcrete> createFunc*/) where TConcrete : class, IAddressableService, new()
-        {
-            //    if (string.IsNullOrWhiteSpace(data.addressKey)) { DebugLogs.RequireNotNull(data.addressKey, "addressKey", this); return null; }
-
-            var svc = new TConcrete();
-            if (svc == null)
-            {
-                DebugLogs.RequireNotNull(svc, $"{typeof(TConcrete).Name}", this);
-                return null;
-            }
-
-            bool serviceInitSuccess = await svc.TryInitialiseAsync(data);
-
-            if (!serviceInitSuccess)
-            {
-                DebugLogs.LoadFail(svc, $"(The Service of {typeof(TConcrete).Name})", this);
-                svc.Dispose();
-                return null;
-
-            }
-
-            return svc;
-        }
-        // END NEW META SETUP
-
-
-        public void Dispose()
-        {
-            throw new System.NotImplementedException();
-        }
-
-
-
-
-
-
-        public void LateTick(float dt) { }
-
-
-        /*  public void Tick(float dt)
-          {
-              if (_tickables == null || _tickables.Count == 0) return;
-
-              foreach (var t in _tickables)
-                  t.Tick(dt);
-          }*/
 
         /// <summary>
         /// Attempts to create a new state with the specified identifier and add it to the provided state dictionary.
@@ -180,30 +77,7 @@ namespace Services.Internal
         private bool TryCreatePatrol(Dictionary<StateId, IFsmState> _dict, NavMeshPath path, Transform t, TryGetCombatTarget tgt)
             => _dict.TryAdd(StateId.Patrol, new FsmPatrolState(null, null, null, null));
 
-        public bool TryCreateFsm(out IFsmController fsm, IInstanceIdentifiable callerId, INpcBody body, TryGetCombatTarget targetRetrieverFunc, ITickableRunner tickHost, ICoroutineHost coroutineHost, IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null)
-        {
-            if (body is null || body.Transform is null) { fsm = null; return false; }
-
-            // if (_registry == null) _registry = new FsmRegistry();
-            int id = callerId.EntityId;
-
-            if (!_registry.TryRegister(id, body, targetRetrieverFunc)) { fsm = null; return false; }
-            //  fsm = new FsmManagerNew(id, _registry, _registry, null); // Placeholder
-            Dictionary<StateId, IFsmState> _states = new();
-
-            FsmContext c = new FsmContext(body, targetRetrieverFunc, id);
-            FsmServices s = new FsmServices(tickHost, coroutineHost, pathNotifySender, animNotifySender);
-            FsmConfig cfg = new FsmConfig(new FsmSpeedControlBridge((IFsmSpeedService)_fsmControlService), _states);
-
-            FsmManager fsNew = new FsmManager(c, s, cfg);
-
-            PatrolServiceBridge pb = new PatrolServiceBridge((IPatrolService)_wpService);
-            IFsmState patrol = new FsmPatrolState(fsNew, pb, new DestinationProcessor(_pathService, coroutineHost), coroutineHost);
-            _states.Add(StateId.Patrol, patrol);
-            fsm = fsNew;
-
-            return true;
-        }
+       
 
         private HumanoidFactory _humanoidFactory;
 
@@ -226,14 +100,9 @@ namespace Services.Internal
         }
 
 
-        private void CreateFsmManager()
+        private void CreateHumanoid(Dictionary<StateId, IFsmState> stateBuffer)
         {
-            
-        }
-
-        private void CreateHumanoidFsm(Dictionary<StateId, IFsmState> stateBuffer)
-        {
-            
+            throw new NotImplementedException();
         }
 
     }
@@ -243,8 +112,9 @@ namespace Services.Internal
 
     public interface IFsmFactory
     {
+       /* [Obsolete]
         bool TryCreateFsm(out IFsmController fsm, IInstanceIdentifiable callerId, INpcBody body, TryGetCombatTarget targetRetrieverFunc, ITickableRunner tickHost,
-            ICoroutineHost coroutineHost, IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null);
+            ICoroutineHost coroutineHost, IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null);*/
 
         bool TryCreateAndAddState(StateId id, Dictionary<StateId, IFsmState> _stateDict, NavMeshPath path, Transform ownerTransform, TryGetCombatTarget targetRetrieverFunc);
 
@@ -635,6 +505,287 @@ public interface ITickableRunner
     void Register(ITickable tickable);
     void Unregister(ITickable tickable);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+public sealed class FsmFactoryOld : ServiceBundle<FsmFeatureGroup>, IFsmFactory//, ITickable
+{
+
+    //  private List<ITickable> _tickables = new(5);
+    private IAddressableService _wpService; // Split interfaces in WaypointResources class so only correct interface is used by relevant classes i.e. => This class need only store it as an IAddressableService
+    private IAddressableService _flankService;
+    private IAddressableService _chaseService;
+    private IAddressableService _fsmControlService;
+    private IDistanceMonitoringService _distService;
+    private IPathService _pathService;
+
+    private FsmRegistry _registry;
+    // SO's
+
+    private AgentChaseData _agentChaseData;
+    private readonly ITickableRunner _tickHost;
+    // End SO's
+
+    private readonly List<AsyncOperationHandle> _handles = new(5);
+
+
+    public FsmFactoryOld(FsmFeatureGroup data, ITickableRunner tickHost) : base(data) { _tickHost = tickHost; }
+
+
+
+    public IPatrolService GetWService() => _wpService as IPatrolService;
+
+
+    /*public override async Task InitialiseAsync()
+    {
+        if (_registry == null) _registry = new FsmRegistry();
+
+        var controlFeature = _metaData.SpeedData;
+
+        _fsmControlService = await TryLoadStateServiceAndInitialize<FsmSpeedResources>(controlFeature*//*, () => new FsmSpeedResources(*//*_registry*//*)*//*);
+        _pathService = new PathRequestManager(_tickHost);
+        //   if(_pathService is ITickable t) _tickables.Add(t);
+        if (_metaData == null)
+        {
+            DebugLogs.RequireNotNull(_metaData, "SceneMetaData", this);
+            return;
+        } //=> Possibly just switch all to manual systems
+
+        var waypointFeature = _metaData.Waypoints;
+        if (waypointFeature.enabled)
+        {
+            _wpService = await TryLoadStateServiceAndInitialize<WaypointResources>(waypointFeature*//*, () => new WaypointResources())*//*);
+            if (_wpService == null) DebugLogs.Nre(_wpService, "WaypointService");
+            else
+            {
+                //  if(_wpService is ITickable tick) _tickables.Add(tick);
+                DebugLogs.Log("Found Waypoint service", this);
+            }
+
+        }
+
+        var flankFeature = _metaData.FlankPoints;
+        if (flankFeature.enabled)
+        {
+            _flankService = await TryLoadStateServiceAndInitialize<PlayerFlankingResources>(flankFeature*//*, () => new PlayerFlankingResources()*//*);
+            if (_flankService == null) DebugLogs.Nre(_flankService, "Flank service", this);
+            else DebugLogs.Log("Flank Service Constructed successfully", this);
+            //  var flnk = await TryLoadStateServiceAndInitialize<SamplePointDataSO, PlayerFlankingResources>(flankFeature, ()=> new PlayerFlankingResources());
+        }
+
+        var chaseFeature = _metaData.ChaseData;
+        if (chaseFeature.enabled)
+        {
+            CreateDistanceMonitorService();
+            _chaseService = await TryLoadStateServiceAndInitialize<ChaseResources>(chaseFeature*//*, ()=> new ChaseResources()*//*);
+            if (_chaseService == null) DebugLogs.Nre(_chaseService, "Chase Service", this);
+            else DebugLogs.Log("Chase service constructed successfully", this);
+        }
+
+    }*/
+
+    private void CreateDistanceMonitorService()
+    {
+        if (_distService != null) return;
+        _distService = new DistanceManagerJob();
+    }
+
+    private async Task<TConcrete> TryLoadStateServiceAndInitialize<TConcrete>(FeatureMeta data/*, Func<TConcrete> createFunc*/) where TConcrete : class, IAddressableService, new()
+    {
+        //    if (string.IsNullOrWhiteSpace(data.addressKey)) { DebugLogs.RequireNotNull(data.addressKey, "addressKey", this); return null; }
+
+        var svc = new TConcrete();
+        if (svc == null)
+        {
+            DebugLogs.RequireNotNull(svc, $"{typeof(TConcrete).Name}", this);
+            return null;
+        }
+
+        bool serviceInitSuccess = await svc.TryInitialiseAsync(data);
+
+        if (!serviceInitSuccess)
+        {
+            DebugLogs.LoadFail(svc, $"(The Service of {typeof(TConcrete).Name})", this);
+            svc.Dispose();
+            return null;
+
+        }
+
+        return svc;
+    }
+    // END NEW META SETUP
+
+
+    public void Dispose()
+    {
+        throw new System.NotImplementedException();
+    }
+
+
+
+
+
+
+    public void LateTick(float dt) { }
+
+
+    /*  public void Tick(float dt)
+      {
+          if (_tickables == null || _tickables.Count == 0) return;
+
+          foreach (var t in _tickables)
+              t.Tick(dt);
+      }*/
+
+    /// <summary>
+    /// Attempts to create a new state with the specified identifier and add it to the provided state dictionary.
+    /// </summary>
+    /// <param name="id">The unique identifier for the state to create and add.</param>
+    /// <param name="_stateDict">A dictionary that maps state identifiers to their corresponding state instances. The new state will be added to
+    /// this dictionary if creation succeeds.</param>
+    /// <param name="path">The navigation path to associate with the new state. Cannot be null.</param>
+    /// <param name="ownerTransform">The transform representing the owner of the state. Used to initialize the new state.</param>
+    /// <param name="targetRetrieverFunc">A delegate used to retrieve the target for the state. The function is invoked whenever a state needs to know its targets position</param>
+    /// <returns>true if the state was successfully created and added to the dictionary; otherwise, false.</returns>
+    public bool TryCreateAndAddState(StateId id, Dictionary<StateId, IFsmState> _stateDict, NavMeshPath path, Transform ownerTransform, TryGetCombatTarget targetRetrieverFunc)
+    {
+        if (id == StateId.None || _stateDict == null || path == null ||
+            ownerTransform == null || targetRetrieverFunc == null) return false;
+
+        if (_stateDict.ContainsKey(id)) return false;
+
+
+        return id switch
+        {
+            StateId.Patrol => TryCreatePatrol(_stateDict, path, ownerTransform, targetRetrieverFunc),
+            _ => false
+
+        };
+
+        /* switch (id)
+         {
+             case StateId.Patrol:
+               //  FSMPatrolState ps = new FSMPatrolState();
+                // _stateDict[id] = ps;
+                 return true;
+             default:
+                 return false;
+         }*/
+
+    }
+
+    private bool TryCreatePatrol(Dictionary<StateId, IFsmState> _dict, NavMeshPath path, Transform t, TryGetCombatTarget tgt)
+        => _dict.TryAdd(StateId.Patrol, new FsmPatrolState(null, null, null, null));
+
+    [Obsolete]
+    public bool TryCreateFsm(out IFsmController fsm, IInstanceIdentifiable callerId, INpcBody body, TryGetCombatTarget targetRetrieverFunc, ITickableRunner tickHost, ICoroutineHost coroutineHost, IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null)
+    {
+        if (body is null || body.Transform is null) { fsm = null; return false; }
+
+        // if (_registry == null) _registry = new FsmRegistry();
+        int id = callerId.EntityId;
+
+        if (!_registry.TryRegister(id, body, targetRetrieverFunc)) { fsm = null; return false; }
+        //  fsm = new FsmManagerNew(id, _registry, _registry, null); // Placeholder
+        /* Dictionary<StateId, IFsmState> _states = new();
+
+         FsmContext c = new FsmContext(body, targetRetrieverFunc, id);
+         FsmServices s = new FsmServices(tickHost, coroutineHost, pathNotifySender, animNotifySender);
+         FsmConfig cfg = new FsmConfig(new FsmSpeedControlBridge((IFsmSpeedService)_fsmControlService), _states);
+
+         FsmManager fsNew = new FsmManager(c, s, cfg);
+
+         PatrolServiceBridge pb = new PatrolServiceBridge((IPatrolService)_wpService);
+         IFsmState patrol = new FsmPatrolState(fsNew, pb, new DestinationProcessor(_pathService, coroutineHost), coroutineHost);
+         _states.Add(StateId.Patrol, patrol);
+         fsm = fsNew;*/
+        fsm = null;
+        return false;
+    }
+
+    private HumanoidFactory _humanoidFactory;
+
+    public async Task<(IFsmController manager, INpcBrain brain)> CreateFsm(IInstanceIdentifiable callerId, INpcBody body, TryGetCombatTarget targetRetrieverFunc, ITickableRunner tickHost, ICoroutineHost coroutineHost,
+    IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null)
+    {
+        _pathService ??= new PathRequestManager(_tickHost);
+        IFsmController fsm = null;
+        INpcBrain brain = null;
+        var humanoid = _metaData.Humanoid;
+
+        if (humanoid is not null)
+        {
+            _humanoidFactory ??= new HumanoidFactory(_metaData.Humanoid, _pathService);
+            (fsm, brain) = await _humanoidFactory.Build(callerId, body, targetRetrieverFunc, tickHost, coroutineHost,
+                pathNotifySender, animNotifySender);
+        }
+
+        return (fsm, brain);
+    }
+
+
+    private void CreateFsmManager()
+    {
+
+    }
+
+    private void CreateHumanoidFsm(Dictionary<StateId, IFsmState> stateBuffer)
+    {
+
+    }
+
+}
+
 
 
 
