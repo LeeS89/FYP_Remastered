@@ -13,8 +13,8 @@ public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
     // private FsmManagerServices _deps;
 
 
-    private IPathNotifications _pathNotifies;
-    private IAnimationRequestNotifications _animNotifies;
+    private readonly IPathNotifications _pathNotifies;
+    private readonly IAnimationRequestNotifications _animNotifies;
     // End Injected Dependancies
     //public Notification Notification { get; set; }
     // Used by owning Monobehaviour via interface
@@ -570,8 +570,7 @@ public class FsmManager : IFsmStateContext, IFsmController, ITargetProvider
 
     public void Dispose()
     {
-
-        throw new NotImplementedException();
+        _tickHost?.Unregister(this);
     }
 
     public bool HasReachedDestination()

@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Rendering.PostProcessing;
 
-public partial class NpcController : TargetableInit<ISceneAIServices, AgentEventManager>, INpcBody, /*IAgentData, */INpcBrainContext, INotificationListener, ICoroutineHost, ITickableRunner
+public partial class NpcController : TargetableInit<ISceneAIServices, AgentEventManager>, INpcBody, /*IAgentData, */INpcBrainContext, INotificationListener, ICoroutineHost/*, ITickableRunner*/
 {
     //   private bool _isInStateTransition = false;
     protected Action _onLayerToggleComplete;
@@ -49,7 +49,7 @@ public partial class NpcController : TargetableInit<ISceneAIServices, AgentEvent
     private Action<FOVResult> OnStableFOVResult;
 
     //private readonly BufferedInbox _inbox = new();
-    private HashSet<ITickable> _tickables = new(5);
+  //  private HashSet<ITickable> _tickables = new(5);
 
     // IFSMNotifications - For notifications received by the FSMManager, i.e. No valid destination, target lost, Target within melee/ shot range, etc.
     public void OnNotificationReceived(in NpcNotification n)
@@ -63,9 +63,9 @@ public partial class NpcController : TargetableInit<ISceneAIServices, AgentEvent
 
     }
 
-    public void Register(ITickable tickable) => _tickables.Add(tickable);
+   /* public void Register(ITickable tickable) => _tickables.Add(tickable);
 
-    public void Unregister(ITickable tickable) => _tickables.Remove(tickable);
+    public void Unregister(ITickable tickable) => _tickables.Remove(tickable);*/
 
 
     private void ResetAll()
@@ -229,7 +229,7 @@ public partial class NpcController : TargetableInit<ISceneAIServices, AgentEvent
     public bool _testAgentStop = false;
     public bool _testAgentStop2 = false;
 
-    protected virtual void Update()
+    protected override void Tick()
     {
         if (ShowFOV)
         {
@@ -265,8 +265,8 @@ public partial class NpcController : TargetableInit<ISceneAIServices, AgentEvent
 
         if (_testAgentStop2) { return; }
         //  _fsmManager?.Tick(Time.deltaTime);
-        foreach (var t in _tickables)
-            t.Tick(Time.deltaTime);
+      /*  foreach (var t in _tickables)
+            t.Tick(Time.deltaTime);*/
 
         if (_testStateCheck)
             Debug.LogError("Currentstate: " + _fsmManager?.CurrentState.ToString());

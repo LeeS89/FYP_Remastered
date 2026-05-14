@@ -35,7 +35,7 @@ public partial class NpcController
     private ISceneAIServices _aiServices;
     private IPlayerRefService _playerRefService;
     private IAgentAlertService _alertService;
-    private Notification _componentNotifications;
+    private Notification _notificationReceiver;
     // private Func<ITargetable> OnGetCurrentTarget;
 
     //Latest changes
@@ -50,7 +50,7 @@ public partial class NpcController
         SetManagerAndServices(services, manager);
         //  SetTargetableCollider();
         SetAgentParams();
-        _componentNotifications = OnNotificationReceived;
+        _notificationReceiver = OnNotificationReceived;
 
         var anim = GetComponentsInChildren<MonoBehaviour>(true).OfType<INpcAnimationControl>().FirstOrDefault();
         if (anim != null) _animationControl = anim;
@@ -95,11 +95,12 @@ public partial class NpcController
 
     }
 
+
     private void ConstructFovRunner()
     {
         _fovDeps.SetTarget(_primaryTarget); // TESTING NOW
 
-        var fovNotificationSender = new FovNotificationSender(_componentNotifications);
+        var fovNotificationSender = new FovNotificationSender(_notificationReceiver);
         //   _fovRunner = new NPCFieldOfViewHandlerNew(_fovDeps, onSweepComplete: _componentNotifications);
         _fovRunner = new FovRunner(_fovDeps, onNotify: fovNotificationSender);
     }
@@ -110,8 +111,8 @@ public partial class NpcController
         {
             try
             {
-                var pathNotificationSenderNew = new PathNotificationSender(_componentNotifications);
-                var animRequestNotificationSenderNew = new AnimationNotificationSender(_componentNotifications);
+                var pathNotificationSenderNew = new PathNotificationSender(_notificationReceiver);
+                var animRequestNotificationSenderNew = new AnimationNotificationSender(_notificationReceiver);
 
                 (_fsmManager, _brain) = await factory.CreateFsm(callerId: this, body: this, OnTryGetCurrentTarget, tickHost: this, coroutineHost: this, pathNotificationSenderNew, animRequestNotificationSenderNew);
 

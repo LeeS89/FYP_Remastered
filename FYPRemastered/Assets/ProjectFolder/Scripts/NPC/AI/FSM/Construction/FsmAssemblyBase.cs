@@ -23,7 +23,7 @@ public abstract class FsmAssemblyBase<T> where T : FsmFeatureBase
 
 
     public async Task<(IFsmController manager, INpcBrain brain)> Build(IInstanceIdentifiable callerId, INpcBody body, TryGetCombatTarget targetRetrieverFunc, ITickableRunner tickHost, ICoroutineHost coroutineHost,
-        IPathNotifications pathNotifySender, IAnimationRequestNotifications animNotifySender = null)
+        IPathNotifications pathNotifyChannel, IAnimationRequestNotifications animNotifyChannel = null)
     {
         if (callerId is null || body is null || tickHost is null || coroutineHost is null) return (null, null);
         DebugLogs.Log("Calling Build Fsm");
@@ -31,7 +31,7 @@ public abstract class FsmAssemblyBase<T> where T : FsmFeatureBase
 
         if (_registry.ContainsKey(id)) return (null, null);
        
-        var manager = await CreateManager(callerId, body, targetRetrieverFunc, tickHost, coroutineHost, pathNotifySender, animNotifySender);
+        var manager = await CreateManager(callerId, body, targetRetrieverFunc, tickHost, coroutineHost, pathNotifyChannel, animNotifyChannel);
 
         if(manager is null) return (null, null);
 

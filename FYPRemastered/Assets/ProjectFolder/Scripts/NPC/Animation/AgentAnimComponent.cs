@@ -369,7 +369,7 @@ public class AgentAnimComponent : ComponentInit<ISceneAIServices, AgentEventMana
     [Tooltip("If no target (e.g., fading out), look this far forward.")]
     [SerializeField] private float _fallbackDistance = 2f;
 
-    public void Update()
+    protected override void Update()
     {
         if (_anim == null) return;
 

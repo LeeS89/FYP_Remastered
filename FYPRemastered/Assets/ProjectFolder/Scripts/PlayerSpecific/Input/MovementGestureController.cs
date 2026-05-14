@@ -195,5 +195,8 @@ public class MovementGestureController : BaseGesture
         _playerEventManager = null;
     }
 
-   
+    protected override void Update()
+    {
+       // throw new NotImplementedException();
+    }
 }

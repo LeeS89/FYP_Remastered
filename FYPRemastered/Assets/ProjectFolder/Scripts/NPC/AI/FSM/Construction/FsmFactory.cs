@@ -124,12 +124,6 @@ namespace Services.Internal
 
 
 
-
-
-   
-
-
-
     internal sealed class FsmRegistry// : IFsmNavigationControl, IFsmNavigationQuery, IFsmTargetQuery//IFsmAgentRegistry, IFsmOwnerRegistry, IFsmTargetRegistry, IDisposable
     {
         private readonly Dictionary<int, FsmEntry> _entries = new(25);
@@ -422,6 +416,21 @@ namespace Services.Internal
         }
     }
     
+}
+
+
+public class FsmHandle
+{
+    private readonly IFsmController _controller;
+    private readonly INpcBrain _brain;
+
+    public FsmHandle(IFsmController controller, INpcBrain brain)
+    {
+        _controller = controller;
+        _brain = brain;
+    }
+
+    public void SwitchState(StateId newState) => _controller.SwitchTo(newState);
 }
 
 /*public interface IFsmTargetRegistry

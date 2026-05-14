@@ -682,12 +682,12 @@ public partial class NPCControllerNew : ComponentInit<ISceneAIServices, AgentEve
 
     protected virtual void OnDamageTaken(float remainingHealth) { }
 
-    protected virtual void Update()
+   /* protected override void Tick()
     {
       //  if(IsDead) return;
       //  _fsmManager?.Tick(Time.deltaTime);
       //  IsStationary = _fsmManager?.HasReachedDestination() ?? true;
-    }
+    }*/
 
     protected virtual void LateUpdate()
     {

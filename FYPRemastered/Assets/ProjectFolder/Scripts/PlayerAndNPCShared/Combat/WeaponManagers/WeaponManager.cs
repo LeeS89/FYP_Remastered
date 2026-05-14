@@ -108,6 +108,11 @@ public class WeaponManager : WeaponManagerBase
        // throw new System.NotImplementedException();
     }
 
+  /*  protected override void Update()
+    {
+        throw new System.NotImplementedException();
+    }
+*/
     // private IEquippable[] _slots = new IEquippable[2];
     #endregion
 }
