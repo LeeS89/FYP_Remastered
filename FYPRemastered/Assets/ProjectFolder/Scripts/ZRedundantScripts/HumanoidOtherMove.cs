@@ -5,6 +5,9 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 using Random = UnityEngine.Random;
+using ProjectDawn.Navigation;
+using NavMeshPath = UnityEngine.AI.NavMeshPath;
+using UnityEngine.Animations;
 
 public class HumanoidOtherMove : MonoBehaviour
 {
@@ -52,9 +55,10 @@ public class HumanoidOtherMove : MonoBehaviour
         if (!TryGetComponent(out _rb))
             _rb = GetComponentInChildren<Rigidbody>();
 
-        if (!TryGetComponent(out _agent))
+        if (!TryGetComponent(out _agentAuth))
             _agentAuth = GetComponentInChildren<AgentAuthoring>();
 
+        
        // _path = new NavMeshPath();
     }
 
@@ -79,7 +83,7 @@ public class HumanoidOtherMove : MonoBehaviour
         if (_destinationMode == DestinationMode.Circle)
         {
             Vector3 startPos = _destinationProvider.GetWaypointPositionOnNavMesh();
-            _agent.transform.position = startPos;
+            _agentAuth.transform.position = startPos;
             //if (!_agent.Warp(startPos)) Debug.LogError("Failed to teleport");
 
         }
@@ -98,11 +102,12 @@ public class HumanoidOtherMove : MonoBehaviour
     {
         if (_destinationProvider?.TryGetPath(out _currentDest) is true)
         {
-        
+            _agentAuth.SetDestination(_currentDest);
+            //_hasDestination = true;
             //_hasDestination = _agent.SetPath(_path);
             if (_hasDestination)
             {
-                if (!_ignoringWaitChance)
+              /*  if (!_ignoringWaitChance)
                 {
                     int chanceOfWaitAtNextPoint = Random.Range(0, 10);
                     _waitAtNextPoint = chanceOfWaitAtNextPoint < 5;
@@ -112,8 +117,9 @@ public class HumanoidOtherMove : MonoBehaviour
 
                     float t = _agentAuth.EntityBody.RemainingDistance; 
                     //_agent.autoBraking = _waitAtNextPoint;
-                }
-                _maxRadius = _agentAuth.EntityBody.RemainingDistance;//_agent.remainingDistance;
+                }*/
+                _maxRadius = _agentAuth.EntityBody.RemainingDistance;
+                //_agent.remainingDistance;
                 /*
                                 TestVisualWPToggle(_waitAtNextPoint ? _waitingMat : _originalMat, _currentDest);
                                 TestVisualWPToggle(_originalMat, _prevDest);*/
@@ -197,23 +203,64 @@ public class HumanoidOtherMove : MonoBehaviour
     }*/
 
     float _maxRadius;
+    bool _remainingMorethanZero = false;
 
     private bool DestinationReachedNewest()
     {
-        if (_agent.pathPending || !_agent.hasPath)
+   
+        /*var bod = _agentAuth.EntityBody;
+        if(!_hasDestination || math.all(bod.Destination == new float3(float.PositiveInfinity)))
             return false;
+*/
+        var path = GetComponent<AgentNavMeshAuthoring>();
 
+        if (path.Path.State == NavMeshPathState.InProgress) return false;
 
-        //float switchRadius = Mathf.Max(minRadius, _agent.velocity.magnitude * lookahead);
-        float v = _agent.velocity.magnitude;
-        float radius = MathF.Max(0.3f, 0.5f * v * v / _agent.acceleration);
-        radius = Mathf.Min(radius, _maxRadius);
-
-
-        if ((_agent.remainingDistance - _stopRange) <= radius)
+        if (!path.Path.HasFullPath)
         {
             _hasDestination = false;
-            _agent.ResetPath();
+            return false;
+        }
+
+        if (!_hasDestination)
+        {
+            _hasDestination = true;
+            _maxRadius = _agentAuth.EntityBody.RemainingDistance;
+        }
+        
+        Vector3 currentVelocity = _agentAuth.EntityBody.Velocity;
+        float v = currentVelocity.magnitude;
+
+        var loc = _agentAuth.EntityLocomotion;
+        float accel = loc.Acceleration;
+
+         float radius = MathF.Max(0.3f, 0.5f * v * v / accel);
+         radius = Mathf.Min(radius, _maxRadius);
+
+
+       // float radius = 0.3f;
+       /* if (accel > 0.01f)
+            radius = Mathf.Max(0.3f, 0.5f * v * v / accel);
+
+        radius = Mathf.Min(radius, _maxRadius);*/
+
+        float remaining = _agentAuth.EntityBody.RemainingDistance;
+
+        if (!_remainingMorethanZero && remaining > 0)
+        {
+            _remainingMorethanZero = true;
+            return false;
+        }
+        else if (remaining == 0) return false;
+
+            Debug.LogError($"RemainDistance: {remaining.ToString()}");
+        Debug.LogError($"Radius: {radius.ToString()}");
+        if ((remaining - _stopRange) <= radius)
+        {
+            var body = _agentAuth.EntityBody;
+            body.Destination = new float3(float.PositiveInfinity);
+            _hasDestination = false;
+            _remainingMorethanZero = false;
             return true;
 
         }
@@ -313,12 +360,12 @@ public class HumanoidOtherMove : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (_agent == null || _anim == null) return;
+        if (_agentAuth == null || _anim == null) return;
 
         float remainingdist;
         if (DestinationReachedNewest())
         {
-
+            Debug.LogError("Reached Dest");
             if (_waitAtNextPoint)
             {
                 if (_runningRoutine == null)
@@ -334,9 +381,13 @@ public class HumanoidOtherMove : MonoBehaviour
         }
 
 
-        Vector3 currentVel = _agent.velocity;
+        /*Vector3 currentVel = _agent.velocity;
         Vector3 horizontalVelocity = new Vector3(currentVel.x, 0, currentVel.z);
-        float animSpeed = horizontalVelocity.magnitude;
+        float animSpeed = horizontalVelocity.magnitude;*/
+        Vector3 currentVel = _agentAuth.EntityBody.Velocity;
+        Vector3 horizontalVel = new Vector3(currentVel.x, 0, currentVel.z);
+        float animSpeed = horizontalVel.magnitude;
+
 
         _anim.SetFloat("Speed", animSpeed, 0.1f, Time.fixedDeltaTime);
 
